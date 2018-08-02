@@ -35,61 +35,61 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class AstigmatismModelManagerTest
 {
-	@Test
-	public void canConvertModel()
-	{
-		final DistanceUnit[] unit = new DistanceUnit[] { DistanceUnit.PIXEL, DistanceUnit.NM, DistanceUnit.UM };
-		for (int i = 0; i < unit.length; i++)
-			for (int j = 0; j < unit.length; j++)
-				canConvertModel(unit[i], unit[j]);
-	}
+    @Test
+    public void canConvertModel()
+    {
+        final DistanceUnit[] unit = new DistanceUnit[] { DistanceUnit.PIXEL, DistanceUnit.NM, DistanceUnit.UM };
+        for (int i = 0; i < unit.length; i++)
+            for (int j = 0; j < unit.length; j++)
+                canConvertModel(unit[i], unit[j]);
+    }
 
-	private static void canConvertModel(DistanceUnit zDistanceUnit, DistanceUnit sDistanceUnit)
-	{
-		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
-		final double sx = 1.08;
-		final double sy = 1.01;
-		final double gamma = 0.389;
-		final double d = 0.531;
-		final double Ax = -0.0708;
-		final double Bx = -0.073;
-		final double Ay = 0.164;
-		final double By = 0.0417;
-		final double nmPerPixel = 100;
+    private static void canConvertModel(DistanceUnit zDistanceUnit, DistanceUnit sDistanceUnit)
+    {
+        // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
+        final double sx = 1.08;
+        final double sy = 1.01;
+        final double gamma = 0.389;
+        final double d = 0.531;
+        final double Ax = -0.0708;
+        final double Bx = -0.073;
+        final double Ay = 0.164;
+        final double By = 0.0417;
+        final double nmPerPixel = 100;
 
-		//Ax = Ay = 0;
-		//Bx = By = 0;
+        //Ax = Ay = 0;
+        //Bx = By = 0;
 
-		final AstigmatismModel.Builder builder = AstigmatismModel.newBuilder();
-		builder.setGamma(gamma);
-		builder.setD(d);
-		builder.setS0X(sx);
-		builder.setAx(Ax);
-		builder.setBx(Bx);
-		builder.setS0Y(sy);
-		builder.setAy(Ay);
-		builder.setBy(By);
-		builder.setZDistanceUnit(DistanceUnit.UM);
-		builder.setSDistanceUnit(DistanceUnit.PIXEL);
-		builder.setNmPerPixel(nmPerPixel);
+        final AstigmatismModel.Builder builder = AstigmatismModel.newBuilder();
+        builder.setGamma(gamma);
+        builder.setD(d);
+        builder.setS0X(sx);
+        builder.setAx(Ax);
+        builder.setBx(Bx);
+        builder.setS0Y(sy);
+        builder.setAy(Ay);
+        builder.setBy(By);
+        builder.setZDistanceUnit(DistanceUnit.UM);
+        builder.setSDistanceUnit(DistanceUnit.PIXEL);
+        builder.setNmPerPixel(nmPerPixel);
 
-		final AstigmatismModel model1 = builder.build();
-		final AstigmatismModel model2 = AstigmatismModelManager.convert(model1, zDistanceUnit, sDistanceUnit);
+        final AstigmatismModel model1 = builder.build();
+        final AstigmatismModel model2 = AstigmatismModelManager.convert(model1, zDistanceUnit, sDistanceUnit);
 
-		final AstigmatismZModel m1 = AstigmatismModelManager.create(model1);
-		final AstigmatismZModel m2 = AstigmatismModelManager.create(model2);
+        final AstigmatismZModel m1 = AstigmatismModelManager.create(model1);
+        final AstigmatismZModel m2 = AstigmatismModelManager.create(model2);
 
-		final TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(DistanceUnit.UM, zDistanceUnit,
-				nmPerPixel);
-		final TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, sDistanceUnit,
-				nmPerPixel);
+        final TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(DistanceUnit.UM, zDistanceUnit,
+                nmPerPixel);
+        final TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, sDistanceUnit,
+                nmPerPixel);
 
-		for (double z = -0.5; z <= 0.5; z += 0.1)
-		{
-			final double e = sc.convert(m1.getSx(z));
-			final double o = m2.getSx(zc.convert(z));
-			//System.out.printf("%f vs %f\n", e, o);
-			ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
-		}
-	}
+        for (double z = -0.5; z <= 0.5; z += 0.1)
+        {
+            final double e = sc.convert(m1.getSx(z));
+            final double o = m2.getSx(zc.convert(z));
+            //logger.fine(TestLog.getSupplier("%f vs %f", e, o);
+            ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
+        }
+    }
 }

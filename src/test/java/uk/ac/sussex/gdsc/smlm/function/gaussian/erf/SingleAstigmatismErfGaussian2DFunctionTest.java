@@ -29,29 +29,29 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 @SuppressWarnings({ "javadoc" })
 public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
-	@Override
-	protected void init()
-	{
-		flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;
-		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
-		final double sx = 1.08;
-		final double sy = 1.01;
-		final double gamma = 0.389;
-		final double d = 0.531;
-		final double Ax = -0.0708;
-		final double Bx = -0.073;
-		final double Ay = 0.164;
-		final double By = 0.0417;
-		zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
-		f1 = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
-	}
+    @Override
+    protected void init()
+    {
+        flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;
+        // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
+        final double sx = 1.08;
+        final double sy = 1.01;
+        final double gamma = 0.389;
+        final double d = 0.531;
+        final double Ax = -0.0708;
+        final double Bx = -0.073;
+        final double Ay = 0.164;
+        final double By = 0.0417;
+        zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
+        f1 = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
+    }
 
-	@Override
-	protected void postInit()
-	{
-		// Even though the function does not evaluate the widths it can use them
-		// to construct independent widths.
-		// Test with different X and Y SD
-		testw1 = new double[][] { { 1.1, 1.1 }, { 1.1, 1.2 }, { 1.1, 1.5 } };
-	}
+    @Override
+    protected void postInit()
+    {
+        // Even though the function does not evaluate the widths it can use them
+        // to construct independent widths.
+        // Test with different X and Y SD
+        testw1 = new double[][] { { 1.1, 1.1 }, { 1.1, 1.2 }, { 1.1, 1.5 } };
+    }
 }

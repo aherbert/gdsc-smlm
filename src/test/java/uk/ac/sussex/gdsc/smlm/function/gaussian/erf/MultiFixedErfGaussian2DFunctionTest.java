@@ -28,11 +28,11 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 @SuppressWarnings({ "javadoc" })
 public class MultiFixedErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
-	@Override
-	protected void init()
-	{
-		flags = GaussianFunctionFactory.FIT_ERF_FIXED;
-		f1 = new MultiFixedErfGaussian2DFunction(1, maxx, maxy);
-		f2 = new MultiFixedErfGaussian2DFunction(2, maxx, maxy);
-	}
+    @Override
+    protected void init()
+    {
+        flags = GaussianFunctionFactory.FIT_ERF_FIXED;
+        f1 = new MultiFixedErfGaussian2DFunction(1, maxx, maxy);
+        f2 = new MultiFixedErfGaussian2DFunction(2, maxx, maxy);
+    }
 }

@@ -24,114 +24,129 @@
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import java.awt.Rectangle;
+import java.util.function.Function;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.DataCache;
-import uk.ac.sussex.gdsc.test.DataProvider;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
 @SuppressWarnings({ "javadoc" })
-public class ImageConverterTest implements DataProvider<RandomSeed, Object>
+public class ImageConverterTest implements Function<RandomSeed, Object>
 {
-	final static int w = 200, h = 300;
+    private static DataCache<RandomSeed, Object> dataCache;
 
-	private class ImageConverterTestData
-	{
-		byte[] bdata;
-		short[] sdata;
-		float[] fdata;
-	}
+    @BeforeAll
+    public static void beforeAll()
+    {
+        dataCache = new DataCache<>();
+    }
 
-	private static DataCache<RandomSeed, Object> dataCache = new DataCache<>();
+    @AfterAll
+    public static void afterAll()
+    {
+        dataCache.clear();
+        dataCache = null;
+    }
 
-	@Override
-	public Object getData(RandomSeed seed)
-	{
-		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-		final ByteProcessor bp = new ByteProcessor(w, h);
-		final ImageConverterTestData data = new ImageConverterTestData();
-		data.bdata = (byte[]) bp.getPixels();
-		data.sdata = new short[data.bdata.length];
-		data.fdata = new float[data.bdata.length];
-		for (int i = 0; i < bp.getPixelCount(); i++)
-		{
-			final int value = r.nextInt(256);
-			bp.set(i, value);
-			data.fdata[i] = data.sdata[i] = (short) value;
-		}
-		return data;
-	}
+    final static int w = 200, h = 300;
 
-	@SeededTest
-	public void canGetData(RandomSeed seed)
-	{
-		final ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
-		final byte[] bdata = data.bdata;
-		final short[] sdata = data.sdata;
-		final float[] fdata = data.fdata;
-		final Rectangle bounds = null;
-		final float[] fe = fdata;
-		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
-		// Check the double format
-		final double[] de = SimpleArrayUtils.toDouble(fe);
-		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
-	}
+    private class ImageConverterTestData
+    {
+        byte[] bdata;
+        short[] sdata;
+        float[] fdata;
+    }
 
-	@SeededTest
-	public void canGetDataWithFullBounds(RandomSeed seed)
-	{
-		final ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
-		final byte[] bdata = data.bdata;
-		final short[] sdata = data.sdata;
-		final float[] fdata = data.fdata;
-		final Rectangle bounds = new Rectangle(0, 0, w, h);
-		final float[] fe = fdata;
-		Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
-		// Check the double format
-		final double[] de = SimpleArrayUtils.toDouble(fe);
-		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
-		Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
-	}
+    @Override
+    public Object apply(RandomSeed seed)
+    {
+        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final ByteProcessor bp = new ByteProcessor(w, h);
+        final ImageConverterTestData data = new ImageConverterTestData();
+        data.bdata = (byte[]) bp.getPixels();
+        data.sdata = new short[data.bdata.length];
+        data.fdata = new float[data.bdata.length];
+        for (int i = 0; i < bp.getPixelCount(); i++)
+        {
+            final int value = r.nextInt(256);
+            bp.set(i, value);
+            data.fdata[i] = data.sdata[i] = (short) value;
+        }
+        return data;
+    }
 
-	@SeededTest
-	public void canGetCropData(RandomSeed seed)
-	{
-		final ImageConverterTestData data = (ImageConverterTestData) dataCache.getData(seed, this);
-		final byte[] bdata = data.bdata;
-		final short[] sdata = data.sdata;
-		final float[] fdata = data.fdata;
-		final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
-		final ImageExtractor ie = new ImageExtractor(fdata, w, h);
-		for (int i = 0; i < 10; i++)
-		{
-			final Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
-					5 + rand.nextInt(5));
-			final FloatProcessor ip = new FloatProcessor(w, h, fdata.clone());
-			ip.setRoi(bounds);
-			final float[] fe = (float[]) (ip.crop().getPixels());
-			Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
-			Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
-			Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
-			// Check the double format
-			final double[] de = SimpleArrayUtils.toDouble(fe);
-			Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
-			Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
-			Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
-		}
-	}
+    @SeededTest
+    public void canGetData(RandomSeed seed)
+    {
+        final ImageConverterTestData data = (ImageConverterTestData) dataCache.getOrComputeIfAbsent(seed, this);
+        final byte[] bdata = data.bdata;
+        final short[] sdata = data.sdata;
+        final float[] fdata = data.fdata;
+        final Rectangle bounds = null;
+        final float[] fe = fdata;
+        Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
+        // Check the double format
+        final double[] de = SimpleArrayUtils.toDouble(fe);
+        Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
+    }
+
+    @SeededTest
+    public void canGetDataWithFullBounds(RandomSeed seed)
+    {
+        final ImageConverterTestData data = (ImageConverterTestData) dataCache.getOrComputeIfAbsent(seed, this);
+        final byte[] bdata = data.bdata;
+        final short[] sdata = data.sdata;
+        final float[] fdata = data.fdata;
+        final Rectangle bounds = new Rectangle(0, 0, w, h);
+        final float[] fe = fdata;
+        Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
+        // Check the double format
+        final double[] de = SimpleArrayUtils.toDouble(fe);
+        Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
+        Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
+    }
+
+    @SeededTest
+    public void canGetCropData(RandomSeed seed)
+    {
+        final ImageConverterTestData data = (ImageConverterTestData) dataCache.getOrComputeIfAbsent(seed, this);
+        final byte[] bdata = data.bdata;
+        final short[] sdata = data.sdata;
+        final float[] fdata = data.fdata;
+        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final ImageExtractor ie = new ImageExtractor(fdata, w, h);
+        for (int i = 0; i < 10; i++)
+        {
+            final Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
+                    5 + rand.nextInt(5));
+            final FloatProcessor ip = new FloatProcessor(w, h, fdata.clone());
+            ip.setRoi(bounds);
+            final float[] fe = (float[]) (ip.crop().getPixels());
+            Assertions.assertArrayEquals(fe, IJImageConverter.getData(bdata, w, h, bounds, null));
+            Assertions.assertArrayEquals(fe, IJImageConverter.getData(sdata, w, h, bounds, null));
+            Assertions.assertArrayEquals(fe, IJImageConverter.getData(fdata, w, h, bounds, null));
+            // Check the double format
+            final double[] de = SimpleArrayUtils.toDouble(fe);
+            Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(bdata, w, h, bounds, null));
+            Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(sdata, w, h, bounds, null));
+            Assertions.assertArrayEquals(de, IJImageConverter.getDoubleData(fdata, w, h, bounds, null));
+        }
+    }
 }

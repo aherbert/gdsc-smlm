@@ -28,11 +28,11 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 @SuppressWarnings({ "javadoc" })
 public class MultiFreeCircularErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
-	@Override
-	protected void init()
-	{
-		flags = GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE;
-		f1 = new MultiFreeCircularErfGaussian2DFunction(1, maxx, maxy);
-		f2 = new MultiFreeCircularErfGaussian2DFunction(2, maxx, maxy);
-	}
+    @Override
+    protected void init()
+    {
+        flags = GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE;
+        f1 = new MultiFreeCircularErfGaussian2DFunction(1, maxx, maxy);
+        f2 = new MultiFreeCircularErfGaussian2DFunction(2, maxx, maxy);
+    }
 }

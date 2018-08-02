@@ -37,91 +37,91 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class CalibrationWriterTest
 {
-	@SeededTest
-	public void canWrite(RandomSeed seed)
-	{
-		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-		for (int i = 0; i < 100; i++)
-			canWrite(r);
-	}
+    @SeededTest
+    public void canWrite(RandomSeed seed)
+    {
+        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        for (int i = 0; i < 100; i++)
+            canWrite(r);
+    }
 
-	private static void canWrite(UniformRandomProvider r)
-	{
-		final double qe = r.nextDouble();
-		final double bias = 1 + r.nextDouble();
-		final double exposureTime = 1 + r.nextDouble();
-		final double gain = 1 + r.nextDouble();
-		final double nmPerPixel = 1 + r.nextDouble();
-		final double readNoise = 1 + r.nextDouble();
-		final AngleUnit angleUnit = AngleUnit.values()[r.nextInt(AngleUnit.values().length - 1)];
-		final CameraType cameraType = CameraType.values()[r.nextInt(CameraType.values().length - 1)];
-		final DistanceUnit distanceUnit = DistanceUnit.values()[r.nextInt(DistanceUnit.values().length - 1)];
-		final IntensityUnit intensityUnit = IntensityUnit.values()[r.nextInt(IntensityUnit.values().length - 1)];
+    private static void canWrite(UniformRandomProvider r)
+    {
+        final double qe = r.nextDouble();
+        final double bias = 1 + r.nextDouble();
+        final double exposureTime = 1 + r.nextDouble();
+        final double gain = 1 + r.nextDouble();
+        final double nmPerPixel = 1 + r.nextDouble();
+        final double readNoise = 1 + r.nextDouble();
+        final AngleUnit angleUnit = AngleUnit.values()[r.nextInt(AngleUnit.values().length - 1)];
+        final CameraType cameraType = CameraType.values()[r.nextInt(CameraType.values().length - 1)];
+        final DistanceUnit distanceUnit = DistanceUnit.values()[r.nextInt(DistanceUnit.values().length - 1)];
+        final IntensityUnit intensityUnit = IntensityUnit.values()[r.nextInt(IntensityUnit.values().length - 1)];
 
-		final CalibrationWriter writer = new CalibrationWriter();
+        final CalibrationWriter writer = new CalibrationWriter();
 
-		Assertions.assertEquals(writer.getQuantumEfficiency(), 0);
-		Assertions.assertEquals(writer.getBias(), 0);
-		Assertions.assertEquals(writer.getExposureTime(), 0);
-		Assertions.assertEquals(writer.getCountPerPhoton(), 0);
-		Assertions.assertEquals(writer.getNmPerPixel(), 0);
-		Assertions.assertEquals(writer.getReadNoise(), 0);
-		Assertions.assertFalse(writer.hasQuantumEfficiency());
-		Assertions.assertFalse(writer.hasBias());
-		Assertions.assertFalse(writer.hasExposureTime());
-		Assertions.assertFalse(writer.hasCountPerPhoton());
-		Assertions.assertFalse(writer.hasNmPerPixel());
-		Assertions.assertFalse(writer.hasReadNoise());
-		Assertions.assertEquals(writer.getAngleUnit(), AngleUnit.ANGLE_UNIT_NA);
-		Assertions.assertEquals(writer.getCameraType(), CameraType.CAMERA_TYPE_NA);
-		Assertions.assertEquals(writer.getDistanceUnit(), DistanceUnit.DISTANCE_UNIT_NA);
-		Assertions.assertEquals(writer.getIntensityUnit(), IntensityUnit.INTENSITY_UNIT_NA);
+        Assertions.assertEquals(writer.getQuantumEfficiency(), 0);
+        Assertions.assertEquals(writer.getBias(), 0);
+        Assertions.assertEquals(writer.getExposureTime(), 0);
+        Assertions.assertEquals(writer.getCountPerPhoton(), 0);
+        Assertions.assertEquals(writer.getNmPerPixel(), 0);
+        Assertions.assertEquals(writer.getReadNoise(), 0);
+        Assertions.assertFalse(writer.hasQuantumEfficiency());
+        Assertions.assertFalse(writer.hasBias());
+        Assertions.assertFalse(writer.hasExposureTime());
+        Assertions.assertFalse(writer.hasCountPerPhoton());
+        Assertions.assertFalse(writer.hasNmPerPixel());
+        Assertions.assertFalse(writer.hasReadNoise());
+        Assertions.assertEquals(writer.getAngleUnit(), AngleUnit.ANGLE_UNIT_NA);
+        Assertions.assertEquals(writer.getCameraType(), CameraType.CAMERA_TYPE_NA);
+        Assertions.assertEquals(writer.getDistanceUnit(), DistanceUnit.DISTANCE_UNIT_NA);
+        Assertions.assertEquals(writer.getIntensityUnit(), IntensityUnit.INTENSITY_UNIT_NA);
 
-		writer.setQuantumEfficiency(qe);
-		writer.setBias(bias);
-		writer.setExposureTime(exposureTime);
-		writer.setCountPerPhoton(gain);
-		writer.setNmPerPixel(nmPerPixel);
-		writer.setReadNoise(readNoise);
-		writer.setAngleUnit(angleUnit);
-		writer.setCameraType(cameraType);
-		writer.setDistanceUnit(distanceUnit);
-		writer.setIntensityUnit(intensityUnit);
+        writer.setQuantumEfficiency(qe);
+        writer.setBias(bias);
+        writer.setExposureTime(exposureTime);
+        writer.setCountPerPhoton(gain);
+        writer.setNmPerPixel(nmPerPixel);
+        writer.setReadNoise(readNoise);
+        writer.setAngleUnit(angleUnit);
+        writer.setCameraType(cameraType);
+        writer.setDistanceUnit(distanceUnit);
+        writer.setIntensityUnit(intensityUnit);
 
-		Assertions.assertEquals(writer.getQuantumEfficiency(), qe);
-		Assertions.assertEquals(writer.getBias(), bias);
-		Assertions.assertEquals(writer.getExposureTime(), exposureTime);
-		Assertions.assertEquals(writer.getCountPerPhoton(), gain);
-		Assertions.assertEquals(writer.getNmPerPixel(), nmPerPixel);
-		Assertions.assertEquals(writer.getReadNoise(), readNoise);
-		Assertions.assertTrue(writer.hasQuantumEfficiency());
-		Assertions.assertTrue(writer.hasBias());
-		Assertions.assertTrue(writer.hasExposureTime());
-		Assertions.assertTrue(writer.hasCountPerPhoton());
-		Assertions.assertTrue(writer.hasNmPerPixel());
-		Assertions.assertTrue(writer.hasReadNoise());
-		Assertions.assertEquals(writer.getAngleUnit(), angleUnit);
-		Assertions.assertEquals(writer.getCameraType(), cameraType);
-		Assertions.assertEquals(writer.getDistanceUnit(), distanceUnit);
-		Assertions.assertEquals(writer.getIntensityUnit(), intensityUnit);
+        Assertions.assertEquals(writer.getQuantumEfficiency(), qe);
+        Assertions.assertEquals(writer.getBias(), bias);
+        Assertions.assertEquals(writer.getExposureTime(), exposureTime);
+        Assertions.assertEquals(writer.getCountPerPhoton(), gain);
+        Assertions.assertEquals(writer.getNmPerPixel(), nmPerPixel);
+        Assertions.assertEquals(writer.getReadNoise(), readNoise);
+        Assertions.assertTrue(writer.hasQuantumEfficiency());
+        Assertions.assertTrue(writer.hasBias());
+        Assertions.assertTrue(writer.hasExposureTime());
+        Assertions.assertTrue(writer.hasCountPerPhoton());
+        Assertions.assertTrue(writer.hasNmPerPixel());
+        Assertions.assertTrue(writer.hasReadNoise());
+        Assertions.assertEquals(writer.getAngleUnit(), angleUnit);
+        Assertions.assertEquals(writer.getCameraType(), cameraType);
+        Assertions.assertEquals(writer.getDistanceUnit(), distanceUnit);
+        Assertions.assertEquals(writer.getIntensityUnit(), intensityUnit);
 
-		final CalibrationReader reader = new CalibrationReader(writer.getCalibration());
+        final CalibrationReader reader = new CalibrationReader(writer.getCalibration());
 
-		Assertions.assertEquals(reader.getQuantumEfficiency(), qe);
-		Assertions.assertEquals(reader.getBias(), bias);
-		Assertions.assertEquals(reader.getExposureTime(), exposureTime);
-		Assertions.assertEquals(reader.getCountPerPhoton(), gain);
-		Assertions.assertEquals(reader.getNmPerPixel(), nmPerPixel);
-		Assertions.assertEquals(reader.getReadNoise(), readNoise);
-		Assertions.assertTrue(reader.hasQuantumEfficiency());
-		Assertions.assertTrue(reader.hasBias());
-		Assertions.assertTrue(reader.hasExposureTime());
-		Assertions.assertTrue(reader.hasCountPerPhoton());
-		Assertions.assertTrue(reader.hasNmPerPixel());
-		Assertions.assertTrue(reader.hasReadNoise());
-		Assertions.assertEquals(reader.getAngleUnit(), angleUnit);
-		Assertions.assertEquals(reader.getCameraType(), cameraType);
-		Assertions.assertEquals(reader.getDistanceUnit(), distanceUnit);
-		Assertions.assertEquals(reader.getIntensityUnit(), intensityUnit);
-	}
+        Assertions.assertEquals(reader.getQuantumEfficiency(), qe);
+        Assertions.assertEquals(reader.getBias(), bias);
+        Assertions.assertEquals(reader.getExposureTime(), exposureTime);
+        Assertions.assertEquals(reader.getCountPerPhoton(), gain);
+        Assertions.assertEquals(reader.getNmPerPixel(), nmPerPixel);
+        Assertions.assertEquals(reader.getReadNoise(), readNoise);
+        Assertions.assertTrue(reader.hasQuantumEfficiency());
+        Assertions.assertTrue(reader.hasBias());
+        Assertions.assertTrue(reader.hasExposureTime());
+        Assertions.assertTrue(reader.hasCountPerPhoton());
+        Assertions.assertTrue(reader.hasNmPerPixel());
+        Assertions.assertTrue(reader.hasReadNoise());
+        Assertions.assertEquals(reader.getAngleUnit(), angleUnit);
+        Assertions.assertEquals(reader.getCameraType(), cameraType);
+        Assertions.assertEquals(reader.getDistanceUnit(), distanceUnit);
+        Assertions.assertEquals(reader.getIntensityUnit(), intensityUnit);
+    }
 }

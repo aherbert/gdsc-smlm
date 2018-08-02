@@ -33,29 +33,29 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class NormaliserTest extends AbstractFilterTest
 {
-	@SeededTest
-	public void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed)
-	{
-		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+    @SeededTest
+    public void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed)
+    {
+        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
-		for (final int width : primes)
-			for (final int height : primes)
-			{
-				final float[] data = createData(rg, width, height);
-				for (final int boxSize : boxSizes)
-				{
-					//System.out.printf("%dx%d : border=%d\n", width, height, boxSize);
+        for (final int width : primes)
+            for (final int height : primes)
+            {
+                final float[] data = createData(rg, width, height);
+                for (final int boxSize : boxSizes)
+                {
+                    //logger.fine(() -> String.format("%dx%d : border=%d", width, height, boxSize);
 
-					// Assume fixed normaliser works
-					final FixedNormaliser n = new FixedNormaliser(1);
-					final NonNormaliser nn = new NonNormaliser();
-					final float[] e = new float[data.length];
-					final float[] o = new float[data.length];
-					n.normalise(data, e, width, height, boxSize);
-					nn.normalise(data, o, width, height, boxSize);
-					Assertions.assertArrayEquals(o, e,
-							() -> String.format("%dx%d : border=%d", width, height, boxSize));
-				}
-			}
-	}
+                    // Assume fixed normaliser works
+                    final FixedNormaliser n = new FixedNormaliser(1);
+                    final NonNormaliser nn = new NonNormaliser();
+                    final float[] e = new float[data.length];
+                    final float[] o = new float[data.length];
+                    n.normalise(data, e, width, height, boxSize);
+                    nn.normalise(data, o, width, height, boxSize);
+                    Assertions.assertArrayEquals(o, e,
+                            () -> String.format("%dx%d : border=%d", width, height, boxSize));
+                }
+            }
+    }
 }

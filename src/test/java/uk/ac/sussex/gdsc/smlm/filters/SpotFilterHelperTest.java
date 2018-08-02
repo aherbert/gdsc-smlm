@@ -36,75 +36,75 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class SpotFilterHelperTest
 {
-	private static Spot[] createData(UniformRandomProvider rg, int width, int height, int n)
-	{
-		if (n == 0)
-			return new Spot[0];
+    private static Spot[] createData(UniformRandomProvider rg, int width, int height, int n)
+    {
+        if (n == 0)
+            return new Spot[0];
 
-		final int[] data = new int[width * height];
-		for (int i = n; i-- > 0;)
-			data[i] = 1;
+        final int[] data = new int[width * height];
+        for (int i = n; i-- > 0;)
+            data[i] = 1;
 
-		Random.shuffle(data, rg);
+        Random.shuffle(data, rg);
 
-		final Spot[] spots = new Spot[n];
-		for (int i = 0, j = 0; i < data.length; i++)
-			if (data[i] == 1)
-			{
-				spots[j++] = new Spot(i % width, i / width, 1);
-				if (j == n)
-					break;
-			}
+        final Spot[] spots = new Spot[n];
+        for (int i = 0, j = 0; i < data.length; i++)
+            if (data[i] == 1)
+            {
+                spots[j++] = new Spot(i % width, i / width, 1);
+                if (j == n)
+                    break;
+            }
 
-		return spots;
-	}
+        return spots;
+    }
 
-	@SeededTest
-	public void canCountNeighbours(RandomSeed seed)
-	{
-		final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+    @SeededTest
+    public void canCountNeighbours(RandomSeed seed)
+    {
+        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
-		final int width = 64, height = 64;
-		final int size = width * height;
-		int n = 1; // Don't test simple case of no neighbours
-		final SpotFilterHelper h = new SpotFilterHelper();
-		while (n < size / 4)
-		{
-			n *= 2;
-			for (int loop = 0; loop < 5; loop++)
-			{
-				final Spot[] spots = createData(rg, width, height, n);
-				for (final int box : new int[] { 1, 2, 3, 4, 5 })
-				{
-					final int[] e = countNeighbours(spots, width, height, box);
-					final int[] count = h.countNeighbours(spots, box);
-					Assertions.assertArrayEquals(e, count);
-					final int[] count2 = h.countNeighbours(spots, width, height, box);
-					Assertions.assertArrayEquals(e, count2);
-				}
-			}
-		}
-	}
+        final int width = 64, height = 64;
+        final int size = width * height;
+        int n = 1; // Don't test simple case of no neighbours
+        final SpotFilterHelper h = new SpotFilterHelper();
+        while (n < size / 4)
+        {
+            n *= 2;
+            for (int loop = 0; loop < 5; loop++)
+            {
+                final Spot[] spots = createData(rg, width, height, n);
+                for (final int box : new int[] { 1, 2, 3, 4, 5 })
+                {
+                    final int[] e = countNeighbours(spots, width, height, box);
+                    final int[] count = h.countNeighbours(spots, box);
+                    Assertions.assertArrayEquals(e, count);
+                    final int[] count2 = h.countNeighbours(spots, width, height, box);
+                    Assertions.assertArrayEquals(e, count2);
+                }
+            }
+        }
+    }
 
-	private static int[] countNeighbours(Spot[] spots, int width, int height, int box)
-	{
-		final short[] data = new short[width * height];
-		for (int i = 0; i < spots.length; i++)
-			data[spots[i].x + width * spots[i].y] = 1;
-		final Rectangle r = new Rectangle(width, height);
-		final Rectangle bounds = new Rectangle(2 * box + 1, 2 * box + 1);
-		final int[] count = new int[spots.length];
-		for (int i = 0; i < spots.length; i++)
-		{
-			bounds.x = spots[i].x - box;
-			bounds.y = spots[i].y - box;
-			final Rectangle limits = r.intersection(bounds);
-			int sum = -1;
-			for (int y = limits.y; y < limits.y + limits.height; y++)
-				for (int x = limits.x, j = y * width + x; x < limits.x + limits.width; x++)
-					sum += data[j++];
-			count[i] = sum;
-		}
-		return count;
-	}
+    private static int[] countNeighbours(Spot[] spots, int width, int height, int box)
+    {
+        final short[] data = new short[width * height];
+        for (int i = 0; i < spots.length; i++)
+            data[spots[i].x + width * spots[i].y] = 1;
+        final Rectangle r = new Rectangle(width, height);
+        final Rectangle bounds = new Rectangle(2 * box + 1, 2 * box + 1);
+        final int[] count = new int[spots.length];
+        for (int i = 0; i < spots.length; i++)
+        {
+            bounds.x = spots[i].x - box;
+            bounds.y = spots[i].y - box;
+            final Rectangle limits = r.intersection(bounds);
+            int sum = -1;
+            for (int y = limits.y; y < limits.y + limits.height; y++)
+                for (int x = limits.x, j = y * width + x; x < limits.x + limits.width; x++)
+                    sum += data[j++];
+            count[i] = sum;
+        }
+        return count;
+    }
 }

@@ -32,75 +32,75 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class ParameterBoundsTest
 {
-	@Test
-	public void canUpperBoundParameter()
-	{
-		canBoundParameter(1);
-	}
+    @Test
+    public void canUpperBoundParameter()
+    {
+        canBoundParameter(1);
+    }
 
-	@Test
-	public void canLowerBoundParameter()
-	{
-		canBoundParameter(-1);
-	}
+    @Test
+    public void canLowerBoundParameter()
+    {
+        canBoundParameter(-1);
+    }
 
-	private static void canBoundParameter(double s)
-	{
-		final ParameterBounds b = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
-		if (s < 0)
-			b.setBounds(new double[] { 2 * s }, null);
-		else
-			b.setBounds(null, new double[] { 2 * s });
-		final double[] a1 = new double[1];
-		final double[] a2 = new double[1];
-		final double[] step = new double[] { s };
-		b.applyBounds(a1, step, a2);
-		Assertions.assertArrayEquals(a2, new double[] { 1 * s }, "Step 1");
-		b.applyBounds(a2, step, a1);
-		Assertions.assertArrayEquals(a1, new double[] { 2 * s }, "Step 2");
-		b.applyBounds(a1, step, a2);
-		// Should be bounded
-		Assertions.assertArrayEquals(a2, new double[] { 2 * s }, "Step 3");
-	}
+    private static void canBoundParameter(double s)
+    {
+        final ParameterBounds b = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
+        if (s < 0)
+            b.setBounds(new double[] { 2 * s }, null);
+        else
+            b.setBounds(null, new double[] { 2 * s });
+        final double[] a1 = new double[1];
+        final double[] a2 = new double[1];
+        final double[] step = new double[] { s };
+        b.applyBounds(a1, step, a2);
+        Assertions.assertArrayEquals(a2, new double[] { 1 * s }, "Step 1");
+        b.applyBounds(a2, step, a1);
+        Assertions.assertArrayEquals(a1, new double[] { 2 * s }, "Step 2");
+        b.applyBounds(a1, step, a2);
+        // Should be bounded
+        Assertions.assertArrayEquals(a2, new double[] { 2 * s }, "Step 3");
+    }
 
-	@Test
-	public void canDoubleBoundParameter()
-	{
-		final ParameterBounds b = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
-		final double s = 2;
-		b.setBounds(new double[] { -s }, new double[] { s });
-		final double[] a1 = new double[1];
-		final double[] a2 = new double[1];
-		b.applyBounds(a1, new double[] { 10 }, a2);
-		Assertions.assertArrayEquals(a2, new double[] { s }, "Step 10");
+    @Test
+    public void canDoubleBoundParameter()
+    {
+        final ParameterBounds b = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
+        final double s = 2;
+        b.setBounds(new double[] { -s }, new double[] { s });
+        final double[] a1 = new double[1];
+        final double[] a2 = new double[1];
+        b.applyBounds(a1, new double[] { 10 }, a2);
+        Assertions.assertArrayEquals(a2, new double[] { s }, "Step 10");
 
-		b.applyBounds(a1, new double[] { -10 }, a2);
-		Assertions.assertArrayEquals(a2, new double[] { -s }, "Step -10");
-	}
+        b.applyBounds(a1, new double[] { -10 }, a2);
+        Assertions.assertArrayEquals(a2, new double[] { -s }, "Step -10");
+    }
 
-	@Test
-	public void canStepParameter()
-	{
-		canStepParameter(0.5);
-		canStepParameter(1);
-		canStepParameter(-0.5);
-		canStepParameter(-1);
-	}
+    @Test
+    public void canStepParameter()
+    {
+        canStepParameter(0.5);
+        canStepParameter(1);
+        canStepParameter(-0.5);
+        canStepParameter(-1);
+    }
 
-	private static void canStepParameter(double s)
-	{
-		final ParameterBounds b = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
-		double[] a1 = new double[1];
-		double[] a2 = new double[1];
-		double[] tmp;
-		final double[] step = new double[] { s };
-		for (int i = 1; i <= 10; i++)
-		{
-			b.applyBounds(a1, step, a2);
-			ExtraAssertions.assertArrayEquals(a2, new double[] { i * s }, "Step %d", i);
-			tmp = a1;
-			a1 = a2;
-			a2 = tmp;
-		}
-	}
+    private static void canStepParameter(double s)
+    {
+        final ParameterBounds b = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
+        double[] a1 = new double[1];
+        double[] a2 = new double[1];
+        double[] tmp;
+        final double[] step = new double[] { s };
+        for (int i = 1; i <= 10; i++)
+        {
+            b.applyBounds(a1, step, a2);
+            ExtraAssertions.assertArrayEquals(a2, new double[] { i * s }, "Step %d", i);
+            tmp = a1;
+            a1 = a2;
+            a2 = tmp;
+        }
+    }
 }

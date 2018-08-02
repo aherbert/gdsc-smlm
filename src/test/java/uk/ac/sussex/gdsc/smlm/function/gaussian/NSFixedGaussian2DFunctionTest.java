@@ -26,11 +26,11 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 @SuppressWarnings({ "javadoc" })
 public class NSFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
-	@Override
-	protected void init()
-	{
-		flags = GaussianFunctionFactory.FIT_SIMPLE_NS_FIXED;
-		f1 = new NSFixedGaussian2DFunction(1, maxx, maxy);
-		f2 = new NSFixedGaussian2DFunction(2, maxx, maxy);
-	}
+    @Override
+    protected void init()
+    {
+        flags = GaussianFunctionFactory.FIT_SIMPLE_NS_FIXED;
+        f1 = new NSFixedGaussian2DFunction(1, maxx, maxy);
+        f2 = new NSFixedGaussian2DFunction(2, maxx, maxy);
+    }
 }

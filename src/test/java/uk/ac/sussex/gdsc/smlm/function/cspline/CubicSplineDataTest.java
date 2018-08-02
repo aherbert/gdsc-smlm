@@ -38,45 +38,45 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 @SuppressWarnings({ "javadoc" })
 public class CubicSplineDataTest
 {
-	@SeededTest
-	public void canExternaliseDoubleFunction(RandomSeed seed) throws IOException
-	{
-		canExternaliseFunction(seed, false);
-	}
+    @SeededTest
+    public void canExternaliseDoubleFunction(RandomSeed seed) throws IOException
+    {
+        canExternaliseFunction(seed, false);
+    }
 
-	@SeededTest
-	public void canExternaliseFloatFunction(RandomSeed seed) throws IOException
-	{
-		canExternaliseFunction(seed, true);
-	}
+    @SeededTest
+    public void canExternaliseFloatFunction(RandomSeed seed) throws IOException
+    {
+        canExternaliseFunction(seed, true);
+    }
 
-	private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision) throws IOException
-	{
-		final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-		final int x = 6, y = 5, z = 4;
+    private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision) throws IOException
+    {
+        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final int x = 6, y = 5, z = 4;
 
-		final int size = x * y;
-		final CustomTricubicFunction[][] splines = new CustomTricubicFunction[z][x * y];
-		final double[] a = new double[64];
-		for (int zz = 0; zz < z; zz++)
-			for (int i = 0; i < size; i++)
-			{
-				for (int j = 0; j < 64; j++)
-					a[j] = r.nextDouble();
-				splines[zz][i] = CustomTricubicFunction.create(a.clone());
-				if (singlePrecision)
-					splines[zz][i] = splines[zz][i].toSinglePrecision();
-			}
-		final CubicSplineData f1 = new CubicSplineData(x, y, splines);
+        final int size = x * y;
+        final CustomTricubicFunction[][] splines = new CustomTricubicFunction[z][x * y];
+        final double[] a = new double[64];
+        for (int zz = 0; zz < z; zz++)
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < 64; j++)
+                    a[j] = r.nextDouble();
+                splines[zz][i] = CustomTricubicFunction.create(a.clone());
+                if (singlePrecision)
+                    splines[zz][i] = splines[zz][i].toSinglePrecision();
+            }
+        final CubicSplineData f1 = new CubicSplineData(x, y, splines);
 
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		f1.write(b);
+        final ByteArrayOutputStream b = new ByteArrayOutputStream();
+        f1.write(b);
 
-		final byte[] bytes = b.toByteArray();
-		final CubicSplineData f2 = CubicSplineData.read(new ByteArrayInputStream(bytes));
+        final byte[] bytes = b.toByteArray();
+        final CubicSplineData f2 = CubicSplineData.read(new ByteArrayInputStream(bytes));
 
-		for (int zz = 0; zz < z; zz++)
-			for (int i = 0; i < size; i++)
-				Assertions.assertArrayEquals(f1.splines[zz][i].getA(), f2.splines[zz][i].getA());
-	}
+        for (int zz = 0; zz < z; zz++)
+            for (int i = 0; i < size; i++)
+                Assertions.assertArrayEquals(f1.splines[zz][i].getA(), f2.splines[zz][i].getA());
+    }
 }

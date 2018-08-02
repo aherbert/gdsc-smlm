@@ -40,202 +40,202 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 @SuppressWarnings({ "javadoc" })
 public class DoubleDHT3DTest
 {
-	static int size = 16;
-	static double centre = (size - 1) / 2.0;
+    static int size = 16;
+    static double centre = (size - 1) / 2.0;
 
-	final static double gamma = 2;
-	final static int zDepth = 5;
-	private static QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
+    final static double gamma = 2;
+    final static int zDepth = 5;
+    private static QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-	private static DoubleDHT3D createData(double cx, double cy, double cz)
-	{
-		final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ASTIGMATISM,
-				zModel);
-		final int length = size * size;
-		final double[] data = new double[size * length];
-		final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		a[Gaussian2DFunction.SIGNAL] = 1;
-		a[Gaussian2DFunction.X_POSITION] = cx;
-		a[Gaussian2DFunction.Y_POSITION] = cy;
-		a[Gaussian2DFunction.X_SD] = 1;
-		a[Gaussian2DFunction.Y_SD] = 1;
-		final StandardValueProcedure p = new StandardValueProcedure();
-		for (int z = 0; z < size; z++)
-		{
-			a[Gaussian2DFunction.Z_POSITION] = z - cz;
-			p.getValues(f, a, data, z * length);
-		}
-		return new DoubleDHT3D(size, size, size, data, false);
-	}
+    private static DoubleDHT3D createData(double cx, double cy, double cz)
+    {
+        final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
+                GaussianFunctionFactory.FIT_ASTIGMATISM, zModel);
+        final int length = size * size;
+        final double[] data = new double[size * length];
+        final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+        a[Gaussian2DFunction.SIGNAL] = 1;
+        a[Gaussian2DFunction.X_POSITION] = cx;
+        a[Gaussian2DFunction.Y_POSITION] = cy;
+        a[Gaussian2DFunction.X_SD] = 1;
+        a[Gaussian2DFunction.Y_SD] = 1;
+        final StandardValueProcedure p = new StandardValueProcedure();
+        for (int z = 0; z < size; z++)
+        {
+            a[Gaussian2DFunction.Z_POSITION] = z - cz;
+            p.getValues(f, a, data, z * length);
+        }
+        return new DoubleDHT3D(size, size, size, data, false);
+    }
 
-	private static DoubleDHT3D createData()
-	{
-		return createData(centre, centre, centre);
-	}
+    private static DoubleDHT3D createData()
+    {
+        return createData(centre, centre, centre);
+    }
 
-	private static DoubleDHT3D createOctants(int w, int h, int d)
-	{
-		return new DoubleDHT3D(FloatDHT3DTest.createOctantsStack(w, h, d));
-	}
+    private static DoubleDHT3D createOctants(int w, int h, int d)
+    {
+        return new DoubleDHT3D(FloatDHT3DTest.createOctantsStack(w, h, d));
+    }
 
-	@Test
-	public void canSwapOctants()
-	{
-		DoubleDHT3D dht;
+    @Test
+    public void canSwapOctants()
+    {
+        DoubleDHT3D dht;
 
-		// Simple test
-		final double[] data = new double[] { 2, 1, 3, 4, 6, 5, 7, 8 };
-		dht = new DoubleDHT3D(2, 2, 2, data.clone(), false);
-		dht.swapOctants();
-		checkOctants(data, dht.getData());
+        // Simple test
+        final double[] data = new double[] { 2, 1, 3, 4, 6, 5, 7, 8 };
+        dht = new DoubleDHT3D(2, 2, 2, data.clone(), false);
+        dht.swapOctants();
+        checkOctants(data, dht.getData());
 
-		final int[] test = new int[] { 2, 4, 6 };
-		for (final int w : test)
-			for (final int h : test)
-				for (final int d : test)
-				{
-					dht = createOctants(w, h, d);
+        final int[] test = new int[] { 2, 4, 6 };
+        for (final int w : test)
+            for (final int h : test)
+                for (final int d : test)
+                {
+                    dht = createOctants(w, h, d);
 
-					final double[] in = dht.getData().clone();
+                    final double[] in = dht.getData().clone();
 
-					// This just tests that the swap of the DHT and the stack matches
-					final ImageStack stack = dht.getImageStack();
-					//uk.ac.sussex.gdsc.core.ij.Utils.display("Test", stack);
-					dht.swapOctants();
-					FloatDHT3D.swapOctants(stack);
+                    // This just tests that the swap of the DHT and the stack matches
+                    final ImageStack stack = dht.getImageStack();
+                    //uk.ac.sussex.gdsc.core.ij.Utils.display("Test", stack);
+                    dht.swapOctants();
+                    FloatDHT3D.swapOctants(stack);
 
-					final double[] e = new DoubleDHT3D(stack).getData();
-					final double[] o = dht.getData();
+                    final double[] e = new DoubleDHT3D(stack).getData();
+                    final double[] o = dht.getData();
 
-					checkOctants(in, o);
+                    checkOctants(in, o);
 
-					Assertions.assertArrayEquals(e, o);
-				}
-	}
+                    Assertions.assertArrayEquals(e, o);
+                }
+    }
 
-	private static void checkOctants(double[] in, double[] out)
-	{
-		final int[] swap = new int[9];
-		swap[1] = 7;
-		swap[2] = 8;
-		swap[3] = 5;
-		swap[4] = 6;
-		swap[5] = 3;
-		swap[6] = 4;
-		swap[7] = 1;
-		swap[8] = 2;
-		for (int i = 0; i < in.length; i++)
-			Assertions.assertEquals(in[i], swap[(int) out[i]]);
-	}
+    private static void checkOctants(double[] in, double[] out)
+    {
+        final int[] swap = new int[9];
+        swap[1] = 7;
+        swap[2] = 8;
+        swap[3] = 5;
+        swap[4] = 6;
+        swap[5] = 3;
+        swap[6] = 4;
+        swap[7] = 1;
+        swap[8] = 2;
+        for (int i = 0; i < in.length; i++)
+            Assertions.assertEquals(in[i], swap[(int) out[i]]);
+    }
 
-	@Test
-	public void canConvolveAndDeconvolve()
-	{
-		final DoubleDHT3D dht = createData();
-		final double[] pixels = dht.getData().clone();
-		dht.transform();
+    @Test
+    public void canConvolveAndDeconvolve()
+    {
+        final DoubleDHT3D dht = createData();
+        final double[] pixels = dht.getData().clone();
+        dht.transform();
 
-		final DoubleDHT3D copy = dht.copy();
-		copy.initialiseFastMultiply();
+        final DoubleDHT3D copy = dht.copy();
+        copy.initialiseFastMultiply();
 
-		final DoubleDHT3D convolved = dht.multiply(dht);
-		final DoubleDHT3D deconvolved = convolved.divide(dht);
+        final DoubleDHT3D convolved = dht.multiply(dht);
+        final DoubleDHT3D deconvolved = convolved.divide(dht);
 
-		final DoubleDHT3D convolved2 = dht.multiply(copy);
-		final DoubleDHT3D deconvolved2 = convolved.divide(copy);
+        final DoubleDHT3D convolved2 = dht.multiply(copy);
+        final DoubleDHT3D deconvolved2 = convolved.divide(copy);
 
-		Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
-		Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
+        Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
+        Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
 
-		double[] e = dht.getData();
-		double[] o = deconvolved.getData();
-		for (int i = 0; i < e.length; i++)
-			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6, 1e-6));
+        double[] e = dht.getData();
+        double[] o = deconvolved.getData();
+        for (int i = 0; i < e.length; i++)
+            Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6, 1e-6));
 
-		deconvolved.inverseTransform();
+        deconvolved.inverseTransform();
 
-		// Test after reverse transform
-		e = pixels;
-		o = deconvolved.getData();
+        // Test after reverse transform
+        e = pixels;
+        o = deconvolved.getData();
 
-		for (int i = 0; i < e.length; i++)
-			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-8, 1e-8));
-	}
+        for (int i = 0; i < e.length; i++)
+            Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-8, 1e-8));
+    }
 
-	@Test
-	public void canCorrelate()
-	{
-		final DoubleDHT3D dht = createData();
-		dht.transform();
+    @Test
+    public void canCorrelate()
+    {
+        final DoubleDHT3D dht = createData();
+        dht.transform();
 
-		final DoubleDHT3D copy = dht.copy();
-		copy.initialiseFastMultiply();
+        final DoubleDHT3D copy = dht.copy();
+        copy.initialiseFastMultiply();
 
-		// Centre of power spectrum
-		final int icentre = size / 2;
+        // Centre of power spectrum
+        final int icentre = size / 2;
 
-		for (int z = -1; z <= 1; z++)
-			for (int y = -1; y <= 1; y++)
-				for (int x = -1; x <= 1; x++)
-				{
-					final DoubleDHT3D dht2 = createData(centre + x, centre + y, centre + z);
-					dht2.transform();
+        for (int z = -1; z <= 1; z++)
+            for (int y = -1; y <= 1; y++)
+                for (int x = -1; x <= 1; x++)
+                {
+                    final DoubleDHT3D dht2 = createData(centre + x, centre + y, centre + z);
+                    dht2.transform();
 
-					final DoubleDHT3D correlation = dht2.conjugateMultiply(dht);
-					final DoubleDHT3D correlation2 = dht2.conjugateMultiply(copy);
-					Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
+                    final DoubleDHT3D correlation = dht2.conjugateMultiply(dht);
+                    final DoubleDHT3D correlation2 = dht2.conjugateMultiply(copy);
+                    Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
 
-					correlation.inverseTransform();
-					correlation.swapOctants();
+                    correlation.inverseTransform();
+                    correlation.swapOctants();
 
-					final double[] pixels = correlation.getData();
+                    final double[] pixels = correlation.getData();
 
-					final int i = SimpleArrayUtils.findMaxIndex(pixels);
-					final int[] xyz = correlation.getXYZ(i);
+                    final int i = SimpleArrayUtils.findMaxIndex(pixels);
+                    final int[] xyz = correlation.getXYZ(i);
 
-					// This is how far dht has to move to align with dht2.
-					// To align dht2 with dht would be the opposite sign.
-					final int ox = xyz[0] - icentre;
-					final int oy = xyz[1] - icentre;
-					final int oz = xyz[2] - icentre;
-					//System.out.printf("Shift [%d,%d,%d], centre [%d,%d,%d]\n", x, y, z, xyz[0], xyz[1], xyz[2]);
-					Assertions.assertEquals(x, ox);
-					Assertions.assertEquals(y, oy);
-					Assertions.assertEquals(z, oz);
-				}
-	}
+                    // This is how far dht has to move to align with dht2.
+                    // To align dht2 with dht would be the opposite sign.
+                    final int ox = xyz[0] - icentre;
+                    final int oy = xyz[1] - icentre;
+                    final int oz = xyz[2] - icentre;
+                    //logger.fine(TestLog.getSupplier("Shift [%d,%d,%d], centre [%d,%d,%d]", x, y, z, xyz[0], xyz[1], xyz[2]);
+                    Assertions.assertEquals(x, ox);
+                    Assertions.assertEquals(y, oy);
+                    Assertions.assertEquals(z, oz);
+                }
+    }
 
-	@Test
-	public void canConvertToDFT()
-	{
-		final DoubleDHT3D dht = createData();
-		final double[] input = dht.getData().clone();
-		dht.transform();
+    @Test
+    public void canConvertToDFT()
+    {
+        final DoubleDHT3D dht = createData();
+        final double[] input = dht.getData().clone();
+        dht.transform();
 
-		final DoubleImage3D[] result = dht.toDFT(null, null);
+        final DoubleImage3D[] result = dht.toDFT(null, null);
 
-		final double rel = 1e-14;
-		final double abs = 1e-14;
+        final double rel = 1e-14;
+        final double abs = 1e-14;
 
-		// Test reverse transform
-		final DoubleDHT3D dht2 = DoubleDHT3D.fromDFT(result[0], result[1], null);
+        // Test reverse transform
+        final DoubleDHT3D dht2 = DoubleDHT3D.fromDFT(result[0], result[1], null);
 
-		final double[] e = dht.getData();
-		final double[] o = dht2.getData();
-		for (int i = 0; i < e.length; i++)
-			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
+        final double[] e = dht.getData();
+        final double[] o = dht2.getData();
+        for (int i = 0; i < e.length; i++)
+            Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs));
 
-		// Test verses full forward transform
-		final DoubleFFT_3D fft = new DoubleFFT_3D(dht.ns, dht.nr, dht.nc);
-		final double[] dft = Arrays.copyOf(input, 2 * e.length);
-		fft.realForwardFull(dft);
+        // Test verses full forward transform
+        final DoubleFFT_3D fft = new DoubleFFT_3D(dht.ns, dht.nr, dht.nc);
+        final double[] dft = Arrays.copyOf(input, 2 * e.length);
+        fft.realForwardFull(dft);
 
-		final double[] or = result[0].getData();
-		final double[] oi = result[1].getData();
-		for (int i = 0, j = 0; i < dft.length; i += 2, j++)
-		{
-			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
-			Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
-		}
-	}
+        final double[] or = result[0].getData();
+        final double[] oi = result[1].getData();
+        for (int i = 0, j = 0; i < dft.length; i += 2, j++)
+        {
+            Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i], or[j], rel, abs));
+            Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(dft[i + 1], oi[j], rel, abs));
+        }
+    }
 }

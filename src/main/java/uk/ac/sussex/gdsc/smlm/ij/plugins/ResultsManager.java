@@ -192,6 +192,13 @@ public class ResultsManager implements PlugIn
 
 		if (arg != null && arg.startsWith("clear"))
 		{
+			if (MemoryPeakResults.isMemoryEmpty())
+			{
+				IJ.error(TITLE, "There are no fitting results in memory");
+				IJ.showStatus("");
+				return;
+			}
+			
 			Collection<MemoryPeakResults> allResults;
 			boolean removeAll = false;
 			if (arg.contains("multi"))
@@ -234,9 +241,8 @@ public class ResultsManager implements PlugIn
 			final GenericDialog gd = new GenericDialog(TITLE);
 
 			gd.addMessage(String.format("Do you want to remove %s from memory (%s, %s)?", count, sets, memory));
-			gd.enableYesNoCancel();
 			gd.showDialog();
-			if (!gd.wasOKed())
+			if (gd.wasCanceled())
 				return;
 
 			if (removeAll)

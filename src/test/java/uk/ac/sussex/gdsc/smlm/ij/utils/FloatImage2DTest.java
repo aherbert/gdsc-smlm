@@ -28,16 +28,16 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 @SuppressWarnings({ "javadoc" })
 public class FloatImage2DTest extends Image2DTest
 {
-	@Override
-	protected FloatImage2D createData(int w, int h)
-	{
-		final float[] data = SimpleArrayUtils.newArray(w * h, 1f, 1f);
-		return new FloatImage2D(w, h, data);
-	}
+    @Override
+    protected FloatImage2D createData(int w, int h)
+    {
+        final float[] data = SimpleArrayUtils.newArray(w * h, 1f, 1f);
+        return new FloatImage2D(w, h, data);
+    }
 
-	@Override
-	protected FloatImage2D createEmptyData(int w, int h)
-	{
-		return new FloatImage2D(w, h);
-	}
+    @Override
+    protected FloatImage2D createEmptyData(int w, int h)
+    {
+        return new FloatImage2D(w, h);
+    }
 }

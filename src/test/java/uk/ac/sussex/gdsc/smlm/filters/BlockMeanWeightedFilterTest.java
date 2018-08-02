@@ -26,30 +26,30 @@ package uk.ac.sussex.gdsc.smlm.filters;
 @SuppressWarnings({ "javadoc" })
 public class BlockMeanWeightedFilterTest extends WeightedMeanFilterTest
 {
-	@Override
-	DataFilter createDataFilter()
-	{
-		return new DataFilter("blockMean", true)
-		{
-			BlockMeanFilter f = new BlockMeanFilter();
+    @Override
+    DataFilter createDataFilter()
+    {
+        return new DataFilter("blockMean", true)
+        {
+            BlockMeanFilter f = new BlockMeanFilter();
 
-			@Override
-			public void filter(float[] data, int width, int height, float boxSize)
-			{
-				f.blockFilter(data, width, height, boxSize);
-			}
+            @Override
+            public void filter(float[] data, int width, int height, float boxSize)
+            {
+                f.blockFilter(data, width, height, boxSize);
+            }
 
-			@Override
-			public void filterInternal(float[] data, int width, int height, float boxSize)
-			{
-				f.blockFilterInternal(data, width, height, boxSize);
-			}
+            @Override
+            public void filterInternal(float[] data, int width, int height, float boxSize)
+            {
+                f.blockFilterInternal(data, width, height, boxSize);
+            }
 
-			@Override
-			public void setWeights(float[] w, int width, int height)
-			{
-				f.setWeights(w, width, height);
-			}
-		};
-	}
+            @Override
+            public void setWeights(float[] w, int width, int height)
+            {
+                f.setWeights(w, width, height);
+            }
+        };
+    }
 }

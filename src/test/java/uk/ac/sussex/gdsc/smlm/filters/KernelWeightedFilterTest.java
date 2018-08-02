@@ -26,60 +26,60 @@ package uk.ac.sussex.gdsc.smlm.filters;
 @SuppressWarnings({ "javadoc" })
 public class KernelWeightedFilterTest extends WeightedKernelFilterTest
 {
-	@Override
-	DataFilter createDataFilter()
-	{
-		// Do not support non-integer box sizes
-		return new DataFilter("kernel", false, 3)
-		{
-			float[] w;
-			int width, height;
-			KernelFilter f;
-			int k = 0;
+    @Override
+    DataFilter createDataFilter()
+    {
+        // Do not support non-integer box sizes
+        return new DataFilter("kernel", false, 3)
+        {
+            float[] w;
+            int width, height;
+            KernelFilter f;
+            int k = 0;
 
-			@Override
-			public void filter(float[] data, int width, int height, float boxSize)
-			{
-				final int k = (int) boxSize;
-				// Only do odd box sizes
-				if ((k & 1) != 1)
-					return;
-				updateKernelFilter(k);
-				f.convolve(data, width, height);
-			}
+            @Override
+            public void filter(float[] data, int width, int height, float boxSize)
+            {
+                final int k = (int) boxSize;
+                // Only do odd box sizes
+                if ((k & 1) != 1)
+                    return;
+                updateKernelFilter(k);
+                f.convolve(data, width, height);
+            }
 
-			@Override
-			public void filterInternal(float[] data, int width, int height, float boxSize)
-			{
-				final int k = (int) boxSize;
-				// Only do odd box sizes
-				if ((k & 1) != 1)
-					return;
-				updateKernelFilter(k);
-				f.convolve(data, width, height, k / 2);
-			}
+            @Override
+            public void filterInternal(float[] data, int width, int height, float boxSize)
+            {
+                final int k = (int) boxSize;
+                // Only do odd box sizes
+                if ((k & 1) != 1)
+                    return;
+                updateKernelFilter(k);
+                f.convolve(data, width, height, k / 2);
+            }
 
-			private void updateKernelFilter(int k)
-			{
-				if (this.k != k || f == null)
-					f = createKernelFilter(k);
-				if (w != null)
-					f.setWeights(w, this.width, this.height);
-			}
+            private void updateKernelFilter(int k)
+            {
+                if (this.k != k || f == null)
+                    f = createKernelFilter(k);
+                if (w != null)
+                    f.setWeights(w, this.width, this.height);
+            }
 
-			private KernelFilter createKernelFilter(int k)
-			{
-				final KernelFilter f = new KernelFilter(KernelFilterTest.createKernel(k, k), k, k);
-				return f;
-			}
+            private KernelFilter createKernelFilter(int k)
+            {
+                final KernelFilter f = new KernelFilter(KernelFilterTest.createKernel(k, k), k, k);
+                return f;
+            }
 
-			@Override
-			public void setWeights(float[] w, int width, int height)
-			{
-				this.w = w;
-				this.width = width;
-				this.height = height;
-			}
-		};
-	}
+            @Override
+            public void setWeights(float[] w, int width, int height)
+            {
+                this.w = w;
+                this.width = width;
+                this.height = height;
+            }
+        };
+    }
 }

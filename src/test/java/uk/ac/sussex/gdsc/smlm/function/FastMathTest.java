@@ -2,16 +2,14 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 
 import org.apache.commons.math3.util.FastMath;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
@@ -33,7 +31,7 @@ public class FastMathTest
         logger = null;
     }
 
-	//@formatter:off
+    //@formatter:off
 	private abstract class FunctionTimingTask extends BaseTimingTask
 	{
 		double[] data;
@@ -82,37 +80,37 @@ public class FastMathTest
 	}
 	//@formatter:on
 
-	@SpeedTag
-	@Test
-	public void cbrtIsFaster()
-	{
-		ExtraAssumptions.assumeSpeedTest();
+    @SpeedTag
+    @Test
+    public void cbrtIsFaster()
+    {
+        ExtraAssumptions.assumeSpeedTest();
 
-		// Q. What is a suitable range for this test?
-		final int range = 5;
-		final int steps = 10000;
-		final double[] x = new double[steps];
-		final double total = 2 * range;
-		final double step = total / steps;
-		for (int i = 0; i < steps; i++)
-			x[i] = -range + i * step;
+        // Q. What is a suitable range for this test?
+        final int range = 5;
+        final int steps = 10000;
+        final double[] x = new double[steps];
+        final double total = 2 * range;
+        final double step = total / steps;
+        for (int i = 0; i < steps; i++)
+            x[i] = -range + i * step;
 
-		final TimingService ts = new TimingService(5);
-		ts.execute(new MathPow1_3(x));
-		ts.execute(new FastMathPow1_3(x));
-		ts.execute(new FastMathCbrt(x));
+        final TimingService ts = new TimingService(5);
+        ts.execute(new MathPow1_3(x));
+        ts.execute(new FastMathPow1_3(x));
+        ts.execute(new FastMathCbrt(x));
 
-		final int size = ts.getSize();
-		ts.repeat(size);
-		if (logger.isLoggable(Level.INFO))
-			ts.report();
+        final int size = ts.getSize();
+        ts.repeat(size);
+        if (logger.isLoggable(Level.INFO))
+            ts.report();
 
-		for (int k = 2; k <= 3; k++)
-		{
-			final double t1 = ts.get(-1).getMean();
-			final double t2 = ts.get(-k).getMean();
-			TestLog.logTestResult(logger,t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-k).getTask().getName(), t2,
-					ts.get(-1).getTask().getName(), t1, t2 / t1);
-		}
-	}
+        for (int k = 2; k <= 3; k++)
+        {
+            final double t1 = ts.get(-1).getMean();
+            final double t2 = ts.get(-k).getMean();
+            TestLog.logTestResult(logger, t1 < t2, "%s %s => %s %s = %.2fx", ts.get(-k).getTask().getName(), t2,
+                    ts.get(-1).getTask().getName(), t1, t2 / t1);
+        }
+    }
 }

@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 @SuppressWarnings({ "javadoc" })
 public class SingleNBEllipticalGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
-	@Override
-	protected void init()
-	{
-		flags = GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL;
-		f1 = new SingleNBEllipticalGaussian2DFunction(maxx, maxx);
-	}
+    @Override
+    protected void init()
+    {
+        flags = GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL;
+        f1 = new SingleNBEllipticalGaussian2DFunction(maxx, maxx);
+    }
 }

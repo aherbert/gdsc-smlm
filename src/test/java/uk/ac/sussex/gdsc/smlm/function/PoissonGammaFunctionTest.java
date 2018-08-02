@@ -1,23 +1,21 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-
 import java.util.Arrays;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.test.LogLevel;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -26,311 +24,311 @@ import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaFunctionTest
 {
-	private static Logger logger;
+    private static Logger logger;
 
-	@BeforeAll
-	public static void beforeAll()
-	{
-		logger = Logger.getLogger(PoissonGammaFunctionTest.class.getName());
-	}
+    @BeforeAll
+    public static void beforeAll()
+    {
+        logger = Logger.getLogger(PoissonGammaFunctionTest.class.getName());
+    }
 
-	@AfterAll
-	public static void afterAll()
-	{
-		logger = null;
-	}
+    @AfterAll
+    public static void afterAll()
+    {
+        logger = null;
+    }
 
-	static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
-	static double[] photons = { 0.001, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
+    static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
+    static double[] photons = { 0.001, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 
-	@Test
-	public void cumulativeProbabilityIsOneWithPMF()
-	{
-		for (final double g : gain)
-			for (final double p : photons)
-				cumulativeProbabilityIsOne(g, p, false);
-	}
+    @Test
+    public void cumulativeProbabilityIsOneWithPMF()
+    {
+        for (final double g : gain)
+            for (final double p : photons)
+                cumulativeProbabilityIsOne(g, p, false);
+    }
 
-	@Test
-	public void cumulativeProbabilityIsOneWithPDF()
-	{
-		for (final double g : gain)
-			for (final double p : photons)
-				cumulativeProbabilityIsOne(g, p, true);
-	}
+    @Test
+    public void cumulativeProbabilityIsOneWithPDF()
+    {
+        for (final double g : gain)
+            for (final double p : photons)
+                cumulativeProbabilityIsOne(g, p, true);
+    }
 
-	@Test
-	public void probabilityMatchesLogProbability()
-	{
-		for (final double g : gain)
-			for (final double p : photons)
-				probabilityMatchesLogProbability(g, p);
-	}
+    @Test
+    public void probabilityMatchesLogProbability()
+    {
+        for (final double g : gain)
+            for (final double p : photons)
+                probabilityMatchesLogProbability(g, p);
+    }
 
-	private static void cumulativeProbabilityIsOne(final double gain, final double mu, boolean pdf)
-	{
-		final double p2 = cumulativeProbability(gain, mu, pdf);
+    private static void cumulativeProbabilityIsOne(final double gain, final double mu, boolean pdf)
+    {
+        final double p2 = cumulativeProbability(gain, mu, pdf);
 
-		if (pdf)
-			ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
-		else // This is not actually a PMF but is a PDF so requires integration.
-		// This only works when the mean is above 2 if the gain is low
-		if (mu > 2 || gain > 20)
-			ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
-	}
+        if (pdf)
+            ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
+        else // This is not actually a PMF but is a PDF so requires integration.
+        // This only works when the mean is above 2 if the gain is low
+        if (mu > 2 || gain > 20)
+            ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
+    }
 
-	private static double cumulativeProbability(final double gain, final double mu, boolean pdf)
-	{
-		final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
+    private static double cumulativeProbability(final double gain, final double mu, boolean pdf)
+    {
+        final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
-		double p = 0;
-		int min = 1;
-		int max = 0;
+        double p = 0;
+        int min = 1;
+        int max = 0;
 
-		// Note: The input mu parameter is pre-gain.
-		final double e = mu;
+        // Note: The input mu parameter is pre-gain.
+        final double e = mu;
 
-		final boolean debug = false;
+        final boolean debug = false;
 
-		// Evaluate an initial range.
-		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu.
-		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		if (mu > 0)
-		{
-			// Note: The input s parameter is after-gain so adjust.
-			final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
-			min = range[0];
-			max = range[1];
-			for (int x = min; x <= max; x++)
-			{
-				final double pp = f.likelihood(x, e);
-				//System.out.printf("x=%d, p=%g\n", x, pp);
-				if (debug)
-					System.out.printf("x=%d, p=%f\n", x, pp);
-				p += pp;
-			}
-			//if (p > 1.01)
-			//	Assertions.fail("P > 1: " + p);
-		}
+        // Evaluate an initial range.
+        // Gaussian should have >99% within +/- s
+        // Poisson will have mean mu with a variance mu.
+        // At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
+        if (mu > 0)
+        {
+            // Note: The input s parameter is after-gain so adjust.
+            final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
+            min = range[0];
+            max = range[1];
+            for (int x = min; x <= max; x++)
+            {
+                final double pp = f.likelihood(x, e);
+                //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+                if (debug)
+                    logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp));
+                p += pp;
+            }
+            //if (p > 1.01)
+            //	Assertions.fail("P > 1: " + p);
+        }
 
-		// We have most of the likelihood density.
-		// Now keep evaluating up and down until no difference
-		final double changeTolerance = 1e-6;
-		for (int x = min - 1;; x--)
-		{
-			min = x;
-			final double pp = f.likelihood(x, e);
-			//System.out.printf("x=%d, p=%g\n", x, pp);
-			if (debug)
-				System.out.printf("x=%d, p=%f\n", x, pp);
-			p += pp;
-			if (pp == 0 || pp / p < changeTolerance)
-				break;
-		}
-		for (int x = max + 1;; x++)
-		{
-			max = x;
-			final double pp = f.likelihood(x, e);
-			//System.out.printf("x=%d, p=%g\n", x, pp);
-			if (debug)
-				System.out.printf("x=%d, p=%f\n", x, pp);
-			p += pp;
-			if (pp == 0 || pp / p < changeTolerance)
-				break;
-		}
+        // We have most of the likelihood density.
+        // Now keep evaluating up and down until no difference
+        final double changeTolerance = 1e-6;
+        for (int x = min - 1;; x--)
+        {
+            min = x;
+            final double pp = f.likelihood(x, e);
+            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            if (debug)
+                logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp));
+            p += pp;
+            if (pp == 0 || pp / p < changeTolerance)
+                break;
+        }
+        for (int x = max + 1;; x++)
+        {
+            max = x;
+            final double pp = f.likelihood(x, e);
+            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            if (debug)
+                logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp));
+            p += pp;
+            if (pp == 0 || pp / p < changeTolerance)
+                break;
+        }
 
-		double p2 = p;
-		if (pdf)
-		{
-			// Do a formal integration
-			if (debug)
-				if (p < 0.98 || p > 1.02)
-					System.out.printf("g=%f, mu=%f, p=%f\n", gain, mu, p);
-			final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
-					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
-			p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
-			{
-				@Override
-				public double value(double x)
-				{
-					//return f.likelihood(x, e);
-					return PoissonGammaFunction.poissonGammaN(x, mu, gain);
-				}
-			}, min, max);
+        double p2 = p;
+        if (pdf)
+        {
+            // Do a formal integration
+            if (debug)
+                if (p < 0.98 || p > 1.02)
+                    logger.fine(TestLog.getSupplier("g=%f, mu=%f, p=%f", gain, mu, p));
+            final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
+                    SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+            p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
+            {
+                @Override
+                public double value(double x)
+                {
+                    //return f.likelihood(x, e);
+                    return PoissonGammaFunction.poissonGammaN(x, mu, gain);
+                }
+            }, min, max);
 
-			p2 += PoissonGammaFunction.dirac(mu);
-		}
+            p2 += PoissonGammaFunction.dirac(mu);
+        }
 
-		//if (p2 < 0.98 || p2 > 1.02)
-		TestLog.info(logger, "g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
+        //if (p2 < 0.98 || p2 > 1.02)
+        TestLog.info(logger, "g=%f, mu=%f, p=%f  %f", gain, mu, p, p2);
 
-		return p2;
-	}
+        return p2;
+    }
 
-	private static void probabilityMatchesLogProbability(final double gain, double mu)
-	{
-		final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
+    private static void probabilityMatchesLogProbability(final double gain, double mu)
+    {
+        final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
-		// Evaluate an initial range.
-		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu.
-		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		// Note: The input s parameter is after-gain so adjust.
-		final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
-		final int min = range[0];
-		final int max = range[1];
-		// Note: The input mu parameter is pre-gain.
-		final double e = mu;
-		final Supplier<String> msg = () -> String.format("g=%f, mu=%f", gain, mu);
-		for (int x = min; x <= max; x++)
-		{
-			final double p = f.likelihood(x, e);
-			if (p == 0)
-				continue;
-			final double logP = f.logLikelihood(x, e);
-			ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-6, msg);
-		}
-	}
+        // Evaluate an initial range.
+        // Gaussian should have >99% within +/- s
+        // Poisson will have mean mu with a variance mu.
+        // At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
+        // Note: The input s parameter is after-gain so adjust.
+        final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
+        final int min = range[0];
+        final int max = range[1];
+        // Note: The input mu parameter is pre-gain.
+        final double e = mu;
+        final Supplier<String> msg = () -> String.format("g=%f, mu=%f", gain, mu);
+        for (int x = min; x <= max; x++)
+        {
+            final double p = f.likelihood(x, e);
+            if (p == 0)
+                continue;
+            final double logP = f.logLikelihood(x, e);
+            ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-6, msg);
+        }
+    }
 
-	@Test
-	public void canComputePoissonGammaGradientWithInteger()
-	{
-		for (int j = 0; j < gain.length; j++)
-			for (int i = 0; i < photons.length; i++)
-				canComputePoissonGammaGradient(gain[j], photons[i], false);
-	}
+    @Test
+    public void canComputePoissonGammaGradientWithInteger()
+    {
+        for (int j = 0; j < gain.length; j++)
+            for (int i = 0; i < photons.length; i++)
+                canComputePoissonGammaGradient(gain[j], photons[i], false);
+    }
 
-	@Test
-	public void canComputePoissonGammaGradientWithReal()
-	{
-		for (int j = 0; j < gain.length; j++)
-			for (int i = 0; i < photons.length; i++)
-				canComputePoissonGammaGradient(gain[j], photons[i], true);
-	}
+    @Test
+    public void canComputePoissonGammaGradientWithReal()
+    {
+        for (int j = 0; j < gain.length; j++)
+            for (int i = 0; i < photons.length; i++)
+                canComputePoissonGammaGradient(gain[j], photons[i], true);
+    }
 
-	@SuppressWarnings("unused")
-	private static void canComputePoissonGammaGradient(final double gain, final double mu, boolean nonInteger)
-	{
-		final double o = mu;
-		final double delta = 1e-3; // * o;
-		final double uo = o + delta;
-		final double lo = o - delta;
-		final double diff = uo - lo;
+    @SuppressWarnings("unused")
+    private static void canComputePoissonGammaGradient(final double gain, final double mu, boolean nonInteger)
+    {
+        final double o = mu;
+        final double delta = 1e-3; // * o;
+        final double uo = o + delta;
+        final double lo = o - delta;
+        final double diff = uo - lo;
 
-		// The numerical gradient is poor around the switch between the use of the
-		// Bessel function and the approximation. So just count the errors.
-		int fail = 0;
-		double sum = 0;
+        // The numerical gradient is poor around the switch between the use of the
+        // Bessel function and the approximation. So just count the errors.
+        int fail = 0;
+        double sum = 0;
 
-		final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
-		final int min = Math.max(0, range[0]);
-		final int max = range[1];
-		final double[] dp_dt = new double[1];
-		final double[] dp_dt2 = new double[1];
-		final double step = (nonInteger) ? 0.5 : 1;
+        final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
+        final int min = Math.max(0, range[0]);
+        final int max = range[1];
+        final double[] dp_dt = new double[1];
+        final double[] dp_dt2 = new double[1];
+        final double step = (nonInteger) ? 0.5 : 1;
 
-		// When using the approximation the gradients are not as accurate
-		final boolean approx = (2 * Math.sqrt(max * o / gain) > 709);
-		final double tol = approx ? 0.05 : 1e-3;
+        // When using the approximation the gradients are not as accurate
+        final boolean approx = (2 * Math.sqrt(max * o / gain) > 709);
+        final double tol = approx ? 0.05 : 1e-3;
 
-		final TDoubleArrayList list = new TDoubleArrayList();
-		if (min != 0)
-			list.add(0);
-		for (double x = min; x <= max; x += step)
-			list.add(x);
+        final TDoubleArrayList list = new TDoubleArrayList();
+        if (min != 0)
+            list.add(0);
+        for (double x = min; x <= max; x += step)
+            list.add(x);
 
-		for (final double x : list.toArray())
-		{
-			final double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
-			final double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
-			Assertions.assertEquals(p1, p2);
+        for (final double x : list.toArray())
+        {
+            final double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
+            final double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
+            Assertions.assertEquals(p1, p2);
 
-			// Check partial gradient matches
-			double p3 = PoissonGammaFunction.poissonGammaPartial(x, o, gain, dp_dt2);
-			Assertions.assertEquals(p1, p3);
-			ExtraAssertions.assertEqualsRelative(dp_dt[0] + p1, dp_dt2[0], 1e-8);
+            // Check partial gradient matches
+            double p3 = PoissonGammaFunction.poissonGammaPartial(x, o, gain, dp_dt2);
+            Assertions.assertEquals(p1, p3);
+            ExtraAssertions.assertEqualsRelative(dp_dt[0] + p1, dp_dt2[0], 1e-8);
 
-			// Check no dirac gradient matches
-			p3 = PoissonGammaFunction.poissonGammaN(x, o, gain, dp_dt2);
-			if (x == 0)
-			{
-				final double dirac = PoissonGammaFunction.dirac(o);
-				// Add the dirac contribution
-				p3 += dirac;
-				dp_dt2[0] -= dirac;
-				ExtraAssertions.assertEqualsRelative(p1, p3, 1e-8);
-				ExtraAssertions.assertEqualsRelative(dp_dt[0], dp_dt2[0], 1e-8);
-			}
-			else
-			{
-				Assertions.assertEquals(p1, p3);
-				ExtraAssertions.assertEqualsRelative(dp_dt[0], dp_dt2[0], 1e-8);
-			}
+            // Check no dirac gradient matches
+            p3 = PoissonGammaFunction.poissonGammaN(x, o, gain, dp_dt2);
+            if (x == 0)
+            {
+                final double dirac = PoissonGammaFunction.dirac(o);
+                // Add the dirac contribution
+                p3 += dirac;
+                dp_dt2[0] -= dirac;
+                ExtraAssertions.assertEqualsRelative(p1, p3, 1e-8);
+                ExtraAssertions.assertEqualsRelative(dp_dt[0], dp_dt2[0], 1e-8);
+            }
+            else
+            {
+                Assertions.assertEquals(p1, p3);
+                ExtraAssertions.assertEqualsRelative(dp_dt[0], dp_dt2[0], 1e-8);
+            }
 
-			final double up = PoissonGammaFunction.poissonGamma(x, uo, gain);
-			final double lp = PoissonGammaFunction.poissonGamma(x, lo, gain);
+            final double up = PoissonGammaFunction.poissonGamma(x, uo, gain);
+            final double lp = PoissonGammaFunction.poissonGamma(x, lo, gain);
 
-			final double eg = dp_dt[0];
-			final double g = (up - lp) / diff;
-			final double error = DoubleEquality.relativeError(g, eg);
-			final double ox = x / gain;
-			//System.out.printf("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
-			//		error);
+            final double eg = dp_dt[0];
+            final double g = (up - lp) / diff;
+            final double error = DoubleEquality.relativeError(g, eg);
+            final double ox = x / gain;
+            //logger.fine(TestLog.getSupplier("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g", gain, mu, x, ox, p1, g, eg,
+            //		error);
 
-			if (error > tol)
-			{
-				fail++;
-				sum += error;
-			}
-		}
+            if (error > tol)
+            {
+                fail++;
+                sum += error;
+            }
+        }
 
-		final double f = (double) fail / list.size();
-		TestLog.info(logger, "g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
-		if (approx)
-			Assertions.assertTrue(f < 0.2);
-		else
-			Assertions.assertTrue(f < 0.01);
-	}
+        final double f = (double) fail / list.size();
+        TestLog.info(logger, "g=%g, mu=%g, failures=%g, mean=%f", gain, mu, f, Maths.div0(sum, fail));
+        if (approx)
+            Assertions.assertTrue(f < 0.2);
+        else
+            Assertions.assertTrue(f < 0.01);
+    }
 
-	@Test
-	public void canComputeSeparatelyAtC0()
-	{
-		final TDoubleArrayList list = new TDoubleArrayList();
-		for (int exp = -12; exp < 6; exp++)
-			list.add(Math.pow(10, exp * 0.5));
-		for (int x = 2; x < 10; x++)
-			list.add(x / 10.0);
-		for (double x = 11; x <= 20; x++)
-			list.add(x / 10.0);
-		final double[] p = list.toArray();
+    @Test
+    public void canComputeSeparatelyAtC0()
+    {
+        final TDoubleArrayList list = new TDoubleArrayList();
+        for (int exp = -12; exp < 6; exp++)
+            list.add(Math.pow(10, exp * 0.5));
+        for (int x = 2; x < 10; x++)
+            list.add(x / 10.0);
+        for (double x = 11; x <= 20; x++)
+            list.add(x / 10.0);
+        final double[] p = list.toArray();
 
-		final boolean report = logger.isLoggable(Level.INFO) && TestSettings.allow(TestComplexity.MEDIUM);
-		if (report)
-			Arrays.sort(p);
+        final boolean report = logger.isLoggable(Level.INFO) && TestSettings.allow(TestComplexity.MEDIUM);
+        if (report)
+            Arrays.sort(p);
 
-		final double m = 5;
+        final double m = 5;
 
-		for (final double x : p)
-		{
-			final double e = PoissonGammaFunction.poissonGamma(0, x, m);
-			// Test the function can be separated into the dirac and the rest
-			final double dirac = PoissonGammaFunction.dirac(x);
-			final double p0 = PoissonGammaFunction.poissonGammaN(0, x, m);
-			ExtraAssertions.assertEqualsRelative(e, dirac + p0, 1e-10);
+        for (final double x : p)
+        {
+            final double e = PoissonGammaFunction.poissonGamma(0, x, m);
+            // Test the function can be separated into the dirac and the rest
+            final double dirac = PoissonGammaFunction.dirac(x);
+            final double p0 = PoissonGammaFunction.poissonGammaN(0, x, m);
+            ExtraAssertions.assertEqualsRelative(e, dirac + p0, 1e-10);
 
-			// For reporting
-			if (report)
-			{
-				final double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
+            // For reporting
+            if (report)
+            {
+                final double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
 
-				TestLog.info(logger, "p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, dirac, p0,
-						dirac / p0,
-						//uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
-						p01, p0 / p01
-				//uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
-				);
-			}
-		}
-	}
+                TestLog.info(logger, "p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)", x, dirac, p0,
+                        dirac / p0,
+                        //uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
+                        p01, p0 / p01
+                //uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
+                );
+            }
+        }
+    }
 }

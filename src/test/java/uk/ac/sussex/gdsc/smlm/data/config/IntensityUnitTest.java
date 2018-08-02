@@ -32,14 +32,14 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 @SuppressWarnings({ "unchecked", "javadoc" })
 public class IntensityUnitTest
 {
-	@Test
-	public void canConvert()
-	{
-		final double offset = 120;
-		final double countPerPhoton = 45.5;
-		for (int photon = 1; photon < 100; photon++)
-		{
-			//@formatter:off
+    @Test
+    public void canConvert()
+    {
+        final double offset = 120;
+        final double countPerPhoton = 45.5;
+        for (int photon = 1; photon < 100; photon++)
+        {
+            //@formatter:off
     		check(offset, countPerPhoton,
     			new ExpectedUnit<>(IntensityUnit.COUNT, offset + photon * countPerPhoton),
     			new ExpectedUnit<>(IntensityUnit.PHOTON, photon)
@@ -53,42 +53,42 @@ public class IntensityUnitTest
         			new ExpectedUnit<>(IntensityUnit.PHOTON, photon)
         			);
     		//@formatter:on
-		}
-	}
+        }
+    }
 
-	private static void check(double offset, double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
-	{
-		final int n = expectedUnits.length;
-		TypeConverter<IntensityUnit> c;
-		for (int i = 0; i < n; i++)
-		{
-			final IntensityUnit u1 = expectedUnits[i].u;
-			final double v1 = expectedUnits[i].value;
-			for (int j = 0; j < n; j++)
-			{
-				final IntensityUnit u2 = expectedUnits[j].u;
-				c = UnitConverterFactory.createConverter(u1, u2, offset, countPerPhoton);
-				final double o = c.convert(v1);
-				Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
-			}
-		}
-	}
+    private static void check(double offset, double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
+    {
+        final int n = expectedUnits.length;
+        TypeConverter<IntensityUnit> c;
+        for (int i = 0; i < n; i++)
+        {
+            final IntensityUnit u1 = expectedUnits[i].u;
+            final double v1 = expectedUnits[i].value;
+            for (int j = 0; j < n; j++)
+            {
+                final IntensityUnit u2 = expectedUnits[j].u;
+                c = UnitConverterFactory.createConverter(u1, u2, offset, countPerPhoton);
+                final double o = c.convert(v1);
+                Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
+            }
+        }
+    }
 
-	private static void check(double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
-	{
-		final int n = expectedUnits.length;
-		TypeConverter<IntensityUnit> c;
-		for (int i = 0; i < n; i++)
-		{
-			final IntensityUnit u1 = expectedUnits[i].u;
-			final double v1 = expectedUnits[i].value;
-			for (int j = 0; j < n; j++)
-			{
-				final IntensityUnit u2 = expectedUnits[j].u;
-				c = UnitConverterFactory.createConverter(u1, u2, countPerPhoton);
-				final double o = c.convert(v1);
-				Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
-			}
-		}
-	}
+    private static void check(double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits)
+    {
+        final int n = expectedUnits.length;
+        TypeConverter<IntensityUnit> c;
+        for (int i = 0; i < n; i++)
+        {
+            final IntensityUnit u1 = expectedUnits[i].u;
+            final double v1 = expectedUnits[i].value;
+            for (int j = 0; j < n; j++)
+            {
+                final IntensityUnit u2 = expectedUnits[j].u;
+                c = UnitConverterFactory.createConverter(u1, u2, countPerPhoton);
+                final double o = c.convert(v1);
+                Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
+            }
+        }
+    }
 }

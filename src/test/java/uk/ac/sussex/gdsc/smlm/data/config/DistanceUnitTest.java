@@ -32,35 +32,35 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 @SuppressWarnings({ "unchecked", "javadoc" })
 public class DistanceUnitTest
 {
-	@Test
-	public void canConvert()
-	{
-		final double nmPerPixel = 104.5;
-		for (int pixel = 1; pixel < 10; pixel++)
-			//@formatter:off
+    @Test
+    public void canConvert()
+    {
+        final double nmPerPixel = 104.5;
+        for (int pixel = 1; pixel < 10; pixel++)
+            //@formatter:off
     		check(nmPerPixel,
     			new ExpectedUnit<>(DistanceUnit.PIXEL, pixel),
     			new ExpectedUnit<>(DistanceUnit.UM, pixel * nmPerPixel / 1e3),
     			new ExpectedUnit<>(DistanceUnit.NM, pixel * nmPerPixel)
     			);
     		//@formatter:on
-	}
+    }
 
-	private static void check(double nmPerPixel, ExpectedUnit<DistanceUnit>... expectedUnits)
-	{
-		final int n = expectedUnits.length;
-		TypeConverter<DistanceUnit> c;
-		for (int i = 0; i < n; i++)
-		{
-			final DistanceUnit u1 = expectedUnits[i].u;
-			final double v1 = expectedUnits[i].value;
-			for (int j = 0; j < n; j++)
-			{
-				final DistanceUnit u2 = expectedUnits[j].u;
-				c = UnitConverterFactory.createConverter(u1, u2, nmPerPixel);
-				final double o = c.convert(v1);
-				Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
-			}
-		}
-	}
+    private static void check(double nmPerPixel, ExpectedUnit<DistanceUnit>... expectedUnits)
+    {
+        final int n = expectedUnits.length;
+        TypeConverter<DistanceUnit> c;
+        for (int i = 0; i < n; i++)
+        {
+            final DistanceUnit u1 = expectedUnits[i].u;
+            final double v1 = expectedUnits[i].value;
+            for (int j = 0; j < n; j++)
+            {
+                final DistanceUnit u2 = expectedUnits[j].u;
+                c = UnitConverterFactory.createConverter(u1, u2, nmPerPixel);
+                final double o = c.convert(v1);
+                Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
+            }
+        }
+    }
 }
