@@ -147,7 +147,7 @@ public abstract class Gaussian2DFunctionTest
 
         final int[] gradientIndices = gf.gradientIndices();
         if (logger.isLoggable(Level.INFO))
-            TestLog.info(logger, "Function%d %s %s", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
+            logger.log(TestLog.getRecord(Level.INFO, "Function%d %s %s", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices)));
 
         Assertions.assertEquals(gf.getNPeaks(), npeaks, "Incorrect number of peaks");
 
@@ -221,8 +221,8 @@ public abstract class Gaussian2DFunctionTest
                                     if (record)
                                     {
                                         record = false;
-                                        TestLog.info(logger, "%s %d frozen to %s", f1.getClass().getSimpleName(), 1,
-                                                f.getClass().getSimpleName());
+                                        logger.log(TestLog.getRecord(Level.INFO, "%s %d frozen to %s", f1.getClass().getSimpleName(), 1,
+                                                f.getClass().getSimpleName()));
                                     }
 
                                     for (final int x : testx)
@@ -414,9 +414,9 @@ public abstract class Gaussian2DFunctionTest
                                                             if (record)
                                                             {
                                                                 record = false;
-                                                                TestLog.info(logger, "%s %d frozen to %s",
+                                                                logger.log(TestLog.getRecord(Level.INFO, "%s %d frozen to %s",
                                                                         f2.getClass().getSimpleName(), 2,
-                                                                        f.getClass().getSimpleName());
+                                                                        f.getClass().getSimpleName()));
                                                             }
 
                                                             for (final int x : testx)

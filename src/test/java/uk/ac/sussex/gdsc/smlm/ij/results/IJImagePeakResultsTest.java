@@ -2,6 +2,7 @@ package uk.ac.sussex.gdsc.smlm.ij.results;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.rng.UniformRandomProvider;
@@ -483,7 +484,7 @@ public class IJImagePeakResultsTest
         {
             r[i].end();
             image[i] = getImage(r[i]);
-            TestLog.fine(logger, "[%d] = %s", i, Arrays.toString(image[i]));
+            logger.log(TestLog.getRecord(Level.FINE, "[%d] = %s", i, Arrays.toString(image[i])));
         }
 
         // Test single value adds

@@ -1,5 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterAll;
@@ -39,8 +40,8 @@ public class PoissonFunctionTest
             for (int i = 0; i < photons.length; i++)
             {
                 final int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
-                TestLog.fine(logger, "minRange[%d][%d] = %d;", j, i, result[0]);
-                TestLog.fine(logger, "maxRange[%d][%d] = %d;", j, i, result[1]);
+                logger.log(TestLog.getRecord(Level.FINE, "minRange[%d][%d] = %d;", j, i, result[0]));
+                logger.log(TestLog.getRecord(Level.FINE, "maxRange[%d][%d] = %d;", j, i, result[1]));
             }
     }
 
@@ -131,8 +132,8 @@ public class PoissonFunctionTest
         minx += min;
         maxx += min;
 
-        TestLog.info(logger, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, p, minx, maxp, maxc,
-                maxx);
+        logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, p, minx, maxp, maxc,
+                maxx));
         return new int[] { minx, maxx };
     }
 

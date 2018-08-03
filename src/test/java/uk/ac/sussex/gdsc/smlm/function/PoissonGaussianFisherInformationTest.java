@@ -1,5 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterAll;
@@ -128,7 +129,7 @@ public class PoissonGaussianFisherInformationTest
             final double lower = f.getPoissonGaussianApproximationI(u);
             final double upper = PoissonFisherInformation.getPoissonI(u);
             final double alpha = I / upper;
-            TestLog.info(logger, "s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", f.s, u, I, I2, lower, upper, alpha);
+            logger.log(TestLog.getRecord(Level.INFO, "s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", f.s, u, I, I2, lower, upper, alpha));
             Assertions.assertTrue(I > lower);
             Assertions.assertTrue(I < upper);
 

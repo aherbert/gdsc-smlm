@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -26,7 +27,6 @@ import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.BoxMullerUnitGaussianSampler;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
@@ -254,7 +254,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] sd = testData.sd;
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
+        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 1);
 
         for (final double background : testbackground)
             for (final double signal1 : testsignal1)
@@ -318,8 +318,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
                                         }
                                 }
         final double p = (100.0 * count) / total;
-        TestLog.info(logger, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter],
-                count, total, p);
+        logger.log(TestLog.getRecord(Level.INFO, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(),
+                NAME[targetParameter], count, total, p));
         Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
     }
 
@@ -455,7 +455,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] sd = testData.sd;
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
+        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 1);
 
         for (final double background : testbackground)
             for (final double signal1 : testsignal1)
@@ -513,8 +513,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 
                                 }
         final double p = (100.0 * count) / total;
-        TestLog.info(logger, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter], count,
-                total, p);
+        logger.log(TestLog.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(),
+                NAME[targetParameter], count, total, p));
         ExtraAssertions.assertTrue(p > threshold, "%s fraction too low: %s", NAME[targetParameter], p);
     }
 
@@ -811,7 +811,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 
     private void canComputePValue(RandomSeed seed, BaseNonLinearFunction nlf)
     {
-        TestLog.info(logger, nlf.name);
+        logger.log(TestLog.getRecord(Level.INFO, nlf.name));
 
         final int n = maxx * maxx;
 
@@ -828,7 +828,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] sd = testData.sd;
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final BoxMullerUnitGaussianSampler gs = new BoxMullerUnitGaussianSampler(r);
+        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 1);
 
         final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
         for (int i = 0; i < n; i++)
@@ -852,7 +852,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
             op[j] = SCMOSLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
             oll2 -= Math.log(op[j]);
         }
-        TestLog.info(logger, "oll=%f, oll2=%f", oll, oll2);
+        logger.log(TestLog.getRecord(Level.INFO, "oll=%f, oll2=%f", oll, oll2));
         ExtraAssertions.assertEqualsRelative(oll2, oll, 1e-10, "Observed Log-likelihood");
 
         final TDoubleArrayList list = new TDoubleArrayList();
@@ -874,8 +874,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
             }
             final double llr2 = -2 * Math.log(product.doubleValue());
             final double q = f.computeQValue(ll);
-            TestLog.info(logger, "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f", a[0], ll, ll2, llr, llr2,
-                    product.round(new MathContext(4)).toString(), q);
+            logger.log(TestLog.getRecord(Level.INFO, "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f", a[0], ll,
+                    ll2, llr, llr2, product.round(new MathContext(4)).toString(), q));
 
             // Only value if the product could be computed. Low ratios cause it to becomes
             // too small to store in a double.
@@ -908,7 +908,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 
         // Allow a tolerance as the random data may alter the p-value computation.
         // Should allow it to be less than 2 increment either side of the answer.
-        TestLog.info(logger, "min fit = %g => %g", mina, fita);
+        logger.log(TestLog.getRecord(Level.INFO, "min fit = %g => %g", mina, fita));
         Assertions.assertEquals(1, fita, 0.199, "min");
     }
 }

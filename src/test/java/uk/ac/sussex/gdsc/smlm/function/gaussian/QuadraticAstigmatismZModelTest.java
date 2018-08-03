@@ -75,8 +75,8 @@ public class QuadraticAstigmatismZModelTest
             final double o2 = ds_dz2[1];
 
             if (record)
-                TestLog.info(logger, "z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)", z, s0, e1, o1,
-                        DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2));
+                logger.log(TestLog.getRecord(Level.INFO, "z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)", z, s0, e1, o1,
+                        DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2)));
 
             //double error = DoubleEquality.relativeError(o, e);
             if (Math.abs(z) > 0.02)

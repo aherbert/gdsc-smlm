@@ -220,7 +220,7 @@ public class FastLogTest
         final float e = (float) Math.log(v);
         final float o = f.log(v);
         final float error = FloatEquality.relativeError(e, o);
-        uk.ac.sussex.gdsc.test.TestLog.info(logger, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error);
+        logger.log(uk.ac.sussex.gdsc.test.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
         if (test)
         {
             if (Double.isNaN(e) && Double.isNaN(o))
@@ -304,7 +304,7 @@ public class FastLogTest
         final double e = Math.log(v);
         final double o = f.log(v);
         final double error = DoubleEquality.relativeError(e, o);
-        uk.ac.sussex.gdsc.test.TestLog.info(logger, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error);
+        logger.log(uk.ac.sussex.gdsc.test.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
         if (test)
         {
             if (Double.isNaN(e) && Double.isNaN(o))

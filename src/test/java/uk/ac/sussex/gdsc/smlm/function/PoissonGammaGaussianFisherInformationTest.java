@@ -235,7 +235,7 @@ public class PoissonGammaGaussianFisherInformationTest
                 final double I = f.getPoissonGammaGaussianI(u);
                 final double upper = PoissonFisherInformation.getPoissonI(u);
                 final double alpha = I / upper;
-                TestLog.fine(logger, "m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s", f.m, f.s, u, I, upper, alpha);
+                logger.log(TestLog.getRecord(Level.FINE, "m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s", f.m, f.s, u, I, upper, alpha));
                 ExtraAssertions.assertTrue(I < upper, "Fisher information (%s) is not below upper limit: %s", I, upper);
                 Assertions.assertTrue(alpha > 0, "Alpha is not above zero");
             }

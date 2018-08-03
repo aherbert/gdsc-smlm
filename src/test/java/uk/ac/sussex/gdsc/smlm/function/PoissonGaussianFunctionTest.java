@@ -1,6 +1,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -125,7 +126,7 @@ public class PoissonGaussianFunctionTest
         final long t1 = getTime(noise2, N, x, true);
         final long t2 = getTime(noise2, N, x, false);
 
-        TestLog.info(logger, "Picard %d : Pade %d (%fx)", t1, t2, t1 / (double) t2);
+        logger.log(TestLog.getRecord(Level.INFO, "Picard %d : Pade %d (%fx)", t1, t2, t1 / (double) t2));
         ExtraAssertions.assertTrue(t2 < t1, "Picard %d < Pade %d", t1, t2);
     }
 
@@ -237,7 +238,7 @@ public class PoissonGaussianFunctionTest
         }, min, max);
 
         if (p2 < 0.98 || p2 > 1.02)
-            TestLog.info(logger, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2);
+            logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
 
         return p2;
     }

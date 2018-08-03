@@ -1,5 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.util.FastMath;
@@ -424,7 +425,7 @@ public class PrecisionTest
             maxx *= 2;
             while (maxx * maxx < Integer.MAX_VALUE)
             {
-                TestLog.info(logger, "maxx = %d", maxx);
+                logger.log(TestLog.getRecord(Level.INFO, "maxx = %d", maxx));
                 functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
                         1e-3);
                 maxx *= 2;
@@ -432,7 +433,7 @@ public class PrecisionTest
         }
         catch (final AssertionError e)
         {
-            TestLog.info(logger, e.getMessage());
+            logger.log(TestLog.getRecord(Level.INFO, e.getMessage()));
             //e.printStackTrace();
             return;
         }
@@ -496,14 +497,14 @@ public class PrecisionTest
             maxx *= 2;
             while (maxx * maxx < Integer.MAX_VALUE)
             {
-                TestLog.info(logger, "maxx = %d", maxx);
+                logger.log(TestLog.getRecord(Level.INFO, "maxx = %d", maxx));
                 functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
                 maxx *= 2;
             }
         }
         catch (final AssertionError e)
         {
-            TestLog.info(logger, e.getMessage());
+            logger.log(TestLog.getRecord(Level.INFO, e.getMessage()));
             //e.printStackTrace();
             return;
         }

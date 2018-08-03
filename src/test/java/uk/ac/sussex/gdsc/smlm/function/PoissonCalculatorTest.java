@@ -216,7 +216,7 @@ public class PoissonCalculatorTest
 
         p = in.integrate(20000, f, min, max);
 
-        TestLog.info(logger, "mu=%f, p=%f", f.mu, p);
+        logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f", f.mu, p));
         if (test)
             ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", f.mu);
     }
@@ -295,7 +295,7 @@ public class PoissonCalculatorTest
 
     private static void canComputeLogLikelihoodRatio(RandomSeed seed, BaseNonLinearFunction nlf)
     {
-        TestLog.info(logger, nlf.name);
+        logger.log(TestLog.getRecord(Level.INFO, nlf.name));
 
         final int n = maxx * maxx;
 
@@ -321,7 +321,7 @@ public class PoissonCalculatorTest
         final double mll = PoissonCalculator.maximumLogLikelihood(x);
         double llr = -2 * (ll - mll);
         double llr2 = PoissonCalculator.logLikelihoodRatio(u, x);
-        TestLog.info(logger, "llr=%f, llr2=%f", llr, llr2);
+        logger.log(TestLog.getRecord(Level.INFO, "llr=%f, llr2=%f", llr, llr2));
         ExtraAssertions.assertEqualsRelative(llr, llr2, 1e-10, "Log-likelihood ratio");
 
         final double[] op = new double[x.length];
@@ -334,13 +334,13 @@ public class PoissonCalculatorTest
         final ChiSquaredDistributionTable table = ChiSquaredDistributionTable.createUpperTailed(0.05, df);
         final ChiSquaredDistributionTable table2 = ChiSquaredDistributionTable.createUpperTailed(0.001, df);
         if (logger.isLoggable(Level.INFO))
-            TestLog.info(logger, "Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f", table.getCrititalValue(df),
-                    table.getSignificanceValue(), table2.getCrititalValue(df), table2.getSignificanceValue(),
-                    ChiSquaredDistributionTable.computeQValue(24, 2),
+            logger.log(TestLog.getRecord(Level.INFO, "Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f",
+                    table.getCrititalValue(df), table.getSignificanceValue(), table2.getCrititalValue(df),
+                    table2.getSignificanceValue(), ChiSquaredDistributionTable.computeQValue(24, 2),
                     ChiSquaredDistributionTable.createUpperTailed(0.05, 2).reject(24, 2),
                     ChiSquaredDistributionTable.getChiSquared(1e-6, 2)
 
-            );
+            ));
         final TDoubleArrayList list = new TDoubleArrayList();
         final int imin = 5, imax = 15;
         for (int i = imin; i <= imax; i++)
@@ -365,10 +365,10 @@ public class PoissonCalculatorTest
             llr2 = -2 * Math.log(product.doubleValue());
             final double p = ChiSquaredDistributionTable.computePValue(llr, df);
             final double q = ChiSquaredDistributionTable.computeQValue(llr, df);
-            TestLog.info(logger,
+            logger.log(TestLog.getRecord(Level.INFO,
                     "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f (reject=%b @ %.3f, reject=%b @ %.3f)",
                     a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q, table.reject(llr, df),
-                    table.getSignificanceValue(), table2.reject(llr, df), table2.getSignificanceValue());
+                    table.getSignificanceValue(), table2.reject(llr, df), table2.getSignificanceValue()));
 
             // Only value if the product could be computed. Low ratios cause it to becomes
             // too small to store in a double.
@@ -404,7 +404,7 @@ public class PoissonCalculatorTest
 
         // Allow a tolerance as the random data may alter the p-value computation.
         // Should allow it to be less than 2 increment either side of the answer.
-        TestLog.info(logger, "max fit = %g => %g", maxa, fita);
+        logger.log(TestLog.getRecord(Level.INFO, "max fit = %g => %g", maxa, fita));
         Assertions.assertEquals(1, fita, 0.199, "max");
     }
 
@@ -429,7 +429,7 @@ public class PoissonCalculatorTest
 
     private static void canComputeFastLog_LogLikelihoodRatio(RandomSeed seed, BaseNonLinearFunction nlf)
     {
-        TestLog.info(logger, nlf.name);
+        logger.log(TestLog.getRecord(Level.INFO, nlf.name));
 
         final int n = maxx * maxx;
 
@@ -454,7 +454,7 @@ public class PoissonCalculatorTest
         // Only test the LLR
         final double llr = PoissonCalculator.logLikelihoodRatio(u, x);
         final double llr2 = PoissonCalculator.logLikelihoodRatio(u, x, FastLogFactory.getFastLog());
-        TestLog.info(logger, "llr=%f, llr2=%f", llr, llr2);
+        logger.log(TestLog.getRecord(Level.INFO, "llr=%f, llr2=%f", llr, llr2));
         // Approximately equal
         ExtraAssertions.assertEqualsRelative(llr, llr2, 5e-3, "Log-likelihood ratio");
     }
@@ -591,7 +591,8 @@ public class PoissonCalculatorTest
             o[i] = PoissonCalculator.logFactorialApproximation(x, i);
             error[i] = DoubleEquality.relativeError(e, o[i]);
         }
-        TestLog.info(logger, "%s! = %s : %s", Double.toString(x), Utils.rounded(e), Arrays.toString(error));
+        logger.log(TestLog.getRecord(Level.INFO, "%s! = %s : %s", Double.toString(x), Utils.rounded(e),
+                Arrays.toString(error)));
     }
 
     @Test
@@ -621,8 +622,8 @@ public class PoissonCalculatorTest
             final double e = PoissonCalculator.logLikelihood(u, x);
             final double o = PoissonCalculator.fastLogLikelihood(u, x);
             final double error = DoubleEquality.relativeError(e, o);
-            TestLog.info(logger, "ll(%s|%s) = %s : %s", Double.toString(x), Double.toString(u), Utils.rounded(e),
-                    Double.toString(error));
+            logger.log(TestLog.getRecord(Level.INFO, "ll(%s|%s) = %s : %s", Double.toString(x), Double.toString(u),
+                    Utils.rounded(e), Double.toString(error)));
         }
     }
 
@@ -654,8 +655,8 @@ public class PoissonCalculatorTest
             final double e = PoissonCalculator.logLikelihood(u, x);
             final double o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
             final double error = DoubleEquality.relativeError(e, o);
-            TestLog.info(logger, "ll(%s|%s) = %s : %s", Double.toString(x), Double.toString(u), Utils.rounded(e),
-                    Double.toString(error));
+            logger.log(TestLog.getRecord(Level.INFO, "ll(%s|%s) = %s : %s", Double.toString(x), Double.toString(u),
+                    Utils.rounded(e), Double.toString(error)));
         }
     }
 
@@ -687,8 +688,8 @@ public class PoissonCalculatorTest
             final double e = PoissonCalculator.logLikelihoodRatio(u, x);
             final double o = PoissonCalculator.logLikelihoodRatio(u, x, fastLog);
             final double error = DoubleEquality.relativeError(e, o);
-            TestLog.info(logger, "llr(%s|%s) = %s : %s", Double.toString(x), Double.toString(u), Utils.rounded(e),
-                    Double.toString(error));
+            logger.log(TestLog.getRecord(Level.INFO, "llr(%s|%s) = %s : %s", Double.toString(x), Double.toString(u),
+                    Utils.rounded(e), Double.toString(error)));
         }
     }
 
@@ -712,13 +713,13 @@ public class PoissonCalculatorTest
             final PoissonCalculator pc = new PoissonCalculator(x);
             e = PoissonCalculator.maximumLogLikelihood(x);
             o = pc.getMaximumLogLikelihood();
-            TestLog.info(logger, "[%s] Instance MaxLL = %g vs %g (error = %g)", X, e, o,
-                    DoubleEquality.relativeError(e, o));
+            logger.log(TestLog.getRecord(Level.INFO, "[%s] Instance MaxLL = %g vs %g (error = %g)", X, e, o,
+                    DoubleEquality.relativeError(e, o)));
             Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Instance Max LL not equal: x=" + X);
 
             o = PoissonCalculator.fastMaximumLogLikelihood(x);
-            TestLog.info(logger, "[%s] Fast MaxLL = %g vs %g (error = %g)", X, e, o,
-                    DoubleEquality.relativeError(e, o));
+            logger.log(TestLog.getRecord(Level.INFO, "[%s] Fast MaxLL = %g vs %g (error = %g)", X, e, o,
+                    DoubleEquality.relativeError(e, o)));
             Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Fast Max LL not equal: x=" + X);
 
             // Generate data around the value
@@ -727,19 +728,20 @@ public class PoissonCalculatorTest
 
             e = PoissonCalculator.logLikelihood(u, x);
             o = pc.logLikelihood(u);
-            TestLog.info(logger, "[%s] Instance LL = %g vs %g (error = %g)", X, e, o,
-                    DoubleEquality.relativeError(e, o));
+            logger.log(TestLog.getRecord(Level.INFO, "[%s] Instance LL = %g vs %g (error = %g)", X, e, o,
+                    DoubleEquality.relativeError(e, o)));
             Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Instance LL not equal: x=" + X);
 
             o = PoissonCalculator.fastLogLikelihood(u, x);
-            TestLog.info(logger, "[%s] Fast LL = %g vs %g (error = %g)", X, e, o, DoubleEquality.relativeError(e, o));
+            logger.log(TestLog.getRecord(Level.INFO, "[%s] Fast LL = %g vs %g (error = %g)", X, e, o,
+                    DoubleEquality.relativeError(e, o)));
             Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Fast LL not equal: x=" + X);
 
             e = PoissonCalculator.logLikelihoodRatio(u, x);
             o = pc.getLogLikelihoodRatio(o);
 
-            TestLog.info(logger, "[%s] Instance LLR = %g vs %g (error = %g)", X, e, o,
-                    DoubleEquality.relativeError(e, o));
+            logger.log(TestLog.getRecord(Level.INFO, "[%s] Instance LLR = %g vs %g (error = %g)", X, e, o,
+                    DoubleEquality.relativeError(e, o)));
             Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e, o), () -> "Instance LLR not equal: x=" + X);
         }
     }
@@ -880,7 +882,7 @@ public class PoissonCalculatorTest
             }
         }
         final double[] limits = Maths.limits(x);
-        TestLog.info(logger, "Speed test x-range: %f - %f", limits[0], limits[1]);
+        logger.log(TestLog.getRecord(Level.INFO, "Speed test x-range: %f - %f", limits[0], limits[1]));
 
         final TimingService ts = new TimingService(5);
         final int[] loops = new int[] { 0, 1, 10 };

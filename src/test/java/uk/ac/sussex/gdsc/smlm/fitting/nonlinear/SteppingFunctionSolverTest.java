@@ -1,10 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import java.util.logging.Logger;
-
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.test.TestLog;

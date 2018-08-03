@@ -2,6 +2,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.util.Precision;
@@ -467,7 +468,7 @@ public class FastMLEGradient2ProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.info(logger, "Standard = %d : Unrolled %d = %d : %fx", time1, nparams, time2, (1.0 * time1) / time2);
+        logger.log(TestLog.getRecord(Level.INFO, "Standard = %d : Unrolled %d = %d : %fx", time1, nparams, time2, (1.0 * time1) / time2));
         Assertions.assertTrue(time2 < time1 * 1.5);
     }
 

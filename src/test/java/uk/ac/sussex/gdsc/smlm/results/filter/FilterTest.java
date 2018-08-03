@@ -218,7 +218,7 @@ public class FilterTest
         {
             final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
             final String xml = f1.toXML();
-            TestLog.fine(logger, XmlUtils.prettyPrintXml(xml));
+            logger.log(TestLog.getRecord(Level.FINE, XmlUtils.prettyPrintXml(xml)));
             final MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
             Assertions.assertTrue(f1.getClass().equals(f2.getClass()));
             Assertions.assertEquals(f1, f2);

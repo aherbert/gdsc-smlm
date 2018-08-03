@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.rng.UniformRandomProvider;
@@ -103,7 +104,7 @@ public class ConfigurationTemplateTest
         {
             if (set.contains(template.name))
             {
-                TestLog.info(logger, test + " loaded: " + template);
+                logger.log(TestLog.getRecord(Level.INFO, test + " loaded: " + template));
                 continue;
             }
             Assertions.fail(test + " could not load: " + template);

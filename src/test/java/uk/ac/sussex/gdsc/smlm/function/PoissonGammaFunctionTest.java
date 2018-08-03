@@ -161,7 +161,7 @@ public class PoissonGammaFunctionTest
         }
 
         //if (p2 < 0.98 || p2 > 1.02)
-        TestLog.info(logger, "g=%f, mu=%f, p=%f  %f", gain, mu, p, p2);
+        logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, p=%f  %f", gain, mu, p, p2));
 
         return p2;
     }
@@ -284,7 +284,7 @@ public class PoissonGammaFunctionTest
         }
 
         final double f = (double) fail / list.size();
-        TestLog.info(logger, "g=%g, mu=%g, failures=%g, mean=%f", gain, mu, f, Maths.div0(sum, fail));
+        logger.log(TestLog.getRecord(Level.INFO, "g=%g, mu=%g, failures=%g, mean=%f", gain, mu, f, Maths.div0(sum, fail)));
         if (approx)
             Assertions.assertTrue(f < 0.2);
         else
@@ -322,12 +322,12 @@ public class PoissonGammaFunctionTest
             {
                 final double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
 
-                TestLog.info(logger, "p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)", x, dirac, p0,
+                logger.log(TestLog.getRecord(Level.INFO, "p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)", x, dirac, p0,
                         dirac / p0,
                         //uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
                         p01, p0 / p01
                 //uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
-                );
+                ));
             }
         }
     }

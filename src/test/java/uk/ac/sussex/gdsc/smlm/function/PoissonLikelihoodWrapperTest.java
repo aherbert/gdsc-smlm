@@ -1,6 +1,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -258,8 +259,8 @@ public class PoissonLikelihoodWrapperTest
                                         }
                                 }
         final double p = (100.0 * count) / total;
-        TestLog.info(logger, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter],
-                count, total, p);
+        logger.log(TestLog.getRecord(Level.INFO, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter],
+                count, total, p));
         Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
     }
 
@@ -442,8 +443,8 @@ public class PoissonLikelihoodWrapperTest
 
                                 }
         final double p = (100.0 * count) / total;
-        TestLog.info(logger, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter], count,
-                total, p);
+        logger.log(TestLog.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter], count,
+                total, p));
         Assertions.assertTrue(p > threshold, () -> NAME[targetParameter] + " fraction too low: " + p);
     }
 
@@ -509,7 +510,7 @@ public class PoissonLikelihoodWrapperTest
             if (pp / p < changeTolerance)
                 break;
         }
-        TestLog.info(logger, "mu=%f, p=%f, max=%d", mu, p, x);
+        logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f, max=%d", mu, p, x));
         ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
     }
 
@@ -537,7 +538,7 @@ public class PoissonLikelihoodWrapperTest
             }
         }, 0, max);
 
-        TestLog.info(logger, "mu=%f, p=%f", mu, p);
+        logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f", mu, p));
         ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
     }
 
@@ -633,7 +634,7 @@ public class PoissonLikelihoodWrapperTest
                 break;
         }
 
-        TestLog.info(logger, "mu=%f, limit=%d, p=%f", mu, limit, p);
+        logger.log(TestLog.getRecord(Level.INFO, "mu=%f, limit=%d, p=%f", mu, limit, p));
         ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
 
         // Check the function can compute the same total

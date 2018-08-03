@@ -547,7 +547,7 @@ public class LSQLVMGradientProcedureTest
                 betaList.add(beta.clone());
                 for (int j = 0; j < nparams; j++)
                     if (Math.abs(beta[j]) < 1e-6)
-                        TestLog.info(logger, "[%d] Tiny beta %s %g", i, func.getGradientParameterName(j), beta[j]);
+                        logger.log(TestLog.getRecord(Level.INFO, "[%d] Tiny beta %s %g", i, func.getGradientParameterName(j), beta[j]));
                 // Solve
                 if (!solver.solve(p.getAlphaMatrix(), beta))
                     throw new AssertionError();
@@ -596,9 +596,9 @@ public class LSQLVMGradientProcedureTest
 
                 if (debug)
                     for (int i = 0; i < nparams; i++)
-                        TestLog.log(logger, logLevel, "Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
+                        logger.log(TestLog.getRecord(logLevel, "Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
                                 func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
-                                abs[i].getMean(), abs[i].getStandardDeviation());
+                                abs[i].getMean(), abs[i].getStandardDeviation()));
             }
         }
         finally

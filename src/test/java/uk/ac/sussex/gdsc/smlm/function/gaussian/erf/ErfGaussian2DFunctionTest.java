@@ -664,8 +664,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
                                                             m.get(j, k));
                                                     if (!ok)
                                                     {
-                                                        TestLog.info(logger, "%d [%d,%d] %f ?= %f", i, j, k, gradient,
-                                                                m.get(j, k));
+                                                        logger.log(TestLog.getRecord(Level.INFO, "%d [%d,%d] %f ?= %f",
+                                                                i, j, k, gradient, m.get(j, k)));
                                                         ExtraAssertions.fail("%d [%d,%d] %f != %f", i, j, k, gradient,
                                                                 m.get(j, k));
                                                     }
@@ -890,11 +890,11 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
                                                                             final boolean ok = eq
                                                                                     .almostEqualRelativeOrAbsolute(
                                                                                             gradient, m.get(j, k));
+                                                                            //logger.log(TestLog.getRecord(Level.FINE,
+                                                                            //        "%d [%d,%d] %f ?= %f", i, j, k,
+                                                                            //       gradient, m.get(j, k)));
                                                                             if (!ok)
                                                                             {
-                                                                                TestLog.info(logger,
-                                                                                        "%d [%d,%d] %f ?= %f", i, j, k,
-                                                                                        gradient, m.get(j, k));
                                                                                 ExtraAssertions.fail(
                                                                                         "%d [%d,%d] %f != %f", i, j, k,
                                                                                         gradient, m.get(j, k));
@@ -1147,8 +1147,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         final long t3 = System.nanoTime();
         t1 = t2 - t1;
         t2 = t3 - t2;
-        TestLog.info(logger, "computeIntegralIsFaster %s %d vs %d (%gx)", f1.getClass().getSimpleName(), t1, t2,
-                (double) t1 / t2);
+        logger.log(TestLog.getRecord(Level.INFO, "computeIntegralIsFaster %s %d vs %d (%gx)",
+                f1.getClass().getSimpleName(), t1, t2, (double) t1 / t2));
         ExtraAssertions.assertEqualsRelative(s1, s2, 1e-3);
         Assertions.assertTrue(t2 < t1);
     }
@@ -1223,8 +1223,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         final long t3 = System.nanoTime();
         t1 = t2 - t1;
         t2 = t3 - t2;
-        TestLog.info(logger, "computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)", f1.getClass().getSimpleName(), t1,
-                t2, (double) t1 / t2);
+        logger.log(TestLog.getRecord(Level.INFO, "computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)",
+                f1.getClass().getSimpleName(), t1, t2, (double) t1 / t2));
         ExtraAssertions.assertEqualsRelative(s1, s2, 1e-3);
         Assertions.assertTrue(t2 < t1);
     }

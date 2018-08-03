@@ -3,6 +3,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -571,28 +572,28 @@ public class PoissonGammaGaussianFunctionTest
     public void discretePDFCloselyMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.34, ConvolutionMode.DISCRETE_PDF);
-        TestLog.fine(logger, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]);
+        logger.log(TestLog.getRecord(Level.FINE, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     @Test
     public void discretePMFCloselyMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.22, ConvolutionMode.DISCRETE_PMF);
-        TestLog.fine(logger, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]);
+        logger.log(TestLog.getRecord(Level.FINE, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     @Test
     public void approximationCloselyMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.22, ConvolutionMode.APPROXIMATION);
-        TestLog.fine(logger, "Approximation max error : rel = %g : abs = %g", e[0], e[1]);
+        logger.log(TestLog.getRecord(Level.FINE, "Approximation max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     @Test
     public void legedreGaussPDFMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.03, ConvolutionMode.LEGENDRE_GAUSS_PDF);
-        TestLog.fine(logger, "Simpson integration max error : rel = %g : abs = %g", e[0], e[1]);
+        logger.log(TestLog.getRecord(Level.FINE, "Simpson integration max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     // Speed order is roughly: Approx, Simpson, Discrete PDF, Legendre, Discrete PMF
@@ -630,7 +631,7 @@ public class PoissonGammaGaussianFunctionTest
             ConvolutionMode convolutionMode, boolean pmfMode)
     {
         final double p = cumulativeProbability(mu, s, g, convolutionMode, pmfMode);
-        TestLog.info(logger, "%s : mu=%f, s=%f, g=%f, p=%f", getName(convolutionMode), mu, s, g, p);
+        logger.log(TestLog.getRecord(Level.INFO, "%s : mu=%f, s=%f, g=%f, p=%f", getName(convolutionMode), mu, s, g, p));
 
         // Poisson-Gamma convolution approximation does not sum to 1 at lower gain
         // so account for this during the test.
@@ -710,8 +711,8 @@ public class PoissonGammaGaussianFunctionTest
                     return f.likelihood(x, mu);
                 }
             }, min, max);
-            TestLog.fine(logger, "%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g", getName(convolutionMode), mu, s, g,
-                    s, g, p, pp);
+            logger.log(TestLog.getRecord(Level.FINE, "%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g", getName(convolutionMode), mu, s, g,
+                    s, g, p, pp));
             p = pp;
         }
 

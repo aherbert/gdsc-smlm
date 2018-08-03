@@ -54,7 +54,7 @@ public class PSFProtosTest
         final String e = psfBuilder.toString();
         final PSFProtos.PSF psf = psfBuilder.build();
         final String o = psf.toString();
-        TestLog.log(logger, logLevel, o);
+        logger.log(TestLog.getRecord(logLevel, o));
         Assertions.assertEquals(e, o);
 
         psfBuilder.clear();
@@ -63,7 +63,7 @@ public class PSFProtosTest
 
         // Short string
         final String o2 = TextFormat.shortDebugString(psf);
-        TestLog.log(logger, logLevel, o2);
+        logger.log(TestLog.getRecord(logLevel, o2));
 
         psfBuilder.clear();
         TextFormat.merge(o2, psfBuilder);
@@ -72,9 +72,9 @@ public class PSFProtosTest
         // JSON
         final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
         String json = printer.print(psf);
-        TestLog.log(logger, logLevel, json);
+        logger.log(TestLog.getRecord(logLevel, json));
         json = JSONUtils.simplify(json);
-        TestLog.log(logger, logLevel, json);
+        logger.log(TestLog.getRecord(logLevel, json));
 
         psfBuilder.clear();
         JsonFormat.parser().merge(json, psfBuilder);

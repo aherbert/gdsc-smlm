@@ -413,12 +413,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
                                 {
                                     betterPrecision[index]++;
                                     args[args.length - 1] = "P*";
-                                    TestLog.fine(logger, msg, args);
+                                    logger.log(TestLog.getRecord(Level.FINE, msg, args));
                                 }
                                 else
                                 {
                                     args[args.length - 1] = "P";
-                                    TestLog.fine(logger, msg, args);
+                                    logger.log(TestLog.getRecord(Level.FINE, msg, args));
                                 }
                                 totalPrecision[index]++;
                             }
@@ -432,12 +432,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
                             {
                                 betterAccuracy[index]++;
                                 args[args.length - 1] = "A*";
-                                TestLog.fine(logger, msg, args);
+                                logger.log(TestLog.getRecord(Level.FINE, msg, args));
                             }
                             else
                             {
                                 args[args.length - 1] = "A";
-                                TestLog.fine(logger, msg, args);
+                                logger.log(TestLog.getRecord(Level.FINE, msg, args));
                             }
                             totalAccuracy[index]++;
                         }
@@ -449,12 +449,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
                         {
                             betterPrecision[index]++;
                             args[args.length - 1] = "P*";
-                            TestLog.fine(logger, msg, args);
+                            logger.log(TestLog.getRecord(Level.FINE, msg, args));
                         }
                         else
                         {
                             args[args.length - 1] = "P";
-                            TestLog.fine(logger, msg, args);
+                            logger.log(TestLog.getRecord(Level.FINE, msg, args));
                         }
                         totalPrecision[index]++;
                     }

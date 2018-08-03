@@ -1,5 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -140,7 +141,7 @@ public class CustomSimpsonIntegratorTest
         final double ee = simpson(f, a, b, c);
         final double o = in.integrate(Integer.MAX_VALUE, f, a, b);
 
-        TestLog.info(logger, "%s c=%d  %g-%g  e=%g  ee=%g  o=%g", f.getClass().getSimpleName(), c, a, b, e, ee, o);
+        logger.log(TestLog.getRecord(Level.INFO, "%s c=%d  %g-%g  e=%g  ee=%g  o=%g", f.getClass().getSimpleName(), c, a, b, e, ee, o));
 
         final double delta = 1e-6;
         ExtraAssertions.assertEqualsRelative(e, ee, delta);

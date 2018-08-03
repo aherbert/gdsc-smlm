@@ -2,6 +2,7 @@ package uk.ac.sussex.gdsc.smlm.model;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.rng.UniformRandomProvider;
@@ -78,7 +79,7 @@ public class SphericalDistributionTest
         dist.setUseRejectionMethod(true);
         final long time2 = getRunTime(dist);
         ExtraAssertions.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d", time2, time1);
-        TestLog.info(logger, "Rejection = %d, Transformation = %d", time2, time1);
+        logger.log(TestLog.getRecord(Level.INFO, "Rejection = %d, Transformation = %d", time2, time1));
     }
 
     private static long getRunTime(SphericalDistribution dist)

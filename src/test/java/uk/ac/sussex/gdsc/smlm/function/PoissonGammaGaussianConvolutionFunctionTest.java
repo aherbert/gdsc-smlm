@@ -1,6 +1,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -127,7 +128,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
         }
 
         if (p < 0.98 || p > 1.02)
-            TestLog.fine(logger, "g=%f, mu=%f, s=%f p=%f", gain, mu, s, p);
+            logger.log(TestLog.getRecord(Level.FINE, "g=%f, mu=%f, s=%f p=%f", gain, mu, s, p));
 
         // Do a formal integration
         double p2 = 0;
@@ -143,7 +144,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
         }, min, max);
 
         if (p2 < 0.98 || p2 > 1.02)
-            TestLog.info(logger, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2);
+            logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
 
         return p2;
     }

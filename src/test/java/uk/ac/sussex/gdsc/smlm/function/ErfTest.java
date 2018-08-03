@@ -116,7 +116,7 @@ public class ErfTest
                 //logger.fine(TestLog.getSupplier("x=%f, e=%f, o=%f, error=%f", x, e, o, error);
                 Assertions.assertTrue(error < expected);
             }
-        TestLog.info(logger, "erfx %s max error = %g", erf.name, max);
+        logger.log(TestLog.getRecord(Level.INFO, "erfx %s max error = %g", erf.name, max));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class ErfTest
                     }
                 }
 
-        TestLog.info(logger, "erfxx %s max error = %g", erf.name, max);
+        logger.log(TestLog.getRecord(Level.INFO, "erfxx %s max error = %g", erf.name, max));
     }
 
     @Test
@@ -247,7 +247,7 @@ public class ErfTest
             Assertions.assertTrue(error < expected);
         }
 
-        TestLog.info(logger, "erfxx %s unit max error = %g", erf.name, max);
+        logger.log(TestLog.getRecord(Level.INFO, "erfxx %s unit max error = %g", erf.name, max));
     }
 
     @Test
@@ -318,8 +318,8 @@ public class ErfTest
         Assertions.assertTrue(DoubleEquality.relativeError(sum1, sum3) < 1e-3,
                 () -> erf.name + " Gaussian approx integral is incorrect");
 
-        TestLog.info(logger, "%s Erf approx pixel unit max error = %f", erf.name, max);
-        TestLog.info(logger, "%s Gaussian approx pixel unit max error = %f", erf.name, max2);
+        logger.log(TestLog.getRecord(Level.INFO, "%s Erf approx pixel unit max error = %f", erf.name, max));
+        logger.log(TestLog.getRecord(Level.INFO, "%s Gaussian approx pixel unit max error = %f", erf.name, max2));
     }
 
     private static class ErfTimingTask extends BaseTimingTask
@@ -452,7 +452,7 @@ public class ErfTest
 
             final int n = steps * steps;
             o = norm * sum / n;
-            TestLog.info(logger, "n=%d, e=%f, o=%f, error=%f", n, e, o, DoubleEquality.relativeError(e, o));
+            logger.log(TestLog.getRecord(Level.INFO, "n=%d, e=%f, o=%f, error=%f", n, e, o, DoubleEquality.relativeError(e, o)));
         }
 
         ExtraAssertions.assertEqualsRelative(e, o, 1e-2);

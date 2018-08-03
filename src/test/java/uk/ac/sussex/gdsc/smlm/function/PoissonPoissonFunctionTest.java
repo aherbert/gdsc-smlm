@@ -2,6 +2,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -149,7 +150,7 @@ public class PoissonPoissonFunctionTest
             }
         }, min, max);
 
-        TestLog.info(logger, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2);
+        logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
 
         return p2;
     }

@@ -186,7 +186,7 @@ public abstract class CubicSplineFunctionTest
             return;
 
         final int[] gradientIndices = cf.gradientIndices();
-        TestLog.info(logger, "Function%d %s %s", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
+        logger.log(TestLog.getRecord(Level.INFO, "Function%d %s %s", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices)));
 
         Assertions.assertEquals(cf.getN(), npeaks, "Incorrect number of peaks");
 
