@@ -9,7 +9,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
@@ -84,7 +86,7 @@ public class FastMathTest
     @Test
     public void cbrtIsFaster()
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         // Q. What is a suitable range for this test?
         final int range = 5;
@@ -103,14 +105,13 @@ public class FastMathTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report();
+            logger.info(ts.getReport());
 
+        TimingResult fast = ts.get(-1);
         for (int k = 2; k <= 3; k++)
         {
-            final double t1 = ts.get(-1).getMean();
-            final double t2 = ts.get(-k).getMean();
-            TestLog.logTestResult(logger, t1 < t2, "%s %s => %s %s = %.2fx", ts.get(-k).getTask().getName(), t2,
-                    ts.get(-1).getTask().getName(), t1, t2 / t1);
+            TimingResult slow = ts.get(-k);
+            logger.log(TestLog.getTimingRecord(slow, fast));
         }
     }
 }

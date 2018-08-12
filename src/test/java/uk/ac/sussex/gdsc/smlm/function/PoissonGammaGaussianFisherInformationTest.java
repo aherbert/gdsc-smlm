@@ -172,21 +172,21 @@ public class PoissonGammaGaussianFisherInformationTest
     @Test
     public void canComputeFisherInformationWithLowMean()
     {
-        ExtraAssumptions.assumeLowComplexity();
+        ExtraAssumptions.assume(TestComplexity.LOW);
         computeFisherInformationWithMean(1e-100);
     }
 
     @Test
     public void canComputeFisherInformationWithVeryLowMean()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         computeFisherInformationWithMean(1e-300);
     }
 
     @Test
     public void canComputeFisherInformationWithLowestPossibleMean()
     {
-        ExtraAssumptions.assumeHighComplexity();
+        ExtraAssumptions.assume(TestComplexity.HIGH);
 
         // Lowest value where the reciprocal is not infinity.
         double u = Double.longBitsToDouble(0x4000000000001L);

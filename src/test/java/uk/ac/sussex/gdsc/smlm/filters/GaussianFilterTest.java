@@ -15,8 +15,10 @@ import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -313,7 +315,7 @@ public class GaussianFilterTest
     @SeededTest
     public void floatFilterIsFasterThanDoubleFilter(RandomSeed seed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
@@ -331,15 +333,14 @@ public class GaussianFilterTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
         final int n = size / sigmas.length;
         for (int i = 0, j = size; i < sigmas.length; i++, j += n)
             for (int k = 1; k < n; k++)
             {
-                final double t1 = ts.get(j).getMean();
-                final double t2 = ts.get(j + k).getMean();
-                TestLog.logTestResult(logger, t1 < t2, "%s %s => %s %s = %.2fx", ts.get(j + k).getTask().getName(), t2,
-                        ts.get(j).getTask().getName(), t1, t2 / t1);
+                TimingResult slow = ts.get(j + k);
+                TimingResult fast = ts.get(j);
+                logger.log(TestLog.getTimingRecord(slow, fast));
             }
     }
 
@@ -347,7 +348,7 @@ public class GaussianFilterTest
     @SeededTest
     public void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed)
     {
-        ExtraAssumptions.assumeHighComplexity();
+        ExtraAssumptions.assume(TestComplexity.HIGH);
 
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
@@ -365,15 +366,14 @@ public class GaussianFilterTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
         final int n = size / sigmas.length;
         for (int i = 0, j = size; i < sigmas.length; i++, j += n)
             for (int k = 1; k < n; k++)
             {
-                final double t1 = ts.get(j).getMean();
-                final double t2 = ts.get(j + k).getMean();
-                TestLog.logTestResult(logger, t1 < t2, "%s %s => %s %s = %.2fx", ts.get(j + k).getTask().getName(), t2,
-                        ts.get(j).getTask().getName(), t1, t2 / t1);
+                TimingResult slow = ts.get(j + k);
+                TimingResult fast = ts.get(j);
+                logger.log(TestLog.getTimingRecord(slow, fast));
             }
     }
 

@@ -26,6 +26,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
@@ -285,7 +286,7 @@ public class FastMLEGradient2ProcedureTest
 
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 1000;
 
@@ -343,9 +344,7 @@ public class FastMLEGradient2ProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1,
-                "GradientCalculator = %d : FastMLEGradient2Procedure %d = %d : %fx", time1, nparams, time2,
-                (1.0 * time1) / time2);
+        logger.log(TestLog.getTimingRecord("GradientCalculator " + nparams, time1, "FastMLEGradient2Procedure", time2));
     }
 
     @SeededTest
@@ -405,7 +404,7 @@ public class FastMLEGradient2ProcedureTest
 
     private void gradientProcedureLinearIsFasterThanGradientProcedure(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 100;
 
@@ -468,7 +467,8 @@ public class FastMLEGradient2ProcedureTest
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getRecord(Level.INFO, "Standard = %d : Unrolled %d = %d : %fx", time1, nparams, time2, (1.0 * time1) / time2));
+        logger.log(TestLog.getRecord(Level.INFO, "Standard = %d : Unrolled %d = %d : %fx", time1, nparams, time2,
+                (1.0 * time1) / time2));
         Assertions.assertTrue(time2 < time1 * 1.5);
     }
 

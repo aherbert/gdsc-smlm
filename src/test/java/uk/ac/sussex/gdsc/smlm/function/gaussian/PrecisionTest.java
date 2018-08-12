@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -583,7 +584,7 @@ public class PrecisionTest
     private void isFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
             boolean doubleFaster)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         f1.setMaxX(maxx);
         f2.setMaxX(maxx);
@@ -628,8 +629,8 @@ public class PrecisionTest
             c2 = f2.getClass();
         }
 
-        TestLog.logTestResult(logger, time1 < time2, "%sGradient %s = %d, %s = %d => (%f)", (noSum) ? "No sum " : "",
-                c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
+        logger.log(TestLog.getTimingRecord(((noSum) ? "No sum " : "") + "Gradient " + c1.getSimpleName(), time1,
+                c2.getSimpleName(), time2));
     }
 
     @SuppressWarnings("unused")
@@ -732,7 +733,7 @@ public class PrecisionTest
 
     private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum, boolean doubleFaster)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         f1.setMaxX(maxx);
         f2.setMaxX(maxx);
@@ -776,8 +777,8 @@ public class PrecisionTest
             c2 = f2.getClass();
         }
 
-        TestLog.logTestResult(logger, time1 < time2, "%s%s = %d, %s = %d => (%f)", (noSum) ? "No sum " : "",
-                c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
+        logger.log(
+                TestLog.getTimingRecord(((noSum) ? "No sum " : "") + c1.getSimpleName(), time1, c2.getSimpleName(), time2));
     }
 
     @SuppressWarnings("unused")

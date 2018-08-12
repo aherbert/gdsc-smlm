@@ -15,6 +15,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
@@ -282,7 +283,7 @@ public class KernelFilterTest
 
     private void floatFilterIsFasterThanIJFilter(RandomSeed seed, int k)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
 
         final float[][] data = new float[10][];
@@ -299,8 +300,8 @@ public class KernelFilterTest
             final int size = ts.getSize();
             ts.repeat();
             if (logger.isLoggable(Level.INFO))
-                ts.report(logger, size);
-            TestLog.logSpeedTestResult(logger, ts.get(-3), ts.get(-1));
+                logger.info(ts.getReport(size));
+            logger.log(TestLog.getTimingRecord(ts.get(-3), ts.get(-1)));
         }
     }
 

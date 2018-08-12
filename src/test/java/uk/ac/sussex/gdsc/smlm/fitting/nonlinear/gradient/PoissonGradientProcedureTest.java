@@ -20,6 +20,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -167,7 +168,7 @@ public class PoissonGradientProcedureTest
 
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 1000;
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -221,8 +222,7 @@ public class PoissonGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1, "GradientCalculator = %d : PoissonGradientProcedure %d = %d : %fx",
-                time1, nparams, time2, (1.0 * time1) / time2);
+        logger.log(TestLog.getTimingRecord("GradientCalculator " + nparams, time1, "PoissonGradientProcedure", time2));
     }
 
     @SeededTest
@@ -294,7 +294,7 @@ public class PoissonGradientProcedureTest
     private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
             final boolean precomputed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 100;
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -355,8 +355,7 @@ public class PoissonGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx",
-                precomputed, time1, nparams, time2, (1.0 * time1) / time2);
+        logger.log(TestLog.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
         //Assertions.assertTrue(time2 < time1);
     }
 

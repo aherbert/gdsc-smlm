@@ -20,6 +20,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
@@ -499,7 +500,7 @@ public class EJMLLinearSolverTest
 
     private void runSolverSpeedTest(RandomSeed seed, int flags)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
         final int n = f0.size();
@@ -566,13 +567,13 @@ public class EJMLLinearSolverTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         // Since the speed is very similar at sizes 2-5 there is nothing to reliably assert
         // about the fastest of Cholesky/CholeskyLDLT/Direct.
         // Just check the PseudoInverse is slowest
         for (int i = 1; i < size; i++)
-            TestLog.logSpeedTestResult(logger, ts.get(-(size)), ts.get(-i));
+            logger.log(TestLog.getTimingRecord(ts.get(-(size)), ts.get(-i)));
 
         if (np > 2)
         {
@@ -580,7 +581,7 @@ public class EJMLLinearSolverTest
             int i = (np == 5) ? 2 : 1;
             final int size_1 = size - 1;
             for (; i < size_1; i++)
-                TestLog.logSpeedTestResult(logger, ts.get(-(size_1)), ts.get(-i));
+                logger.log(TestLog.getTimingRecord(ts.get(-(size_1)), ts.get(-i)));
         }
     }
 
@@ -810,7 +811,7 @@ public class EJMLLinearSolverTest
 
     private void runInversionSpeedTest(RandomSeed seed, int flags)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
         final int n = f0.size();
@@ -877,28 +878,28 @@ public class EJMLLinearSolverTest
         final int size = ts.getSize();
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         // When it is present the DiagonalDirect is fastest (n<=5)
         if (np <= 5)
         {
             for (int i = 2; i <= size; i++)
-                TestLog.logSpeedTestResult(logger, ts.get(-i), ts.get(-1));
+                logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-1)));
 
             if (np < 5)
                 // n < 5 Direct is fastest
                 for (int i = 3; i <= size; i++)
-                    TestLog.logSpeedTestResult(logger, ts.get(-i), ts.get(-2));
+                    logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-2)));
             else
                 // Cholesky should be fastest. It is marginal over CholeskyLDLT.
                 // and may not be faster than Direct at n=5 so that comparison is ignored.
                 for (int i = 4; i <= size; i++)
-                    TestLog.logSpeedTestResult(logger, ts.get(-i), ts.get(-3));
+                    logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-3)));
         }
         else
             // No Direct inversion possible.
             // Cholesky should be fastest.
             for (int i = 2; i <= size; i++)
-                TestLog.logSpeedTestResult(logger, ts.get(-i), ts.get(-1));
+                logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-1)));
     }
 }

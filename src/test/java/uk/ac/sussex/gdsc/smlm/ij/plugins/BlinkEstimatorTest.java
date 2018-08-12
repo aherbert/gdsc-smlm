@@ -57,6 +57,7 @@ import uk.ac.sussex.gdsc.smlm.model.UniformDistribution;
 import uk.ac.sussex.gdsc.smlm.model.UniformIllumination;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -236,7 +237,7 @@ public class BlinkEstimatorTest
     private TIntHashSet estimateBlinking(UniformRandomProvider rg, double nBlinks, double tOn, double tOff,
             int particles, double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
     {
-        ExtraAssumptions.assumeMaximumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MAXIMUM);
 
         final SpatialIllumination activationIllumination = new UniformIllumination(100);
         int totalSteps = 100;

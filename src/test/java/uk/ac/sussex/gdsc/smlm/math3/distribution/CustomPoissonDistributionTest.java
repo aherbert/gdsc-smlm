@@ -13,6 +13,7 @@ import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -98,7 +99,7 @@ public class CustomPoissonDistributionTest
     {
         public InstanceTimingTask(RandomSeed seed, double min, double max)
         {
-            super("Instance", seed, min, max);
+            super("CustomPoissonDistribution", seed, min, max);
         }
 
         @Override
@@ -142,13 +143,12 @@ public class CustomPoissonDistributionTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-        final double t1 = ts.get(-1).getMean();
-        final double t2 = ts.get(-2).getMean();
-        TestLog.logTestResult(logger, t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
-                t1, t2 / t1);
+        TimingResult slow = ts.get(-2);
+        TimingResult fast = ts.get(-1);
+        logger.log(TestLog.getTimingRecord(slow, fast));
     }
 
     @SpeedTag
@@ -162,13 +162,12 @@ public class CustomPoissonDistributionTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-        final double t1 = ts.get(-1).getMean();
-        final double t2 = ts.get(-2).getMean();
-        TestLog.logTestResult(logger, t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
-                t1, t2 / t1);
+        TimingResult slow = ts.get(-2);
+        TimingResult fast = ts.get(-1);
+        logger.log(TestLog.getTimingRecord(slow, fast));
     }
 
     @SpeedTag
@@ -188,12 +187,11 @@ public class CustomPoissonDistributionTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-        final double t1 = ts.get(-1).getMean();
-        final double t2 = ts.get(-2).getMean();
-        TestLog.logTestResult(logger, t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
-                t1, t2 / t1);
+        TimingResult slow = ts.get(-2);
+        TimingResult fast = ts.get(-1);
+        logger.log(TestLog.getTimingRecord(slow, fast));
     }
 }

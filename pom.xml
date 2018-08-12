@@ -133,8 +133,10 @@ Software for single molecule localisation microscopy (SMLM)
         <configuration>
           <systemPropertyVariables>
             <!-- Set JUL Formatting -->
-            <java.util.logging.SimpleFormatter.format>%4$-7s %2$s %5$s%6$s%n</java.util.logging.SimpleFormatter.format>
+            <java.util.logging.SimpleFormatter.format><![CDATA[%4$-7s %2$s %5$s%6$s%n]]></java.util.logging.SimpleFormatter.format>
           </systemPropertyVariables>
+          <!--  Ensure the JaCoCo settings are preserved in argLine when ImageJ settings are added -->
+          <argLine>@{argLine} -Xms512m -Xmx512m -Dapple.awt.UIElement="true"</argLine>
         </configuration>
         <dependencies>
           <dependency>
@@ -201,6 +203,55 @@ Software for single molecule localisation microscopy (SMLM)
             <exclude>**/math3/**/*Copy.java</exclude>
           </excludes>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.eluder.coveralls</groupId>
+        <artifactId>coveralls-maven-plugin</artifactId>
+        <version>4.3.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.1</version>
+        <executions>
+          <execution>
+            <id>default-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <!-- implementation is needed only for Maven 2 -->
+                <rule
+                  implementation="org.jacoco.maven.RuleConfiguration">
+                  <element>BUNDLE</element>
+                  <limits>
+                    <!-- implementation is needed only for Maven 2 -->
+                    <limit
+                      implementation="org.jacoco.report.check.Limit">
+                      <counter>COMPLEXITY</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.60</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <haltOnFailure>false</haltOnFailure>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <resources>

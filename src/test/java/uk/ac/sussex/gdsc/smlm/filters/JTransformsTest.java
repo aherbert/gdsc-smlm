@@ -20,8 +20,10 @@ import ij.process.ImageProcessor;
 import uk.ac.sussex.gdsc.core.ij.process.FHT2;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -294,7 +296,7 @@ public class JTransformsTest
     @SeededTest
     public void jTransforms2DDHTIsFasterThanFHT2(RandomSeed seed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         // Test the forward DHT of data. and reverse transform or the pre-computed correlation.
 
@@ -339,14 +341,11 @@ public class JTransformsTest
         ts.execute(new JTransformsDHTSpeedTask(size, data));
         ts.repeat();
         if (logger.isLoggable(Level.INFO))
-            ts.report();
+            logger.info(ts.getReport());
 
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-
-        final double t1 = ts.get(-1).getMean();
-        final double t2 = ts.get(-2).getMean();
-        TestLog.logTestResult(logger, t1 < t2, "%s %s => %s %s = %.2fx", ts.get(-2).getTask().getName(), t2,
-                ts.get(-1).getTask().getName(), t1, t2 / t1);
-
+        TimingResult slow = ts.get(-2);
+        TimingResult fast = ts.get(-1);
+        logger.log(TestLog.getTimingRecord(slow, fast));
     }
 }

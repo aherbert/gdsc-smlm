@@ -22,7 +22,9 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -427,7 +429,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     @Test
     public void functionIsFasterThanEquivalentGaussian2DFunction()
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
         final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
@@ -472,14 +474,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report();
+            logger.info(ts.getReport());
 
         for (int i = 1; i <= 2; i++)
         {
-            final double t1 = ts.get(-i).getMean();
-            final double t2 = ts.get(-i - 3).getMean();
-            TestLog.logTestResult(logger, t1 < t2, "ERF function %d  %s  vs equivalent Gaussian2DFunction  %s : %.2fx",
-                    i - 1, t1, t2, t2 / t1);
+            TimingResult slow = ts.get(-i - 3);
+            TimingResult fast = ts.get(-i);
+            logger.log(TestLog.getTimingRecord(slow, fast));
         }
     }
 
@@ -1056,7 +1057,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     @Test
     public void functionIsFasterUsingForEach()
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
@@ -1088,14 +1089,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report();
+            logger.info(ts.getReport());
 
         for (int i = 1; i <= 3; i++)
         {
-            final double t1 = ts.get(-i).getMean();
-            final double t2 = ts.get(-i - 3).getMean();
-            TestLog.logTestResult(logger, t1 < t2, "forEach %d  order  %s  vs eval(int)  %s : %.2fx", i - 1, t1, t2,
-                    t2 / t1);
+            TimingResult slow = ts.get(-i - 3);
+            TimingResult fast = ts.get(-i);
+            logger.log(TestLog.getTimingRecord(slow, fast));
         }
     }
 
@@ -1122,7 +1122,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     @Test
     public void computeIntegralIsFaster()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final TurboList<double[]> p = new TurboList<>();
         for (final double background : testbackground)
@@ -1188,7 +1188,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     @Test
     public void computeIntegralIsFasterWith2Peaks()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         Assumptions.assumeTrue(null != f2);
 
         final TurboList<double[]> p = new TurboList<>();

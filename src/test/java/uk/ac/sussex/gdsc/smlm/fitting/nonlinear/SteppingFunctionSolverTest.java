@@ -3,6 +3,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 import org.junit.jupiter.api.Assertions;
 import org.opentest4j.AssertionFailedError;
 
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -169,7 +170,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
         }
         catch (final AssertionError e)
         {
-            TestLog.logFailure(logger, e);
+            logger.log(TestLog.getFailRecord(e));
         }
     }
 
@@ -244,7 +245,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
     {
         // The JFastMLE method was built using a misinterpretation of the Newton
         // method in Numerical Recipes, 2nd Ed. This test is just here to prove that.
-        ExtraAssumptions.assumeMaximumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MAXIMUM);
 
         // The JFastMLE method does not work
         Assertions.assertThrows(AssertionFailedError.class, () -> {
@@ -403,7 +404,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
         }
         catch (final AssertionError e)
         {
-            TestLog.logFailure(logger, e);
+            logger.log(TestLog.getFailRecord(e));
         }
     }
 
@@ -575,7 +576,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
             SteppingFunctionSolverType type2, boolean bounded, SteppingFunctionSolverClamp clamp,
             SteppingFunctionSolverType type, NoiseModel noiseModel)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         final SteppingFunctionSolver solver = getSolver(clamp, type);
         final SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
         canFitSingleGaussianBetter(seed, solver, bounded, solver2, bounded2, getName(bounded, clamp, type),

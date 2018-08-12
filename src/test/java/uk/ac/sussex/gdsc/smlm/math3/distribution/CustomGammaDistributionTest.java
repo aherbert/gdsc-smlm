@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -127,7 +128,7 @@ public class CustomGammaDistributionTest
     @SeededTest
     public void customDistributionIsFaster(RandomSeed seed)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final TimingService ts = new TimingService(5);
         ts.execute(new StaticTimingTask(seed));
@@ -136,7 +137,7 @@ public class CustomGammaDistributionTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
     }

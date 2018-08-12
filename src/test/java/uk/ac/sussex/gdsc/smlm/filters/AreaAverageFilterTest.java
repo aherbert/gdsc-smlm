@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -21,7 +22,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
     @SeededTest
     public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal(RandomSeed seed)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final AreaAverageFilter filter = new AreaAverageFilter();
 
@@ -81,20 +82,18 @@ public class AreaAverageFilterTest extends AbstractFilterTest
                     //		blockTime, time), blockTime < time);
                 }
             //if (debug)
-            TestLog.logTestStageResult(logger, boxFastTotal < boxSlowTotal,
-                    "float areaAverageInternal %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx", boxSize,
-                    boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+            logger.log(TestLog.getStageTimingRecord("float areaAverageInternal " + boxSize, boxSlowTotal,
+                    "areaAverageUsingSumsInternal", boxFastTotal));
         }
-        TestLog.logTestResult(logger, fastTotal < slowTotal,
-                "float areaAverageInternal %d => areaAverageUsingSumsInternal %d = %.2fx", slowTotal, fastTotal,
-                speedUpFactor(slowTotal, fastTotal));
+        logger.log(
+                TestLog.getTimingRecord("float areaAverageInternal", slowTotal, "areaAverageUsingSumsInternal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void stripedBlockAverageIsFasterThanAreaAverage(RandomSeed seed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final AreaAverageFilter filter = new AreaAverageFilter();
         final AverageFilter filter2 = new AverageFilter();
@@ -155,20 +154,17 @@ public class AreaAverageFilterTest extends AbstractFilterTest
                     //		blockTime, time), blockTime < time);
                 }
             //if (debug)
-            TestLog.logTestStageResult(logger, boxFastTotal < boxSlowTotal,
-                    "float areaAverageUsingAverages %.1f : %d => stripedBlockAverage %d = %.2fx", boxSize, boxSlowTotal,
-                    boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+            logger.log(TestLog.getStageTimingRecord("float areaAverageUsingAverages " + boxSize, boxSlowTotal,
+                    "stripedBlockAverage", boxFastTotal));
         }
-        TestLog.logTestResult(logger, fastTotal < slowTotal,
-                "float areaAverageUsingAverages %d => stripedBlockAverage %d = %.2fx", slowTotal, fastTotal,
-                speedUpFactor(slowTotal, fastTotal));
+        logger.log(TestLog.getTimingRecord("float areaAverageUsingAverages", slowTotal, "stripedBlockAverage", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal(RandomSeed seed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final AreaAverageFilter filter = new AreaAverageFilter();
         final AverageFilter filter2 = new AverageFilter();
@@ -229,13 +225,11 @@ public class AreaAverageFilterTest extends AbstractFilterTest
                     //		blockTime, time), blockTime < time);
                 }
             //if (debug)
-            TestLog.logTestStageResult(logger, boxFastTotal < boxSlowTotal,
-                    "float areaAverageUsingAveragesInternal %.1f : %d => stripedBlockAverageInternal %d = %.2fx",
-                    boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+            logger.log(TestLog.getStageTimingRecord("float areaAverageUsingAveragesInternal " + boxSize, boxSlowTotal,
+                    "stripedBlockAverageInternal", boxFastTotal));
         }
-        TestLog.logTestResult(logger, fastTotal < slowTotal,
-                "float areaAverageUsingAveragesInternal %d => stripedBlockAverageInternal %d = %.2fx", slowTotal,
-                fastTotal, speedUpFactor(slowTotal, fastTotal));
+        logger.log(TestLog.getTimingRecord("float areaAverageUsingAveragesInternal", slowTotal, "stripedBlockAverageInternal",
+                fastTotal));
     }
 
     @SeededTest

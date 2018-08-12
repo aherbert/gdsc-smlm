@@ -47,6 +47,7 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.IntensityUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.LocationUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -62,35 +63,35 @@ public class ResultsManagerTest
     public void writeTSFMatchesRead(RandomSeed seed)
     {
         // This is redundant
-        ExtraAssumptions.assumeLowComplexity();
+        ExtraAssumptions.assume(TestComplexity.LOW);
         writeTSFMatchesRead(seed, 1, 1, 1, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithChannels(RandomSeed seed)
     {
-        //ExtraAssumptions.assumeLowComplexity();
+        //ExtraAssumptions.assume(TestComplexity.LOW);
         writeTSFMatchesRead(seed, 2, 1, 1, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithSlices(RandomSeed seed)
     {
-        //ExtraAssumptions.assumeLowComplexity();
+        //ExtraAssumptions.assume(TestComplexity.LOW);
         writeTSFMatchesRead(seed, 1, 2, 1, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithPositions(RandomSeed seed)
     {
-        //ExtraAssumptions.assumeLowComplexity();
+        //ExtraAssumptions.assume(TestComplexity.LOW);
         writeTSFMatchesRead(seed, 1, 1, 2, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithTypes(RandomSeed seed)
     {
-        //ExtraAssumptions.assumeLowComplexity();
+        //ExtraAssumptions.assume(TestComplexity.LOW);
         writeTSFMatchesRead(seed, 1, 1, 1, 2);
     }
 
@@ -98,7 +99,7 @@ public class ResultsManagerTest
     public void writeTSFMatchesReadWithCombinations(RandomSeed seed)
     {
         // This takes longer
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         writeTSFMatchesRead(seed, 2, 2, 2, 2);
     }
 

@@ -15,6 +15,7 @@ import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -230,7 +231,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
             final boolean precomputed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 100;
 
@@ -290,8 +291,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx",
-                precomputed, time1, nparams, time2, (1.0 * time1) / time2);
+        logger.log(TestLog.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
     }
 
     @SpeedTag
@@ -306,7 +306,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
     private void gradientProcedureIsFasterThanWLSEGradientProcedure(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 100;
 
@@ -366,9 +366,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1,
-                "WLSQLVMGradientProcedure %d : WPoissonGradientProcedure %d = %d : %fx", time1, nparams, time2,
-                (1.0 * time1) / time2);
+        logger.log(TestLog.getTimingRecord("WLSQLVMGradientProcedure " + nparams, time1, "WPoissonGradientProcedure", time2));
     }
 
     protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList,

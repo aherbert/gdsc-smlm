@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
@@ -100,7 +101,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest50()
     {
-        ExtraAssumptions.assumeLowComplexity();
+        ExtraAssumptions.assume(TestComplexity.LOW);
         speedTest(50, false, 10);
     }
 
@@ -108,7 +109,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest200()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         speedTest(200, true, 5);
     }
 
@@ -116,7 +117,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest1000()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         speedTest(1000, true, 2);
     }
 
@@ -125,7 +126,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest5000()
     {
-        ExtraAssumptions.assumeHighComplexity();
+        ExtraAssumptions.assume(TestComplexity.HIGH);
         speedTest(5000, true, 1);
     }
 
@@ -184,10 +185,10 @@ public class RampedSelectionStrategyTest
         final int n = ts.repeat();
         ts.repeat(n);
         if (logger.isLoggable(Level.INFO))
-            ts.report();
+            logger.info(ts.getReport());
 
         final TimingResult slow = ts.get((faster) ? ts.getSize() - 2 : ts.getSize() - 1);
         final TimingResult fast = ts.get((faster) ? ts.getSize() - 1 : ts.getSize() - 2);
-        TestLog.logSpeedTestResult(logger, slow, fast);
+        logger.log(TestLog.getTimingRecord(slow, fast));
     }
 }

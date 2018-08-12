@@ -13,6 +13,7 @@ import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -62,7 +63,7 @@ public class SphericalDistributionTest
     @SeededTest
     public void rejectionMethodIsFasterThanTransformationMethod(RandomSeed seed)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
         final double radius = 10 + rg.nextDouble() * 10;

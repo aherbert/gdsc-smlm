@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
@@ -358,7 +359,7 @@ public class ErfTest
     @Test
     public void erfApproxIsFaster()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int range = 5;
         final int steps = 10000;
@@ -377,7 +378,7 @@ public class ErfTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         Assertions.assertTrue(ts.get(-3).getMean() < ts.get(-4).getMean());
     }
@@ -591,7 +592,7 @@ public class ErfTest
     @Test
     public void powerApproxIsFaster()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int range = 5000;
         final int steps = 100000;
@@ -611,7 +612,7 @@ public class ErfTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report();
+            logger.info(ts.getReport());
 
         for (int i = 0; i < 2; i++)
         {

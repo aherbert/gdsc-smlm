@@ -810,7 +810,7 @@ public class FastLogTest
 
         final int size = ts.getSize();
         ts.repeat(size);
-        ts.report(logger, size);
+        logger.info(ts.getReport(size));
     }
 
     private class DoubleTimingTask extends DummyTimingTask
@@ -904,7 +904,7 @@ public class FastLogTest
 
         final int size = ts.getSize();
         ts.repeat(size);
-        ts.report(logger, size);
+        logger.info(ts.getReport(size));
     }
 
     @SpeedTag
@@ -934,7 +934,7 @@ public class FastLogTest
 
         final int size = ts.getSize();
         ts.repeat(size);
-        ts.report(logger, size);
+        logger.info(ts.getReport(size));
     }
 
     @SpeedTag
@@ -1005,7 +1005,7 @@ public class FastLogTest
 
         final int size = ts.getSize();
         ts.repeat(size);
-        ts.report(logger, size);
+        logger.info(ts.getReport(size));
     }
 
     /**

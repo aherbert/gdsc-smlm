@@ -2,6 +2,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.util.Precision;
@@ -22,8 +23,10 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.TestLog.TestLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -240,7 +243,7 @@ public class LSQLVMGradientProcedureTest
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams,
             final BaseLSQLVMGradientProcedureFactory factory)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 1000;
         final double[][] alpha = new double[nparams][nparams];
@@ -299,8 +302,8 @@ public class LSQLVMGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1, "GradientCalculator = %d : %s %d = %d : %fx", time1,
-                factory.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
+        logger.log(
+                TestLog.getTimingRecord("GradientCalculator " + nparams, time1, factory.getClass().getSimpleName(), time2));
     }
 
     @SeededTest
@@ -377,7 +380,7 @@ public class LSQLVMGradientProcedureTest
             final BaseLSQLVMGradientProcedureFactory factory1, final BaseLSQLVMGradientProcedureFactory factory2,
             boolean doAssert)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 100;
 
@@ -438,9 +441,11 @@ public class LSQLVMGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, !doAssert || time2 < time1, "%s = %d : %s %d = %d : %fx",
-                factory1.getClass().getSimpleName(), time1, factory2.getClass().getSimpleName(), nparams, time2,
-                (1.0 * time1) / time2);
+        LogRecord record = TestLog.getTimingRecord(factory1.getClass().getSimpleName() + nparams, time1,
+                factory2.getClass().getSimpleName(), time2);
+        if (!doAssert && record.getLevel() == TestLevel.TEST_FAILURE)
+            record.setLevel(TestLevel.STAGE_FAILURE);
+        logger.log(record);
     }
 
     @SeededTest
@@ -547,7 +552,8 @@ public class LSQLVMGradientProcedureTest
                 betaList.add(beta.clone());
                 for (int j = 0; j < nparams; j++)
                     if (Math.abs(beta[j]) < 1e-6)
-                        logger.log(TestLog.getRecord(Level.INFO, "[%d] Tiny beta %s %g", i, func.getGradientParameterName(j), beta[j]));
+                        logger.log(TestLog.getRecord(Level.INFO, "[%d] Tiny beta %s %g", i,
+                                func.getGradientParameterName(j), beta[j]));
                 // Solve
                 if (!solver.solve(p.getAlphaMatrix(), beta))
                     throw new AssertionError();

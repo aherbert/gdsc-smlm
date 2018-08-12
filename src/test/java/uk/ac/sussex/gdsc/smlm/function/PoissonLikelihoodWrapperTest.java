@@ -18,6 +18,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
@@ -85,7 +86,7 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitFixedComputesGradientPerDatum()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_FIXED);
     }
 
@@ -104,35 +105,35 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitEllipticalComputesGradientPerDatum()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_ELLIPTICAL);
     }
 
     @Test
     public void fitNBFixedComputesGradientPerDatum()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
     }
 
     @Test
     public void fitNBCircleComputesGradientPerDatum()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
     }
 
     @Test
     public void fitNBFreeCircleComputesGradientPerDatum()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
     }
 
     @Test
     public void fitNBEllipticalComputesGradientPerDatum()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
     }
 
@@ -267,7 +268,7 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitFixedComputesGradient()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradient(GaussianFunctionFactory.FIT_FIXED);
     }
 
@@ -286,7 +287,7 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitEllipticalComputesGradient()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         // The elliptical function gradient evaluation is worse
         final DoubleEquality tmp = eq;
         eq = eqPerDatum;
@@ -297,28 +298,28 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitNBFixedComputesGradient()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
     }
 
     @Test
     public void fitNBCircleComputesGradient()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
     }
 
     @Test
     public void fitNBFreeCircleComputesGradient()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
     }
 
     @Test
     public void fitNBEllipticalComputesGradient()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         // The elliptical function gradient evaluation is worse
         final DoubleEquality tmp = eq;
         eq = eqPerDatum;

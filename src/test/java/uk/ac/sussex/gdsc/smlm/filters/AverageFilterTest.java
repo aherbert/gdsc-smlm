@@ -210,7 +210,7 @@ public class AverageFilterTest extends AbstractFilterTest
     private void speedTest(RandomSeed seed, DataFilter fast, DataFilter slow, int[] testBoxSizes)
     {
         // These test a deprecated filter
-        ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
+        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
 
         ArrayList<float[]> dataSet = getSpeedData(seed, ITER3);
 
@@ -270,11 +270,9 @@ public class AverageFilterTest extends AbstractFilterTest
                                 height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
                 }
             //if (debug)
-            TestLog.logTestStageResult(logger, boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx", slow.name,
-                    boxSize, boxSlowTotal, fast.name, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+            logger.log(TestLog.getStageTimingRecord(slow.name + " " + boxSize, boxSlowTotal, fast.name, boxFastTotal));
         }
-        TestLog.logTestResult(logger, fastTotal < slowTotal, "%s %d => %s %d = %.2fx", slow.name, slowTotal, fast.name,
-                fastTotal, speedUpFactor(slowTotal, fastTotal));
+        logger.log(TestLog.getTimingRecord(slow.name, slowTotal, fast.name, fastTotal));
     }
 
     private void speedTestInternal(RandomSeed seed, DataFilter fast, DataFilter slow)
@@ -285,7 +283,7 @@ public class AverageFilterTest extends AbstractFilterTest
     private void speedTestInternal(RandomSeed seed, DataFilter fast, DataFilter slow, int[] testBoxSizes)
     {
         // These test a deprecated filter
-        ExtraAssumptions.assumeSpeedTest(TestComplexity.VERY_HIGH);
+        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
 
         ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
 
@@ -345,12 +343,10 @@ public class AverageFilterTest extends AbstractFilterTest
                                 width, height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
                 }
             //if (debug)
-            TestLog.logTestStageResult(logger, boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx",
-                    slow.name, boxSize, boxSlowTotal, fast.name, boxFastTotal,
-                    speedUpFactor(boxSlowTotal, boxFastTotal));
+            logger.log(TestLog.getStageTimingRecord("Internal " + slow.name + " " + boxSize, boxSlowTotal, fast.name,
+                    boxFastTotal));
         }
-        TestLog.logTestResult(logger, fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx", slow.name, slowTotal,
-                fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
+        logger.log(TestLog.getTimingRecord("Internal " + slow.name, slowTotal, fast.name, fastTotal));
     }
 
     @SpeedTag

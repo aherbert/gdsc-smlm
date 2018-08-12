@@ -18,7 +18,10 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
+import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -166,7 +169,7 @@ public class FRCTest
     @SeededTest
     public void computeSineIsFaster()
     {
-        ExtraAssumptions.assumeHighComplexity();
+        ExtraAssumptions.assume(TestComplexity.HIGH);
 
         final int steps = 100000;
         final double delta = 2 * Math.PI / steps;
@@ -216,7 +219,7 @@ public class FRCTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
         Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
@@ -225,7 +228,7 @@ public class FRCTest
     @SeededTest
     public void computeMirroredIsFaster(RandomSeed seed)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         // Sample lines through an image to create a structure.
         final int N = 2048;
@@ -301,9 +304,15 @@ public class FRCTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
-        Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-        Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
+        // The 'Fast' method may not always be faster so just log results
+        final TimingResult slow = ts.get(-3);
+        final TimingResult fast = ts.get(-2);
+        final TimingResult fastest = ts.get(-1);
+        logger.log(TestLog.getTimingRecord(slow, fastest));
+        logger.log(TestLog.getTimingRecord(fast, fastest));
+        // It should be faster than the non mirrored version
+        Assertions.assertTrue(ts.get(-1).getMean() <= ts.get(-3).getMean());
     }
 }

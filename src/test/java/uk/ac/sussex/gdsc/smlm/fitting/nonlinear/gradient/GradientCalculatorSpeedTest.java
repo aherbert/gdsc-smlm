@@ -27,6 +27,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -326,7 +327,7 @@ public class GradientCalculatorSpeedTest
     private void gradientCalculatorNIsFasterThanGradientCalculator(RandomSeed seed, Gaussian2DFunction func,
             int nparams, boolean mle)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         // Check the function is the correct size
         Assertions.assertEquals(nparams, func.gradientIndices().length);
@@ -360,15 +361,14 @@ public class GradientCalculatorSpeedTest
             calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
         start2 = System.nanoTime() - start2;
 
-        TestLog.logTestResult(logger, start2 < start1,
-                "%sLinearised GradientCalculator = %d : GradientCalculator%d = %d : %fx", (mle) ? "MLE " : "", start1,
-                nparams, start2, (1.0 * start1) / start2);
+        logger.log(TestLog.getTimingRecord(((mle) ? "MLE " : "") + "Linearised GradientCalculator " + nparams, start1,
+                "GradientCalculator", start2));
     }
 
     @SeededTest
     public void gradientCalculatorAssumedXIsFasterThanGradientCalculator(RandomSeed seed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 10000;
 
@@ -402,8 +402,7 @@ public class GradientCalculatorSpeedTest
             calc2.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
         start2 = System.nanoTime() - start2;
 
-        TestLog.logTestResult(logger, start2 < start1, "GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx",
-                start1, start2, (1.0 * start1) / start2);
+        logger.log(TestLog.getTimingRecord("GradientCalculator", start1, "GradientCalculatorAssumed", start2));
     }
 
     @SeededTest

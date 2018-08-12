@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.DataCache;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -338,7 +339,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
 
     void f1FasterThanf2(RandomSeed seed, int npeaks, int flags1, int flags2)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 10000;
         ArrayList<double[]> paramsList2;
@@ -385,8 +386,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
         }
         start2 = System.nanoTime() - start2;
 
-        TestLog.logTestResult(logger, start2 > start1, "%s = %d : %s = %d : %fx", f1.getClass().getName(), start1,
-                f2.getClass().getName(), start2, (1.0 * start2) / start1);
+        logger.log(TestLog.getTimingRecord(f1.getClass().getName(), start1, f2.getClass().getName(), start2));
     }
 
     /**

@@ -942,7 +942,7 @@ public abstract class CubicSplineFunctionTest
 
         final int size = ts.getSize();
         ts.repeat(size);
-        ts.report(logger, size);
+        logger.info(ts.getReport(size));
     }
 
     protected double[] createParameters(double... args)

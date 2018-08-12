@@ -861,7 +861,7 @@ public class PoissonCalculatorTest
     @Test
     public void instanceMethodIsFaster()
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int n = 1000;
         final int m = 10;
@@ -900,7 +900,7 @@ public class PoissonCalculatorTest
         final int size = ts.getSize();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         final int index = ts.getSize() - 1;
         Assertions.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());

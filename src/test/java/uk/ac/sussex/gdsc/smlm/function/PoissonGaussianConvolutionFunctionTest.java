@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -200,7 +201,7 @@ public class PoissonGaussianConvolutionFunctionTest
     @SeededTest
     public void pdfFasterThanPMF(RandomSeed seed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         // Realistic CCD parameters for speed test
         final double s = 7.16;
@@ -265,7 +266,7 @@ public class PoissonGaussianConvolutionFunctionTest
         for (int i = 0; i < 5; i++)
             t2 += run(f2, samples, photons);
 
-        TestLog.logTestResult(logger, t2 < t1, "cdf  %d -> pdf  %d = %f x", t1, t2, (double) t1 / t2);
+        logger.log(TestLog.getTimingRecord("cdf", t1, "pdf", t2));
     }
 
     private static long run(PoissonGaussianConvolutionFunction f, double[][] samples, double[] photons)

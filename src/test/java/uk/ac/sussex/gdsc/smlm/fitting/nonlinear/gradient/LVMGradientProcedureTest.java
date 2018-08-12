@@ -32,9 +32,11 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -319,7 +321,7 @@ public class LVMGradientProcedureTest
 
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams, final Type type)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 1000;
         final double[][] alpha = new double[nparams][nparams];
@@ -381,8 +383,8 @@ public class LVMGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1, "GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx",
-                time1, nparams, type, time2, (1.0 * time1) / time2);
+        logger.log(TestLog.getTimingRecord(new TimingResult("GradientCalculator", time1),
+                new TimingResult(() -> String.format("LVMGradientProcedure %d %s", nparams, type), time2)));
     }
 
     @SeededTest
@@ -564,7 +566,7 @@ public class LVMGradientProcedureTest
     private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
             final Type type, final boolean precomputed)
     {
-        ExtraAssumptions.assumeSpeedTest();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final int iter = 100;
 
@@ -636,8 +638,9 @@ public class LVMGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        TestLog.logTestResult(logger, time2 < time1, "%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx",
-                type, precomputed, time1, nparams, time2, (1.0 * time1) / time2);
+        logger.log(TestLog.getTimingRecord(
+                new TimingResult(() -> String.format("%s, Precomputed=%b : Standard", type, precomputed), time1),
+                new TimingResult(() -> String.format("Unrolled %d", nparams), time2)));
     }
 
     @SeededTest
@@ -1019,12 +1022,12 @@ public class LVMGradientProcedureTest
             if (type != Type.LSQ)
             {
                 if (eq.almostEqualRelativeOrAbsolute(p123.value, s))
-                    TestLog.logFailure(logger, "p12b3 Same value @ %d (error=%s) : %s == %s", i,
-                            DoubleEquality.relativeError(p123.value, s), p123.value, s);
+                    logger.log(TestLog.getFailRecord("p12b3 Same value @ %d (error=%s) : %s == %s", i,
+                            DoubleEquality.relativeError(p123.value, s), p123.value, s));
                 if (eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
-                    TestLog.logFailure(logger, "p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
+                    logger.log(TestLog.getFailRecord("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
                             DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
-                            Arrays.toString(p123.beta));
+                            Arrays.toString(p123.beta)));
 
                 // Note: Test the matrix is different by finding 1 different column
                 int dj = -1;
@@ -1049,25 +1052,25 @@ public class LVMGradientProcedureTest
                             dj = j;
                         }
                     }
-                    TestLog.logFailure(logger, "p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i, dj, error,
-                            Arrays.toString(alpha[dj]), Arrays.toString(m123[dj]));
+                    logger.log(TestLog.getFailRecord("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i, dj, error,
+                            Arrays.toString(alpha[dj]), Arrays.toString(m123[dj])));
                 }
             }
             else
             {
                 if (!eq.almostEqualRelativeOrAbsolute(p123.value, s))
-                    TestLog.logFailure(logger, "p12b3 Not same value @ %d (error=%s) : %s == %s", i,
-                            DoubleEquality.relativeError(p123.value, s), p123.value, s);
+                    logger.log(TestLog.getFailRecord("p12b3 Not same value @ %d (error=%s) : %s == %s", i,
+                            DoubleEquality.relativeError(p123.value, s), p123.value, s));
                 if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
-                    TestLog.logFailure(logger, "p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
+                    logger.log(TestLog.getFailRecord("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
                             DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
-                            Arrays.toString(p123.beta));
+                            Arrays.toString(p123.beta)));
                 for (int j = 0; j < alpha.length; j++)
                     //logger.fine(TestLog.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
                     if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
-                        TestLog.logFailure(logger, "p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
+                        logger.log(TestLog.getFailRecord("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
                                 DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
-                                Arrays.toString(m123[j]));
+                                Arrays.toString(m123[j])));
             }
 
             // Check actual gradients are correct

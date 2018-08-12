@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -331,7 +332,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
     private void fitSingleGaussianBetterLVM(RandomSeed seed, boolean bounded2, int clamping2, boolean mle2,
             boolean bounded, int clamping, boolean mle)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
         final NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
         final NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
         canFitSingleGaussianBetter(seed, solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),

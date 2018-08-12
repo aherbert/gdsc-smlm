@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
@@ -68,7 +69,7 @@ public class FilterTest
     @SeededTest
     public void directCompareMultiFilterIsFaster(RandomSeed seed)
     {
-        ExtraAssumptions.assumeMediumComplexity();
+        ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
         final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
         final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -184,7 +185,7 @@ public class FilterTest
         final int size = ts.repeat();
         ts.repeat(size);
         if (logger.isLoggable(Level.INFO))
-            ts.report(logger, size);
+            logger.info(ts.getReport(size));
 
         for (int i = 0; i < size; i += 2)
         {
