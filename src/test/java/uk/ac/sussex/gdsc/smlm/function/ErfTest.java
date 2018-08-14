@@ -17,6 +17,7 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -114,7 +115,7 @@ public class ErfTest
                 final double error = Math.abs(o - e);
                 if (max < error)
                     max = error;
-                //logger.fine(TestLog.getSupplier("x=%f, e=%f, o=%f, error=%f", x, e, o, error);
+                //logger.fine(FunctionUtils.getSupplier("x=%f, e=%f, o=%f, error=%f", x, e, o, error);
                 Assertions.assertTrue(error < expected);
             }
         logger.log(TestLog.getRecord(Level.INFO, "erfx %s max error = %g", erf.name, max));
@@ -161,7 +162,7 @@ public class ErfTest
                 lower = mid;
         }
 
-        logger.info(TestLog.getSupplier("erfx %s indistinguishable from 1: x > %s, x >= %s", erf.name,
+        logger.info(FunctionUtils.getSupplier("erfx %s indistinguishable from 1: x > %s, x >= %s", erf.name,
                 Double.toString(lower), Double.toString(upper)));
     }
 
@@ -204,7 +205,7 @@ public class ErfTest
                         final double error = Math.abs(o - e);
                         if (max < error)
                             max = error;
-                        //logger.fine(TestLog.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e, o, error);
+                        //logger.fine(FunctionUtils.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e, o, error);
                         Assertions.assertTrue(error < expected);
                     }
                 }
@@ -244,7 +245,7 @@ public class ErfTest
             final double error = Math.abs(o - e);
             if (max < error)
                 max = error;
-            //logger.fine(TestLog.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e, o, error);
+            //logger.fine(FunctionUtils.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e, o, error);
             Assertions.assertTrue(error < expected);
         }
 
@@ -308,7 +309,7 @@ public class ErfTest
                     max = error;
                 if (max2 < error2)
                     max2 = error2;
-                //logger.fine(TestLog.getSupplier("x=%d, y=%d, e=%g, o=%g, o2=%g, error=%f, error2=%f", x, y, e, o, oo, error, error2);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, y=%d, e=%g, o=%g, o2=%g, error=%f, error2=%f", x, y, e, o, oo, error, error2);
                 Assertions.assertTrue(error < error2);
             }
         }
@@ -449,7 +450,7 @@ public class ErfTest
             //		sum2 += FastMath.exp(-(xx * xx + yy * yy) / twos2);
             //	}
             //}
-            //logger.fine(TestLog.getSupplier("sum=%f, sum2=%f", sum, sum2);
+            //logger.fine(FunctionUtils.getSupplier("sum=%f, sum2=%f", sum, sum2);
 
             final int n = steps * steps;
             o = norm * sum / n;
@@ -492,7 +493,7 @@ public class ErfTest
                 final double f = i + d;
                 final double e = Math.pow(f, 4);
                 final double o = uk.ac.sussex.gdsc.smlm.function.Erf.pow4(f);
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
+                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, () -> "x="+ f);
             }
     }
 
@@ -505,7 +506,7 @@ public class ErfTest
                 final double f = i + d;
                 final double e = Math.pow(f, 16);
                 final double o = uk.ac.sussex.gdsc.smlm.function.Erf.pow16(f);
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
+                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, () -> "x=" + f);
             }
     }
 

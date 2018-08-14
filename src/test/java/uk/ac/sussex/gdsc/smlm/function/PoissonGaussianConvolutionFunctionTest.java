@@ -9,6 +9,7 @@ import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -83,7 +84,7 @@ public class PoissonGaussianConvolutionFunctionTest
             boolean computePMF)
     {
         final double p2 = cumulativeProbability(gain, mu, s, computePMF);
-        ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
+        Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF));
     }
 
     private static double cumulativeProbability(final double gain, final double mu, final double s, boolean computePMF)
@@ -115,8 +116,8 @@ public class PoissonGaussianConvolutionFunctionTest
             for (int x = min; x <= max; x++)
             {
                 final double pp = f.likelihood(x, e);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%f   %f", x, pp, f2.probability(x));
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.probability(x));
                 p += pp;
             }
             //if (p > 1.01)
@@ -130,7 +131,7 @@ public class PoissonGaussianConvolutionFunctionTest
         {
             min = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;
@@ -139,7 +140,7 @@ public class PoissonGaussianConvolutionFunctionTest
         {
             max = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;
@@ -150,7 +151,7 @@ public class PoissonGaussianConvolutionFunctionTest
         {
             // Do a formal integration if the PDF
             //if (p < 0.98 || p > 1.02)
-            //	logger.fine(TestLog.getSupplier("g=%f, mu=%f, s=%f p=%f", gain, mu, s, p);
+            //	logger.fine(FunctionUtils.getSupplier("g=%f, mu=%f, s=%f p=%f", gain, mu, s, p);
             final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
                     SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
             p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()

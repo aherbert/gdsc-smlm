@@ -133,7 +133,7 @@ public class PoissonCalculatorTest
             double v;
             v = likelihood(mu, x);
             //v = pgf.probability(x, mu);
-            //logger.fine(TestLog.getSupplier("x=%f, v=%f", x, v);
+            //logger.fine(FunctionUtils.getSupplier("x=%f, v=%f", x, v);
             return v;
         }
 
@@ -218,7 +218,7 @@ public class PoissonCalculatorTest
 
         logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f", f.mu, p));
         if (test)
-            ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", f.mu);
+            Assertions.assertEquals(P_LIMIT, p, 0.02, () -> "mu=" + f.mu);
     }
 
     private static abstract class BaseNonLinearFunction implements NonLinearFunction
@@ -546,16 +546,16 @@ public class PoissonCalculatorTest
         final double ll1a = PoissonCalculator.logLikelihood(b12, x);
         final double ll2a = PoissonCalculator.logLikelihood(add(b12, b3), x);
         final double llra = -2 * (ll1a - ll2a);
-        //logger.fine(TestLog.getSupplier("x|(a+b+c) ll1=%f, ll2=%f, llra=%f", ll1a, ll2a, llra);
+        //logger.fine(FunctionUtils.getSupplier("x|(a+b+c) ll1=%f, ll2=%f, llra=%f", ll1a, ll2a, llra);
 
         // Compute the LLR of adding b3 to b2 given we already have x minus b1
         x = subtract(x, b1);
         final double ll1b = PoissonCalculator.logLikelihood(b2, x);
         final double ll2b = PoissonCalculator.logLikelihood(add(b2, b3), x);
         final double llrb = -2 * (ll1b - ll2b);
-        //logger.fine(TestLog.getSupplier("x-a|(b+c) : ll1=%f, ll2=%f, llrb=%f", ll1b, ll2b, llrb);
+        //logger.fine(FunctionUtils.getSupplier("x-a|(b+c) : ll1=%f, ll2=%f, llrb=%f", ll1b, ll2b, llrb);
 
-        //logger.fine(TestLog.getSupplier("llr=%f (%g), llr2=%f (%g)", llra, PoissonCalculator.computePValue(llra, 1), llrb,
+        //logger.fine(FunctionUtils.getSupplier("llr=%f (%g), llr2=%f (%g)", llra, PoissonCalculator.computePValue(llra, 1), llrb,
         //		PoissonCalculator.computePValue(llrb, 1));
         Assertions.assertThrows(AssertionFailedError.class, () -> {
             ExtraAssertions.assertEqualsRelative(llra, llrb, 1e-10, "Log-likelihood ratio");

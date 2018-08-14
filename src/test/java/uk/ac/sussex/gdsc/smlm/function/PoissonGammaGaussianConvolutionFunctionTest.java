@@ -8,11 +8,13 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
@@ -59,7 +61,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
         final double p2 = cumulativeProbability(gain, mu, s);
         // This only works when the mean is above 2 if the gain is low
         if (mu > 2 || gain > 20)
-            ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
+            Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s));
     }
 
     private static double cumulativeProbability(final double gain, final double mu, double s)
@@ -92,9 +94,9 @@ public class PoissonGammaGaussianConvolutionFunctionTest
             for (int x = min; x <= max; x++)
             {
                 final double pp = f.likelihood(x, e);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
                 if (debug)
-                    logger.fine(TestLog.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
+                    logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
                 p += pp;
             }
             //if (p > 1.01)
@@ -108,9 +110,9 @@ public class PoissonGammaGaussianConvolutionFunctionTest
         {
             min = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
             if (debug)
-                logger.fine(TestLog.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
+                logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;
@@ -119,9 +121,9 @@ public class PoissonGammaGaussianConvolutionFunctionTest
         {
             max = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
             if (debug)
-                logger.fine(TestLog.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
+                logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;

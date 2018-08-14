@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "unused", "javadoc" })
@@ -67,7 +68,7 @@ public class PoissonFunctionTest
         for (int x = min; x <= max; x++)
         {
             final double pp = f.likelihood(x, o);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
             p += pp;
             values.add(pp);
             if (maxp < pp)
@@ -89,7 +90,7 @@ public class PoissonFunctionTest
             {
                 min = x;
                 final double pp = f.likelihood(x, o);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
                 p += pp;
                 values.add(pp);
                 if (maxp < pp)
@@ -106,7 +107,7 @@ public class PoissonFunctionTest
         {
             max = x;
             final double pp = f.likelihood(x, o);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
             p += pp;
             values.add(pp);
             if (maxp < pp)
@@ -171,7 +172,7 @@ public class PoissonFunctionTest
             final double v1 = Math.log(f.likelihood(x, o));
             final double v2 = f.logLikelihood(x, o);
 
-            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
+            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
         }
     }
 
@@ -199,7 +200,7 @@ public class PoissonFunctionTest
             final double v1 = f.likelihood(x, o);
             final double v2 = pd.probability(x);
 
-            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
+            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
         }
     }
 }

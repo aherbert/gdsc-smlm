@@ -67,7 +67,7 @@ public class FakeGradientFunction
         int seed = 0;
         for (int i = a.length; i-- > 0;)
             seed += Double.hashCode(a[i]);
-        //logger.fine(TestLog.getSupplier("seed = %d", seed);
+        //logger.fine(FunctionUtils.getSupplier("seed = %d", seed);
         r.setSeed(seed);
     }
 

@@ -22,8 +22,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -91,13 +91,13 @@ public class Gaussian2DPeakResultHelperTest
                             final double error = DoubleEquality.relativeError(e, o);
                             sum[points] += error;
                             if (error > 1e-2)
-                                ExtraAssertions.fail("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f", a, s, N, b2,
-                                        points, e, o, error);
+                                Assertions.fail(String.format("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f", a, s, N, b2,
+                                        points, e, o, error));
                         }
                     }
 
         for (int points = minPoints; points <= maxPoints; points++)
-            logger.info(TestLog.getSupplier("Points = %d, Av error = %f", points, sum[points] / count));
+            logger.info(FunctionUtils.getSupplier("Points = %d, Av error = %f", points, sum[points] / count));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class Gaussian2DPeakResultHelperTest
                     }
 
         for (int points = minPoints; points <= maxPoints; points++)
-            logger.info(TestLog.getSupplier("Points = %d, Av relative time = %f, Slow down factor = %f", points,
+            logger.info(FunctionUtils.getSupplier("Points = %d, Av relative time = %f, Slow down factor = %f", points,
                     sum[points] / count, sum2[points] / count2));
     }
 
@@ -199,12 +199,12 @@ public class Gaussian2DPeakResultHelperTest
                         final double o1 = calc.getAmplitude(paramsf);
                         final double o2 = calc.getPixelAmplitude(paramsf);
 
-                        //logger.fine(TestLog.getSupplier("e=%f, o1=%f, o2=%f", e, o1, o2));
+                        //logger.fine(FunctionUtils.getSupplier("e=%f, o1=%f, o2=%f", e, o1, o2));
                         Assertions.assertEquals(e, o2, 1e-3);
                         r.addData(e, o1);
                     }
 
-        //logger.fine(TestLog.getSupplier("Regression: pixel amplitude vs amplitude = %f, slope=%f, n=%d", r.getR(), r.getSlope(),
+        //logger.fine(FunctionUtils.getSupplier("Regression: pixel amplitude vs amplitude = %f, slope=%f, n=%d", r.getR(), r.getSlope(),
         //		r.getN()));
         // The simple amplitude over estimates the actual pixel amplitude
         Assertions.assertTrue(r.getSlope() > 1);

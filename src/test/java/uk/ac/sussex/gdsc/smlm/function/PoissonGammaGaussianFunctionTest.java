@@ -643,7 +643,7 @@ public class PoissonGammaGaussianFunctionTest
             upper = pgSum[(int) g] + delta;
 
         if (p < lower || p > upper)
-            ExtraAssertions.fail("mu=%f, s=%f, g=%f, p=%g", mu, s, g, p);
+            Assertions.fail(String.format("mu=%f, s=%f, g=%f, p=%g", mu, s, g, p));
     }
 
     private static double cumulativeProbability(final double mu, final double s, final double g,
@@ -760,8 +760,8 @@ public class PoissonGammaGaussianFunctionTest
                             if (p1 < 1e-3)
                                 continue;
 
-                            ExtraAssertions.fail("s=%g, g=%g, p=%g, x=%g: %g != %g (%g)", s, g, p, x, p1, p2,
-                                    relativeError);
+                            Assertions.fail(String.format("s=%g, g=%g, p=%g, x=%g: %g != %g (%g)", s, g, p, x, p1, p2,
+                                    relativeError));
                         }
                         if (maxError[0] < relativeError)
                             maxError[0] = relativeError;

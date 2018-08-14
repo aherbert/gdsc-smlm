@@ -155,7 +155,7 @@ public class ToleranceCheckerTest
             v *= 0.5;
             p *= 0.5;
             v2 = v1 + dir * v;
-            //logger.fine(TestLog.getSupplier("v2 = %f", v2);
+            //logger.fine(FunctionUtils.getSupplier("v2 = %f", v2);
             p2 = new double[] { p1[0] + dir * p };
             final int observed = tc.converged(v1, p1, v2, p2);
             if (observed != 0)

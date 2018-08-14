@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.DataCache;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 
@@ -291,11 +292,11 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
                             for (int i = 0; i < expected.length; i++)
                             {
                                 if (fp[i] < lower[i])
-                                    ExtraAssertions.fail("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i], lower[i],
-                                            Arrays.toString(fp), Arrays.toString(expected));
+                                    Assertions.fail(FunctionUtils.getSupplier("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i], lower[i],
+                                            Arrays.toString(fp), Arrays.toString(expected)));
                                 if (fp[i] > upper[i])
-                                    ExtraAssertions.fail("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i], upper[i],
-                                            Arrays.toString(fp), Arrays.toString(expected));
+                                    Assertions.fail(FunctionUtils.getSupplier("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i], upper[i],
+                                            Arrays.toString(fp), Arrays.toString(expected)));
                                 if (report)
                                     fp[i] = expected[i] - fp[i];
                             }
@@ -306,7 +307,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
             // Report
             if (report)
                 logger.info(
-                        TestLog.getSupplier("%s %s %f : CRLB = %s, Deviations = %s", solver.getClass().getSimpleName(),
+                        FunctionUtils.getSupplier("%s %s %f : CRLB = %s, Deviations = %s", solver.getClass().getSimpleName(),
                                 noiseModel, s, Arrays.toString(crlb), Arrays.toString(m.getStandardDeviation())));
         }
     }
@@ -477,7 +478,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     {
         final double p = (total == 0) ? 0 : 100.0 * better / total;
         logger.log(logLevel,
-                TestLog.getSupplier("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p));
+                FunctionUtils.getSupplier("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p));
         // Do not test if we don't have many examples
         if (total <= 10)
             return;
@@ -535,12 +536,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
     double[] fitGaussian(FunctionSolver solver, double[] data, double[] params, double[] expected)
     {
-        //logger.info(TestLog.getSupplier("%s : Expected %s", solver.getClass().getSimpleName(), Arrays.toString(expected)));
+        //logger.info(FunctionUtils.getSupplier("%s : Expected %s", solver.getClass().getSimpleName(), Arrays.toString(expected)));
         params = params.clone();
         final FitStatus status = solver.fit(data, null, params, null);
         if (status != FitStatus.OK)
-            ExtraAssertions.fail("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
-                    Arrays.toString(params), Arrays.toString(expected));
+            Assertions.fail(FunctionUtils.getSupplier("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
+                    Arrays.toString(params), Arrays.toString(expected)));
         return params;
     }
 

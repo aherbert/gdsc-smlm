@@ -247,7 +247,7 @@ public class PoissonLikelihoodWrapperTest
                                             final double gradient = (value2 - value3) / (2 * h);
                                             boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
                                                     Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-                                            //logger.fine(TestLog.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
+                                            //logger.fine(FunctionUtils.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
                                             //		dyda[gradientIndex]));
                                             if (!ok)
                                                 Assertions.fail(NAME[targetParameter] + ": " + gradient + " != " +
@@ -432,7 +432,7 @@ public class PoissonLikelihoodWrapperTest
                                     final double gradient = (value2 - value3) / (2 * h);
                                     boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
                                             Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-                                    //logger.fine(TestLog.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
+                                    //logger.fine(FunctionUtils.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
                                     //		dyda[gradientIndex]));
                                     if (!ok)
                                         Assertions.fail(
@@ -493,7 +493,7 @@ public class PoissonLikelihoodWrapperTest
             for (; x <= max; x++)
             {
                 final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
                 p += pp;
             }
             if (p > 1.01)
@@ -506,13 +506,13 @@ public class PoissonLikelihoodWrapperTest
         for (;; x++)
         {
             final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
             p += pp;
             if (pp / p < changeTolerance)
                 break;
         }
         logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f, max=%d", mu, p, x));
-        ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
+        Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
     }
 
     @Test
@@ -540,7 +540,7 @@ public class PoissonLikelihoodWrapperTest
         }, 0, max);
 
         logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f", mu, p));
-        ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
+        Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
     }
 
     @Test
@@ -629,14 +629,14 @@ public class PoissonLikelihoodWrapperTest
             Assertions.assertEquals(nll, nll2, 1e-10, "computeLikelihood(i)");
             total += nll;
             final double pp = FastMath.exp(-nll);
-            //logger.fine(TestLog.getSupplier("mu=%f, o=%f, i=%d, pp=%f", mu, mu / alpha, i, pp);
+            //logger.fine(FunctionUtils.getSupplier("mu=%f, o=%f, i=%d, pp=%f", mu, mu / alpha, i, pp);
             p += pp;
             if (p > 0.5 && pp / p < changeTolerance)
                 break;
         }
 
         logger.log(TestLog.getRecord(Level.INFO, "mu=%f, limit=%d, p=%f", mu, limit, p));
-        ExtraAssertions.assertEquals(1, p, 0.02, "mu=%f", mu);
+        Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
 
         // Check the function can compute the same total
         f = new PoissonLikelihoodWrapper(nlf, a, k, i, alpha);

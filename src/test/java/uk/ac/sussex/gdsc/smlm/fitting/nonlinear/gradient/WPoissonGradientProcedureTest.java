@@ -18,7 +18,7 @@ import uk.ac.sussex.gdsc.test.DataCache;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -107,7 +107,8 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         createFakeParams(r, nparams, iter, paramsList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-        final String name = String.format("[%d]", nparams);
+        final IntArrayFormatSupplier msgOA = getMessage(nparams, "[%d] Observations: Not same alpha @ %d");
+        final IntArrayFormatSupplier msgOAl = getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
 
         for (int i = 0; i < paramsList.size(); i++)
         {
@@ -118,10 +119,16 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
             p2.gradient(paramsList.get(i));
 
             // Exactly the same ...
-            ExtraAssertions.assertArrayEquals(p1.data, p2.alpha, "%s Observations: Not same alpha @ %d", name, i);
-            ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getAlphaLinear(),
-                    "%s Observations: Not same alpha linear @ %d", name, i);
+            Assertions.assertArrayEquals(p1.data, p2.alpha, msgOA.set(1, i));
+            Assertions.assertArrayEquals(p1.getLinear(), p2.getAlphaLinear(),
+                    msgOAl.set(1, i));
         }
+    }
+
+    private static IntArrayFormatSupplier getMessage(int nparams, String format) {
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier(format, 2);
+        msg.set(0, nparams);
+        return msg;
     }
 
     private abstract class Timer
@@ -158,7 +165,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
             long t = System.nanoTime();
             run();
             t = System.nanoTime() - t;
-            //logger.fine(TestLog.getSupplier("[%d] Time = %d", loops, t);
+            //logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
             return t;
         }
 
@@ -194,7 +201,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
         final double[] v = (precomputed) ? dataCache.getOrComputeIfAbsent(seed, this) : null;
 
-        final String name = String.format("[%d]", nparams);
+        final IntArrayFormatSupplier msg = getMessage(nparams, "[%d] Observations: Not same linear @ %d");
         for (int i = 0; i < paramsList.size(); i++)
         {
             final double[] y = createFakeData(r);
@@ -205,8 +212,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
             p2.computeFisherInformation(paramsList.get(i));
 
             // Exactly the same ...
-            ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), "%s Observations: Not same linear @ %d",
-                    name, i);
+            Assertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), msg.set(1, i));
         }
     }
 
@@ -243,6 +249,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         // Remove the timing of the function call by creating a dummy function
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
         final double[] v = (precomputed) ? dataCache.getOrComputeIfAbsent(seed, this) : null;
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("M [%d]", 1);
 
         for (int i = 0; i < paramsList.size(); i++)
         {
@@ -254,7 +261,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
             p2.computeFisherInformation(paramsList.get(i));
 
             // Check they are the same
-            ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), "M %d", i);
+            Assertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), msg.set(0, i));
         }
 
         // Realistic loops for an optimisation
@@ -318,6 +325,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
         // Remove the timing of the function call by creating a dummy function
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("M [%d]", 1);
         for (int i = 0; i < paramsList.size(); i++)
         {
             final double[] y = yList.get(i);
@@ -328,7 +336,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
             p2.computeFisherInformation(paramsList.get(i));
 
             // Check they are the same
-            ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getLinear(), "M %d", i);
+            Assertions.assertArrayEquals(p1.getAlphaLinear(), p2.getLinear(), msg.set(0, i));
         }
 
         // Realistic loops for an optimisation

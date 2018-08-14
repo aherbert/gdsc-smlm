@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestLog.TestLevel;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -180,6 +180,12 @@ public class LSQLVMGradientProcedureTest
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
         final String name = factory.getClass().getSimpleName();
+        // Create messages
+        final IndexSupplier msgR = new IndexSupplier(1, name + "Result: Not same ", null);
+        final IndexSupplier msgOB = new IndexSupplier(1, name + "Observations: Not same beta ", null);
+        final IndexSupplier msgOAl = new IndexSupplier(1, name + "Observations: Not same alpha linear ", null);
+        final IndexSupplier msgOAm = new IndexSupplier(1, name + "Observations: Not same alpha matrix ", null);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
@@ -187,15 +193,14 @@ public class LSQLVMGradientProcedureTest
             final double s = p.value;
             final double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
             // Exactly the same ...
-            ExtraAssertions.assertEquals(s, s2, "%s Result: Not same @ %d", name, i);
-            ExtraAssertions.assertArrayEquals(p.beta, beta, "%s Observations: Not same beta @ %d", name, i);
+            Assertions.assertEquals(s, s2, msgR.set(0, i));
+            Assertions.assertArrayEquals(p.beta, beta, msgOB.set(0, i));
 
             final double[] al = p.getAlphaLinear();
-            ExtraAssertions.assertArrayEquals(al, new DenseMatrix64F(alpha).data,
-                    "%s Observations: Not same alpha linear @ %d", name, i);
+            Assertions.assertArrayEquals(al, new DenseMatrix64F(alpha).data, msgOAl.set(0, i));
 
             final double[][] am = p.getAlphaMatrix();
-            ExtraAssertions.assertArrayEquals(am, alpha, "%s Observations: Not same alpha matrix @ %d", name, i);
+            Assertions.assertArrayEquals(am, alpha, msgOAm.set(0, i));
         }
     }
 
@@ -233,7 +238,7 @@ public class LSQLVMGradientProcedureTest
             long t = System.nanoTime();
             run();
             t = System.nanoTime() - t;
-            //logger.fine(TestLog.getSupplier("[%d] Time = %d", loops, t);
+            //logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
             return t;
         }
 
@@ -327,6 +332,12 @@ public class LSQLVMGradientProcedureTest
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
         final String name = GradientCalculator.class.getSimpleName();
+        // Create messages
+        final IndexSupplier msgR = new IndexSupplier(1, name + "Result: Not same ", null);
+        final IndexSupplier msgOB = new IndexSupplier(1, name + "Observations: Not same beta ", null);
+        final IndexSupplier msgOAl = new IndexSupplier(1, name + "Observations: Not same alpha linear ", null);
+        final IndexSupplier msgOAm = new IndexSupplier(1, name + "Observations: Not same alpha matrix ", null);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final BaseLSQLVMGradientProcedure p1 = LSQLVMGradientProcedureFactory.create(yList.get(i), func);
@@ -336,16 +347,15 @@ public class LSQLVMGradientProcedureTest
             p2.gradient(paramsList.get(i));
 
             // Exactly the same ...
-            ExtraAssertions.assertEquals(p1.value, p2.value, "%s Result: Not same @ %d", name, i);
+            Assertions.assertEquals(p1.value, p2.value, msgR.set(0, i));
 
-            ExtraAssertions.assertArrayEquals(p1.beta, p2.beta, "%s Observations: Not same beta @ %d", name, i);
+            Assertions.assertArrayEquals(p1.beta, p2.beta, msgOB.set(0, i));
 
-            ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(),
-                    "%s Observations: Not same alpha linear @ %d", name, i);
+            Assertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(), msgOAl.set(0, i));
 
             final double[][] am1 = p1.getAlphaMatrix();
             final double[][] am2 = p2.getAlphaMatrix();
-            ExtraAssertions.assertArrayEquals(am1, am2, "%s Observations: Not same alpha matrix @ %d", name, i);
+            Assertions.assertArrayEquals(am1, am2, msgOAm.set(0, i));
         }
     }
 
@@ -392,6 +402,9 @@ public class LSQLVMGradientProcedureTest
         // Remove the timing of the function call by creating a dummy function
         final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
+        // Create messages
+        final IndexSupplier msgA = new IndexSupplier(1, "A ", null);
+        final IndexSupplier msgB = new IndexSupplier(1, "B ", null);
         for (int i = 0; i < paramsList.size(); i++)
         {
             final BaseLSQLVMGradientProcedure p1 = factory1.createProcedure(yList.get(i), func);
@@ -403,8 +416,8 @@ public class LSQLVMGradientProcedureTest
             p2.gradient(paramsList.get(i));
 
             // Check they are the same
-            ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(), "A %d", i);
-            ExtraAssertions.assertArrayEquals(p1.beta, p2.beta, "B %d", i);
+            Assertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(), msgA.set(0, i));
+            Assertions.assertArrayEquals(p1.beta, p2.beta, msgB.set(0, i));
         }
 
         // Realistic loops for an optimisation
@@ -502,13 +515,13 @@ public class LSQLVMGradientProcedureTest
                 beta[j] *= -2;
 
                 final double gradient = (s1 - s2) / (2 * d);
-                //logger.fine(TestLog.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f", i, k, s, func.getName(k), a[k], d, beta[j],
+                //logger.fine(FunctionUtils.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f", i, k, s, func.getName(k), a[k], d, beta[j],
                 //		gradient);
                 failCounter.run(j, () -> {
                     return eq.almostEqualRelativeOrAbsolute(beta[jj], gradient);
                 }, () -> {
-                    ExtraAssertions.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
-                            DoubleEquality.relativeError(beta[jj], gradient));
+                    Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+                            DoubleEquality.relativeError(beta[jj], gradient)));
                 });
             }
         }

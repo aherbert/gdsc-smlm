@@ -29,8 +29,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 
-import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
@@ -179,7 +179,7 @@ public class PeakResultDigestTest
             for (int i = N; i-- > 0;)
                 digest.digest(r1);
             time = System.nanoTime() - time;
-            logger.info(TestLog.getSupplier("size = %d, time = %g ms", size, (1e-6 * time) / N));
+            logger.info(FunctionUtils.getSupplier("size = %d, time = %g ms", size, (1e-6 * time) / N));
         }
     }
 

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class QuadraticAstigmatismZModelTest
@@ -80,12 +79,12 @@ public class QuadraticAstigmatismZModelTest
 
             //double error = DoubleEquality.relativeError(o, e);
             if (Math.abs(z) > 0.02)
-                ExtraAssertions.assertTrue((e1 * o1) >= 0, "%s sign != %s", e1, o1);
-            ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e1, o1), "%s != %s", e1, o1);
+                Assertions.assertTrue((e1 * o1) >= 0, () -> String.format("%s sign != %s", e1, o1));
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e1, o1), () -> String.format("%s != %s", e1, o1));
 
             if (Math.abs(z) > 0.02)
-                ExtraAssertions.assertTrue((e2 * o2) >= 0, "%s sign != %s", e2, o2);
-            ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e2, o2), "%s != %s", e2, o2);
+                Assertions.assertTrue((e2 * o2) >= 0, () -> String.format("%s sign != %s", e2, o2));
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(e2, o2), () -> String.format("%s != %s", e2, o2));
         }
     }
 }

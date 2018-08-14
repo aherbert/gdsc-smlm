@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -150,15 +151,16 @@ public class FHTFilterTest
         final int failureLimit = TestCounter.computeFailureLimit(repeats, 0.1);
         final TestCounter failCounter = new TestCounter(failureLimit);
 
+        final IndexSupplier msg = new IndexSupplier(2);
         for (int y = min; y < max; y++)
         {
-            final int yy = y;
+            msg.set(1, y);
             for (int x = min; x < max; x++)
             {
                 final int xx = x;
                 final int i = y * size + x;
                 failCounter.run(() -> {
-                    ExtraAssertions.assertEqualsRelative(e[i], input1[i], error, "Element [%d,%d]", xx, yy);
+                    ExtraAssertions.assertEqualsRelative(e[i], input1[i], error, msg.set(0, xx));
                 });
             }
         }

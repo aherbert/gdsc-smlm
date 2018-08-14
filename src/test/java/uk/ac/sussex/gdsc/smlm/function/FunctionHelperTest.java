@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class FunctionHelperTest
@@ -159,7 +159,7 @@ public class FunctionHelperTest
                     final double o = FunctionHelper.getMeanValue(values.clone(),
                             scale * Gaussian2DPeakResultHelper.cumulative2D(range));
                     if (debug)
-                        logger.fine(TestLog.getSupplier("%g,%g   %d  %g %g  %g", sx, sy, range, e, o,
+                        logger.fine(FunctionUtils.getSupplier("%g,%g   %d  %g %g  %g", sx, sy, range, e, o,
                                 DoubleEquality.relativeError(e, o)));
                     // Only test the highest
                     if (i == n_1)

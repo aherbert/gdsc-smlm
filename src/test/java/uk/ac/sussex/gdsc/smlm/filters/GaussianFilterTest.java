@@ -20,6 +20,7 @@ import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -272,7 +273,7 @@ public class GaussianFilterTest
             }
 
             logger.fine(
-                    TestLog.getSupplier("%s vs %s w=%b @ %.1f = %g", f1.getName(), f2.getName(), weighted, sigma, max));
+                    FunctionUtils.getSupplier("%s vs %s w=%b @ %.1f = %g", f1.getName(), f2.getName(), weighted, sigma, max));
             Assertions.assertTrue(max < tolerance);
         }
     }

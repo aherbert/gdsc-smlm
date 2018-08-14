@@ -15,22 +15,18 @@ import uk.ac.sussex.gdsc.core.ij.Utils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
-public abstract class Gaussian2DFunctionTest
-{
+public abstract class Gaussian2DFunctionTest {
     protected static Logger logger;
 
     @BeforeAll
-    public static void beforeAll()
-    {
+    public static void beforeAll() {
         logger = Logger.getLogger(Gaussian2DFunctionTest.class.getName());
     }
 
     @AfterAll
-    public static void afterAll()
-    {
+    public static void afterAll() {
         logger = null;
     }
 
@@ -42,8 +38,9 @@ public abstract class Gaussian2DFunctionTest
     // Approximate error accuracy in single precision: Ef
     // Step size for derivatives:
     // h ~ (Ef)^(1/3) * xc
-    // xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
-    protected double h_ = 0.0001; //(double) (Math.pow(1e-3f, 1.0 / 3));
+    // xc is the characteristic scale over which x changes, assumed to be 1 (not x
+    // as per NR since x is close to zero)
+    protected double h_ = 0.0001; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
     protected int[] testx = new int[] { 4, 5, 6 };
     protected int[] testy = new int[] { 4, 5, 6 };
@@ -73,49 +70,41 @@ public abstract class Gaussian2DFunctionTest
     protected int flags;
     protected AstigmatismZModel zModel = null;
 
-    public Gaussian2DFunctionTest()
-    {
+    public Gaussian2DFunctionTest() {
         init();
 
         // Setup Tests
         if (!f1.evaluatesBackground())
             testbackground = new double[] { testbackground[0] };
-        if (!f1.evaluatesSignal())
-        {
+        if (!f1.evaluatesSignal()) {
             testsignal1 = new double[] { testsignal1[0] };
             testsignal2 = new double[] { testsignal2[0] };
         }
         // XY Position is always evaluated
-        if (!f1.evaluatesZ())
-        {
+        if (!f1.evaluatesZ()) {
             testcz1 = new double[] { 0 };
             testcz2 = new double[] { 0 };
         }
 
         boolean noSecondWidth = false;
-        if (!f1.evaluatesSD0())
-        {
+        if (!f1.evaluatesSD0()) {
             // Just use 1 width
             testw1 = new double[][] { testw1[0] };
             testw2 = new double[][] { testw2[0] };
             // If no width 0 then assume we have no width 1 as well
             noSecondWidth = true;
-        }
-        else if (!f1.evaluatesSD1())
-        {
+        } else if (!f1.evaluatesSD1()) {
             // No evaluation of second width needs only variation in width 0 so truncate
             testw1 = Arrays.copyOf(testw1, 2);
             testw2 = Arrays.copyOf(testw2, 2);
             noSecondWidth = true;
         }
         if (noSecondWidth)
-            for (int i = 0; i < testw1.length; i++)
-            {
+            for (int i = 0; i < testw1.length; i++) {
                 testw1[i][1] = testw1[i][0];
                 testw2[i][1] = testw2[i][0];
             }
-        if (!f1.evaluatesAngle())
-        {
+        if (!f1.evaluatesAngle()) {
             testangle1 = new double[] { 0 };
             testangle2 = new double[] { 0 };
         }
@@ -124,43 +113,40 @@ public abstract class Gaussian2DFunctionTest
     }
 
     /**
-     * Create the Gaussian2DFunction for 1 and 2 peaks. Creates the flags for the factory
+     * Create the Gaussian2DFunction for 1 and 2 peaks. Creates the flags for the
+     * factory
      */
     protected abstract void init();
 
-    protected void postInit()
-    {
+    protected void postInit() {
         // To be overridden
     }
 
     @Test
-    public void functionCreatesCorrectGradientIndices()
-    {
+    public void functionCreatesCorrectGradientIndices() {
         checkGradientIndices(1, f1);
         checkGradientIndices(2, f2);
     }
 
-    private static void checkGradientIndices(int npeaks, Gaussian2DFunction gf)
-    {
+    private static void checkGradientIndices(int npeaks, Gaussian2DFunction gf) {
         if (gf == null)
             return;
 
         final int[] gradientIndices = gf.gradientIndices();
         if (logger.isLoggable(Level.INFO))
-            logger.log(TestLog.getRecord(Level.INFO, "Function%d %s %s", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices)));
+            logger.log(TestLog.getRecord(Level.INFO, "Function%d %s %s", npeaks, gf.getClass().getName(),
+                    Arrays.toString(gradientIndices)));
 
         Assertions.assertEquals(gf.getNPeaks(), npeaks, "Incorrect number of peaks");
 
         int p = 0;
         if (gf.evaluatesBackground())
             Assertions.assertEquals(0, gradientIndices[p++], "Background");
-        for (int peak = 1, i = 1; peak <= npeaks; peak++, i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
-        {
+        for (int peak = 1, i = 1; peak <= npeaks; peak++, i += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
             final int ii = i;
             if (gf.evaluatesSignal())
                 Assertions.assertEquals(i, gradientIndices[p++], () -> Gaussian2DFunction.getName(ii));
-            if (gf.evaluatesPosition())
-            {
+            if (gf.evaluatesPosition()) {
                 Assertions.assertEquals(i + 1, gradientIndices[p++], () -> Gaussian2DFunction.getName(ii + 1));
                 Assertions.assertEquals(i + 2, gradientIndices[p++], () -> Gaussian2DFunction.getName(ii + 2));
             }
@@ -176,25 +162,20 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void factoryCreatesCorrectFunction()
-    {
+    public void factoryCreatesCorrectFunction() {
         Gaussian2DFunction f;
 
-        if (f2 != null)
-        {
+        if (f2 != null) {
             f = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
             Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function2");
-        }
-        else
-        {
+        } else {
             f = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
             Assertions.assertTrue(f.getClass() == f1.getClass(), "Incorrect function1");
         }
     }
 
     @Test
-    public void functionComputesTargetWithAndWithoutGradient()
-    {
+    public void functionComputesTargetWithAndWithoutGradient() {
         final double[] dyda = new double[f1.gradientIndices().length];
         double[] a;
 
@@ -207,8 +188,7 @@ public abstract class Gaussian2DFunctionTest
                     for (final double cy1 : testcy1)
                         for (final double cz1 : testcz1)
                             for (final double[] w1 : testw1)
-                                for (final double angle1 : testangle1)
-                                {
+                                for (final double angle1 : testangle1) {
                                     a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
                                     f1.initialise(a);
@@ -218,16 +198,14 @@ public abstract class Gaussian2DFunctionTest
                                     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, f1.getMaxX(),
                                             f1.getMaxY(), flags, zModel);
                                     f.initialise(a);
-                                    if (record)
-                                    {
+                                    if (record) {
                                         record = false;
-                                        logger.log(TestLog.getRecord(Level.INFO, "%s %d frozen to %s", f1.getClass().getSimpleName(), 1,
-                                                f.getClass().getSimpleName()));
+                                        logger.log(TestLog.getRecord(Level.INFO, "%s %d frozen to %s",
+                                                f1.getClass().getSimpleName(), 1, f.getClass().getSimpleName()));
                                     }
 
                                     for (final int x : testx)
-                                        for (final int y : testy)
-                                        {
+                                        for (final int y : testy) {
                                             final int xx = y * maxx + x;
                                             final double y1 = f1.eval(xx, dyda);
                                             final double y2 = f1.eval(xx);
@@ -244,61 +222,52 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesBackgroundGradient()
-    {
+    public void functionComputesBackgroundGradient() {
         Assumptions.assumeTrue(f1.evaluatesBackground());
         functionComputesTargetGradient(Gaussian2DFunction.BACKGROUND);
     }
 
     @Test
-    public void functionComputesSignalGradient()
-    {
+    public void functionComputesSignalGradient() {
         Assumptions.assumeTrue(f1.evaluatesSignal());
         functionComputesTargetGradient(Gaussian2DFunction.SIGNAL);
     }
 
     @Test
-    public void functionComputesXGradient()
-    {
+    public void functionComputesXGradient() {
         functionComputesTargetGradient(Gaussian2DFunction.X_POSITION);
     }
 
     @Test
-    public void functionComputesYGradient()
-    {
+    public void functionComputesYGradient() {
         functionComputesTargetGradient(Gaussian2DFunction.Y_POSITION);
     }
 
     @Test
-    public void functionComputesZGradient()
-    {
+    public void functionComputesZGradient() {
         Assumptions.assumeTrue(f1.evaluatesZ());
         functionComputesTargetGradient(Gaussian2DFunction.Z_POSITION);
     }
 
     @Test
-    public void functionComputesXWidthGradient()
-    {
+    public void functionComputesXWidthGradient() {
         Assumptions.assumeTrue(f1.evaluatesSD0());
         functionComputesTargetGradient(Gaussian2DFunction.X_SD);
     }
 
     @Test
-    public void functionComputesYWidthGradient()
-    {
+    public void functionComputesYWidthGradient() {
         Assumptions.assumeTrue(f1.evaluatesSD1());
         functionComputesTargetGradient(Gaussian2DFunction.Y_SD);
     }
 
     @Test
-    public void functionComputesAngleGradient()
-    {
+    public void functionComputesAngleGradient() {
         Assumptions.assumeTrue(f1.evaluatesAngle());
         functionComputesTargetGradient(Gaussian2DFunction.ANGLE);
     }
 
-    private void functionComputesTargetGradient(int targetParameter)
-    {
+    private void functionComputesTargetGradient(int targetParameter) {
         final int gradientIndex = findGradientIndex(f1, targetParameter);
         final double[] dyda = new double[f1.gradientIndices().length];
         final double[] dyda2 = new double[dyda.length];
@@ -315,8 +284,7 @@ public abstract class Gaussian2DFunctionTest
                     for (final double cy1 : testcy1)
                         for (final double cz1 : testcz1)
                             for (final double[] w1 : testw1)
-                                for (final double angle1 : testangle1)
-                                {
+                                for (final double angle1 : testangle1) {
                                     a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
                                     f1.initialise(a);
 
@@ -335,8 +303,7 @@ public abstract class Gaussian2DFunctionTest
                                     f1b.initialise(a.clone());
 
                                     for (final int x : testx)
-                                        for (final int y : testy)
-                                        {
+                                        for (final int y : testy) {
                                             final int i = y * maxx + x;
                                             f1.eval(i, dyda);
                                             final double value2 = f1a.eval(i, dyda2);
@@ -346,15 +313,17 @@ public abstract class Gaussian2DFunctionTest
                                             final double error = DoubleEquality.relativeError(gradient,
                                                     dyda2[gradientIndex]);
                                             s.add(error);
-                                            ExtraAssertions.assertTrue((gradient * dyda2[gradientIndex]) >= 0,
-                                                    "%s sign != %s", gradient, dyda2[gradientIndex]);
-                                            //logger.fine(TestLog.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y, gradient,
-                                            //		gradientIndex, dyda2[gradientIndex], error);
-                                            //logger.fine(TestLog.getSupplier("[%d,%d] %f == [%d] %f?", x, y, gradient, gradientIndex, dyda[gradientIndex]);
-                                            ExtraAssertions.assertTrue(
-                                                    eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]),
-                                                    "%s != %s", gradient, dyda[gradientIndex]);
-
+                                            if ((gradient * dyda2[gradientIndex]) < 0)
+                                                Assertions.fail(
+                                                        String.format("%s sign != %s", gradient, dyda2[gradientIndex]));
+                                            // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
+                                            // y, gradient,
+                                            // gradientIndex, dyda2[gradientIndex], error);
+                                            // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f?", x, y,
+                                            // gradient, gradientIndex, dyda[gradientIndex]);
+                                            if (!eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]))
+                                                Assertions
+                                                        .fail(String.format("%s != %s", gradient, dyda[gradientIndex]));
                                         }
                                 }
         logger.info(() -> {
@@ -364,16 +333,14 @@ public abstract class Gaussian2DFunctionTest
         });
     }
 
-    protected int findGradientIndex(Gaussian2DFunction f, int targetParameter)
-    {
+    protected int findGradientIndex(Gaussian2DFunction f, int targetParameter) {
         final int i = f.findGradientIndex(targetParameter);
         Assertions.assertTrue(i >= 0, "Cannot find gradient index");
         return i;
     }
 
     @Test
-    public void functionComputesTargetWithAndWithoutGradientWith2Peaks()
-    {
+    public void functionComputesTargetWithAndWithoutGradientWith2Peaks() {
         if (f2 == null)
             return;
 
@@ -396,8 +363,7 @@ public abstract class Gaussian2DFunctionTest
                                             for (final double cy2 : testcy2)
                                                 for (final double cz2 : testcz2)
                                                     for (final double[] w2 : testw2)
-                                                        for (final double angle2 : testangle2)
-                                                        {
+                                                        for (final double angle2 : testangle2) {
                                                             a = createParameters(background, signal1, cx1, cy1, cz1,
                                                                     w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
                                                                     w2[1], angle2);
@@ -411,17 +377,16 @@ public abstract class Gaussian2DFunctionTest
                                                                     .create2D(2, f2.getMaxX(), f2.getMaxY(), flags,
                                                                             zModel);
                                                             f.initialise(a);
-                                                            if (record)
-                                                            {
+                                                            if (record) {
                                                                 record = false;
-                                                                logger.log(TestLog.getRecord(Level.INFO, "%s %d frozen to %s",
+                                                                logger.log(TestLog.getRecord(Level.INFO,
+                                                                        "%s %d frozen to %s",
                                                                         f2.getClass().getSimpleName(), 2,
                                                                         f.getClass().getSimpleName()));
                                                             }
 
                                                             for (final int x : testx)
-                                                                for (final int y : testy)
-                                                                {
+                                                                for (final int y : testy) {
                                                                     final int xx = y * maxx + x;
                                                                     final double y1 = f2.eval(xx, dyda);
                                                                     final double y2 = f2.eval(xx);
@@ -440,16 +405,14 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesBackgroundGradientWith2Peaks()
-    {
+    public void functionComputesBackgroundGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         Assumptions.assumeTrue(f2.evaluatesBackground());
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.BACKGROUND);
     }
 
     @Test
-    public void functionComputesSignalGradientWith2Peaks()
-    {
+    public void functionComputesSignalGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         Assumptions.assumeTrue(f2.evaluatesSignal());
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
@@ -457,8 +420,7 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesXGradientWith2Peaks()
-    {
+    public void functionComputesXGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
         functionComputesTargetGradientWith2Peaks(
@@ -466,8 +428,7 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesYGradientWith2Peaks()
-    {
+    public void functionComputesYGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
         functionComputesTargetGradientWith2Peaks(
@@ -475,8 +436,7 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesZGradientWith2Peaks()
-    {
+    public void functionComputesZGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         Assumptions.assumeTrue(f2.evaluatesZ());
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
@@ -485,8 +445,7 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesXWidthGradientWith2Peaks()
-    {
+    public void functionComputesXWidthGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         Assumptions.assumeTrue(f2.evaluatesSD0());
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
@@ -494,8 +453,7 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesYWidthGradientWith2Peaks()
-    {
+    public void functionComputesYWidthGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         Assumptions.assumeTrue(f2.evaluatesSD1());
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
@@ -503,16 +461,14 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesAngleGradientWith2Peaks()
-    {
+    public void functionComputesAngleGradientWith2Peaks() {
         Assumptions.assumeTrue(null != f2);
         Assumptions.assumeTrue(f2.evaluatesAngle());
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
         functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE + Gaussian2DFunction.PARAMETERS_PER_PEAK);
     }
 
-    private void functionComputesTargetGradientWith2Peaks(int targetParameter)
-    {
+    private void functionComputesTargetGradientWith2Peaks(int targetParameter) {
         final int gradientIndex = findGradientIndex(f2, targetParameter);
         final double[] dyda = new double[f2.gradientIndices().length];
         final double[] dyda2 = new double[dyda.length];
@@ -536,8 +492,7 @@ public abstract class Gaussian2DFunctionTest
                                             for (final double cy2 : testcy2)
                                                 for (final double cz2 : testcz2)
                                                     for (final double[] w2 : testw2)
-                                                        for (final double angle2 : testangle2)
-                                                        {
+                                                        for (final double angle2 : testangle2) {
                                                             a = createParameters(background, signal1, cx1, cy1, cz1,
                                                                     w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
                                                                     w2[1], angle2);
@@ -545,7 +500,8 @@ public abstract class Gaussian2DFunctionTest
                                                             f2.initialise(a);
 
                                                             // Numerically solve gradient.
-                                                            // Calculate the step size h to be an exact numerical representation
+                                                            // Calculate the step size h to be an exact numerical
+                                                            // representation
                                                             final double xx = a[targetParameter];
 
                                                             // Get h to minimise roundoff error
@@ -559,8 +515,7 @@ public abstract class Gaussian2DFunctionTest
                                                             f2b.initialise(a.clone());
 
                                                             for (final int x : testx)
-                                                                for (final int y : testy)
-                                                                {
+                                                                for (final int y : testy) {
                                                                     final int i = y * maxx + x;
                                                                     f2.eval(i, dyda);
                                                                     final double value2 = f2a.eval(i, dyda2);
@@ -570,17 +525,19 @@ public abstract class Gaussian2DFunctionTest
                                                                     final double error = DoubleEquality.relativeError(
                                                                             gradient, dyda2[gradientIndex]);
                                                                     s.add(error);
-                                                                    ExtraAssertions.assertTrue(
-                                                                            (gradient * dyda2[gradientIndex]) >= 0,
-                                                                            "%s sign != %s", gradient,
-                                                                            dyda2[gradientIndex]);
-                                                                    //logger.fine(TestLog.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y, gradient,
-                                                                    //		gradientIndex, dyda2[gradientIndex], error);
-                                                                    //logger.fine(TestLog.getSupplier("[%d,%d] %f == [%d] %f?", x, y, gradient, gradientIndex, dyda[gradientIndex]);
-                                                                    ExtraAssertions.assertTrue(
-                                                                            eq.almostEqualRelativeOrAbsolute(gradient,
-                                                                                    dyda[gradientIndex]),
-                                                                            "%s != %s", gradient, dyda[gradientIndex]);
+                                                                    if ((gradient * dyda2[gradientIndex]) < 0)
+                                                                        Assertions.fail(String.format("%s sign != %s",
+                                                                                gradient, dyda2[gradientIndex]));
+                                                                    // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f
+                                                                    // == [%d] %f? (%g)", x, y, gradient,
+                                                                    // gradientIndex, dyda2[gradientIndex], error);
+                                                                    // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f
+                                                                    // == [%d] %f?", x, y, gradient, gradientIndex,
+                                                                    // dyda[gradientIndex]);
+                                                                    if (!eq.almostEqualRelativeOrAbsolute(gradient,
+                                                                            dyda[gradientIndex]))
+                                                                        Assertions.fail(String.format("%s != %s",
+                                                                                gradient, dyda[gradientIndex]));
                                                                 }
                                                         }
         logger.info(() -> {
@@ -592,8 +549,7 @@ public abstract class Gaussian2DFunctionTest
     }
 
     @Test
-    public void functionComputesGaussian()
-    {
+    public void functionComputesGaussian() {
         final double background = 0;
         final int maxx = 30;
 
@@ -611,14 +567,12 @@ public abstract class Gaussian2DFunctionTest
                 for (final double cy1 : new double[] { maxx / 2 + 0.876f })
                     for (final double cz1 : testcz1)
                         for (final double[] w1 : testw1)
-                            for (final double angle1 : testangle1)
-                            {
+                            for (final double angle1 : testangle1) {
                                 final double[] a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
                                         angle1);
 
                                 f.initialise(a);
-                                if (zDepth)
-                                {
+                                if (zDepth) {
                                     // Change to a standard free circular function
                                     a[Gaussian2DFunction.X_SD] = zModel.getSx(a[Gaussian2DFunction.Z_POSITION]);
                                     a[Gaussian2DFunction.Y_SD] = zModel.getSy(a[Gaussian2DFunction.Z_POSITION]);
@@ -626,24 +580,23 @@ public abstract class Gaussian2DFunctionTest
                                 }
                                 f2.initialise(a);
                                 double sum = 0;
-                                for (int index = maxx * maxx; index-- > 0;)
-                                {
+                                for (int index = maxx * maxx; index-- > 0;) {
                                     final double r1 = f.eval(index);
                                     final double r2 = f2.eval(index);
-                                    //logger.fine(TestLog.getSupplier("%d,%d r1=%f", index%maxx, index/maxx, r1);
+                                    // logger.fine(FunctionUtils.getSupplier("%d,%d r1=%f", index%maxx, index/maxx,
+                                    // r1);
                                     sum += r1;
-                                    final boolean ok = eq2.almostEqualRelativeOrAbsolute(r1, r2);
-                                    ExtraAssertions.assertTrue(ok, "%g != %g @ [%d,%d]", r1, r2, index / maxx,
-                                            index % maxx);
+                                    if (!eq2.almostEqualRelativeOrAbsolute(r1, r2))
+                                        Assertions.fail(String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx,
+                                                index % maxx));
                                 }
 
-                                ExtraAssertions.assertTrue(eq3.almostEqualRelativeOrAbsolute(sum, signal1), "%s != %s",
-                                        sum, signal1);
+                                if (!eq3.almostEqualRelativeOrAbsolute(sum, signal1))
+                                    Assertions.fail(String.format("%s != %s", sum, signal1));
                             }
     }
 
-    protected double[] createParameters(double... args)
-    {
+    protected double[] createParameters(double... args) {
         return args;
     }
 }

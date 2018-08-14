@@ -30,6 +30,8 @@ import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -270,56 +272,75 @@ public class GradientCalculatorSpeedTest
                 : new GradientCalculator(beta.length);
         final GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
 
+        // Create messages
+        IntArrayFormatSupplier msgR = new IntArrayFormatSupplier("Result: Not same @ %d", 1);
+        IntArrayFormatSupplier msgB = new IntArrayFormatSupplier("Observations: Not same beta @ %d", 1);
+        IntArrayFormatSupplier msgA = new IntArrayFormatSupplier("Observations: Not same alpha @ %d", 1);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
             final double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-            ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), "Result: Not same @ %d", i);
-            ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2),
-                    "Observations: Not same beta @ %d", i);
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2), msgB.set(0, i));
+            msgA.set(0, i);
             for (int j = 0; j < beta.length; j++)
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
-                        "Observations: Not same alpha @ %d", i);
+                Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
+                        msgA);
         }
 
+        msgR = new IntArrayFormatSupplier("N-Result: Not same @ %d", 1);
+        msgB = new IntArrayFormatSupplier("N-Observations: Not same beta @ %d", 1);
+        msgA = new IntArrayFormatSupplier("N-Observations: Not same alpha @ %d", 1);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
             final double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-            ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), "N-Result: Not same @ %d", i);
-            ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2),
-                    "N-Observations: Not same beta @ %d", i);
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2), msgB.set(0, i));
+            msgA.set(0, i);
             for (int j = 0; j < beta.length; j++)
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
-                        "N-Observations: Not same alpha @ %d", i);
+                Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
+                        msgA);
         }
 
         if (!mle)
         {
             func.setNoiseModel(CameraNoiseModel.createNoiseModel(10, 0, true));
 
+            msgR = new IntArrayFormatSupplier("Result+Noise: Not same @ %d", 1);
+            msgB = new IntArrayFormatSupplier("Observations+Noise: Not same beta @ %d", 1);
+            msgA = new IntArrayFormatSupplier("Observations+Noise: Not same alpha @ %d", 1);
+            
             for (int i = 0; i < paramsList.size(); i++)
             {
                 final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
                 final double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), "Result+Noise: Not same @ %d", i);
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2),
-                        "Observations+Noise: Not same beta @ %d", i);
+                Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
+                Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2),
+                        msgB.set(0, i));
+                msgA.set(0, i);                
                 for (int j = 0; j < beta.length; j++)
-                    ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
-                            "Observations+Noise: Not same alpha @ %d", i);
+                    Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
+                            msgA);
             }
 
+            msgR = new IntArrayFormatSupplier("N-Result+Noise: Not same @ %d", 1);
+            msgB = new IntArrayFormatSupplier("N-Observations+Noise: Not same beta @ %d", 1);
+            msgA = new IntArrayFormatSupplier("N-Observations+Noise: Not same alpha @ %d", 1);
+            
             for (int i = 0; i < paramsList.size(); i++)
             {
                 final double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
                 final double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), "N-Result+Noise: Not same @ %d", i);
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2),
-                        "N-Observations+Noise: Not same beta @ %d", i);
+                Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
+                Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2),
+                        msgB.set(0, i));
+                msgA.set(0, i);
                 for (int j = 0; j < beta.length; j++)
-                    ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
-                            "N-Observations+Noise: Not same alpha @ %d", i);
+                    Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
+                            msgA);
             }
         }
     }
@@ -438,8 +459,12 @@ public class GradientCalculatorSpeedTest
         final double delta = 1e-3;
         final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("[%d] Not same gradient @ %d", 2);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
+            msg.set(0, i);
+            
             final double[] y = yList.get(i);
             final double[] a = paramsList.get(i);
             final double[] a2 = a.clone();
@@ -457,10 +482,10 @@ public class GradientCalculatorSpeedTest
                 a2[j] = a[j];
 
                 final double gradient = (s1 - s2) / (2 * d);
-                //logger.fine(TestLog.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f", i, j, s, func.getName(j), a[j], d, beta[k],
+                //logger.fine(FunctionUtils.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f", i, j, s, func.getName(j), a[j], d, beta[k],
                 //		gradient));
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[k], gradient),
-                        "Not same gradient @ %d", j);
+                Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[k], gradient),
+                        msg.set(1, j));
             }
         }
     }
@@ -557,7 +582,7 @@ public class GradientCalculatorSpeedTest
                 betaList.add(beta.clone());
                 for (int j = 0; j < nparams; j++)
                     if (Math.abs(beta[j]) < 1e-6)
-                        logger.info(TestLog.getSupplier("[%d] Tiny beta %s %g", i, func.getGradientParameterName(j),
+                        logger.info(FunctionUtils.getSupplier("[%d] Tiny beta %s %g", i, func.getGradientParameterName(j),
                                 beta[j]));
                 // Solve
                 if (!solver.solve(alpha, beta))
@@ -614,7 +639,7 @@ public class GradientCalculatorSpeedTest
 
                 if (report)
                     for (int i = 0; i < nparams; i++)
-                        logger.info(TestLog.getSupplier("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
+                        logger.info(FunctionUtils.getSupplier("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
                                 func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
                                 abs[i].getMean(), abs[i].getStandardDeviation()));
             }
@@ -676,7 +701,7 @@ public class GradientCalculatorSpeedTest
 
             final double llr = PoissonCalculator.logLikelihoodRatio(u, x);
             final double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
-            //logger.fine(TestLog.getSupplier("llr=%f, llr2=%f", llr, llr2));
+            //logger.fine(FunctionUtils.getSupplier("llr=%f, llr2=%f", llr, llr2));
             ExtraAssertions.assertEqualsRelative(llr, llr2, 1e-10, "Log-likelihood ratio");
         }
     }

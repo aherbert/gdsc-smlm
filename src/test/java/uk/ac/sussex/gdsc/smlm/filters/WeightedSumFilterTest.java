@@ -30,6 +30,7 @@ import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -111,7 +112,7 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
         filter.setWeights(w, width, height);
         final float[] o = filter(data, width, height, boxSize - offset, internal, filter);
 
-        ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-6, "%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width,
-                height, boxSize - offset, internal);
+        ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-6, FunctionUtils.getSupplier("%s : [%dx%d] @ %.1f [internal=%b]",
+                filter.name, width, height, boxSize - offset, internal));
     }
 }

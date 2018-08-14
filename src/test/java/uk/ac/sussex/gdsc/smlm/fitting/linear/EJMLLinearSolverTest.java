@@ -24,6 +24,7 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -75,11 +76,11 @@ public class EJMLLinearSolverTest
 		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("x = %s", Arrays.toString(b)));
+			logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
 		for (int i = 0; i < b.length; i++)
 		{
 			if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
+			logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
 			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
@@ -112,11 +113,11 @@ public class EJMLLinearSolverTest
 		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		if (logger.isLoggable(Level.INFO))
-		logger.info(TestLog.getSupplier("x = %s", Arrays.toString(b)));
+		logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
 		for (int i = 0; i < b.length; i++)
 		{
 			if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
+			logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
 			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
@@ -150,11 +151,11 @@ public class EJMLLinearSolverTest
 		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		if (logger.isLoggable(Level.INFO))
-		logger.info(TestLog.getSupplier("x = %s", Arrays.toString(b)));
+		logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
 		for (int i = 0; i < b.length; i++)
 		{
 			if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
+			logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
 			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
@@ -194,11 +195,11 @@ public class EJMLLinearSolverTest
 		Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
 		if (logger.isLoggable(Level.INFO))
-		logger.info(TestLog.getSupplier("x = %s", Arrays.toString(b)));
+		logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
 		for (int i = 0; i < b.length; i++)
 		{
 			if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
+			logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
 			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
@@ -229,7 +230,7 @@ public class EJMLLinearSolverTest
 		for (int i = 0; i < a[0].length; i++)
 		{
 			if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
+			logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
 			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
@@ -266,7 +267,7 @@ public class EJMLLinearSolverTest
 		for (int i = 0; i < a[0].length; i++)
 		{
 			if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
+			logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
 			Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
 		}
 	}
@@ -292,7 +293,7 @@ public class EJMLLinearSolverTest
 		Assertions.assertNotNull(o, "Failed to invert");
 
 		if (logger.isLoggable(Level.INFO))
-			logger.info(TestLog.getSupplier("a diagonal = %s", Arrays.toString(o)));
+			logger.info(FunctionUtils.getSupplier("a diagonal = %s", Arrays.toString(o)));
 		Assertions.assertArrayEquals(e, o, 1e-4, "Bad inversion");
 	}
 
@@ -320,7 +321,7 @@ public class EJMLLinearSolverTest
 		Assertions.assertNotNull(o, "Failed to invert");
 
 		if (logger.isLoggable(Level.INFO))
-		logger.info(TestLog.getSupplier("a diagonal = %s", Arrays.toString(o)));
+		logger.info(FunctionUtils.getSupplier("a diagonal = %s", Arrays.toString(o)));
 		Assertions.assertArrayEquals(e, o, 1e-4, "Bad inversion");
 	}
 	//@formatter:on
@@ -350,7 +351,7 @@ public class EJMLLinearSolverTest
                     fail++;
             if (fail > 0)
             {
-                logger.info(TestLog.getSupplier(getName() + " failed to invert %d/%d", fail, a.length));
+                logger.info(FunctionUtils.getSupplier(getName() + " failed to invert %d/%d", fail, a.length));
                 badSolver = true;
             }
             else
@@ -624,7 +625,7 @@ public class EJMLLinearSolverTest
                         }
             }
             if (fail > 0)
-                logger.info(TestLog.getSupplier(getName() + " failed to invert %d/%d", fail, a.length));
+                logger.info(FunctionUtils.getSupplier(getName() + " failed to invert %d/%d", fail, a.length));
             solver.setInversionTolerance(0);
             if (fail == a.length)
                 // This solver cannot do the inversion

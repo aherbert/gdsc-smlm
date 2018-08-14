@@ -9,6 +9,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -127,7 +128,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
                 c++;
         }
         if (c > ITER / 2)
-            ExtraAssertions.fail("Failed to solve %d / %d", c, ITER);
+            Assertions.fail(String.format("Failed to solve %d / %d", c, ITER));
     }
 
     @SeededTest
@@ -164,7 +165,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
                 c++;
         }
         if (c > ITER / 2)
-            ExtraAssertions.fail("Failed to solve %d / %d", c, ITER);
+            Assertions.fail(String.format("Failed to solve %d / %d", c, ITER));
     }
 
     @SeededTest
@@ -209,7 +210,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
                 c++;
         }
         if (c > ITER / 2)
-            ExtraAssertions.fail("Failed to solve %d / %d", c, ITER);
+            Assertions.fail(String.format("Failed to solve %d / %d", c, ITER));
     }
 
     @SpeedTag

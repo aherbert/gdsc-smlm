@@ -198,7 +198,7 @@ public class DoubleDHT3DTest
                     final int ox = xyz[0] - icentre;
                     final int oy = xyz[1] - icentre;
                     final int oz = xyz[2] - icentre;
-                    //logger.fine(TestLog.getSupplier("Shift [%d,%d,%d], centre [%d,%d,%d]", x, y, z, xyz[0], xyz[1], xyz[2]);
+                    //logger.fine(FunctionUtils.getSupplier("Shift [%d,%d,%d], centre [%d,%d,%d]", x, y, z, xyz[0], xyz[1], xyz[2]);
                     Assertions.assertEquals(x, ox);
                     Assertions.assertEquals(y, oy);
                     Assertions.assertEquals(z, oz);

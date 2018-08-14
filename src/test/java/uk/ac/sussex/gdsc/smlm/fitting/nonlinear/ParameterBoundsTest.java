@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
 
 @SuppressWarnings({ "javadoc" })
 public class ParameterBoundsTest
@@ -94,10 +94,11 @@ public class ParameterBoundsTest
         double[] a2 = new double[1];
         double[] tmp;
         final double[] step = new double[] { s };
+        final IndexSupplier msg = new IndexSupplier(1, "Step ", null);
         for (int i = 1; i <= 10; i++)
         {
             b.applyBounds(a1, step, a2);
-            ExtraAssertions.assertArrayEquals(a2, new double[] { i * s }, "Step %d", i);
+            Assertions.assertArrayEquals(a2, new double[] { i * s }, msg.set(0, i));
             tmp = a1;
             a1 = a2;
             a2 = tmp;

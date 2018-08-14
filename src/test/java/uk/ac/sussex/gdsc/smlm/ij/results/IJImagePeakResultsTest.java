@@ -25,7 +25,7 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
@@ -489,18 +489,20 @@ public class IJImagePeakResultsTest
 
         // Test single value adds
         float[] expecteds = image[0];
+        IntArrayFormatSupplier msg = new IntArrayFormatSupplier("Single add image %d", 1);
         for (int i = 1; i < 4; i++)
         {
             final float[] actuals = image[i];
-            ExtraAssertions.assertArrayEquals(expecteds, actuals, "Single add image %d", i);
+            Assertions.assertArrayEquals(expecteds, actuals, msg.set(0, i));
         }
 
         // Test multi value adds
         expecteds = image[4];
+        msg = new IntArrayFormatSupplier("Multi add image %d", 1);
         for (int i = 5; i < image.length; i++)
         {
             final float[] actuals = image[i];
-            ExtraAssertions.assertArrayEquals(expecteds, actuals, "Multi add image %d", i);
+            Assertions.assertArrayEquals(expecteds, actuals, msg.set(0, i));
         }
 
         // Test they are roughly the same (differences occur due to floating point summation

@@ -14,8 +14,8 @@ import pl.edu.icm.jlargearrays.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -171,7 +171,7 @@ public class ConvolutionTest
             r2 = Convolution.convolveFFT(kernel, data);
         t2 = System.nanoTime() - t2;
 
-        logger.info(TestLog.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
+        logger.info(FunctionUtils.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
                 size * kernel.length, t1, t2, t1 / (double) t2));
     }
 
@@ -220,7 +220,7 @@ public class ConvolutionTest
             r2 = Convolution.convolveFFT(kernel, data1, data2);
         t2 = System.nanoTime() - t2;
 
-        logger.info(TestLog.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
+        logger.info(FunctionUtils.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
                 size * kernel.length, t1, t2, t1 / (double) t2));
     }
 
@@ -274,7 +274,7 @@ public class ConvolutionTest
             r2 = Convolution.convolve(kernel, data1, data2);
         t2 = System.nanoTime() - t2;
 
-        logger.info(TestLog.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
+        logger.info(FunctionUtils.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
                 size * kernel.length, t1, t2, t1 / (double) t2));
     }
 
@@ -328,7 +328,7 @@ public class ConvolutionTest
             r2 = Convolution.convolveFFT(kernel, data1, data2);
         t2 = System.nanoTime() - t2;
 
-        logger.info(TestLog.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
+        logger.info(FunctionUtils.getSupplier("Size=%d, s=%f (%d) [%d] : %d -> %d (%f)", size, s, kernel.length,
                 size * kernel.length, t1, t2, t1 / (double) t2));
     }
 
@@ -614,7 +614,7 @@ public class ConvolutionTest
             Convolution.convolve(kernel, data1, scale);
         t2 = System.nanoTime() - t2;
 
-        logger.info(TestLog.getSupplier("Size=%d, s=%f, scale=%d (%d) [%d] : %d -> %d (%f)", size, s, scale,
+        logger.info(FunctionUtils.getSupplier("Size=%d, s=%f, scale=%d (%d) [%d] : %d -> %d (%f)", size, s, scale,
                 kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
     }
 }

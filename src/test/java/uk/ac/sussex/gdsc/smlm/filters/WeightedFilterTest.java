@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.junit.jupiter.api.Assertions;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -34,6 +35,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -201,8 +203,9 @@ public abstract class WeightedFilterTest
         final double error = DoubleEquality.relativeError(u1, u2);
         //logger.fine(() -> String.format("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title,
         //		width, height, boxSize, internal, u1, u2, error);
-        ExtraAssertions.assertTrue(error <= tol, "%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name,
-                title, width, height, boxSize, internal, u1, u2, error);
+        Assertions.assertEquals(0, error, tol,
+                FunctionUtils.getSupplier("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title, width,
+                        height, boxSize, internal, u1, u2, error));
         return u2;
     }
 }

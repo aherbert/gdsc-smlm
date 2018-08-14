@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class InterpolatedPoissonFunctionTest
@@ -235,7 +234,7 @@ public class InterpolatedPoissonFunctionTest
 
         logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, p, minx, maxp, maxc,
                 maxx));
-        ExtraAssertions.assertEquals(1, p, 0.02, "g=%f, mu=%f", gain, mu);
+        Assertions.assertEquals(1, p, 0.02, () -> String.format("g=%f, mu=%f", gain, mu));
         return new int[] { minx, maxx };
     }
 

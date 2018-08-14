@@ -30,6 +30,9 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -131,13 +134,14 @@ public class FastMLEGradient2ProcedureTest
         final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams,
                 true);
 
+        final IndexSupplier msg = new IndexSupplier(1, "["+nparams+"] Result: not same @ ", null);
         for (int i = 0; i < paramsList.size(); i++)
         {
             final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
             final double s = p.computeLogLikelihood(paramsList.get(i));
             final double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
             // Virtually the same ...
-            ExtraAssertions.assertEqualsRelative(s, s2, 1e-5, "[%d] Result: Not same @ %d", nparams, i);
+            ExtraAssertions.assertEqualsRelative(s, s2, 1e-5, msg.set(0, i));
         }
     }
 
@@ -365,6 +369,14 @@ public class FastMLEGradient2ProcedureTest
         createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList, yList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
+        // Create messages
+        final IntArrayFormatSupplier msgLL = getMessage(nparams, "[%d] LL: Not same @ %d");
+        final IntArrayFormatSupplier msg1Dv = getMessage(nparams, "[%d] first derivative: Not same value @ %d");
+        final IntArrayFormatSupplier msg1Dd1 = getMessage(nparams, "[%d] first derivative: Not same d1 @ %d");
+        final IntArrayFormatSupplier msg2Dv = getMessage(nparams, "[%d] second derivative: Not same value @ %d");
+        final IntArrayFormatSupplier msg2Dd1 = getMessage(nparams, "[%d] second derivative: Not same d1 @ %d");
+        final IntArrayFormatSupplier msg2Dd2 = getMessage(nparams, "[%d] second derivative: Not same d2 @ %d");
+        
         FastMLEGradient2Procedure p1, p2;
         for (int i = 0; i < paramsList.size(); i++)
         {
@@ -374,23 +386,29 @@ public class FastMLEGradient2ProcedureTest
 
             final double ll1 = p1.computeLogLikelihood(a);
             final double ll2 = p2.computeLogLikelihood(a);
-            ExtraAssertions.assertEquals(ll1, ll2, "[%d] LL: Not same @ %d", nparams, i);
+            Assertions.assertEquals(ll1, ll2, msgLL.set(1, i));
 
             p1 = new FastMLEGradient2Procedure(yList.get(i), func);
             p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
             p1.computeFirstDerivative(a);
             p2.computeFirstDerivative(a);
-            ExtraAssertions.assertArrayEquals(p1.u, p2.u, "[%d]  first derivative value: Not same @ %d", nparams, i);
-            ExtraAssertions.assertArrayEquals(p1.d1, p2.d1, "[%d]  first derivative: Not same @ %d", nparams, i);
+            Assertions.assertArrayEquals(p1.u, p2.u, msg1Dv.set(1, i));
+            Assertions.assertArrayEquals(p1.d1, p2.d1, msg1Dd1.set(1, i));
 
             p1 = new FastMLEGradient2Procedure(yList.get(i), func);
             p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
             p1.computeSecondDerivative(a);
             p2.computeSecondDerivative(a);
-            ExtraAssertions.assertArrayEquals(p1.u, p2.u, "[%d]  update value: Not same @ %d", nparams, i);
-            ExtraAssertions.assertArrayEquals(p1.d1, p2.d1, "[%d]  update: Not same d1 @ %d", nparams, i);
-            ExtraAssertions.assertArrayEquals(p1.d2, p2.d2, "[%d]  update: Not same d2 @ %d", nparams, i);
+            Assertions.assertArrayEquals(p1.u, p2.u, msg2Dv.set(1, i));
+            Assertions.assertArrayEquals(p1.d1, p2.d1, msg2Dd1.set(1, i));
+            Assertions.assertArrayEquals(p1.d2, p2.d2, msg2Dd2.set(1, i));
         }
+    }
+    
+    private static IntArrayFormatSupplier getMessage(int nparams, String format) {
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier(format, 2);
+        msg.set(0, nparams);
+        return msg;
     }
 
     @SpeedTag
@@ -545,14 +563,14 @@ public class FastMLEGradient2ProcedureTest
                 failCounter.run(j, () -> {
                     return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
                 }, () -> {
-                    ExtraAssertions.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
-                            DoubleEquality.relativeError(gradient1, d1[j_]));
+                    Assertions.fail(FunctionUtils.getSupplier("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
+                            DoubleEquality.relativeError(gradient1, d1[j_])));
                 });
                 failCounter.run(nparams + j, () -> {
                     return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
                 }, () -> {
-                    ExtraAssertions.fail("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
-                            DoubleEquality.relativeError(gradient2, d2[j_]));
+                    Assertions.fail(FunctionUtils.getSupplier("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
+                            DoubleEquality.relativeError(gradient2, d2[j_])));
                 });
             }
         }

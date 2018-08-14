@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Assertions;
 import org.opentest4j.AssertionFailedError;
 
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.TestUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
@@ -86,7 +86,7 @@ public class PulseActivationAnalysisTest
         }
         catch (final AssertionFailedError e)
         {
-            ExtraAssertions.wrapAssertionFailedError(e, "channels=%d, crosstalk=%d", n, m);
+            TestUtils.wrapAssertionFailedError(e, () -> String.format("channels=%d, crosstalk=%d", n, m));
         }
     }
 
@@ -167,7 +167,7 @@ public class PulseActivationAnalysisTest
         }
         catch (final AssertionFailedError e)
         {
-            ExtraAssertions.wrapAssertionFailedError(e, "channels=%d, crosstalk=%d", n, m);
+            TestUtils.wrapAssertionFailedError(e, () -> String.format("channels=%d, crosstalk=%d", n, m));
         }
     }
 

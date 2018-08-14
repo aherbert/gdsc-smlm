@@ -18,9 +18,8 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 
@@ -93,7 +92,7 @@ public class FisherInformationMatrixTest
             final double[] crlb2 = m.crlbReciprocal();
             // These increasingly do not match with increasing number of parameters.
             if (logger.isLoggable(level))
-                logger.log(level, TestLog.getSupplier("%s =? %s", Arrays.toString(crlb), Arrays.toString(crlb2)));
+                logger.log(level, FunctionUtils.getSupplier("%s =? %s", Arrays.toString(crlb), Arrays.toString(crlb2)));
             if (n > 1)
                 // Just do a sum so we have a test
                 Assertions.assertThrows(AssertionFailedError.class, () -> {
@@ -109,8 +108,8 @@ public class FisherInformationMatrixTest
         // Invert for CRLB
         final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
         if (logger.isLoggable(level))
-            logger.log(level, TestLog.getSupplier("n=%d, k=%d : %s", n, k, Arrays.toString(crlb)));
-        ExtraAssertions.assertNotNull(crlb, "CRLB failed: n=%d, k=%d", n, k);
+            logger.log(level, FunctionUtils.getSupplier("n=%d, k=%d : %s", n, k, Arrays.toString(crlb)));
+        Assertions.assertNotNull(crlb, () -> String.format("CRLB failed: n=%d, k=%d", n, k));
         return crlb;
     }
 
@@ -202,7 +201,7 @@ public class FisherInformationMatrixTest
             final DenseMatrix64F o = m.subset(indices).getMatrix();
             if (logger.isLoggable(level))
             {
-                logger.log(level, TestLog.getSupplier(Arrays.toString(indices)));
+                logger.log(level, FunctionUtils.getSupplier(Arrays.toString(indices)));
                 logger.log(level, String.valueOf(o));
             }
             for (int i = 0; i < indices.length; i++)

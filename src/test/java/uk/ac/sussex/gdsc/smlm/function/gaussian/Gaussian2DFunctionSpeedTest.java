@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -14,7 +15,6 @@ import uk.ac.sussex.gdsc.test.DataCache;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -315,7 +315,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
                 nparams++;
             }
         }
-
+        
         for (int i = 0; i < paramsList2.size(); i++)
         {
             f1.initialise(paramsList2.get(i));
@@ -326,13 +326,14 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
                 final double y1 = f1.eval(x[j], dyda1);
                 final double y2 = f2.eval(x[j], dyda2);
 
-                ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(y1, y2), "Not same y[%d] @ %d : %g != %g",
-                        j, i, y1, y2);
+                if (!eq.almostEqualRelativeOrAbsolute(y1, y2))
+                    Assertions.fail(String.format("Not same y[%d] @ %d : %g != %g",
+                        j, i, y1, y2));
 
                 for (int ii = 0; ii < nparams; ii++)
-                    ExtraAssertions.assertTrue(eq.almostEqualRelativeOrAbsolute(dyda1[g1[ii]], dyda2[g2[ii]]),
-                            "Not same dyda[%d] @ %d : %g != %g", j, gradientIndices[g1[ii]], dyda1[g1[ii]],
-                            dyda2[g2[ii]]);
+                    if (!eq.almostEqualRelativeOrAbsolute(dyda1[g1[ii]], dyda2[g2[ii]]))
+                        Assertions.fail(String.format("Not same dyda[%d] @ %d : %g != %g", j, gradientIndices[g1[ii]], dyda1[g1[ii]],
+                            dyda2[g2[ii]]));
             }
         }
     }

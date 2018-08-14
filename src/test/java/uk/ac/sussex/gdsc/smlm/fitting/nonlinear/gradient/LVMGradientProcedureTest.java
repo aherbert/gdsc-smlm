@@ -37,6 +37,9 @@ import uk.ac.sussex.gdsc.test.TestCounter;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingResult;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -251,7 +254,12 @@ public class LVMGradientProcedureTest
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 
         final String name = String.format("[%d] %b", nparams, mle);
-
+        // Create messages
+        final IndexSupplier msgR = new IndexSupplier(1, name + "Result: Not same ", null);
+        final IndexSupplier msgOB = new IndexSupplier(1, name + "Observations: Not same beta ", null);
+        final IndexSupplier msgOAl = new IndexSupplier(1, name + "Observations: Not same alpha linear ", null);
+        final IndexSupplier msgOAm = new IndexSupplier(1, name + "Observations: Not same alpha matrix ", null);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             // Reference implementation
@@ -261,20 +269,20 @@ public class LVMGradientProcedureTest
             p.gradient(paramsList.get(i));
             final double s2 = p.value;
             // Value may be different depending on log implementation
+            msgR.set(0, i);
             if (error == 0)
-                ExtraAssertions.assertEquals(s, s2, "%s Result: Not same @ %d", name, i);
+                Assertions.assertEquals(s, s2, msgR);
             else
-                ExtraAssertions.assertEqualsRelative(s, s2, error, "%s Result: Not same @ %d", name, i);
+                ExtraAssertions.assertEqualsRelative(s, s2, error, msgR);
 
             // Exactly the same ...
-            ExtraAssertions.assertArrayEquals(p.beta, beta, "%s Observations: Not same beta @ %d", name, i);
+            Assertions.assertArrayEquals(p.beta, beta, msgOB.set(0, i));
 
             final double[] al = p.getAlphaLinear();
-            ExtraAssertions.assertArrayEquals(al, new DenseMatrix64F(alpha).data,
-                    "%s Observations: Not same alpha linear @ %d", name, i);
+            Assertions.assertArrayEquals(al, new DenseMatrix64F(alpha).data, msgOAl.set(0, i));
 
             final double[][] am = p.getAlphaMatrix();
-            ExtraAssertions.assertArrayEquals(am, alpha, "%s Observations: Not same alpha matrix @ %d", name, i);
+            Assertions.assertArrayEquals(am, alpha, msgOAm.set(0, i));
         }
     }
 
@@ -312,7 +320,7 @@ public class LVMGradientProcedureTest
             long t = System.nanoTime();
             run();
             t = System.nanoTime() - t;
-            //logger.fine(TestLog.getSupplier("[%d] Time = %d", loops, t);
+            //logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
             return t;
         }
 
@@ -463,6 +471,12 @@ public class LVMGradientProcedureTest
         final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
         final String name = String.format("[%d] %b", nparams, type);
+        // Create messages
+        final IndexSupplier msgR = new IndexSupplier(1, name + "Result: Not same ", null);
+        final IndexSupplier msgOB = new IndexSupplier(1, name + "Observations: Not same beta ", null);
+        final IndexSupplier msgOAl = new IndexSupplier(1, name + "Observations: Not same alpha linear ", null);
+        final IndexSupplier msgOAm = new IndexSupplier(1, name + "Observations: Not same alpha matrix ", null);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
@@ -472,16 +486,16 @@ public class LVMGradientProcedureTest
             p2.gradient(paramsList.get(i));
 
             // Exactly the same ...
-            ExtraAssertions.assertEquals(p1.value, p2.value, "%s Result: Not same @ %d", name, i);
+            Assertions.assertEquals(p1.value, p2.value, msgR.set(0, i));
 
-            ExtraAssertions.assertArrayEquals(p1.beta, p2.beta, "%s Observations: Not same beta @ %d", name, i);
+            Assertions.assertArrayEquals(p1.beta, p2.beta, msgOB.set(0, i));
 
-            ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(),
-                    "%s Observations: Not same alpha linear @ %d", name, i);
+            Assertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(),
+                    msgOAl.set(0, i));
 
             final double[][] am1 = p1.getAlphaMatrix();
             final double[][] am2 = p2.getAlphaMatrix();
-            ExtraAssertions.assertArrayEquals(am1, am2, "%s Observations: Not same alpha matrix @ %d", name, i);
+            Assertions.assertArrayEquals(am1, am2, msgOAm.set(0, i));
         }
     }
 
@@ -588,6 +602,9 @@ public class LVMGradientProcedureTest
 
         final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
+        final IntArrayFormatSupplier msgA = new IntArrayFormatSupplier("A [%d]", 1);
+        final IntArrayFormatSupplier msgB = new IntArrayFormatSupplier("B [%d]", 1);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
@@ -599,8 +616,8 @@ public class LVMGradientProcedureTest
             p2.gradient(paramsList.get(i));
 
             // Check they are the same
-            ExtraAssertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(), "A %d", i);
-            ExtraAssertions.assertArrayEquals(p1.beta, p2.beta, "B %d", i);
+            Assertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(), msgA.set(0, i));
+            Assertions.assertArrayEquals(p1.beta, p2.beta, msgB.set(0, i));
         }
 
         // Realistic loops for an optimisation
@@ -676,7 +693,7 @@ public class LVMGradientProcedureTest
         {
             try
             {
-                //logger.fine(TestLog.getSupplier("Precision n=%d", n);
+                //logger.fine(FunctionUtils.getSupplier("Precision n=%d", n);
                 fastLog = new TurboLog2(n);
                 gradientProcedureComputesGradient(seed,
                         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FastLogMLE, false);
@@ -798,14 +815,14 @@ public class LVMGradientProcedureTest
                 beta[j] *= -2;
 
                 final double gradient = (s1 - s2) / (2 * d);
-                //logger.fine(TestLog.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f", i, k, s, Gaussian2DFunction.getName(k),
+                //logger.fine(FunctionUtils.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f", i, k, s, Gaussian2DFunction.getName(k),
                 //		a[k], d, beta[j], gradient);
 
                 failCounter.run(j, () -> {
                     return eq.almostEqualRelativeOrAbsolute(beta[jj], gradient);
                 }, () -> {
-                    ExtraAssertions.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
-                            DoubleEquality.relativeError(beta[jj], gradient));
+                    Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+                            DoubleEquality.relativeError(beta[jj], gradient)));
                 });
             }
         }
@@ -907,7 +924,7 @@ public class LVMGradientProcedureTest
             final int ii = i;
             final double[] y = yList.get(i);
             final double[] a3peaks = paramsList.get(i);
-            //logger.fine(TestLog.getSupplier("[%d] a=%s", i, Arrays.toString(a3peaks));
+            //logger.fine(FunctionUtils.getSupplier("[%d] a=%s", i, Arrays.toString(a3peaks));
 
             final double[] a2peaks = Arrays.copyOf(a3peaks, 1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK);
             final double[] a2peaks2 = a2peaks.clone();
@@ -953,21 +970,21 @@ public class LVMGradientProcedureTest
             final double[] beta = p12b3.beta.clone();
             double[][] alpha = p12b3.getAlphaMatrix();
 
-            //logger.fine(TestLog.getSupplier("MLE=%b [%d] p12b3  %f  %f", type.isMLE(), i, p123.value, s);
+            //logger.fine(FunctionUtils.getSupplier("MLE=%b [%d] p12b3  %f  %f", type.isMLE(), i, p123.value, s);
 
             if (!eq.almostEqualRelativeOrAbsolute(p123.value, s))
-                ExtraAssertions.fail("p12b3 Not same value @ %d (error=%s) : %s == %s", i,
-                        DoubleEquality.relativeError(p123.value, s), p123.value, s);
+                Assertions.fail(FunctionUtils.getSupplier("p12b3 Not same value @ %d (error=%s) : %s == %s", i,
+                        DoubleEquality.relativeError(p123.value, s), p123.value, s));
             if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
-                ExtraAssertions.fail("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
+                Assertions.fail(FunctionUtils.getSupplier("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
                         DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
-                        Arrays.toString(p123.beta));
+                        Arrays.toString(p123.beta)));
             for (int j = 0; j < alpha.length; j++)
-                //logger.fine(TestLog.getSupplier("%s !=\n%s", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
+                //logger.fine(FunctionUtils.getSupplier("%s !=\n%s", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
                 if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
-                    ExtraAssertions.fail("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
+                    Assertions.fail(FunctionUtils.getSupplier("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
                             DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
-                            Arrays.toString(m123[j]));
+                            Arrays.toString(m123[j])));
 
             // Check actual gradients are correct
             if (checkGradients)
@@ -990,14 +1007,14 @@ public class LVMGradientProcedureTest
                     beta[j] *= -2;
 
                     final double gradient = (s1 - s2) / (2 * d);
-                    //logger.fine(TestLog.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)", i, k, s,
+                    //logger.fine(FunctionUtils.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)", i, k, s,
                     //		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
                     //		DoubleEquality.relativeError(gradient, beta[j]));
                     failCounter.run(j, () -> {
                         return eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient);
                     }, () -> {
-                        ExtraAssertions.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj],
-                                gradient, DoubleEquality.relativeError(beta[jj], gradient));
+                        Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj],
+                                gradient, DoubleEquality.relativeError(beta[jj], gradient)));
                     });
                 }
 
@@ -1014,7 +1031,7 @@ public class LVMGradientProcedureTest
             System.arraycopy(p12m3.beta, 0, beta, 0, p12m3.beta.length);
             alpha = p12m3.getAlphaMatrix();
 
-            //logger.fine(TestLog.getSupplier("%s [%d] p12m3  %f  %f", type, i, p123.value, s);
+            //logger.fine(FunctionUtils.getSupplier("%s [%d] p12m3  %f  %f", type, i, p123.value, s);
 
             // The test for different or equal is not robust to different random seeds.
             // ExtraAssertions.fail has been changed for TestLog.logFailure
@@ -1032,7 +1049,7 @@ public class LVMGradientProcedureTest
                 // Note: Test the matrix is different by finding 1 different column
                 int dj = -1;
                 for (int j = 0; j < alpha.length; j++)
-                    //logger.fine(TestLog.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
+                    //logger.fine(FunctionUtils.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
                     if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
                     {
                         dj = j; // Different column
@@ -1066,7 +1083,7 @@ public class LVMGradientProcedureTest
                             DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
                             Arrays.toString(p123.beta)));
                 for (int j = 0; j < alpha.length; j++)
-                    //logger.fine(TestLog.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
+                    //logger.fine(FunctionUtils.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
                     if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
                         logger.log(TestLog.getFailRecord("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
                                 DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
@@ -1096,14 +1113,14 @@ public class LVMGradientProcedureTest
                 beta[j] *= -2;
 
                 final double gradient = (s1 - s2) / (2 * d);
-                //logger.fine(TestLog.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)", i, k, s,
+                //logger.fine(FunctionUtils.getSupplier("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)", i, k, s,
                 //		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
                 //		DoubleEquality.relativeError(gradient, beta[j]));
                 failCounter.run(nparams + j, () -> {
                     return eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient);
                 }, () -> {
-                    ExtraAssertions.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
-                            DoubleEquality.relativeError(beta[jj], gradient));
+                    Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+                            DoubleEquality.relativeError(beta[jj], gradient)));
                 });
             }
         }

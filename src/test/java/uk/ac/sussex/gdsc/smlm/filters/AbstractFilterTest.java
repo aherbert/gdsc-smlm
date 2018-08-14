@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -15,7 +16,7 @@ import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.test.DataCache;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 
 @SuppressWarnings({ "javadoc" })
@@ -228,8 +229,8 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
                 if (!eq.almostEqualRelativeOrAbsolute(data1[index], data2[index]))
                 {
                     final String message = String.format(format, args);
-                    ExtraAssertions.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
-                            FloatEquality.relativeError(data1[index], data2[index]));
+                    Assertions.fail(FunctionUtils.getSupplier("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
+                            FloatEquality.relativeError(data1[index], data2[index])));
                 }
         }
     }
@@ -246,8 +247,8 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
                 if (data1[index] != data2[index])
                 {
                     final String message = String.format(format, args);
-                    ExtraAssertions.fail("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
-                            FloatEquality.relativeError(data1[index], data2[index]));
+                    Assertions.fail(FunctionUtils.getSupplier("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
+                            FloatEquality.relativeError(data1[index], data2[index])));
                 }
         }
     }

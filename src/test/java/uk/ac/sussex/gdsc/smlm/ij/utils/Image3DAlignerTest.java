@@ -12,7 +12,7 @@ import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
-import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class Image3DAlignerTest
@@ -54,7 +54,7 @@ public class Image3DAlignerTest
         {
             final double dz = zz - cz;
             //if (zz == 0 || zz == z - 1)
-            //	logger.fine(TestLog.getSupplier("%f  %f %f", dz, zModel.getSx(dz), zModel.getSy(dz));
+            //	logger.fine(FunctionUtils.getSupplier("%f  %f %f", dz, zModel.getSx(dz), zModel.getSy(dz));
             a[Gaussian2DFunction.Z_POSITION] = dz;
             p.getValues(f, a, data, zz * length);
         }
@@ -141,7 +141,7 @@ public class Image3DAlignerTest
         //	result = a.align(target.copy(), i, error);
         //	c = a.getCorrelation();
         //
-        //	logger.fine(TestLog.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
+        //	logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
         //			java.util.Arrays.toString(result));
         //}
 
@@ -152,7 +152,7 @@ public class Image3DAlignerTest
             result = a.align(target, refinements, error);
         c = a.getCorrelation();
         if (logger.isLoggable(Level.FINE))
-            logger.fine(TestLog.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
+            logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
                     java.util.Arrays.toString(result)));
 
         for (int i = 0; i < 3; i++)

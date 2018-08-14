@@ -23,6 +23,7 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -108,6 +109,10 @@ public class PoissonGradientProcedureTest
 
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
+        // Create messages
+        final IntArrayFormatSupplier msgOAl = getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
+        final IntArrayFormatSupplier msgOAm = getMessage(nparams, "[%d] Observations: Not same alpha matrix @ %d");
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(func);
@@ -115,16 +120,19 @@ public class PoissonGradientProcedureTest
             final double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
             // Not exactly the same ...
             final double[] al = p.getLinear();
-            ExtraAssertions.assertArrayEqualsRelative(al, new DenseMatrix64F(m).data, 1e-10,
-                    "[%d] Observations: Not same alphaLinear @ %d", nparams, i);
+            ExtraAssertions.assertArrayEqualsRelative(al, new DenseMatrix64F(m).data, 1e-10, msgOAl.set(1, i));
 
             final double[][] am = p.getMatrix();
-            for (int j = 0; j < nparams; j++)
-                ExtraAssertions.assertArrayEqualsRelative(am[j], m[j], 1e-10,
-                        "[%d] Observations: Not same alphaMatrix @ %d,%d", nparams, i, j);
+            ExtraAssertions.assertArrayEqualsRelative(am, m, 1e-10, msgOAm.set(1, i));
         }
     }
 
+    private static IntArrayFormatSupplier getMessage(int nparams, String format) {
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier(format, 2);
+        msg.set(0, nparams);
+        return msg;
+    }
+    
     private abstract class Timer
     {
         private int loops;
@@ -159,7 +167,7 @@ public class PoissonGradientProcedureTest
             long t = System.nanoTime();
             run();
             t = System.nanoTime() - t;
-            //logger.fine(TestLog.getSupplier("[%d] Time = %d", loops, t);
+            //logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
             return t;
         }
 
@@ -254,7 +262,10 @@ public class PoissonGradientProcedureTest
             func = OffsetGradient1Function.wrapGradient1Function(func,
                     SimpleArrayUtils.newArray(func.size(), 0.1, 1.3));
 
-        final String name = String.format("[%d]", nparams);
+        // Create messages
+        final IntArrayFormatSupplier msgOAl = getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
+        final IntArrayFormatSupplier msgOAm = getMessage(nparams, "[%d] Observations: Not same alpha matrix @ %d");
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             final PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
@@ -264,12 +275,11 @@ public class PoissonGradientProcedureTest
             p2.computeFisherInformation(paramsList.get(i));
 
             // Exactly the same ...
-            ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(),
-                    "%s Observations: Not same alpha linear @ %d", name, i);
+            Assertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), msgOAl.set(1, i));
 
             final double[][] am1 = p1.getMatrix();
             final double[][] am2 = p2.getMatrix();
-            ExtraAssertions.assertArrayEquals(am1, am2, "%s Observations: Not same alpha matrix @ %d", name, i);
+            Assertions.assertArrayEquals(am1, am2, msgOAm.set(1, i));
         }
     }
 
@@ -307,6 +317,7 @@ public class PoissonGradientProcedureTest
                 ? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
                 : f;
 
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("M [%d]", 1);
         for (int i = 0; i < paramsList.size(); i++)
         {
             final PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
@@ -318,7 +329,7 @@ public class PoissonGradientProcedureTest
             p2.computeFisherInformation(paramsList.get(i));
 
             // Check they are the same
-            ExtraAssertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), "M %d", i);
+            Assertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), msg.set(0, i));
         }
 
         // Realistic loops for an optimisation
@@ -398,7 +409,7 @@ public class PoissonGradientProcedureTest
             final double[] crlb2 = m2.crlb();
             Assertions.assertNotNull(crlb1);
             Assertions.assertNotNull(crlb2);
-            //logger.fine(TestLog.getSupplier("%s : %s", Arrays.toString(crlb1), Arrays.toString(crlb2));
+            //logger.fine(FunctionUtils.getSupplier("%s : %s", Arrays.toString(crlb1), Arrays.toString(crlb2));
             for (int j = 0; j < n; j++)
                 Assertions.assertTrue(crlb1[j] < crlb2[j]);
         }
@@ -446,7 +457,7 @@ public class PoissonGradientProcedureTest
                             final double o1 = Math.sqrt(crlb[ix]) * a;
                             final double o2 = Math.sqrt(crlb[iy]) * a;
                             final double e = Gaussian2DPeakResultHelper.getMLPrecisionX(a, ss, N, b2, false);
-                            //logger.fine(TestLog.getSupplier("e = %f  :  o  =   %f   %f", e, o1, o2);
+                            //logger.fine(FunctionUtils.getSupplier("e = %f  :  o  =   %f   %f", e, o1, o2);
                             Assertions.assertEquals(e, o1, e * 5e-2);
                             Assertions.assertEquals(e, o2, e * 5e-2);
                         }

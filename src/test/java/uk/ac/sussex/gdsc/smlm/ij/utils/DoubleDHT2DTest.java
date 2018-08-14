@@ -36,7 +36,6 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class DoubleDHT2DTest
@@ -195,7 +194,7 @@ public class DoubleDHT2DTest
                 // To align dht2 with dht would be the opposite sign.
                 final int ox = xy[0] - icentre;
                 final int oy = xy[1] - icentre;
-                //logger.fine(TestLog.getSupplier("Shift [%d,%d], centre [%d,%d]", x, y, xy[0], xy[1]);
+                //logger.fine(FunctionUtils.getSupplier("Shift [%d,%d], centre [%d,%d]", x, y, xy[0], xy[1]);
                 Assertions.assertEquals(x, ox);
                 Assertions.assertEquals(y, oy);
             }
@@ -264,8 +263,8 @@ public class DoubleDHT2DTest
     {
         for (int i = 0; i < e.length; i++)
             if (!DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs))
-                ExtraAssertions.fail("%s [%d] %g vs %g = %g", msg, i, e[i], o[i],
-                        DoubleEquality.relativeError(e[i], o[i]));
+                Assertions.fail(String.format("%s [%d] %g vs %g = %g", msg, i, e[i], o[i],
+                        DoubleEquality.relativeError(e[i], o[i])));
     }
 
     private static void check(String operation, DoubleDHT2D dht, FHT2 fht, double rel, double abs)

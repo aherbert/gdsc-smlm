@@ -27,8 +27,9 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.functions.ObjectArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -667,11 +668,11 @@ public class PeakResultsReaderTest
         final long time2 = getReadTime(filename, useScanner2, loops);
 
         if (useScanner1 != useScanner2)
-            logger.info(TestLog.getSupplier("%s (scan=%b) is %.2fx faster than %s (scan=%b)", f2, useScanner2,
+            logger.info(FunctionUtils.getSupplier("%s (scan=%b) is %.2fx faster than %s (scan=%b)", f2, useScanner2,
                     (double) time1 / time2, f1, useScanner1));
         else
-            logger.info(TestLog.getSupplier("%s is %.2fx faster than %s", f2, (double) time1 / time2, f1));
-        ExtraAssertions.assertTrue(time2 < time1, "%s (%d) is not faster than %s (%d)", f2, time2, f1, time1);
+            logger.info(FunctionUtils.getSupplier("%s is %.2fx faster than %s", f2, (double) time1 / time2, f1));
+        Assertions.assertTrue(time2 < time1, () -> String.format("%s (%d) is not faster than %s (%d)", f2, time2, f1, time1));
     }
 
     // -=-=-=-=-
@@ -825,61 +826,62 @@ public class PeakResultsReaderTest
         {
             final PeakResult p1 = expected[i];
             final PeakResult p2 = actual[i];
+            final ObjectArrayFormatSupplier msg = new ObjectArrayFormatSupplier("%s @ ["+i+"]", 1);
 
-            ExtraAssertions.assertEquals(p1.getFrame(), p2.getFrame(), "Peak mismatch @ [%d]", i);
+            Assertions.assertEquals(p1.getFrame(), p2.getFrame(), msg.set(0, "Peak"));
 
             if (fileFormat == ResultsFileFormat.MALK)
             {
                 final double delta = 1e-5f;
-                ExtraAssertions.assertEqualsRelative(p1.getXPosition(), p2.getXPosition(), delta, "X @ [%d]", i);
-                ExtraAssertions.assertEqualsRelative(p1.getYPosition(), p2.getYPosition(), delta, "Y @ [%d]", i);
-                ExtraAssertions.assertEqualsRelative(p1.getIntensity(), p2.getIntensity(), delta, "Signal @ " + i);
+                ExtraAssertions.assertEqualsRelative(p1.getXPosition(), p2.getXPosition(), delta, msg.set(0, "X"));
+                ExtraAssertions.assertEqualsRelative(p1.getYPosition(), p2.getYPosition(), delta, msg.set(0, "Y"));
+                ExtraAssertions.assertEqualsRelative(p1.getIntensity(), p2.getIntensity(), delta, msg.set(0, "Intensity"));
                 continue;
             }
 
-            ExtraAssertions.assertEquals(p1.getOrigX(), p2.getOrigX(), "Orig X mismatch @ [%d]", i);
-            ExtraAssertions.assertEquals(p1.getOrigY(), p2.getOrigY(), "Orig Y mismatch @ [%d]", i);
-            ExtraAssertions.assertNotNull(p2.getParameters(), "Params is null @ [%d]", i);
+            Assertions.assertEquals(p1.getOrigX(), p2.getOrigX(), msg.set(0, "Orig X"));
+            Assertions.assertEquals(p1.getOrigY(), p2.getOrigY(), msg.set(0, "Orig Y"));
+            Assertions.assertNotNull(p2.getParameters(), msg.set(0, "Params is null"));
             if (showEndFrame)
-                ExtraAssertions.assertEquals(p1.getEndFrame(), p2.getEndFrame(), "End frame mismatch @ [%d]", i);
+                Assertions.assertEquals(p1.getEndFrame(), p2.getEndFrame(), msg.set(0, "End frame"));
             if (showId)
-                ExtraAssertions.assertEquals(p1.getId(), p2.getId(), "ID mismatch @ [%d]", i);
+                Assertions.assertEquals(p1.getId(), p2.getId(), msg.set(0, "ID"));
             if (showDeviations)
-                ExtraAssertions.assertNotNull(p2.getParameterDeviations(), "Deviations @ [%d]", i);
+                Assertions.assertNotNull(p2.getParameterDeviations(), msg.set(0, "Deviations"));
 
             // Binary should be exact for float numbers
             if (fileFormat == ResultsFileFormat.BINARY)
             {
-                ExtraAssertions.assertEquals(p1.getOrigValue(), p2.getOrigValue(), "Orig value mismatch @ [%d]", i);
-                ExtraAssertions.assertEquals(p1.getError(), p2.getError(), "Error mismatch @ [%d]", i);
-                ExtraAssertions.assertEquals(p1.getNoise(), p2.getNoise(), "Noise mismatch @ [%d]", i);
-                ExtraAssertions.assertEquals(p1.getMeanIntensity(), p2.getMeanIntensity(),
-                        "Mean intensity mismatch @ [%d]", i);
-                ExtraAssertions.assertArrayEquals(p1.getParameters(), p2.getParameters(), "Params mismatch @ [%d]", i);
+                Assertions.assertEquals(p1.getOrigValue(), p2.getOrigValue(), msg.set(0, "Orig value"));
+                Assertions.assertEquals(p1.getError(), p2.getError(), msg.set(0, "Error"));
+                Assertions.assertEquals(p1.getNoise(), p2.getNoise(), msg.set(0, "Noise"));
+                Assertions.assertEquals(p1.getMeanIntensity(), p2.getMeanIntensity(),
+                       msg.set(0, "Mean intensity"));
+                Assertions.assertArrayEquals(p1.getParameters(), p2.getParameters(), msg.set(0, "Params"));
                 if (showDeviations)
-                    ExtraAssertions.assertArrayEquals(p1.getParameterDeviations(), p2.getParameterDeviations(),
-                            "Params StdDev mismatch @ [%d]", i);
+                    Assertions.assertArrayEquals(p1.getParameterDeviations(), p2.getParameterDeviations(),
+                           msg.set(0, "Params StdDev"));
                 if (showPrecision)
-                    ExtraAssertions.assertEquals(p1.getPrecision(), p2.getPrecision(), "Precision mismatch @ [%d]", i);
+                    Assertions.assertEquals(p1.getPrecision(), p2.getPrecision(), msg.set(0, "Precision"));
                 continue;
             }
 
             // Otherwise have an error
             final double delta = 1e-5f;
             ExtraAssertions.assertEqualsRelative(p1.getOrigValue(), p2.getOrigValue(), delta,
-                    "Orig value mismatch @ [%d]", i);
-            ExtraAssertions.assertEqualsRelative(p1.getError(), p2.getError(), delta, "Error mismatch @ [%d]", i);
-            ExtraAssertions.assertEqualsRelative(p1.getNoise(), p2.getNoise(), delta, "Noise mismatch @ [%d]", i);
+                   msg.set(0, "Orig value"));
+            ExtraAssertions.assertEqualsRelative(p1.getError(), p2.getError(), delta, msg.set(0, "Error"));
+            ExtraAssertions.assertEqualsRelative(p1.getNoise(), p2.getNoise(), delta, msg.set(0, "Noise"));
             ExtraAssertions.assertEqualsRelative(p1.getMeanIntensity(), p2.getMeanIntensity(), delta,
-                    "Mean intensity mismatch @ [%d]", i);
+                   msg.set(0, "Mean intensity"));
             ExtraAssertions.assertArrayEqualsRelative(p1.getParameters(), p2.getParameters(), delta,
-                    "Params mismatch @ [%d]", i);
+                   msg.set(0, "Params"));
             if (showDeviations)
                 ExtraAssertions.assertArrayEqualsRelative(p1.getParameterDeviations(), p2.getParameterDeviations(),
-                        delta, "Params StdDev mismatch @ [%d]", i);
+                        delta, msg.set(0, "Params StdDev"));
             if (showPrecision)
                 ExtraAssertions.assertEqualsRelative(p1.getPrecision(), p2.getPrecision(), delta,
-                        "Precision mismatch @ [%d]", i);
+                       msg.set(0, "Precision"));
         }
 
         // Check the header information

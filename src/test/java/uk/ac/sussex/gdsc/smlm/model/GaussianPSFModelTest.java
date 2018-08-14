@@ -35,7 +35,6 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianPSFModelTest
@@ -99,13 +98,13 @@ public class GaussianPSFModelTest
                         else if (e[ii] > 1e-8) // Only check where there is a reasonable amount of signal
                         {
                             final double error = DoubleEquality.relativeError(e[ii], o[ii]);
-                            //logger.fine(TestLog.getSupplier("[%d,%d]   %g == %g    %g", ii/maxx, ii%maxx, e[ii], o[ii], error);
+                            //logger.fine(FunctionUtils.getSupplier("[%d,%d]   %g == %g    %g", ii/maxx, ii%maxx, e[ii], o[ii], error);
                             // We expect a small error since the ErfGaussian2DFunction uses a
                             // fast approximation of the Erf(..) (the error function). The PSFModel
                             // uses the Apache commons implementation.
                             if (error > 1e-8)
-                                ExtraAssertions.fail("[%d] %s != %s  error = %f", ii, Double.toString(e[ii]),
-                                        Double.toString(o[ii]), error);
+                                Assertions.fail(String.format("[%d] %s != %s  error = %f", ii, Double.toString(e[ii]),
+                                        Double.toString(o[ii]), error));
                         }
                 }
             }
@@ -161,10 +160,10 @@ public class GaussianPSFModelTest
                             for (int l = 0; l < 3; l++)
                             {
                                 final double error = DoubleEquality.relativeError(g[ii][l], g2[ii][l]);
-                                //logger.fine(TestLog.getSupplier("[%d,%d]   %g == %g    %g", ii, l, g[ii][l], g2[ii][l], error);
+                                //logger.fine(FunctionUtils.getSupplier("[%d,%d]   %g == %g    %g", ii, l, g[ii][l], g2[ii][l], error);
                                 if (error > 5e-3)
-                                    ExtraAssertions.fail("[%d] %s != %s  error = %f", ii, Double.toString(g[ii][l]),
-                                            Double.toString(g2[ii][l]), error);
+                                    Assertions.fail(String.format("[%d] %s != %s  error = %f", ii, Double.toString(g[ii][l]),
+                                            Double.toString(g2[ii][l]), error));
 
                             }
                 }
@@ -219,7 +218,7 @@ public class GaussianPSFModelTest
                             Assertions.assertEquals(o[ii], o2[ii]);
                     Assertions.assertFalse(0 == extra, "No extra");
                     final double f = (double) extra / zero;
-                    //logger.fine(TestLog.getSupplier("Extra %d/%d (%g)", extra, zero, f);
+                    //logger.fine(FunctionUtils.getSupplier("Extra %d/%d (%g)", extra, zero, f);
                     Assertions.assertTrue(f > 0.4, "Not much extra");
                 }
             }

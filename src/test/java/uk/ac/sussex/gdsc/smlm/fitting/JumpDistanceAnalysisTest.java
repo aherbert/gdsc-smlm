@@ -21,8 +21,8 @@ import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
 import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -103,9 +103,9 @@ public class JumpDistanceAnalysisTest
                 final double e = fc.evaluate(x, params);
                 // Integrate
                 final double o = si.integrate(10000, func, 0, x);
-                //logger.info(TestLog.getSupplier("Integrate d=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d", d, x, e, o, si.getIterations(),
+                //logger.info(FunctionUtils.getSupplier("Integrate d=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d", d, x, e, o, si.getIterations(),
                 //		si.getEvaluations());
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-2, "Failed to integrate: x=%g", x);
+                ExtraAssertions.assertEqualsRelative(e, o, 1e-2, FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
             }
         }
     }
@@ -139,9 +139,9 @@ public class JumpDistanceAnalysisTest
                     final double e = fc.evaluate(x, params);
                     // Integrate
                     final double o = si.integrate(10000, func, 0, x);
-                    //logger.info(TestLog.getSupplier("Integrate d=%.1f, f=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d", d, f, x, e, o,
+                    //logger.info(FunctionUtils.getSupplier("Integrate d=%.1f, f=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d", d, f, x, e, o,
                     //		si.getIterations(), si.getEvaluations());
-                    ExtraAssertions.assertEqualsRelative(e, o, 1e-2, "Failed to integrate: x=%g", x);
+                    ExtraAssertions.assertEqualsRelative(e, o, 1e-2, FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
                 }
             }
     }
@@ -386,7 +386,7 @@ public class JumpDistanceAnalysisTest
         {
             final double[] e1 = getPercentError(d, fitD);
             final double[] e2 = getPercentError(f, fitF);
-            logger.info(TestLog.getSupplier("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]",
+            logger.info(FunctionUtils.getSupplier("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]",
                     (error == null) ? "+++ Pass" : "--- Fail", title, d.length, samples, n, toString(d), toString(fitD),
                     toString(e1), toString(f), toString(fitF), toString(e2)));
             if (error != null)

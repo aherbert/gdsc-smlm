@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFisherInformationTest
@@ -41,7 +42,7 @@ public class PoissonGaussianFisherInformationTest
         //double I = f.getPoissonGaussianI(u);
         //double lower = f.getPoissonGaussianApproximationI(u);
         //double upper = PoissonFisherInformation.getPoissonI(u);
-        //logger.fine(TestLog.getSupplier("s=%g u=%g I=%s  (%s - %s) alpha=%s", f.s, u, I, lower, upper, I / upper);
+        //logger.fine(FunctionUtils.getSupplier("s=%g u=%g I=%s  (%s - %s) alpha=%s", f.s, u, I, lower, upper, I / upper);
         //if (true)
         //	return;
 
@@ -71,7 +72,7 @@ public class PoissonGaussianFisherInformationTest
         final double I = f.getPoissonGaussianI(u);
         double lower = f.getPoissonGaussianApproximationI(u);
         double upper = PoissonFisherInformation.getPoissonI(u);
-        //logger.fine(TestLog.getSupplier("s=%g u=%g I=%s  (%s - %s) alpha=%s", f.s, u, I, lower, upper, I / upper);
+        //logger.fine(FunctionUtils.getSupplier("s=%g u=%g I=%s  (%s - %s) alpha=%s", f.s, u, I, lower, upper, I / upper);
         // Allow a tolerance on the approximation at high mean.
         // The function does not compute the sum to infinity and so can underestimate
         // the value.
@@ -114,7 +115,7 @@ public class PoissonGaussianFisherInformationTest
             }
 
             u = Double.longBitsToDouble(upper);
-            logger.info(TestLog.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), u));
+            logger.info(FunctionUtils.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), u));
         }
 
         Assertions.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);

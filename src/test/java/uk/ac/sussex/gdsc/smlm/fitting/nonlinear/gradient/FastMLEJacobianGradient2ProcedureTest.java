@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
@@ -205,19 +206,19 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 
                 final double gradient1 = (llh - lll) / (2 * d);
                 final double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
-                //logger.fine(TestLog.getSupplier("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f", i, k, ll, func.getName(k), a[k], d,
+                //logger.fine(FunctionUtils.getSupplier("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f", i, k, ll, func.getName(k), a[k], d,
                 //		gradient1, d1[j], gradient2, d2[j]);
                 failCounter.run(j, () -> {
                     return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
                 }, () -> {
-                    ExtraAssertions.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
-                            DoubleEquality.relativeError(gradient1, d1[j_]));
+                    Assertions.fail(() -> String.format("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
+                            DoubleEquality.relativeError(gradient1, d1[j_])));
                 });
                 failCounter.run(nparams + j, () -> {
                     return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
                 }, () -> {
-                    ExtraAssertions.fail("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
-                            DoubleEquality.relativeError(gradient2, d2[j_]));
+                    Assertions.fail(() -> String.format("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
+                            DoubleEquality.relativeError(gradient2, d2[j_])));
                 });
 
                 // Test the Jacobian ...
@@ -245,7 +246,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
                     // Use index j even though we adjusted index jj
                     final double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
                     final boolean ok = eq.almostEqualRelativeOrAbsolute(gradient3, J.get(j, jj));
-                    //logger.fine(TestLog.getSupplier("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b", i, k, kk, func.getName(k),
+                    //logger.fine(FunctionUtils.getSupplier("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b", i, k, kk, func.getName(k),
                     //		a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);
                     //if (!ok)
                     //{
@@ -254,8 +255,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
                     failCounter2.run(nparams * j_ + jj_, () -> {
                         return ok;
                     }, () -> {
-                        ExtraAssertions.fail("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)", ii, j_, jj_,
-                                gradient3, J.get(j_, jj_), DoubleEquality.relativeError(gradient3, J.get(j_, jj_)));
+                        Assertions.fail(() -> String.format("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)", ii, j_, jj_,
+                                gradient3, J.get(j_, jj_), DoubleEquality.relativeError(gradient3, J.get(j_, jj_))));
                     });
                 }
             }

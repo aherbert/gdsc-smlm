@@ -12,9 +12,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -184,7 +183,7 @@ public class BinomialFitterTest
         //BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
         bf.setMaximumLikelihood(maximumLikelihood);
 
-        logger.info(TestLog.getSupplier("Fitting (n=%d, p=%f)", n, p));
+        logger.info(FunctionUtils.getSupplier("Fitting (n=%d, p=%f)", n, p));
         int fail = 0;
         for (int i = 0; i < TRIALS; i++)
         {
@@ -192,7 +191,7 @@ public class BinomialFitterTest
             final double[] fit = bf.fitBinomial(data, minN, maxN, zeroTruncated);
             final int fittedN = (int) fit[0];
             final double fittedP = fit[1];
-            logger.info(TestLog.getSupplier("  Fitted (n=%d, p=%f)", fittedN, fittedP));
+            logger.info(FunctionUtils.getSupplier("  Fitted (n=%d, p=%f)", fittedN, fittedP));
             try
             {
                 Assertions.assertEquals(n, fittedN, "Failed to fit n");
@@ -204,7 +203,8 @@ public class BinomialFitterTest
                 logger.info("    " + e.getMessage());
             }
         }
-        ExtraAssertions.assertTrue(fail <= FAILURES, "Too many failures (n=%d, p=%f): %d", n, p, fail);
+        Assertions.assertTrue(fail <= FAILURES, FunctionUtils.getSupplier(
+                "Too many failures (n=%d, p=%f): %d", n, p, fail));
     }
 
     private void fitBinomialUsing_LSE_Or_MLE(UniformRandomProvider rg, int n, double p, boolean zeroTruncated, int minN,
@@ -213,7 +213,7 @@ public class BinomialFitterTest
         final BinomialFitter bf = new BinomialFitter(null);
         //BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 
-        logger.info(TestLog.getSupplier("Fitting (n=%d, p=%f)", n, p));
+        logger.info(FunctionUtils.getSupplier("Fitting (n=%d, p=%f)", n, p));
         int fail = 0;
         int c1 = 0;
         for (int i = 0; i < TRIALS; i++)
@@ -229,7 +229,7 @@ public class BinomialFitterTest
             final int n2 = (int) fitMLE[0];
             final double p2 = fitMLE[1];
 
-            logger.info(TestLog.getSupplier("  Fitted LSE (n=%d, p=%f) == MLE (n=%d, p=%f)", n1, p1, n2, p2));
+            logger.info(FunctionUtils.getSupplier("  Fitted LSE (n=%d, p=%f) == MLE (n=%d, p=%f)", n1, p1, n2, p2));
 
             try
             {
@@ -244,7 +244,7 @@ public class BinomialFitterTest
             if (Math.abs(p1 - p) < Math.abs(p2 - p))
                 c1++;
         }
-        logger.info(TestLog.getSupplier("  Closest LSE %d, MLE %d", c1, TRIALS - c1));
+        logger.info(FunctionUtils.getSupplier("  Closest LSE %d, MLE %d", c1, TRIALS - c1));
         if (fail > FAILURES)
         {
             final String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);

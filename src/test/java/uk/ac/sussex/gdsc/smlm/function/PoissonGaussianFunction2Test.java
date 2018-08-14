@@ -95,7 +95,7 @@ public class PoissonGaussianFunction2Test
             final boolean usePicard)
     {
         final double p2 = cumulativeProbability(gain, mu, s, usePicard);
-        ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
+        Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s));
     }
 
     private static double cumulativeProbability(final double gain, final double mu, final double s,
@@ -127,8 +127,8 @@ public class PoissonGaussianFunction2Test
             for (int x = min; x <= max; x++)
             {
                 final double pp = f.likelihood(x, e);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%f   %f", x, pp);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%f   %f", x, pp, f2.probability(x));
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.probability(x));
                 p += pp;
             }
             //if (p > 1.01)
@@ -142,7 +142,7 @@ public class PoissonGaussianFunction2Test
         {
             min = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;
@@ -151,7 +151,7 @@ public class PoissonGaussianFunction2Test
         {
             max = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;

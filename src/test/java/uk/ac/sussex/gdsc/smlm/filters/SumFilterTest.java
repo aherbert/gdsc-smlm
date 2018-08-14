@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.internal.ArrayComparisonFailure;
+import org.junit.jupiter.api.Assertions;
 
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
@@ -38,7 +39,7 @@ public class SumFilterTest extends AbstractFilterTest
      */
     private static void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
     {
-        ExtraAssertions.assertArrayEqualsRelative(data1, data2, 1e-4, format, args);
+        ExtraAssertions.assertArrayEqualsRelative(data1, data2, 1e-4, () -> String.format(format, args));
     }
 
     /**
@@ -57,7 +58,7 @@ public class SumFilterTest extends AbstractFilterTest
      */
     private static void intArrayEquals(int[] data1, int[] data2, int boxSize, String format, Object... args)
     {
-        ExtraAssertions.assertArrayEquals(data1, data2, format, args);
+        Assertions.assertArrayEquals(data1, data2, () -> String.format(format, args));
     }
 
     private static float[] floatCreateData(UniformRandomProvider rg, int width, int height)

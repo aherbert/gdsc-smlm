@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
@@ -16,7 +17,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -79,7 +79,7 @@ public class SphericalDistributionTest
         final long time1 = getRunTime(dist);
         dist.setUseRejectionMethod(true);
         final long time2 = getRunTime(dist);
-        ExtraAssertions.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d", time2, time1);
+        Assertions.assertTrue(time1 > time2, () -> String.format("Rejection = %d, Transformation = %d", time2, time1));
         logger.log(TestLog.getRecord(Level.INFO, "Rejection = %d, Transformation = %d", time2, time1));
     }
 

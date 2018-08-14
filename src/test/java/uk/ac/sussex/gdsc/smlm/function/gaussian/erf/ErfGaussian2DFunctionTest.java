@@ -667,8 +667,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
                                                     {
                                                         logger.log(TestLog.getRecord(Level.INFO, "%d [%d,%d] %f ?= %f",
                                                                 i, j, k, gradient, m.get(j, k)));
-                                                        ExtraAssertions.fail("%d [%d,%d] %f != %f", i, j, k, gradient,
-                                                                m.get(j, k));
+                                                        Assertions.fail(String.format("%d [%d,%d] %f != %f", i, j, k, gradient,
+                                                                m.get(j, k)));
                                                     }
                                                 }
                                             }
@@ -896,9 +896,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
                                                                             //       gradient, m.get(j, k)));
                                                                             if (!ok)
                                                                             {
-                                                                                ExtraAssertions.fail(
+                                                                                Assertions.fail(String.format(
                                                                                         "%d [%d,%d] %f != %f", i, j, k,
-                                                                                        gradient, m.get(j, k));
+                                                                                        gradient, m.get(j, k)));
                                                                             }
                                                                         }
                                                                     }

@@ -128,7 +128,7 @@ public class PoissonGaussianFunctionTest
         final long t2 = getTime(noise2, N, x, false);
 
         logger.log(TestLog.getRecord(Level.INFO, "Picard %d : Pade %d (%fx)", t1, t2, t1 / (double) t2));
-        ExtraAssertions.assertTrue(t2 < t1, "Picard %d < Pade %d", t1, t2);
+        Assertions.assertTrue(t2 < t1, () -> String.format("Picard %d < Pade %d", t1, t2));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class PoissonGaussianFunctionTest
             final boolean usePicard)
     {
         final double p2 = cumulativeProbability(gain, mu, s, usePicard);
-        ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
+        Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s));
     }
 
     private static double cumulativeProbability(final double gain, final double mu, final double s,
@@ -196,7 +196,7 @@ public class PoissonGaussianFunctionTest
             for (int x = min; x <= max; x++)
             {
                 final double pp = f.probability(x);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
                 p += pp;
             }
             //if (p > 1.01)
@@ -210,7 +210,7 @@ public class PoissonGaussianFunctionTest
         {
             min = x;
             final double pp = f.probability(x);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;
@@ -219,7 +219,7 @@ public class PoissonGaussianFunctionTest
         {
             max = x;
             final double pp = f.probability(x);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;

@@ -33,6 +33,8 @@ import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.DataCache;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -305,7 +307,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
                                             final double gradient = (value2 - value3) / (2 * h);
                                             boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
                                                     Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-                                            //logger.fine(TestLog.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
+                                            //logger.fine(FunctionUtils.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
                                             //		dyda[gradientIndex]);
                                             if (!ok)
                                                 Assertions.fail(NAME[targetParameter] + ": " + gradient + " != " +
@@ -501,10 +503,10 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
                                     final double gradient = (value2 - value3) / (2 * h);
                                     boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
                                             Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-                                    //logger.fine(TestLog.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
+                                    //logger.fine(FunctionUtils.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2, "" + value3, h, gradient,
                                     //		dyda[gradientIndex]));
                                     if (!ok)
-                                        ExtraAssertions.fail(
+                                        Assertions.fail(
                                                 NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex]);
                                     ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
                                     if (ok)
@@ -515,7 +517,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final double p = (100.0 * count) / total;
         logger.log(TestLog.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(),
                 NAME[targetParameter], count, total, p));
-        ExtraAssertions.assertTrue(p > threshold, "%s fraction too low: %s", NAME[targetParameter], p);
+        Assertions.assertTrue(p > threshold, FunctionUtils.getSupplier("%s fraction too low: %s", NAME[targetParameter], p));
     }
 
     private static double[] getVariables(int[] indices, double[] a)
@@ -585,7 +587,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 
         //TestLog.fine(logger,"mu=%f, p=%f", mu, p);
         if (test)
-            ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
+            Assertions.assertEquals(P_LIMIT, p, 0.02, () -> "mu=" + mu);
     }
 
     @Test
@@ -668,6 +670,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         };
         SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
 
+        final IntArrayFormatSupplier msg1 = new IntArrayFormatSupplier("computeLikelihood @ %d", 1);        
+        final IntArrayFormatSupplier msg2 = new IntArrayFormatSupplier("computeLikelihood+gradient @ %d", 1);        
         double total = 0, p = 0;
         double maxp = 0;
         int maxi = 0;
@@ -677,8 +681,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
             final double nll2 = f.computeLikelihood(gradient, i);
             final double nll3 = SCMOSLikelihoodWrapper.negativeLogLikelihood(mu, var[i], g[i], o[i], k[i]);
             total += nll;
-            ExtraAssertions.assertEqualsRelative(nll3, nll, 1e-10, "computeLikelihood @%d", i);
-            ExtraAssertions.assertEqualsRelative(nll3, nll2, 1e-10, "computeLikelihood+gradient @%d", i);
+            ExtraAssertions.assertEqualsRelative(nll3, nll, 1e-10, msg1.set(0, i));
+            ExtraAssertions.assertEqualsRelative(nll3, nll2, 1e-10, msg2.set(0, i));
             final double pp = FastMath.exp(-nll);
             if (maxp < pp)
             {
@@ -704,7 +708,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         ExtraAssertions.assertEqualsRelative(kmax, k[maxi], 1e-3, "k-max");
 
         if (test)
-            ExtraAssertions.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
+            Assertions.assertEquals(P_LIMIT, p, 0.02, () -> "mu=" + mu);
 
         // Check the function can compute the same total
         double sum, sum2;

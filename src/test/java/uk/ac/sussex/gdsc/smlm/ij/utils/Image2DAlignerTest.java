@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.TestLog;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class Image2DAlignerTest
@@ -127,7 +127,7 @@ public class Image2DAlignerTest
         //	result = a.align(target.copy(), i, error);
         //	c = a.getCorrelation();
         //
-        //	logger.fine(TestLog.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
+        //	logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
         //			java.util.Arrays.toString(result));
         //}
 
@@ -138,7 +138,7 @@ public class Image2DAlignerTest
             result = a.align(target, refinements);
         c = a.getCorrelation();
         if (logger.isLoggable(Level.FINE))
-            logger.fine(TestLog.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
+            logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e), c.get(index),
                     java.util.Arrays.toString(result)));
 
         for (int i = 0; i < 2; i++)

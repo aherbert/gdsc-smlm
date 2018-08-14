@@ -429,7 +429,7 @@ public class FastLogTest
             {
                 final int bits = m | (e << 23);
                 final float v = Float.intBitsToFloat(bits);
-                //logger.fine(TestLog.getSupplier("%g = %s", v, Integer.toBinaryString(bits));
+                //logger.fine(FunctionUtils.getSupplier("%g = %s", v, Integer.toBinaryString(bits));
                 d[i++] = v;
             }
         return d;
@@ -500,7 +500,7 @@ public class FastLogTest
         delta = Math.abs(delta);
         //		if (delta > 1)
         //		{
-        //			//logger.fine(TestLog.getSupplier("Big error: %f %f", v, d[pair.i-1]);
+        //			//logger.fine(FunctionUtils.getSupplier("Big error: %f %f", v, d[pair.i-1]);
         //		}
         final Stats s1 = new Stats(delta, d[pair.i - 1]);
         final Stats s2 = (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
@@ -511,7 +511,7 @@ public class FastLogTest
             delta = Math.abs(delta);
             //if (delta > 5)
             //{
-            //	//logger.fine(TestLog.getSupplier("Big error: [%g] %f %f %f", d[pair.i - 1], v, pair.f, v));
+            //	//logger.fine(FunctionUtils.getSupplier("Big error: [%g] %f %f %f", d[pair.i - 1], v, pair.f, v));
             //}
             s1.add(delta, d[pair.i - 1]);
             if (v != 0)
@@ -531,7 +531,7 @@ public class FastLogTest
             pair.f = f.log(x);
             if (pair.f != Float.NEGATIVE_INFINITY)
                 return true;
-            //logger.fine(TestLog.getSupplier("%g", x);
+            //logger.fine(FunctionUtils.getSupplier("%g", x);
         }
         return false;
     }
@@ -668,7 +668,7 @@ public class FastLogTest
             {
                 final long bits = m | (e << 52);
                 final double v = Double.longBitsToDouble(bits);
-                //logger.fine(TestLog.getSupplier("%g = %s", v, Long.toBinaryString(bits));
+                //logger.fine(FunctionUtils.getSupplier("%g = %s", v, Long.toBinaryString(bits));
                 d[i++] = v;
             }
         }
@@ -695,7 +695,7 @@ public class FastLogTest
         while (next(f, pair, d))
         {
             v = logD[pair.i - 1];
-            //logger.fine(TestLog.getSupplier("%g vs %g", v, pair.f);
+            //logger.fine(FunctionUtils.getSupplier("%g vs %g", v, pair.f);
             delta = v - pair.f;
             delta = Math.abs(delta);
             s1.add(delta, d[pair.i - 1]);
@@ -716,7 +716,7 @@ public class FastLogTest
             pair.f = f.log(x);
             if (pair.f != Double.NEGATIVE_INFINITY)
                 return true;
-            //logger.fine(TestLog.getSupplier("%g", x);
+            //logger.fine(FunctionUtils.getSupplier("%g", x);
         }
         return false;
     }

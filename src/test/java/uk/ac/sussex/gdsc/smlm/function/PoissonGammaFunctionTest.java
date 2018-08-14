@@ -19,6 +19,7 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
@@ -70,11 +71,11 @@ public class PoissonGammaFunctionTest
         final double p2 = cumulativeProbability(gain, mu, pdf);
 
         if (pdf)
-            ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
+            Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, pdf=%b", gain, mu, pdf));
         else // This is not actually a PMF but is a PDF so requires integration.
         // This only works when the mean is above 2 if the gain is low
         if (mu > 2 || gain > 20)
-            ExtraAssertions.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
+            Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, pdf=%b", gain, mu, pdf));
     }
 
     private static double cumulativeProbability(final double gain, final double mu, boolean pdf)
@@ -103,9 +104,9 @@ public class PoissonGammaFunctionTest
             for (int x = min; x <= max; x++)
             {
                 final double pp = f.likelihood(x, e);
-                //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+                //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
                 if (debug)
-                    logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp));
+                    logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
                 p += pp;
             }
             //if (p > 1.01)
@@ -119,9 +120,9 @@ public class PoissonGammaFunctionTest
         {
             min = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
             if (debug)
-                logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp));
+                logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;
@@ -130,9 +131,9 @@ public class PoissonGammaFunctionTest
         {
             max = x;
             final double pp = f.likelihood(x, e);
-            //logger.fine(TestLog.getSupplier("x=%d, p=%g", x, pp);
+            //logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
             if (debug)
-                logger.fine(TestLog.getSupplier("x=%d, p=%f", x, pp));
+                logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
             p += pp;
             if (pp == 0 || pp / p < changeTolerance)
                 break;
@@ -144,7 +145,7 @@ public class PoissonGammaFunctionTest
             // Do a formal integration
             if (debug)
                 if (p < 0.98 || p > 1.02)
-                    logger.fine(TestLog.getSupplier("g=%f, mu=%f, p=%f", gain, mu, p));
+                    logger.fine(FunctionUtils.getSupplier("g=%f, mu=%f, p=%f", gain, mu, p));
             final UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
                     SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
             p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
@@ -273,7 +274,7 @@ public class PoissonGammaFunctionTest
             final double g = (up - lp) / diff;
             final double error = DoubleEquality.relativeError(g, eg);
             final double ox = x / gain;
-            //logger.fine(TestLog.getSupplier("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g", gain, mu, x, ox, p1, g, eg,
+            //logger.fine(FunctionUtils.getSupplier("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g", gain, mu, x, ox, p1, g, eg,
             //		error);
 
             if (error > tol)

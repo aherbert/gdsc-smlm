@@ -55,7 +55,7 @@ public class FRCTest
             final double cosA = Math.cos(a);
             final double e = Math.sin(a);
             final double o = FRC.getSine(a, cosA);
-            //logger.fine(TestLog.getSupplier("%f  %f ?= %f", a, e, o);
+            //logger.fine(FunctionUtils.getSupplier("%f  %f ?= %f", a, e, o);
             Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(o, e, 1e-6, 1e-10));
         }
     }
@@ -119,7 +119,7 @@ public class FRCTest
         //for (int y=0, i=0; y<size; y++)
         //	for (int x=0; x<size; x++, i++)
         //	{
-        //		logger.fine(TestLog.getSupplier("[%d,%d = %d] %f ?= %f", x, y, i, numeratorE[i], numeratorA[i]);
+        //		logger.fine(FunctionUtils.getSupplier("[%d,%d = %d] %f ?= %f", x, y, i, numeratorE[i], numeratorA[i]);
         //	}
 
         Assertions.assertArrayEquals(numeratorE, numeratorA, "numerator");

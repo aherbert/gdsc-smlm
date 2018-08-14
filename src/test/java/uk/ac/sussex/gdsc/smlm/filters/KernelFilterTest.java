@@ -19,6 +19,7 @@ import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.TimingService;
+import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -236,7 +237,7 @@ public class KernelFilterTest
                 }
         }
 
-        logger.fine(TestLog.getSupplier("%s vs %s @ %d = %g", f1.getName(), f2.getName(), border, max));
+        logger.fine(FunctionUtils.getSupplier("%s vs %s @ %d = %g", f1.getName(), f2.getName(), border, max));
         Assertions.assertTrue(max < tolerance);
     }
 

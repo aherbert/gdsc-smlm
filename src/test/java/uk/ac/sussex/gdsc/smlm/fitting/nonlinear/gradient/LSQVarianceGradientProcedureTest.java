@@ -21,7 +21,8 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.TestComplexity;
 import uk.ac.sussex.gdsc.test.TestLog;
 import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
+import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -106,14 +107,15 @@ public class LSQVarianceGradientProcedureTest
 
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
-        final String name = String.format("[%d]", nparams);
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("[%d] Observations: Not same variance @ %d", 2);
+        msg.set(0, nparams);
 
         for (int i = 0; i < paramsList.size(); i++)
         {
             final LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(func);
             p.variance(paramsList.get(i));
             final double[] e = calc.variance(n, paramsList.get(i), func);
-            ExtraAssertions.assertArrayEquals(e, p.variance, "%s Observations: Not same @ %d", name, i);
+            Assertions.assertArrayEquals(e, p.variance, msg.set(1, i));
         }
     }
 
@@ -151,7 +153,7 @@ public class LSQVarianceGradientProcedureTest
             long t = System.nanoTime();
             run();
             t = System.nanoTime() - t;
-            //logger.fine(TestLog.getSupplier("[%d] Time = %d", loops, t);
+            //logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
             return t;
         }
 
@@ -248,7 +250,9 @@ public class LSQVarianceGradientProcedureTest
             func = OffsetGradient1Function.wrapGradient1Function(func,
                     SimpleArrayUtils.newArray(func.size(), 0.1, 1.3));
 
-        final String name = String.format("[%d]", nparams);
+        final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("[%d] Observations: Not same variance @ %d", 2);
+        msg.set(0, nparams);
+        
         for (int i = 0; i < paramsList.size(); i++)
         {
             final LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
@@ -258,7 +262,7 @@ public class LSQVarianceGradientProcedureTest
             p2.variance(paramsList.get(i));
 
             // Exactly the same ...
-            ExtraAssertions.assertArrayEquals(p1.variance, p2.variance, "%s Observations: Not same @ %d", name, i);
+            Assertions.assertArrayEquals(p1.variance, p2.variance, msg.set(1, i));
         }
     }
 
@@ -297,6 +301,7 @@ public class LSQVarianceGradientProcedureTest
                 ? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
                 : f;
 
+        final IndexSupplier msg = new IndexSupplier(1, "M ", null);
         for (int i = 0; i < paramsList.size(); i++)
         {
             final LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
@@ -308,7 +313,7 @@ public class LSQVarianceGradientProcedureTest
             p2.variance(paramsList.get(i));
 
             // Check they are the same
-            ExtraAssertions.assertArrayEquals(p1.variance, p2.variance, "M %d", i);
+            Assertions.assertArrayEquals(p1.variance, p2.variance, msg.set(0, i));
         }
 
         // Realistic loops for an optimisation
@@ -385,7 +390,7 @@ public class LSQVarianceGradientProcedureTest
             final double[] crlb2 = p2.variance;
             Assertions.assertNotNull(crlb1);
             Assertions.assertNotNull(crlb2);
-            //logger.fine(TestLog.getSupplier("%s : %s", Arrays.toString(crlb1), Arrays.toString(crlb2));
+            //logger.fine(FunctionUtils.getSupplier("%s : %s", Arrays.toString(crlb1), Arrays.toString(crlb2));
             for (int j = 0; j < n; j++)
                 Assertions.assertTrue(crlb1[j] < crlb2[j]);
         }
@@ -429,7 +434,7 @@ public class LSQVarianceGradientProcedureTest
                             final double o1 = Math.sqrt(p.variance[ix]) * a;
                             final double o2 = Math.sqrt(p.variance[iy]) * a;
                             final double e = Gaussian2DPeakResultHelper.getPrecisionX(a, ss, N, b2, false);
-                            //logger.fine(TestLog.getSupplier("e = %f  :  o  =   %f   %f", e, o1, o2);
+                            //logger.fine(FunctionUtils.getSupplier("e = %f  :  o  =   %f   %f", e, o1, o2);
                             Assertions.assertEquals(e, o1, e * 5e-2);
                             Assertions.assertEquals(e, o2, e * 5e-2);
                         }
