@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
-import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +18,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
@@ -218,7 +219,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         // This is generated once so create the randon generator here.
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(source.getSeed());
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, gain, gainSD);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, gain, gainSD);
         final double[] w = new double[size * size];
         final double[] n = new double[size * size];
         for (int i = 0; i < w.length; i++)
@@ -605,7 +606,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         }
 
         // Read-noise
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, 0, 1);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, 0, 1);
         if (noise != null)
             for (int i = 0; i < data.length; i++)
                 data[i] += gs.sample() * noise[i];

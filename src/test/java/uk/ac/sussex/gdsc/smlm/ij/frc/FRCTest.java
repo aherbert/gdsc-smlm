@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.PermutationSampler;
-import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +16,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
 import uk.ac.sussex.gdsc.test.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.TestComplexity;
@@ -67,7 +68,7 @@ public class FRCTest
         final int size = 1024;
         final double[][] data = new double[size * 2][];
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 5);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 5);
         for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--)
         {
             data[i++] = new double[] { x + gs.sample(), y + gs.sample() };
@@ -234,7 +235,7 @@ public class FRCTest
         final int N = 2048;
         final double[][] data = new double[N * 2][];
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 5);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 5);
         for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--)
         {
             data[i++] = new double[] { x + gs.sample(), y + gs.sample() };

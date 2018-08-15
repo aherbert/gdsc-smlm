@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.junit.jupiter.api.Assertions;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -34,6 +34,7 @@ import gnu.trove.list.array.TIntArrayList;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -137,7 +138,7 @@ public abstract class WeightedFilterTest
 
         final TDoubleArrayList l1 = new TDoubleArrayList();
 
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, 2, 0.2);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, 2, 0.2);
 
         for (final int width : primes)
             for (final int height : primes)

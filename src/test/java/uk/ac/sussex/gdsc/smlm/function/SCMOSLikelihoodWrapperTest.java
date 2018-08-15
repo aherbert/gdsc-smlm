@@ -15,7 +15,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
-import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,6 +27,7 @@ import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
@@ -121,7 +122,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         data.sd = new float[n];
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(source.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), O);
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, G, G_SD);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, G, G_SD);
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
         for (int i = 0; i < n; i++)
         {
@@ -256,7 +257,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] sd = testData.sd;
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 1);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
 
         for (final double background : testbackground)
             for (final double signal1 : testsignal1)
@@ -457,7 +458,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] sd = testData.sd;
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 1);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
 
         for (final double background : testbackground)
             for (final double signal1 : testsignal1)
@@ -832,7 +833,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] sd = testData.sd;
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, 1);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
 
         final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
         for (int i = 0; i < n; i++)

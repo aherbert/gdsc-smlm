@@ -26,9 +26,10 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
@@ -44,7 +45,7 @@ public abstract class WeightedKernelFilterTest extends WeightedFilterTest
         final DataFilter filter = createDataFilter();
 
         final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(rg, 2, 0.2);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, 2, 0.2);
 
         final float[] offsets = getOffsets(filter);
         final int[] boxSizes = getBoxSizes(filter);

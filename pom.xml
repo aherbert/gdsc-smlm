@@ -213,6 +213,14 @@ Software for single molecule localisation microscopy (SMLM)
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.1</version>
+        <configuration>
+          <excludes>
+            <!-- Auto generated code -->
+            <exclude>**/*Protos.class</exclude>
+            <exclude>**/*Protos$*.class</exclude>
+            <!-- Add plugins with no testable code -->
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <id>default-prepare-agent</id>

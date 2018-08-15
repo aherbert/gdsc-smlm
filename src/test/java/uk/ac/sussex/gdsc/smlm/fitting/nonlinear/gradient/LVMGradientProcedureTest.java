@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.BoxMullerGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -18,6 +18,7 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
@@ -869,7 +870,7 @@ public class LVMGradientProcedureTest
     {
         final int iter = 10;
         final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
-        final BoxMullerGaussianSampler gs = new BoxMullerGaussianSampler(r, 0, noise);
+        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, noise);
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
