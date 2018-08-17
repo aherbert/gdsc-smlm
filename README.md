@@ -45,28 +45,28 @@ Installation from source
 
 The source code is accessed using git and built using Maven. 
 
-The code depends on the GDSC-Analytics, GDSC-Test and GDSC-Core artifacts so 
+The code depends on the gdsc-analytics, gdsc-test and gdsc-core artifacts so 
 you will have to install these to your local Maven repository before building:
 
 1. Clone the required repositories
 
-        git clone https://github.com/aherbert/GDSC-Analytics.git
-        git clone https://github.com/aherbert/GDSC-Test.git
-        git clone https://github.com/aherbert/GDSC-Core.git
-        git clone https://github.com/aherbert/GDSC-SMLM.git
+        git clone https://github.com/aherbert/gdsc-analytics.git
+        git clone https://github.com/aherbert/gdsc-test.git
+        git clone https://github.com/aherbert/gdsc-core.git
+        git clone https://github.com/aherbert/gdsc-smlm.git
 
 2. Build the code and install using Maven
 
-        cd GDSC-Analytics
+        cd gdsc-analytics
         mvn install
         cd ..
-        cd GDSC-Test
+        cd gdsc-test
         mvn install
         cd ..
-        cd GDSC-Core
+        cd gdsc-core
         mvn install
         cd ..
-        cd GDSC-SMLM
+        cd gdsc-smlm
         mvn package
 
 	This will produce a gdsc_smlm-[VERSION].jar file in the target directory. 
@@ -118,7 +118,7 @@ Running from source
 Modifying the source
 --------------------
 
-The GDSC-SMLM code was developed using the [Eclipse IDE](https://eclipse.org/).
+The gdsc-smlm code was developed using the [Eclipse IDE](https://eclipse.org/).
 
 Details of how to open the source code with Eclipse can be found in the eclipse
 folder.
