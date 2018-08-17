@@ -136,7 +136,7 @@ Software for single molecule localisation microscopy (SMLM)
             <java.util.logging.SimpleFormatter.format><![CDATA[%4$-7s %2$s %5$s%6$s%n]]></java.util.logging.SimpleFormatter.format>
           </systemPropertyVariables>
           <!--  Ensure the JaCoCo settings are preserved in argLine when ImageJ settings are added -->
-          <argLine>@{argLine} -Xms512m -Xmx512m -Dapple.awt.UIElement="true"</argLine>
+          <argLine>@{argLine} -Xms512m -Dapple.awt.UIElement="true"</argLine>
         </configuration>
         <dependencies>
           <dependency>
@@ -415,11 +415,6 @@ Software for single molecule localisation microscopy (SMLM)
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>5.2.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
