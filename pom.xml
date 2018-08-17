@@ -16,7 +16,7 @@
   <packaging>jar</packaging>
 
   <name>GDSC SMLM plugins for ImageJ</name>
-  <url>http:///github.com/aherbert/GDSC-SMLM</url>
+  <url>http:///github.com/aherbert/gdsc-smlm</url>
   <organization>
     <name>Genome Damage and Stability Centre</name>
     <url>http://www.sussex.ac.uk/gdsc/</url>
@@ -43,15 +43,15 @@ Software for single molecule localisation microscopy (SMLM)
   </mailingLists>
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>https://github.com/aherbert/GDSC-SMLM/issues</url>
+    <url>https://github.com/aherbert/gdsc-smlm/issues</url>
   </issueManagement>
   <ciManagement>
     <system>None</system>
   </ciManagement>
   <scm>
-    <connection>scm:git:git://github.com/aherbert/GDSC-SMLM.git</connection>
-    <developerConnection>scm:git:ssh://github.com:aherbert/GDSC-SMLM.git</developerConnection>
-    <url>https://github.com/aherbert/GDSC-SMLM</url>
+    <connection>scm:git:git://github.com/aherbert/gdsc-smlm.git</connection>
+    <developerConnection>scm:git:ssh://github.com:aherbert/gdsc-smlm.git</developerConnection>
+    <url>https://github.com/aherbert/gdsc-smlm</url>
   </scm>
 
   <developers>
