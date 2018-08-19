@@ -24,11 +24,10 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.internal.ArrayComparisonFailure;
 
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class IntBlockSumFilterTest extends AbstractFilterTest
@@ -118,7 +117,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
     }
 
     private static void sumIsCorrect(int[] data, int width, int height, int boxSize, boolean internal,
-            BlockSumDataFilter filter) throws ArrayComparisonFailure
+            BlockSumDataFilter filter)
     {
         final int[] data1 = data.clone();
         final int[] data2 = data.clone();
@@ -139,7 +138,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 
     private static void checkIsCorrect(RandomSeed seed, BlockSumDataFilter filter)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         for (final int width : primes)
             for (final int height : primes)

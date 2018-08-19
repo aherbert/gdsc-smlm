@@ -18,15 +18,15 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
-import uk.ac.sussex.gdsc.test.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.TimingResult;
-import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TimingResult;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({ "javadoc" })
 public class FRCTest
@@ -67,7 +67,7 @@ public class FRCTest
         // Sample lines through an image to create a structure.
         final int size = 1024;
         final double[][] data = new double[size * 2][];
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 5);
         for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--)
         {
@@ -234,7 +234,7 @@ public class FRCTest
         // Sample lines through an image to create a structure.
         final int N = 2048;
         final double[][] data = new double[N * 2][];
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 5);
         for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--)
         {

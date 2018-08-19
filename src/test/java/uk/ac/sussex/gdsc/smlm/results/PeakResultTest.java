@@ -26,9 +26,9 @@ package uk.ac.sussex.gdsc.smlm.results;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultTest
@@ -36,7 +36,7 @@ public class PeakResultTest
     @SeededTest
     public void sameResultIsEqual(RandomSeed seed)
     {
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
         final PeakResult p = r1[0];
         Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
@@ -55,10 +55,10 @@ public class PeakResultTest
                 for (final boolean withEndFrame : both)
                     for (final boolean withPrecision : both)
                     {
-                        r = TestSettings.getRandomGenerator(seed.getSeed());
+                        r = RNGFactory.create(seed.getSeed());
                         final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
                                 withPrecision);
-                        r = TestSettings.getRandomGenerator(seed.getSeed());
+                        r = RNGFactory.create(seed.getSeed());
                         final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
                                 withPrecision);
                         for (int i = 0; i < r1.length; i++)
@@ -78,7 +78,7 @@ public class PeakResultTest
                 for (final boolean withEndFrame : both)
                     for (final boolean withPrecision : both)
                     {
-                        r = TestSettings.getRandomGenerator(seed.getSeed());
+                        r = RNGFactory.create(seed.getSeed());
                         final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
                                 withPrecision);
                         final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,

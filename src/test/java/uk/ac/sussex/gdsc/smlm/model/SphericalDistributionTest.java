@@ -14,12 +14,12 @@ import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class SphericalDistributionTest
@@ -41,7 +41,7 @@ public class SphericalDistributionTest
     @SeededTest
     public void canSampleUsingTransformationMethod(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final double radius = 10 + rg.nextDouble() * 10;
         final SphericalDistribution dist = new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
         dist.setUseRejectionMethod(false);
@@ -52,7 +52,7 @@ public class SphericalDistributionTest
     @SeededTest
     public void canSampleUsingRejectionMethod(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final double radius = 10 + rg.nextDouble() * 10;
         final SphericalDistribution dist = new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
         dist.setUseRejectionMethod(true);
@@ -65,7 +65,7 @@ public class SphericalDistributionTest
     {
         ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final double radius = 10 + rg.nextDouble() * 10;
         final SphericalDistribution dist = new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
         dist.setUseRejectionMethod(false);
@@ -108,7 +108,7 @@ public class SphericalDistributionTest
 
     private static void drawImage(RandomSeed seed, boolean useRejctionMethod)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final MemoryPeakResults results = new MemoryPeakResults();
         results.setSortAfterEnd(true);
         final int radius = 10;

@@ -33,19 +33,19 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestCounter;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.TimingResult;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
-import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
-import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestCounter;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TimingResult;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
+import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -245,7 +245,7 @@ public class LVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList,
+        final int[] x = createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList,
                 yList);
         final int n = x.length;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -339,7 +339,7 @@ public class LVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList,
+        final int[] x = createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList,
                 yList);
         final int n = x.length;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -460,7 +460,7 @@ public class LVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createFakeData(TestSettings.getRandomGenerator(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
         Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
         if (precomputed)
@@ -588,7 +588,7 @@ public class LVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
+        createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
 
         // Remove the timing of the function call by creating a dummy function
         final FakeGradientFunction fgf = new FakeGradientFunction(blockWidth, nparams);
@@ -762,7 +762,7 @@ public class LVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList, true);
+        createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
         // for the gradients
         final double delta = 1e-4;
@@ -869,7 +869,7 @@ public class LVMGradientProcedureTest
     private void gradientProcedureSupportsPrecomputed(RandomSeed seed, final Type type, boolean checkGradients)
     {
         final int iter = 10;
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, noise);
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);

@@ -30,11 +30,11 @@ import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedSumFilterTest extends WeightedFilterTest
@@ -44,7 +44,7 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
     {
         final DataFilter filter = createDataFilter();
 
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, 2, 0.2);
 
         final float[] offsets = getOffsets(filter);

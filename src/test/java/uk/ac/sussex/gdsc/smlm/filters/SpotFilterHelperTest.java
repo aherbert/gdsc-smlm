@@ -29,9 +29,9 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
 import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class SpotFilterHelperTest
@@ -62,7 +62,7 @@ public class SpotFilterHelperTest
     @SeededTest
     public void canCountNeighbours(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         final int width = 64, height = 64;
         final int size = width * height;

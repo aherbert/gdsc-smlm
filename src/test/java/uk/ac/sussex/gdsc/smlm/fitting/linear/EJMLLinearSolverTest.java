@@ -19,16 +19,16 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.TimingService;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class EJMLLinearSolverTest
@@ -516,7 +516,7 @@ public class EJMLLinearSolverTest
         final int np = f0.getNumberOfGradients();
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-                new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
+                new RandomGeneratorAdapter(RNGFactory.create(seed.getSeed())), 1);
         //double lambda = 10;
         for (final double background : testbackground)
             // Peak 1
@@ -826,7 +826,7 @@ public class EJMLLinearSolverTest
         final int np = f0.getNumberOfGradients();
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-                new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
+                new RandomGeneratorAdapter(RNGFactory.create(seed.getSeed())), 1);
         //double lambda = 10;
         for (final double background : testbackground)
             // Peak 1

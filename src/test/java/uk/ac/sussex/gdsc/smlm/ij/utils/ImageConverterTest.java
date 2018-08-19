@@ -35,10 +35,10 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.test.DataCache;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.DataCache;
 
 @SuppressWarnings({ "javadoc" })
 public class ImageConverterTest implements Function<RandomSeed, Object>
@@ -70,7 +70,7 @@ public class ImageConverterTest implements Function<RandomSeed, Object>
     @Override
     public Object apply(RandomSeed seed)
     {
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final ByteProcessor bp = new ByteProcessor(w, h);
         final ImageConverterTestData data = new ImageConverterTestData();
         data.bdata = (byte[]) bp.getPixels();
@@ -130,7 +130,7 @@ public class ImageConverterTest implements Function<RandomSeed, Object>
         final byte[] bdata = data.bdata;
         final short[] sdata = data.sdata;
         final float[] fdata = data.fdata;
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
         final ImageExtractor ie = new ImageExtractor(fdata, w, h);
         for (int i = 0; i < 10; i++)
         {

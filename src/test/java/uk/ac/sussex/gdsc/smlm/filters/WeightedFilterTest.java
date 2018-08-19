@@ -35,11 +35,11 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedFilterTest
@@ -69,7 +69,7 @@ public abstract class WeightedFilterTest
     @SeededTest
     public void evenWeightsDoesNotAlterFiltering(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         final DataFilter filter1 = createDataFilter();
         final DataFilter filter2 = createDataFilter();
@@ -128,7 +128,7 @@ public abstract class WeightedFilterTest
     @SeededTest
     public void filterDoesNotAlterFilteredImageMean(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         //ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
         //		ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 

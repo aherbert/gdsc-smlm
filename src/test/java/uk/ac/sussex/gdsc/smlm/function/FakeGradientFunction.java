@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomSequence;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.test.TestSettings;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class FakeGradientFunction
@@ -51,7 +51,7 @@ public class FakeGradientFunction
         this.maxx = maxx;
         this.n = maxx * maxx;
         this.nparams = nparams;
-        this.r = new PseudoRandomSequence(randomSize, TestSettings.getRandomGenerator(randomSeed), scale);
+        this.r = new PseudoRandomSequence(randomSize, RNGFactory.create(randomSeed), scale);
         this.dy_da = new double[nparams];
     }
 

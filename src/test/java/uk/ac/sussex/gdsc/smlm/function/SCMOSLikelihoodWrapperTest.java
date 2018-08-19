@@ -31,14 +31,14 @@ import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.DataCache;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
-import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.DataCache;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 @SuppressWarnings({ "javadoc" })
 public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
@@ -120,7 +120,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         data.g = new float[n];
         data.o = new float[n];
         data.sd = new float[n];
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(source.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(source.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), O);
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, G, G_SD);
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
@@ -255,7 +255,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] g = testData.g;
         final float[] o = testData.o;
         final float[] sd = testData.sd;
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
 
@@ -456,7 +456,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] g = testData.g;
         final float[] o = testData.o;
         final float[] sd = testData.sd;
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
 
@@ -831,7 +831,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final float[] g = testData.g;
         final float[] o = testData.o;
         final float[] sd = testData.sd;
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
 

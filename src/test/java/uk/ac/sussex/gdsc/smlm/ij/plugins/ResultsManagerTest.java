@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.internal.ArrayComparisonFailure;
 import org.junit.jupiter.api.Assertions;
 
 import ij.Macro;
@@ -47,11 +46,11 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.IntensityUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.LocationUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 
 /**
  * Test the ResultsManager functionality to load results from file when the file has options.
@@ -135,7 +134,7 @@ public class ResultsManagerTest
         }
 
         // Generate random spots
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
         final int size = 100;
         final Spot[] spots = new Spot[size];
         for (int i = 1; i <= size; i++)
@@ -286,7 +285,7 @@ public class ResultsManagerTest
     }
 
     private static void checkEqual(Spot[] spots, int channel, int slice, int position, int type,
-            MemoryPeakResults actualResults) throws ArrayComparisonFailure
+            MemoryPeakResults actualResults)
     {
         Assertions.assertNotNull(actualResults, "Input results are null");
 

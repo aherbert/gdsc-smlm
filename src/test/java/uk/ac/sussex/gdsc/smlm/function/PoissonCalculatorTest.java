@@ -27,16 +27,16 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonCalculatorTest
@@ -304,7 +304,7 @@ public class PoissonCalculatorTest
         // Simulate Poisson process
         nlf.initialise(a);
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-                new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
+                new RandomGeneratorAdapter(RNGFactory.create(seed.getSeed())), 1);
         final double[] x = new double[n];
         final double[] u = new double[n];
         for (int i = 0; i < n; i++)
@@ -438,7 +438,7 @@ public class PoissonCalculatorTest
         // Simulate Poisson process
         nlf.initialise(a);
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-                new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
+                new RandomGeneratorAdapter(RNGFactory.create(seed.getSeed())), 1);
         final double[] x = new double[n];
         final double[] u = new double[n];
         for (int i = 0; i < n; i++)
@@ -517,7 +517,7 @@ public class PoissonCalculatorTest
         nlf2.initialise(a);
         nlf3.initialise(a);
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-                new RandomGeneratorAdapter(TestSettings.getRandomGenerator(seed.getSeed())), 1);
+                new RandomGeneratorAdapter(RNGFactory.create(seed.getSeed())), 1);
         double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
         final double[] u = new double[x.length];
         final double[] b1 = new double[x.length];
@@ -697,7 +697,7 @@ public class PoissonCalculatorTest
     public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod(RandomSeed seed)
     {
         final DoubleEquality eq = new DoubleEquality(3e-4, 0);
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         // Test for different x. The calculator approximation begins
         final int n = 100;
         final double[] u = new double[n];

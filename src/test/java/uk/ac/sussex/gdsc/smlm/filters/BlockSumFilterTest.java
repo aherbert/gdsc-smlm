@@ -5,17 +5,16 @@ import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
-import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
 
 @SuppressWarnings({ "javadoc" })
 public class BlockSumFilterTest extends AbstractFilterTest
@@ -179,7 +178,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
     }
 
     private static void sumIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,
-            BlockSumDataFilter filter) throws ArrayComparisonFailure
+            BlockSumDataFilter filter)
     {
         final float[] data1 = data.clone();
         final float[] data2 = data.clone();
@@ -201,7 +200,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
     }
 
     private static void weightedSumIsCorrect(float[] data, float[] w, int width, int height, float boxSize,
-            boolean internal, BlockSumDataFilter filter) throws ArrayComparisonFailure
+            boolean internal, BlockSumDataFilter filter)
     {
         final float[] data1 = data.clone();
         final float[] data2 = data.clone();
@@ -231,7 +230,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
 
     private static void checkIsCorrect(RandomSeed seed, BlockSumDataFilter filter)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, 57);
 
         for (final int width : primes)

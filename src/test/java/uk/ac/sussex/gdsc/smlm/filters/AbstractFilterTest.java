@@ -14,10 +14,10 @@ import org.junit.jupiter.api.BeforeEach;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.test.DataCache;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.DataCache;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class AbstractFilterTest implements Function<RandomSeed, Object>
@@ -156,7 +156,7 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
     public Object apply(RandomSeed source)
     {
         // Just store the random generator and the empty data
-        return new FloatData(TestSettings.getRandomGenerator(source.getSeed()));
+        return new FloatData(RNGFactory.create(source.getSeed()));
     }
 
     /**

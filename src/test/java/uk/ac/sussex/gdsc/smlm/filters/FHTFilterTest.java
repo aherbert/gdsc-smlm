@@ -34,12 +34,12 @@ import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
-import uk.ac.sussex.gdsc.test.TestCounter;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.IndexSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestCounter;
+import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 @SuppressWarnings({ "javadoc" })
 public class FHTFilterTest
@@ -67,7 +67,7 @@ public class FHTFilterTest
         final int size = 16;
         final int ex = 5, ey = 7;
         final int ox = 1, oy = 2;
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
         // This is offset from the centre
         final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);

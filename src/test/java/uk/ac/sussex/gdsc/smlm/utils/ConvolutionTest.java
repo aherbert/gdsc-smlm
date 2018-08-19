@@ -13,14 +13,14 @@ import gnu.trove.list.array.TDoubleArrayList;
 import pl.edu.icm.jlargearrays.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class ConvolutionTest
@@ -51,7 +51,7 @@ public class ConvolutionTest
     @SeededTest
     public void canComputeConvolution(RandomSeed seed)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         int size = 10;
         for (int i = 0; i < sizeLoops; i++)
         {
@@ -81,7 +81,7 @@ public class ConvolutionTest
     @SeededTest
     public void canComputeDoubleConvolution(RandomSeed seed)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         int size = 10;
         for (int i = 0; i < sizeLoops; i++)
         {
@@ -133,7 +133,7 @@ public class ConvolutionTest
     {
         ExtraAssumptions.assume(logger, Level.INFO);
         ExtraAssumptions.assume(TestComplexity.HIGH);
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         int size = 10;
         for (int i = 0; i < sizeLoops; i++)
@@ -181,7 +181,7 @@ public class ConvolutionTest
     {
         ExtraAssumptions.assume(logger, Level.INFO);
         ExtraAssumptions.assume(TestComplexity.HIGH);
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         int size = 10;
         for (int i = 0; i < sizeLoops; i++)
@@ -246,7 +246,7 @@ public class ConvolutionTest
 
     private static void singleVsDoubleSpeedTest(RandomSeed seed, int size, double s)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         final int RUNS = 1000;
 
         final double[] data1 = randomData(random, size);
@@ -300,7 +300,7 @@ public class ConvolutionTest
 
     private static void singleVsDoubleFFTSpeedTest(RandomSeed seed, int size, double s)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         final int RUNS = 1000;
 
         final double[] data1 = randomData(random, size);
@@ -366,7 +366,7 @@ public class ConvolutionTest
     @SeededTest
     public void canComputeScaledConvolution(RandomSeed seed)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         final TDoubleArrayList list = new TDoubleArrayList();
         int size = 10;
         for (int i = 0; i < sizeLoops; i++)
@@ -407,7 +407,7 @@ public class ConvolutionTest
     @SeededTest
     public void canComputeDoubleScaledConvolution(RandomSeed seed)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         final TDoubleArrayList list = new TDoubleArrayList();
         int size = 10;
         for (int i = 0; i < sizeLoops / 2; i++)
@@ -473,7 +473,7 @@ public class ConvolutionTest
     @SeededTest
     public void canComputeScaledConvolutionWithEarlyExit(RandomSeed seed)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         int size = 10;
         final int sizeLoops = 4;
         final int sLoops = 2;
@@ -518,7 +518,7 @@ public class ConvolutionTest
     @SeededTest
     public void canComputeDoubleScaledConvolutionWithEarlyExit(RandomSeed seed)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         int size = 10;
         final int sizeLoops = 4;
         final int sLoops = 2;
@@ -593,7 +593,7 @@ public class ConvolutionTest
 
     private static void doScaledSpeedTest(RandomSeed seed, int size, double s, int scale)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         final int RUNS = 100;
 
         final double[] data1 = randomData(random, size);

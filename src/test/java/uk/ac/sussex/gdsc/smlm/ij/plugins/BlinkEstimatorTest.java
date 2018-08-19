@@ -57,12 +57,12 @@ import uk.ac.sussex.gdsc.smlm.model.UniformDistribution;
 import uk.ac.sussex.gdsc.smlm.model.UniformIllumination;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class BlinkEstimatorTest
@@ -114,7 +114,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM],
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM],
                 particles, fixedFraction, false, true);
     }
 
@@ -123,7 +123,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[MEDIUM], tOn[MEDIUM], tOff[MEDIUM],
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[MEDIUM], tOn[MEDIUM], tOff[MEDIUM],
                 particles, fixedFraction, false, true);
     }
 
@@ -132,7 +132,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[HIGH], tOn[MEDIUM], tOff[MEDIUM],
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[HIGH], tOn[MEDIUM], tOff[MEDIUM],
                 particles, fixedFraction, false, true);
     }
 
@@ -141,7 +141,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[LOW], tOn[HIGH], tOff[HIGH],
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[LOW], tOn[HIGH], tOff[HIGH],
                 particles, fixedFraction, false, true);
     }
 
@@ -150,7 +150,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH],
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH],
                 particles, fixedFraction, false, true);
     }
 
@@ -159,7 +159,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[HIGH], tOn[HIGH], tOff[HIGH],
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[HIGH], tOn[HIGH], tOff[HIGH],
                 particles, fixedFraction, false, true);
     }
 
@@ -168,7 +168,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[LOW], tOn[LOW], tOff[LOW], particles,
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[LOW], tOn[LOW], tOff[LOW], particles,
                 fixedFraction, false, true);
     }
 
@@ -177,7 +177,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[MEDIUM], tOn[LOW], tOff[LOW],
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[MEDIUM], tOn[LOW], tOff[LOW],
                 particles, fixedFraction, false, true);
     }
 
@@ -186,7 +186,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(TestSettings.getRandomGenerator(seed.getSeed()), nBlinks[HIGH], tOn[LOW], tOff[LOW], particles,
+        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[HIGH], tOn[LOW], tOff[LOW], particles,
                 fixedFraction, false, true);
     }
 
@@ -195,7 +195,7 @@ public class BlinkEstimatorTest
     {
         // Skip this as it is slow
         Assumptions.assumeTrue(false);
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         final int particles = 1000;
         final double fixedFraction = 1;

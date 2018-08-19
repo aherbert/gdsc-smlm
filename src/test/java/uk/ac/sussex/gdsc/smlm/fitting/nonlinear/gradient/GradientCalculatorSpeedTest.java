@@ -27,16 +27,16 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
-import uk.ac.sussex.gdsc.test.functions.IntArrayFormatSupplier;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -266,7 +266,7 @@ public class GradientCalculatorSpeedTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
+        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
 
         final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length)
                 : new GradientCalculator(beta.length);
@@ -360,7 +360,7 @@ public class GradientCalculatorSpeedTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
+        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
 
         final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length)
                 : new GradientCalculator(beta.length);
@@ -396,7 +396,7 @@ public class GradientCalculatorSpeedTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList);
+        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
 
         final GradientCalculator calc = new GradientCalculator6();
         final GradientCalculator calc2 = new GradientCalculator6();
@@ -454,7 +454,7 @@ public class GradientCalculatorSpeedTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList, true);
+        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
         final double delta = 1e-3;
         final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
@@ -567,7 +567,7 @@ public class GradientCalculatorSpeedTest
         try
         {
             background = 1e-2;
-            createData(TestSettings.getRandomGenerator(seed.getSeed()), 1, iter, paramsList, yList, true);
+            createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
             final EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
@@ -664,7 +664,7 @@ public class GradientCalculatorSpeedTest
         final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
         final int n = blockWidth * blockWidth;
         final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
         for (int run = 5; run-- > 0;)
         {

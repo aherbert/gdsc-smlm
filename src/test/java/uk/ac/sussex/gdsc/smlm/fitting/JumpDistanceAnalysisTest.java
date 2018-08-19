@@ -21,13 +21,13 @@ import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunc
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
@@ -156,7 +156,7 @@ public class JumpDistanceAnalysisTest
 
     private void fitSinglePopulation(RandomSeed seed, boolean mle)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final String title = String.format("%s Single  ", (mle) ? "MLE" : "LSQ");
         AssertionError error = null;
         NEXT_D: for (final double d : D)
@@ -219,7 +219,7 @@ public class JumpDistanceAnalysisTest
     private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction)
     {
         ExtraAssumptions.assume(TestComplexity.MAXIMUM);
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
         AssertionError error = null;
@@ -253,7 +253,7 @@ public class JumpDistanceAnalysisTest
     {
         // Skip this as it is slow
         Assumptions.assumeTrue(false);
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         out = null;
         try

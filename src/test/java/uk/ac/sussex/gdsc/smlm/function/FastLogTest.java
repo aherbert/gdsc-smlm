@@ -17,14 +17,14 @@ import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.function.ICSIFastLog.DataType;
-import uk.ac.sussex.gdsc.test.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.TimingService;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class FastLogTest
@@ -220,7 +220,7 @@ public class FastLogTest
         final float e = (float) Math.log(v);
         final float o = f.log(v);
         final float error = FloatEquality.relativeError(e, o);
-        logger.log(uk.ac.sussex.gdsc.test.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
+        logger.log(uk.ac.sussex.gdsc.test.utils.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
         if (test)
         {
             if (Double.isNaN(e) && Double.isNaN(o))
@@ -304,7 +304,7 @@ public class FastLogTest
         final double e = Math.log(v);
         final double o = f.log(v);
         final double error = DoubleEquality.relativeError(e, o);
-        logger.log(uk.ac.sussex.gdsc.test.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
+        logger.log(uk.ac.sussex.gdsc.test.utils.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
         if (test)
         {
             if (Double.isNaN(e) && Double.isNaN(o))
@@ -352,7 +352,7 @@ public class FastLogTest
 
     private static float[] generateRandomFloats(RandomSeed seed, int n)
     {
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final float[] d = new float[n];
         for (int i = 0; i < d.length; i++)
             d[i] = nextUniformFloat(r);
@@ -543,7 +543,7 @@ public class FastLogTest
         ExtraAssumptions.assume(TestComplexity.HIGH);
 
         // All float values is a lot so we do a representative set
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
         final double[] d = new double[10000000];
         final double[] logD = new double[d.length];
@@ -583,7 +583,7 @@ public class FastLogTest
         ExtraAssumptions.assume(TestComplexity.HIGH);
 
         // All float values is a lot so we do a representative set
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
         final double[] d = new double[100000];
         final double[] logD = new double[d.length];
@@ -613,7 +613,7 @@ public class FastLogTest
         ExtraAssumptions.assume(logger, Level.INFO);
         ExtraAssumptions.assume(TestComplexity.HIGH);
 
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
 
         final TurboList<TestFastLog> test = new TurboList<>();
         final int n = 13;
@@ -775,7 +775,7 @@ public class FastLogTest
         ExtraAssumptions.assume(logger, Level.INFO);
         ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final float[] x = new float[1000000];
         for (int i = 0; i < x.length; i++)
             x[i] = nextUniformFloat(r);
@@ -864,7 +864,7 @@ public class FastLogTest
         ExtraAssumptions.assume(logger, Level.INFO);
         ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final double[] x = new double[1000000];
         for (int i = 0; i < x.length; i++)
             x[i] = nextUniformDouble(r);
@@ -915,7 +915,7 @@ public class FastLogTest
         ExtraAssumptions.assume(logger, Level.INFO);
         ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final double[] x = new double[1000000];
         for (int i = 0; i < x.length; i++)
             x[i] = nextUniformDouble(r);
@@ -945,7 +945,7 @@ public class FastLogTest
         ExtraAssumptions.assume(logger, Level.INFO);
         ExtraAssumptions.assume(TestComplexity.MEDIUM);
 
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final double[] x = new double[1000000];
         final float[] xf = new float[x.length];
         for (int i = 0; i < x.length; i++)

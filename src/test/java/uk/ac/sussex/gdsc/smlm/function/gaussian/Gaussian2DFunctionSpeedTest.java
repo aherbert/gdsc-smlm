@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.test.DataCache;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.DataCache;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -72,7 +72,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
     @Override
     public Object apply(RandomSeed source)
     {
-        return new Gaussian2DFunctionSpeedTestData(TestSettings.getRandomGenerator(source.getSeed()));
+        return new Gaussian2DFunctionSpeedTestData(RNGFactory.create(source.getSeed()));
     }
 
     //	private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();

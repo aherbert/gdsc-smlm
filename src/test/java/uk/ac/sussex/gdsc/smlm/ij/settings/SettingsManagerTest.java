@@ -30,9 +30,9 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class SettingsManagerTest
@@ -40,7 +40,7 @@ public class SettingsManagerTest
     @SeededTest
     public void canReadWriteConfiguration(RandomSeed seed) throws IOException
     {
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
 
         final Calibration.Builder builder = Calibration.newBuilder();
         builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());

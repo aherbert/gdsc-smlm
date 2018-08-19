@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class TensorTest
@@ -93,7 +93,7 @@ public class TensorTest
     @SeededTest
     public void canComputeSameTensor(RandomSeed seed)
     {
-        final UniformRandomProvider random = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
         final int w = 3, h = 4;
         final float[] data = new float[w * h];
         for (int i = 0; i < 10; i++)

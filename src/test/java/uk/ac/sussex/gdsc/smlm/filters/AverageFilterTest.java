@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.internal.ArrayComparisonFailure;
 
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AverageFilterTest extends AbstractFilterTest
@@ -104,7 +103,7 @@ public class AverageFilterTest extends AbstractFilterTest
     }
 
     private static void averageIsCorrect(UniformRandomProvider rg, int width, int height, float boxSize,
-            boolean internal, DataFilter filter) throws ArrayComparisonFailure
+            boolean internal, DataFilter filter)
     {
         final float[] data1 = createData(rg, width, height);
         final float[] data2 = data1.clone();
@@ -127,7 +126,7 @@ public class AverageFilterTest extends AbstractFilterTest
 
     private static void checkIsCorrect(RandomSeed seed, DataFilter filter)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         for (final int width : primes)
             for (final int height : primes)
                 for (final float boxSize : boxSizes)

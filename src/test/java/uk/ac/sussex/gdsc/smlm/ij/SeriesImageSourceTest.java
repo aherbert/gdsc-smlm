@@ -41,9 +41,9 @@ import ij.measure.Calibration;
 import uk.ac.sussex.gdsc.core.utils.Random;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class SeriesImageSourceTest
@@ -141,7 +141,7 @@ public class SeriesImageSourceTest
             for (int j = 0; j < d; j++)
                 pixels[k++] = (float[]) stacks[i].getPixels(j + 1);
 
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         for (int i = 0; i < 3; i++)
         {
             final int[] random = Random.sample(pixels.length / 2, pixels.length, r);

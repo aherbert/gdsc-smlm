@@ -34,12 +34,12 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.test.DataCache;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.DataCache;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 /**
  * Base class for testing the function solvers
@@ -217,7 +217,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     {
         // Per observation read noise.
         // This is generated once so create the randon generator here.
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(source.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(source.getSeed());
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
         final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, gain, gainSD);
         final double[] w = new double[size * size];
@@ -258,7 +258,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         if (solver.isWeighted())
             solver.setWeights(getWeights(seed, noiseModel));
 
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
 
         for (final double s : signal)
         {
@@ -333,7 +333,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
             solver.setWeights(getWeights(seed, noiseModel));
 
         final int LOOPS = 5;
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final StoredDataStatistics[] stats = new StoredDataStatistics[6];
         final String[] statName = { "Signal", "X", "Y" };
 
@@ -666,7 +666,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         }
 
         // Draw target data
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
         // fit with 2 peaks using the known params.
@@ -780,7 +780,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         }
 
         // Draw target data
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
         // fit with 2 peaks using the known params.

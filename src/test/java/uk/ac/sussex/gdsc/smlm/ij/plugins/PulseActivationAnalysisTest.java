@@ -30,10 +30,10 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.opentest4j.AssertionFailedError;
 
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.TestUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestUtils;
 
 /**
  * Test the PulseActivationAnalysis unmixing functions
@@ -44,7 +44,7 @@ public class PulseActivationAnalysisTest
     @SeededTest
     public void canLinearlyUnmix2Channels(RandomSeed seed)
     {
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         for (int n = 0; n <= 2; n++)
             for (int m = 0; m <= 2; m++)
                 canLinearlyUnmix2Channels(r, n, m);
@@ -125,7 +125,7 @@ public class PulseActivationAnalysisTest
     @SeededTest
     public void canLinearlyUnmix3Channels(RandomSeed seed)
     {
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         for (int n = 0; n <= 3; n++)
             for (int m = 0; m <= 6; m++)
                 canLinearlyUnmix3Channels(r, n, m);

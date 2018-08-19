@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
-import uk.ac.sussex.gdsc.test.TestComplexity;
-import uk.ac.sussex.gdsc.test.TestLog;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLog;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AreaAverageFilterTest extends AbstractFilterTest
@@ -235,7 +235,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
     @SeededTest
     public void areaAverageCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final int max = 50;
         final float[] data = createData(rg, max, max);
         final AreaAverageFilter filter = new AreaAverageFilter();
@@ -294,7 +294,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
     @SeededTest
     public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final int max = 50;
         final float[] data = createData(rg, max, max);
         final AreaAverageFilter filter = new AreaAverageFilter();
@@ -316,7 +316,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
     @SeededTest
     public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final int max = 50;
         final float[] data = createData(rg, max, max);
         final AreaAverageFilter filter = new AreaAverageFilter();
@@ -339,7 +339,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
     @SeededTest
     public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final int max = 50;
         final float[] data = createData(rg, max, max);
         final AreaAverageFilter filter = new AreaAverageFilter();

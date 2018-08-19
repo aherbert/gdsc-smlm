@@ -18,10 +18,10 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.TestSettings;
-import uk.ac.sussex.gdsc.test.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class FisherInformationMatrixTest
@@ -46,7 +46,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLB(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         for (int n = 1; n < 10; n++)
             canComputeCRLB(rg, n, 0, true);
     }
@@ -54,7 +54,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLBWithZeros(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         for (int n = 2; n < 10; n++)
         {
             canComputeCRLB(rg, n, 1, true);
@@ -65,7 +65,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLBWithReciprocal(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         for (int n = 1; n < 10; n++)
             canComputeCRLB(rg, n, 0, false);
     }
@@ -73,7 +73,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLBWithReciprocalWithZeros(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         for (int n = 2; n < 10; n++)
         {
             canComputeCRLB(rg, n, 1, false);
@@ -84,7 +84,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void inversionDoesNotMatchReciprocal(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         for (int n = 1; n < 10; n++)
         {
             final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, 0);
@@ -188,7 +188,7 @@ public class FisherInformationMatrixTest
         final int k = 5;
         final int n = 10;
 
-        final UniformRandomProvider UniformRandomProvider = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider UniformRandomProvider = RNGFactory.create(seed.getSeed());
         final FisherInformationMatrix m = createRandomMatrix(UniformRandomProvider, n);
         final DenseMatrix64F e = m.getMatrix();
         if (logger.isLoggable(level))
@@ -221,7 +221,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void computeWithSubsetReducesTheCRLB(RandomSeed seed)
     {
-        final UniformRandomProvider rg = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
         final Gaussian2DFunction f = createFunction(10, 1);
         final int perPeak = f.getGradientParametersPerPeak();
         // Create a matrix with 2 peaks + background

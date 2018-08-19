@@ -36,10 +36,10 @@ import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.Maths;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.test.DataCache;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.utils.DataCache;
 
 @SuppressWarnings({ "javadoc" })
 public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
@@ -69,7 +69,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @Override
     public Object apply(RandomSeed seed)
     {
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
 
         final PerPixelCameraModelTestData data = new PerPixelCameraModelTestData();
         data.bias = new float[size];
@@ -117,7 +117,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
         final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = createModel(data, initialise);
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
         final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
         for (int i = 0; i < 10; i++)
         {
@@ -164,7 +164,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
         final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = createModel(data, initialise);
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
         final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
         for (int i = 0; i < 10; i++)
         {
@@ -222,7 +222,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
         final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
         final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
         for (int j = 0; j < 10; j++)
         {
@@ -237,7 +237,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
         final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
         final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
         for (int j = 0; j < 10; j++)
         {
@@ -311,7 +311,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
         final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = createModel(data, initialise);
-        final UniformRandomProvider rand = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
         final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
         for (int i = 0; i < 10; i++)
         {

@@ -27,9 +27,9 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
-import uk.ac.sussex.gdsc.test.TestSettings;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RNGFactory;
 
 @SuppressWarnings({ "javadoc" })
 public class PrecomputedFunctionTest
@@ -37,7 +37,7 @@ public class PrecomputedFunctionTest
     @SeededTest
     public void precomputedValueFunctionWrapsPrecomputedValues(RandomSeed seed)
     {
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final int size = 100;
         final double[] v = new PseudoRandomGenerator(size, r).getSequence();
         final ValueFunction f = new PrecomputedValueFunction(v);
@@ -66,7 +66,7 @@ public class PrecomputedFunctionTest
     public void precomputedGradient1FunctionWrapsPrecomputedValues(RandomSeed seed)
     {
         final int n = 3;
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final int size = 100;
         final double[] v = new PseudoRandomGenerator(size, r).getSequence();
         final double[][] g1 = new double[size][];
@@ -102,7 +102,7 @@ public class PrecomputedFunctionTest
     public void precomputedGradient2FunctionWrapsPrecomputedValues(RandomSeed seed)
     {
         final int n = 3;
-        final UniformRandomProvider r = TestSettings.getRandomGenerator(seed.getSeed());
+        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
         final int size = 100;
         final double[] v = new PseudoRandomGenerator(size, r).getSequence();
         final double[][] g1 = new double[size][];
