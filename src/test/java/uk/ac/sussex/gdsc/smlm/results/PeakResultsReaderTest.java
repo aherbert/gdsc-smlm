@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.utils.rng.RadixStringSampler;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -969,8 +970,8 @@ public class PeakResultsReaderTest
             else
                 results.add(startFrame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
         }
-        results.setName(Long.toString(rg.nextLong()));
-        results.setConfiguration(Long.toString(rg.nextLong()));
+        results.setName(RadixStringSampler.nextBase64String(rg, 16));
+        results.setConfiguration(RadixStringSampler.nextBase64String(rg, 16));
         results.setBounds(new Rectangle(rg.nextInt(10), rg.nextInt(10), rg.nextInt(100), rg.nextInt(100)));
         final CalibrationWriter cal = new CalibrationWriter();
         cal.setNmPerPixel(rg.nextDouble());
