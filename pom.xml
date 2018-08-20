@@ -75,6 +75,8 @@ Software for single molecule localisation microscopy (SMLM)
   <properties>
     <license.licenseName>gpl_v3</license.licenseName>
     <license.copyrightOwners>Alex Herbert</license.copyrightOwners>
+    <junit.platform.version>1.2.0</junit.platform.version>
+    <junit5.version>5.2.0</junit5.version>
   </properties>
 
   <build>
@@ -142,17 +144,17 @@ Software for single molecule localisation microscopy (SMLM)
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.2.0</version>
+            <version>${junit.platform.version}</version>
           </dependency>
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.2.0</version>
+            <version>${junit5.version}</version>
           </dependency>
           <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.2.0</version>
+            <version>${junit5.version}</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -322,6 +324,34 @@ Software for single molecule localisation microscopy (SMLM)
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>eclipse</id>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit5.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>org.junit.platform</groupId>
+          <artifactId>junit-platform-launcher</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 
