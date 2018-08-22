@@ -50,7 +50,7 @@ Software for single molecule localisation microscopy (SMLM)
   </ciManagement>
   <scm>
     <connection>scm:git:git://github.com/aherbert/gdsc-smlm.git</connection>
-    <developerConnection>scm:git:ssh://github.com:aherbert/gdsc-smlm.git</developerConnection>
+    <developerConnection>scm:git:ssh://github.com/aherbert/gdsc-smlm.git</developerConnection>
     <url>https://github.com/aherbert/gdsc-smlm</url>
   </scm>
 
@@ -75,8 +75,8 @@ Software for single molecule localisation microscopy (SMLM)
   <properties>
     <license.licenseName>gpl_v3</license.licenseName>
     <license.copyrightOwners>Alex Herbert</license.copyrightOwners>
-    <junit.platform.version>1.2.0</junit.platform.version>
-    <junit5.version>5.2.0</junit5.version>
+    <org.junit.platform.version>1.2.0</org.junit.platform.version>
+    <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
   </properties>
 
   <build>
@@ -144,17 +144,17 @@ Software for single molecule localisation microscopy (SMLM)
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>${junit.platform.version}</version>
+            <version>${org.junit.platform.version}</version>
           </dependency>
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit5.version}</version>
+            <version>${org.junit.jupiter.version}</version>
           </dependency>
           <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>${junit5.version}</version>
+            <version>${org.junit.jupiter.version}</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -332,12 +332,12 @@ Software for single molecule localisation microscopy (SMLM)
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit5.version}</version>
+            <version>${org.junit.jupiter.version}</version>
           </dependency>
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>${junit.platform.version}</version>
+            <version>${org.junit.platform.version}</version>
             <scope>test</scope>
           </dependency>
         </dependencies>
