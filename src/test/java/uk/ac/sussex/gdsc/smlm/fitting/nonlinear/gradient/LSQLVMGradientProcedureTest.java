@@ -457,7 +457,7 @@ public class LSQLVMGradientProcedureTest
         LogRecord record = TestLog.getTimingRecord(factory1.getClass().getSimpleName() + nparams, time1,
                 factory2.getClass().getSimpleName(), time2);
         if (!doAssert && record.getLevel() == TestLevel.TEST_FAILURE)
-            record.setLevel(TestLevel.STAGE_FAILURE);
+            record.setLevel(TestLevel.TEST_WARNING);
         logger.log(record);
     }
 
