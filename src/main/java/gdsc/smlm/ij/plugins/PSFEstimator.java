@@ -23,6 +23,7 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.gui.LegacyGenericDialog;
 import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFEstimatorSettings;
@@ -41,7 +42,6 @@ import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.PlugInFilter;
@@ -166,7 +166,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		this.imp = imp;
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Estimate 2D Gaussian to fit maxima");
 
@@ -264,7 +264,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		return flags;
 	}
 
-	private boolean readDialog(GenericDialog gd)
+	private boolean readDialog(LegacyGenericDialog gd)
 	{
 		initialPeakStdDev0 = gd.getNextNumber();
 		initialPeakStdDev1 = gd.getNextNumber();
@@ -355,7 +355,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		// Extra parameters are needed for interlaced data
 		if (interlacedData)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new LegacyGenericDialog(TITLE);
 			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
 					+ "Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n"
 					+ "Block = The number of continuous frames containing data\n"

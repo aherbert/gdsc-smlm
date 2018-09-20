@@ -19,12 +19,12 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
+import gdsc.smlm.ij.gui.LegacyGenericDialog;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.results.Calibration;
 import ij.IJ;
-import ij.gui.GenericDialog;
 import ij.gui.YesNoCancelDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
@@ -111,7 +111,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 

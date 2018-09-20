@@ -146,37 +146,46 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		gd.addMessage("Fit 2D Gaussian to identified maxima");
 
-		gd.addMessage("--- Image smoothing ---\n" + "- Within a 2n+1 box\n");
+		//gd.addMessage("--- Image smoothing ---\n" + "- Within a 2n+1 box\n");
 		gd.addSlider("Smoothing", 0, 4.5, smooth);
 
-		gd.addMessage("--- Maxima identification ---\n" + "- Within a 2n+1 box\n");
+		//gd.addMessage("--- Maxima identification ---\n" + "- Within a 2n+1 box\n");
 		gd.addSlider("Box_size", 1, 15, boxSize);
 		gd.addSlider("Background", minValue, maxValue, background);
 		gd.addSlider("Min_height", 0, maxValue, peakHeight);
 		gd.addSlider("Fraction_above_background", 0, 1.01, fractionAboveBackground);
 		gd.addSlider("Min_width", 0, 20, peakWidth);
 		gd.addSlider("Top_N", 0, 20, topN);
-		gd.addCheckbox("Block_find_algorithm", blockFindAlgorithm);
-		gd.addCheckbox("Neighbour_check", neighbourCheck);
+    String[] labels = {"Block_find_algorithm", "Neighbour_check"};
+    boolean[] defaultValues = {blockFindAlgorithm, neighbourCheck};
+    gd.addCheckboxGroup(1, 2, labels, defaultValues);
+		//gd.addCheckbox("Block_find_algorithm", blockFindAlgorithm);
+		//gd.addCheckbox("Neighbour_check", neighbourCheck);
 		gd.addSlider("Border", 0, 15, border);
 
-		gd.addMessage("--- Gaussian fitting ---");
-		Component splitLabel = gd.getMessage();
+		//gd.addMessage("--- Gaussian fitting ---");
+		//Component splitLabel = gd.getMessage();
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitFunction]);
-		gd.addCheckbox("Fit_background", fitBackground);
+    String[] labels2 = {"Fit_background", "Single_fit"};
+    boolean[] defaultValues2 = {fitBackground, singleFit};
+    gd.addCheckboxGroup(1, 2, labels2, defaultValues2);
+		//gd.addCheckbox("Fit_background", fitBackground);
+    //gd.addCheckbox("Single_fit", singleFit);
 		String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
 		gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitCriteria]);
 		gd.addNumericField("Max_iterations", maxIterations, 0);
 		gd.addNumericField("Significant_digits", significantDigits, 0);
 		gd.addNumericField("Coord_delta", delta, 4);
-		gd.addCheckbox("Single_fit", singleFit);
 		gd.addNumericField("Single_region_size", singleRegionSize, 0);
 		gd.addNumericField("Initial_StdDev", initialPeakStdDev, 3);
-		gd.addCheckbox("Log_progress", logProgress);
-		gd.addCheckbox("Show_deviations", showDeviations);
-		gd.addCheckbox("Filter_results", filterResults);
-		gd.addCheckbox("Show_fit", showFit);
+		String[] labels3 = {"Log_progress", "Show_deviations", "Filter_results", "Show_fit"};
+		boolean[] defaultValues3 = {logProgress, showDeviations, filterResults, showFit};
+		gd.addCheckboxGroup(2, 2, labels3, defaultValues3);
+		//gd.addCheckbox("Log_progress", logProgress);
+		//gd.addCheckbox("Show_deviations", showDeviations);
+		//gd.addCheckbox("Filter_results", filterResults);
+		//gd.addCheckbox("Show_fit", showFit);
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
@@ -186,36 +195,37 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		//		setProperties();
 		//		this.run(imp.getProcessor());
 
-		if (gd.getLayout() != null)
-		{
-			GridBagLayout grid = (GridBagLayout) gd.getLayout();
-
-			int xOffset = 0, yOffset = 0;
-			int lastY = -1, rowCount = 0;
-			for (Component comp : gd.getComponents())
-			{
-				// Check if this should be the second major column
-				if (comp == splitLabel)
-				{
-					xOffset += 2;
-					yOffset -= rowCount;
-				}
-				// Reposition the field
-				GridBagConstraints c = grid.getConstraints(comp);
-				if (lastY != c.gridy)
-					rowCount++;
-				lastY = c.gridy;
-				c.gridx = c.gridx + xOffset;
-				c.gridy = c.gridy + yOffset;
-				c.insets.left = c.insets.left + 10 * xOffset;
-				c.insets.top = 0;
-				c.insets.bottom = 0;
-				grid.setConstraints(comp, c);
-			}
-
-			if (IJ.isLinux())
-				gd.setBackground(new Color(238, 238, 238));
-		}
+		// Not possible from ImageJ 1.52g onwards
+//		if (gd.getLayout() != null)
+//		{
+//			GridBagLayout grid = (GridBagLayout) gd.getLayout();
+//
+//			int xOffset = 0, yOffset = 0;
+//			int lastY = -1, rowCount = 0;
+//			for (Component comp : gd.getComponents())
+//			{
+//				// Check if this should be the second major column
+//				if (comp == splitLabel)
+//				{
+//					xOffset += 2;
+//					yOffset -= rowCount;
+//				}
+//				// Reposition the field
+//				GridBagConstraints c = grid.getConstraints(comp);
+//				if (lastY != c.gridy)
+//					rowCount++;
+//				lastY = c.gridy;
+//				c.gridx = c.gridx + xOffset;
+//				c.gridy = c.gridy + yOffset;
+//				c.insets.left = c.insets.left + 10 * xOffset;
+//				c.insets.top = 0;
+//				c.insets.bottom = 0;
+//				grid.setConstraints(comp, c);
+//			}
+//
+//			if (IJ.isLinux())
+//				gd.setBackground(new Color(238, 238, 238));
+//		}
 
 		gd.showDialog();
 

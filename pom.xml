@@ -139,7 +139,7 @@
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
-			<version>1.50a</version>
+			<version>1.52g</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

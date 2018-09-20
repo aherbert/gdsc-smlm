@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.gui.LegacyGenericDialog;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -34,7 +36,6 @@ import gdsc.smlm.results.filter.TraceFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import ij.IJ;
-import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.io.OpenDialog;
@@ -280,7 +281,7 @@ public class FilterAnalysis implements PlugIn
 	{
 		if (resultsList != null && inputDirectory.equals(lastInputDirectory))
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 			gd.addMessage("Re-use results from the same directory (no to refresh)?");
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
@@ -324,7 +325,7 @@ public class FilterAnalysis implements PlugIn
 
 	private boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput)
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		int total = 0;
@@ -421,7 +422,7 @@ public class FilterAnalysis implements PlugIn
 		return true;
 	}
 
-	private boolean readDialog(GenericDialog gd, boolean fileInput)
+	private boolean readDialog(LegacyGenericDialog gd, boolean fileInput)
 	{
 		if (!fileInput)
 		{

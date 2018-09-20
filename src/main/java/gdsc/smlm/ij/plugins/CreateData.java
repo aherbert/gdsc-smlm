@@ -76,6 +76,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.gui.LegacyGenericDialog;
 import gdsc.smlm.ij.settings.Atom;
 import gdsc.smlm.ij.settings.Compound;
 import gdsc.smlm.ij.settings.CreateDataSettings;
@@ -118,7 +119,6 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
@@ -584,7 +584,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					System.out.printf("Mean samples = %f\n", mean);
 					if (mean < 0.5)
 					{
-						GenericDialog gd = new GenericDialog(TITLE);
+						LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 						gd.addMessage("The mean samples per frame is low: " + Utils.rounded(mean) + "\n \nContinue?");
 						gd.enableYesNoCancel();
 						gd.hideCancelButton();
@@ -1019,7 +1019,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		if (max > totalSteps)
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
+			LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			final double simulationStepsPerFrame = (settings.stepsPerSecond * settings.exposureTime) / 1000.0;
@@ -3720,7 +3720,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private boolean showSimpleDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getCreateDataSettings();
@@ -3924,7 +3924,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			String[] maskImages = createDistributionImageList();
 			if (maskImages != null)
 			{
-				gd = new GenericDialog(TITLE);
+				gd = new LegacyGenericDialog(TITLE);
 				gd.addMessage("Select the mask image for the distribution");
 				gd.addChoice("Distribution_mask", maskImages, settings.distributionMask);
 				if (maskListContainsStacks)
@@ -3951,7 +3951,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * @param gd
 	 * @return
 	 */
-	private List<String> addPSFOptions(GenericDialog gd)
+	private List<String> addPSFOptions(LegacyGenericDialog gd)
 	{
 		gd.addMessage("--- PSF Model ---");
 		List<String> imageNames = PSFCombiner.createImageList();
@@ -3973,7 +3973,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * @param gd
 	 * @return
 	 */
-	private boolean collectPSFOptions(GenericDialog gd, List<String> imageNames)
+	private boolean collectPSFOptions(LegacyGenericDialog gd, List<String> imageNames)
 	{
 		settings.psfModel = gd.getNextChoice();
 		settings.enterWidth = gd.getNextBoolean();
@@ -3981,7 +3981,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			imagePSF = settings.psfModel.equals(PSF_MODELS[PSF_MODELS.length - 1]);
 
 		// Show a second dialog to get the PSF parameters we need
-		GenericDialog gd2 = new GenericDialog(TITLE);
+		LegacyGenericDialog gd2 = new LegacyGenericDialog(TITLE);
 		gd2.addMessage("Configure the " + settings.psfModel + " PSF model");
 		if (imagePSF)
 		{
@@ -4042,10 +4042,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private boolean getHistogramOptions()
 	{
-		GenericDialog gd;
+		LegacyGenericDialog gd;
 		if (settings.showHistograms && settings.chooseHistograms)
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new LegacyGenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
 			for (int i = 0; i < displayHistograms.length; i++)
 				gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
@@ -4069,7 +4069,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Fixed length tracks will be drawn, non-overlapping in time. This is the simplest
 		// simulation for moving molecules
 
-		GenericDialog gd = new GenericDialog(TITLE);
+		LegacyGenericDialog gd = new LegacyGenericDialog(TITLE);
 
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getCreateDataSettings();
@@ -4331,7 +4331,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			maskImages = createDistributionImageList();
 			if (maskImages != null)
 			{
-				gd = new GenericDialog(TITLE);
+				gd = new LegacyGenericDialog(TITLE);
 				gd.addMessage("Select the mask image for the distribution");
 				gd.addChoice("Distribution_mask", maskImages, settings.distributionMask);
 				if (maskListContainsStacks)
@@ -4346,7 +4346,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else if (settings.distribution.equals(DISTRIBUTION[GRID]))
 		{
-			gd = new GenericDialog(TITLE);
+			gd = new LegacyGenericDialog(TITLE);
 			gd.addMessage("Select grid for the distribution");
 			gd.addNumericField("Cell_size", settings.cellSize, 0);
 			gd.addSlider("p-binary", 0, 1, settings.probabilityBinary);
@@ -4384,7 +4384,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 			{
-				gd = new GenericDialog(TITLE);
+				gd = new LegacyGenericDialog(TITLE);
 				gd.addMessage("Select the sphere radius for the diffusion confinement");
 				gd.addSlider("Confinement_radius (nm)", 0, 2000, settings.confinementRadius);
 				gd.showDialog();
@@ -4398,7 +4398,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					maskImages = createDistributionImageList();
 				if (maskImages != null)
 				{
-					gd = new GenericDialog(TITLE);
+					gd = new LegacyGenericDialog(TITLE);
 					gd.addMessage("Select the mask image for the diffusion confinement");
 					gd.addChoice("Confinement_mask", maskImages, settings.confinementMask);
 					if (maskListContainsStacks)
@@ -4418,7 +4418,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.compoundMolecules)
 		{
 			// Show a second dialog where the molecule configuration is specified
-			gd = new GenericDialog(TITLE);
+			gd = new LegacyGenericDialog(TITLE);
 
 			gd.addMessage("Specify the compound molecules");
 			gd.addTextAreas(settings.compoundText, null, 20, 80);
@@ -4455,7 +4455,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		SettingsManager.saveSettings(globalSettings);
 
-		gd = new GenericDialog(TITLE);
+		gd = new LegacyGenericDialog(TITLE);
 		gd.addMessage("Configure the photon distribution: " + settings.photonDistribution);
 		if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.photonDistribution))
 		{
