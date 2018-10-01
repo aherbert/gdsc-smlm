@@ -55,11 +55,7 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
         super(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
@@ -130,11 +126,7 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {

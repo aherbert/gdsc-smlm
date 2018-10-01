@@ -469,11 +469,7 @@ public class CubicSplineManager implements PlugIn
 	//@formatter:on
     private CubicSplineManagerSettings.Builder pluginSettings;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

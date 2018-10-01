@@ -631,11 +631,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         this.directFilter = (DirectFilter) f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public FitConfiguration clone()
     {
@@ -2272,11 +2268,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         this.peakResultValidationData = peakResultValidationData;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitConfiguration#validateFit(int, double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramDevs)
     {
@@ -2912,11 +2904,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
             return newResult;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public FractionalAssignment[] getAssignments(int predictedId)
         {
@@ -2937,44 +2925,28 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
             return p;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public void setValidationResult(int result)
         {
             throw new NotImplementedException("The validation result should not be set on a dynamic result");
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
-         */
+        /** {@inheritDoc} */
         @Override
         public int getValidationResult()
         {
             throw new NotImplementedException("The validation result should not be set on a dynamic result");
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean ignore()
         {
             return false;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isNotDuplicate()
         {
@@ -3640,22 +3612,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup()
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup()
     {
         setup(0);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(int flags)
     {
@@ -3689,13 +3653,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         return flags;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(uk.ac.sussex.gdsc.smlm.results.filter.FilterSetupData[]
-     * )
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(int flags, FilterSetupData... filterSetupData)
     {
@@ -3731,11 +3689,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFilterSetupFlags()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getFilterSetupFlags() throws IllegalStateException
     {
@@ -3743,11 +3697,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         return filterSetupFlags;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
-     */
+    /** {@inheritDoc} */
     @Override
     public FilterSetupData[] getFilterSetupData() throws IllegalStateException
     {
@@ -3755,24 +3705,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         return filterSetupData;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#accept(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean accept(PreprocessedPeakResult peak)
     {
         return (filterResult = validate(peak)) == 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#validate(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public int validate(PreprocessedPeakResult peak)
     {
@@ -3786,11 +3726,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         return flags;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getValidationFlags()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getValidationFlags()
     {
@@ -3898,33 +3834,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFilterType()
-     */
+    /** {@inheritDoc} */
     @Override
     public FilterType getFilterType()
     {
         return FilterType.DIRECT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getResult()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getResult()
     {
         return filterResult;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public IDirectFilter copy()
     {

@@ -121,66 +121,42 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel
         return s;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSx(double z)
     {
         return getS(z - gamma, zDepth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSx(double z, double[] ds_dz)
     {
         return getS1(z - gamma, zDepth, ds_dz);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSx2(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSx2(double z, double[] ds_dz)
     {
         return getS2(z - gamma, ds_dz);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSy(double z)
     {
         return getS(z + gamma, zDepth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSy(double z, double[] ds_dz)
     {
         return getS1(z + gamma, zDepth, ds_dz);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSy2(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSy2(double z, double[] ds_dz)
     {

@@ -131,11 +131,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
         sumLogFactorialK = sum;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood()
     {
@@ -161,11 +157,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
         return ll + sumLogFactorialK;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood(double[] gradient)
     {
@@ -210,11 +202,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
         return ll + sumLogFactorialK;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood(int i)
     {
@@ -234,11 +222,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
         return l - k * Math.log(l) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k)) - logAlpha;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood(double[] gradient, int i)
     {
@@ -310,11 +294,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
         return FastMath.exp(-nll);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean canComputeGradient()
     {

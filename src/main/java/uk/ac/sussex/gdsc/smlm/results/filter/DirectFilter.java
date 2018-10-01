@@ -38,56 +38,35 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
     @XStreamOmitField
     private float strength = Float.NaN;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup()
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup()
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(final int flags)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#setup(int,
-     * uk.ac.sussex.gdsc.smlm.results.filter.FilterSetupData[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(int flags, FilterSetupData... filterSetupData)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFlags()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getFilterSetupFlags() throws IllegalStateException
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
-     */
+    /** {@inheritDoc} */
     @Override
     public FilterSetupData[] getFilterSetupData() throws IllegalStateException
     {
@@ -134,54 +113,32 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
         return (flags & bits) != 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#accept(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     final public boolean accept(final PreprocessedPeakResult peak)
     {
         return (result = validate(peak)) == 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#validate(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public abstract int validate(final PreprocessedPeakResult peak);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getFilterType()
-     */
+    /** {@inheritDoc} */
     @Override
     public FilterType getFilterType()
     {
         return FilterType.DIRECT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getResult()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getResult()
     {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public IDirectFilter copy()
     {

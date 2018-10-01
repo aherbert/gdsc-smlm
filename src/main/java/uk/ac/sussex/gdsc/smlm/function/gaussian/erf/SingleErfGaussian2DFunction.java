@@ -105,12 +105,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
     @Override
     public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * ValueProcedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ValueProcedure procedure)
     {
@@ -130,11 +125,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] computeValues(double[] variables)
     {

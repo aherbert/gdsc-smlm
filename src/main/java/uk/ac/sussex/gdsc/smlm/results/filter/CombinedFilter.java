@@ -86,11 +86,7 @@ public abstract class CombinedFilter extends DirectFilter
             dfilter2 = (DirectFilter) filter2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter clone()
     {
@@ -211,11 +207,7 @@ public abstract class CombinedFilter extends DirectFilter
         return result2 == 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#setup(uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(MemoryPeakResults peakResults)
     {
@@ -306,11 +298,7 @@ public abstract class CombinedFilter extends DirectFilter
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {
@@ -318,22 +306,14 @@ public abstract class CombinedFilter extends DirectFilter
         filter2.end();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumericalValue()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getNumericalValue()
     {
         return filter1.getNumericalValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumericalValueName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getNumericalValueName()
     {
@@ -420,11 +400,7 @@ public abstract class CombinedFilter extends DirectFilter
      */
     protected abstract Filter createFilter(Filter f1, Filter f2);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
@@ -433,11 +409,7 @@ public abstract class CombinedFilter extends DirectFilter
         return createFilter(filter1.create(p1), filter2.create(p2));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -449,33 +421,21 @@ public abstract class CombinedFilter extends DirectFilter
         System.arraycopy(p2, 0, parameters, p1.length, p2.length);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#subsetWithFailCount()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean subsetWithFailCount()
     {
         return filter1.subsetWithFailCount() && filter2.subsetWithFailCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#length()
-     */
+    /** {@inheritDoc} */
     @Override
     public int length()
     {
         return filter1.length() + filter2.length();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#lowerLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] lowerLimit()
     {
@@ -494,11 +454,7 @@ public abstract class CombinedFilter extends DirectFilter
         return lower;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] upperLimit()
     {
@@ -519,22 +475,14 @@ public abstract class CombinedFilter extends DirectFilter
         return upper;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#sequence()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] sequence()
     {
         return combine(filter1.sequence(), filter2.sequence());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {
@@ -549,11 +497,7 @@ public abstract class CombinedFilter extends DirectFilter
         return s;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getChromosomeParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] getChromosomeParameters()
     {

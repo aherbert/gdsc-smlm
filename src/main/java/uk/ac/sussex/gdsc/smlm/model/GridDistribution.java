@@ -139,11 +139,7 @@ public class GridDistribution implements SpatialDistribution
         nCells = nCellsPerRow * nCellsPerRow;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#next()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] next()
     {
@@ -190,11 +186,7 @@ public class GridDistribution implements SpatialDistribution
         return previous;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithin(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWithin(double[] xyz)
     {
@@ -204,11 +196,7 @@ public class GridDistribution implements SpatialDistribution
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWithinXY(double[] xyz)
     {
@@ -218,11 +206,7 @@ public class GridDistribution implements SpatialDistribution
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] xyz)
     {

@@ -88,11 +88,7 @@ public class FakePerPixelCameraModel extends FixedPixelCameraModel
         super(bias, gain, variance);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isPerPixelModel()
     {

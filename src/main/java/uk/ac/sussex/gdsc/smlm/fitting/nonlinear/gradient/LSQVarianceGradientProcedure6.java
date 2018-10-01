@@ -67,11 +67,7 @@ public class LSQVarianceGradientProcedure6 extends LSQVarianceGradientProcedure
             throw new IllegalArgumentException("Function must compute 6 gradients");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(final double Ei, double[] Eix)
     {

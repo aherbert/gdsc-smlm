@@ -61,44 +61,28 @@ public class NonNormaliser implements Normaliser
         return sum;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, int size)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, float[] out, int size)
     {
         System.arraycopy(data, 0, out, 0, size);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, int maxx, int maxy, int border)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
     {
@@ -110,11 +94,7 @@ public class NonNormaliser implements Normaliser
             System.arraycopy(data, i, out, i, width);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(double[] data, float[] out, int size)
     {
@@ -122,11 +102,7 @@ public class NonNormaliser implements Normaliser
             out[i] = (float) (data[i]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
     {

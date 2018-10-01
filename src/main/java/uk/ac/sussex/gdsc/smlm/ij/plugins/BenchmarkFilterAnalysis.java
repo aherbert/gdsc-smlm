@@ -443,11 +443,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 border = xlimit = ylimit = 0;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -729,11 +725,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         isHeadless = java.awt.GraphicsEnvironment.isHeadless();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -5771,11 +5763,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         uniqueIdCount = 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore#add(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int uniqueId)
     {
@@ -6244,11 +6232,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             this.coordinateStore = coordinateStore;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -6313,11 +6297,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             this.gridCoordinateStore = new GridCoordinateStore(bounds.x, bounds.y, bounds.width, bounds.height, 0, 0);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -6720,11 +6700,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             MultiPathFilter.resetValidationFlag(ga_resultsListToScore);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(List<? extends Chromosome<FilterScore>> individuals)
     {
@@ -6758,11 +6734,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         return filters;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.FitnessFunction#fitness(uk.ac.sussex.gdsc.smlm.ga.Chromosome)
-     */
+    /** {@inheritDoc} */
     @Override
     public FilterScore fitness(Chromosome<FilterScore> chromosome)
     {
@@ -6780,11 +6752,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         return new SimpleFilterScore(scoreResult, true, scoreResult.criteria >= minCriteria);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.FitnessFunction#shutdown()
-     */
+    /** {@inheritDoc} */
     @Override
     public void shutdown()
     {
@@ -6969,11 +6937,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see uk.ac.sussex.gdsc.smlm.search.ScoreFunction#findOptimum(double[][])
-     */
+    /** {@inheritDoc} */
     @Override
     public SearchResult<FilterScore> findOptimum(double[][] points)
     {
@@ -7009,11 +6973,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         return new SearchResult<>(filter.getParameters(), max);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see uk.ac.sussex.gdsc.smlm.search.FullScoreFunction#score(double[][])
-     */
+    /** {@inheritDoc} */
     @Override
     public SearchResult<FilterScore>[] score(double[][] points)
     {
@@ -7052,11 +7012,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         return scores;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.FullScoreFunction#cut(uk.ac.sussex.gdsc.smlm.search.SearchResult[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("unchecked")
     public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size)
@@ -7108,11 +7064,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
     private double limit = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#progress(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void progress(double fraction)
     {
@@ -7132,55 +7084,35 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         IJ.showProgress(fraction);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#progress(long, long)
-     */
+    /** {@inheritDoc} */
     @Override
     public void progress(long position, long total)
     {
         progress((double) position / total);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#incrementProgress(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void incrementProgress(double fraction)
     {
         // Ignore
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#log(java.lang.String, java.lang.Object[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void log(String format, Object... args)
     {
         // Ignore
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#status(java.lang.String, java.lang.Object[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void status(String format, Object... args)
     {
         IJ.showStatus(ga_statusPrefix + String.format(format, args));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#isEnded()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isEnded()
     {
@@ -7188,33 +7120,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#isProgress()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isProgress()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#isLogging()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isLog()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.core.logging.TrackProgress#isStatus()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isStatus()
     {

@@ -60,11 +60,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
         return new MultiNBFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda)
     {
@@ -87,11 +83,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
         return I;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda, final double[] d2uda2)
     {
@@ -181,12 +173,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
             super.forEach(procedure);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -208,12 +195,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -240,12 +222,7 @@ public class MultiNBFreeCircularErfGaussian2DFunction extends MultiFreeCircularE
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.
-     * ExtendedGradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ExtendedGradient2Procedure procedure)
     {

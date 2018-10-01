@@ -476,11 +476,7 @@ public abstract class ImageSource
      */
     public abstract boolean isValid(int frame);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {

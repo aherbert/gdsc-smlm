@@ -516,33 +516,21 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
         return ParameterType.SNR.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
         return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift, precision and Z-depth";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 9;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
@@ -575,11 +563,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
         return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getParameterIncrement(int index)
     {
@@ -607,11 +591,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -655,11 +635,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
             EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE,
             ZCoordinateFilter.DEFAULT_RANGE };
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -670,11 +646,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
                 (float) params[7], (float) params[8]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
@@ -682,11 +654,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
                 parameters[5], parameters[6], (float) parameters[7], (float) parameters[8]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -701,11 +669,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
         setMax(parameters, 8, maxZ);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public int lowerBoundOrientation(int index)
     {
@@ -741,11 +705,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		//@formatter:on
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] upperLimit()
     {
@@ -754,11 +714,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
                 ZCoordinateFilter.UPPER_LIMIT, ZCoordinateFilter.UPPER_LIMIT };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {
@@ -825,11 +781,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
         return maxZ;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#initialiseState()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void initialiseState()
     {

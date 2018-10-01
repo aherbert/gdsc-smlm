@@ -155,14 +155,7 @@ public class MultiPathFilter implements Cloneable
             isValid = new boolean[totalCandidates];
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(uk.ac.sussex.gdsc.smlm.results.
-         * filter.MultiPathFilter.
-         * SelectedResult)
-         */
+        /** {@inheritDoc} */
         @Override
         public void add(SelectedResult selectedResult)
         {
@@ -174,36 +167,21 @@ public class MultiPathFilter implements Cloneable
                     isFit[results[i].getCandidateId()] = true;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isFit(int candidateId)
         {
             return isFit[candidateId];
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isValid(int candidateId)
         {
             return isValid[candidateId];
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(uk.ac.sussex.gdsc.smlm.results
-         * .filter.
-         * PreprocessedPeakResult)
-         */
+        /** {@inheritDoc} */
         @Override
         public void pass(PreprocessedPeakResult result)
         {
@@ -217,14 +195,7 @@ public class MultiPathFilter implements Cloneable
             isValid[result.getCandidateId()] = true;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(uk.ac.sussex.gdsc.smlm.
-         * results.filter.
-         * PreprocessedPeakResult)
-         */
+        /** {@inheritDoc} */
         @Override
         public void passMin(PreprocessedPeakResult result)
         {
@@ -259,25 +230,14 @@ public class MultiPathFilter implements Cloneable
      */
     private static class NullSelectedResultStore implements SelectedResultStore
     {
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(uk.ac.sussex.gdsc.smlm.results.
-         * filter.MultiPathFilter.
-         * SelectedResult)
-         */
+        /** {@inheritDoc} */
         @Override
         public void add(SelectedResult selectedResult)
         {
             // Do nothing
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isFit(int candidateId)
         {
@@ -285,39 +245,21 @@ public class MultiPathFilter implements Cloneable
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isValid(int candidateId)
         {
             return false;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(uk.ac.sussex.gdsc.smlm.results
-         * .filter.
-         * PreprocessedPeakResult)
-         */
+        /** {@inheritDoc} */
         @Override
         public void pass(PreprocessedPeakResult result)
         {
             // Do nothing
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(uk.ac.sussex.gdsc.smlm.
-         * results.filter.
-         * PreprocessedPeakResult)
-         */
+        /** {@inheritDoc} */
         @Override
         public void passMin(PreprocessedPeakResult result)
         {
@@ -501,11 +443,7 @@ public class MultiPathFilter implements Cloneable
         return new MultiPathFilter(copy(filter), copy(minFilter), residualsThreshold);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj)
     {
@@ -526,11 +464,7 @@ public class MultiPathFilter implements Cloneable
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+    /** {@inheritDoc} */
     @Override
     public int hashCode()
     {
@@ -832,11 +766,7 @@ public class MultiPathFilter implements Cloneable
                 count = countNewResult(results);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(ResultRank o)
         {
@@ -2598,143 +2528,91 @@ public class MultiPathFilter implements Cloneable
             this.a = a;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#size()
-         */
+        /** {@inheritDoc} */
         @Override
         public int size()
         {
             return a.length;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#isEmpty()
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isEmpty()
         {
             return size() == 0;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#contains(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean contains(Object o)
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#iterator()
-         */
+        /** {@inheritDoc} */
         @Override
         public Iterator<FractionalAssignment> iterator()
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#toArray()
-         */
+        /** {@inheritDoc} */
         @Override
         public Object[] toArray()
         {
             return a;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#toArray(java.lang.Object[])
-         */
+        /** {@inheritDoc} */
         @Override
         public <T> T[] toArray(T[] a)
         {
             return a;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#add(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean add(FractionalAssignment e)
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#remove(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean remove(Object o)
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#containsAll(java.util.Collection)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean containsAll(Collection<?> c)
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#addAll(java.util.Collection)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean addAll(Collection<? extends FractionalAssignment> c)
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#removeAll(java.util.Collection)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean removeAll(Collection<?> c)
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#retainAll(java.util.Collection)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean retainAll(Collection<?> c)
         {
             throw new NotImplementedException();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Collection#clear()
-         */
+        /** {@inheritDoc} */
         @Override
         public void clear()
         {

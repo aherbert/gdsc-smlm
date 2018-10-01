@@ -36,11 +36,7 @@ import java.util.List;
  */
 public class ChromosomeComparator<T extends Comparable<T>> implements Comparator<Chromosome<T>>
 {
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compare(Chromosome<T> chromosome1, Chromosome<T> chromosome2)
     {

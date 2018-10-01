@@ -341,11 +341,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
         f.forEach(new SimpleValueProcedure(yFit));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean computeValue(double[] y, double[] yFit, double[] a)
     {
@@ -399,12 +395,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
      */
     protected abstract double computeFunctionValue(double[] a);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFisherInformationMatrix(double[],
-     * double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
     {
@@ -435,11 +426,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
      */
     protected abstract FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#isBounded()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isBounded()
     {
@@ -447,11 +434,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setBounds(double[] lower, double[] upper)
     {
@@ -476,22 +459,14 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
         bounds.setGradientFunction(f);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setWeights(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWeights(double[] weights)
     {

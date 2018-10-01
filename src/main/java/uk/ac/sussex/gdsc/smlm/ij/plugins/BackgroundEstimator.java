@@ -137,11 +137,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
         return IJ.setupDialog(imp, FLAGS);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {
@@ -260,11 +256,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
             wo.add(pw);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(ImageProcessor ip)
     {
@@ -288,11 +280,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
         results.add(result);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setNPasses(int nPasses)
     {

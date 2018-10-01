@@ -147,11 +147,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
         Arrays.fill(data, 0.0);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da)
     {

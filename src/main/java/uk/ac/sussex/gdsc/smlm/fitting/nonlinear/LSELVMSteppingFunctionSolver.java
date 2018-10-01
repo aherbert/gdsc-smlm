@@ -119,22 +119,14 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         super(FunctionSolverType.LSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#preProcess()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void preProcess()
     {
         totalSumOfSquares = Double.NaN;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#createGradientProcedure(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected LVMGradientProcedure createGradientProcedure(double[] y)
     {
@@ -186,11 +178,6 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         throw new NotImplementedException();
     }
 
-    //	/*
-    //	 * (non-Javadoc)
-    //	 *
-    //	 * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
-    //	 */
     //	@Override
     //	protected FisherInformationMatrix computeFisherInformationMatrix()
     //	{
@@ -212,11 +199,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
     //		return new FisherInformationMatrix(gradientProcedure.getAlphaLinear(), f.getNumberOfGradients());
     //	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getTotalSumOfSquares()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getTotalSumOfSquares()
     {
@@ -225,33 +208,21 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         return totalSumOfSquares;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getResidualSumOfSquares()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getResidualSumOfSquares()
     {
         return value;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getCoefficientOfDetermination()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getCoefficientOfDetermination()
     {
         return 1.0 - (value / getTotalSumOfSquares());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getAdjustedCoefficientOfDetermination()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getAdjustedCoefficientOfDetermination()
     {
@@ -259,22 +230,14 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
                 getNumberOfFittedParameters());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getMeanSquaredError()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMeanSquaredError()
     {
         return value / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {

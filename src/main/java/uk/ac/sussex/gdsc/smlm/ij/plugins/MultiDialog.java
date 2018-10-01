@@ -362,11 +362,7 @@ public class MultiDialog extends Dialog
         return wasCanceled;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e)
     {
@@ -384,11 +380,7 @@ public class MultiDialog extends Dialog
                 list.deselect(i);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void keyTyped(KeyEvent paramKeyEvent)
     {
@@ -429,11 +421,7 @@ public class MultiDialog extends Dialog
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.KeyListener#keyReleased(java.awt.event.KeyEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void keyReleased(KeyEvent paramKeyEvent)
     {
@@ -508,11 +496,7 @@ public class MultiDialog extends Dialog
         return theText;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void windowClosing(WindowEvent e)
     {
@@ -592,22 +576,14 @@ public class MultiDialog extends Dialog
     /** The last event from {@link ItemEvent#getStateChange()} captured in {@link #itemStateChanged(ItemEvent)}. */
     protected int lastEvent = -1;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void mouseClicked(MouseEvent paramMouseEvent)
     {
         modifiers = paramMouseEvent.getModifiers();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void itemStateChanged(ItemEvent paramItemEvent)
     {

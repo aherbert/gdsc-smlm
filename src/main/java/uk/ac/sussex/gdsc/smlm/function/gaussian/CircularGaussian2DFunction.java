@@ -61,11 +61,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
         peakFactors = new double[npeaks][5];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
@@ -83,11 +79,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
     /** The index for the x width gradient pre-factor */
     protected static final int AX = 4;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {

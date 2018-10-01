@@ -62,11 +62,7 @@ public class EJMLLinearSolver
         {
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.ejml.factory.LinearSolver#setA(org.ejml.data.Matrix64F)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean setA(DenseMatrix64F A)
         {
@@ -89,55 +85,35 @@ public class EJMLLinearSolver
             return false;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.ejml.factory.LinearSolver#quality()
-         */
+        /** {@inheritDoc} */
         @Override
         public double quality()
         {
             return 0;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.ejml.factory.LinearSolver#solve(org.ejml.data.Matrix64F, org.ejml.data.Matrix64F)
-         */
+        /** {@inheritDoc} */
         @Override
         public void solve(DenseMatrix64F B, DenseMatrix64F X)
         {
             CommonOps.mult(A, B, X);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.ejml.factory.LinearSolver#invert(org.ejml.data.Matrix64F)
-         */
+        /** {@inheritDoc} */
         @Override
         public void invert(DenseMatrix64F A_inv)
         {
             System.arraycopy(A.data, 0, A_inv.data, 0, A.data.length);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.ejml.factory.LinearSolver#modifiesA()
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean modifiesA()
         {
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.ejml.factory.LinearSolver#modifiesB()
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean modifiesB()
         {

@@ -285,11 +285,7 @@ public class AstigmatismModelManager implements PlugIn
         OPTIONS2 = Arrays.copyOf(OPTIONS, 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

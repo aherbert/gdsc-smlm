@@ -125,11 +125,7 @@ public class OffsetValueFunction extends PrecomputedValueFunction
         return func;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.NamedFunction#getParameterName(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public String getParameterName(int i)
     {

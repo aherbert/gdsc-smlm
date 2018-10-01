@@ -407,11 +407,7 @@ public class FHTFilter extends BaseFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public FHTFilter clone()
     {

@@ -64,11 +64,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
         return new MultiFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise0(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise0(double[] a)
     {
@@ -106,11 +102,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
         return sum;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise1(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise1(double[] a)
     {
@@ -132,11 +124,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Function#initialise2(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise2(double[] a)
     {
@@ -158,11 +146,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction#initialiseExtended2(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialiseExtended2(double[] a)
     {
@@ -550,11 +534,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda)
     {
@@ -578,11 +558,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
         return I;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda, final double[] d2uda2)
     {
@@ -654,12 +630,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
         return 5;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -706,12 +677,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -739,12 +705,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.
-     * ExtendedGradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ExtendedGradient2Procedure procedure)
     {

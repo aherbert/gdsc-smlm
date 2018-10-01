@@ -138,11 +138,7 @@ public class CalibrationWriter extends CalibrationReader
         return calibrationBuilder;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader#getCalibrationOrBuilder()
-     */
+    /** {@inheritDoc} */
     @Override
     public CalibrationOrBuilder getCalibrationOrBuilder()
     {

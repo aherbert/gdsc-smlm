@@ -52,11 +52,7 @@ public class SplitResults implements PlugIn
     private static boolean showObjectMask = false;
     private static boolean nonMaskDataset = false;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

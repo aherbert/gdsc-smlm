@@ -158,44 +158,28 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
         return "Filter results using a shift factor. (X/Y shift is relative to initial peak width.)";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
         return shift;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getParameterIncrement(int index)
     {
@@ -203,11 +187,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
         return DEFAULT_INCREMENT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -215,11 +195,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
         return ParameterType.SHIFT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -227,55 +203,35 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
         return new ShiftFilter(updateParameter(shift, delta, DEFAULT_RANGE));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
         return new ShiftFilter(parameters[0]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
         setMax(parameters, 0, shift);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public int lowerBoundOrientation(int index)
     {
         return 1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] upperLimit()
     {
         return new double[] { UPPER_LIMIT };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {

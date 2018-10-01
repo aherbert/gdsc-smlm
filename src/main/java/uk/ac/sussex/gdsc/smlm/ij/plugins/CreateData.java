@@ -732,11 +732,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     private static int benchmarkImageId = 0;
     private static String benchmarkResultsName = "";
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -2824,11 +2820,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             qe = getQuantumEfficiency();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -5620,9 +5612,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     }
 
     /**
-     * Get a random generator. The generators used in the simulation can be adjusted by changing this method.
-     *
-     * (non-Javadoc)
+     * {@inheritDoc}
+     * 
+     * <p>The generators used in the simulation can be adjusted by changing this method.
      *
      * @see uk.ac.sussex.gdsc.smlm.model.RandomGeneratorFactory#createRandomGenerator()
      */

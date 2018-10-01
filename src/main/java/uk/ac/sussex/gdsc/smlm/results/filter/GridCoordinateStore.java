@@ -232,11 +232,7 @@ public class GridCoordinateStore implements CoordinateStore
         return new GridCoordinateStore(minx, miny, width, height, xyResolution, zResolution);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public GridCoordinateStore resize(int minx, int miny, int width, int height)
     {
@@ -291,22 +287,14 @@ public class GridCoordinateStore implements CoordinateStore
         setZResolution(zResolution);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getXYResolution()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getXYResolution()
     {
         return xyResolution;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getZResolution()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getZResolution()
     {
@@ -325,11 +313,7 @@ public class GridCoordinateStore implements CoordinateStore
             queue.add(x, y, z);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#flush()
-     */
+    /** {@inheritDoc} */
     @Override
     public void flush()
     {
@@ -401,11 +385,7 @@ public class GridCoordinateStore implements CoordinateStore
         return l;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#clear()
-     */
+    /** {@inheritDoc} */
     @Override
     public void clear()
     {
@@ -424,11 +404,7 @@ public class GridCoordinateStore implements CoordinateStore
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean contains(final double x, final double y, final double z)
     {
@@ -500,11 +476,7 @@ public class GridCoordinateStore implements CoordinateStore
         return (x > x2) ? x - x2 : x2 - x;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] find(final double x, final double y, final double z)
     {
@@ -559,44 +531,28 @@ public class GridCoordinateStore implements CoordinateStore
         return (min < Double.POSITIVE_INFINITY) ? match : null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinX()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getMinX()
     {
         return minx;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinY()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getMinY()
     {
         return miny;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getWidth()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getWidth()
     {
         return width;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getHeight()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getHeight()
     {

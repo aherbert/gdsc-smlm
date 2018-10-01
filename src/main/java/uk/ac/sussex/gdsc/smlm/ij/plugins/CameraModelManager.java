@@ -266,11 +266,7 @@ public class CameraModelManager implements PlugIn
 	//@formatter:on
     private CameraModelManagerSettings.Builder pluginSettings;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

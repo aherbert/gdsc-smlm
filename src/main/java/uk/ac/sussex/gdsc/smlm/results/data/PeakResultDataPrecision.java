@@ -30,22 +30,14 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PeakResultDataPrecision extends PeakResultDataDouble
 {
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public Double getValue(PeakResult result)
     {
         return (result.hasPrecision()) ? result.getPrecision() : 0.0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getValueName()
     {

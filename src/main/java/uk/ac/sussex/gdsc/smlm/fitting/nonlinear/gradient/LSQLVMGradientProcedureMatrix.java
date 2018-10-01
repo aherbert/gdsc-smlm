@@ -55,11 +55,7 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure
         alpha = new double[n][n];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da)
     {

@@ -267,11 +267,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
         return item;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e)
     {

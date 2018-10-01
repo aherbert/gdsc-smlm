@@ -50,154 +50,98 @@ public class NullCoordinateStore implements CoordinateStore
         return (coordinateStore == null) ? INSTANCE : coordinateStore;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getResolution()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getXYResolution()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getZResolution()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getZResolution()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void addToQueue(double x, double y, double z)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#flush()
-     */
+    /** {@inheritDoc} */
     @Override
     public void flush()
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(double x, double y, double z)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#clear()
-     */
+    /** {@inheritDoc} */
     @Override
     public void clear()
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean contains(double x, double y, double z)
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] find(double x, double y, double z)
     {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#newInstance()
-     */
+    /** {@inheritDoc} */
     @Override
     public CoordinateStore newInstance()
     {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public CoordinateStore resize(int minx, int miny, int maxx, int maxy)
     {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinX()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getMinX()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getMinY()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getMinY()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getWidth()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getWidth()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#getHeight()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getHeight()
     {

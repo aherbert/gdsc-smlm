@@ -232,22 +232,14 @@ public abstract class ItemGroup extends Group implements ItemShape
         return Arrays.toString(points);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return points.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public Point3f getCoordinate(int i)
     {

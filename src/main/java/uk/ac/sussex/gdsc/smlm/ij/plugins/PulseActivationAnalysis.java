@@ -379,33 +379,21 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
             return currentChannel - 1;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.core.clustering.DensityCounter.Molecule#getX()
-         */
+        /** {@inheritDoc} */
         @Override
         public float getX()
         {
             return x;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.core.clustering.DensityCounter.Molecule#getY()
-         */
+        /** {@inheritDoc} */
         @Override
         public float getY()
         {
             return y;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.core.clustering.DensityCounter.Molecule#getID()
-         */
+        /** {@inheritDoc} */
         @Override
         public int getID()
         {
@@ -418,11 +406,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
     private Activation[] specificActivations, nonSpecificActivations;
     private int[] count;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -1192,11 +1176,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {
@@ -1284,12 +1264,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
-     * OptionCollectedEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void optionCollected(OptionCollectedEvent e)
     {
@@ -1732,11 +1707,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
             this.density = density;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -1823,11 +1794,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
             this.dc = dc;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {

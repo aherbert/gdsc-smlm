@@ -65,11 +65,7 @@ public class SummariseResults implements PlugIn, MouseListener
     private int histgramBins;
     private int removeOutliers;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

@@ -249,11 +249,7 @@ public class BenchmarkFit implements PlugIn
                     answer[Gaussian2DFunction.Z_POSITION] };
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {

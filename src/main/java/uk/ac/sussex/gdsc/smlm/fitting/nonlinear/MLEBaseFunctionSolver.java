@@ -55,22 +55,14 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implement
         llr = Double.NaN;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihood()
     {
         return value;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihoodRatio()
     {
@@ -105,11 +97,7 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implement
      */
     protected abstract double computeObservedLogLikelihood(double[] y, double[] a);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getQ()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getQ()
     {

@@ -50,11 +50,7 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
         // We could check that y is positive ...
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double fi, double[] dfi_da)
     {
@@ -94,11 +90,7 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double fi)
     {

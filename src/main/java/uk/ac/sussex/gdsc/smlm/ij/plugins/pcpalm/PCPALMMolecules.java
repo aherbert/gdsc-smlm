@@ -201,11 +201,7 @@ public class PCPALMMolecules implements PlugIn
     /** The area. */
     static double area;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -2128,11 +2124,7 @@ public class PCPALMMolecules implements PlugIn
             return jacobian;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {
@@ -2153,11 +2145,7 @@ public class PCPALMMolecules implements PlugIn
             super(parameters);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double value(double[] point)
         {

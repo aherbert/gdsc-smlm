@@ -72,11 +72,7 @@ public class PerPixelNormaliser implements Normaliser
         return sum / normalisation[index];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, int size)
     {
@@ -84,11 +80,7 @@ public class PerPixelNormaliser implements Normaliser
             data[i] /= normalisation[i];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, float[] out, int size)
     {
@@ -96,11 +88,7 @@ public class PerPixelNormaliser implements Normaliser
             out[i] = data[i] / normalisation[i];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, int maxx, int maxy, int border)
     {
@@ -111,11 +99,7 @@ public class PerPixelNormaliser implements Normaliser
                 data[i] /= normalisation[i];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
     {
@@ -126,11 +110,7 @@ public class PerPixelNormaliser implements Normaliser
                 out[i] = data[i] / normalisation[i];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(double[] data, float[] out, int size)
     {
@@ -138,11 +118,7 @@ public class PerPixelNormaliser implements Normaliser
             out[i] = (float) (data[i] / normalisation[i]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.Normaliser#normalise(double[], float[], int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
     {

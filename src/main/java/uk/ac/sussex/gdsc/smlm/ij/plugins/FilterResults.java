@@ -77,11 +77,7 @@ public class FilterResults implements PlugIn
     private PrecisionResultProcedure pp;
     private WidthResultProcedure wp;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

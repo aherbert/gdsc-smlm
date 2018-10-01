@@ -87,22 +87,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         this.maxWidth = Math.max(0, maxWidth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#generateName()
-     */
+    /** {@inheritDoc} */
     @Override
     protected String generateName()
     {
         return "Width " + minWidth + "-" + maxWidth;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#setup(uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(MemoryPeakResults peakResults)
     {
@@ -116,22 +108,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#setup()
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup()
     {
         setup(minWidth, maxWidth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#setup(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(int flags)
     {
@@ -141,12 +125,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
             setup(minWidth, maxWidth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#setup(int,
-     * uk.ac.sussex.gdsc.smlm.results.filter.FilterSetupData[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setup(int flags, FilterSetupData... filterSetupData)
     {
@@ -180,22 +159,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
             lowerSigmaThreshold = 0f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#getFilterSetupFlags()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getFilterSetupFlags() throws IllegalStateException
     {
         return (widthEnabled) ? 0 : IDirectFilter.NO_WIDTH;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#accept(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean accept(PeakResult peak)
     {
@@ -203,23 +174,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         return sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter#getValidationFlags()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getValidationFlags()
     {
         return V_X_SD_FACTOR;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#validate(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public int validate(final PreprocessedPeakResult peak)
     {
@@ -229,33 +191,21 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
         return "Filter results using a width range. (Width is relative to initial peak width.)";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
@@ -268,11 +218,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getParameterIncrement(int index)
     {
@@ -286,11 +232,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -304,11 +246,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -322,22 +260,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
         return new WidthFilter2(parameters[0], parameters[1]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -345,143 +275,91 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
         setMax(parameters, 1, maxWidth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public int lowerBoundOrientation(int index)
     {
         return (index == 1) ? 1 : -1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] upperLimit()
     {
         return new double[] { WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {
         return new double[] { WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getSignal()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSignal()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getSNR()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSNR()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getMinWidth()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMinWidth()
     {
         return minWidth;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getMaxWidth()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMaxWidth()
     {
         return maxWidth;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getShift()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getShift()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getEShift()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getEShift()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getPrecision()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getPrecision()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getPrecisionType()
-     */
+    /** {@inheritDoc} */
     @Override
     public PrecisionType getPrecisionType()
     {
         return PrecisionType.NONE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getMinZ()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMinZ()
     {
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiFilter#getMaxZ()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMaxZ()
     {

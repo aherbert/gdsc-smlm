@@ -67,22 +67,14 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
         super(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
         return new SingleSimpleGaussian2DFunction(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {
@@ -182,11 +174,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {

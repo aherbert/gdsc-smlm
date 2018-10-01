@@ -287,11 +287,7 @@ public class FitType implements Cloneable
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public FitType clone()
     {

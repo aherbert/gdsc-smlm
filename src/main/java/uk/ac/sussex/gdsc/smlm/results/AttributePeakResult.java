@@ -41,33 +41,21 @@ public class AttributePeakResult extends PeakResult
     private int endFrame;
     private float precision;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#hasId()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasId()
     {
         return ((fields & FIELD_ID) == FIELD_ID);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#hasEndFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasEndFrame()
     {
         return ((fields & FIELD_END_FRAME) == FIELD_END_FRAME);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#hasPrecision()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasPrecision()
     {
@@ -113,11 +101,7 @@ public class AttributePeakResult extends PeakResult
         fields = fields & ~FIELD_PRECISION;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#getId()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getId()
     {
@@ -144,11 +128,7 @@ public class AttributePeakResult extends PeakResult
         //	clearHasId();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#getEndFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getEndFrame()
     {
@@ -184,11 +164,7 @@ public class AttributePeakResult extends PeakResult
         setEndFrame(endFrame);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#getPrecision()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getPrecision()
     {

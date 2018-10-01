@@ -44,11 +44,7 @@ public class FixedLifetimeImageModel extends ImageModel
         super(tOn, tOff, 0, 0, 0);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createActivationTime(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected double createActivationTime(double[] xyz)
     {
@@ -65,11 +61,7 @@ public class FixedLifetimeImageModel extends ImageModel
         return tAct;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
-     */
+    /** {@inheritDoc} */
     @Override
     protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
     {

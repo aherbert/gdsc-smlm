@@ -65,11 +65,7 @@ public class FloatImage2D extends Image2D
         super(image);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image2D#createData(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void createData(int size)
     {
@@ -116,11 +112,7 @@ public class FloatImage2D extends Image2D
         this.data = data;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image2D#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public FloatImage2D copy()
     {
@@ -137,22 +129,14 @@ public class FloatImage2D extends Image2D
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image2D#getDataLength()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getDataLength()
     {
         return data.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image2D#crop(int, int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public FloatImage2D crop(int x, int y, int w, int h) throws IllegalArgumentException
     {

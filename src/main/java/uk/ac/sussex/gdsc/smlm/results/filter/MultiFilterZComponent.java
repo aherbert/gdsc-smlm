@@ -44,12 +44,7 @@ public class MultiFilterZComponent extends MultiFilterComponent
         this.maxZ = (float) maxZ;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean fail(final PreprocessedPeakResult peak)
     {
@@ -57,11 +52,7 @@ public class MultiFilterZComponent extends MultiFilterComponent
         return (z > maxZ || z < minZ);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getType()
     {

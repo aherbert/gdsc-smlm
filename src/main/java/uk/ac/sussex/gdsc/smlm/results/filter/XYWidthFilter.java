@@ -83,22 +83,14 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
         return "Filter results using an upper XY width factor. (Width is relative to initial peak width.)";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -106,11 +98,7 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter
         return new XYWidthFilter(updateParameter(width, delta, DEFAULT_RANGE));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {

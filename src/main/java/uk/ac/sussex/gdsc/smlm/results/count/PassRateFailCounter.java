@@ -76,11 +76,7 @@ public class PassRateFailCounter extends BaseFailCounter
         return new PassRateFailCounter(Math.max(0, allowedCounts), passRate);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass()
     {
@@ -89,11 +85,7 @@ public class PassRateFailCounter extends BaseFailCounter
             throw new IllegalStateException("Unable to increment");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass(int n)
     {
@@ -104,11 +96,7 @@ public class PassRateFailCounter extends BaseFailCounter
             throw new IllegalStateException("Unable to increment");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail()
     {
@@ -117,11 +105,7 @@ public class PassRateFailCounter extends BaseFailCounter
             throw new IllegalStateException("Unable to increment");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail(int n)
     {
@@ -132,11 +116,7 @@ public class PassRateFailCounter extends BaseFailCounter
             throw new IllegalStateException("Unable to increment");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isOK()
     {
@@ -144,22 +124,14 @@ public class PassRateFailCounter extends BaseFailCounter
         return total <= allowedCounts || passCount / total >= passRate;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-     */
+    /** {@inheritDoc} */
     @Override
     public FailCounter newCounter()
     {
         return new PassRateFailCounter(allowedCounts, passRate);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
-     */
+    /** {@inheritDoc} */
     @Override
     public void reset()
     {

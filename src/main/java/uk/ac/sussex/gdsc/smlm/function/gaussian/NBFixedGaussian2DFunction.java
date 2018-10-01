@@ -49,11 +49,7 @@ public class NBFixedGaussian2DFunction extends FixedGaussian2DFunction
         super(npeaks, maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {

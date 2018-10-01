@@ -63,11 +63,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
         setSignificantDigits(significantDigits);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.model.StoppingCriteria#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {
@@ -85,22 +81,14 @@ public class ErrorStoppingCriteria extends StoppingCriteria
             insignificantImprovmentIteration = getMaximumIterations();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.model.StoppingCriteria#copyCoefficients(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void copyCoefficients(double[] a)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void evaluate(double oldError, double newError, double[] a)
     {

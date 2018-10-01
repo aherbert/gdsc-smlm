@@ -110,22 +110,14 @@ public class SNRHysteresisFilter extends HysteresisFilter
                 "limit are included. Any results below the lower SNR limit are excluded. " + super.getDescription();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 2 + super.getNumberOfParameters();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
@@ -141,11 +133,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -165,11 +153,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
     private static double[] defaultRange = new double[] { 0, 0, 0, 0, SNRFilter.DEFAULT_RANGE,
             SNRFilter.DEFAULT_RANGE };
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -188,11 +172,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
         return create(parameters);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
@@ -200,11 +180,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
                 (float) parameters[4], (float) parameters[5]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -215,11 +191,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
         parameters[5] = 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {

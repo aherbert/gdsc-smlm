@@ -101,22 +101,14 @@ public class Spot implements Comparable<Spot>, Cloneable
         return dx * dx + dy * dy;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(Spot o)
     {
         return Double.compare(o.score, score);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public Spot clone()
     {

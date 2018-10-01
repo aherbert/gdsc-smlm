@@ -526,11 +526,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
         return (GeometryArray) sphere.getShape(0).getGeometry();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f color)
     {
@@ -552,11 +548,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
                 material[i].setDiffuseColor(color);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f[] color) throws IllegalArgumentException
     {
@@ -586,11 +578,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
                 material[i].setDiffuseColor(color[i]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor4(Color4f[] color) throws IllegalArgumentException
     {
@@ -625,11 +613,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemAlpha(float[] alpha) throws IllegalArgumentException
     {
@@ -710,11 +694,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
         setTransparency(transparency);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemAlpha(float alpha) throws IllegalArgumentException
     {
@@ -765,11 +745,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
         setTransparency(transparency);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void getItemAlpha(float[] alpha) throws IllegalArgumentException
     {

@@ -261,11 +261,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
             requireSNR = (levels.length > 0);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -516,11 +512,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

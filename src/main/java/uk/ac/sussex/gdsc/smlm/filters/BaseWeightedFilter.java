@@ -70,11 +70,7 @@ public abstract class BaseWeightedFilter extends BaseFilter
      */
     protected abstract void newWeights();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public BaseWeightedFilter clone()
     {

@@ -710,11 +710,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
             this.maxCandidate = maxCandidate;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#clone()
-         */
+        /** {@inheritDoc} */
         @Override
         public FilterCandidates clone()
         {
@@ -784,11 +780,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
             multiFilter = BenchmarkSpotFit.multiFilter.clone();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -1064,11 +1056,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

@@ -41,11 +41,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
     private Normaliser weightedNormaliser = null;
     private double weightedNormaliserRadius = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.BaseWeightedFilter#newWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void newWeights()
     {

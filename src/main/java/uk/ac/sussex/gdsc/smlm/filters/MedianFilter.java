@@ -816,11 +816,7 @@ public class MedianFilter extends BaseFilter
         System.arraycopy(newData, 0, data, 0, length);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public MedianFilter clone()
     {

@@ -41,23 +41,14 @@ public class MultiFilterSNRComponent extends MultiFilterComponent
         this.snr = snr;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean fail(final PreprocessedPeakResult peak)
     {
         return peak.getSNR() < this.snr;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getType()
     {

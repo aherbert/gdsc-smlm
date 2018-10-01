@@ -63,11 +63,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
         nms.setNeighbourCheck(search < 3);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#find(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Spot[] find(final float[] data, final int width, final int height)
     {
@@ -90,11 +86,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
         return spots;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getPreprocessedData()
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] getPreprocessedData()
     {
@@ -160,11 +152,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public MaximaSpotFilter clone()
     {

@@ -104,11 +104,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
             this.tifPath = tifPath;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#toString()
-         */
+        /** {@inheritDoc} */
         @Override
         public String toString()
         {
@@ -817,11 +813,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	}
 	//@formatter:on
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -1238,11 +1230,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         return imp;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {
@@ -1258,33 +1246,21 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.ImageListener#imageOpened(ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public void imageOpened(ImagePlus imp)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.ImageListener#imageClosed(ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public void imageClosed(ImagePlus imp)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.ImageListener#imageUpdated(ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public void imageUpdated(ImagePlus imp)
     {

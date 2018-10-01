@@ -52,11 +52,7 @@ public class SearchResult<T extends Comparable<T>> implements Comparable<SearchR
         this.score = score;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(SearchResult<T> o)
     {

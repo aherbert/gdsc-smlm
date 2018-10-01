@@ -119,22 +119,14 @@ public class TraceFilter extends Filter
         return "Filter results that can be traced over time frames.";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
@@ -147,11 +139,7 @@ public class TraceFilter extends Filter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getParameterIncrement(int index)
     {
@@ -165,11 +153,7 @@ public class TraceFilter extends Filter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -183,11 +167,7 @@ public class TraceFilter extends Filter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -201,22 +181,14 @@ public class TraceFilter extends Filter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
         return new TraceFilter(parameters[0], (int) parameters[1]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -224,11 +196,7 @@ public class TraceFilter extends Filter
         setMax(parameters, 1, t);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {

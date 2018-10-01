@@ -2635,11 +2635,7 @@ public class AverageFilter extends BaseFilter
         System.arraycopy(newData, 0, data, 0, data.length);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public AverageFilter clone()
     {

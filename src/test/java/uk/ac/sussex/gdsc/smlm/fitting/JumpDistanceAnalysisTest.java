@@ -642,11 +642,7 @@ public class JumpDistanceAnalysisTest
             return new double[][] { data, d, f };
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#hashCode()
-         */
+        /** {@inheritDoc} */
         @Override
         public int hashCode()
         {

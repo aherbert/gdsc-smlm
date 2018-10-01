@@ -99,11 +99,7 @@ public class BatchPeakFit implements PlugIn
         xs = createXStream();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

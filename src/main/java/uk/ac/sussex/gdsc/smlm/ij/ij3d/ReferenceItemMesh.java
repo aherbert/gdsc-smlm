@@ -168,11 +168,7 @@ public class ReferenceItemMesh extends ItemMesh
         return ga;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void reorderFast(int[] indices) throws IllegalArgumentException
     {
@@ -268,11 +264,7 @@ public class ReferenceItemMesh extends ItemMesh
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f color)
     {
@@ -313,11 +305,7 @@ public class ReferenceItemMesh extends ItemMesh
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f[] color) throws IllegalArgumentException
     {
@@ -356,11 +344,7 @@ public class ReferenceItemMesh extends ItemMesh
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor4(Color4f[] color) throws IllegalArgumentException
     {
@@ -382,11 +366,7 @@ public class ReferenceItemMesh extends ItemMesh
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemAlpha(float[] alpha) throws IllegalArgumentException
     {
@@ -412,11 +392,7 @@ public class ReferenceItemMesh extends ItemMesh
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemAlpha(float alpha) throws IllegalArgumentException
     {
@@ -440,11 +416,7 @@ public class ReferenceItemMesh extends ItemMesh
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void getItemAlpha(float[] alpha) throws IllegalArgumentException
     {

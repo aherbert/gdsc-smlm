@@ -144,11 +144,7 @@ public class PCPALMClusters implements PlugIn
     private int nMolecules = 0;
     private double count = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

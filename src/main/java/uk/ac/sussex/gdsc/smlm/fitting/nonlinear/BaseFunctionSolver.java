@@ -95,22 +95,14 @@ public abstract class BaseFunctionSolver implements FunctionSolver
         this.type = type;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#getType()
-     */
+    /** {@inheritDoc} */
     @Override
     public FunctionSolverType getType()
     {
         return type;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#fit(double[], double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public FitStatus fit(double[] y, double[] yFit, double[] a, double[] aDev)
     {
@@ -150,11 +142,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
         // To be over-ridden
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#evaluate(double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean evaluate(double[] y, double[] yFit, double[] a)
     {
@@ -178,11 +166,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
         return status;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#computeDeviations(double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean computeDeviations(double[] y, double[] a, double[] aDev)
     {
@@ -349,44 +333,28 @@ public abstract class BaseFunctionSolver implements FunctionSolver
         return (d > 0) ? d : 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfFittedParameters()
     {
         return f.getNumberOfGradients();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedPoints()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfFittedPoints()
     {
         return numberOfFittedPoints;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#getIterations()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getIterations()
     {
         return iterations;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#getEvaluations()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getEvaluations()
     {
@@ -410,44 +378,28 @@ public abstract class BaseFunctionSolver implements FunctionSolver
         this.maxEvaluations = maxEvaluations;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#isBounded()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isBounded()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#isConstrained()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isConstrained()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#isStrictlyPositiveFunction()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isStrictlyPositiveFunction()
     {
@@ -471,44 +423,28 @@ public abstract class BaseFunctionSolver implements FunctionSolver
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setBounds(double[] lower, double[] upper)
     {
         // To be over-ridden
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#setConstraints(double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setConstraints(double[] lower, double[] upper)
     {
         // To be over-ridden
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#setWeights(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWeights(double[] weights)
     {
         // To be over-ridden
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#getValue()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getValue()
     {
@@ -538,11 +474,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
         return f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver#getName(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName(int i)
     {

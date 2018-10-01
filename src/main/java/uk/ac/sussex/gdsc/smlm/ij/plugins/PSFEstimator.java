@@ -113,11 +113,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
     {
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public int setup(String arg, ImagePlus imp)
     {
@@ -385,11 +381,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(ImageProcessor ip)
     {
@@ -810,11 +802,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
         sampleNew[Y] = new DescriptiveStatistics();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
             float meanIntensity, float[] params, float[] paramsStdDev)
@@ -879,11 +867,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

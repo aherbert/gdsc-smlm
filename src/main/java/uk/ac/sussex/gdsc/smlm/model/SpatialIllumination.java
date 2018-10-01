@@ -53,6 +53,8 @@ public interface SpatialIllumination
     public double[] getPulsedPhotons(double[] xyz, int t);
 
     /**
+     * Gets the average photons.
+     *
      * @return An estimate of the average photons per time frame
      */
     public double getAveragePhotons();

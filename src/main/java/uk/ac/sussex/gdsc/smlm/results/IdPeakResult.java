@@ -102,22 +102,14 @@ public class IdPeakResult extends PeakResult
         this.id = id;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#hasId()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasId()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#getId()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getId()
     {

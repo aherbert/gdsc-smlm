@@ -72,11 +72,7 @@ public class StandardFloatValueProcedure implements ValueProcedure
         f.forEach(this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(float)
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value)
     {

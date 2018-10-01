@@ -1441,11 +1441,7 @@ public class JumpDistanceAnalysis
             return values;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double value(double[] variables)
         {
@@ -1467,11 +1463,6 @@ public class JumpDistanceAnalysis
 
         // This has not been tested. It could be used for LVM fitting of the p-values. However MLE
         // is less sensitive to outliers of p-values.
-        //		/*
-        //		 * (non-Javadoc)
-        //		 *
-        //		 * @see uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
-        //		 */
         //		public double[][] jacobian(double[] variables)
         //		{
         //			// Compute the gradients using calculus differentiation:
@@ -1542,11 +1533,7 @@ public class JumpDistanceAnalysis
             return 1 - FastMath.exp(-x / (4 * params[0]));
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {
@@ -1557,11 +1544,7 @@ public class JumpDistanceAnalysis
             return values;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[][] jacobian(double[] variables)
         {
@@ -1681,11 +1664,7 @@ public class JumpDistanceAnalysis
             return values;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double value(double[] params)
         {
@@ -1807,22 +1786,14 @@ public class JumpDistanceAnalysis
             super(x, y, estimatedD, n);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] point) throws IllegalArgumentException
         {
             return getValue(point);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[][] jacobian(double[] variables)
         {
@@ -1944,11 +1915,7 @@ public class JumpDistanceAnalysis
             super(x, y, estimatedD, n);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double value(double[] parameters)
         {

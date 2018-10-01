@@ -30,33 +30,21 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class CircularSumFilter extends CircularFilter
 {
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeWeightedNormaliser(double)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Normaliser computeWeightedNormaliser(double radius)
     {
         return NonNormaliser.INSTANCE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeNormaliser(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Normaliser computeNormaliser(int nPoints)
     {
         return NonNormaliser.INSTANCE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public CircularSumFilter clone()
     {

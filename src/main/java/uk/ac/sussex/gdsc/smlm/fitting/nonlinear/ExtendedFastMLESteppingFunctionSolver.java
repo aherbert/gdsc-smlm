@@ -185,11 +185,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
             throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeStep(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void computeStep(double[] step)
     {

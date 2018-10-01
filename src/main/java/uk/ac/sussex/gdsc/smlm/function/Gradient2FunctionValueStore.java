@@ -112,56 +112,35 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
         this.f2 = f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {
         f1.initialise(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise1(double[] a)
     {
         f1.initialise(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {
         return f1.gradientIndices();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfGradients()
     {
         return f1.getNumberOfGradients();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient1Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -171,11 +150,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
         f1.forEach((Gradient1Procedure) this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da)
     {
@@ -183,23 +158,14 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
         p1.execute(value, dy_da);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Function#initialise2(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise2(double[] a)
     {
         f2.initialise2(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -209,11 +175,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
         f2.forEach((Gradient2Procedure) this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure#execute(double, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da, double[] d2y_da2)
     {

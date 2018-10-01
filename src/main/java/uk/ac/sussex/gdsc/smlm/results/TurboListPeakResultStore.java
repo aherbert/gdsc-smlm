@@ -68,66 +68,42 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         this.results = new TurboList<>(store.results);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#get(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResult get(int index)
     {
         return results.get(index);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return results.size();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#add(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean add(PeakResult result)
     {
         return results.add(result);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#addCollection(java.util.Collection)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean addCollection(Collection<PeakResult> results)
     {
         return this.results.addAll(results);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#addArray(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean addArray(PeakResult[] results)
     {
         return this.results.addAll(Arrays.asList(results));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#addStore(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean addStore(PeakResultStore results)
     {
@@ -136,22 +112,14 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         return addArray(results.toArray());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#remove(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResult remove(int index)
     {
         return results.remove(index);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#remove(int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void remove(int fromIndex, int toIndex)
     {
@@ -161,44 +129,28 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
             results.remove(i);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#remove(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean remove(PeakResult result)
     {
         return results.remove(result);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#removeCollection(java.util.Collection)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean removeCollection(Collection<PeakResult> results)
     {
         return this.results.removeAll(results);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#removeArray(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean removeArray(PeakResult[] results)
     {
         return this.results.removeAll(Arrays.asList(results));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#removeStore(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean removeStore(PeakResultStore results)
     {
@@ -207,33 +159,21 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         return removeArray(results.toArray());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#retainCollection(java.util.Collection)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean retainCollection(Collection<PeakResult> results)
     {
         return this.results.retainAll(results);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#retainArray(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean retainArray(PeakResult[] results)
     {
         return this.results.retainAll(Arrays.asList(results));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#retainStore(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean retainStore(PeakResultStore results)
     {
@@ -242,66 +182,42 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         return retainArray(results.toArray());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#clear()
-     */
+    /** {@inheritDoc} */
     @Override
     public void clear()
     {
         results.clear();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#trimToSize()
-     */
+    /** {@inheritDoc} */
     @Override
     public void trimToSize()
     {
         results.trimToSize();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
-     */
+    /** {@inheritDoc} */
     @Override
     public void sort(Comparator<PeakResult> comparator)
     {
         Collections.sort(results, comparator);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#toArray()
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResult[] toArray()
     {
         return results.toArray(new PeakResult[size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResultStore copy()
     {
         return new TurboListPeakResultStore(this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#copy(boolean)
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResultStore copy(boolean deepCopy)
     {
@@ -315,11 +231,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         return copy();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#removeIf(uk.ac.sussex.gdsc.smlm.results.PeakResultPredicate)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean removeIf(final PeakResultPredicate filter)
     {
@@ -334,12 +246,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#forEach(uk.ac.sussex.gdsc.smlm.results.procedures.
-     * PeakResultProcedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(PeakResultProcedure procedure)
     {
@@ -347,12 +254,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
             procedure.execute(results.getf(i));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#subset(uk.ac.sussex.gdsc.smlm.results.procedures.
-     * PeakResultPredicate)
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResult[] subset(PeakResultPredicate filter)
     {
@@ -363,11 +265,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         return list.toArray();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
-     */
+    /** {@inheritDoc} */
     @Override
     public void shuffle(RandomGenerator randomSource)
     {
@@ -380,44 +278,28 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         Collections.shuffle(results, RandomAdaptor.createAdaptor(new RandomGeneratorAdapter(randomSource)));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#indexOf(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public int indexOf(PeakResult result)
     {
         return results.indexOf(result);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#lastIndexOf(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public int lastIndexOf(PeakResult result)
     {
         return results.lastIndexOf(result);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#contains(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean contains(PeakResult result)
     {
         return results.contains(result);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreCollection#getCollection()
-     */
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("unchecked")
     public Collection<PeakResult> getCollection()
@@ -425,11 +307,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         return (Collection<PeakResult>) results.clone();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreCollection#getCollectionReference()
-     */
+    /** {@inheritDoc} */
     @Override
     public Collection<PeakResult> getCollectionReference()
     {

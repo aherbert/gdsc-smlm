@@ -47,12 +47,7 @@ public class MultiFilterXYWidthComponent extends MultiFilterComponent
         upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean fail(final PreprocessedPeakResult peak)
     {
@@ -60,11 +55,7 @@ public class MultiFilterXYWidthComponent extends MultiFilterComponent
         return (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getType()
     {

@@ -222,11 +222,7 @@ public class LoadLocalisations implements PlugIn
 
     private static final String TITLE = "Load Localisations";
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

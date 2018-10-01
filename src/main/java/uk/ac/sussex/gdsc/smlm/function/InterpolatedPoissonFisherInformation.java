@@ -173,11 +173,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
         return I;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.BasePoissonFisherInformation#getAlpha(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getAlpha(double t)
     {
@@ -221,11 +217,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
         return (upperFI != null) ? upperFI.getAlpha(t) : alphaMax;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.BasePoissonFisherInformation#postClone()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void postClone()
     {

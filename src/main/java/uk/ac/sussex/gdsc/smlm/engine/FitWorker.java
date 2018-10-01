@@ -4022,11 +4022,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         return candidates;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Runnable#run()
-     */
+    /** {@inheritDoc} */
     @Override
     public void run()
     {
@@ -4124,22 +4120,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             counter.add(fitType);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getFrame()
     {
         return slice;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfResults()
     {
@@ -4348,11 +4336,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
     private DynamicMultiPathFitResult dynamicMultiPathFitResult;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public MultiPathFitResult getResult(int index)
     {
@@ -4360,11 +4344,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         return dynamicMultiPathFitResult;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void complete(int index)
     {
@@ -4405,11 +4385,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             success++;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getTotalCandidates()
     {
@@ -4422,14 +4398,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
      */
     private int success = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(uk.ac.sussex.gdsc.smlm.results.
-     * filter.MultiPathFilter.
-     * SelectedResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(SelectedResult selectedResult)
     {
@@ -4584,11 +4553,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isFit(int candidateId)
     {
@@ -4596,11 +4561,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         return candidates.get(candidateId).fit;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isValid(int candidateId)
     {
@@ -4611,14 +4572,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         return isValid[candidateId];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(uk.ac.sussex.gdsc.smlm.results.
-     * filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass(PreprocessedPeakResult result)
     {
@@ -4631,14 +4585,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         isValid[result.getCandidateId()] = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(uk.ac.sussex.gdsc.smlm.results.
-     * filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public void passMin(PreprocessedPeakResult result)
     {

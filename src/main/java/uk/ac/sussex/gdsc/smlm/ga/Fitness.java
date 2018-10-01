@@ -51,11 +51,7 @@ public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>>
         this.score = score;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(Fitness<T> o)
     {

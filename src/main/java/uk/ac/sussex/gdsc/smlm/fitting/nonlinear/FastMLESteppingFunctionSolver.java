@@ -166,11 +166,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         super(FunctionSolverType.MLE, f, tc, bounds);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#preProcess()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void preProcess()
     {
@@ -178,11 +174,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         isPseudoLogLikelihood = false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#prepareFitValue(double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected double[] prepareFitValue(double[] y, double[] a)
     {
@@ -237,11 +229,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return FastMLEGradient2ProcedureFactory.create(y, f2);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFitValue(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected double computeFitValue(double[] a)
     {
@@ -350,11 +338,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
             throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeStep(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void computeStep(double[] step)
     {
@@ -368,11 +352,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
             step[i] = -d1[i] / d2[i];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#accept(double, double[], double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean accept(double currentValue, double[] a, double newValue, double[] newA)
     {
@@ -383,11 +363,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean computeValue(double[] y, double[] yFit, double[] a)
     {
@@ -405,11 +381,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#prepareFunctionValue(double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected double[] prepareFunctionValue(double[] y, double[] a)
     {
@@ -418,11 +390,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return y;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFunctionValue(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected double computeFunctionValue(double[] a)
     {
@@ -449,11 +417,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
             System.arraycopy(u, 0, yFit, 0, u.length);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeValues(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void computeValues(double[] yFit)
     {
@@ -512,11 +476,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return new FisherInformationMatrix(p.getLinear(), p.n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#getValue()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getValue()
     {
@@ -525,11 +485,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return getLogLikelihood();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihood()
     {
@@ -546,11 +502,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return ll;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihoodRatio()
     {
@@ -559,11 +511,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
         return llr;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getQ()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getQ()
     {

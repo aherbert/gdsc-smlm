@@ -618,11 +618,7 @@ public class FitEngineConfiguration implements Cloneable
         return fitEngineSettings.getDuplicateDistance().getAbsolute();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public FitEngineConfiguration clone()
     {

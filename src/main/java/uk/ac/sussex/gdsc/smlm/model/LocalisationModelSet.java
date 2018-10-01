@@ -112,11 +112,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
         return time;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(LocalisationModelSet o)
     {

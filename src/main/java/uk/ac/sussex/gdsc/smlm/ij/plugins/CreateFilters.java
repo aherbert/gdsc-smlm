@@ -74,11 +74,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
     private final Pattern pattern = Pattern.compile("(\\S+)=\"(\\S+):(\\S+):(\\S+)\"(\\S*)");
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -367,14 +363,7 @@ public class CreateFilters implements PlugIn, ItemListener
             this.attributeSubstitutions = attributeSubstitutions;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String,
-         * org.xml.sax.Attributes)
-         *
-         * Only start elements have attributes so this is where the substitutions are made
-         */
+        /** {@inheritDoc} */
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes)
         {
@@ -398,14 +387,7 @@ public class CreateFilters implements PlugIn, ItemListener
             sb.append(">");
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
-         *
-         * We must respect the end elements since combined filters require them. They can be later stripped using a
-         * pretty print XML method.
-         */
+        /** {@inheritDoc} */
         @Override
         public void endElement(String uri, String localName, String qName)
         {

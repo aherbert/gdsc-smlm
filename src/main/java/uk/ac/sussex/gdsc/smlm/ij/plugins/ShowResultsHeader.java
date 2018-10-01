@@ -44,11 +44,7 @@ public class ShowResultsHeader implements PlugIn
     private static String inputFilename = Prefs.get(Constants.inputFilename, "");
     private static boolean raw = false;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

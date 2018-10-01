@@ -69,12 +69,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
         bestPeakResults = new PeakResult[filter.size()];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
-     * uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
     {
@@ -103,12 +98,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#filter(uk.ac.sussex.gdsc.smlm.fitting.FitResult, int,
-     * float, float)
-     */
+    /** {@inheritDoc} */
     @Override
     public void filter(FitResult fitResult, int maxIndex, float x, float y)
     {
@@ -131,11 +121,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.engine.filter.ResultFilter#finalise()
-     */
+    /** {@inheritDoc} */
     @Override
     public void finalise()
     {

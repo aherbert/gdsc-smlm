@@ -283,11 +283,7 @@ public class SearchDimension implements Cloneable, Dimension
         return values[values.length - 1];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#isAtBounds(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isAtBounds(double v)
     {
@@ -458,11 +454,7 @@ public class SearchDimension implements Cloneable, Dimension
         return active && increment != minIncrement && reduceFactor < 1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public SearchDimension clone()
     {
@@ -565,33 +557,21 @@ public class SearchDimension implements Cloneable, Dimension
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#getMin()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMin()
     {
         return min;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#getMax()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMax()
     {
         return max;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

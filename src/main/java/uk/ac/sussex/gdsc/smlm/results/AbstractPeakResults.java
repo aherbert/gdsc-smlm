@@ -55,11 +55,7 @@ public abstract class AbstractPeakResults implements PeakResults
     /** The calibration reader. This is encapsulated */
     private CalibrationReader calibrationReader = null;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(java.util.Collection)
-     */
+    /** {@inheritDoc} */
     @Override
     public void addAll(Collection<PeakResult> results)
     {
@@ -67,11 +63,7 @@ public abstract class AbstractPeakResults implements PeakResults
         addAll(results.toArray(new PeakResult[results.size()]));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
-     */
+    /** {@inheritDoc} */
     @Override
     public void addAll(PeakResultStore results)
     {
@@ -79,44 +71,28 @@ public abstract class AbstractPeakResults implements PeakResults
         addAll(results.toArray());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#setSource(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setSource(ImageSource source)
     {
         this.source = source;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#getSource()
-     */
+    /** {@inheritDoc} */
     @Override
     public ImageSource getSource()
     {
         return source;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#setBounds(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setBounds(Rectangle bounds)
     {
         this.bounds = bounds;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#getBounds()
-     */
+    /** {@inheritDoc} */
     @Override
     public Rectangle getBounds()
     {
@@ -135,13 +111,7 @@ public abstract class AbstractPeakResults implements PeakResults
         return "";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.PeakResults#setCalibration(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.
-     * Calibration)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setCalibration(Calibration calibration)
     {
@@ -149,11 +119,7 @@ public abstract class AbstractPeakResults implements PeakResults
         calibrationReader = (calibration != null) ? new CalibrationReader(calibration) : null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#getCalibration()
-     */
+    /** {@inheritDoc} */
     @Override
     public Calibration getCalibration()
     {
@@ -208,44 +174,28 @@ public abstract class AbstractPeakResults implements PeakResults
         return (calibration != null) ? new CalibrationWriter(calibration) : new CalibrationWriter();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#getPSF()
-     */
+    /** {@inheritDoc} */
     @Override
     public PSF getPSF()
     {
         return psf;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#setPSF(uk.ac.sussex.gdsc.smlm.data.config.SMLMSettings.PSF)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setPSF(PSF psf)
     {
         this.psf = psf;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#setConfiguration(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setConfiguration(String configuration)
     {
         this.configuration = configuration;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#getConfiguration()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getConfiguration()
     {
@@ -359,11 +309,7 @@ public abstract class AbstractPeakResults implements PeakResults
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#copySettings(gdsc.utils.fitting.results.PeakResults)
-     */
+    /** {@inheritDoc} */
     @Override
     public void copySettings(PeakResults peakResults)
     {

@@ -57,22 +57,14 @@ public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction
         this.gradientIndices = createGradientIndices(npeaks);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.GaussianFunction#getNPeaks()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNPeaks()
     {
         return npeaks;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {

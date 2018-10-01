@@ -60,11 +60,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         this.filename = filename;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#begin()
-     */
+    /** {@inheritDoc} */
     @Override
     public void begin()
     {
@@ -262,22 +258,14 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return size;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {
@@ -329,11 +317,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         return sortAfterEnd;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

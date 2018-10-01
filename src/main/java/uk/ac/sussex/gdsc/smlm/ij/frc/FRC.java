@@ -108,11 +108,7 @@ public class FRC
 		public String getName() { return "Four sigma"; }};
 		//@formatter:on
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Enum#toString()
-         */
+        /** {@inheritDoc} */
         @Override
         public String toString()
         {
@@ -148,11 +144,7 @@ public class FRC
 		public String getName() { return "Interpolated Circle"; }};
 		//@formatter:on
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Enum#toString()
-         */
+        /** {@inheritDoc} */
         @Override
         public String toString()
         {
@@ -182,11 +174,7 @@ public class FRC
 		public String getName() { return "FHT"; }};
 		//@formatter:on
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Enum#toString()
-         */
+        /** {@inheritDoc} */
         @Override
         public String toString()
         {
@@ -328,11 +316,7 @@ public class FRC
             return sum2;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#clone()
-         */
+        /** {@inheritDoc} */
         @Override
         public FRCCurveResult clone()
         {
@@ -427,11 +411,7 @@ public class FRC
             return curve;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#clone()
-         */
+        /** {@inheritDoc} */
         @Override
         protected FRCCurve clone()
         {

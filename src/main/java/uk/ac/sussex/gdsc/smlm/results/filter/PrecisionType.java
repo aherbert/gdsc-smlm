@@ -104,33 +104,21 @@ public enum PrecisionType implements NamedObject
         this.shortName = sname;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Enum#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {
         return shortName;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName()
     {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getShortName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getShortName()
     {

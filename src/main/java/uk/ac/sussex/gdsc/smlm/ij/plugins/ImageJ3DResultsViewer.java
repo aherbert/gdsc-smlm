@@ -741,11 +741,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     private JMenuItem cropResults;
     private JCheckBoxMenuItem toggleDynamicTransparency;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -3196,11 +3192,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         return vWorldToLocal;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e)
     {

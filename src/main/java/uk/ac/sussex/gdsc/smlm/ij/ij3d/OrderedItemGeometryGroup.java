@@ -94,22 +94,14 @@ public class OrderedItemGeometryGroup extends ItemGeometryGroup implements Updat
         return orderedGroup;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.UpdateableItemShape#reorder(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void reorder(int[] indices) throws IllegalArgumentException
     {
         reorderFast(indices);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.UpdateableItemShape#reorderFast(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void reorderFast(int[] indices) throws IllegalArgumentException
     {

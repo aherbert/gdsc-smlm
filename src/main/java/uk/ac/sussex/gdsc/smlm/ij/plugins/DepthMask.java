@@ -42,11 +42,7 @@ public class DepthMask implements PlugIn
     private static String titleXZ = "";
     private static String titleYZ = "";
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

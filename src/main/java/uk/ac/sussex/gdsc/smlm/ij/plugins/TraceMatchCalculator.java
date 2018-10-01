@@ -74,11 +74,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
     private static TextWindow triplesWindow = null;
     private static ImageROIPainter pairPainter = null, triplePainter = null;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -431,11 +427,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
         return sb.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.CoordinateProvider#getCoordinates(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] getCoordinates(String line)
     {
@@ -533,11 +525,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
                 startT = p1.getStart();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(TimeComparablePointPair o)
         {
@@ -642,11 +630,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
                 startT = p1.getStart();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(TimeComparableTriple o)
         {
@@ -723,11 +707,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
             }
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(ScoreComparableTriple o)
         {

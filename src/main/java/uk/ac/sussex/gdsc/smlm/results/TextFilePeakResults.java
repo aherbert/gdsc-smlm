@@ -187,11 +187,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FilePeakResults#begin()
-     */
+    /** {@inheritDoc} */
     @Override
     public void begin()
     {
@@ -273,11 +269,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
         return names.toArray(new String[names.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
             float[] params, float[] paramsStdDev)
@@ -562,11 +554,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FilePeakResults#sort()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void sort() throws IOException
     {

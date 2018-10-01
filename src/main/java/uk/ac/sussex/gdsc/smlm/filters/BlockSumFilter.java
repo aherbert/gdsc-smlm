@@ -28,11 +28,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class BlockSumFilter extends BlockFilter
 {
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Normaliser computeWeightedNormaliser(float n)
     {
@@ -49,22 +45,14 @@ public class BlockSumFilter extends BlockFilter
         return new PerPixelNormaliser(divisor);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.BlockFilter#computeNormaliser(float)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Normaliser computeNormaliser(float n)
     {
         return NonNormaliser.INSTANCE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public BlockSumFilter clone()
     {

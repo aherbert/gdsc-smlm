@@ -45,11 +45,7 @@ public class MultivariateMatrixFunctionWrapper extends NonLinearFunctionWrapper 
         super(fun, a, n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.commons.math3.analysis.MultivariateMatrixFunction#value(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double[][] value(double[] point) throws IllegalArgumentException
     {

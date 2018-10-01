@@ -56,11 +56,7 @@ public class FastLogMLELVMGradientProcedureX4 extends FastLogMLELVMGradientProce
             throw new IllegalArgumentException("Function must compute 4 gradients");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double fi, double[] dfi_da)
     {

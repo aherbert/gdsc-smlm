@@ -63,11 +63,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         return new SingleFreeCircularErfGaussian2DFunction(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise0(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise0(double[] a)
     {
@@ -98,11 +94,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
                 compute1DIntegral(ONE_OVER_ROOT2 / tsy, maxy, ty);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise1(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise1(double[] a)
     {
@@ -121,11 +113,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, tsy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Function#initialise2(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise2(double[] a)
     {
@@ -144,11 +132,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, tsy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function#initialiseExtended2(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialiseExtended2(double[] a)
     {
@@ -502,11 +486,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda)
     {
@@ -526,11 +506,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         return tB + tI * duda[1];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda, final double[] d2uda2)
     {
@@ -598,34 +574,21 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         return 5;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {
         return gradientIndices;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfGradients()
     {
         return 6;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -648,12 +611,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -683,12 +641,7 @@ public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2D
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.
-     * ExtendedGradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ExtendedGradient2Procedure procedure)
     {

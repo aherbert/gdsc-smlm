@@ -214,11 +214,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
     @Override
     public abstract void forEach(Gradient1Procedure procedure);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {

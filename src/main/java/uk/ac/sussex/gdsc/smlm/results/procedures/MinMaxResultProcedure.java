@@ -52,12 +52,7 @@ public class MinMaxResultProcedure implements PeakResultProcedure
         results.forEach(this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure#execute(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(PeakResult peakResult)
     {

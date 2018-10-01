@@ -247,11 +247,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
         return new SCMOSLikelihoodWrapper(f, a, x, n, var_g2, logG, logNormalisation);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood()
     {
@@ -355,11 +351,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
         return ChiSquaredDistributionTable.computeQValue(llr, degreesOfFreedom);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood(double[] gradient)
     {
@@ -403,11 +395,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
         return ll + logNormalisation;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood(int i)
     {
@@ -425,11 +413,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
         return ll;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood(double[] gradient, int i)
     {
@@ -522,11 +506,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
         return FastMath.exp(-nll);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean canComputeGradient()
     {

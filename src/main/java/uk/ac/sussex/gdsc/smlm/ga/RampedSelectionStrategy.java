@@ -150,11 +150,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
         return subset;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialiseBreeding(List<? extends Chromosome<T>> individuals)
     {
@@ -359,11 +355,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
         return low;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#finishBreeding()
-     */
+    /** {@inheritDoc} */
     @Override
     public void finishBreeding()
     {

@@ -235,22 +235,14 @@ public class FixedDimension implements Cloneable, Dimension
         return upper;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#isAtBounds(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isAtBounds(double v)
     {
         return (v <= lower || v >= upper);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public FixedDimension clone()
     {
@@ -265,33 +257,21 @@ public class FixedDimension implements Cloneable, Dimension
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#getMin()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMin()
     {
         return min;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#getMax()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMax()
     {
         return max;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

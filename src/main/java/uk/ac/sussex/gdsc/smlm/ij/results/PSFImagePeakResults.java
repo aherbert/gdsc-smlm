@@ -71,11 +71,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
         super(title, bounds, scale);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.IJImagePeakResults#checkDisplayFlags()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void preBegin()
     {
@@ -124,11 +120,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
             calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(), flags);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#isUncalibrated()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isUncalibrated()
     {
@@ -136,22 +128,14 @@ public class PSFImagePeakResults extends IJImagePeakResults
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#setUncalibrated(boolean)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setUncalibrated(boolean uncalibrated)
     {
         throw new NotImplementedException("This method is not supported. The PSF assumes the units are in pixels.");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#add(int, float, float, float)
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int peak, float x, float y, float v)
     {
@@ -160,11 +144,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
         add(new PeakResult(peak, x, y, v));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#add(float, float, float)
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(float x, float y, float v)
     {
@@ -173,11 +153,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
         add(new PeakResult(x, y, v));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#add(int[], float[], float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int[] allpeak, float[] allx, float[] ally, float[] allv)
     {
@@ -187,11 +163,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
             add(new PeakResult(allpeak[i], allx[i], ally[i], allv[i]));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#add(float[], float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(float[] allx, float[] ally, float[] allv)
     {
@@ -201,12 +173,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
             add(new PeakResult(allx[i], ally[i], allv[i]));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#add(int, int, int, float, double, float, float,
-     * float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
             float[] params, float[] paramsDev)
@@ -365,11 +332,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
         return params;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void addAll(PeakResult[] results)
     {

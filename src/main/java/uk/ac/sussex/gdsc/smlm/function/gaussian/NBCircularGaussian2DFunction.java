@@ -49,11 +49,7 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction
         super(npeaks, maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {

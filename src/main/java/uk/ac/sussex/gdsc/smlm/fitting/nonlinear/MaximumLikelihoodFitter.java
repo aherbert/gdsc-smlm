@@ -100,11 +100,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
             super(fun);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double value(double[] point)
         {
@@ -130,11 +126,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
             this.map = map;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double value(double[] point)
         {
@@ -193,11 +185,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
             super(fun);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] point)
         {
@@ -340,12 +328,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
         super(f);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(double[], double[], double[],
-     * double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
     {
@@ -929,11 +912,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setBounds(double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setBounds(double[] lowerB, double[] upperB)
     {
@@ -949,11 +928,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setConstraints(double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setConstraints(double[] lowerB, double[] upperB)
     {

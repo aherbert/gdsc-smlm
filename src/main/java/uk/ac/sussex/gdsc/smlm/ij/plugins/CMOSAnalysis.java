@@ -105,11 +105,7 @@ public class CMOSAnalysis implements PlugIn
             this.photons = photons;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -248,11 +244,7 @@ public class CMOSAnalysis implements PlugIn
             this.moment = moment.newInstance();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -391,11 +383,7 @@ public class CMOSAnalysis implements PlugIn
         lastNThreads = this.nThreads;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

@@ -137,11 +137,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
         this.usePicardApproximation = usePicardApproximation;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double likelihood(double o, double e)
     {
@@ -159,11 +155,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
         return FastMath.exp(logP) * probabilityNormalisation;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double logLikelihood(double o, double e)
     {

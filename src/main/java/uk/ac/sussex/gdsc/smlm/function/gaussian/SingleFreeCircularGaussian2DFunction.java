@@ -91,22 +91,14 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
         super(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
         return new SingleFreeCircularGaussian2DFunction(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {
@@ -304,11 +296,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
         return 5;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {

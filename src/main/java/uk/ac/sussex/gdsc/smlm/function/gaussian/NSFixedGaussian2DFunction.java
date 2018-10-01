@@ -60,11 +60,7 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
         peakFactors = new double[npeaks][4];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
@@ -80,11 +76,7 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
     /** The index for the x0 position gradient pre-factor */
     protected static final int AA2 = 3;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {

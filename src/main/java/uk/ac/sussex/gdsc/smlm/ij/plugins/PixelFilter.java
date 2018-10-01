@@ -55,11 +55,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
     private boolean preview = false;
     private Label label = null;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public int setup(String arg, ImagePlus imp)
     {
@@ -256,12 +252,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
-     * ij.plugin.filter.PlugInFilterRunner)
-     */
+    /** {@inheritDoc} */
     @Override
     public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
     {
@@ -293,11 +284,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
         return IJ.setupDialog(imp, FLAGS);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {
@@ -309,11 +296,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setNPasses(int nPasses)
     {

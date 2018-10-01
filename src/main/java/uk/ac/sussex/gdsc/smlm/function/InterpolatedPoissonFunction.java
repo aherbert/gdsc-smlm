@@ -73,11 +73,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
         pd = (nonInteger) ? null : new CustomPoissonDistribution(null, 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double likelihood(double o, double e)
     {
@@ -130,11 +126,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
         return Gamma.gamma(k + 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double logLikelihood(double o, double e)
     {

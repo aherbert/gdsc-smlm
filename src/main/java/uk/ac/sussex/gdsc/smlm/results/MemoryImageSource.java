@@ -94,22 +94,14 @@ public class MemoryImageSource extends ImageSource
         this.frames = data.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#openSource()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean openSource()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#closeSource()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void closeSource()
     {
@@ -118,11 +110,7 @@ public class MemoryImageSource extends ImageSource
             data = new float[0][0];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#initialseSequentialReading()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean initialiseSequentialRead()
     {
@@ -130,11 +118,7 @@ public class MemoryImageSource extends ImageSource
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     protected float[] nextRawFrame()
     {
@@ -143,11 +127,7 @@ public class MemoryImageSource extends ImageSource
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     protected float[] getRawFrame(int frame)
     {
@@ -156,11 +136,7 @@ public class MemoryImageSource extends ImageSource
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#isValid(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isValid(int frame)
     {

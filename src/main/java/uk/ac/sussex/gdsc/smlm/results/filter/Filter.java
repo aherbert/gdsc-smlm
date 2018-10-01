@@ -1100,11 +1100,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(Filter o)
     {
@@ -1516,11 +1512,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#length()
-     */
+    /** {@inheritDoc} */
     @Override
     public int length()
     {
@@ -1528,11 +1520,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return getNumberOfParameters();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#sequence()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] sequence()
     {
@@ -1540,22 +1528,14 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return getParameters();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#newChromosome(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Chromosome<FilterScore> newChromosome(double[] sequence)
     {
         return create(sequence);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#lowerLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] lowerLimit()
     {
@@ -1563,11 +1543,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return new double[length()];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#upperLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] upperLimit()
     {
@@ -1575,22 +1551,14 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#setFitness(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setFitness(FilterScore fitness)
     {
         this.fitness = fitness;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#getFitness()
-     */
+    /** {@inheritDoc} */
     @Override
     public FilterScore getFitness()
     {
@@ -1618,11 +1586,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return d;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#equals(uk.ac.sussex.gdsc.smlm.ga.Chromosome)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Chromosome<FilterScore> other)
     {
@@ -1754,11 +1718,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj)
     {
@@ -1785,11 +1745,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+    /** {@inheritDoc} */
     @Override
     public int hashCode()
     {

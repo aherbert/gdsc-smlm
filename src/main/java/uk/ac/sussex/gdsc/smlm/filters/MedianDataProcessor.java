@@ -66,44 +66,28 @@ public class MedianDataProcessor extends DataProcessor
         return (int) smooth;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWeights(float[] weights, int width, int height)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasWeights()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] process(float[] data, int width, int height)
     {
@@ -148,11 +132,7 @@ public class MedianDataProcessor extends DataProcessor
         return smooth;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public MedianDataProcessor clone()
     {
@@ -162,22 +142,14 @@ public class MedianDataProcessor extends DataProcessor
         return f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName()
     {
         return "Median";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public List<String> getParameters()
     {
@@ -186,11 +158,7 @@ public class MedianDataProcessor extends DataProcessor
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSpread()
     {

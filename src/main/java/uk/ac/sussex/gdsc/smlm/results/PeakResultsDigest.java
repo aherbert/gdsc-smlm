@@ -178,11 +178,7 @@ public class PeakResultsDigest
         return value.equals(other.value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+    /** {@inheritDoc} */
     @Override
     public int hashCode()
     {
@@ -192,11 +188,7 @@ public class PeakResultsDigest
         return value.hashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj)
     {
@@ -207,11 +199,7 @@ public class PeakResultsDigest
         return matches((PeakResultsDigest) obj);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {

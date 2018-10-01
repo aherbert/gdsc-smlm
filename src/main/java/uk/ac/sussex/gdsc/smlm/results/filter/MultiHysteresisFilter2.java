@@ -144,11 +144,7 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter
         return ParameterType.PRECISION2_RANGE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
@@ -158,11 +154,7 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter
                 parameters[15]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#newChromosome(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Chromosome<FilterScore> newChromosome(double[] sequence)
     {

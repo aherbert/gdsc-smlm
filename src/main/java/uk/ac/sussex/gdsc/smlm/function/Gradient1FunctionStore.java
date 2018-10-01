@@ -66,56 +66,35 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
         length = f.getNumberOfGradients();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {
         f.initialise(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise1(double[] a)
     {
         f.initialise(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {
         return f.gradientIndices();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfGradients()
     {
         return f.getNumberOfGradients();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient1Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -135,11 +114,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
             dyda = new double[values.length][length];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da)
     {

@@ -58,11 +58,7 @@ public class UniformDistribution implements SpatialDistribution
             return rng;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.commons.math3.random.RandomVectorGenerator#nextVector()
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] nextVector()
         {
@@ -178,11 +174,7 @@ public class UniformDistribution implements SpatialDistribution
         this.vectorGenerator = randomVectorGenerator;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#next()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] next()
     {
@@ -202,11 +194,7 @@ public class UniformDistribution implements SpatialDistribution
         return vectorGenerator.nextVector();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithin(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWithin(double[] xyz)
     {
@@ -216,11 +204,7 @@ public class UniformDistribution implements SpatialDistribution
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWithinXY(double[] xyz)
     {
@@ -230,11 +214,7 @@ public class UniformDistribution implements SpatialDistribution
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] xyz)
     {

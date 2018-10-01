@@ -61,33 +61,21 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
         this.values = values;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return f.size();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise0(double[] a)
     {
         f.initialise0(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#forEach(uk.ac.sussex.gdsc.smlm.function.ValueProcedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ValueProcedure procedure)
     {
@@ -106,11 +94,7 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
             values = new double[f.size()];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value)
     {

@@ -73,11 +73,7 @@ public class DrawClusters implements PlugIn
     private static boolean useStackPosition = false;
     private static int lut = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

@@ -55,11 +55,7 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
         super(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
@@ -109,11 +105,7 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {

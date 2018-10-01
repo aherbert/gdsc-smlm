@@ -68,11 +68,7 @@ public class FloatImage3D extends Image3D
         super(stack);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image3D#createData(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void createData(int size)
     {
@@ -150,11 +146,7 @@ public class FloatImage3D extends Image3D
         this.data = data;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image3D#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public FloatImage3D copy()
     {
@@ -171,22 +163,14 @@ public class FloatImage3D extends Image3D
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image3D#getDataLength()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getDataLength()
     {
         return data.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.Image3D#crop(int, int, int, int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public FloatImage3D crop(int x, int y, int z, int w, int h, int d) throws IllegalArgumentException
     {

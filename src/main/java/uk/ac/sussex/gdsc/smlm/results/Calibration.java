@@ -467,11 +467,7 @@ class Calibration implements Cloneable
         setExposureTime(exposureTime);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public Calibration clone()
     {

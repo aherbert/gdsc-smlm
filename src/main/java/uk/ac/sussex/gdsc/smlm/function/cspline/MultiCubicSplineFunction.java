@@ -110,11 +110,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
         super(splineData, maxx, maxy, cx, cy, cz, scale);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction#getN()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getN()
     {
@@ -138,11 +134,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
         this.n = n;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {
@@ -151,22 +143,14 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
         return gradientIndices;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfGradients()
     {
         return 1 + 4 * n;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction#initialise(double[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void initialise(double[] a, int order)
     {
@@ -195,11 +179,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#forEach(uk.ac.sussex.gdsc.smlm.function.ValueProcedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ValueProcedure procedure)
     {
@@ -228,12 +208,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient1Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -265,12 +240,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -303,11 +273,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction#isNodeBoundary(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isNodeBoundary(int gradientIndex)
     {

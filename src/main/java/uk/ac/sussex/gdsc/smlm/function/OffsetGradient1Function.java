@@ -80,11 +80,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
             f1.forEach(this);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public void execute(double value, double[] dy_da)
         {

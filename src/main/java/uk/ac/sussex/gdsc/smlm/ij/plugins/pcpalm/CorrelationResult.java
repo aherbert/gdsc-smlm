@@ -116,11 +116,7 @@ public class CorrelationResult implements Comparable<CorrelationResult>
         this.spatialDomain = spatialDomain;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(CorrelationResult o)
     {

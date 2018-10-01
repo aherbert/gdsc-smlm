@@ -79,11 +79,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
     private final Rounder rounder = RounderFactory.create(4);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -532,11 +528,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
         final TIntProcedure p = new TIntProcedure()
         {
 
-            /*
-             * (non-Javadoc)
-             *
-             * @see gnu.trove.procedure.TIntProcedure#execute(int)
-             */
+            /** {@inheritDoc} */
             @Override
             public boolean execute(int value)
             {
@@ -677,11 +669,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
         return sb.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.utils.CoordinateProvider#getCoordinates(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] getCoordinates(String line)
     {

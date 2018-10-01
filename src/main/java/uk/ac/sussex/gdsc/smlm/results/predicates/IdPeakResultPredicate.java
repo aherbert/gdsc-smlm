@@ -44,12 +44,7 @@ public class IdPeakResultPredicate implements PeakResultPredicate
         this.id = id;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultPredicate#test(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean test(PeakResult t)
     {

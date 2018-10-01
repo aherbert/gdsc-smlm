@@ -114,33 +114,21 @@ public class CoordinateFilter extends DirectFilter
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
         return "Filter results using a coordinate range.";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 4;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
@@ -157,11 +145,7 @@ public class CoordinateFilter extends DirectFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getParameterIncrement(int index)
     {
@@ -169,11 +153,7 @@ public class CoordinateFilter extends DirectFilter
         return DEFAULT_INCREMENT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDisabledParameterValue(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getDisabledParameterValue(int index)
     {
@@ -191,11 +171,7 @@ public class CoordinateFilter extends DirectFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -213,11 +189,7 @@ public class CoordinateFilter extends DirectFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -235,11 +207,7 @@ public class CoordinateFilter extends DirectFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
@@ -247,11 +215,7 @@ public class CoordinateFilter extends DirectFilter
                 (float) parameters[3]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -261,33 +225,21 @@ public class CoordinateFilter extends DirectFilter
         setMax(parameters, 3, maxY);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public int lowerBoundOrientation(int index)
     {
         return (index == 1 || index == 3) ? 1 : -1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#length()
-     */
+    /** {@inheritDoc} */
     @Override
     public int length()
     {
         return 4;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#sequence()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] sequence()
     {
@@ -295,11 +247,7 @@ public class CoordinateFilter extends DirectFilter
         return new double[] { minX, maxX, minY, maxY };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {

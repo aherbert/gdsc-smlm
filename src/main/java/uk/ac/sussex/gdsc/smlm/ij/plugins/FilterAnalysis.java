@@ -133,11 +133,7 @@ public class FilterAnalysis implements PlugIn
         isHeadless = java.awt.GraphicsEnvironment.isHeadless();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

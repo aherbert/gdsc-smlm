@@ -57,11 +57,7 @@ public class PSFCombiner implements PlugIn
     private static List<String> selected = null;
     private final List<PSF> input = new LinkedList<>();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

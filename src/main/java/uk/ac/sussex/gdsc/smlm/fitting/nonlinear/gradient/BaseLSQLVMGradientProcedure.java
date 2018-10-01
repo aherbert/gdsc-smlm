@@ -60,11 +60,7 @@ public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure
         super(y, b, func);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value)
     {

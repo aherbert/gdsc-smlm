@@ -30,11 +30,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class CircularMeanFilter extends CircularFilter
 {
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeWeightedNormaliser(double)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Normaliser computeWeightedNormaliser(double radius)
     {
@@ -44,22 +40,14 @@ public class CircularMeanFilter extends CircularFilter
         return new PerPixelNormaliser(nPoints);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.CircularFilter#computeNormaliser(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Normaliser computeNormaliser(int nPoints)
     {
         return new FixedNormaliser(nPoints);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public CircularMeanFilter clone()
     {

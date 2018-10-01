@@ -48,11 +48,7 @@ class CandidateList
 
     private static class CandidateComparator implements Comparator<Candidate>
     {
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compare(Candidate o1, Candidate o2)
         {

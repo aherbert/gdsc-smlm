@@ -3556,11 +3556,7 @@ public class OPTICS implements PlugIn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -4172,12 +4168,7 @@ public class OPTICS implements PlugIn
             }
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
-         * OptionCollectedEvent)
-         */
+        /** {@inheritDoc} */
         @Override
         public void optionCollected(OptionCollectedEvent e)
         {

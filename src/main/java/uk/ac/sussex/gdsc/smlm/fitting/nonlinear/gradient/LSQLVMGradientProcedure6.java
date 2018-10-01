@@ -64,11 +64,7 @@ public class LSQLVMGradientProcedure6 extends LSQLVMGradientProcedure
             throw new IllegalArgumentException("Function must compute 6 gradients");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da)
     {

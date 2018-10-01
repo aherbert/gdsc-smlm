@@ -122,11 +122,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
         return size;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialiseBreeding(List<? extends Chromosome<T>> individuals)
     {
@@ -164,11 +160,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
         return new ChromosomePair<>(individuals.get(first), individuals.get(second));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#finishBreeding()
-     */
+    /** {@inheritDoc} */
     @Override
     public void finishBreeding()
     {
@@ -176,11 +168,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
         individuals = null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#setTracker(uk.ac.sussex.gdsc.core.logging.TrackProgress)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setTracker(TrackProgress tracker)
     {

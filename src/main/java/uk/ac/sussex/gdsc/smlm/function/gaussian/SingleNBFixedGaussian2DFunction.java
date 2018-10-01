@@ -55,11 +55,7 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
         super(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
@@ -106,11 +102,7 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {

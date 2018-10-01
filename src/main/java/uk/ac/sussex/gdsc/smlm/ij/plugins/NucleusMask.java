@@ -60,11 +60,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
     private ImagePlus imp = null;
     private ImageStack sphere = null;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -377,11 +373,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
         // Ignore
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {

@@ -474,33 +474,21 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
             return Double.NEGATIVE_INFINITY;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double likelihood(final double o, final double e)
     {
         return poissonGamma(o, e, m);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double logLikelihood(double o, double e)
     {
         return logPoissonGamma(o, e, m);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double likelihood(double o, double t, double[] dp_dt)
     {

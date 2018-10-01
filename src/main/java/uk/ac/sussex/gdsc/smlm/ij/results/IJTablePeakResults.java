@@ -155,11 +155,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
         this.clearAtStart = clearAtStart;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#begin()
-     */
+    /** {@inheritDoc} */
     @Override
     public void begin()
     {
@@ -402,11 +398,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
             sb.append("\t+/-");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int frame, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
             float[] params, float[] paramsDev)
@@ -550,11 +542,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
                 result.getParameters(), result.getParameterDeviations(), result.getPrecision());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void addAll(PeakResult[] results)
     {
@@ -575,22 +563,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return size;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {
@@ -623,11 +603,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
         this.frameColumnName = frameColumnName;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

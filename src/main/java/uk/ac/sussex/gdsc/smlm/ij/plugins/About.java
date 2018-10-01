@@ -370,11 +370,7 @@ public class About implements PlugIn, MacroExtension
         Functions.registerExtensions(this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.macro.MacroExtension#handleExtension(java.lang.String, java.lang.Object[])
-     */
+    /** {@inheritDoc} */
     @Override
     public String handleExtension(String name, Object[] args)
     {
@@ -391,11 +387,7 @@ public class About implements PlugIn, MacroExtension
         return "";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.macro.MacroExtension#getExtensionFunctions()
-     */
+    /** {@inheritDoc} */
     @Override
     public ExtensionDescriptor[] getExtensionFunctions()
     {

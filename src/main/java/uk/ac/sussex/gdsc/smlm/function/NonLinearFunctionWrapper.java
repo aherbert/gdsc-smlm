@@ -72,11 +72,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
         fun.initialise(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {
@@ -89,66 +85,42 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
         return gradientIndices.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(int x, double[] dyda)
     {
         return fun.eval(x, dyda);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#eval(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(int x)
     {
         return fun.eval(x);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(int x, double[] dyda, double[] w)
     {
         return fun.eval(x, dyda, w);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double evalw(int x, double[] w)
     {
         return fun.eval(x, w);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean canComputeWeights()
     {
         return fun.canComputeWeights();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] computeValues(double[] variables)
     {
@@ -160,11 +132,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
         return values;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double[][] computeJacobian(double[] variables)
     {
@@ -183,22 +151,14 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
         return jacobian;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean canComputeValuesAndJacobian()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
     {

@@ -130,11 +130,7 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
         return STATUS_OK;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(final double Ei, double[] Eix)
     {

@@ -313,22 +313,14 @@ public class MultiHysteresisFilter extends HysteresisFilter
                 super.getDescription();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 12 + super.getNumberOfParameters();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
@@ -399,11 +391,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -467,11 +455,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
             ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE,
             PrecisionFilter.DEFAULT_RANGE };
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -491,11 +475,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
         return create(parameters);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {
@@ -505,11 +485,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
                 parameters[15]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -530,11 +506,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
         parameters[15] = 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#newChromosome(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Chromosome<FilterScore> newChromosome(double[] sequence)
     {
@@ -545,11 +517,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
                 sequence[9], sequence[10], sequence[11], sequence[12], sequence[13]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#upperLimit()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] upperLimit()
     {
@@ -559,11 +527,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
                 ShiftFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#mutationStepRange()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] mutationStepRange()
     {

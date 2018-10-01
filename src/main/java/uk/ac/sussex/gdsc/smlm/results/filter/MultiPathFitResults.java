@@ -83,66 +83,42 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
         this.nActual = nActual;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getFrame()
     {
         return frame;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfResults()
     {
         return multiPathFitResults.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public MultiPathFitResult getResult(int index)
     {
         return multiPathFitResults[index];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void complete(int index)
     {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getTotalCandidates()
     {
         return totalCandidates;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public MultiPathFitResults clone()
     {

@@ -245,11 +245,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
         return (int) Math.ceil(f);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#begin()
-     */
+    /** {@inheritDoc} */
     @Override
     public void begin()
     {
@@ -599,11 +595,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
         return -1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
             float[] params, float[] paramsDev)
@@ -1108,11 +1100,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
         Arrays.fill(data, EMPTY);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(PeakResult result)
     {
@@ -1120,11 +1108,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
                 result.getNoise(), result.getMeanIntensity(), result.getParameters(), null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void addAll(PeakResult[] results)
     {
@@ -1277,22 +1261,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return size;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {
@@ -1386,11 +1362,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
         return displayFlags;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

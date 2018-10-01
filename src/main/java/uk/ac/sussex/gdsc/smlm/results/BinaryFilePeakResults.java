@@ -141,22 +141,14 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FilePeakResults#getHeaderEnd()
-     */
+    /** {@inheritDoc} */
     @Override
     protected String getHeaderEnd()
     {
         return END_HEADER;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FilePeakResults#getHeaderComments()
-     */
+    /** {@inheritDoc} */
     @Override
     protected String[] getHeaderComments()
     {
@@ -183,11 +175,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
         return comments;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FilePeakResults#getFieldNames()
-     */
+    /** {@inheritDoc} */
     @Override
     protected String[] getFieldNames()
     {
@@ -235,11 +223,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
             float[] params, float[] paramsStdDev)
@@ -324,11 +308,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void addAll(PeakResult[] results)
     {
@@ -388,11 +368,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FilePeakResults#sort()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void sort() throws IOException
     {
@@ -536,11 +512,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FilePeakResults#isBinary()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isBinary()
     {

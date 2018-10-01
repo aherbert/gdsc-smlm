@@ -61,11 +61,7 @@ public class MedianFilter implements PlugInFilter
     private ImagePlus imp;
     private int counter, size;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public int setup(String arg, ImagePlus imp)
     {
@@ -216,11 +212,7 @@ public class MedianFilter implements PlugInFilter
             this.n = n;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -257,11 +249,7 @@ public class MedianFilter implements PlugInFilter
             this.end = end;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -448,11 +436,7 @@ public class MedianFilter implements PlugInFilter
             this.n = n;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {

@@ -310,11 +310,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
             data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public AreaAverageFilter clone()
     {
@@ -346,11 +342,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
         this.simpleInterpolation = simpleInterpolation;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.BaseWeightedFilter#newWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void newWeights()
     {

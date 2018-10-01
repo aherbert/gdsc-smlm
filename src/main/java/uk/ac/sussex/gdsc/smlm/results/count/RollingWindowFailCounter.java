@@ -76,22 +76,14 @@ public class RollingWindowFailCounter extends BaseFailCounter
         return new RollingWindowFailCounter(Math.max(0, allowedFailures), window);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass()
     {
         rollingArray.add(false);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass(int n)
     {
@@ -100,22 +92,14 @@ public class RollingWindowFailCounter extends BaseFailCounter
         rollingArray.add(false, n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail()
     {
         rollingArray.add(true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail(int n)
     {
@@ -124,33 +108,21 @@ public class RollingWindowFailCounter extends BaseFailCounter
         rollingArray.add(true, n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isOK()
     {
         return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-     */
+    /** {@inheritDoc} */
     @Override
     public FailCounter newCounter()
     {
         return new RollingWindowFailCounter(allowedFailures, getWindow());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
-     */
+    /** {@inheritDoc} */
     @Override
     public void reset()
     {

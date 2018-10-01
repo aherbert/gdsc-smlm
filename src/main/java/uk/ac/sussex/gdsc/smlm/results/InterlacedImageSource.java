@@ -73,110 +73,70 @@ public class InterlacedImageSource extends ImageSource
         this.skip = skip;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getXOrigin()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getXOrigin()
     {
         return imageSource.getXOrigin();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getYOrigin()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getYOrigin()
     {
         return imageSource.getYOrigin();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getWidth()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getWidth()
     {
         return imageSource.getWidth();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getHeight()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getHeight()
     {
         return imageSource.getHeight();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getFrames()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getFrames()
     {
         return (int) Math.ceil((imageSource.getFrames() - start + 1) * ((double) size / (size + skip)));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getParent()
-     */
+    /** {@inheritDoc} */
     @Override
     public ImageSource getParent()
     {
         return imageSource;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getOriginal()
-     */
+    /** {@inheritDoc} */
     @Override
     public ImageSource getOriginal()
     {
         return imageSource.getOriginal();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ResultsSource#openSource()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean openSource()
     {
         return imageSource.openSource();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#closeSource()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void closeSource()
     {
         imageSource.closeSource();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#initialiseSequentialRead()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean initialiseSequentialRead()
     {
@@ -194,11 +154,7 @@ public class InterlacedImageSource extends ImageSource
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#nextRawFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     protected Object nextRawFrame()
     {
@@ -222,11 +178,7 @@ public class InterlacedImageSource extends ImageSource
         return pixels;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getRawFrame(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Object getRawFrame(int frame)
     {
@@ -261,11 +213,7 @@ public class InterlacedImageSource extends ImageSource
         return imageSource.isValid(frame);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {
@@ -296,22 +244,14 @@ public class InterlacedImageSource extends ImageSource
         return skip;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#setReadHint(uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setReadHint(ReadHint readHint)
     {
         imageSource.setReadHint(readHint);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getReadHint()
-     */
+    /** {@inheritDoc} */
     @Override
     public ReadHint getReadHint()
     {

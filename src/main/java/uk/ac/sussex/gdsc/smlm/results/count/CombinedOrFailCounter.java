@@ -47,22 +47,14 @@ public class CombinedOrFailCounter extends CombinedFailCounter
         return "&&";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isOK()
     {
         return c1.isOK() || c2.isOK();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-     */
+    /** {@inheritDoc} */
     @Override
     public FailCounter newCounter()
     {

@@ -91,11 +91,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
     private TextField textMinWidthFactor;
     private TextField textWidthFactor;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -354,33 +350,21 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider#getFitEngineConfiguration()
-     */
+    /** {@inheritDoc} */
     @Override
     public FitEngineConfiguration getFitEngineConfiguration()
     {
         return config;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider#getFitConfiguration()
-     */
+    /** {@inheritDoc} */
     @Override
     public FitConfiguration getFitConfiguration()
     {
         return config.getFitConfiguration();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void itemStateChanged(ItemEvent e)
     {

@@ -523,13 +523,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
         /** The table 6. */
         double[] table6;
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computePowerTable(double,
-         * double, double,
-         * int)
-         */
+        /** {@inheritDoc} */
         @Override
         public void computePowerTable(double x, double y, double z, int order)
         {
@@ -567,53 +561,28 @@ public abstract class CubicSplineFunction implements Gradient2Function
             return table;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue(uk.ac.sussex.gdsc.core.
-         * math.interpolation.
-         * CustomTricubicFunction)
-         */
+        /** {@inheritDoc} */
         @Override
         public double computeValue(CustomTricubicFunction customTricubicFunction)
         {
             return customTricubicFunction.value(table1);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue1(uk.ac.sussex.gdsc.core
-         * .math.interpolation.
-         * CustomTricubicFunction)
-         */
+        /** {@inheritDoc} */
         @Override
         public double computeValue1(CustomTricubicFunction customTricubicFunction)
         {
             return customTricubicFunction.value(table1, table2, table3, dfda);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue2(uk.ac.sussex.gdsc.core
-         * .math.interpolation.
-         * CustomTricubicFunction)
-         */
+        /** {@inheritDoc} */
         @Override
         public double computeValue2(CustomTricubicFunction customTricubicFunction)
         {
             return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#isNodeBoundary(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isNodeBoundary(int dimension)
         {
@@ -639,13 +608,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
         /** The table 6. */
         float[] table6;
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computePowerTable(double,
-         * double, double,
-         * int)
-         */
+        /** {@inheritDoc} */
         @Override
         public void computePowerTable(double x, double y, double z, int order)
         {
@@ -683,53 +646,28 @@ public abstract class CubicSplineFunction implements Gradient2Function
             return table;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue(uk.ac.sussex.gdsc.core.
-         * math.interpolation.
-         * CustomTricubicFunction)
-         */
+        /** {@inheritDoc} */
         @Override
         public double computeValue(CustomTricubicFunction customTricubicFunction)
         {
             return customTricubicFunction.value(table1);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue1(uk.ac.sussex.gdsc.core
-         * .math.interpolation.
-         * CustomTricubicFunction)
-         */
+        /** {@inheritDoc} */
         @Override
         public double computeValue1(CustomTricubicFunction customTricubicFunction)
         {
             return customTricubicFunction.value(table1, table2, table3, dfda);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue2(uk.ac.sussex.gdsc.core
-         * .math.interpolation.
-         * CustomTricubicFunction)
-         */
+        /** {@inheritDoc} */
         @Override
         public double computeValue2(CustomTricubicFunction customTricubicFunction)
         {
             return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#isNodeBoundary(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean isNodeBoundary(int dimension)
         {
@@ -1034,55 +972,35 @@ public abstract class CubicSplineFunction implements Gradient2Function
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return maxx * maxy;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {
         initialise(a, 0);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise0(double[] a)
     {
         initialise(a, 0);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise1(double[] a)
     {
         initialise(a, 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Function#initialise2(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise2(double[] a)
     {

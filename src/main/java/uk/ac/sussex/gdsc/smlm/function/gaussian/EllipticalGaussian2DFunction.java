@@ -63,11 +63,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
         peakFactors = new double[npeaks][16];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public Gaussian2DFunction copy()
     {
@@ -107,11 +103,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
     /** The index for the y width gradient pre-factor */
     protected static final int CY = 15;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] a)
     {

@@ -830,11 +830,7 @@ public class PeakResult implements Cloneable
         paramStdDevs = Arrays.copyOf(paramStdDevs, length);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResult clone()
     {

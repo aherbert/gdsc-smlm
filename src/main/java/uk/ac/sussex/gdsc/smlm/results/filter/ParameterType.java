@@ -113,22 +113,14 @@ public enum ParameterType implements NamedObject
         return shortName;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName()
     {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getShortName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getShortName()
     {

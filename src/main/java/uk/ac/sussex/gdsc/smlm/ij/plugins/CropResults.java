@@ -87,11 +87,7 @@ public class CropResults implements PlugIn
     private TypeConverter<DistanceUnit> c;
     private boolean myLimitZ = false;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

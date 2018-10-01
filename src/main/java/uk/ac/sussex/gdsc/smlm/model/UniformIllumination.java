@@ -56,22 +56,14 @@ public class UniformIllumination implements SpatialIllumination
         this.pulseInterval = pulseInterval;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialIllumination#getPhotons(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getPhotons(double[] xyz)
     {
         return photons;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialIllumination#getPulsedPhotons(double[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] getPulsedPhotons(double[] xyz, int t)
     {
@@ -81,11 +73,7 @@ public class UniformIllumination implements SpatialIllumination
         return new double[] { 0, photons };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialIllumination#getAveragePhotons()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getAveragePhotons()
     {

@@ -107,11 +107,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
         return ta;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void reorder(int[] indices) throws IllegalArgumentException
     {
@@ -119,11 +115,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
         reorderFast(indices);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void reorderFast(int[] indices) throws IllegalArgumentException
     {
@@ -196,33 +188,21 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
                 throw new IllegalArgumentException("Indices do not contain a valid natural order");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemMesh#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return mesh.size();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public Point3f getCoordinate(int i)
     {
         return mesh.get(i);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setColor(Color3f color)
     {
@@ -231,22 +211,14 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
         setItemColor(color);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f color)
     {
         super.setColor(color);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f[] color) throws IllegalArgumentException
     {

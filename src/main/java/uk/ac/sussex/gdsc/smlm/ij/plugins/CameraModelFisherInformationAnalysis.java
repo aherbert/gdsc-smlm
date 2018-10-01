@@ -493,11 +493,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
     private ExecutorService es = null;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -515,12 +511,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
         analyse();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
-     * ij.plugin.filter.PlugInFilterRunner)
-     */
+    /** {@inheritDoc} */
     private boolean showDialog()
     {
         settings = SettingsManager.readCameraModelFisherInformationAnalysisSettings(0).toBuilder();

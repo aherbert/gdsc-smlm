@@ -227,11 +227,7 @@ public class IJImageSource extends ImageSource
         yOrigin = y;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#openSource()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean openSource()
     {
@@ -261,11 +257,7 @@ public class IJImageSource extends ImageSource
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#closeSource()
-     */
+    /** {@inheritDoc} */
     @Override
     public void closeSource()
     {
@@ -288,11 +280,7 @@ public class IJImageSource extends ImageSource
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#initialiseSequentialRead()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean initialiseSequentialRead()
     {
@@ -300,11 +288,7 @@ public class IJImageSource extends ImageSource
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#nextRawFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     protected Object nextRawFrame()
     {
@@ -315,11 +299,7 @@ public class IJImageSource extends ImageSource
         return get(slice);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getRawFrame(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Object getRawFrame(int frame)
     {
@@ -343,11 +323,7 @@ public class IJImageSource extends ImageSource
         return frame > 0 && frame <= frames;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {

@@ -167,11 +167,7 @@ public class ResultsManager implements PlugIn
     private static double input_exposureTime = Prefs.get(Constants.inputExposureTime, 0);
     private static ArrayList<String> selected;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

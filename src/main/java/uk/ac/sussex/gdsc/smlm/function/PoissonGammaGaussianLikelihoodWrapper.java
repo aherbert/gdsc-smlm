@@ -77,11 +77,7 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
         p = new PoissonGammaGaussianFunction(alpha, s);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood()
     {
@@ -92,22 +88,14 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
         return ll;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double computeLikelihood(int i)
     {
         return -p.logLikelihood(data[i], f.eval(i));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean canComputeGradient()
     {

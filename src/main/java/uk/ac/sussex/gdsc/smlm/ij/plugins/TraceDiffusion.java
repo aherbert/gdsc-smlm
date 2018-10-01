@@ -150,11 +150,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
     // Used for the multiMode option
     private static ArrayList<String> selected;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -1467,11 +1463,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
             return y;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {
@@ -1555,11 +1547,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
             return y;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {
@@ -1642,11 +1630,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
             return y;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {

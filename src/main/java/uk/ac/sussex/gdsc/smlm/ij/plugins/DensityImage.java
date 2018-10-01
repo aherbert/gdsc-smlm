@@ -87,11 +87,7 @@ public class DensityImage implements PlugIn
     private double scaledRoiMinX, scaledRoiMaxX, scaledRoiMinY, scaledRoiMaxY;
     private int roiImageWidth, roiImageHeight;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

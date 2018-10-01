@@ -113,11 +113,7 @@ public class ZeroKernelFilter extends KernelFilter
         return pixels[x + yIndex];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public ZeroKernelFilter clone()
     {

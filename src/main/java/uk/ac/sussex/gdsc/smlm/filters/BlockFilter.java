@@ -50,11 +50,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
     private Normaliser weightedNormaliser = null;
     private float weightedNormaliserN = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.BaseWeightedFilter#newWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void newWeights()
     {
@@ -2522,11 +2518,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
         normaliser.normalise(buffer, data, data.length);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public BlockFilter clone()
     {

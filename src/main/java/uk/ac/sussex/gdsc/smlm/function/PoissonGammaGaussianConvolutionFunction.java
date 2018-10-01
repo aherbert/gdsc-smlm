@@ -131,11 +131,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
         return new PoissonGammaGaussianConvolutionFunction(alpha, var, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double likelihood(final double o, final double e)
     {
@@ -224,11 +220,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
         return p;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double logLikelihood(double o, double e)
     {

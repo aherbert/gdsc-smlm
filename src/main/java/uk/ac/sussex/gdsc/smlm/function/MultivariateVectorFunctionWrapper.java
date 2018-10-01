@@ -45,11 +45,7 @@ public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper 
         super(fun, a, n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] value(double[] point)
     {

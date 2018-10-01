@@ -55,22 +55,14 @@ public class EMCCDCameraNoiseModel extends CameraNoiseModel
         super(readNoise, bias);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.CameraNoiseModel#variance(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double variance(final double value)
     {
         return readNoise2 + FastMath.max(value - bias, 0.0) * 2.0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.CameraNoiseModel#isEmCCD()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isEmCCD()
     {

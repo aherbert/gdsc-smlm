@@ -84,11 +84,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
     private int[] h1, h2;
     private float[] x1, x2, y1, y2;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -253,11 +249,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {

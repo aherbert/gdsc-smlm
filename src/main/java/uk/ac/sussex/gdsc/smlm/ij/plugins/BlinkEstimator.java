@@ -96,11 +96,7 @@ public class BlinkEstimator implements PlugIn
     private double[] parameters = null;
     private boolean increaseNFittedPoints = false;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -646,11 +642,7 @@ public class BlinkEstimator implements PlugIn
             super("Blinking Model");
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see uk.ac.sussex.gdsc.smlm.ij.plugins.OptimiserFunction#getWeights()
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] getWeights()
         {
@@ -764,11 +756,7 @@ public class BlinkEstimator implements PlugIn
             return evaluate(td, parameters[0], parameters[1], parameters[2]);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {

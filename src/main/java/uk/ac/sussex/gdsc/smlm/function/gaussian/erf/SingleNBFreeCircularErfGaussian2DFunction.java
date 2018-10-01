@@ -59,11 +59,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
         return new SingleNBFreeCircularErfGaussian2DFunction(maxx, maxy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda)
     {
@@ -82,11 +78,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
         return tB + tI * duda[0];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda, final double[] d2uda2)
     {
@@ -152,34 +144,21 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
         return 5;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {
         return gradientIndices;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfGradients()
     {
         return 5;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * ValueProcedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ValueProcedure procedure)
     {
@@ -197,12 +176,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
             super.forEach(procedure);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -224,12 +198,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -258,12 +227,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.
-     * ExtendedGradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ExtendedGradient2Procedure procedure)
     {

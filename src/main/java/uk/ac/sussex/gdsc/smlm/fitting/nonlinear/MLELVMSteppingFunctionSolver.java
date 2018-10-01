@@ -140,11 +140,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         super(FunctionSolverType.MLE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#preProcess()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void preProcess()
     {
@@ -152,11 +148,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         lastyFit = null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#prepareY(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected double[] prepareY(double[] y)
     {
@@ -176,11 +168,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         return ensurePositive(y);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#createGradientProcedure(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected LVMGradientProcedure createGradientProcedure(double[] y)
     {
@@ -202,11 +190,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         return super.computeFitValue(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#computeValues(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void computeValues(double[] yFit)
     {
@@ -224,11 +208,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
             System.arraycopy(yFit, 0, lastyFit, 0, size);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
-     */
+    /** {@inheritDoc} */
     @Override
     protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
     {
@@ -268,11 +248,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         return new FisherInformationMatrix(p.getLinear(), f.getNumberOfGradients());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihood()
     {
@@ -300,11 +276,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         return ll;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihoodRatio()
     {
@@ -312,11 +284,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
         return value;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getQ()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getQ()
     {

@@ -387,55 +387,35 @@ public class PeakResultTableModel extends AbstractTableModel
     // Table model methods
     //*************************************************************************/
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.table.TableModel#getRowCount()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getRowCount()
     {
         return data.size();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public String getColumnName(int column)
     {
         return names[column]; // values[column].getValueName();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public Class<?> getColumnClass(int columnIndex)
     {
         return values[columnIndex].getValueClass();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.table.TableModel#getColumnCount()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getColumnCount()
     {
         return values.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex)
     {

@@ -81,11 +81,7 @@ public class WeightedFailCounter extends BaseFailCounter
                 Math.max(0, passDecrement));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass()
     {
@@ -94,11 +90,7 @@ public class WeightedFailCounter extends BaseFailCounter
             failCount = 0L;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass(int n)
     {
@@ -109,11 +101,7 @@ public class WeightedFailCounter extends BaseFailCounter
             failCount = 0L;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail()
     {
@@ -122,11 +110,7 @@ public class WeightedFailCounter extends BaseFailCounter
             throw new IllegalStateException("Unable to increment");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail(int n)
     {
@@ -137,33 +121,21 @@ public class WeightedFailCounter extends BaseFailCounter
             throw new IllegalStateException("Unable to increment");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isOK()
     {
         return failCount <= allowedFailures;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-     */
+    /** {@inheritDoc} */
     @Override
     public FailCounter newCounter()
     {
         return new WeightedFailCounter(allowedFailures, failIncrement, passDecrement);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
-     */
+    /** {@inheritDoc} */
     @Override
     public void reset()
     {

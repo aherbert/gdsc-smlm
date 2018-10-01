@@ -115,22 +115,14 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
         super(FunctionSolverType.WLSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#createGradientProcedure(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected LVMGradientProcedure createGradientProcedure(double[] y)
     {
         return WLSQLVMGradientProcedureFactory.create(y, getWeights(y.length), (Gradient1Function) f);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
-     */
+    /** {@inheritDoc} */
     @Override
     protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
     {
@@ -163,22 +155,14 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
         return new FisherInformationMatrix(p.getLinear(), p.n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.WLSEFunctionSolver#getChiSquared()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getChiSquared()
     {
         return value;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.WLSEFunctionSolver#getQ()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getQ()
     {

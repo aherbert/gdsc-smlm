@@ -76,22 +76,14 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
         return delegate.toArray();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.ListModel#getSize()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getSize()
     {
         return delegate.size();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.ListModel#getElementAt(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public PeakResult getElementAt(int index)
     {

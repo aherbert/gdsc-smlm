@@ -127,11 +127,7 @@ public abstract class SpotFilter implements Cloneable
      */
     public abstract boolean isAbsoluteIntensity();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public SpotFilter clone()
     {

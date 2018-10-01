@@ -192,11 +192,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda)
     {
@@ -219,11 +215,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
         return I;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double eval(final int i, final double[] duda, final double[] d2uda2)
     {
@@ -297,12 +289,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
         return 4;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -325,12 +312,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
             }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -365,12 +347,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.
-     * ExtendedGradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ExtendedGradient2Procedure procedure)
     {

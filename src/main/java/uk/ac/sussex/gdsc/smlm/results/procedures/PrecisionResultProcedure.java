@@ -108,11 +108,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
         results.forEach((StoredPrecisionProcedure) this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.procedures.StoredPrecisionProcedure#executeStoredPrecision(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void executeStoredPrecision(double precision)
     {
@@ -132,11 +128,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
         results.forEach((LSEPrecisionProcedure) this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.procedures.LSEPrecisionProcedure#executeLSEPrecision(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void executeLSEPrecision(double precision)
     {
@@ -156,11 +148,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
         results.forEach((LSEPrecisionBProcedure) this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.procedures.LSEPrecisionBProcedure#executeLSEPrecisionB(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void executeLSEPrecisionB(double precision)
     {
@@ -180,11 +168,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
         results.forEach((MLEPrecisionProcedure) this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.procedures.MLEPrecisionProcedure#executeMLEPrecision(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void executeMLEPrecision(double precision)
     {
@@ -204,11 +188,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
         results.forEach((MLEPrecisionBProcedure) this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.procedures.MLEPrecisionBProcedure#executeMLEPrecisionB(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void executeMLEPrecisionB(double precision)
     {

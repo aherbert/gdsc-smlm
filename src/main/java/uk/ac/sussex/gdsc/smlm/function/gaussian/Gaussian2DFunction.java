@@ -107,11 +107,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.NamedFunction#getParameterName(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public String getParameterName(int i)
     {
@@ -338,11 +334,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
         this.noiseModel = noiseModel;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean canComputeWeights()
     {
@@ -429,11 +421,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
         return -1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] computeValues(double[] variables)
     {
@@ -464,33 +452,21 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
         return new IntegralValueProcedure().getIntegral(this, a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double[][] computeJacobian(double[] variables)
     {
         return computeValuesAndJacobian(variables).b;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean canComputeValuesAndJacobian()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
     {
@@ -512,33 +488,21 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
         return new Pair<>(values, jacobian);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return maxx * maxy;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfGradients()
     {
         return gradientIndices().length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.ValueProcedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ValueProcedure procedure)
     {
@@ -546,11 +510,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
             procedure.execute(eval(i));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient1Procedure procedure)
     {
@@ -562,11 +522,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise0(double[] a)
     {
@@ -575,11 +531,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
         initialise(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise1(double[] a)
     {

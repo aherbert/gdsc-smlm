@@ -48,11 +48,7 @@ public class IntegralValueProcedure implements ValueProcedure
         return integral;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value)
     {

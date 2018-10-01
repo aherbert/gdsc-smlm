@@ -112,11 +112,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
         setVisible(true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.frame.PlugInFrame#windowClosing(java.awt.event.WindowEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void windowClosing(WindowEvent e)
     {
@@ -146,11 +142,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.frame.PlugInFrame#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

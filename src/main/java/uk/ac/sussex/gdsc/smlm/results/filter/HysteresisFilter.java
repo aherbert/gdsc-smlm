@@ -202,22 +202,14 @@ public abstract class HysteresisFilter extends Filter
         return String.format("@%.2f %s, %.2f %s", searchDistance, getSearchName(), timeThreshold, getTimeName());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getNumberOfParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfParameters()
     {
         return 4;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected double getParameterValueInternal(int index)
     {
@@ -234,11 +226,7 @@ public abstract class HysteresisFilter extends Filter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getParameterIncrement(int index)
     {
@@ -257,22 +245,14 @@ public abstract class HysteresisFilter extends Filter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDisabledParameterValue(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getDisabledParameterValue(int index)
     {
         throw new NotImplementedException("Parameters in hysteresis filters cannot be disabled");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getParameterType(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public ParameterType getParameterType(int index)
     {
@@ -290,11 +270,7 @@ public abstract class HysteresisFilter extends Filter
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#weakestParameters(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void weakestParameters(double[] parameters)
     {
@@ -442,11 +418,7 @@ public abstract class HysteresisFilter extends Filter
         return ok.contains(peak);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {
@@ -454,11 +426,7 @@ public abstract class HysteresisFilter extends Filter
         ok = null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
@@ -467,22 +435,14 @@ public abstract class HysteresisFilter extends Filter
                 "tracing is the search distance multiplied by the average precision of the candidates.";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#subsetWithFailCount()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean subsetWithFailCount()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#newChromosome(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Chromosome<FilterScore> newChromosome(double[] sequence)
     {
@@ -497,11 +457,7 @@ public abstract class HysteresisFilter extends Filter
         return create(parameters);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getChromosomeParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] getChromosomeParameters()
     {
@@ -515,11 +471,7 @@ public abstract class HysteresisFilter extends Filter
         return indices;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#length()
-     */
+    /** {@inheritDoc} */
     @Override
     public int length()
     {

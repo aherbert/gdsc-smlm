@@ -480,11 +480,7 @@ public class IntBlockSumFilter extends BaseFilter
         System.arraycopy(inData, index, row, 1, width);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public IntBlockSumFilter clone()
     {

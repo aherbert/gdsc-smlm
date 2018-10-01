@@ -53,11 +53,7 @@ public abstract class MultiFilterComponentSet implements Cloneable
      */
     abstract void replace0(MultiFilterComponent c);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public MultiFilterComponentSet clone()
     {

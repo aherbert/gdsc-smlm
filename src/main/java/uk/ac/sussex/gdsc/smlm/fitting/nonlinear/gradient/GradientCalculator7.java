@@ -41,12 +41,7 @@ public class GradientCalculator7 extends GradientCalculator
         super(7);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
-     * gdsc.fitting.function.NonLinearFunction)
-     */
+    /** {@inheritDoc} */
     @Override
     public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
             NonLinearFunction func)
@@ -216,12 +211,7 @@ public class GradientCalculator7 extends GradientCalculator
         return checkGradients(alpha, beta, nparams, ssx);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[] double[], double[][],
-     * double[], gdsc.fitting.function.NonLinearFunction)
-     */
+    /** {@inheritDoc} */
     @Override
     public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
     {

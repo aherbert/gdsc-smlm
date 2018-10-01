@@ -52,66 +52,42 @@ public class SingleSpotFilter extends MaximaSpotFilter
         this.processor = processor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isAbsoluteIntensity()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {
         return processor.isWeighted();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#setWeights(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWeights(float[] weights, int width, int height)
     {
         processor.setWeights(weights, width, height);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#hasWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasWeights()
     {
         return processor.hasWeights();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] preprocessData(float[] data, int width, int height)
     {
         return processor.process(data, width, height);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public SingleSpotFilter clone()
     {
@@ -121,22 +97,14 @@ public class SingleSpotFilter extends MaximaSpotFilter
         return f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName()
     {
         return "Single";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#getParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public List<String> getParameters()
     {
@@ -145,11 +113,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getSpread()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSpread()
     {

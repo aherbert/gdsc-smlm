@@ -63,33 +63,21 @@ public class ConsecutiveFailCounter extends BaseFailCounter
         return new ConsecutiveFailCounter(Math.max(0, allowedFailures));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass()
     {
         failCount = 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass(int n)
     {
         failCount = 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail()
     {
@@ -98,11 +86,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
         failCount++;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail(int n)
     {
@@ -113,33 +97,21 @@ public class ConsecutiveFailCounter extends BaseFailCounter
         failCount += n;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#isOK()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isOK()
     {
         return failCount <= allowedFailures;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#newCounter()
-     */
+    /** {@inheritDoc} */
     @Override
     public FailCounter newCounter()
     {
         return new ConsecutiveFailCounter(allowedFailures);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
-     */
+    /** {@inheritDoc} */
     @Override
     public void reset()
     {

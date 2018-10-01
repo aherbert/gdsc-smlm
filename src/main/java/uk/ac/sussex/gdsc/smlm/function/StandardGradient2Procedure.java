@@ -57,11 +57,7 @@ public class StandardGradient2Procedure implements Gradient2Procedure
         return values;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da, double[] d2y_da2)
     {

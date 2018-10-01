@@ -588,11 +588,7 @@ public class BinomialFitter
             super(p, trials, zeroTruncated);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double value(double[] parameters)
         {
@@ -660,11 +656,7 @@ public class BinomialFitter
             return w;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] point) throws IllegalArgumentException
         {

@@ -79,22 +79,14 @@ public class ParameterisedFitJob extends FitJob
         this.parameters = parameters;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.engine.FitJob#getFitParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public FitParameters getFitParameters()
     {
         return parameters;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.engine.FitJob#setResults(java.util.List)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setResults(List<PeakResult> results)
     {
@@ -109,11 +101,7 @@ public class ParameterisedFitJob extends FitJob
         return peakResults;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.engine.FitJob#setIndices(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setIndices(int[] indices)
     {

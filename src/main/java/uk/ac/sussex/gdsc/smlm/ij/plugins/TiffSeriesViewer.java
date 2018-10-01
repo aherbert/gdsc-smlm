@@ -78,11 +78,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 
     private Label label, label2;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -495,66 +491,42 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
             return ip;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see ij.VirtualStack#saveChanges(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public int saveChanges(int n)
         {
             return -1; // Not implemented
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see ij.VirtualStack#getSize()
-         */
+        /** {@inheritDoc} */
         @Override
         public int getSize()
         {
             return source.getFrames();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see ij.VirtualStack#getSliceLabel(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public String getSliceLabel(int n)
         {
             return null;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see ij.VirtualStack#getDirectory()
-         */
+        /** {@inheritDoc} */
         @Override
         public String getDirectory()
         {
             return null;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see ij.VirtualStack#getFileName(int)
-         */
+        /** {@inheritDoc} */
         @Override
         public String getFileName(int n)
         {
             return null;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see ij.VirtualStack#sortDicom(java.lang.String[], java.lang.String[], int)
-         */
+        /** {@inheritDoc} */
         @Override
         public ImageStack sortDicom(String[] strings, String[] info, int maxDigits)
         {

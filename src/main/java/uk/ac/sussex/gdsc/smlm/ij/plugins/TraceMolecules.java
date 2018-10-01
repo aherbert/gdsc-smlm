@@ -203,11 +203,7 @@ public class TraceMolecules implements PlugIn
     private int origX, origY;
     private boolean debugMode = false, altKeyDown, optimiseBlinkingRate = false;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

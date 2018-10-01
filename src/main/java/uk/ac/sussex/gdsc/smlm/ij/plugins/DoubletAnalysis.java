@@ -290,11 +290,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
             this.fp = fp;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(DoubletBonus that)
         {
@@ -320,11 +316,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
             this.id = id;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(ResultCoordinate that)
         {
@@ -420,11 +412,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
             return (score1 + score2) * 0.5;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(DoubletResult that)
         {
@@ -507,11 +495,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
                 signalScore = new RampedScore(lowerSignalFactor, signalFactor);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -1533,11 +1517,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
         return 2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -3167,11 +3147,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
         return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\tFilter\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void itemStateChanged(ItemEvent e)
     {

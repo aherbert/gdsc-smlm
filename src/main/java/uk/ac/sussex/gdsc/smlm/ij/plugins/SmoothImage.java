@@ -65,11 +65,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 
     private final int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public int setup(String arg, ImagePlus imp)
     {
@@ -99,12 +95,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
         return flags;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
-     * ij.plugin.filter.PlugInFilterRunner)
-     */
+    /** {@inheritDoc} */
     @Override
     public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
     {
@@ -132,11 +123,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
         return IJ.setupDialog(imp, flags);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {
@@ -151,11 +138,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
         return !gd.invalidNumber();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(ImageProcessor ip)
     {
@@ -193,11 +176,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
         return new SingleSpotFilter(search, border, processor0);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setNPasses(int nPasses)
     {

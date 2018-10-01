@@ -57,22 +57,14 @@ public final class JurySpotFilter extends MaximaSpotFilter
         this.processors = processors;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isAbsoluteIntensity()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {
@@ -82,11 +74,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#setWeights(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWeights(float[] weights, int width, int height)
     {
@@ -94,11 +82,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
             processor.setWeights(weights, width, height);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#hasWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasWeights()
     {
@@ -108,11 +92,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#find(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Spot[] find(float[] data, int width, int height)
     {
@@ -152,11 +132,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
         return Arrays.copyOf(spots, count);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] preprocessData(float[] data, int width, int height)
     {
@@ -175,11 +151,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
         return sum;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public JurySpotFilter clone()
     {
@@ -191,22 +163,14 @@ public final class JurySpotFilter extends MaximaSpotFilter
         return f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName()
     {
         return "Jury";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#getParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public List<String> getParameters()
     {
@@ -216,11 +180,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getSpread()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSpread()
     {

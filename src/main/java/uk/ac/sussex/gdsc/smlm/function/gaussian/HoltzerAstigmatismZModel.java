@@ -211,77 +211,49 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
         return s0 * Math.sqrt(1 + one_d2 * (z2 + A * z3 + B * z4));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSx(double z)
     {
         return getS(s0x, z - gamma, one_d2, Ax, Bx);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSx(double z, double[] ds_dz)
     {
         return getS1(s0x, z - gamma, one_d2, Ax, Bx, ds_dz);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSx2(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSx2(double z, double[] ds_dz)
     {
         return getS2(s0x, z - gamma, one_d2, Ax, Bx, ds_dz);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSy(double z)
     {
         return getS(s0y, z + gamma, one_d2, Ay, By);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSy(double z, double[] ds_dz)
     {
         return getS1(s0y, z + gamma, one_d2, Ay, By, ds_dz);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.AstimatismZModel#getSy2(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSy2(double z, double[] ds_dz)
     {
         return getS2(s0y, z + gamma, one_d2, Ay, By, ds_dz);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public HoltzerAstigmatismZModel clone()
     {
@@ -295,11 +267,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {

@@ -718,11 +718,7 @@ public class SeriesImageSource extends ImageSource
      */
     private class TIFFWorker extends BaseWorker
     {
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -878,11 +874,7 @@ public class SeriesImageSource extends ImageSource
      */
     private class BufferWorker extends BaseWorker
     {
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -953,11 +945,7 @@ public class SeriesImageSource extends ImageSource
      */
     private class DecodeWorker extends BaseWorker
     {
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -1064,11 +1052,7 @@ public class SeriesImageSource extends ImageSource
      */
     private class ReadWorker extends BaseWorker
     {
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -1126,110 +1110,6 @@ public class SeriesImageSource extends ImageSource
             run = false;
         }
     }
-
-    //	/**
-    //	 * Add source images to the queue to be read.
-    //	 */
-    //	private class SourceWorker extends BaseWorker
-    //	{
-    //		/*
-    //		 * (non-Javadoc)
-    //		 *
-    //		 * @see java.lang.Runnable#run()
-    //		 */
-    //		public void run()
-    //		{
-    //			try
-    //			{
-    //				// Read each image in sequence
-    //				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
-    //				{
-    //					ExtendedFileInfo[] info = null;
-    //					SeekableStream ss = null;
-    //
-    //					final String path = images.get(currentImage);
-    //					//System.out.println("Reading " + images.get(currentImage));
-    //
-    //					// This may contain a custom SeekableStream that wraps an in-memory RandomAccessFile
-    //					ss = createSeekableStream(path);
-    //
-    //					if (ss != null)
-    //					{
-    //						TiffDecoder td = new CustomTiffDecoder(ss, path);
-    //						if (logProgress)
-    //						{
-    //							long time = System.currentTimeMillis();
-    //							if (time - lastTime > 500)
-    //							{
-    //								lastTime = time;
-    //								IJ.log("Reading TIFF info " + path);
-    //							}
-    //						}
-    //						try
-    //						{
-    //							//td.enableDebugging();
-    //							// This will close the seekable stream.
-    //							// If it is a custom in-memory object then the close call is ignored.
-    //							info = td.getTiffInfo();
-    //							//if (info != null)
-    //							//{
-    //							//	System.out.println(info[0].debugInfo);
-    //							//
-    //							//	// This contains OME TIFF metadata as serialised JSON when using
-    //							//	// MicroManager to save the TIFF
-    //							//	System.out.println(info[0].info);
-    //							//
-    //							//	ij.io.FileOpener fo = new ij.io.FileOpener(info[0]);
-    //							//	java.util.Properties p = fo.decodeDescriptionString(info[0]);
-    //							//	System.out.println(p);
-    //							//	//double ox = 0, oy = 0;
-    //							//	//if (p.containsKey("xorigin"))
-    //							//	//	ox = Double.parseDouble(p.getProperty("xorigin"));
-    //							//	//if (p.containsKey("yorigin"))
-    //							//	//	oy = Double.parseDouble(p.getProperty("yorigin"));
-    //							//	//// Should the origin be converted by the units?
-    //							//	//setOrigin((int)ox, (int)oy);
-    //							//}
-    //						}
-    //						catch (IOException e)
-    //						{
-    //							e.printStackTrace();
-    //						}
-    //					}
-    //
-    //					sourceQueue.put(new NextSource(info, (inMemory[0]) ? ss : null, currentImage));
-    //				}
-    //			}
-    //			catch (FileNotFoundException e)
-    //			{
-    //				e.printStackTrace();
-    //			}
-    //			catch (SecurityException e)
-    //			{
-    //
-    //			}
-    //			catch (InterruptedException e)
-    //			{
-    //				// This is from the queue put method, possibly an interrupt on the queue or thread?
-    //				System.out.println(e.toString()); e.printStackTrace();
-    //			}
-    //
-    //			// Add jobs to shutdown all the workers
-    //			try
-    //			{
-    //				for (int i = 0; run && i < workers.size(); i++)
-    //					sourceQueue.put(new NextSource());
-    //			}
-    //			catch (InterruptedException e)
-    //			{
-    //				// This is from the queue put method, possibly an interrupt on the queue or thread?
-    //				// Q - How should this be handled?
-    //				e.printStackTrace();
-    //			}
-    //
-    //			run = false;
-    //		}
-    //	}
 
     /**
      * Creates the seekable stream.
@@ -1336,11 +1216,6 @@ public class SeriesImageSource extends ImageSource
     //			this.id = id;
     //		}
     //
-    //		/*
-    //		 * (non-Javadoc)
-    //		 *
-    //		 * @see java.lang.Runnable#run()
-    //		 */
     //		public void run()
     //		{
     //			try
@@ -1762,11 +1637,7 @@ public class SeriesImageSource extends ImageSource
         return (i == 0) ? imageSize[i] : imageSize[i] - imageSize[i - 1];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#openSource()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean openSource()
     {
@@ -1810,11 +1681,7 @@ public class SeriesImageSource extends ImageSource
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#closeSource()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void closeSource()
     {
@@ -2071,11 +1938,7 @@ public class SeriesImageSource extends ImageSource
         height = maxy;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#initialiseSequentialReading()
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean initialiseSequentialRead()
     {
@@ -2128,11 +1991,7 @@ public class SeriesImageSource extends ImageSource
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#getRawFrame(int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected Object getRawFrame(int frame)
     {
@@ -2257,22 +2116,14 @@ public class SeriesImageSource extends ImageSource
         return tiffImage;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#isValid(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isValid(int frame)
     {
         return frame > 0 && frame <= frames;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {

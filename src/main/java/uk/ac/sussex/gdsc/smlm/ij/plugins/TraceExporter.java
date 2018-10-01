@@ -93,11 +93,7 @@ public class TraceExporter implements PlugIn
 
     private ExportFormat exportFormat;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

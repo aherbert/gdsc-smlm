@@ -93,11 +93,7 @@ public class EMGainAnalysis implements PlugInFilter
     private ImagePlus imp;
     private double offset = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public int setup(String arg, ImagePlus imp)
     {

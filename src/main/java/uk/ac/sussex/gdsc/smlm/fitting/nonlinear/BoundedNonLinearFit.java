@@ -90,11 +90,7 @@ public class BoundedNonLinearFit extends NonLinearFit
         setBounds(bounds);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit#solve(double[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean solve(double[] a, final int m)
     {
@@ -118,23 +114,14 @@ public class BoundedNonLinearFit extends NonLinearFit
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit#updateFitParameters(double[], int[], int, double[],
-     * double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da, double[] ap)
     {
         bounds.applyBounds(a, da, ap);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit#accepted(double[], double[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void accepted(double[] a, double[] ap, int m)
     {
@@ -142,11 +129,7 @@ public class BoundedNonLinearFit extends NonLinearFit
         super.accepted(a, ap, m);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(double[], double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
     {
@@ -154,22 +137,14 @@ public class BoundedNonLinearFit extends NonLinearFit
         return super.computeFit(y, yFit, a, aDev);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isBounded()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isBounded()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isConstrained()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isConstrained()
     {

@@ -42,12 +42,7 @@ public class PeakResultValueParameter implements PeakResultValue
         this.index = index;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultValue#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public float getValue(PeakResult result)
     {

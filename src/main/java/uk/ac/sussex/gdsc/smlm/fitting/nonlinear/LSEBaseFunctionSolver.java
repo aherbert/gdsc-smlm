@@ -109,11 +109,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
         return error;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getTotalSumOfSquares()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getTotalSumOfSquares()
     {
@@ -122,33 +118,21 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
         return totalSumOfSquares;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getResidualSumOfSquares()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getResidualSumOfSquares()
     {
         return value;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getCoefficientOfDetermination()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getCoefficientOfDetermination()
     {
         return 1.0 - (value / getTotalSumOfSquares());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getAdjustedCoefficientOfDetermination()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getAdjustedCoefficientOfDetermination()
     {
@@ -156,11 +140,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
                 getNumberOfFittedPoints(), getNumberOfFittedParameters());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver#getMeanSquaredError()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMeanSquaredError()
     {

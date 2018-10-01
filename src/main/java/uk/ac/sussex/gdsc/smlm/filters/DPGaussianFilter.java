@@ -45,11 +45,7 @@ public class DPGaussianFilter extends BaseWeightedFilter
     private Normaliser normaliser = null;
     private double sx, sy;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.BaseWeightedFilter#newWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void newWeights()
     {
@@ -613,11 +609,7 @@ public class DPGaussianFilter extends BaseWeightedFilter
         return kernel;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public DPGaussianFilter clone()
     {

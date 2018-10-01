@@ -99,11 +99,7 @@ public abstract class CoordinateChecker implements OptimizationData, Convergence
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.commons.math3.optim.ConvergenceChecker#converged(int, java.lang.Object, java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean converged(int iteration, PointValuePair previous, PointValuePair current)
     {

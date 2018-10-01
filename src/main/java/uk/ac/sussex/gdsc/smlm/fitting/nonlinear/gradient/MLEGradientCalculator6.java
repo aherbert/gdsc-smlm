@@ -44,11 +44,7 @@ public class MLEGradientCalculator6 extends MLEGradientCalculator
         super(6);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.MLEGradientCalculator#zero(double[][], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void zero(final double[][] alpha, final double[] beta)
     {
@@ -82,13 +78,7 @@ public class MLEGradientCalculator6 extends MLEGradientCalculator
         beta[5] = 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.MLEGradientCalculator#compute(double[][], double[],
-     * double[], double,
-     * double)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
             final double xi)
@@ -133,11 +123,7 @@ public class MLEGradientCalculator6 extends MLEGradientCalculator
         beta[5] -= e * dfi_da[5];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.MLEGradientCalculator#symmetric(double[][])
-     */
+    /** {@inheritDoc} */
     @Override
     protected void symmetric(final double[][] alpha)
     {

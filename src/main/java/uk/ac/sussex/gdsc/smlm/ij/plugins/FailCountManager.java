@@ -337,11 +337,7 @@ public class FailCountManager implements PlugIn
 
     private FailCountManagerSettings.Builder settings;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

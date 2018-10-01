@@ -70,11 +70,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
         this.pulseInterval = pulseInterval;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialIllumination#getPhotons(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public double getPhotons(double[] xyz)
     {
@@ -94,11 +90,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
         return 1.0 / (1.0 + (d2 / radius2));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialIllumination#getPulsedPhotons(double[], int)
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] getPulsedPhotons(double[] xyz, int t)
     {
@@ -109,7 +101,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
     }
 
     /**
-     * (non-Javadoc)
+     * {@inheritDoc}
      *
      * @return The average intensity from the centre to the radius (specified in
      *         the constructor)

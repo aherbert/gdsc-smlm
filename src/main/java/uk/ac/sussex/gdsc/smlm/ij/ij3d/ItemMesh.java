@@ -817,11 +817,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         return appearance;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void reorder(int[] indices) throws IllegalArgumentException
     {
@@ -829,11 +825,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         reorderFast(indices);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void reorderFast(int[] indices) throws IllegalArgumentException
     {
@@ -949,33 +941,21 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         return c;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemMesh#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return points.length;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public Point3f getCoordinate(int i)
     {
         return points[i];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setColor(Color3f color)
     {
@@ -984,11 +964,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         setItemColor(color);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f color)
     {
@@ -1031,11 +1007,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor(Color3f[] color) throws IllegalArgumentException
     {
@@ -1086,11 +1058,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemColor4(Color4f[] color) throws IllegalArgumentException
     {
@@ -1112,11 +1080,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemAlpha(float[] alpha) throws IllegalArgumentException
     {
@@ -1143,11 +1107,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setItemAlpha(float alpha) throws IllegalArgumentException
     {
@@ -1172,11 +1132,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         changed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void getItemAlpha(float[] alpha) throws IllegalArgumentException
     {
@@ -1197,11 +1153,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
             alpha[i] = colors[i * n + 3];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see customnode.CustomMesh#setShaded(boolean)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setShaded(boolean b)
     {

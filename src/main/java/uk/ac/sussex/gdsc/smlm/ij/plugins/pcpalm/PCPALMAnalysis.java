@@ -114,11 +114,7 @@ public class PCPALMAnalysis implements PlugInFilter
     /** Area of the region cropped from the PCPALM Molecules list */
     double croppedArea = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public int setup(String arg, ImagePlus imp)
     {
@@ -298,11 +294,7 @@ public class PCPALMAnalysis implements PlugInFilter
         IJ.error(TITLE, message);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(ImageProcessor ip)
     {

@@ -76,11 +76,7 @@ public class DarkTimeAnalysis implements PlugIn
     private static double percentile = 99;
     private static int nBins = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

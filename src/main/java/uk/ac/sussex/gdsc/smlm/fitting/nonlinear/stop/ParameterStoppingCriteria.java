@@ -52,12 +52,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
         eq = new DoubleEquality(DoubleEquality.getMaxRelativeError(significantDigits), 1e-16);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria#logParameters(double, double,
-     * double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected StringBuilder logParameters(double oldError, double newError, double[] a)
     {
@@ -106,11 +101,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria#noCoordinateChange(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean noCoordinateChange(double[] a)
     {

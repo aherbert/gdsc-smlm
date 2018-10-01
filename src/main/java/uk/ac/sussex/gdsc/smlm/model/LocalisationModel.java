@@ -248,11 +248,7 @@ public class LocalisationModel implements Comparable<LocalisationModel>
         this.intensity = intensity;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(LocalisationModel o)
     {

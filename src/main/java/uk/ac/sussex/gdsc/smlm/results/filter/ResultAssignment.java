@@ -77,11 +77,7 @@ public class ResultAssignment implements Comparable<ResultAssignment>
         return new PeakFractionalAssignment(targetId, predictedId, distance, score, peakResult);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(ResultAssignment that)
     {

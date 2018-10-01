@@ -140,11 +140,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
         return this.results.get(index);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
@@ -692,11 +688,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
         add(new PeakResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {
@@ -798,11 +790,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		//@formatter:on
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

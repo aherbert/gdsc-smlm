@@ -41,11 +41,7 @@ public class Gaussian2DPeakResultDataSNR extends PeakResultDataFloat
     /** The index of the y width. */
     final static int j = i + 1;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public Float getValue(PeakResult result)
     {
@@ -53,11 +49,7 @@ public class Gaussian2DPeakResultDataSNR extends PeakResultDataFloat
                 result.getParameter(j)) / result.getNoise());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getValueName()
     {

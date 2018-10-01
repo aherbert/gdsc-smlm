@@ -153,12 +153,7 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.search.ConvergenceChecker#converged(uk.ac.sussex.gdsc.smlm.search.ScoreResult,
-     * uk.ac.sussex.gdsc.smlm.search.ScoreResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean converged(SearchResult<T> previous, SearchResult<T> current)
     {

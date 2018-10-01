@@ -30,11 +30,7 @@ public abstract class BaseFailCounter implements FailCounter
 {
     private String description;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {

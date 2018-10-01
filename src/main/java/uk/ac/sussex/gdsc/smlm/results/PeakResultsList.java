@@ -88,11 +88,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
         return results.toArray(new PeakResults[results.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#begin()
-     */
+    /** {@inheritDoc} */
     @Override
     public void begin()
     {
@@ -100,11 +96,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
             peakResults.begin();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
             float[] params, float[] paramsStdDev)
@@ -134,22 +126,14 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
             peakResults.addAll(results);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return (results.isEmpty()) ? 0 : results.get(0).size();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {
@@ -157,11 +141,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
             peakResults.end();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {

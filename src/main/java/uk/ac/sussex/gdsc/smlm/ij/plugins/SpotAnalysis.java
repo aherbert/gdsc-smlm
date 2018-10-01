@@ -137,11 +137,7 @@ public class SpotAnalysis extends PlugInFrame
             return String.format("%d : %.2f", frame, getSignal(frame));
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(Spot o)
         {
@@ -150,11 +146,7 @@ public class SpotAnalysis extends PlugInFrame
             return Integer.compare(frame, o.frame);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public boolean equals(Object obj)
         {
@@ -164,11 +156,7 @@ public class SpotAnalysis extends PlugInFrame
             return frame == o.frame;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#hashCode()
-         */
+        /** {@inheritDoc} */
         @Override
         public int hashCode()
         {
@@ -210,11 +198,7 @@ public class SpotAnalysis extends PlugInFrame
             this.outputStack = outputStack;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -414,11 +398,7 @@ public class SpotAnalysis extends PlugInFrame
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public synchronized void actionPerformed(ActionEvent e)
     {
@@ -452,22 +432,14 @@ public class SpotAnalysis extends PlugInFrame
         super.notify();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void itemStateChanged(ItemEvent e)
     {
         // Ignore
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.frame.PlugInFrame#windowClosing(java.awt.event.WindowEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void windowClosing(WindowEvent e)
     {
@@ -475,11 +447,7 @@ public class SpotAnalysis extends PlugInFrame
         close();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.frame.PlugInFrame#close()
-     */
+    /** {@inheritDoc} */
     @Override
     public void close()
     {
@@ -487,11 +455,7 @@ public class SpotAnalysis extends PlugInFrame
         super.close();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.frame.PlugInFrame#windowActivated(java.awt.event.WindowEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public void windowActivated(WindowEvent e)
     {
@@ -501,11 +465,7 @@ public class SpotAnalysis extends PlugInFrame
         WindowManager.setWindow(this);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Runnable#run()
-     */
+    /** {@inheritDoc} */
     @Override
     public void run()
     {
@@ -1322,33 +1282,21 @@ public class SpotAnalysis extends PlugInFrame
         return panel;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.ImageListener#imageOpened(ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public void imageOpened(ImagePlus imp)
     {
         // Ignore
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.ImageListener#imageClosed(ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public void imageClosed(ImagePlus imp)
     {
         // Ignore
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.ImageListener#imageUpdated(ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public void imageUpdated(ImagePlus imp)
     {

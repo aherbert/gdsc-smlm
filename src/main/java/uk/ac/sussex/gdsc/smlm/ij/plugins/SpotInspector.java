@@ -91,11 +91,7 @@ public class SpotInspector implements PlugIn, MouseListener
     private static int currentId = 0;
     private int id;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

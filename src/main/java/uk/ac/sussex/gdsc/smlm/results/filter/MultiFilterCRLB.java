@@ -94,22 +94,14 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
         return variance; // Return the current limit
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
         return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift, precision (uses fitted parameter variance) and Z-depth";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#requiresParameterDeviations()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean requiresParameterDeviations()
     {
@@ -122,11 +114,7 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
         return ParameterType.PRECISION_CRLB;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -137,11 +125,7 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
                 (float) params[7], (float) params[8]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {

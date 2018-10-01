@@ -550,13 +550,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
         return initialResidualSumOfSquares;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(uk.ac.sussex.gdsc.smlm.function.
-     * GradientFunction)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setGradientFunction(GradientFunction f)
     {
@@ -608,11 +602,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
             setType((func.canComputeWeights()) ? FunctionSolverType.WLSE : FunctionSolverType.LSE);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean computeValue(double[] y, double[] yFit, double[] a)
     {
@@ -674,11 +664,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
         return new FisherInformationMatrix(I);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver#getTotalSumOfSquares()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getTotalSumOfSquares()
     {
@@ -687,11 +673,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
         throw new IllegalStateException();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.WLSEFunctionSolver#getChiSquared()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getChiSquared()
     {
@@ -701,11 +683,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
         throw new IllegalStateException();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihood()
     {
@@ -720,11 +698,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
         throw new IllegalStateException();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLogLikelihoodRatio()
     {
@@ -734,11 +708,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
         throw new IllegalStateException();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver#getQ()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getQ()
     {

@@ -35,11 +35,7 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
      */
     public static final double MIN_MEAN = Double.longBitsToDouble(0x4000000000001L);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#isValid(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isValid(double t)
     {
@@ -62,11 +58,7 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
      */
     public abstract double getAlpha(double t);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public BasePoissonFisherInformation clone()
     {

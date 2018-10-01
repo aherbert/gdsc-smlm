@@ -79,11 +79,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
      */
     protected abstract String getOperator();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass()
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass()
     {
@@ -91,11 +87,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
         c2.pass();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#pass(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void pass(int n)
     {
@@ -103,11 +95,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
         c2.pass(n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail()
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail()
     {
@@ -115,11 +103,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
         c2.fail();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#fail(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void fail(int n)
     {
@@ -127,11 +111,7 @@ public abstract class CombinedFailCounter extends BaseFailCounter
         c2.fail(n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.FailCounter#reset()
-     */
+    /** {@inheritDoc} */
     @Override
     public void reset()
     {

@@ -63,11 +63,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
         tI = new double[nPeaks];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.fitting.function.GaussianFunction#getNPeaks()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNPeaks()
     {
@@ -102,22 +98,14 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
         return indices;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
-     */
+    /** {@inheritDoc} */
     @Override
     public int[] gradientIndices()
     {
         return gradientIndices;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#getNumberOfGradients()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getNumberOfGradients()
     {
@@ -172,12 +160,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
     @Override
     public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#forEach(uk.ac.sussex.gdsc.smlm.function.GradientFunction.
-     * ValueProcedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(ValueProcedure procedure)
     {

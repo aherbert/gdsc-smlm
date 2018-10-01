@@ -45,11 +45,7 @@ public class KernelFilter extends BaseWeightedFilter
     private Normaliser normaliser = null;
     private boolean convolution;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.BaseWeightedFilter#newWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     protected void newWeights()
     {
@@ -299,11 +295,7 @@ public class KernelFilter extends BaseWeightedFilter
         return pixels[x + yIndex];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public KernelFilter clone()
     {

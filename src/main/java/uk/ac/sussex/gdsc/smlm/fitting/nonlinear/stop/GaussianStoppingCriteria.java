@@ -62,11 +62,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
         this.peaks = func.getNPeaks();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void evaluate(double oldError, double newError, double[] a)
     {

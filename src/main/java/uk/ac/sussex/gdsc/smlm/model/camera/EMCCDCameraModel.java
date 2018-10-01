@@ -130,22 +130,14 @@ public class EMCCDCameraModel extends FixedPixelCameraModel
         return super.getMeanNormalisedVariance(bounds);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public EMCCDCameraModel copy()
     {
         return clone();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     protected EMCCDCameraModel clone()
     {

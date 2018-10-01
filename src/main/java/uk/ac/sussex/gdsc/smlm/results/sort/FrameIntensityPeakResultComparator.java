@@ -35,11 +35,7 @@ public class FrameIntensityPeakResultComparator implements Comparator<PeakResult
     /** An instance of the comparator */
     public static final FrameIntensityPeakResultComparator INSTANCE = new FrameIntensityPeakResultComparator();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compare(PeakResult o1, PeakResult o2)
     {

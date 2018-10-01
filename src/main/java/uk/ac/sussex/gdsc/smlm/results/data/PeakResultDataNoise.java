@@ -30,22 +30,14 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PeakResultDataNoise extends PeakResultDataFloat
 {
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public Float getValue(PeakResult result)
     {
         return result.getNoise();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getValueName()
     {

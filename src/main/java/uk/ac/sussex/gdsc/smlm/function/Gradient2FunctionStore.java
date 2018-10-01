@@ -64,23 +64,14 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gr
         this.d2yda2 = d2yda2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Function#initialise2(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise2(double[] a)
     {
         f.initialise2(a);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.function.Gradient2Function#forEach(uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure)
-     */
+    /** {@inheritDoc} */
     @Override
     public void forEach(Gradient2Procedure procedure)
     {
@@ -101,11 +92,7 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gr
             d2yda2 = new double[values.length][length];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure#execute(double, double[], double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da, double[] d2y_da2)
     {

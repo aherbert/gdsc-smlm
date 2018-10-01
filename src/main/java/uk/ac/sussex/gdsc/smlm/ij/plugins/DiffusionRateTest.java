@@ -198,11 +198,7 @@ public class DiffusionRateTest implements PlugIn
     private final int[] idList = new int[12];
     private int idCount = 0;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

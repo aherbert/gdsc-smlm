@@ -66,44 +66,28 @@ public class GaussianDataProcessor extends DataProcessor
         return smooth;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWeights(float[] weights, int width, int height)
     {
         filter.setWeights(weights, width, height);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#hasWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasWeights()
     {
         return filter.hasWeights();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#process(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] process(float[] data, int width, int height)
     {
@@ -128,11 +112,7 @@ public class GaussianDataProcessor extends DataProcessor
         return sigma;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public GaussianDataProcessor clone()
     {
@@ -142,22 +122,14 @@ public class GaussianDataProcessor extends DataProcessor
         return f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName()
     {
         return "Gaussian";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public List<String> getParameters()
     {
@@ -167,11 +139,7 @@ public class GaussianDataProcessor extends DataProcessor
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.DataProcessor#getSpread()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSpread()
     {

@@ -140,11 +140,7 @@ public class PCPALMFitting implements PlugIn
     private static double previous_peakDensity;
     private static boolean previous_spatialDomain;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {
@@ -1637,11 +1633,7 @@ public class PCPALMFitting implements PlugIn
             return evaluate(r, parameters[0], parameters[1]);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {
@@ -1835,11 +1827,7 @@ public class PCPALMFitting implements PlugIn
         // Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
         // Use the deprecated API since the new one is not yet documented.
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {
@@ -2175,11 +2163,7 @@ public class PCPALMFitting implements PlugIn
      */
     private class EmulsionModelFunctionGradient extends EmulsionModelFunction implements MultivariateVectorFunction
     {
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
-         */
+        /** {@inheritDoc} */
         @Override
         public double[] value(double[] variables)
         {

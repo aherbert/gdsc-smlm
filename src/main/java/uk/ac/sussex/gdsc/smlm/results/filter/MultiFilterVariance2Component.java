@@ -41,23 +41,14 @@ public class MultiFilterVariance2Component extends MultiFilterComponent
         this.variance = Filter.getDUpperSquaredLimit(precision);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#fail(uk.ac.sussex.gdsc.smlm.results.filter.
-     * PreprocessedPeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean fail(final PreprocessedPeakResult peak)
     {
         return (peak.getLocationVariance2() > variance);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterComponent#getType()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getType()
     {

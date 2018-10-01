@@ -62,33 +62,21 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
         this.processor2 = processor2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isAbsoluteIntensity()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#isWeighted()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWeighted()
     {
         return processor1.isWeighted() || processor2.isWeighted();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#setWeights(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWeights(float[] weights, int width, int height)
     {
@@ -96,22 +84,14 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
         processor2.setWeights(weights, width, height);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#hasWeights()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasWeights()
     {
         return processor1.hasWeights() || processor2.hasWeights();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#preprocessData(float[], int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] preprocessData(float[] data, int width, int height)
     {
@@ -122,11 +102,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
         return data1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public DifferenceSpotFilter clone()
     {
@@ -137,22 +113,14 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
         return f;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getName()
     {
         return "Difference";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter#getParameters()
-     */
+    /** {@inheritDoc} */
     @Override
     public List<String> getParameters()
     {
@@ -162,11 +130,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.filters.SpotFilter#getSpread()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getSpread()
     {

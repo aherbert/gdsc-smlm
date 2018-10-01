@@ -136,11 +136,7 @@ public class Workflow<S, R>
             this.worker = worker;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         @SuppressWarnings("unchecked")
         public void run()

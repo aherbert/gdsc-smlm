@@ -501,11 +501,7 @@ public class BenchmarkSpotFilter implements PlugIn
             return FastMath.max(0, 1 - score);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
+        /** {@inheritDoc} */
         @Override
         public int compareTo(ScoredSpot o)
         {
@@ -586,11 +582,7 @@ public class BenchmarkSpotFilter implements PlugIn
             this.coordinates = new TIntObjectHashMap<>();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -769,11 +761,7 @@ public class BenchmarkSpotFilter implements PlugIn
                 this.spotFilter.setWeights(weights, bounds.width, bounds.height);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
+        /** {@inheritDoc} */
         @Override
         public void run()
         {
@@ -1186,11 +1174,7 @@ public class BenchmarkSpotFilter implements PlugIn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.PlugIn#run(java.lang.String)
-     */
+    /** {@inheritDoc} */
     @Override
     public void run(String arg)
     {

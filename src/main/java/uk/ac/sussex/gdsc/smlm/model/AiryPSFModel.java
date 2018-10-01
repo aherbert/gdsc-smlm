@@ -172,11 +172,7 @@ public class AiryPSFModel extends PSFModel
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.PSFModel#create3D(float[], int, int, double, double, double, double, boolean)
-     */
+    /** {@inheritDoc} */
     @Override
     public double create3D(float[] data, final int width, final int height, final double sum, double x0, double x1,
             double x2, boolean poissonNoise)
@@ -196,11 +192,7 @@ public class AiryPSFModel extends PSFModel
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.PSFModel#create3D(double[], int, int, double, double, double, double, boolean)
-     */
+    /** {@inheritDoc} */
     @Override
     public double create3D(double[] data, final int width, final int height, final double sum, double x0, double x1,
             double x2, boolean poissonNoise)
@@ -663,11 +655,7 @@ public class AiryPSFModel extends PSFModel
         return w1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.PSFModel#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public AiryPSFModel copy()
     {

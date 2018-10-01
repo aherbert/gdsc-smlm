@@ -70,11 +70,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
                 w[i] = (y[i] > 0) ? 1.0 / (y[i] + 1.0) : 1.0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dy_da)
     {
@@ -97,11 +93,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
-     */
+    /** {@inheritDoc} */
     @Override
     public void execute(double value)
     {

@@ -60,22 +60,14 @@ public class GridCoordinateStore1 extends GridCoordinateStore
             throw new IllegalArgumentException("XY Resolution must be <= 1");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.GridCoordinateStore#newInstance(int, int, int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public GridCoordinateStore newInstance(int minx, int miny, int width, int height)
     {
         return new GridCoordinateStore1(minx, miny, width, height, getXYResolution(), getZResolution());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.GridCoordinateStore#getBlock(double)
-     */
+    /** {@inheritDoc} */
     @Override
     protected int getBlock(final double x)
     {

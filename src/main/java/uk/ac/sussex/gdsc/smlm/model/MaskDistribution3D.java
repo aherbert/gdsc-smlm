@@ -179,11 +179,7 @@ public class MaskDistribution3D implements SpatialDistribution
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#next()
-     */
+    /** {@inheritDoc} */
     @Override
     public double[] next()
     {
@@ -210,11 +206,7 @@ public class MaskDistribution3D implements SpatialDistribution
         return getIndex(x, y, z);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithin(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWithin(double[] xyz)
     {
@@ -229,11 +221,7 @@ public class MaskDistribution3D implements SpatialDistribution
         return mask[index] == particle;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isWithinXY(double[] xyz)
     {
@@ -255,11 +243,7 @@ public class MaskDistribution3D implements SpatialDistribution
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.SpatialDistribution#initialise(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void initialise(double[] xyz)
     {

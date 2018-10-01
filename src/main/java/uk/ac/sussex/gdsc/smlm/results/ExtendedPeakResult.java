@@ -103,22 +103,14 @@ public class ExtendedPeakResult extends IdPeakResult
         super(x, y, intensity, id);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#hasEndFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasEndFrame()
     {
         return endFrame > getFrame();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResult#getEndFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getEndFrame()
     {

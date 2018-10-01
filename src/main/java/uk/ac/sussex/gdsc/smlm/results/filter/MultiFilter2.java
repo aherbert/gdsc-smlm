@@ -106,11 +106,7 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter
         return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#getDescription()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getDescription()
     {
@@ -123,11 +119,7 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter
         return ParameterType.PRECISION2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter adjustParameter(int index, double delta)
     {
@@ -138,11 +130,7 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter
                 (float) params[7], (float) params[8]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#create(double[])
-     */
+    /** {@inheritDoc} */
     @Override
     public Filter create(double... parameters)
     {

@@ -79,11 +79,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
     private FHTFilter ff = null;
     private ImagePlus dataImp, kernelImp;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
-     */
+    /** {@inheritDoc} */
     @Override
     public int setup(String arg, ImagePlus imp)
     {
@@ -158,11 +154,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
         return IJ.setupDialog(imp, FLAGS);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
     {

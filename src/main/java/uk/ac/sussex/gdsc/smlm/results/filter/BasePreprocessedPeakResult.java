@@ -185,286 +185,182 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
         return (float) (f * f);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getFrame()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getFrame()
     {
         return frame;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getUniqueId()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getUniqueId()
     {
         return uniqueId;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getId()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getId()
     {
         return id;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getCandidateId()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getCandidateId()
     {
         return candidateId;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getSignal()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getSignal()
     {
         return signal;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getMeanSignal()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getMeanSignal()
     {
         return meanSignal;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getSNR()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getSNR()
     {
         return snr;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getNoise()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getNoise()
     {
         return noise;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVariance()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLocationVariance()
     {
         return variance;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVariance2()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLocationVariance2()
     {
         return variance2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getLocationVarianceCRLB()
-     */
+    /** {@inheritDoc} */
     @Override
     public double getLocationVarianceCRLB()
     {
         return varianceCRLB;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getSD()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getSD()
     {
         return sd;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getBackground()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getBackground()
     {
         return b;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getAmplitude()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getAmplitude()
     {
         return amp;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getAngle()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getAngle()
     {
         return angle;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getX()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getX()
     {
         return x;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getY()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getY()
     {
         return y;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getZ()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getZ()
     {
         return z;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getXRelativeShift2()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getXRelativeShift2()
     {
         return xshift2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getYRelativeShift2()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getYRelativeShift2()
     {
         return yshift2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getXSD()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getXSD()
     {
         return xsd;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getYSD()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getYSD()
     {
         return ysd;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getXSDFactor()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getXSDFactor()
     {
         return xwf;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getYSDFactor()
-     */
+    /** {@inheritDoc} */
     @Override
     public float getYSDFactor()
     {
         return ywf;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#isExistingResult()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isExistingResult()
     {
         return existingResult;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#isNewResult()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isNewResult()
     {
@@ -502,36 +398,21 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
         return assignments != null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * uk.ac.sussex.gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setAssignments(uk.ac.sussex.gdsc.smlm.
-     * results.filter.
-     * ResultAssignment[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void setAssignments(ResultAssignment[] assignments)
     {
         this.assignments = assignments;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean ignore()
     {
         return ignore;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setIgnore(boolean)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setIgnore(boolean ignore)
     {
@@ -558,33 +439,21 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
         return p;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
-     */
+    /** {@inheritDoc} */
     @Override
     public int getValidationResult()
     {
         return validationResult;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setValidationResult(int validationResult)
     {
         this.validationResult = validationResult;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isNotDuplicate()
     {

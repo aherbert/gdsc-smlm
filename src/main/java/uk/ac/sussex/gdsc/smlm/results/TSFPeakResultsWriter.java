@@ -93,11 +93,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
         this.filename = filename;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.AbstractPeakResults#begin()
-     */
+    /** {@inheritDoc} */
     @Override
     public void begin()
     {
@@ -172,22 +168,14 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.results.PeakResults#isActive()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isActive()
     {
         return out != null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
             float[] params, float[] paramsStdDev)
@@ -415,11 +403,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#size()
-     */
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
@@ -456,11 +440,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
                 .ordinal()] = IntensityUnits.PHOTONS;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see gdsc.utils.fitting.PeakResults#end()
-     */
+    /** {@inheritDoc} */
     @Override
     public void end()
     {

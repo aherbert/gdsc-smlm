@@ -116,88 +116,56 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
         this.var_g2 = (float) (variance / (gain * gain));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getBounds()
-     */
+    /** {@inheritDoc} */
     @Override
     public Rectangle getBounds()
     {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#setOrigin(int, int)
-     */
+    /** {@inheritDoc} */
     @Override
     public void setOrigin(int x, int y)
     {
         // Ignore
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
-     */
+    /** {@inheritDoc} */
     @Override
     public CameraModel crop(Rectangle bounds, boolean resetOrigin)
     {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isPerPixelModel()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getBias(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] getBias(Rectangle bounds)
     {
         return newArray(bounds, bias);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getGain(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] getGain(Rectangle bounds)
     {
         return newArray(bounds, gain);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getVariance(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] getVariance(Rectangle bounds)
     {
         return newArray(bounds, variance);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getNormalisedVariance(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] getNormalisedVariance(Rectangle bounds)
     {
@@ -228,121 +196,77 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
         return var_g2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getMeanVariance(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMeanVariance(Rectangle bounds)
     {
         return variance;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public double getMeanNormalisedVariance(Rectangle bounds)
     {
         return var_g2;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getWeights(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] getWeights(Rectangle bounds)
     {
         return newArray(bounds, 1f);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
-     */
+    /** {@inheritDoc} */
     @Override
     public float[] getNormalisedWeights(Rectangle bounds)
     {
         return newArray(bounds, 1f);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#removeBias(java.awt.Rectangle, float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void removeBias(Rectangle bounds, float[] data)
     {
         removeBias(data);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#removeGain(java.awt.Rectangle, float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void removeGain(Rectangle bounds, float[] data)
     {
         removeGain(data);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(java.awt.Rectangle, float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void removeBiasAndGain(Rectangle bounds, float[] data)
     {
         removeBiasAndGain(data);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void applyBias(Rectangle bounds, float[] data)
     {
         applyBias(data);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void applyGain(Rectangle bounds, float[] data)
     {
         applyGain(data);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void applyGainAndBias(Rectangle bounds, float[] data)
     {
         applyGainAndBias(data);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#removeBias(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void removeBias(float[] data)
     {
@@ -352,11 +276,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
             data[i] -= bias;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#removeGain(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void removeGain(float[] data)
     {
@@ -366,11 +286,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
             data[i] /= gain;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void removeBiasAndGain(float[] data)
     {
@@ -380,11 +296,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
             data[i] = (data[i] - bias) / gain;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#applyBias(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void applyBias(float[] data)
     {
@@ -394,11 +306,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
             data[i] += bias;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#applyGain(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void applyGain(float[] data)
     {
@@ -408,11 +316,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
             data[i] *= gain;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
-     */
+    /** {@inheritDoc} */
     @Override
     public void applyGainAndBias(float[] data)
     {
@@ -422,22 +326,14 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
             data[i] = data[i] * gain + bias;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#copy()
-     */
+    /** {@inheritDoc} */
     @Override
     public FixedPixelCameraModel copy()
     {
         return clone();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     protected FixedPixelCameraModel clone()
     {

@@ -96,9 +96,7 @@ public class Shape3DHelper
     		@Override public boolean isHighResolution() { return true; }},
         ;
 
-		/* (non-Javadoc)
-		 * @see uk.ac.sussex.gdsc.smlm.data.NamedObject#getShortName()
-		 */
+		/** {@inheritDoc} */
 		@Override
 		public String getShortName()
 		{

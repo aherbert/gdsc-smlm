@@ -157,11 +157,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
         return Gamma.gamma(k + 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
-     */
+    /** {@inheritDoc} */
     @Override
     public double logLikelihood(double o, double e)
     {

@@ -93,11 +93,7 @@ public abstract class DataProcessor implements Cloneable
         return border;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
+    /** {@inheritDoc} */
     @Override
     public DataProcessor clone()
     {

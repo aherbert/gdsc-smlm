@@ -48,22 +48,14 @@ public class PeakResultDataParameterDeviationConverter extends PeakResultDataFlo
         this.index = index;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValue(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
+    /** {@inheritDoc} */
     @Override
     public Float getValue(PeakResult result)
     {
         return converter.convert(result.getParameterDeviation(index));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see uk.ac.sussex.gdsc.smlm.results.PeakResultData#getValueName()
-     */
+    /** {@inheritDoc} */
     @Override
     public String getValueName()
     {
