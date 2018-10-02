@@ -73,6 +73,8 @@ Software for single molecule localisation microscopy (SMLM)
   </contributors>
 
   <properties>
+    <maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
+    <build.date>${maven.build.timestamp}</build.date>
     <license.licenseName>gpl_v3</license.licenseName>
     <license.copyrightOwners>Alex Herbert</license.copyrightOwners>
     <org.junit.platform.version>1.2.0</org.junit.platform.version>
@@ -104,6 +106,13 @@ Software for single molecule localisation microscopy (SMLM)
             <descriptorRefs>
               <descriptorRef>jar-with-dependencies</descriptorRef>
             </descriptorRefs>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>buildnumber-maven-plugin</artifactId>
+          <configuration>
+            <getRevisionOnlyOnce>false</getRevisionOnlyOnce>
           </configuration>
         </plugin>
 
