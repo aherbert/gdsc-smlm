@@ -40,6 +40,8 @@ import ij.macro.ExtensionDescriptor;
 import ij.macro.Functions;
 import ij.macro.MacroExtension;
 import ij.plugin.PlugIn;
+
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.Version;
 
@@ -154,8 +156,6 @@ public class About implements PlugIn, MacroExtension
 
         StringBuilder msg = new StringBuilder();
         String helpURL = HELP_URL;
-        final String version = Version.getVersion();
-        final String buildDate = Version.getBuildDate();
 
         try (BufferedReader input = new BufferedReader(
                 new UnicodeReader(resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/README.txt"), null)))
@@ -184,20 +184,32 @@ public class About implements PlugIn, MacroExtension
 
         // Build final message
         msg = new StringBuilder(msg.toString().trim());
-        if (version != Version.UNKNOWN || buildDate != Version.UNKNOWN)
-            msg.append("\n \n");
-        if (version != Version.UNKNOWN)
-            msg.append("Version : ").append(version).append("\n");
-        if (buildDate != Version.UNKNOWN)
-            msg.append("Build Date : ").append(buildDate).append("\n");
-        if (helpURL != null)
-            msg.append("\n \n(Click help for more information)");
+        addVersion(msg, "GDSC", Version.getVersion(), Version.getBuildDate(), Version.getBuildNumber());
+        addVersion(msg, "GDSC-Core", 
+            uk.ac.sussex.gdsc.core.Version.getVersion(), 
+            uk.ac.sussex.gdsc.core.Version.getBuildDate(), 
+            uk.ac.sussex.gdsc.core.Version.getBuildNumber());
 
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.addMessage(msg.toString());
         gd.addHelp(helpURL);
         gd.hideCancelButton();
         gd.showDialog();
+    }
+
+    private static void addVersion(StringBuilder msg, String name, String version, String buildDate,
+        String buildNumber) {
+      boolean hasVersion = !TextUtils.isNullOrEmpty(version);
+      boolean hasBuildDate = !TextUtils.isNullOrEmpty(buildDate);
+      boolean hasBuildNumber = !TextUtils.isNullOrEmpty(buildNumber);
+      if (hasVersion || hasBuildDate || hasBuildNumber)
+          msg.append("\n \n").append(name).append("\n");
+      if (hasVersion)
+          msg.append("Version : ").append(version).append("\n");
+      if (hasBuildDate)
+          msg.append("Build Date : ").append(buildDate).append("\n");
+      if (hasBuildNumber)
+          msg.append("Build Number : ").append(buildNumber).append("\n");
     }
 
     /**
