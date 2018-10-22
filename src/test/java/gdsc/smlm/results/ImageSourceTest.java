@@ -9,7 +9,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.Random;
 
 public class ImageSourceTest
 {

@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.utils.XmlUtils;
 import gdsc.smlm.Version;
 import ij.IJ;

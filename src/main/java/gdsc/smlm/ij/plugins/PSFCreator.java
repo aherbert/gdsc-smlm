@@ -23,14 +23,14 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.match.BasePoint;
-import gdsc.core.utils.ImageExtractor;
-import gdsc.core.utils.ImageWindow;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Sort;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.BasePoint;
+import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
+import uk.ac.sussex.gdsc.core.utils.ImageWindow;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -67,7 +67,7 @@ import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -220,7 +220,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		magnification = (int) gd.getNextNumber();
 		smoothing = gd.getNextNumber();
 		centreEachSlice = gd.getNextBoolean();
-		comCutOff = Maths.max(0, gd.getNextNumber());
+		comCutOff = MathUtils.max(0, gd.getNextNumber());
 		interactiveMode = gd.getNextBoolean();
 		interpolationMethod = gd.getNextChoiceIndex();
 
@@ -445,7 +445,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			Rectangle regionBounds = null;
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
-				ImageExtractor ie = new ImageExtractor((float[]) stack.getPixels(slice), width, height);
+				ImageExtractor ie = ImageExtractor.wrap((float[]) stack.getPixels(slice), width, height);
 				if (regionBounds == null)
 					regionBounds = ie.getBoxRegionBounds((int) centre[0], (int) centre[1], boxRadius);
 				spot[slice - 1] = ie.crop(regionBounds);
@@ -485,7 +485,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			return;
 
 		final double avSd = getAverage(averageSd, averageA, 2);
-		Utils.log("  Average background = %.2f, Av. SD = %s px", stats.getMean(), Utils.rounded(avSd, 4));
+		Utils.log("  Average background = %.2f, Av. SD = %s px", stats.getMean(), MathUtils.rounded(avSd, 4));
 
 		normalise(psf, maxz, avSd * magnification, false);
 		IJ.showProgress(1);
@@ -505,12 +505,12 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		// - express relative to the average centre
 
 		double[][] com = calculateCentreOfMass(psf, fitCom, nmPerPixel / magnification);
-		double[] slice = Utils.newArray(psf.getSize(), 1, 1.0);
+		double[] slice = SimpleArrayUtils.newArray(psf.getSize(), 1, 1.0);
 		String title = TITLE + " CoM Drift";
 		Plot2 plot = new Plot2(title, "Slice", "Drift (nm)");
 		plot.addLabel(0, 0, "Red = X; Blue = Y");
-		//double[] limitsX = Maths.limits(com[0]);
-		//double[] limitsY = Maths.limits(com[1]);
+		//double[] limitsX = MathUtils.limits(com[0]);
+		//double[] limitsY = MathUtils.limits(com[1]);
 		double[] limitsX = getLimits(com[0]);
 		double[] limitsY = getLimits(com[1]);
 		plot.setLimits(1, psf.getSize(), Math.min(limitsX[0], limitsY[0]), Math.max(limitsX[1], limitsY[1]));
@@ -533,8 +533,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 				new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm, createNote())));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
-				psfImp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
-				stats.getN(), Utils.rounded(fittedSd * nmPerPixel, 4), Utils.rounded(fwhm));
+				psfImp.getTitle(), maxz, MathUtils.rounded(nmPerPixel / magnification, 3), MathUtils.rounded(nmPerSlice, 3),
+				stats.getN(), MathUtils.rounded(fittedSd * nmPerPixel, 4), MathUtils.rounded(fwhm));
 
 		createInteractivePlots(psf, maxz, nmPerPixel / magnification, fittedSd * nmPerPixel);
 
@@ -549,7 +549,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 */
 	private double[] getLimits(double[] data)
 	{
-		double[] limits = Maths.limits(data);
+		double[] limits = MathUtils.limits(data);
 		DescriptiveStatistics stats = new DescriptiveStatistics(data);
 		double lower = stats.getPercentile(25);
 		double upper = stats.getPercentile(75);
@@ -604,7 +604,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		for (int slice = 1; slice <= stack.getSize(); slice++)
 		{
 			// Extract the region from each frame
-			ImageExtractor ie = new ImageExtractor((float[]) stack.getPixels(slice), width, height);
+			ImageExtractor ie = ImageExtractor.wrap((float[]) stack.getPixels(slice), width, height);
 			if (regionBounds == null)
 				regionBounds = ie.getBoxRegionBounds(x, y, boxRadius);
 			float[] region = ie.crop(regionBounds);
@@ -744,7 +744,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		if (a != null)
 		{
 			Plot2 plot = new Plot2(TITLE_AMPLITUDE, "z", "Amplitude", smoothAz, smoothA);
-			double[] limits2 = Maths.limits(Maths.limits(a), smoothA);
+			double[] limits2 = MathUtils.limits(MathUtils.limits(a), smoothA);
 			plot.setLimits(z[0], z[z.length - 1], limits2[0], limits2[1]);
 			plot.addPoints(z, a, Plot2.CIRCLE);
 
@@ -771,8 +771,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 					break;
 				}
 			}
-			plot.addLabel(0, 0, String.format("Amplitude = %s (%sx). z = %s nm", Utils.rounded(amplitude),
-					Utils.rounded(amplitude / maxAmplitude), Utils.rounded((slice - zCentre) * nmPerSlice)));
+			plot.addLabel(0, 0, String.format("Amplitude = %s (%sx). z = %s nm", MathUtils.rounded(amplitude),
+					MathUtils.rounded(amplitude / maxAmplitude), MathUtils.rounded((slice - zCentre) * nmPerSlice)));
 
 			amplitudeWindow = Utils.display(TITLE_AMPLITUDE, plot);
 		}
@@ -783,7 +783,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			Plot2 plot = new Plot2(TITLE_PSF_PARAMETERS, "z", "px", newZ, smoothSd);
 			// Get the limits
 			double[] sd2 = invert(sd);
-			double[] limits = Maths.limits(Maths.limits(Maths.limits(Maths.limits(xCoord), yCoord), sd), sd2);
+			double[] limits = MathUtils.limits(MathUtils.limits(MathUtils.limits(MathUtils.limits(xCoord), yCoord), sd), sd2);
 			plot.setLimits(z[0], z[z.length - 1], limits[0], limits[1]);
 			plot.addPoints(newZ, invert(smoothSd), Plot2.LINE);
 			plot.addPoints(z, sd, Plot2.DOT);
@@ -809,8 +809,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 					break;
 				}
 			}
-			plot.addLabel(0, 0, String.format("Width = %s nm (%sx). z = %s nm", Utils.rounded(width * nmPerPixel),
-					Utils.rounded(width * nmPerPixel / psfWidth), Utils.rounded((slice - zCentre) * nmPerSlice)));
+			plot.addLabel(0, 0, String.format("Width = %s nm (%sx). z = %s nm", MathUtils.rounded(width * nmPerPixel),
+					MathUtils.rounded(width * nmPerPixel / psfWidth), MathUtils.rounded((slice - zCentre) * nmPerSlice)));
 
 			// Check if the window will need to be aligned
 			boolean alignWindows = (WindowManager.getFrame(TITLE_PSF_PARAMETERS) == null);
@@ -983,7 +983,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			plot.setColor(Color.red);
 			plot.addPoints(xValues, newY, Plot.LINE);
 			plot.setColor(Color.green);
-			double[] limits = Maths.limits(yValues);
+			double[] limits = MathUtils.limits(yValues);
 			plot.drawLine(centre[2], limits[0], centre[2], limits[1]);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "Spot " + n);
@@ -1014,8 +1014,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 				spot[i][j] *= scale;
 
 			// Use a Tukey window to roll-off the image edges
-			//spot[i] = imageWindow.applySeperable(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.Tukey);
-			spot[i] = ImageWindow.applyWindow(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.TUKEY);
+			//spot[i] = imageWindow.applySeperable(spot[i], spotWidth, spotHeight, ImageWindow.WindowMethod.Tukey);
+			spot[i] = ImageWindow.applyWindow(spot[i], spotWidth, spotHeight, ImageWindow.WindowMethod.TUKEY);
 		}
 
 		return true;
@@ -1136,7 +1136,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		final int h = fp.getHeight();
 		final int w = fp.getWidth();
 		float[] data = (float[]) fp.getPixels();
-		final double threshold = Maths.max(data) * comCutOff;
+		final double threshold = MathUtils.max(data) * comCutOff;
 		double sx = 0, sy = 0, s = 0;
 		for (int y = 0, i = 0; y < h; y++)
 			for (int x = 0; x < w; x++, i++)
@@ -1282,7 +1282,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			// Normalise so everything below the background is zero
 
 			// Get the average background
-			final double backgroundSum = Maths.sum(data) - foregroundSum;
+			final double backgroundSum = MathUtils.sum(data) - foregroundSum;
 			final double background = backgroundSum / (data.length - foregroundN);
 
 			// Subtract the background from the foreground sum
@@ -1324,7 +1324,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			return;
 		if (!(psf.getPixels(1) instanceof float[]))
 			return;
-		double sum = Maths.sum((float[]) psf.getPixels(n));
+		double sum = MathUtils.sum((float[]) psf.getPixels(n));
 		for (int i = 0; i < psf.getSize(); i++)
 		{
 			float[] data = (float[]) psf.getPixels(i + 1);
@@ -1364,7 +1364,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Smooth the curve ...
 		//		LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
-		//		double[] slice = Utils.newArray(psf.getSize(), 1, 1.0);
+		//		double[] slice = SimpleArrayUtils.newArray(psf.getSize(), 1, 1.0);
 		//		com[0] = loess.smooth(slice, com[0]);
 		//		com[1] = loess.smooth(slice, com[1]);
 
@@ -1390,7 +1390,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		if (radius < 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))
 		{
 			radius = 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
-			Utils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", Utils.rounded(radius));
+			Utils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", MathUtils.rounded(radius));
 		}
 		boxRadius = (int) Math.ceil(radius);
 	}
@@ -1417,7 +1417,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			double[][] d = new double[n][n];
 			for (int i = 0; i < n; i++)
 				for (int j = i + 1; j < n; j++)
-					d[i][j] = d[j][i] = roiPoints[i].distanceXY2(roiPoints[j]);
+					d[i][j] = d[j][i] = roiPoints[i].distanceXy(roiPoints[j]);
 
 			// Spots must be twice as far apart to have no overlap of the extracted box region
 			double d2 = boxRadius * boxRadius * 4;
@@ -1528,7 +1528,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		fitConfig.setCoordinateShiftFactor(shift);
 		fitConfig.setBackgroundFitting(false);
 		fitConfig.setMinPhotons(0); // Since the PSF will be normalised
-		//fitConfig.setLog(new IJLogger());
+		//fitConfig.setLog(new ImageJLogger());
 
 		MemoryPeakResults results = fitSpot(psf, psf.getWidth(), psf.getHeight(), x, y);
 
@@ -1697,7 +1697,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Plot the cumulative signal verses distance from the PSF centre.\n \nZ-centre = " + zCentre +
-				"\nPSF width = " + Utils.rounded(psfWidth) + " nm");
+				"\nPSF width = " + MathUtils.rounded(psfWidth) + " nm");
 		gd.addSlider("Slice", 1, psf.getSize(), slice);
 		final double maxDistance = (psf.getWidth() / 1.414213562) * nmPerPixel;
 		gd.addSlider("Distance", 0, maxDistance, distanceThreshold);
@@ -1899,8 +1899,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 				signal[i] = 100 * sum / total;
 			}
 
-			signalTitle = String.format("%% PSF signal at %s x SD", Utils.rounded(factor, 3));
-			signalLimits = Maths.limits(signal);
+			signalTitle = String.format("%% PSF signal at %s x SD", MathUtils.rounded(factor, 3));
+			signalLimits = MathUtils.limits(signal);
 		}
 
 		// Plot the sum
@@ -1908,8 +1908,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		final double total = signal[slice - 1];
 		Plot2 plot = new Plot2(signalTitle, "z", "Signal", signalZ, signal);
-		plot.addLabel(0, 0, String.format("Total = %s. z = %s nm", Utils.rounded(total),
-				Utils.rounded((slice - zCentre) * nmPerSlice)));
+		plot.addLabel(0, 0, String.format("Total = %s. z = %s nm", MathUtils.rounded(total),
+				MathUtils.rounded((slice - zCentre) * nmPerSlice)));
 		plot.setColor(Color.green);
 		plot.drawLine(slice, signalLimits[0], slice, signalLimits[1]);
 		plot.setColor(Color.blue);
@@ -2008,12 +2008,12 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			}
 
 			// Sort
-			int[] indices = Utils.newArray(d.length, 0, 1);
+			int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
 			Sort.sort(indices, d, true);
 
 			// The sort is made in descending order so invert
-			Sort.reverse(indices);
-			Sort.reverse(d);
+			SimpleArrayUtils.reverse(indices);
+			SimpleArrayUtils.reverse(d);
 
 			// Store a unique cumulative index for each distance
 			double lastD = d[0];
@@ -2076,7 +2076,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		if (resetScale)
 			maxCumulativeSignal = 0;
 
-		maxCumulativeSignal = Maths.maxDefault(maxCumulativeSignal, signal);
+		maxCumulativeSignal = MathUtils.maxDefault(maxCumulativeSignal, signal);
 
 		String title = "Cumulative Signal";
 
@@ -2084,8 +2084,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		Plot2 plot = new Plot2(title, "Distance (nm)", "Signal", distances, signal);
 		plot.setLimits(0, distances[distances.length - 1], 0, maxCumulativeSignal);
-		plot.addLabel(0, 0, String.format("Total = %s (@ %s nm). z = %s nm", Utils.rounded(sum),
-				Utils.rounded(distanceThreshold), Utils.rounded((z - zCentre) * nmPerSlice)));
+		plot.addLabel(0, 0, String.format("Total = %s (@ %s nm). z = %s nm", MathUtils.rounded(sum),
+				MathUtils.rounded(distanceThreshold), MathUtils.rounded((z - zCentre) * nmPerSlice)));
 		plot.setColor(Color.green);
 		plot.drawLine(distanceThreshold, 0, distanceThreshold, maxCumulativeSignal);
 		plot.setColor(Color.blue);

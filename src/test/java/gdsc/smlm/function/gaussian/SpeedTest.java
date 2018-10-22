@@ -1,6 +1,6 @@
 package gdsc.smlm.function.gaussian;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -203,7 +203,7 @@ public class SpeedTest
 
 	void f1ComputesSameAsf2(int npeaks, int flags1, int flags2)
 	{
-		DoubleEquality eq = new DoubleEquality(2, 1e-10);
+		DoubleEquality eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(2), 1e-10);
 		int iter = 2000;
 		ArrayList<double[]> paramsList2 = (npeaks == 1) ? copyList(paramsListSinglePeak, iter) : copyList(
 				paramsListDoublePeak, iter);
@@ -241,11 +241,11 @@ public class SpeedTest
 				double y2 = f2.eval(x[j], dyda2);
 
 				Assert.assertTrue("Not same y[" + j + "] @ " + i + " " + y1 + " != " + y2,
-						eq.almostEqualComplement(y1, y2));
+						eq.almostEqualRelativeOrAbsolute(y1, y2));
 
 				for (int ii = 0; ii < nparams; ii++)
 					Assert.assertTrue("Not same dyda[" + j + "] @ " + gradientIndices[g1[ii]] + ": " + dyda1[g1[ii]] +
-							" != " + dyda2[g2[ii]], eq.almostEqualComplement(dyda1[g1[ii]], dyda2[g2[ii]]));
+							" != " + dyda2[g2[ii]], eq.almostEqualRelativeOrAbsolute(dyda1[g1[ii]], dyda2[g2[ii]]));
 			}
 		}
 	}

@@ -2,7 +2,7 @@ package gdsc.smlm.fitting.linear;
 
 import java.util.Arrays;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 
 import org.junit.Assert;
@@ -139,7 +139,7 @@ public class EJMLLinearSolverTest
 	public void doubleCanSolveLinearEquation()
 	{
 		EJMLLinearSolver solver = new EJMLLinearSolver();
-		DoubleEquality eq = new DoubleEquality(3, 1e-16);
+		DoubleEquality eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(3), 1e-16);
 		solver.setEqual(eq);
 		
 		// Solves (one) linear equation, a x = b, for x[n]
@@ -178,7 +178,7 @@ public class EJMLLinearSolverTest
 	public void doubleCanSolveLinearEquationWithZero()
 	{
 		EJMLLinearSolver solver = new EJMLLinearSolver();
-		DoubleEquality eq = new DoubleEquality(3, 1e-16);
+		DoubleEquality eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(3), 1e-16);
 		solver.setEqual(eq);
 		
 		// Solves (one) linear equation, a x = b, for x[n]

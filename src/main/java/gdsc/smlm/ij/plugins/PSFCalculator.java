@@ -18,12 +18,12 @@ import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.model.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
 import java.awt.AWTEvent;
@@ -425,7 +425,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	{
 		if (x == null)
 		{
-			x = Utils.newArray(200, -10, 0.1);
+			x = SimpleArrayUtils.newArray(200, -10, 0.1);
 			y = new double[x.length];
 			y2 = new double[x.length];
 			for (int i = 0; i < x.length; i++)

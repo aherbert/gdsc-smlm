@@ -18,9 +18,9 @@ import gdsc.smlm.ij.gui.LegacyGenericDialog;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.ClassificationResult;
-import gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.ClassificationResult;
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsReader;
@@ -36,11 +36,11 @@ import gdsc.smlm.results.filter.TraceFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import ij.IJ;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 import java.awt.Color;
@@ -683,8 +683,8 @@ public class FilterAnalysis implements PlugIn
 
 				ClassificationResult s = filter.score(resultsList);
 
-				String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
-						Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
+				String message = type + "\t\t\t" + MathUtils.rounded(s.getJaccard(), 4) + "\t\t" +
+						MathUtils.rounded(s.getPrecision(), 4) + "\t\t" + MathUtils.rounded(s.getRecall(), 4);
 
 				if (isHeadless)
 				{
@@ -708,7 +708,7 @@ public class FilterAnalysis implements PlugIn
 
 					StringBuilder sb = new StringBuilder();
 					sb.append("\t").append(filter.getParameterName(index)).append("\t");
-					sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append("\t");
+					sb.append(MathUtils.rounded(filter.getParameterValue(index), 4)).append("\t");
 
 					double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
 					double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
@@ -753,8 +753,8 @@ public class FilterAnalysis implements PlugIn
 		double relativeSensitivity = (abs1 + abs2) * 0.5;
 		double sensitivity = (dydx1 + dydx2) * 0.5;
 
-		sb.append(Utils.rounded(relativeSensitivity, 4)).append("\t");
-		sb.append(Utils.rounded(sensitivity, 4)).append("\t");
+		sb.append(MathUtils.rounded(relativeSensitivity, 4)).append("\t");
+		sb.append(MathUtils.rounded(sensitivity, 4)).append("\t");
 	}
 
 	private void createResultsWindow()
@@ -969,11 +969,11 @@ public class FilterAnalysis implements PlugIn
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append(filter.getName()).append("\t");
-			sb.append(s.getTP()+s.getFP()).append("\t");
-			sb.append(s.getTP()).append("\t");
-			sb.append(s.getFP()).append("\t");
-			sb.append(s.getTN()).append("\t");
-			sb.append(s.getFN()).append("\t");
+			sb.append(s.getTruePositives()+s.getFalsePositives()).append("\t");
+			sb.append(s.getTruePositives()).append("\t");
+			sb.append(s.getFalsePositives()).append("\t");
+			sb.append(s.getTrueNegatives()).append("\t");
+			sb.append(s.getFalseNegatives()).append("\t");
 			sb.append(s.getJaccard()).append("\t");
 			sb.append(s.getPrecision()).append("\t");
 			sb.append(s.getRecall()).append("\t");

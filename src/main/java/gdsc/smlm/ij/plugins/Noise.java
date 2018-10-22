@@ -1,15 +1,15 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.NoiseEstimator;
-import gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
@@ -155,8 +155,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			final ImageProcessor ip = stack.getProcessor(slice);
 			buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(),
 					ip.getHeight(), bounds, buffer);
-			final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
-			ne.preserveResiduals = preserveResiduals;
+			final NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
+			ne.setPreserveResiduals(preserveResiduals);
 			ne.setRange(lowestPixelsRange);
 			xValues[i] = slice;
 			yValues1[i] = ne.getNoise(method1);
@@ -185,12 +185,12 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		plot.setLimits(a[0], a[1], b1[0]-0.05*range, b1[1]+0.05*range);
 		plot.setColor(Color.blue);
 		plot.draw();
-		String label = String.format("Blue = %s", Utils.rounded(new Statistics(yValues1).getMean()));
+		String label = String.format("Blue = %s", MathUtils.rounded(new Statistics(yValues1).getMean()));
 		if (twoMethods)
 		{
 			plot.setColor(Color.red);
 			plot.addPoints(xValues, yValues2, Plot2.LINE);
-			label += String.format(", Red = %s", Utils.rounded(new Statistics(yValues2).getMean()));
+			label += String.format(", Red = %s", MathUtils.rounded(new Statistics(yValues2).getMean()));
 		}
 		plot.addLabel(0, 0, label);
 
@@ -213,8 +213,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		Rectangle bounds = ip.getRoi();
 		float[] buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(),
 				ip.getHeight(), bounds, null);
-		NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
-		ne.preserveResiduals = true;
+		NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
+		ne.setPreserveResiduals(true);
 		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())
 		{
 			result[i++] = ne.getNoise(m);

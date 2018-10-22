@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.CameraNoiseModel;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
@@ -23,7 +23,7 @@ import org.junit.Test;
  */
 public class GradientCalculatorSpeedTest
 {
-	DoubleEquality eq = new DoubleEquality(6, 1e-16);
+	DoubleEquality eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(6), 1e-16);
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
@@ -133,18 +133,18 @@ public class GradientCalculatorSpeedTest
 		{
 			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("Observations: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("Observations: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("Observations: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
+				Assert.assertTrue("Observations: Not same alpha @ " + i, eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 		}
 		
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
 			calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("N-observations: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("N-observations: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("N-observations: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
+				Assert.assertTrue("N-observations: Not same alpha @ " + i, eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 		} 
 		
 		func.setNoiseModel(CameraNoiseModel.createNoiseModel(10, 0, true));
@@ -153,18 +153,18 @@ public class GradientCalculatorSpeedTest
 		{
 			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("Observations+Noise: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
+				Assert.assertTrue("Observations+Noise: Not same alpha @ " + i, eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 		}
 		
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
 			calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("Observations+Noise: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
+				Assert.assertTrue("Observations+Noise: Not same alpha @ " + i, eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 		}
 		
 		// Only the diagonal Fisher Information has been unrolled into the other calculators
@@ -172,7 +172,7 @@ public class GradientCalculatorSpeedTest
 		{
 			beta = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
 			beta2 = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-			Assert.assertTrue("Not same diagonal @ " + i, eq.almostEqualComplement(beta, beta2));
+			Assert.assertTrue("Not same diagonal @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
 		} 
 	}
 	

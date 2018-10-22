@@ -22,14 +22,14 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
@@ -123,7 +123,7 @@ public class FIRE implements PlugIn
 		double fire = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex], IMAGE_SIZE_VALUES[imageSizeIndex]);
 
 		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", results.getName(),
-				Utils.rounded(fire, 4), units, Utils.rounded(imageScale, 3)));
+				MathUtils.rounded(fire, 4), units, MathUtils.rounded(imageScale, 3)));
 
 		String name = results.getName();
 		if (showFRCCurve)

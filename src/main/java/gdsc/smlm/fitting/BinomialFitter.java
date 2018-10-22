@@ -43,9 +43,9 @@ import org.apache.commons.math3.util.FastMath;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.ij.Utils;
-import gdsc.core.logging.Logger;
-import gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Fit a binomial distribution to a histogram
@@ -127,7 +127,7 @@ public class BinomialFitter
 	 */
 	private static double[] calculateHistogram(double[] data, boolean cumulative)
 	{
-		double[][] histogram = Maths.cumulativeHistogram(data, true);
+		double[][] histogram = MathUtils.cumulativeHistogram(data, true);
 		if (histogram[0].length == 0)
 			return new double[] { 1 };
 		// Pad to include all values
@@ -207,7 +207,7 @@ public class BinomialFitter
 
 		String name = (zeroTruncated) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
 
-		log("Mean cluster size = %s", Utils.rounded(mean));
+		log("Mean cluster size = %s", MathUtils.rounded(mean));
 		log("Fitting cumulative " + name);
 
 		// Since varying the N should be done in integer steps do this
@@ -221,7 +221,7 @@ public class BinomialFitter
 
 			double p = solution.getPointRef()[0];
 
-			log("Fitted %s : N=%d, p=%s. SS=%g", name, n, Utils.rounded(p), solution.getValue());
+			log("Fitted %s : N=%d, p=%s. SS=%g", name, n, MathUtils.rounded(p), solution.getValue());
 
 			if (bestSS > solution.getValue())
 			{
@@ -450,8 +450,8 @@ public class BinomialFitter
 						if (ss < solution.getValue())
 						{
 							//log("Re-fitting improved the SS from %s to %s (-%s%%)",
-							//		Utils.rounded(solution.getValue(), 4), Utils.rounded(ss, 4),
-							//		Utils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
+							//		MathUtils.rounded(solution.getValue(), 4), MathUtils.rounded(ss, 4),
+							//		MathUtils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
 							return new PointValuePair(lvmSolution.getPoint().toArray(), ss);
 						}
 					}

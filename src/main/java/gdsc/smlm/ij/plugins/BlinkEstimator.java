@@ -15,7 +15,7 @@ import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -38,7 +38,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
 /**
@@ -287,7 +287,7 @@ public class BlinkEstimator implements PlugIn
 		// Blinking rate is 1 + nBlinks
 		double blinkingRate = 1 + parameters[1];
 		if (verbose)
-			Utils.log("  Blinking rate = %s", Utils.rounded(blinkingRate, 4));
+			Utils.log("  Blinking rate = %s", MathUtils.rounded(blinkingRate, 4));
 		return blinkingRate;
 	}
 
@@ -480,11 +480,11 @@ public class BlinkEstimator implements PlugIn
 
 			if (log)
 			{
-				Utils.log("  Fit %d points. R^2 = %s. Adjusted R^2 = %s", obs.length, Utils.rounded(r2, 4),
-						Utils.rounded(adjustedR2, 4));
-				Utils.log("  N=%s, nBlink=%s, tOff=%s (%s frames)", Utils.rounded(parameters[0], 4),
-						Utils.rounded(parameters[1], 4), Utils.rounded(parameters[2], 4),
-						Utils.rounded(parameters[2] / msPerFrame, 4));
+				Utils.log("  Fit %d points. R^2 = %s. Adjusted R^2 = %s", obs.length, MathUtils.rounded(r2, 4),
+						MathUtils.rounded(adjustedR2, 4));
+				Utils.log("  N=%s, nBlink=%s, tOff=%s (%s frames)", MathUtils.rounded(parameters[0], 4),
+						MathUtils.rounded(parameters[1], 4), MathUtils.rounded(parameters[2], 4),
+						MathUtils.rounded(parameters[2] / msPerFrame, 4));
 			}
 
 			return parameters;

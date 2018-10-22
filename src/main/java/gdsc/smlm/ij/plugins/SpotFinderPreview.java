@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.match.BasePoint;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.MatchResult;
-import gdsc.core.match.PointPair;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.BasePoint;
+import uk.ac.sussex.gdsc.core.match.Coordinate;
+import uk.ac.sussex.gdsc.core.match.MatchCalculator;
+import uk.ac.sussex.gdsc.core.match.MatchResult;
+import uk.ac.sussex.gdsc.core.match.PointPair;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -266,8 +266,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 					distance * fitConfig.getInitialPeakStdDev0(), null, FP, null, matches);
 
 			// Show scores
-			setLabel(String.format("P=%s, R=%s, J=%s", Utils.rounded(result.getPrecision()),
-					Utils.rounded(result.getRecall()), Utils.rounded(result.getJaccard())));
+			setLabel(String.format("P=%s, R=%s, J=%s", MathUtils.rounded(result.getPrecision()),
+					MathUtils.rounded(result.getRecall()), MathUtils.rounded(result.getJaccard())));
 
 			// Create Rois for TP and FP
 			if (showTP)

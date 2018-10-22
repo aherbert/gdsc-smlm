@@ -25,11 +25,13 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
-import gdsc.core.ij.Utils;
-import gdsc.core.logging.Logger;
-import gdsc.core.utils.ImageExtractor;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.NoiseEstimator;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
@@ -227,7 +229,7 @@ public class FitWorker implements Runnable
 		{
 			final float sd0 = (float) fitConfig.getInitialPeakStdDev0();
 			final float sd1 = (float) fitConfig.getInitialPeakStdDev1();
-			ImageExtractor ie = new ImageExtractor(data, width, height);
+			ImageExtractor ie = ImageExtractor.wrap(data, width, height);
 			double[] region = null;
 			for (int n = 0; n < spots.length; n++)
 			{
@@ -268,7 +270,7 @@ public class FitWorker implements Runnable
 			}
 
 			// Extract each peak and fit individually until N consecutive failures
-			ImageExtractor ie = new ImageExtractor(data, width, height);
+			ImageExtractor ie = ImageExtractor.wrap(data, width, height);
 			double[] region = null;
 			for (int n = 0, failures = 0; n < spots.length && !finished; n++)
 			{
@@ -490,7 +492,7 @@ public class FitWorker implements Runnable
 	 */
 	public static float estimateNoise(float[] data, int width, int height, NoiseEstimator.Method method)
 	{
-		NoiseEstimator ne = new NoiseEstimator(data, width, height);
+		NoiseEstimator ne = NoiseEstimator.wrap(data, width, height);
 		return (float) ne.getNoise(method);
 	}
 
@@ -538,7 +540,7 @@ public class FitWorker implements Runnable
 
 		if (npeaks == 1)
 		{
-			if (addSingleResult(peakResults, x, y, Utils.toFloat(peakParams), Utils.toFloat(peakParamsDev), value,
+			if (addSingleResult(peakResults, x, y, SimpleArrayUtils.toFloat(peakParams), SimpleArrayUtils.toFloat(peakParamsDev), value,
 					error, noise))
 				count++;
 		}
@@ -1540,9 +1542,9 @@ public class FitWorker implements Runnable
 				// The MLE is only good if we are modelling the camera noise. 
 				// The MLE put out by the Poisson model is not better than using the IC from the fit residuals.
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getBayesianInformationCriterion(singleValue, length,
+				ic1 = MathUtils.getBayesianInformationCriterion(singleValue, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
+				ic2 = MathUtils.getBayesianInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares, MLE (IC) : %f, %f (%f) => %f, %f (%f) : %f",
@@ -1551,9 +1553,9 @@ public class FitWorker implements Runnable
 			else
 			{
 				// If using the least squares estimator then we can get the log likelihood from an approximation
-				ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleSumOfSquares, length,
+				ic1 = MathUtils.getBayesianInformationCriterionFromResiduals(singleSumOfSquares, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
+				ic2 = MathUtils.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
@@ -1606,7 +1608,7 @@ public class FitWorker implements Runnable
 				final double ypos = newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5;
 
 				// Set the bounds using the expected HWHM
-				final double hwhm = Maths.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1(), 1) *
+				final double hwhm = MathUtils.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1(), 1) *
 						GaussianFunction.SD_TO_HWHM_FACTOR;
 
 				if (xpos < -hwhm || xpos > regionBounds.width + hwhm || ypos < -hwhm ||
@@ -2091,9 +2093,9 @@ public class FitWorker implements Runnable
 			{
 				// This is computed directly by the maximum likelihood estimator
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getBayesianInformationCriterion(singleValue, length,
+				ic1 = MathUtils.getBayesianInformationCriterion(singleValue, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
+				ic2 = MathUtils.getBayesianInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares, MLE (IC) : %f, %f (%f) => %f, %f (%f) : %f",
@@ -2104,9 +2106,9 @@ public class FitWorker implements Runnable
 				// If using the least squares estimator then we can get the log likelihood from an approximation
 				// (TODO - we could build a likelihood function using a Poisson model. This may be better than 
 				// the approximation from the residuals)
-				ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleSumOfSquares, length,
+				ic1 = MathUtils.getBayesianInformationCriterionFromResiduals(singleSumOfSquares, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
+				ic2 = MathUtils.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
@@ -2154,7 +2156,7 @@ public class FitWorker implements Runnable
 				final double ypos = newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5;
 
 				// Set the bounds using the expected HWHM
-				final double hwhm = Maths.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1(), 1) *
+				final double hwhm = MathUtils.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1(), 1) *
 						GaussianFunction.SD_TO_HWHM_FACTOR;
 
 				if (xpos < -hwhm || xpos > regionBounds.width + hwhm || ypos < -hwhm ||

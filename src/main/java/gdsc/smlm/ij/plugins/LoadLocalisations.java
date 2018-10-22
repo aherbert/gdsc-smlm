@@ -13,8 +13,8 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -172,7 +172,7 @@ public class LoadLocalisations implements PlugIn
 
 		getFields();
 
-		final boolean hasComment = !Utils.isNullOrEmpty(comment);
+		final boolean hasComment = !TextUtils.isNullOrEmpty(comment);
 		int errors = 0;
 		int count = 0;
 		int h = Math.abs(header);
@@ -322,7 +322,7 @@ public class LoadLocalisations implements PlugIn
 	private static String getNextString(GenericDialog gd, String defaultValue)
 	{
 		String value = gd.getNextString();
-		if (Utils.isNullOrEmpty(value))
+		if (TextUtils.isNullOrEmpty(value))
 			return defaultValue;
 		return value;
 	}

@@ -21,12 +21,12 @@ import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.utils.ImageROIPainter;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -36,7 +36,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GUI;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.ZProjector;
@@ -885,7 +885,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 	private void showProfile(String title, String yTitle, double[] xValues, double[] yValues, double[] yValues2)
 	{
 		Plot2 plot = new Plot2(title, "Frame", yTitle, xValues, yValues);
-		double[] limits = Maths.limits(yValues);
+		double[] limits = MathUtils.limits(yValues);
 		plot.setLimits(xValues[0], xValues[xValues.length - 1], limits[0], limits[1]);
 		plot.draw();
 
@@ -1027,9 +1027,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 		Statistics tOn = new Statistics(trace.getOnTimes());
 		Statistics tOff = new Statistics(trace.getOffTimes());
 		resultsWindow.append(String.format("%d\t%.1f\t%.1f\t%s\t%s\t%s\t%d\t%s\t%s\t%s", id, cx, cy,
-				Utils.rounded(signal, 4), Utils.rounded(tOn.getSum() * msPerFrame, 3),
-				Utils.rounded(tOff.getSum() * msPerFrame, 3), trace.getNBlinks() - 1,
-				Utils.rounded(tOn.getMean() * msPerFrame, 3), Utils.rounded(tOff.getMean() * msPerFrame, 3),
+				MathUtils.rounded(signal, 4), MathUtils.rounded(tOn.getSum() * msPerFrame, 3),
+				MathUtils.rounded(tOff.getSum() * msPerFrame, 3), trace.getNBlinks() - 1,
+				MathUtils.rounded(tOn.getMean() * msPerFrame, 3), MathUtils.rounded(tOff.getMean() * msPerFrame, 3),
 				imp.getTitle()));
 
 		// Save the individual on/off times for use in creating a histogram
@@ -1134,7 +1134,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			files[0] = openBufferedWriter(
 					resultsDirectory + "traces.txt",
 					String.format("#ms/frame = %s\n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
-							Utils.rounded(msPerFrame, 3)));
+							MathUtils.rounded(msPerFrame, 3)));
 			files[1] = openBufferedWriter(resultsDirectory + "tOn.txt", "");
 			files[2] = openBufferedWriter(resultsDirectory + "tOff.txt", "");
 			files[3] = openBufferedWriter(resultsDirectory + "blinks.txt", "");
@@ -1396,14 +1396,14 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			currentSlice = slice;
 			double signal = getSignal(slice);
 			double noise = smoothSd[slice - 1];
-			currentLabel.setText(String.format("Frame %d: Signal = %s, SNR = %s", slice, Utils.rounded(signal, 4),
-					Utils.rounded(signal / noise, 3)));
+			currentLabel.setText(String.format("Frame %d: Signal = %s, SNR = %s", slice, MathUtils.rounded(signal, 4),
+					MathUtils.rounded(signal / noise, 3)));
 
 			drawProfiles();
 
 			// Fit the PSF using a Gaussian
 			float[] data2 = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
-			double[] data = Utils.toDouble(data2);
+			double[] data = SimpleArrayUtils.toDouble(data2);
 			FitConfiguration fitConfiguration = new FitConfiguration();
 			fitConfiguration.setFitFunction(FitFunction.FIXED);
 			fitConfiguration.setBackgroundFitting(true);
@@ -1424,8 +1424,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			{
 				params = fitResult.getParameters();
 				final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
-				rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
-						Utils.rounded(spotSignal / noise, 3)));
+				rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s", MathUtils.rounded(spotSignal, 4),
+						MathUtils.rounded(spotSignal / noise, 3)));
 				ImageROIPainter.addRoi(rawImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
 						params[Gaussian2DFunction.Y_POSITION]));
 			}
@@ -1440,7 +1440,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 				return;
 
 			data2 = (float[]) blurImp.getImageStack().getProcessor(slice).getPixels();
-			data = Utils.toDouble(data2);
+			data = SimpleArrayUtils.toDouble(data2);
 			params = new double[7];
 			//float psfWidth = Float.parseFloat(widthTextField.getText());
 			params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];
@@ -1453,8 +1453,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			{
 				params = fitResult.getParameters();
 				final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
-				blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
-						Utils.rounded(spotSignal / noise, 3)));
+				blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s", MathUtils.rounded(spotSignal, 4),
+						MathUtils.rounded(spotSignal / noise, 3)));
 				ImageROIPainter.addRoi(blurImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
 						params[Gaussian2DFunction.Y_POSITION]));
 			}

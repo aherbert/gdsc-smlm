@@ -1,6 +1,6 @@
 package gdsc.smlm.ga;
 
-import gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 
 import java.util.List;
 

@@ -14,8 +14,8 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Sort;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -34,7 +34,7 @@ import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.LUT;
-import ij.process.LUTHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -119,8 +119,8 @@ public class DrawClusters implements PlugIn
 			return;
 		}
 
-		String msg = String.format(TITLE + ": %d / %s (%s)", count, Utils.pleural(traces.length, "trace"),
-				Utils.pleural(results.size(), "localisation"));
+		String msg = String.format(TITLE + ": %d / %s (%s)", count, TextUtils.pleural(traces.length, "trace"),
+				TextUtils.pleural(results.size(), "localisation"));
 		IJ.showStatus(msg);
 		//Utils.log(msg);
 
@@ -182,7 +182,7 @@ public class DrawClusters implements PlugIn
 		// Create ROIs and store data to sort them
 		Roi[] rois = new Roi[count];
 		int[][] frames = (isUseStackPosition) ? new int[count][] : null;
-		int[] indices = Utils.newArray(count, 0, 1);
+		int[] indices = SimpleArrayUtils.newArray(count, 0, 1);
 		double[] values = new double[count];
 		for (int i = 0; i < count; i++)
 		{
@@ -246,7 +246,7 @@ public class DrawClusters implements PlugIn
 
 		// Draw the traces as ROIs on an overlay
 		Overlay o = new Overlay();
-		LUT lut = LUTHelper.createLUT(DrawClusters.lut);
+		LUT lut = LutHelper.createLut(DrawClusters.lut);
 		final double scale = 256.0 / count;
 		if (isUseStackPosition)
 		{
@@ -255,7 +255,7 @@ public class DrawClusters implements PlugIn
 			for (int i = 0; i < count; i++)
 			{
 				final int index = indices[i];
-				final Color c = LUTHelper.getColour(lut, (int) (i * scale));
+				final Color c = LutHelper.getColour(lut, (int) (i * scale));
 				final PolygonRoi roi = (PolygonRoi) rois[index];
 				roi.setFillColor(c);
 				roi.setStrokeColor(c);
@@ -313,7 +313,8 @@ public class DrawClusters implements PlugIn
 		gd.addChoice("Sort", sorts, sorts[sort]);
 		gd.addCheckbox("Spline_fit (traces only)", splineFit);
 		gd.addCheckbox("Use_stack_position", useStackPosition);
-		gd.addChoice("LUT", LUTHelper.luts, LUTHelper.luts[lut]);
+		String[] names = LutHelper.getLutNames();
+		gd.addChoice("LUT", names, names[lut]);
 
 		gd.showDialog();
 

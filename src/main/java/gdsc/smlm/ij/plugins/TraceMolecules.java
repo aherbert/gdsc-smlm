@@ -27,13 +27,13 @@ import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.core.ij.IJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.Cluster.CentroidMethod;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.ImageSource;
@@ -41,12 +41,12 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
-import gdsc.core.clustering.Cluster;
-import gdsc.core.clustering.ClusterPoint;
-import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.core.clustering.ClusteringEngine;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.clustering.Cluster;
+import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
+import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
+import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -58,7 +58,7 @@ import ij.gui.PolygonRoi;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import ij.process.FloatProcessor;
 import ij.text.TextWindow;
 
@@ -181,7 +181,7 @@ public class TraceMolecules implements PlugIn
 				return;
 
 			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), settings.getClusteringAlgorithm(),
-					new IJTrackProgress());
+					new ImageJTrackProgress());
 
 			if (settings.splitPulses)
 			{
@@ -192,7 +192,7 @@ public class TraceMolecules implements PlugIn
 				}
 			}
 
-			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(), settings.distanceThreshold /
+			List<Cluster> clusters = engine.findClusters(convertToClusterPoints(), settings.distanceThreshold /
 					results.getCalibration().nmPerPixel, timeInFrames(settings.timeThreshold));
 
 			if (clusters == null)
@@ -234,7 +234,7 @@ public class TraceMolecules implements PlugIn
 				}
 			}
 
-			manager.setTracker(new IJTrackProgress());
+			manager.setTracker(new ImageJTrackProgress());
 			manager.traceMolecules(settings.distanceThreshold / results.getCalibration().nmPerPixel,
 					timeInFrames(settings.timeThreshold));
 			traces = manager.getTraces();
@@ -298,7 +298,7 @@ public class TraceMolecules implements PlugIn
 		return points;
 	}
 
-	private Trace[] convertToTraces(ArrayList<Cluster> clusters)
+	private Trace[] convertToTraces(List<Cluster> clusters)
 	{
 		return convertToTraces(results.getResults(), clusters);
 	}
@@ -310,7 +310,7 @@ public class TraceMolecules implements PlugIn
 	 * @param clusters
 	 * @return
 	 */
-	public static Trace[] convertToTraces(List<PeakResult> peakResults, ArrayList<Cluster> clusters)
+	public static Trace[] convertToTraces(List<PeakResult> peakResults, List<Cluster> clusters)
 	{
 		Trace[] traces = new Trace[clusters.size()];
 		int i = 0;
@@ -318,10 +318,10 @@ public class TraceMolecules implements PlugIn
 		{
 			Trace trace = new Trace();
 			trace.setId(i + 1);
-			for (ClusterPoint point = cluster.head; point != null; point = point.next)
+			for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null; point = point.getNext())
 			{
 				// The point Id was the position in the original results array
-				trace.add(peakResults.get(point.id));
+				trace.add(peakResults.get(point.getId()));
 			}
 			traces[i++] = trace;
 		}
@@ -494,9 +494,9 @@ public class TraceMolecules implements PlugIn
 		sb.append(results.getName()).append("\t");
 		sb.append(outputName.equals("Cluster") ? settings.getClusteringAlgorithm() : settings.getTraceMode()).append(
 				"\t");
-		sb.append(Utils.rounded(exposureTime * 1000, 3)).append("\t");
-		sb.append(Utils.rounded(dThreshold, 3)).append("\t");
-		sb.append(Utils.rounded(tThreshold, 3));
+		sb.append(MathUtils.rounded(exposureTime * 1000, 3)).append("\t");
+		sb.append(MathUtils.rounded(dThreshold, 3)).append("\t");
+		sb.append(MathUtils.rounded(tThreshold, 3));
 		if (settings.splitPulses)
 			sb.append(" *");
 		sb.append("\t");
@@ -507,7 +507,7 @@ public class TraceMolecules implements PlugIn
 		sb.append(traces.length - singles).append("\t");
 		for (int i = 0; i < stats.length; i++)
 		{
-			sb.append(Utils.rounded(stats[i].getMean(), 3)).append("\t");
+			sb.append(MathUtils.rounded(stats[i].getMean(), 3)).append("\t");
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
@@ -610,7 +610,7 @@ public class TraceMolecules implements PlugIn
 
 			for (double d : s.getValues())
 			{
-				file.append(Utils.rounded(d, 4));
+				file.append(MathUtils.rounded(d, 4));
 				file.newLine();
 			}
 		}

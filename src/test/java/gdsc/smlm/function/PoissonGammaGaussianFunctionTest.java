@@ -1,7 +1,7 @@
 package gdsc.smlm.function;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;

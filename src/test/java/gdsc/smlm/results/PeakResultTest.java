@@ -3,7 +3,7 @@ package gdsc.smlm.results;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 public class PeakResultTest
 {

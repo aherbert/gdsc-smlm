@@ -5,7 +5,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
@@ -287,6 +287,6 @@ public class ConfigurationTemplate implements PlugIn
 				addTemplate(name, settings, true, file);
 			}
 		}
-		IJ.showMessage("Loaded " + Utils.pleural(count, "result"));
+		IJ.showMessage("Loaded " + TextUtils.pleural(count, "result"));
 	}
 }

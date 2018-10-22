@@ -1,6 +1,6 @@
 package gdsc.smlm.filters;
 
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 import java.awt.Rectangle;
 

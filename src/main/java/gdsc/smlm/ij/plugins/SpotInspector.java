@@ -18,19 +18,19 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
@@ -284,7 +284,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			}
 			int slice = rank.rank + 1;
 			spots.setPixels(spotIp.getPixels(), slice);
-			spots.setSliceLabel(Utils.rounded(rank.originalScore), slice);
+			spots.setSliceLabel(MathUtils.rounded(rank.originalScore), slice);
 		}
 
 		source.close();

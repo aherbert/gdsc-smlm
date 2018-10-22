@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.match.BasePoint;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.MatchResult;
-import gdsc.core.match.PointPair;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.BasePoint;
+import uk.ac.sussex.gdsc.core.match.Coordinate;
+import uk.ac.sussex.gdsc.core.match.MatchCalculator;
+import uk.ac.sussex.gdsc.core.match.MatchResult;
+import uk.ac.sussex.gdsc.core.match.PointPair;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -99,7 +99,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		compareCoordinates(results1, results2, dThreshold, increments, delta);
 		double seconds = (System.nanoTime() - start) / 1000000000.0;
 
-		IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
+		IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
 	}
 
 	private boolean showDialog()
@@ -603,7 +603,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		sb.append(result.getFalsePositives()).append("\t");
 		sb.append(result.getFalseNegatives()).append("\t");
 		sb.append(IJ.d2s(result.getJaccard(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getRMSD(), 4)).append("\t");
+		sb.append(IJ.d2s(result.getRmsd(), 4)).append("\t");
 		sb.append(IJ.d2s(result.getPrecision(), 4)).append("\t");
 		sb.append(IJ.d2s(result.getRecall(), 4)).append("\t");
 		sb.append(IJ.d2s(result.getFScore(0.5), 4)).append("\t");
@@ -689,9 +689,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		sb.append(t).append("\t");
 		addPoint(sb, p1);
 		addPoint(sb, p2);
-		double d = pair.getXYDistance();
+		double d = pair.getXyDistance();
 		if (d >= 0)
-			sb.append(Utils.rounded(d, 4)).append("\t");
+			sb.append(MathUtils.rounded(d, 4)).append("\t");
 		else
 			sb.append("-\t");
 		return sb.toString();
@@ -733,7 +733,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		int i = 0;
 		for (PointPair pair : pairs)
 		{
-			d[i++] = pair.getXYDistance2();
+			d[i++] = pair.getXyDistanceSquared();
 		}
 		return d;
 	}

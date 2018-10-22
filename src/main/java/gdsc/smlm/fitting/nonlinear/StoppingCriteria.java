@@ -2,7 +2,7 @@ package gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
 
-import gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.logging.Logger;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

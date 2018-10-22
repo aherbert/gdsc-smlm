@@ -1,8 +1,9 @@
 package gdsc.smlm.ij.frc;
 
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
+
 import ij.IJ;
 import ij.ImageStack;
-import ij.process.FHT2;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -186,7 +187,7 @@ public class FRC
 	{
 		FloatProcessor taperedDataImage = getSquareTaperedImage(ip);
 
-		FHT2 fht = new FHT2(taperedDataImage);
+		Fht fht = new Fht(taperedDataImage);
 		fht.transform();
 
 		FloatProcessor[] ret = new FloatProcessor[2];

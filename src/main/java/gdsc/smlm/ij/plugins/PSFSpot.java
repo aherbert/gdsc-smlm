@@ -13,7 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.match.BasePoint;
+import uk.ac.sussex.gdsc.core.match.BasePoint;
 import gdsc.smlm.results.PeakResult;
 
 /**

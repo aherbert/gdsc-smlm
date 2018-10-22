@@ -13,21 +13,21 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.ij.IJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
-import gdsc.core.clustering.Cluster;
-import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.core.clustering.ClusteringEngine;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.clustering.Cluster;
+import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
+import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
 import java.util.ArrayList;
@@ -156,10 +156,10 @@ public class DarkTimeAnalysis implements PlugIn
 		if (maxDarkTime > 0)
 			range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
 
-		IJTrackProgress tracker = new IJTrackProgress();
+		ImageJTrackProgress tracker = new ImageJTrackProgress();
 		tracker.status("Analysing ...");
-		tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...", Utils.rounded(searchDistance),
-				Utils.rounded(d), Utils.rounded(range * msPerFrame / 1000.0), range);
+		tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...", MathUtils.rounded(searchDistance),
+				MathUtils.rounded(d), MathUtils.rounded(range * msPerFrame / 1000.0), range);
 
 		Trace[] traces;
 		if (method == 0)
@@ -173,7 +173,7 @@ public class DarkTimeAnalysis implements PlugIn
 		{
 			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
 			List<PeakResult> peakResults = results.getResults();
-			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults), d,
+			List<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults), d,
 					range);
 			traces = TraceMolecules.convertToTraces(peakResults, clusters);
 		}
@@ -231,8 +231,8 @@ public class DarkTimeAnalysis implements PlugIn
 		{
 			if (y[i] >= percentile)
 			{
-				Utils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, Utils.rounded(x[i]),
-						Utils.rounded(x[i] / 1000));
+				Utils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, MathUtils.rounded(x[i]),
+						MathUtils.rounded(x[i] / 1000));
 				break;
 			}
 		}

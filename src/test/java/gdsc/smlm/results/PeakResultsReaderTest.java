@@ -10,11 +10,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-import gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.Random;
 
 public class PeakResultsReaderTest
 {
-	private gdsc.core.utils.Random rand = new Random();
+	private uk.ac.sussex.gdsc.core.utils.Random rand = new Random();
 
 	// TODO - Add tests to compare writing to a IJTablePeakResults, saving the TextPanel contents to file and then reading.
 	

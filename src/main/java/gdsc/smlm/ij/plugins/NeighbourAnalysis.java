@@ -13,9 +13,9 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.ij.IJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.Trace;
@@ -60,7 +60,7 @@ public class NeighbourAnalysis implements PlugIn
 		TraceManager manager = new TraceManager(results);
 
 		// Run the tracing
-		manager.setTracker(new IJTrackProgress());
+		manager.setTracker(new ImageJTrackProgress());
 		Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
 
 		saveTraces(traces);

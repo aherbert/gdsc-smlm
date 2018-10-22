@@ -26,8 +26,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.PeakResult;
-import gdsc.core.logging.Logger;
-import gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Specifies the fitting configuration for Gaussian fitting
@@ -663,7 +663,7 @@ public class FitConfiguration implements Cloneable
 	{
 		if (shiftFactor > 0)
 		{
-			final double widthMax = Maths.max(initialSD0, initialSD1);
+			final double widthMax = MathUtils.max(initialSD0, initialSD1);
 			if (widthMax > 0)
 			{
 				setCoordinateShift(shiftFactor * widthMax);

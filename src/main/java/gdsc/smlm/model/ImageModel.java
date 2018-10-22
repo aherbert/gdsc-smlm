@@ -13,8 +13,8 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -639,7 +639,7 @@ public abstract class ImageModel
 
 	private double getTotalOnTime(FluorophoreSequenceModel f)
 	{
-		return Maths.sum(f.getOnTimes());
+		return MathUtils.sum(f.getOnTimes());
 	}
 
 	/**
@@ -694,8 +694,8 @@ public abstract class ImageModel
 		}
 
 		// Get the maximum and minimum start and end times
-		int sequenceStart = Maths.min(sequenceStartT);
-		int sequenceEnd = Maths.max(sequenceEndT);
+		int sequenceStart = MathUtils.min(sequenceStartT);
+		int sequenceEnd = MathUtils.max(sequenceEndT);
 
 		// Time-range check. Note that the final frames are 1-based
 		if (sequenceStart > maxFrames - 1)
@@ -712,7 +712,7 @@ public abstract class ImageModel
 		for (int i = 0; i < nFluorophores; i++)
 		{
 			generateOnTimes(maxFrames, frameInterval, bursts.get(i), sequenceStart, onTime[i], state[i]);
-			totalOnTime[i] = Maths.sum(onTime[i]);
+			totalOnTime[i] = MathUtils.sum(onTime[i]);
 			photonBudget[i] = photons[i + photonIndex];
 		}
 

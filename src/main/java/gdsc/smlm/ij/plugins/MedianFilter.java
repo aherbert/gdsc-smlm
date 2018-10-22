@@ -1,9 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.MedianWindowDLLFloat;
-import gdsc.core.utils.MedianWindowFloat;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
+import uk.ac.sussex.gdsc.core.utils.FloatMedianWindow;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -280,7 +280,7 @@ public class MedianFilter implements PlugInFilter
 					}
 
 					// Initialise the window with the first n frames.
-					MedianWindowDLLFloat mw = new MedianWindowDLLFloat(data);
+					FloatLinkedMedianWindow mw = new FloatLinkedMedianWindow(data);
 
 					// Get the early medians.
 					int slice = 0;
@@ -311,7 +311,7 @@ public class MedianFilter implements PlugInFilter
 					}
 
 					// Create median window filter
-					MedianWindowFloat mw = new MedianWindowFloat(data.clone(), radius);
+					FloatMedianWindow mw = FloatMedianWindow.wrap(data.clone(), radius);
 
 					// Produce the medians
 					for (int slice = 0; slice < nSlices; slice += interval)
@@ -362,10 +362,10 @@ public class MedianFilter implements PlugInFilter
 					}
 
 					// Initialise the window with the first n frames.
-					MedianWindowDLLFloat[] mw = new MedianWindowDLLFloat[nPixels];
+					FloatLinkedMedianWindow[] mw = new FloatLinkedMedianWindow[nPixels];
 					for (int pixel = 0; pixel < nPixels; pixel++)
 					{
-						mw[pixel] = new MedianWindowDLLFloat(data[pixel]);
+						mw[pixel] = new FloatLinkedMedianWindow(data[pixel]);
 					}
 
 					// Get the early medians.
@@ -408,10 +408,10 @@ public class MedianFilter implements PlugInFilter
 					}
 
 					// Create median window filter
-					MedianWindowFloat[] mw = new MedianWindowFloat[nPixels];
+					FloatMedianWindow[] mw = new FloatMedianWindow[nPixels];
 					for (int pixel = 0; pixel < nPixels; pixel++)
 					{
-						mw[pixel] = new MedianWindowFloat(data[pixel].clone(), radius);
+						mw[pixel] = FloatMedianWindow.wrap(data[pixel].clone(), radius);
 					}
 
 					// Produce the medians

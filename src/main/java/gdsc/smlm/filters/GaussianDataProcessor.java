@@ -1,6 +1,6 @@
 package gdsc.smlm.filters;
 
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -117,8 +117,8 @@ public class GaussianDataProcessor extends DataProcessor
 	public List<String> getParameters()
 	{
 		List<String> list = super.getParameters();
-		list.add("sigma = " + Utils.rounded(sigma));
-		list.add("width = " + Utils.rounded(filter.getHalfWidth(sigma)));
+		list.add("sigma = " + MathUtils.rounded(sigma));
+		list.add("width = " + MathUtils.rounded(filter.getHalfWidth(sigma)));
 		return list;
 	}
 

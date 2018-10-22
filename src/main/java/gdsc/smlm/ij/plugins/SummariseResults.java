@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Rectangle;
 
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -143,8 +143,8 @@ public class SummariseResults implements PlugIn
 		}
 		Rectangle bounds = result.getBounds(true);
 		sb.append(String.format("\t%d,%d,%d,%d\t%s\t%s\t%s", bounds.x, bounds.y, bounds.x + bounds.width, bounds.y +
-				bounds.height, Utils.rounded(result.getNmPerPixel(), 4), Utils.rounded(result.getGain(), 4),
-				Utils.rounded(exposureTime, 4)));
+				bounds.height, MathUtils.rounded(result.getNmPerPixel(), 4), MathUtils.rounded(result.getGain(), 4),
+				MathUtils.rounded(exposureTime, 4)));
 		for (int i = 0; i < stats.length; i++)
 		{
 			if (Double.isNaN(stats[i].getMean()))

@@ -22,7 +22,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**

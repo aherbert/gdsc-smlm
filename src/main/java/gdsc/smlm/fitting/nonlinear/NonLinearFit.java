@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -96,7 +96,8 @@ public class NonLinearFit extends BaseFunctionSolver
 	private void init(StoppingCriteria sc, int significantDigits, double maxAbsoluteError)
 	{
 		setStoppingCriteria(sc);
-		solver.setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
+		solver.setEqual(new DoubleEquality(DoubleEquality.getRelativeErrorTerm(significantDigits), 
+		    maxAbsoluteError));
 	}
 
 	private boolean nonLinearModel(int n, double[] y, double[] a, boolean initialStage)

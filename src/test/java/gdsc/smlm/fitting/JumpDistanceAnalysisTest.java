@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting;
 
-import gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.logging.Logger;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;

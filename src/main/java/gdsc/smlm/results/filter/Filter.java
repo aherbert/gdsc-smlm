@@ -1,9 +1,10 @@
 package gdsc.smlm.results.filter;
 
 import gdsc.smlm.ga.Chromosome;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.ClassificationResult;
-import gdsc.core.match.FractionClassificationResult;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.match.ClassificationResult;
+import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -1437,7 +1438,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	public int[] getChromosomeParameters()
 	{
 		// Assume all the parameters are included in the Chromosome
-		return Utils.newArray(getNumberOfParameters(), 0, 1);
+		return SimpleArrayUtils.newArray(getNumberOfParameters(), 0, 1);
 	}
 
 	/**

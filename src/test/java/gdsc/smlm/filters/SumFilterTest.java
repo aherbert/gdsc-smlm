@@ -12,7 +12,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 public class SumFilterTest
 {
-	private gdsc.core.utils.Random rand;
+	private uk.ac.sussex.gdsc.core.utils.Random rand;
 
 	private boolean debug = false;
 	private int InternalITER3 = 500;
@@ -55,7 +55,7 @@ public class SumFilterTest
 	private void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -80,7 +80,7 @@ public class SumFilterTest
 	private void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -103,7 +103,7 @@ public class SumFilterTest
 	private void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -129,7 +129,7 @@ public class SumFilterTest
 	private void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -151,7 +151,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -235,7 +235,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -309,7 +309,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -392,7 +392,7 @@ public class SumFilterTest
 	private void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(SumFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -407,7 +407,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -472,7 +472,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -537,7 +537,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -602,7 +602,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -675,7 +675,7 @@ public class SumFilterTest
 	private void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -690,7 +690,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -755,7 +755,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -821,7 +821,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -916,7 +916,7 @@ public class SumFilterTest
 	private void floatCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height,
 			int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -940,7 +940,7 @@ public class SumFilterTest
 	private void floatCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height,
 			int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -955,7 +955,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1029,7 +1029,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1103,7 +1103,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1177,7 +1177,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1251,7 +1251,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1333,7 +1333,7 @@ public class SumFilterTest
 	private void floatCompareBlockSum3x3AndBlockSumNxN(SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -1348,7 +1348,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1420,7 +1420,7 @@ public class SumFilterTest
 	private void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -1435,7 +1435,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1507,7 +1507,7 @@ public class SumFilterTest
 	private void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -1522,7 +1522,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1586,7 +1586,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1650,7 +1650,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1714,7 +1714,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1787,7 +1787,7 @@ public class SumFilterTest
 	private void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -1812,7 +1812,7 @@ public class SumFilterTest
 	private void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -1835,7 +1835,7 @@ public class SumFilterTest
 	private void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -1861,7 +1861,7 @@ public class SumFilterTest
 	private void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
 			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -1883,7 +1883,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1967,7 +1967,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2041,7 +2041,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2124,7 +2124,7 @@ public class SumFilterTest
 	private void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -2139,7 +2139,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2203,7 +2203,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2268,7 +2268,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2333,7 +2333,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2406,7 +2406,7 @@ public class SumFilterTest
 	private void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -2421,7 +2421,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2486,7 +2486,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2552,7 +2552,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2647,7 +2647,7 @@ public class SumFilterTest
 	private void intCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height,
 			int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -2671,7 +2671,7 @@ public class SumFilterTest
 	private void intCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height,
 			int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -2686,7 +2686,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2760,7 +2760,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2834,7 +2834,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2908,7 +2908,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2982,7 +2982,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -3064,7 +3064,7 @@ public class SumFilterTest
 	private void intCompareBlockSum3x3AndBlockSumNxN(SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -3079,7 +3079,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3151,7 +3151,7 @@ public class SumFilterTest
 	private void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -3166,7 +3166,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3238,7 +3238,7 @@ public class SumFilterTest
 	private void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
 		int[] data2 = intClone(data1);
 
@@ -3253,7 +3253,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3317,7 +3317,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3381,7 +3381,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3445,7 +3445,7 @@ public class SumFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 

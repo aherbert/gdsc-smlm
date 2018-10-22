@@ -12,16 +12,16 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.match.ClassificationResult;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.threshold.AutoThreshold;
-import gdsc.core.threshold.FloatHistogram;
-import gdsc.core.threshold.Histogram;
-import gdsc.core.utils.ImageExtractor;
-import gdsc.core.utils.NoiseEstimator.Method;
-import gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.ClassificationResult;
+import uk.ac.sussex.gdsc.core.match.Coordinate;
+import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
+import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
+import uk.ac.sussex.gdsc.core.threshold.FloatHistogram;
+import uk.ac.sussex.gdsc.core.threshold.Histogram;
+import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
+import uk.ac.sussex.gdsc.core.utils.NoiseEstimator.Method;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.Spot;
@@ -78,7 +78,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		thresholdMethodOptions[AutoThreshold.Method.NONE.ordinal()] = true;
 		for (i = 0; i < thresholdMethods.length; i++)
 		{
-			thresholdMethodNames[i] = thresholdMethods[i].name;
+			thresholdMethodNames[i] = thresholdMethods[i].toString();
 			thresholdMethodOptions[i] = true;
 		}
 		for (int j = 0; i < thresholdMethodNames.length; i++, j++)
@@ -286,7 +286,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 				final int maxx = stack.getWidth();
 				final int maxy = stack.getHeight();
-				final ImageExtractor ie = new ImageExtractor(data, maxx, maxy);
+				final ImageExtractor ie = ImageExtractor.wrap(data, maxx, maxy);
 				final float noise = FitWorker.estimateNoise(data, maxx, maxy, config.getNoiseMethod());
 				snr = new double[spots.length];
 				for (int i = 0; i < spots.length; i++)
@@ -541,7 +541,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				"Rank candidate spots in the benchmark image created by " + CreateData.TITLE +
 						" plugin\nand identified by the " + BenchmarkSpotFilter.TITLE +
 						" plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
-				Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
+				MathUtils.rounded(simulationParameters.s), MathUtils.rounded(getSa())));
 
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
@@ -776,10 +776,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			FilterResult r = result.getValue();
 
 			// Determine the number of positives to find. This score may be fractional.
-			fP += r.result.getTP();
-			fN += r.result.getFP();
+			fP += r.result.getTruePositives();
+			fN += r.result.getFalsePositives();
 
-			// Q. Is r.result.getTP() not the same as the total of r.spots[i].match
+			// Q. Is r.result.getTruePositives() not the same as the total of r.spots[i].match
 			// A. Not if we used fractional scoring.
 
 			for (ScoredSpot spot : r.spots)
@@ -791,7 +791,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			}
 
 			// Make the target use the fractional score
-			final double targetP = r.result.getTP() * f1;
+			final double targetP = r.result.getTruePositives() * f1;
 
 			// Count the number of positive & negatives
 			int p = 0, n = 0;
@@ -833,7 +833,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 			// Debug
 			//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
-			//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
+			//		r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(), p, n,
 			//		nAfter, (double) n / (n + p));
 
 			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
@@ -1003,12 +1003,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				if (Float.isFinite(r.t))
 					s.add(r.t);
 				time += r.time;
-				tp += r.f.getTP();
-				fp += r.f.getFP();
-				tn += r.f.getTN();
-				itp += r.c.getTP();
-				ifp += r.c.getFP();
-				itn += r.c.getTN();
+				tp += r.f.getTruePositives();
+				fp += r.f.getFalsePositives();
+				tn += r.f.getTrueNegatives();
+				itp += r.c.getTruePositives();
+				ifp += r.c.getFalsePositives();
+				itn += r.c.getTrueNegatives();
 			}
 
 			sb.setLength(0);
@@ -1132,7 +1132,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 	private static void add(StringBuilder sb, double value)
 	{
-		add(sb, Utils.rounded(value));
+		add(sb, MathUtils.rounded(value));
 	}
 
 	private static void addCount(StringBuilder sb, double value)
@@ -1148,7 +1148,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			if (value > 100)
 				sb.append("\t").append(IJ.d2s(value));
 			else
-				add(sb, Utils.rounded(value));
+				add(sb, MathUtils.rounded(value));
 		}
 	}
 
@@ -1211,17 +1211,17 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	{
 		double[] scores = new double[SORT.length - 1];
 		int i = 0;
-		scores[i++] = m.getTP();
-		scores[i++] = m.getFP();
-		scores[i++] = m.getTN();
-		scores[i++] = m.getFN();
+		scores[i++] = m.getTruePositives();
+		scores[i++] = m.getFalsePositives();
+		scores[i++] = m.getTrueNegatives();
+		scores[i++] = m.getFalseNegatives();
 		scores[i++] = m.getPrecision();
 		scores[i++] = m.getRecall();
 		scores[i++] = m.getFScore(0.5);
 		scores[i++] = m.getF1Score();
 		scores[i++] = m.getFScore(2);
 		scores[i++] = m.getJaccard();
-		scores[i++] = m.getMCC();
+		scores[i++] = m.getMatthewsCorrelationCoefficient();
 		for (double s : scores)
 			add(sb, s);
 		return (sortIndex != 0) ? scores[sortIndex - 1] : 0;

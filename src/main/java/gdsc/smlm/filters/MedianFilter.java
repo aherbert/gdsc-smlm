@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.utils.MedianWindowDLLFloat;
+import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -569,7 +569,7 @@ public class MedianFilter implements Cloneable
 			}
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			FloatLinkedMedianWindow window = new FloatLinkedMedianWindow(values);
 
 			// For each position up to the limit, add the next column and increment
 			int index = y * maxx + n;
@@ -635,7 +635,7 @@ public class MedianFilter implements Cloneable
 			values[i++] = data[p2++];
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			FloatLinkedMedianWindow window = new FloatLinkedMedianWindow(values);
 
 			// For each position up to the limit, add the next column and increment
 			int index = p1 - 1;
@@ -748,7 +748,7 @@ public class MedianFilter implements Cloneable
 			}
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			FloatLinkedMedianWindow window = new FloatLinkedMedianWindow(values);
 
 			// For each position up to the limit, add the next column and increment
 			for (int x = 0; x < xlimit; x++)
@@ -820,7 +820,7 @@ public class MedianFilter implements Cloneable
 			values[i++] = data[p2++];
 
 			// Initialise the rolling window
-			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+			FloatLinkedMedianWindow window = new FloatLinkedMedianWindow(values);
 
 			// For each position up to the limit, add the next column and increment
 			for (int x = 0; x < xlimit; x++)

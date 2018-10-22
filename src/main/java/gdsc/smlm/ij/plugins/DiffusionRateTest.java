@@ -1,12 +1,25 @@
 package gdsc.smlm.ij.plugins;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.DoubleRollingArray;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.plugin.LutLoader;
+import ij.plugin.PlugIn;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
+import ij.text.TextWindow;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.distribution.GammaDistribution;
@@ -14,11 +27,13 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.RollingArray;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
+import java.awt.Color;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -46,19 +61,6 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.gui.Plot2;
-import ij.gui.PlotWindow;
-import ij.plugin.LutLoader;
-import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
-import ij.text.TextWindow;
 
 /**
  * Move a set of molecules and calculates the diffusion rate. Uses settings from the CreateData
@@ -175,21 +177,21 @@ public class DiffusionRateTest implements PlugIn
 		final double precisionInPixels = myPrecision / settings.pixelPitch;
 		final boolean addError = myPrecision != 0;
 
-		Utils.log(TITLE + " : D = %s um^2/sec, Precision = %s nm", Utils.rounded(settings.diffusionRate, 4),
-				Utils.rounded(myPrecision, 4));
+		Utils.log(TITLE + " : D = %s um^2/sec, Precision = %s nm", MathUtils.rounded(settings.diffusionRate, 4),
+				MathUtils.rounded(myPrecision, 4));
 		Utils.log("Mean-displacement per dimension = %s nm/sec",
-				Utils.rounded(1e3 * ImageModel.getRandomMoveDistance(settings.diffusionRate), 4));
+				MathUtils.rounded(1e3 * ImageModel.getRandomMoveDistance(settings.diffusionRate), 4));
 		if (extraOptions)
 			Utils.log("Step size = %s, precision = %s",
-					Utils.rounded(ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)),
-					Utils.rounded(precisionInPixels));
+					MathUtils.rounded(ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)),
+					MathUtils.rounded(precisionInPixels));
 
 		// Convert diffusion co-efficient into the standard deviation for the random walk
 		final double diffusionSigma = (settings.getDiffusionType() == DiffusionType.LINEAR_WALK)
 				// Q. What should this be? At the moment just do 1D diffusion on a random vector
 				? ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)
 				: ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep);
-		Utils.log("Simulation step-size = %s nm", Utils.rounded(settings.pixelPitch * diffusionSigma, 4));
+		Utils.log("Simulation step-size = %s nm", MathUtils.rounded(settings.pixelPitch * diffusionSigma, 4));
 
 		// Move the molecules and get the diffusion rate
 		IJ.showStatus("Simulating ...");
@@ -354,10 +356,10 @@ public class DiffusionRateTest implements PlugIn
 				(results.getCalibration().exposureTime / 1000);
 		Utils.log(
 				"Raw data D=%s um^2/s, Precision = %s nm, N=%d, step=%s s, mean2D=%s um^2, MSD 2D = %s um^2/s, mean3D=%s um^2, MSD 3D = %s um^2/s",
-				Utils.rounded(settings.diffusionRate), Utils.rounded(myPrecision), jumpDistances2D.getN(),
-				Utils.rounded(results.getCalibration().exposureTime / 1000),
-				Utils.rounded(jumpDistances2D.getMean() / conversionFactor), Utils.rounded(msd2D),
-				Utils.rounded(jumpDistances3D.getMean() / conversionFactor), Utils.rounded(msd3D));
+				MathUtils.rounded(settings.diffusionRate), MathUtils.rounded(myPrecision), jumpDistances2D.getN(),
+				MathUtils.rounded(results.getCalibration().exposureTime / 1000),
+				MathUtils.rounded(jumpDistances2D.getMean() / conversionFactor), MathUtils.rounded(msd2D),
+				MathUtils.rounded(jumpDistances3D.getMean() / conversionFactor), MathUtils.rounded(msd3D));
 
 		aggregateIntoFrames(points, addError, precisionInPixels, random2);
 
@@ -427,13 +429,13 @@ public class DiffusionRateTest implements PlugIn
 			// where: d^2 = mean-square displacement
 
 			double D = best2D[1] / 4.0;
-			String msg = "2D Diffusion rate = " + Utils.rounded(D, 4) + " um^2 / sec (" + Utils.timeToString(time) +
+			String msg = "2D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec (" + Utils.timeToString(time) +
 					")";
 			IJ.showStatus(msg);
 			Utils.log(msg);
 
 			D = best3D[1] / 6.0;
-			Utils.log("3D Diffusion rate = " + Utils.rounded(D, 4) + " um^2 / sec (" + Utils.timeToString(time) + ")");
+			Utils.log("3D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec (" + Utils.timeToString(time) + ")");
 		}
 		else
 		{
@@ -457,7 +459,7 @@ public class DiffusionRateTest implements PlugIn
 
 		if (useConfinement)
 			Utils.log("3D asymptote distance = %s nm (expected %.2f)",
-					Utils.rounded(asymptote.getMean() * settings.pixelPitch, 4), 3 * settings.confinementRadius / 4);
+					MathUtils.rounded(asymptote.getMean() * settings.pixelPitch, 4), 3 * settings.confinementRadius / 4);
 	}
 
 	/**
@@ -484,8 +486,8 @@ public class DiffusionRateTest implements PlugIn
 		// TODO Auto-generated method stub
 		String title = TITLE + " " + dimensions + "D";
 		Plot2 plot = new Plot2(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues);
-		double[] limits = Maths.limits(upper);
-		limits = Maths.limits(limits, lower);
+		double[] limits = MathUtils.limits(upper);
+		limits = MathUtils.limits(limits, lower);
 		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
 		plot.setColor(Color.blue);
 		plot.addPoints(xValues, lower, Plot2.LINE);
@@ -569,8 +571,8 @@ public class DiffusionRateTest implements PlugIn
 		double estimatedD = steps * settings.diffusionRate / settings.stepsPerSecond;
 		if (myPrecision > 0)
 			estimatedD += myPrecision * myPrecision / 1e6;
-		double max = Maths.max(values);
-		double[] x = Utils.newArray(1000, 0, max / 1000);
+		double max = MathUtils.max(values);
+		double[] x = SimpleArrayUtils.newArray(1000, 0, max / 1000);
 		double k = dimensions / 2.0;
 		double mean = 4 * estimatedD;
 
@@ -823,8 +825,8 @@ public class DiffusionRateTest implements PlugIn
 		Plot2 plot = new Plot2(title, "Time (seconds)", "Distance (um)");
 		float[] xUm = convertToUm(x);
 		float[] yUm = convertToUm(y);
-		float[] limits = Maths.limits(xUm);
-		limits = Maths.limits(limits, yUm);
+		float[] limits = MathUtils.limits(xUm);
+		limits = MathUtils.limits(limits, yUm);
 		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
 		plot.setColor(Color.red);
 		plot.addPoints(xValues, xUm, Plot2.LINE);
@@ -902,7 +904,7 @@ public class DiffusionRateTest implements PlugIn
 
 	private float[] getLimits(float[] x)
 	{
-		float[] limits = Maths.limits(x);
+		float[] limits = MathUtils.limits(x);
 		limits[0] = (float) Math.floor(limits[0]);
 		limits[1] = (float) Math.ceil(limits[1]);
 		return limits;
@@ -995,9 +997,9 @@ public class DiffusionRateTest implements PlugIn
 		double msd = sum / count;
 		// Convert to um^2/second
 		Utils.log("Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
-				Utils.rounded(settings.diffusionRate), Utils.rounded(myPrecision), count,
-				Utils.rounded(results.getCalibration().exposureTime / 1000), Utils.rounded(msd / conversionFactor),
-				Utils.rounded((msd / conversionFactor) / (results.getCalibration().exposureTime / 1000)));
+				MathUtils.rounded(settings.diffusionRate), MathUtils.rounded(myPrecision), count,
+				MathUtils.rounded(results.getCalibration().exposureTime / 1000), MathUtils.rounded(msd / conversionFactor),
+				MathUtils.rounded((msd / conversionFactor) / (results.getCalibration().exposureTime / 1000)));
 
 		msdAnalysis(points);
 	}
@@ -1041,8 +1043,8 @@ public class DiffusionRateTest implements PlugIn
 
 		// Create a new set of points that have coordinates that 
 		// are the rolling average over the number of aggregate steps
-		RollingArray x = new RollingArray(aggregateSteps);
-		RollingArray y = new RollingArray(aggregateSteps);
+		DoubleRollingArray x = new DoubleRollingArray(aggregateSteps);
+		DoubleRollingArray y = new DoubleRollingArray(aggregateSteps);
 
 		int id = 0;
 		int length = 0;
@@ -1050,8 +1052,8 @@ public class DiffusionRateTest implements PlugIn
 		{
 			if (p.id != id)
 			{
-				x.reset();
-				y.reset();
+				x.clear();
+				y.clear();
 			}
 			id = p.id;
 			x.add(p.x);
@@ -1142,12 +1144,12 @@ public class DiffusionRateTest implements PlugIn
 		StringBuilder sb = new StringBuilder();
 		sb.append(settings.diffusionRate).append('\t');
 		sb.append(myPrecision).append('\t');
-		sb.append(Utils.rounded(apparentD)).append('\t');
-		sb.append(Utils.rounded(1.0 / settings.stepsPerSecond)).append('\t');
+		sb.append(MathUtils.rounded(apparentD)).append('\t');
+		sb.append(MathUtils.rounded(1.0 / settings.stepsPerSecond)).append('\t');
 		sb.append(myAggregateSteps).append('\t');
 		// Exposure time is the aggregated frame time 
 		exposureTime = myAggregateSteps / settings.stepsPerSecond;
-		sb.append(Utils.rounded(exposureTime)).append('\t');
+		sb.append(MathUtils.rounded(exposureTime)).append('\t');
 		prefix = sb.toString();
 		return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tn\tN\tMSD (um^2)\tD (um^2/s)";
 	}
@@ -1160,8 +1162,8 @@ public class DiffusionRateTest implements PlugIn
 		// Jump distance separation is the number of steps
 		final double t = step / settings.stepsPerSecond;
 		sb.append(prefix);
-		sb.append(Utils.rounded(t)).append('\t');
-		sb.append(Utils.rounded(t / exposureTime)).append('\t');
+		sb.append(MathUtils.rounded(t)).append('\t');
+		sb.append(MathUtils.rounded(t / exposureTime)).append('\t');
 		sb.append(count).append('\t');
 		// Not rounded to preserve precision 
 		sb.append(msd).append('\t');
@@ -1308,8 +1310,8 @@ public class DiffusionRateTest implements PlugIn
 		// So if s^2 = 2D:
 		// 2D * Chi  ~ Gamma(k/2, 4D)
 		double estimatedD = simpleD * simpleSteps;
-		double max = Maths.max(values);
-		double[] x = Utils.newArray(1000, 0, max / 1000);
+		double max = MathUtils.max(values);
+		double[] x = SimpleArrayUtils.newArray(1000, 0, max / 1000);
 		double k = dimensions / 2.0;
 		double mean = 4 * estimatedD;
 

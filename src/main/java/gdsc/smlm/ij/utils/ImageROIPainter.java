@@ -17,8 +17,8 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Sort;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Overlay;

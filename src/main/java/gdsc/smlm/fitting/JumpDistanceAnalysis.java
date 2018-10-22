@@ -28,8 +28,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.logging.Logger;
-import gdsc.core.logging.NullLogger;
+import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.logging.NullLogger;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -44,8 +44,8 @@ import gdsc.core.logging.NullLogger;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Sort;
 
 /**
  * Perform curve fitting on a cumulative histogram of the mean-squared displacement (MSD) per second to calculate the
@@ -145,7 +145,7 @@ public class JumpDistanceAnalysis
 		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
-		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
 		if (meanJumpDistance == 0)
 			return null;
 		double[][] jdHistogram = cumulativeHistogram(jumpDistances);
@@ -176,7 +176,7 @@ public class JumpDistanceAnalysis
 		final double estimatedD = meanJumpDistance / 4;
 		if (meanJumpDistance == 0)
 			return null;
-		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
 		double[] ic = new double[maxN];
 		Arrays.fill(ic, Double.POSITIVE_INFINITY);
@@ -258,7 +258,7 @@ public class JumpDistanceAnalysis
 		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
-		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
 		if (meanJumpDistance == 0)
 			return null;
 		double[][] jdHistogram = cumulativeHistogram(jumpDistances);
@@ -286,7 +286,7 @@ public class JumpDistanceAnalysis
 		final double estimatedD = meanJumpDistance / 4;
 		if (meanJumpDistance == 0)
 			return null;
-		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
 		double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n);
 		if (fit != null)
@@ -342,12 +342,12 @@ public class JumpDistanceAnalysis
 				// True for an unweighted fit
 				ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 				//ss = calculateSumOfSquares(function.getY(), function.value(fitParams));
-				lastIC = ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, 1);
+				lastIC = ic = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
 				logger.info("Fit Jump distance (N=1) : %s, SS = %s, IC = %s (%d evaluations)", formatD(fitParams[0]),
-						Maths.rounded(ss, 4), Maths.rounded(ic, 4), lvmSolution.getEvaluations());
+						MathUtils.rounded(ss, 4), MathUtils.rounded(ic, 4), lvmSolution.getEvaluations());
 
 				return new double[][] { coefficients, fractions };
 			}
@@ -532,10 +532,10 @@ public class JumpDistanceAnalysis
 			//double ss = calculateSumOfSquares(functionGradient.getY(), functionGradient.value(lvmSolution.getPoint().toArray()));
 
 			// All fitted parameters must be above zero
-			if (ss < this.ss && Maths.min(lvmSolution.getPoint().toArray()) > 0)
+			if (ss < this.ss && MathUtils.min(lvmSolution.getPoint().toArray()) > 0)
 			{
-				logger.info("  Re-fitting improved the SS from %s to %s (-%s%%)", Maths.rounded(this.ss, 4),
-						Maths.rounded(ss, 4), Maths.rounded(100 * (this.ss - ss) / this.ss, 4));
+				logger.info("  Re-fitting improved the SS from %s to %s (-%s%%)", MathUtils.rounded(this.ss, 4),
+						MathUtils.rounded(ss, 4), MathUtils.rounded(100 * (this.ss - ss) / this.ss, 4));
 				fitParams = lvmSolution.getPoint().toArray();
 				this.ss = ss;
 				evaluations += lvmSolution.getEvaluations();
@@ -551,7 +551,7 @@ public class JumpDistanceAnalysis
 		}
 
 		// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-		ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, fitParams.length - 1);
+		ic = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, fitParams.length - 1);
 
 		double[] d = new double[n];
 		double[] f = new double[n];
@@ -570,7 +570,7 @@ public class JumpDistanceAnalysis
 		double[] fractions = f;
 
 		logger.info("Fit Jump distance (N=%d) : %s (%s), SS = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
-				Maths.rounded(ss, 4), Maths.rounded(ic, 4), evaluations);
+				MathUtils.rounded(ss, 4), MathUtils.rounded(ic, 4), evaluations);
 
 		if (isValid(d, f))
 		{
@@ -599,15 +599,15 @@ public class JumpDistanceAnalysis
 			// Check the fit has fractions above the minimum fraction
 			if (f[i] < minFraction)
 			{
-				logger.debug("Fraction is less than the minimum fraction: %s < %s", Maths.rounded(f[i]),
-						Maths.rounded(minFraction));
+				logger.debug("Fraction is less than the minimum fraction: %s < %s", MathUtils.rounded(f[i]),
+						MathUtils.rounded(minFraction));
 				return false;
 			}
 			// Check the coefficients are different
 			if (i + 1 < f.length && d[i] / d[i + 1] < minDifference)
 			{
-				logger.debug("Coefficients are not different: %s / %s = %s < %s", Maths.rounded(d[i]),
-						Maths.rounded(d[i + 1]), Maths.rounded(d[i] / d[i + 1]), Maths.rounded(minDifference));
+				logger.debug("Coefficients are not different: %s / %s = %s < %s", MathUtils.rounded(d[i]),
+						MathUtils.rounded(d[i + 1]), MathUtils.rounded(d[i] / d[i + 1]), MathUtils.rounded(minDifference));
 				return false;
 			}
 		}
@@ -655,13 +655,13 @@ public class JumpDistanceAnalysis
 		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
-		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
 		if (meanJumpDistance == 0)
 			return null;
 
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
-		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
 		// Used for saving fitted the curve 
 		if (curveLogger != null && jdHistogram == null)
@@ -767,13 +767,13 @@ public class JumpDistanceAnalysis
 		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
-		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
 		if (meanJumpDistance == 0)
 			return null;
 
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
-		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
 		// Used for saving fitted the curve 
 		if (curveLogger != null && jdHistogram == null)
@@ -819,12 +819,12 @@ public class JumpDistanceAnalysis
 
 				double[] fitParams = solution.getPointRef();
 				ll = solution.getValue();
-				lastIC = ic = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
+				lastIC = ic = MathUtils.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
 				logger.info("Fit Jump distance (N=1) : %s, MLE = %s, IC = %s (%d evaluations)", formatD(fitParams[0]),
-						Maths.rounded(ll, 4), Maths.rounded(ic, 4), powellOptimizer.getEvaluations());
+						MathUtils.rounded(ll, 4), MathUtils.rounded(ic, 4), powellOptimizer.getEvaluations());
 
 				return new double[][] { coefficients, fractions };
 			}
@@ -983,7 +983,7 @@ public class JumpDistanceAnalysis
 		ll = constrainedSolution.getValue();
 
 		// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-		ic = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
+		ic = MathUtils.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
 
 		double[] d = new double[n];
 		double[] f = new double[n];
@@ -1002,7 +1002,7 @@ public class JumpDistanceAnalysis
 		double[] fractions = f;
 
 		logger.info("Fit Jump distance (N=%d) : %s (%s), MLE = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
-				Maths.rounded(ll, 4), Maths.rounded(ic, 4), evaluations);
+				MathUtils.rounded(ll, 4), MathUtils.rounded(ic, 4), evaluations);
 
 		if (isValid(d, f))
 		{
@@ -1060,7 +1060,7 @@ public class JumpDistanceAnalysis
 		{
 			if (i != 0)
 				sb.append(", ");
-			sb.append(Maths.rounded(jumpD[i], 4));
+			sb.append(MathUtils.rounded(jumpD[i], 4));
 		}
 		sb.append(" um^2");
 		if (calibrated)
@@ -1071,7 +1071,7 @@ public class JumpDistanceAnalysis
 			{
 				if (i != 0)
 					sb.append(", ");
-				sb.append(Maths.rounded(jumpD[i], 4));
+				sb.append(MathUtils.rounded(jumpD[i], 4));
 			}
 			sb.append(" um^2/s");
 		}
@@ -1087,7 +1087,7 @@ public class JumpDistanceAnalysis
 		{
 			if (i != 0)
 				sb.append(", ");
-			sb.append(Maths.rounded(data[i], 4));
+			sb.append(MathUtils.rounded(data[i], 4));
 		}
 		return sb.toString();
 	}
@@ -1939,7 +1939,7 @@ public class JumpDistanceAnalysis
 	 */
 	public static double[][] cumulativeHistogram(double[] values)
 	{
-		return Maths.cumulativeHistogram(values, true);
+		return MathUtils.cumulativeHistogram(values, true);
 	}
 
 	/**

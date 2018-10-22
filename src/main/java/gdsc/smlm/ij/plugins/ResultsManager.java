@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.core.ij.IJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
@@ -26,7 +26,7 @@ import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
@@ -156,8 +156,8 @@ public class ResultsManager implements PlugIn, MouseListener
 				size += results.size();
 			}
 			String memory = MemoryPeakResults.memorySizeString(memorySize);
-			String count = Utils.pleural(size, "result");
-			String sets = Utils.pleural(allResults.size(), "set");
+			String count = TextUtils.pleural(size, "result");
+			String sets = TextUtils.pleural(allResults.size(), "set");
 
 			GenericDialog gd = new GenericDialog(TITLE);
 
@@ -759,7 +759,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		{
 			IJ.showStatus("Reading results file ...");
 			reader = new PeakResultsReader(inputFilename);
-			reader.setTracker(new IJTrackProgress());
+			reader.setTracker(new ImageJTrackProgress());
 			results = reader.getResults();
 			reader.getTracker().progress(1.0);
 

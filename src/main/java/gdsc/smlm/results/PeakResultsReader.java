@@ -28,9 +28,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import gdsc.core.logging.TrackProgress;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.utils.XmlUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 

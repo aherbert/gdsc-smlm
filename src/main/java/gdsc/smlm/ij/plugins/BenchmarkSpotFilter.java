@@ -14,18 +14,19 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.ij.BufferedTextWindow;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.AUCCalculator;
-import gdsc.core.match.BasePoint;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.match.FractionalAssignment;
-import gdsc.core.match.RankedScoreCalculator;
-import gdsc.core.utils.FastCorrelator;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.RampedScore;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.AucCalculator;
+import uk.ac.sussex.gdsc.core.match.BasePoint;
+import uk.ac.sussex.gdsc.core.match.Coordinate;
+import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
+import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
+import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
+import uk.ac.sussex.gdsc.core.match.RankedScoreCalculator;
+import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RampedScore;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -61,10 +62,10 @@ import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 /**
@@ -767,8 +768,27 @@ public class BenchmarkSpotFilter implements PlugIn
 							}
 							s = RampedScore.flatten(s, 256);
 
-							// Store the match
-							fractionalAssignments.add(FractionalAssignment.create(i, j, s, true));
+                            // Store the match.
+                            // This class has been updated to use gdsc-core 2.0 for the 
+							// legacy release of gdsc-smlm.
+                            // It used to store true in the assignment. I do not know why.
+                            // This now copies the logic from the current gdsc-smlm.
+							// I expect this will not work. It it not a core plugin anyway
+							// so support for functionality is void. The release of the 
+							// latest version will make this obsolete.
+							
+                            if (s == 0)
+                                continue;
+
+                            double distance = 1 - s;
+                            if (distance == 0)
+                                // In the case of a match below the distance and signal factor thresholds
+                                // the distance will be 0. To distinguish between candidates all below
+                                // the thresholds just take the closest.
+                                // We know d2 is below dmin so we subtract the delta.
+                                distance -= (dmin - d2);
+
+							fractionalAssignments.add(new ImmutableFractionalAssignment(i, j, 1-s, s));
 							match[j]++;
 						}
 					}
@@ -776,7 +796,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				FractionalAssignment[] assignments = fractionalAssignments
 						.toArray(new FractionalAssignment[fractionalAssignments.size()]);
-				calc = new RankedScoreCalculator(assignments, nActual);
+				calc = RankedScoreCalculator.create(assignments, nActual, nPredicted);
 
 				// Assign matches
 				double tp = 0;
@@ -791,17 +811,17 @@ public class BenchmarkSpotFilter implements PlugIn
 
 					for (FractionalAssignment a : assignments)
 					{
-						if (!actualAssignment[a.targetId])
+						if (!actualAssignment[a.getTargetId()])
 						{
-							actualAssignment[a.targetId] = true;
-							final double intensity = getIntensity(actual[a.targetId]);
-							if (scoredSpots[a.predictedId] == null)
-								scoredSpots[a.predictedId] = new ScoredSpot(true, a.score, intensity,
-										spots[a.predictedId]);
+							actualAssignment[a.getTargetId()] = true;
+							final double intensity = getIntensity(actual[a.getTargetId()]);
+							if (scoredSpots[a.getPredictedId()] == null)
+								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
+										spots[a.getPredictedId()]);
 							else
-								scoredSpots[a.predictedId].add(a.score, intensity);
-							tp += a.score;
-							predictedScore[a.predictedId] += a.score;
+								scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
+							tp += a.getScore();
+							predictedScore[a.getPredictedId()] += a.getScore();
 							if (--nA == 0)
 								break;
 						}
@@ -835,21 +855,21 @@ public class BenchmarkSpotFilter implements PlugIn
 						final boolean[] predictedAssignment = new boolean[nPredicted];
 						for (FractionalAssignment a : assignments)
 						{
-							if (!actualAssignment[a.targetId])
+							if (!actualAssignment[a.getTargetId()])
 							{
-								if (!predictedAssignment[a.predictedId])
+								if (!predictedAssignment[a.getPredictedId()])
 								{
-									actualAssignment[a.targetId] = true;
-									predictedAssignment[a.predictedId] = true;
+									actualAssignment[a.getTargetId()] = true;
+									predictedAssignment[a.getPredictedId()] = true;
 									processAgain = true;
-									final double intensity = getIntensity(actual[a.targetId]);
-									if (scoredSpots[a.predictedId] == null)
-										scoredSpots[a.predictedId] = new ScoredSpot(true, a.score, intensity,
-												spots[a.predictedId]);
+									final double intensity = getIntensity(actual[a.getTargetId()]);
+									if (scoredSpots[a.getPredictedId()] == null)
+										scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
+												spots[a.getPredictedId()]);
 									else
-										scoredSpots[a.predictedId].add(a.score, intensity);
-									tp += a.score;
-									predictedScore[a.predictedId] += a.score;
+										scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
+									tp += a.getScore();
+									predictedScore[a.getPredictedId()] += a.getScore();
 									if (--nA == 0)
 										break OUTER;
 								}
@@ -880,15 +900,15 @@ public class BenchmarkSpotFilter implements PlugIn
 
 					for (FractionalAssignment a : assignments)
 					{
-						if (!actualAssignment[a.targetId])
+						if (!actualAssignment[a.getTargetId()])
 						{
-							if (!predictedAssignment[a.predictedId])
+							if (!predictedAssignment[a.getPredictedId()])
 							{
-								actualAssignment[a.targetId] = true;
-								predictedAssignment[a.predictedId] = true;
-								scoredSpots[a.predictedId] = new ScoredSpot(true, a.score,
-										getIntensity(actual[a.targetId]), spots[a.predictedId]);
-								tp += a.score;
+								actualAssignment[a.getTargetId()] = true;
+								predictedAssignment[a.getPredictedId()] = true;
+								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(),
+										getIntensity(actual[a.getTargetId()]), spots[a.getPredictedId()]);
+								tp += a.getScore();
 								if (--nA == 0 || --nP == 0)
 									break;
 							}
@@ -932,7 +952,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (debug)
 			{
 				System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame, actual.length,
-						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
+						result.getTruePositives(), result.getFalsePositives(), result.getRecall(), result.getPrecision());
 			}
 
 			results.put(frame, new FilterResult(frame, calc, result, scoredSpots, actual, actualAssignment));
@@ -1264,10 +1284,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		StringBuilder sb = new StringBuilder();
 		sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
 		final double sa = getSa() / simulationParameters.a;
-		sb.append("PSF width = ").append(Utils.rounded(simulationParameters.s / simulationParameters.a))
-				.append(" px (sa = ").append(Utils.rounded(sa)).append(" px). HWHM = ")
-				.append(Utils.rounded(sa * Gaussian2DFunction.SD_TO_HWHM_FACTOR)).append(" px\n");
-		sb.append("Simulation depth = ").append(Utils.rounded(simulationParameters.depth)).append(" nm");
+		sb.append("PSF width = ").append(MathUtils.rounded(simulationParameters.s / simulationParameters.a))
+				.append(" px (sa = ").append(MathUtils.rounded(sa)).append(" px). HWHM = ")
+				.append(MathUtils.rounded(sa * Gaussian2DFunction.SD_TO_HWHM_FACTOR)).append(" px\n");
+		sb.append("Simulation depth = ").append(MathUtils.rounded(simulationParameters.depth)).append(" nm");
 		if (simulationParameters.fixedDepth)
 			sb.append(" (fixed)");
 		sb.append("\n \nConfigure the spot filter:");
@@ -1665,7 +1685,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 		}
 
-		double[][] h = Maths.cumulativeHistogram(stats.getValues(), true);
+		double[][] h = MathUtils.cumulativeHistogram(stats.getValues(), true);
 
 		filterResult.cumul = h;
 		filterResult.stats = stats;
@@ -1738,9 +1758,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
 		for (FilterResult result : filterResults.values())
 		{
-			tp += result.result.getTP();
-			fp += result.result.getFP();
-			fn += result.result.getFN();
+			tp += result.result.getTruePositives();
+			fp += result.result.getFalsePositives();
+			fn += result.result.getFalseNegatives();
 			allSpots.addAll(Arrays.asList(result.spots));
 		}
 		FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
@@ -1760,16 +1780,16 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(n).append("\t");
 		double density = ((double) n / imp.getStackSize()) / (w * h) /
 				(simulationParameters.a * simulationParameters.a / 1e6);
-		sb.append(Utils.rounded(density)).append("\t");
-		sb.append(Utils.rounded(signal)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.depth)).append("\t");
+		sb.append(MathUtils.rounded(density)).append("\t");
+		sb.append(MathUtils.rounded(signal)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.s)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.a)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.depth)).append("\t");
 		sb.append(simulationParameters.fixedDepth).append("\t");
-		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.gain)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.readNoise)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.b)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.b2)).append("\t");
 
 		// Compute the noise
 		double noise = simulationParameters.b2;
@@ -1783,33 +1803,33 @@ public class BenchmarkSpotFilter implements PlugIn
 			noise = simulationParameters.b * 2 + readVariance;
 		}
 
-		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
+		sb.append(MathUtils.rounded(signal / Math.sqrt(noise))).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
 		sb.append(config.getDataFilterType()).append("\t");
 		//sb.append(spotFilter.getName()).append("\t");
 		sb.append(spotFilter.getSearch()).append("\t");
 		sb.append(spotFilter.getBorder()).append("\t");
-		sb.append(Utils.rounded(spotFilter.getSpread())).append("\t");
+		sb.append(MathUtils.rounded(spotFilter.getSpread())).append("\t");
 		sb.append(config.getDataFilter(0)).append("\t");
 		final double param = config.getSmooth(0);
 		final double hwhmMin = config.getHWHMMin();
 		if (relativeDistances)
 		{
-			sb.append(Utils.rounded(param * hwhmMin)).append("\t");
-			sb.append(Utils.rounded(param)).append("\t");
+			sb.append(MathUtils.rounded(param * hwhmMin)).append("\t");
+			sb.append(MathUtils.rounded(param)).append("\t");
 		}
 		else
 		{
-			sb.append(Utils.rounded(param)).append("\t");
-			sb.append(Utils.rounded(param / hwhmMin)).append("\t");
+			sb.append(MathUtils.rounded(param)).append("\t");
+			sb.append(MathUtils.rounded(param / hwhmMin)).append("\t");
 		}
 		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
 		sb.append(MATCHING_METHOD[matchingMethod]).append("\t");
-		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
-		sb.append(Utils.rounded(matchDistance)).append("\t");
-		sb.append(Utils.rounded(lowerSignalFactor)).append("\t");
-		sb.append(Utils.rounded(upperSignalFactor));
+		sb.append(MathUtils.rounded(lowerMatchDistance)).append("\t");
+		sb.append(MathUtils.rounded(matchDistance)).append("\t");
+		sb.append(MathUtils.rounded(lowerSignalFactor)).append("\t");
+		sb.append(MathUtils.rounded(upperSignalFactor));
 
 		resultPrefix = sb.toString();
 
@@ -1870,7 +1890,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		i2 = Arrays.copyOf(i2, ci);
 
 		final double slope = regression.getSlope();
-		sb.append(Utils.rounded(slope)).append("\t");
+		sb.append(MathUtils.rounded(slope)).append("\t");
 		addResult(sb, allResult, c[c.length - 1]);
 
 		// Output the match results when the recall achieves the fraction of the maximum.
@@ -1897,10 +1917,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		addResult(sb, new FractionClassificationResult(truePositives[maxIndex], falsePositives[maxIndex], 0,
 				n - truePositives[maxIndex]), c[maxIndex]);
 
-		sb.append(Utils.rounded(time / 1e6));
+		sb.append(MathUtils.rounded(time / 1e6));
 
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
-		final double auc = AUCCalculator.auc(p, r);
+		final double auc = AucCalculator.auc(p, r);
 		// Compute the AUC using the adjusted precision curve
 		// which uses the maximum precision for recall >= r
 		final double[] maxp = new double[p.length];
@@ -1911,19 +1931,19 @@ public class BenchmarkSpotFilter implements PlugIn
 				max = p[k];
 			maxp[k] = max;
 		}
-		final double auc2 = AUCCalculator.auc(maxp, r);
+		final double auc2 = AucCalculator.auc(maxp, r);
 
-		sb.append("\t").append(Utils.rounded(auc));
-		sb.append("\t").append(Utils.rounded(auc2));
+		sb.append("\t").append(MathUtils.rounded(auc));
+		sb.append("\t").append(MathUtils.rounded(auc2));
 
 		// Output the number of fit failures that must be processed to capture fractions of the true positives
 		if (cumul[0].length != 0)
 		{
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.80)));
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.90)));
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.95)));
-			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.99)));
-			sb.append("\t").append(Utils.rounded(cumul[0][cumul[0].length - 1]));
+			sb.append("\t").append(MathUtils.rounded(getFailures(cumul, 0.80)));
+			sb.append("\t").append(MathUtils.rounded(getFailures(cumul, 0.90)));
+			sb.append("\t").append(MathUtils.rounded(getFailures(cumul, 0.95)));
+			sb.append("\t").append(MathUtils.rounded(getFailures(cumul, 0.99)));
+			sb.append("\t").append(MathUtils.rounded(cumul[0][cumul[0].length - 1]));
 		}
 		else
 			sb.append("\t\t\t\t\t");
@@ -2046,7 +2066,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		String title = TITLE + " Performance";
 		Plot2 plot = new Plot2(title, (rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
-		double[] limits = Maths.limits(rank);
+		double[] limits = MathUtils.limits(rank);
 		plot.setLimits(limits[0], limits[1], 0, 1.05);
 		plot.setColor(Color.blue);
 		plot.addPoints(rank, p, Plot2.LINE);
@@ -2060,9 +2080,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.addPoints(rank, c, Plot2.LINE);
 		plot.setColor(Color.magenta);
 		plot.drawLine(rank[fractionIndex], 0, rank[fractionIndex],
-				Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
+				MathUtils.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
 		plot.setColor(Color.pink);
-		plot.drawLine(rank[maxIndex], 0, rank[maxIndex], Maths.max(p[maxIndex], r[maxIndex], j[maxIndex], c[maxIndex]));
+		plot.drawLine(rank[maxIndex], 0, rank[maxIndex], MathUtils.max(p[maxIndex], r[maxIndex], j[maxIndex], c[maxIndex]));
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, Correlation=Yellow");
 
@@ -2079,18 +2099,18 @@ public class BenchmarkSpotFilter implements PlugIn
 		//plot.addPoints(r, maxp, Plot2.LINE);
 		plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 		plot.setColor(Color.black);
-		plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
+		plot.addLabel(0, 0, "AUC = " + MathUtils.rounded(auc) + ", AUC2 = " + MathUtils.rounded(auc2));
 		PlotWindow pw2 = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw2);
 
 		title = TITLE + " Intensity";
 		plot = new Plot2(title, "Candidate", "Spot");
-		double[] limits1 = Maths.limits(i1);
-		double[] limits2 = Maths.limits(i2);
+		double[] limits1 = MathUtils.limits(i1);
+		double[] limits2 = MathUtils.limits(i2);
 		plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
 		plot.addLabel(0, 0,
-				String.format("Correlation=%s; Slope=%s", Utils.rounded(c[c.length - 1]), Utils.rounded(slope)));
+				String.format("Correlation=%s; Slope=%s", MathUtils.rounded(c[c.length - 1]), MathUtils.rounded(slope)));
 		plot.setColor(Color.red);
 		plot.addPoints(i1, i2, Plot.DOT);
 		if (slope > 1)
@@ -2113,12 +2133,12 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private void addResult(StringBuilder sb, FractionClassificationResult matchResult, double c)
 	{
-		addCount(sb, matchResult.getTP());
-		addCount(sb, matchResult.getFP());
-		sb.append(Utils.rounded(matchResult.getRecall())).append("\t");
-		sb.append(Utils.rounded(matchResult.getPrecision())).append("\t");
-		sb.append(Utils.rounded(matchResult.getJaccard())).append("\t");
-		sb.append(Utils.rounded(c)).append("\t");
+		addCount(sb, matchResult.getTruePositives());
+		addCount(sb, matchResult.getFalsePositives());
+		sb.append(MathUtils.rounded(matchResult.getRecall())).append("\t");
+		sb.append(MathUtils.rounded(matchResult.getPrecision())).append("\t");
+		sb.append(MathUtils.rounded(matchResult.getJaccard())).append("\t");
+		sb.append(MathUtils.rounded(c)).append("\t");
 	}
 
 	private static void addCount(StringBuilder sb, double value)
@@ -2134,7 +2154,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (value > 100)
 				sb.append(IJ.d2s(value));
 			else
-				sb.append(Utils.rounded(value));
+				sb.append(MathUtils.rounded(value));
 		}
 		sb.append("\t");
 	}

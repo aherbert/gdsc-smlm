@@ -22,7 +22,7 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.gui.LegacyGenericDialog;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.Calibration;
 import ij.IJ;
 import ij.gui.YesNoCancelDialog;

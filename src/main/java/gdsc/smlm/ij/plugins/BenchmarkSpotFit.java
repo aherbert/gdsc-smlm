@@ -33,19 +33,21 @@ import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.match.Assignment;
-import gdsc.core.match.BasePoint;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.match.PointPair;
-import gdsc.core.utils.Correlator;
-import gdsc.core.utils.FastCorrelator;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.NoiseEstimator.Method;
-import gdsc.core.utils.RampedScore;
-import gdsc.core.utils.Sort;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.Assignment;
+import uk.ac.sussex.gdsc.core.match.AssignmentComparator;
+import uk.ac.sussex.gdsc.core.match.BasePoint;
+import uk.ac.sussex.gdsc.core.match.Coordinate;
+import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
+import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
+import uk.ac.sussex.gdsc.core.match.PointPair;
+import uk.ac.sussex.gdsc.core.utils.Correlator;
+import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.NoiseEstimator.Method;
+import uk.ac.sussex.gdsc.core.utils.RampedScore;
+import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitWorker;
@@ -80,10 +82,10 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 /**
@@ -597,7 +599,7 @@ public class BenchmarkSpotFit implements PlugIn
 						final float y = actual[ii].getY();
 						for (int jj = 0; jj < predicted.length; jj++)
 						{
-							final double d2 = predicted[jj].distance2(x, y);
+							final double d2 = predicted[jj].distanceSquared(x, y);
 							if (d2 <= matchDistance)
 							{
 								// Get the score
@@ -631,12 +633,12 @@ public class BenchmarkSpotFit implements PlugIn
 									// after any fit results.
 									score += matchDistance + 1;
 								}
-								assignments.add(new Assignment(ii, jj, score));
+								assignments.add(new ImmutableFractionalAssignment(ii, jj, score));
 							}
 						}
 					}
 
-					Collections.sort(assignments);
+					AssignmentComparator.sort(assignments);
 
 					final boolean[] actualAssignment = new boolean[actual.length];
 					final boolean[] predictedAssignment = new boolean[predicted.length];
@@ -654,7 +656,7 @@ public class BenchmarkSpotFit implements PlugIn
 								final BasePoint p2 = (BasePoint) predicted[assignment.getPredictedId()];
 								int i = (int) p2.getZ();
 
-								final double d = p2.distanceXY(p3);
+								final double d = p2.distanceXy(p3);
 
 								if (i >= 0)
 								{
@@ -801,7 +803,7 @@ public class BenchmarkSpotFit implements PlugIn
 				"Fit candidate spots in the benchmark image created by " + CreateData.TITLE +
 						" plugin\nand identified by the " + BenchmarkSpotFilter.TITLE +
 						" plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
-				Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
+				MathUtils.rounded(simulationParameters.s), MathUtils.rounded(getSa())));
 
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
@@ -1045,10 +1047,10 @@ public class BenchmarkSpotFit implements PlugIn
 			FilterResult r = result.getValue();
 
 			// Determine the number of positives to find. This score may be fractional.
-			fP += r.result.getTP();
-			fN += r.result.getFP();
+			fP += r.result.getTruePositives();
+			fN += r.result.getFalsePositives();
 
-			// Q. Is r.result.getTP() not the same as the total of r.spots[i].match
+			// Q. Is r.result.getTruePositives() not the same as the total of r.spots[i].match
 			// A. Not if we used fractional scoring.
 
 			for (ScoredSpot spot : r.spots)
@@ -1060,7 +1062,7 @@ public class BenchmarkSpotFit implements PlugIn
 			}
 
 			// Make the target use the fractional score
-			final double targetP = r.result.getTP() * f1;
+			final double targetP = r.result.getTruePositives() * f1;
 
 			// Count the number of positive & negatives
 			int p = 0, n = 0;
@@ -1102,7 +1104,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 			// Debug
 			//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
-			//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
+			//		r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(), p, n,
 			//		nAfter, (double) n / (n + p));
 
 			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
@@ -1320,16 +1322,16 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append(n).append("\t");
 		double density = ((double) n / imp.getStackSize()) / (w * h) /
 				(simulationParameters.a * simulationParameters.a / 1e6);
-		sb.append(Utils.rounded(density)).append("\t");
-		sb.append(Utils.rounded(signal)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.depth)).append("\t");
+		sb.append(MathUtils.rounded(density)).append("\t");
+		sb.append(MathUtils.rounded(signal)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.s)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.a)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.depth)).append("\t");
 		sb.append(simulationParameters.fixedDepth).append("\t");
-		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.gain)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.readNoise)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.b)).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.b2)).append("\t");
 
 		// Compute the noise
 		double noise = simulationParameters.b2;
@@ -1348,8 +1350,8 @@ public class BenchmarkSpotFit implements PlugIn
 			// The total signal is spread over frames
 		}
 
-		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
-		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
+		sb.append(MathUtils.rounded(signal / Math.sqrt(noise))).append("\t");
+		sb.append(MathUtils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
 
 		sb.append(spotFilter.getDescription());
 
@@ -1418,8 +1420,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 		WindowOrganiser wo = new WindowOrganiser();
 
-		String label = String.format("Recall = %s. n = %d. Median = %s nm. SD = %s nm", Utils.rounded(m.getRecall()),
-				distanceStats.getN(), Utils.rounded(median), Utils.rounded(distanceStats.getStandardDeviation()));
+		String label = String.format("Recall = %s. n = %d. Median = %s nm. SD = %s nm", MathUtils.rounded(m.getRecall()),
+				distanceStats.getN(), MathUtils.rounded(median), MathUtils.rounded(distanceStats.getStandardDeviation()));
 		int id = Utils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 0, label);
 		if (Utils.isNewWindow())
 			wo.add(id);
@@ -1428,7 +1430,7 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, median);
 
 		// Sort by spot intensity and produce correlation
-		int[] indices = Utils.newArray(i1.length, 0, 1);
+		int[] indices = SimpleArrayUtils.newArray(i1.length, 0, 1);
 		if (showCorrelation)
 			Sort.sort(indices, is, rankByIntensity);
 		double[] r = (showCorrelation) ? new double[i1.length] : null;
@@ -1469,11 +1471,11 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			String title = TITLE + " Intensity";
 			Plot plot = new Plot(title, "Candidate", "Spot");
-			double[] limits1 = Maths.limits(i1);
-			double[] limits2 = Maths.limits(i2);
+			double[] limits1 = MathUtils.limits(i1);
+			double[] limits2 = MathUtils.limits(i2);
 			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
-			label = String.format("Correlation=%s; Ranked=%s; Slope=%s", Utils.rounded(pearsonCorr),
-					Utils.rounded(rankedCorr), Utils.rounded(slope));
+			label = String.format("Correlation=%s; Ranked=%s; Slope=%s", MathUtils.rounded(pearsonCorr),
+					MathUtils.rounded(rankedCorr), MathUtils.rounded(slope));
 			plot.addLabel(0, 0, label);
 			plot.setColor(Color.red);
 			plot.addPoints(i1, i2, Plot.DOT);
@@ -1487,9 +1489,9 @@ public class BenchmarkSpotFit implements PlugIn
 
 			title = TITLE + " Correlation";
 			plot = new Plot(title, "Spot Rank", "Correlation");
-			double[] xlimits = Maths.limits(rank);
-			double[] ylimits = Maths.limits(r);
-			ylimits = Maths.limits(ylimits, sr);
+			double[] xlimits = MathUtils.limits(rank);
+			double[] ylimits = MathUtils.limits(r);
+			ylimits = MathUtils.limits(ylimits, sr);
 			plot.setLimits(xlimits[0], xlimits[1], ylimits[0], ylimits[1]);
 			plot.setColor(Color.red);
 			plot.addPoints(rank, r, Plot.LINE);
@@ -1506,7 +1508,7 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, rankedCorr);
 		add(sb, slope);
 
-		label = String.format("n = %d. Median = %s nm", depthStats.getN(), Utils.rounded(median));
+		label = String.format("n = %d. Median = %s nm", depthStats.getN(), MathUtils.rounded(median));
 		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 0, label);
 		if (Utils.isNewWindow())
 			wo.add(id);
@@ -1543,9 +1545,9 @@ public class BenchmarkSpotFit implements PlugIn
 
 		for (int i = 0; i < stats[0].length; i++)
 		{
-			lower[i] = Maths.round(lower[i]);
-			upper[i] = Maths.round(upper[i]);
-			increment[i] = Maths.round(increment[i]);
+			lower[i] = MathUtils.round(lower[i]);
+			upper[i] = MathUtils.round(upper[i]);
+			increment[i] = MathUtils.round(increment[i]);
 			sb.append("\t").append(lower[i]).append('-').append(upper[i]);
 		}
 
@@ -1637,7 +1639,7 @@ public class BenchmarkSpotFit implements PlugIn
 		if (showFilterScoreHistograms)
 		{
 			median = d.getPercentile(50);
-			String label = String.format("n = %d. Median = %s nm", s1.getN(), Utils.rounded(median));
+			String label = String.format("n = %d. Median = %s nm", s1.getN(), MathUtils.rounded(median));
 			int id = Utils.showHistogram(TITLE, s1, xLabel, filterCriteria[i].minBinWidth,
 					(filterCriteria[i].restrictRange) ? 1 : 0, 0, label);
 			if (id == 0)
@@ -1687,26 +1689,26 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 
 		// Do cumulative histogram
-		double[][] h1 = Maths.cumulativeHistogram(s1.getValues(), true);
-		double[][] h2 = Maths.cumulativeHistogram(s2.getValues(), true);
-		double[][] h3 = Maths.cumulativeHistogram(s3.getValues(), true);
+		double[][] h1 = MathUtils.cumulativeHistogram(s1.getValues(), true);
+		double[][] h2 = MathUtils.cumulativeHistogram(s2.getValues(), true);
+		double[][] h3 = MathUtils.cumulativeHistogram(s3.getValues(), true);
 
 		if (showFilterScoreHistograms)
 		{
 			title = TITLE + " Cumul " + xLabel;
 			plot = new Plot2(title, xLabel, "Frequency");
 			// Find limits
-			double[] xlimit = Maths.limits(h1[0]);
-			xlimit = Maths.limits(xlimit, h2[0]);
-			xlimit = Maths.limits(xlimit, h3[0]);
+			double[] xlimit = MathUtils.limits(h1[0]);
+			xlimit = MathUtils.limits(xlimit, h2[0]);
+			xlimit = MathUtils.limits(xlimit, h3[0]);
 			// Restrict using the inter-quartile range 
 			if (filterCriteria[i].restrictRange)
 			{
 				double q1 = d.getPercentile(25);
 				double q2 = d.getPercentile(75);
 				double iqr = (q2 - q1) * 2.5;
-				xlimit[0] = Maths.max(xlimit[0], median - iqr);
-				xlimit[1] = Maths.min(xlimit[1], median + iqr);
+				xlimit[0] = MathUtils.max(xlimit[0], median - iqr);
+				xlimit[1] = MathUtils.min(xlimit[1], median + iqr);
 			}
 			plot.setLimits(xlimit[0], xlimit[1], 0, 1.05);
 			plot.addPoints(h1[0], h1[1], Plot.LINE);
@@ -1779,8 +1781,8 @@ public class BenchmarkSpotFit implements PlugIn
 					lower = LowerLimit.ONE_PERCENT;
 			}
 
-			//			System.out.printf("Bounds %s : %s, pos %s, neg %s, %s\n", xLabel, Utils.rounded(getPercentile(h2, 0.01)),
-			//					Utils.rounded(maxx1), Utils.rounded(maxx2), Utils.rounded(getPercentile(h1, 0.99)));
+			//			System.out.printf("Bounds %s : %s, pos %s, neg %s, %s\n", xLabel, MathUtils.rounded(getPercentile(h2, 0.01)),
+			//					MathUtils.rounded(maxx1), MathUtils.rounded(maxx2), MathUtils.rounded(getPercentile(h1, 0.99)));
 		}
 
 		if (showFilterScoreHistograms)
@@ -1788,8 +1790,8 @@ public class BenchmarkSpotFit implements PlugIn
 			// We use bins=1 on charts where we do not need a label
 			if (requireLabel)
 			{
-				String label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
-						Utils.rounded(max2), Utils.rounded(maxx2));
+				String label = String.format("Max+ %s @ %s, Max- %s @ %s", MathUtils.rounded(max1), MathUtils.rounded(maxx1),
+						MathUtils.rounded(max2), MathUtils.rounded(maxx2));
 				plot.setColor(Color.black);
 				plot.addLabel(0, 0, label);
 			}
@@ -1871,7 +1873,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private static void add(StringBuilder sb, double value)
 	{
-		add(sb, Utils.rounded(value));
+		add(sb, MathUtils.rounded(value));
 	}
 
 	private static void addCount(StringBuilder sb, double value)
@@ -1887,7 +1889,7 @@ public class BenchmarkSpotFit implements PlugIn
 			if (value > 100)
 				sb.append("\t").append(IJ.d2s(value));
 			else
-				add(sb, Utils.rounded(value));
+				add(sb, MathUtils.rounded(value));
 		}
 	}
 

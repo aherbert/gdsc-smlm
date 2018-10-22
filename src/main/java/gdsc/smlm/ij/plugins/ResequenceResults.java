@@ -13,11 +13,11 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.core.ij.IJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -59,7 +59,7 @@ public class ResequenceResults implements PlugIn
 			return;
 		}
 
-		if (resequenceResults(results, start, block, skip, (logMapping) ? new IJTrackProgress() : null))
+		if (resequenceResults(results, start, block, skip, (logMapping) ? new ImageJTrackProgress() : null))
 			IJ.showStatus("Resequenced " + results.getName());
 	}
 

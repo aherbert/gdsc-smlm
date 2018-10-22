@@ -12,9 +12,10 @@
  *---------------------------------------------------------------------------*/
 package gdsc.smlm.ij.plugins;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import gdsc.core.ij.ImageJAnalyticsTracker;
+import uk.ac.sussex.gdsc.core.ij.ImageJAnalyticsTracker;
 import gdsc.smlm.Version;
 import ij.plugin.PlugIn;
 
@@ -120,7 +121,7 @@ public class SMLMUsageTracker implements PlugIn
 				return;
 
 			mapInitialised = true;
-			ImageJAnalyticsTracker.buildPluginMap(map, SMLMTools.getPluginsConfig());
+			ImageJAnalyticsTracker.buildPluginMap(map, SMLMTools.getPluginsConfig(), StandardCharsets.UTF_8);
 		}
 	}
 

@@ -2,7 +2,7 @@ package gdsc.smlm.function.gaussian;
 
 import java.util.Arrays;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -12,8 +12,8 @@ import org.junit.Test;
 
 public abstract class Gaussian2DFunctionTest
 {
-	DoubleEquality eq = new DoubleEquality(2, 1e-3);
-	DoubleEquality eq2 = new DoubleEquality(5, 1e-8);
+    DoubleEquality eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(2), 1e-3);
+    DoubleEquality eq2 = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(5), 1e-8);
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
@@ -175,7 +175,7 @@ public abstract class Gaussian2DFunctionTest
 										double y1 = f1.eval(y * maxx + x, dyda);
 										double y2 = f1.eval(y * maxx + x);
 
-										Assert.assertTrue(y1 + " != " + y2, eq2.almostEqualComplement(y1, y2));
+										Assert.assertTrue(y1 + " != " + y2, eq2.almostEqualRelativeOrAbsolute(y1, y2));
 									}
 	}
 
@@ -276,7 +276,7 @@ public abstract class Gaussian2DFunctionTest
 										double gradient = (value2 - value3) / (2 * h);
 										//System.out.printf("%f == [%d] %f?\n", gradient, gradientIndex, dyda[gradientIndex]);
 										Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
-												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
+												eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]));
 									}
 							}
 	}
@@ -322,7 +322,7 @@ public abstract class Gaussian2DFunctionTest
 															double y2 = f2.eval(y * maxx + x);
 
 															Assert.assertTrue(y1 + " != " + y2,
-																	eq2.almostEqualComplement(y1, y2));
+																	eq2.almostEqualRelativeOrAbsolute(y1, y2));
 														}
 	}
 
@@ -467,7 +467,7 @@ public abstract class Gaussian2DFunctionTest
 
 															double gradient = (value2 - value3) / (2 * h);
 															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
-																	eq.almostEqualComplement(gradient,
+																	eq.almostEqualRelativeOrAbsolute(gradient,
 																			dyda[gradientIndex]));
 														}
 												}
@@ -507,7 +507,7 @@ public abstract class Gaussian2DFunctionTest
 									double r2 = f2.eval(index);
 									//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
 									sum += r1;
-									final boolean ok = eq2.almostEqualComplement(r1, r2);
+									final boolean ok = eq2.almostEqualRelativeOrAbsolute(r1, r2);
 									if (!ok)
 										Assert.assertTrue(
 												String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
@@ -515,7 +515,7 @@ public abstract class Gaussian2DFunctionTest
 								}
 
 								Assert.assertTrue(sum + " != " + amplitude1,
-										eq.almostEqualComplement((double) sum, amplitude1));
+										eq.almostEqualRelativeOrAbsolute(sum, amplitude1));
 							}
 		}
 		catch (AssertionError e)

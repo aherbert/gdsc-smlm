@@ -1,7 +1,7 @@
 package gdsc.smlm.model;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 import java.util.Arrays;
 
@@ -359,7 +359,7 @@ public class AiryPSFModel extends PSFModel
 
 		// Pre-compute the Airy intensity used for interpolation.
 		// Find the maximum distance from the centre to the edge of the image (normalised using the widths)
-		final double max = Maths.max(x0 / w0, x1 / w1, (x0range - x0) / w0, (x1range - x1) / w1);
+		final double max = MathUtils.max(x0 / w0, x1 / w1, (x0range - x0) / w0, (x1range - x1) / w1);
 		// Find the maximum distance needed to evaluate the Airy pattern
 		final double maxD = FastMath.min(RINGS[ring], Math.sqrt(2 * max * max));
 		// Limit the total samples used for interpolation but always sample at least every pixel:

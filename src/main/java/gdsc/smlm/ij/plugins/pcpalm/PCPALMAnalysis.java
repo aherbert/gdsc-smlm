@@ -33,10 +33,10 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_2D;
 import edu.emory.mathcs.jtransforms.fft.FloatFFT_2D;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.ImageWindow;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ImageWindow;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.plugins.SMLMUsageTracker;
@@ -46,10 +46,10 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
-import ij.process.FHT2;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
@@ -426,8 +426,8 @@ public class PCPALMAnalysis implements PlugInFilter
 		Roi roi = (imp == null) ? null : imp.getRoi();
 		if (roi == null || !roi.isArea())
 		{
-			log("Roi = %s nm x %s nm = %s um^2", Utils.rounded(pcw, 3), Utils.rounded(pch, 3),
-					Utils.rounded(croppedArea, 3));
+			log("Roi = %s nm x %s nm = %s um^2", MathUtils.rounded(pcw, 3), MathUtils.rounded(pch, 3),
+					MathUtils.rounded(croppedArea, 3));
 			minx = PCPALMMolecules.minx;
 			maxx = PCPALMMolecules.maxx;
 			miny = PCPALMMolecules.miny;
@@ -459,8 +459,8 @@ public class PCPALMAnalysis implements PlugInFilter
 			double fraction = (double) dist.getSize() / (roi.getMask().getWidth() * roi.getMask().getHeight());
 			log("Roi is a mask of %d pixels", dist.getSize());
 			croppedArea = fraction * roix * roiy / 1e6;
-			log("Roi area %s x %s nm x %s nm = %s um^2", Utils.rounded(fraction), Utils.rounded(roix, 3),
-					Utils.rounded(roiy, 3), Utils.rounded(croppedArea, 3));
+			log("Roi area %s x %s nm x %s nm = %s um^2", MathUtils.rounded(fraction), MathUtils.rounded(roix, 3),
+					MathUtils.rounded(roiy, 3), MathUtils.rounded(croppedArea, 3));
 
 			double[] xyz = new double[3];
 			// The mask is 0,0 in the centre so offset by this as well
@@ -477,8 +477,8 @@ public class PCPALMAnalysis implements PlugInFilter
 		else
 		{
 			croppedArea = roix * roiy / 1e6;
-			log("Roi = %s nm x %s nm = %s um^2", Utils.rounded(roix, 3), Utils.rounded(roiy, 3),
-					Utils.rounded(croppedArea, 3));
+			log("Roi = %s nm x %s nm = %s um^2", MathUtils.rounded(roix, 3), MathUtils.rounded(roiy, 3),
+					MathUtils.rounded(croppedArea, 3));
 
 			for (Molecule m : PCPALMMolecules.molecules)
 			{
@@ -584,8 +584,8 @@ public class PCPALMAnalysis implements PlugInFilter
 			if (boundaryMaxx <= boundaryMinx || boundaryMaxy <= boundaryMiny)
 			{
 				log("ERROR: 'Use border' option of %s nm is not possible: Width = %s nm, Height = %s nm",
-						Utils.rounded(correlationDistance, 4), Utils.rounded(maxx - minx, 3),
-						Utils.rounded(maxy - miny, 3));
+						MathUtils.rounded(correlationDistance, 4), MathUtils.rounded(maxx - minx, 3),
+						MathUtils.rounded(maxy - miny, 3));
 				return;
 			}
 			else
@@ -750,14 +750,14 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		log("%s domain analysis computed in %s ms", (spatialDomain) ? "Spatial" : "Frequency",
-				Utils.rounded((System.nanoTime() - start) * 1e-6, 4));
+				MathUtils.rounded((System.nanoTime() - start) * 1e-6, 4));
 		log("---");
 	}
 
 	private ImageProcessor applyWindow(ImageProcessor im, ImageWindow imageWindow)
 	{
 		float[] image = (float[]) im.toFloat(0, null).getPixels();
-		image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(), ImageWindow.WindowFunction.TUKEY);
+		image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(), ImageWindow.WindowMethod.TUKEY);
 		return new FloatProcessor(im.getWidth(), im.getHeight(), image, null);
 	}
 
@@ -770,7 +770,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		System.arraycopy(gr[1], offset, y, 0, y.length);
 
 		Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle);
-		plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
+		plot.setLimits(0, x[x.length - 1], MathUtils.min(y) * 0.95, MathUtils.max(y) * 1.05);
 		plot.addPoints(x, y, (barChart) ? Plot2.BAR : Plot.LINE);
 		
 		Utils.display(plotTitle, plot);
@@ -845,17 +845,17 @@ public class PCPALMAnalysis implements PlugInFilter
 			double nmPerPixel, double density)
 	{
 		log("Creating Hartley transforms");
-		FHT2 fht2Im = padToFHT2(im);
-		FHT2 fht2W = padToFHT2(w);
-		if (fht2Im == null || fht2W == null)
+		Fht FhtIm = padToFht(im);
+		Fht FhtW = padToFht(w);
+		if (FhtIm == null || FhtW == null)
 		{
 			error("Unable to perform Hartley transform");
 			return null;
 		}
 
 		log("Performing correlation");
-		FloatProcessor corrIm = computeAutoCorrelationFHT(fht2Im);
-		FloatProcessor corrW = computeAutoCorrelationFHT(fht2W);
+		FloatProcessor corrIm = computeAutoCorrelationFHT(FhtIm);
+		FloatProcessor corrW = computeAutoCorrelationFHT(FhtW);
 
 		IJ.showProgress(1);
 
@@ -1033,12 +1033,12 @@ public class PCPALMAnalysis implements PlugInFilter
 	 *            in frequency domain
 	 * @return
 	 */
-	private FloatProcessor computeAutoCorrelationFHT(FHT2 fftIm)
+	private FloatProcessor computeAutoCorrelationFHT(Fht fftIm)
 	{
-		FHT2 FHT2 = fftIm.conjugateMultiply(fftIm);
-		FHT2.inverseTransform();
-		FHT2.swapQuadrants();
-		return FHT2;
+		Fht Fht = fftIm.conjugateMultiply(fftIm);
+		Fht.inverseTransform();
+		Fht.swapQuadrants();
+		return Fht;
 	}
 
 	private FloatProcessor normaliseCorrelation(FloatProcessor corrIm, FloatProcessor corrW, double density)
@@ -1062,17 +1062,16 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * Pads the image to the next power of two and transforms into the frequency domain
 	 * 
 	 * @param ip
-	 * @return An FHT2 image in the frequency domain
+	 * @return An Fht image in the frequency domain
 	 */
-	private FHT2 padToFHT2(ImageProcessor ip)
+	private Fht padToFht(ImageProcessor ip)
 	{
 		FloatProcessor im2 = pad(ip);
 		if (im2 == null)
 			return null;
-		FHT2 FHT2 = new FHT2(im2);
-		FHT2.setShowProgress(false);
-		FHT2.transform();
-		return FHT2;
+		Fht fht = new Fht(im2);
+		fht.transform();
+		return fht;
 	}
 
 	/**
@@ -1191,7 +1190,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		// Swap quadrants
 		FloatProcessor fp = new FloatProcessor(size, size, correlation, null);
-		new FHT2().swapQuadrants(fp);
+		Fht.swapQuadrants(fp);
 		return fp;
 	}
 
@@ -1222,9 +1221,9 @@ public class PCPALMAnalysis implements PlugInFilter
 		sb.append(IJ.d2s((maxx - minx) / pcw)).append("\t");
 		sb.append(IJ.d2s(maxy - miny)).append("\t");
 		sb.append(IJ.d2s((maxy - miny) / pch)).append("\t");
-		sb.append(Utils.rounded(uniquePoints, 4)).append("\t");
-		sb.append(Utils.rounded(peakDensity, 4)).append("\t");
-		sb.append(Utils.rounded(nmPerPixel, 4)).append("\t");
+		sb.append(MathUtils.rounded(uniquePoints, 4)).append("\t");
+		sb.append(MathUtils.rounded(peakDensity, 4)).append("\t");
+		sb.append(MathUtils.rounded(nmPerPixel, 4)).append("\t");
 		sb.append(binaryImage).append("\t");
 		resultsTable.append(sb.toString());
 	}

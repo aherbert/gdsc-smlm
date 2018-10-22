@@ -16,7 +16,7 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -262,7 +262,7 @@ public class PSFCombiner implements PlugIn
 				XmlUtils.toXML(new PSFSettings(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
-				imp.getSlice(), Utils.rounded(nmPerPixel), Utils.rounded(nmPerSlice), totalImages, Utils.rounded(fwhm));
+				imp.getSlice(), MathUtils.rounded(nmPerPixel), MathUtils.rounded(nmPerSlice), totalImages, MathUtils.rounded(fwhm));
 	}
 
 	private double getNmPerPixel()

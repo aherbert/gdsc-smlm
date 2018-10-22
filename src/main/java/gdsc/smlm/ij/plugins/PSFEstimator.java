@@ -30,20 +30,20 @@ import gdsc.smlm.ij.settings.PSFEstimatorSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.InterlacedImageSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
-import gdsc.core.utils.Random;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
-import ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
@@ -725,7 +725,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 					continue;
 				StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
 				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins, "Mean = " +
-						Utils.rounded(stats.getMean()) + ". Median = " + Utils.rounded(sampleNew[ii].getPercentile(50)));
+						MathUtils.rounded(stats.getMean()) + ". Median = " + MathUtils.rounded(sampleNew[ii].getPercentile(50)));
 				requireRetile = requireRetile || Utils.isNewWindow();
 			}
 			if (requireRetile && count > 0)

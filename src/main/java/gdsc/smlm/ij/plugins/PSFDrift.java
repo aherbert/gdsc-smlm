@@ -27,21 +27,21 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFOffset;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.model.ImagePSFModel;
 import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -690,7 +690,7 @@ public class PSFDrift implements PlugIn
 		startSlice = psfSettings.zCentre - (centre - start);
 		endSlice = psfSettings.zCentre + (end - centre);
 		gd.addMessage(String.format("Save the drift to the PSF?\n \nSlices %d (%s nm) - %d (%s nm) above recall limit",
-				startSlice, Utils.rounded(zPosition[start]), endSlice, Utils.rounded(zPosition[end])));
+				startSlice, MathUtils.rounded(zPosition[start]), endSlice, MathUtils.rounded(zPosition[end])));
 		gd.addMessage("Optionally average the end points to set drift outside the limits.\n(Select zero to ignore)");
 		gd.addSlider("Number_of_points", 0, 10, positionsToAverage);
 		gd.showDialog();
@@ -811,7 +811,7 @@ public class PSFDrift implements PlugIn
 
 		title = TITLE + " " + title;
 		Plot2 plot = new Plot2(title, "z (nm)", yLabel);
-		double[] limitsx = Maths.limits(x);
+		double[] limitsx = MathUtils.limits(x);
 		double[] limitsy = new double[2];
 		if (se != null)
 		{
@@ -820,15 +820,15 @@ public class PSFDrift implements PlugIn
 				limitsy = new double[] { newY[0] - se[0], newY[0] + se[0] };
 				for (int i = 1; i < newY.length; i++)
 				{
-					limitsy[0] = Maths.min(limitsy[0], newY[i] - se[i]);
-					limitsy[1] = Maths.max(limitsy[1], newY[i] + se[i]);
+					limitsy[0] = MathUtils.min(limitsy[0], newY[i] - se[i]);
+					limitsy[1] = MathUtils.max(limitsy[1], newY[i] + se[i]);
 				}
 			}
 		}
 		else
 		{
 			if (c > 0)
-				limitsy = Maths.limits(newY);
+				limitsy = MathUtils.limits(newY);
 		}
 		double rangex = Math.max(0.05 * (limitsx[1] - limitsx[0]), 0.1);
 		double rangey = Math.max(0.05 * (limitsy[1] - limitsy[0]), 0.1);
@@ -1093,13 +1093,13 @@ public class PSFDrift implements PlugIn
 		
 		double[] w0 = psf.getAllHWHM0();
 		double[] w1 = psf.getAllHWHM1();
-		double[] slice = Utils.newArray(w0.length, 1, 1.0);
+		double[] slice = SimpleArrayUtils.newArray(w0.length, 1, 1.0);
 		
 		// Widths are in pixels
 		String title = TITLE + " HWHM";
 		Plot plot = new Plot(title, "Slice", "HWHM (px)");
-		double[] limits = Maths.limits(w0);
-		limits = Maths.limits(limits, w1);
+		double[] limits = MathUtils.limits(w0);
+		limits = MathUtils.limits(limits, w1);
 		plot.setLimits(1, size, 0, limits[1] * 1.05);
 		plot.setColor(Color.red);
 		plot.addPoints(slice, w0, Plot.LINE);

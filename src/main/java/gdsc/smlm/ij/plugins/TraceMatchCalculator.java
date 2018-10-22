@@ -16,12 +16,12 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.MatchResult;
-import gdsc.core.match.PointPair;
-import gdsc.core.match.Pulse;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.match.Coordinate;
+import uk.ac.sussex.gdsc.core.match.MatchCalculator;
+import uk.ac.sussex.gdsc.core.match.MatchResult;
+import uk.ac.sussex.gdsc.core.match.PointPair;
+import uk.ac.sussex.gdsc.core.match.Pulse;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -93,7 +93,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		compareCoordinates(results1, results2, results3, dThreshold);
 		double seconds = (System.nanoTime() - start) / 1000000000.0;
 
-		IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
+		IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
 	}
 
 	private boolean showDialog()
@@ -325,7 +325,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		sb.append(result.getFalsePositives()).append("\t");
 		sb.append(result.getFalseNegatives()).append("\t");
 		sb.append(IJ.d2s(result.getJaccard(), 4)).append("\t");
-		sb.append(IJ.d2s(result.getRMSD(), 4)).append("\t");
+		sb.append(IJ.d2s(result.getRmsd(), 4)).append("\t");
 		sb.append(IJ.d2s(result.getPrecision(), 4)).append("\t");
 		sb.append(IJ.d2s(result.getRecall(), 4)).append("\t");
 		sb.append(IJ.d2s(result.getFScore(0.5), 4)).append("\t");
@@ -453,13 +453,13 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		addPoint(sb, p2);
 		PointPair pair = new PointPair(p1, p2);
-		double d = pair.getXYDistance();
+		double d = pair.getXyDistance();
 		if (d >= 0)
-			sb.append(Utils.rounded(d, 4)).append("\t");
+			sb.append(MathUtils.rounded(d, 4)).append("\t");
 		else
 			sb.append("-\t");
 		if (p1 != null && p2 != null)
-			sb.append(Utils.rounded(p1.score(p2, d * d, dThreshold), 4)).append("\t");
+			sb.append(MathUtils.rounded(p1.score(p2, d * d, dThreshold), 4)).append("\t");
 		else
 			sb.append("-\t");
 	}

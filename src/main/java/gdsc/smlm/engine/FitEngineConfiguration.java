@@ -17,8 +17,8 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.utils.NoiseEstimator;
-import gdsc.core.utils.NoiseEstimator.Method;
+import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
+import uk.ac.sussex.gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.CircularMeanDataProcessor;

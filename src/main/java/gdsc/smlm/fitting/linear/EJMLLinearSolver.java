@@ -3,7 +3,7 @@ package gdsc.smlm.fitting.linear;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
 import org.ejml.data.DenseMatrix64F;
@@ -302,7 +302,7 @@ public class EJMLLinearSolver
 			// Used for debugging
 			//DenseMatrix64F b2 = new DenseMatrix64F(size, 1);
 			//CommonOps.mult(A, x, b2);
-			//return equal.almostEqualComplement(b.data, b2.data);
+			//return equal.almostEqualRelativeOrAbsolute(b.data, b2.data);
 
 			for (int i = 0, index = 0; i < b.numRows; i++)
 			{
@@ -311,7 +311,7 @@ public class EJMLLinearSolver
 				{
 					bi += A.data[index++] * x.data[j];
 				}
-				if (!equal.almostEqualComplement(b.data[i], bi))
+				if (!equal.almostEqualRelativeOrAbsolute(b.data[i], bi))
 				{
 					//System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi, 
 					//		equal.relativeError(b.data[i], bi), equal.complement(b.data[i], bi));

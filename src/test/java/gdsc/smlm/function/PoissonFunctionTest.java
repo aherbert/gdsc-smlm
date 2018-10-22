@@ -6,7 +6,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 public class PoissonFunctionTest
 {

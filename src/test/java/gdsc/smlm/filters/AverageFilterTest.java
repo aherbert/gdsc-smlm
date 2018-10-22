@@ -1,6 +1,6 @@
 package gdsc.smlm.filters;
 
-import gdsc.core.utils.FloatEquality;
+import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.filters.AverageFilter;
 
@@ -13,7 +13,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 public class AverageFilterTest
 {
-	private gdsc.core.utils.Random rand;
+	private uk.ac.sussex.gdsc.core.utils.Random rand;
 
 	private boolean debug = false;
 	private int InternalITER3 = 500;
@@ -131,7 +131,7 @@ public class AverageFilterTest
 	private void averageIsCorrect(int width, int height, float boxSize, boolean internal, DataFilter filter)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
 		float[] data1 = createData(width, height);
 		float[] data2 = data1.clone();
 
@@ -275,7 +275,7 @@ public class AverageFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -357,7 +357,7 @@ public class AverageFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 
 /**
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in gdsc/smlm/plugins.config. Also add these

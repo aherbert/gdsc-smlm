@@ -27,11 +27,11 @@ import javax.swing.JFileChooser;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.ij.IJLogger;
-import gdsc.core.ij.Utils;
-import gdsc.core.logging.Logger;
-import gdsc.core.utils.NoiseEstimator.Method;
-import gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJLogger;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.NoiseEstimator.Method;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -104,8 +104,8 @@ import ij.gui.YesNoCancelDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
-import ij.process.LUTHelper;
-import ij.process.LUTHelper.LutColour;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 
 //import ij.io.OpenDialog;
 
@@ -370,7 +370,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					// TODO - Find out why XStream does not serialise the inherited name field in 
 					// all ImageSource subclasses. Thjs means that some of the ImageSource details
 					// are missing
-					if (!Utils.isNullOrEmpty(tmpImageSource.getName()))
+					if (!TextUtils.isNullOrEmpty(tmpImageSource.getName()))
 						message += " of: \n \n" + tmpImageSource.getName();
 					message += " \n \nFit the parent?";
 				}
@@ -653,7 +653,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			String textRunTime = Utils.timeToString(runTime / 1000000.0);
 
 			int size = getSize();
-			String message = String.format("%s. Fitting Time = %s. Run time = %s", Utils.pleural(size, "localisation"),
+			String message = String.format("%s. Fitting Time = %s. Run time = %s", TextUtils.pleural(size, "localisation"),
 					textTime, textRunTime);
 			if (resultsSettings.logProgress)
 				IJ.log("-=-=-=-");
@@ -1145,10 +1145,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		IJ.log("-=-=-=-");
 		IJ.log("Peak Fit");
 		IJ.log("-=-=-=-");
-		Utils.log("Pixel pitch = %s", Utils.rounded(calibration.nmPerPixel, 4));
-		Utils.log("Exposure Time = %s", Utils.rounded(calibration.exposureTime, 4));
-		Utils.log("Gain = %s", Utils.rounded(calibration.gain, 4));
-		Utils.log("PSF width = %s", Utils.rounded(fitConfig.getInitialPeakStdDev0(), 4));
+		Utils.log("Pixel pitch = %s", MathUtils.rounded(calibration.nmPerPixel, 4));
+		Utils.log("Exposure Time = %s", MathUtils.rounded(calibration.exposureTime, 4));
+		Utils.log("Gain = %s", MathUtils.rounded(calibration.gain, 4));
+		Utils.log("PSF width = %s", MathUtils.rounded(fitConfig.getInitialPeakStdDev0(), 4));
 
 		// Save
 		settings.setFitEngineConfiguration(config);
@@ -1326,7 +1326,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			{
 				String notes = template.getNotes();
 				IJ.log("Applying template: " + templateName);
-				if (!Utils.isNullOrEmpty(notes))
+				if (!TextUtils.isNullOrEmpty(notes))
 					IJ.log(notes);
 
 				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
@@ -1975,13 +1975,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (!gd.wasOKed())
 				return;
 
-			LUT lut = LUTHelper.createLUT(LutColour.ICE);
+			LUT lut = LutHelper.createLut(LutColour.ICE);
 			Overlay o = new Overlay();
 			for (int i = 0, j=results.size()-1; i < results.size(); i++, j--)
 			{
 				PeakResult r = results.getResults().get(i);
 				PointRoi roi = new PointRoi(r.getXPosition(), r.getYPosition());
-				Color c = LUTHelper.getColour(lut, j, results.size());
+				Color c = LutHelper.getColour(lut, j, results.size());
 				roi.setStrokeColor(c);
 				roi.setFillColor(c);
 				if (imp.getStackSize() > 1)
@@ -2221,17 +2221,17 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			IJ.log("-=-=-=-");
 			IJ.log("Peak Fit");
 			IJ.log("-=-=-=-");
-			Utils.log("Initial Peak SD = %s,%s", Utils.rounded(fitConfig.getInitialPeakStdDev0()),
-					Utils.rounded(fitConfig.getInitialPeakStdDev1()));
+			Utils.log("Initial Peak SD = %s,%s", MathUtils.rounded(fitConfig.getInitialPeakStdDev0()),
+					MathUtils.rounded(fitConfig.getInitialPeakStdDev1()));
 			SpotFilter spotFilter = engine.getSpotFilter();
 			IJ.log("Spot Filter = " + spotFilter.getDescription());
 			int w = 2 * engine.getFitting() + 1;
 			Utils.log("Fit window = %d x %d", w, w);
-			IJ.log("Coordinate shift = " + Utils.rounded(config.getFitConfiguration().getCoordinateShift()));
-			IJ.log("Signal strength = " + Utils.rounded(fitConfig.getSignalStrength()));
+			IJ.log("Coordinate shift = " + MathUtils.rounded(config.getFitConfiguration().getCoordinateShift()));
+			IJ.log("Signal strength = " + MathUtils.rounded(fitConfig.getSignalStrength()));
 			if (extraOptions)
-				IJ.log("Noise = " + Utils.rounded(fitConfig.getNoise()));
-			IJ.log("Width factor = " + Utils.rounded(fitConfig.getWidthFactor()));
+				IJ.log("Noise = " + MathUtils.rounded(fitConfig.getNoise()));
+			IJ.log("Width factor = " + MathUtils.rounded(fitConfig.getWidthFactor()));
 			IJ.log("-=-=-=-");
 		}
 
@@ -2249,7 +2249,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		// Adjust the settings that are relevant within the fitting configuration. 
 		fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
-		logger = (resultsSettings.logProgress) ? new IJLogger() : null;
+		logger = (resultsSettings.logProgress) ? new ImageJLogger() : null;
 		fitConfig.setLog(logger);
 
 		fitConfig.setComputeDeviations(resultsSettings.showDeviations);

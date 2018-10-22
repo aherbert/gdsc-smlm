@@ -7,7 +7,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 /**
  * Extend the XML Utilities using XStream
  */
-public class XmlUtils extends gdsc.core.utils.XmlUtils
+public class XmlUtils extends uk.ac.sussex.gdsc.core.utils.XmlUtils
 {
 	private static XStream xs = null;
 

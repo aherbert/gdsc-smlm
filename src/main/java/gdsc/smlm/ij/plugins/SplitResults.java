@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.ObjectAnalyzer;
-import gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -94,7 +94,7 @@ public class SplitResults implements PlugIn
 
 	private void splitResults(MemoryPeakResults results, ImageProcessor ip)
 	{
-		IJ.showStatus("Splitting " + Utils.pleural(results.size(), "result"));
+		IJ.showStatus("Splitting " + TextUtils.pleural(results.size(), "result"));
 
 		// Create an object mask
 		ObjectAnalyzer objectAnalyzer = new ObjectAnalyzer(ip, false);
@@ -169,6 +169,6 @@ public class SplitResults implements PlugIn
 			}
 		}
 
-		IJ.showStatus("Split " + Utils.pleural(results.size(), "result") + " into " + Utils.pleural(i, "set"));
+		IJ.showStatus("Split " + TextUtils.pleural(results.size(), "result") + " into " + TextUtils.pleural(i, "set"));
 	}
 }

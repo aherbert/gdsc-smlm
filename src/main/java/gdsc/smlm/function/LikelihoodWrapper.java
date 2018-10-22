@@ -2,7 +2,7 @@ package gdsc.smlm.function;
 
 import java.util.Arrays;
 
-import gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood

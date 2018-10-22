@@ -14,10 +14,10 @@ import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.apache.commons.math3.util.MathArrays;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -38,7 +38,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
@@ -400,7 +400,7 @@ public class MeanVarianceTest implements PlugIn
 					sb.append(IJ.d2s(pair.mean2, 2)).append("\t");
 					sb.append(IJ.d2s(mean[j], 2)).append("\t");
 					sb.append(IJ.d2s(variance[j], 2)).append("\t");
-					sb.append(Utils.rounded(gain, 4)).append("\n");
+					sb.append(MathUtils.rounded(gain, 4)).append("\n");
 				}
 				j++;
 			}
@@ -424,13 +424,13 @@ public class MeanVarianceTest implements PlugIn
 			{
 				// Plot the gain over time
 				String title = TITLE + " Gain vs Frame";
-				Plot2 plot = new Plot2(title, "Slice", "Gain", Utils.newArray(gainStats.getN(), 1, 1.0),
+				Plot2 plot = new Plot2(title, "Slice", "Gain", SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0),
 						stats.getValues());
 				PlotWindow pw = Utils.display(title, plot);
 
 				// Show a histogram
-				String label = String.format("Mean = %s, Median = %s", Utils.rounded(stats.getMean()),
-						Utils.rounded(stats.getMedian()));
+				String label = String.format("Mean = %s, Median = %s", MathUtils.rounded(stats.getMean()),
+						MathUtils.rounded(stats.getMedian()));
 				int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
 				if (Utils.isNewWindow())
 				{
@@ -448,14 +448,14 @@ public class MeanVarianceTest implements PlugIn
 			{
 				final double totalGain = gain;
 				final double emGain = totalGain / cameraGain;
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(cameraGain, 4));
-				Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
-				Utils.log("  Total Gain = %s (ADU/e-)", Utils.rounded(totalGain, 4));
+				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(cameraGain, 4));
+				Utils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
+				Utils.log("  Total Gain = %s (ADU/e-)", MathUtils.rounded(totalGain, 4));
 			}
 			else
 			{
 				cameraGain = gain;
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(cameraGain, 4));
+				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(cameraGain, 4));
 			}
 		}
 		else
@@ -480,8 +480,8 @@ public class MeanVarianceTest implements PlugIn
 				// Plot mean verses variance. Gradient is gain in ADU/e.
 				String title = TITLE + " results";
 				Plot2 plot = new Plot2(title, "Mean", "Variance");
-				double[] xlimits = Maths.limits(mean);
-				double[] ylimits = Maths.limits(variance);
+				double[] xlimits = MathUtils.limits(mean);
+				double[] ylimits = MathUtils.limits(variance);
 				double xrange = (xlimits[1] - xlimits[0]) * 0.05;
 				if (xrange == 0)
 					xrange = 0.05;
@@ -501,30 +501,30 @@ public class MeanVarianceTest implements PlugIn
 
 			Utils.log(TITLE);
 			Utils.log("  Directory = %s", inputDirectory);
-			Utils.log("  Bias = %s +/- %s (ADU)", Utils.rounded(bias, 4), Utils.rounded(avBiasNoise, 4));
-			Utils.log("  Variance = %s + %s * mean", Utils.rounded(best[0], 4), Utils.rounded(best[1], 4));
+			Utils.log("  Bias = %s +/- %s (ADU)", MathUtils.rounded(bias, 4), MathUtils.rounded(avBiasNoise, 4));
+			Utils.log("  Variance = %s + %s * mean", MathUtils.rounded(best[0], 4), MathUtils.rounded(best[1], 4));
 			if (emMode)
 			{
 				final double emGain = best[1] / (2 * cameraGain);
 
 				// Noise is standard deviation of the bias image divided by the total gain (in ADU/e-)
 				final double totalGain = emGain * cameraGain;
-				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(avBiasNoise / totalGain, 4),
-						Utils.rounded(avBiasNoise, 4));
+				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", MathUtils.rounded(avBiasNoise / totalGain, 4),
+						MathUtils.rounded(avBiasNoise, 4));
 
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
-				Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
-				Utils.log("  Total Gain = %s (ADU/e-)", Utils.rounded(totalGain, 4));
+				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(1 / cameraGain, 4));
+				Utils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
+				Utils.log("  Total Gain = %s (ADU/e-)", MathUtils.rounded(totalGain, 4));
 			}
 			else
 			{
 				// Noise is standard deviation of the bias image divided by the gain (in ADU/e-)
 				cameraGain = best[1];
 				final double readNoise = avBiasNoise / cameraGain;
-				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(readNoise, 4),
-						Utils.rounded(readNoise * cameraGain, 4));
+				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", MathUtils.rounded(readNoise, 4),
+						MathUtils.rounded(readNoise * cameraGain, 4));
 
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
+				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(1 / cameraGain, 4));
 			}
 		}
 		IJ.showStatus("");

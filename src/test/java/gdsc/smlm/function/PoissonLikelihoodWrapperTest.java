@@ -9,8 +9,8 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
@@ -21,8 +21,8 @@ public class PoissonLikelihoodWrapperTest
 	// Set this at the range output from cumulativeProbabilityIsOneWithIntegerData
 	int[] maxRange = { 6, 7, 10, 13, 17, 29, 149, 1141 };
 
-	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
-	DoubleEquality eq = new DoubleEquality(3, 0.001);
+	DoubleEquality eqPerDatum = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(2), 0.01);
+	DoubleEquality eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(3), 0.001);
 
 	String[] NAME = { "BACKGROUND", "SIGNAL", "ANGLE", "X_POSITION", "Y_POSITION", "X_SD", "Y_SD" };
 
@@ -223,7 +223,7 @@ public class PoissonLikelihoodWrapperTest
 										if (!ok)
 											Assert.assertTrue(NAME[targetParameter] + ": " + gradient + " != " +
 													dyda[gradientIndex], ok);
-										ok = eqPerDatum.almostEqualComplement(gradient, dyda[gradientIndex]);
+										ok = eqPerDatum.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 										if (ok)
 											count++;
 										total++;
@@ -410,7 +410,7 @@ public class PoissonLikelihoodWrapperTest
 								if (!ok)
 									Assert.assertTrue(
 											NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex], ok);
-								ok = eq.almostEqualComplement(gradient, dyda[gradientIndex]);
+								ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 								if (ok)
 									count++;
 								total++;
@@ -549,7 +549,7 @@ public class PoissonLikelihoodWrapperTest
 		int n = (int) Math.ceil(limit / alpha);
 
 		// Evaluate all values from zero to large n
-		double[] k = Utils.newArray(n, 0, 1.0);
+		double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
 		double[] a = new double[0];
 		double[] g = new double[0];
 

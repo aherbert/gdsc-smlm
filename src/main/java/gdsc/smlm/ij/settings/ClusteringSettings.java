@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.settings;
 
-import gdsc.core.clustering.ClusteringAlgorithm;
+import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.TraceManager.TraceMode;
 
