@@ -610,8 +610,8 @@ public class ResultsManager implements PlugIn {
       if (extraOptions) {
         Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -1375,9 +1375,9 @@ public class ResultsManager implements PlugIn {
         }
       }
       reader.setOptions(options);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // This can occur if the options are not valid
-      IJ.log(TITLE + ": Failed to configure reader options: " + e.getMessage());
+      IJ.log(TITLE + ": Failed to configure reader options: " + ex.getMessage());
     }
   }
 
@@ -1573,7 +1573,7 @@ public class ResultsManager implements PlugIn {
           omDirectory = fc.getCurrentDirectory().getPath() + File.separator;
         }
       });
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore
     }
     if (omDirectory == null) {
@@ -1671,7 +1671,7 @@ public class ResultsManager implements PlugIn {
           source.getName() + ".results."
               + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat()))
                   .getCanonicalPath();
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       return false;
     }
     PeakResults r;

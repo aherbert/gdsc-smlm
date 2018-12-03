@@ -340,9 +340,9 @@ public class BinomialFitter {
             if (solution == null || result.getValue() < solution.getValue()) {
               solution = result;
             }
-          } catch (final TooManyEvaluationsException e) {
+          } catch (final TooManyEvaluationsException ex) {
             // No solution
-          } catch (final TooManyIterationsException e) {
+          } catch (final TooManyIterationsException ex) {
             // No solution
           }
           if (solution == null) {
@@ -358,9 +358,9 @@ public class BinomialFitter {
             if (result.getValue() < solution.getValue()) {
               solution = result;
             }
-          } catch (final TooManyEvaluationsException e) {
+          } catch (final TooManyEvaluationsException ex) {
             // No solution
-          } catch (final TooManyIterationsException e) {
+          } catch (final TooManyIterationsException ex) {
             // No solution
           }
         }
@@ -426,18 +426,18 @@ public class BinomialFitter {
               return new PointValuePair(lvmSolution.getPoint().toArray(), ss);
             }
           }
-        } catch (final TooManyIterationsException e) {
-          log("Failed to re-fit: Too many iterations: %s", e.getMessage());
-        } catch (final ConvergenceException e) {
-          log("Failed to re-fit: %s", e.getMessage());
-        } catch (final Exception e) {
+        } catch (final TooManyIterationsException ex) {
+          log("Failed to re-fit: Too many iterations: %s", ex.getMessage());
+        } catch (final ConvergenceException ex) {
+          log("Failed to re-fit: %s", ex.getMessage());
+        } catch (final Exception ex) {
           // Ignore this ...
         }
       }
 
       return solution;
-    } catch (final Exception e) {
-      log("Failed to fit Binomial distribution with N=%d : %s", n, e.getMessage());
+    } catch (final Exception ex) {
+      log("Failed to fit Binomial distribution with N=%d : %s", n, ex.getMessage());
     }
     return null;
   }

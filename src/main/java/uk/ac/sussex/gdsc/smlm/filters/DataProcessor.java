@@ -87,7 +87,7 @@ public abstract class DataProcessor implements Cloneable {
   public DataProcessor clone() {
     try {
       return (DataProcessor) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

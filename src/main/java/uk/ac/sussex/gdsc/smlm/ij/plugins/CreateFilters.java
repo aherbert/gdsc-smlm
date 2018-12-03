@@ -125,8 +125,8 @@ public class CreateFilters implements PlugIn, ItemListener {
       } else {
         IJ.error(TITLE, "No filters created");
       }
-    } catch (final Exception e) {
-      IJ.error(TITLE, "Unable to load the input XML:\n" + e.getMessage());
+    } catch (final Exception ex) {
+      IJ.error(TITLE, "Unable to load the input XML:\n" + ex.getMessage());
       IJ.showStatus("");
     }
   }
@@ -157,8 +157,8 @@ public class CreateFilters implements PlugIn, ItemListener {
           if (min.compareTo(max) > 0 || inc.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Invalid 'min:max:increment' attribute: " + token);
           }
-        } catch (final NumberFormatException e) {
-          throw new RuntimeException("Invalid 'min:max:increment' attribute: " + token, e);
+        } catch (final NumberFormatException ex) {
+          throw new RuntimeException("Invalid 'min:max:increment' attribute: " + token, ex);
         }
         final String suffix = "\"" + match.group(5);
 
@@ -235,8 +235,8 @@ public class CreateFilters implements PlugIn, ItemListener {
         out.write(uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(sw.toString()));
         SettingsManager.writeSettings(filterSettings.build());
         IJ.showStatus(total + " filters: " + filterSettings.getFilterSetFilename());
-      } catch (final Exception e) {
-        IJ.log("Unable to save the filter sets to file: " + e.getMessage());
+      } catch (final Exception ex) {
+        IJ.log("Unable to save the filter sets to file: " + ex.getMessage());
       }
     }
   }
@@ -324,8 +324,8 @@ public class CreateFilters implements PlugIn, ItemListener {
         final SAXParser saxParser = factory.newSAXParser();
         saxParser.parse(new InputSource(new StringReader(xml)),
             new AttributeSubstitutionHandler(sb, attributeSubstitutions));
-      } catch (final Exception e) {
-        e.printStackTrace();
+      } catch (final Exception ex) {
+        ex.printStackTrace();
       }
 
       // IJ.log(xml);

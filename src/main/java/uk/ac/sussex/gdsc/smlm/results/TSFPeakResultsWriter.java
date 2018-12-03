@@ -106,7 +106,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     try {
       ia = PSFHelper.getGaussian2DAngleIndex(getPSF());
       fitMode = FitMode.TWOAXISANDTHETA;
-    } catch (final ConfigurationException e) {
+    } catch (final ConfigurationException ex) {
       // This is not an angled PSF. Revert to 1/2 axis:
       fitMode = (isx == isy) ? FitMode.ONEAXIS : FitMode.TWOAXIS;
     }
@@ -114,9 +114,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     id = new AtomicInteger();
     try {
       out = new FileOutputStream(filename);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       System.err.println("Failed to write open TSF file: " + filename);
-      e.printStackTrace();
+      ex.printStackTrace();
       closeOutput();
       return;
     }
@@ -126,9 +126,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
       final DataOutputStream dos = new DataOutputStream(out);
       dos.writeInt(0);
       dos.writeLong(0);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       System.err.println("Failed to write TSF offset fields");
-      e.printStackTrace();
+      ex.printStackTrace();
       closeOutput();
     }
   }
@@ -140,7 +140,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
 
     try {
       out.close();
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore exception
     } finally {
       out = null;
@@ -367,7 +367,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
       for (int i = 0; i < count; i++) {
         spots[i].writeDelimitedTo(out);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       System.err.println("Failed to write Spot message");
       closeOutput();
     }
@@ -426,10 +426,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
       // magic number (4 bytes) and long offset (8 bytes)
       // out.flush();
       offset = out.getChannel().position() - 12;
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // This is bad.
       System.err.println("Failed to determine offset for SpotList message");
-      e.printStackTrace();
+      ex.printStackTrace();
       closeOutput();
       return;
     }
@@ -508,9 +508,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
       try {
         final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
         builder.setPSF(printer.print(getPSF()));
-      } catch (final InvalidProtocolBufferException e) {
+      } catch (final InvalidProtocolBufferException ex) {
         // This shouldn't happen so throw it
-        throw new NotImplementedException("Unable to serialise the PSF settings", e);
+        throw new NotImplementedException("Unable to serialise the PSF settings", ex);
       }
     }
 
@@ -530,9 +530,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     final SpotList spotList = builder.build();
     try {
       spotList.writeDelimitedTo(out);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       System.err.println("Failed to write SpotList message");
-      e.printStackTrace();
+      ex.printStackTrace();
       return;
     } finally {
       closeOutput();
@@ -547,9 +547,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     try (RandomAccessFile f = new RandomAccessFile(new File(filename), "rw")) {
       f.seek(4);
       f.writeLong(offset);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       System.err.println("Failed to record offset for SpotList message");
-      e.printStackTrace();
+      ex.printStackTrace();
     }
   }
 

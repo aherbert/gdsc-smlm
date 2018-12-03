@@ -378,7 +378,7 @@ public class PoissonCalculatorTest {
 
       fita = QuadraticUtils.findMinMax((double) (imin + i1) / 10, data[i1],
           (double) (imin + i2) / 10, data[i2], (double) (imin + i3) / 10, data[i3]);
-    } catch (final DataException e) {
+    } catch (final DataException ex) {
       // Ignore
     }
 

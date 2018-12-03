@@ -149,8 +149,8 @@ public class SettingsManager {
       if (!settingsDirectory.exists()) {
         settingsDirectory.mkdirs();
       }
-    } catch (final Exception e) {
-      IJ.log("Unable create settings directory: " + e.getMessage());
+    } catch (final Exception ex) {
+      IJ.log("Unable create settings directory: " + ex.getMessage());
     }
   }
 
@@ -788,8 +788,8 @@ public class SettingsManager {
         return file.delete();
       }
       return true; // Already clear
-    } catch (final SecurityException e) {
-      IJ.log("Unable to clear the settings: " + e.getMessage());
+    } catch (final SecurityException ex) {
+      IJ.log("Unable to clear the settings: " + ex.getMessage());
     }
     return false;
   }
@@ -1187,10 +1187,10 @@ public class SettingsManager {
   public static boolean writeMessage(Message message, File file, int flags) {
     try (FileOutputStream fs = new FileOutputStream(file)) {
       return writeMessage(message, fs, flags);
-    } catch (final IOException e) {
-      // e.printStackTrace();
+    } catch (final IOException ex) {
+      // ex.printStackTrace();
       if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + e.getMessage());
+        IJ.log("Unable to write message: " + ex.getMessage());
       }
     }
     return false;
@@ -1208,9 +1208,9 @@ public class SettingsManager {
     try {
       message.writeDelimitedTo(output);
       return true;
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + e.getMessage());
+        IJ.log("Unable to write message: " + ex.getMessage());
       }
     }
     return false;
@@ -1241,14 +1241,14 @@ public class SettingsManager {
   public static Message readMessage(Parser<? extends Message> parser, File file, int flags) {
     try (FileInputStream fs = new FileInputStream(file)) {
       return readMessage(parser, fs, flags);
-    } catch (final IOException e) {
-      // e.printStackTrace();
+    } catch (final IOException ex) {
+      // ex.printStackTrace();
       // Only print this if the file-not-found flag is present
       // and not silent. This prevents warnings when settings files
-      // have yet to be created, i.e. for new users of a settings file.
+      // have yet to be created, i.ex. for new users of a settings file.
       if (BitFlagUtils.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ)
           && !BitFlagUtils.anySet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + e.getMessage());
+        IJ.log("Unable to read message: " + ex.getMessage());
       }
     }
     return null;
@@ -1267,10 +1267,10 @@ public class SettingsManager {
       int flags) {
     try {
       return parser.parseDelimitedFrom(input);
-    } catch (final InvalidProtocolBufferException e) {
-      // e.printStackTrace();
+    } catch (final InvalidProtocolBufferException ex) {
+      // ex.printStackTrace();
       if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + e.getMessage());
+        IJ.log("Unable to read message: " + ex.getMessage());
       }
     }
     return null;
@@ -1328,9 +1328,9 @@ public class SettingsManager {
   public static boolean toJSON(MessageOrBuilder message, File file, int flags) {
     try (PrintStream fs = new PrintStream(file)) {
       return toJSON(message, fs, flags);
-    } catch (final FileNotFoundException e) {
+    } catch (final FileNotFoundException ex) {
       if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + e.getMessage());
+        IJ.log("Unable to write message: " + ex.getMessage());
       }
     }
     return false;
@@ -1358,9 +1358,9 @@ public class SettingsManager {
       }
       p.appendTo(message, output);
       return true;
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + e.getMessage());
+        IJ.log("Unable to write message: " + ex.getMessage());
       }
     }
     return false;
@@ -1402,9 +1402,9 @@ public class SettingsManager {
   public static boolean fromJSON(File file, Message.Builder builder, int flags) {
     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
       return fromJSON(reader, builder, flags);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + e.getMessage());
+        IJ.log("Unable to read message: " + ex.getMessage());
       }
     }
     return false;
@@ -1425,9 +1425,9 @@ public class SettingsManager {
       }
       parser.merge(reader, builder);
       return true;
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + e.getMessage());
+        IJ.log("Unable to read message: " + ex.getMessage());
       }
     }
     return false;

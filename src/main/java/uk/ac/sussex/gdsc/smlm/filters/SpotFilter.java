@@ -119,7 +119,7 @@ public abstract class SpotFilter implements Cloneable {
   public SpotFilter clone() {
     try {
       return (SpotFilter) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

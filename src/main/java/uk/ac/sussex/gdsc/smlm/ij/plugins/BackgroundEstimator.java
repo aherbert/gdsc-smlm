@@ -184,9 +184,9 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
         background[i] = de.getBackground();
         threshold[i] = de.getThreshold();
         percentile[i] = de.getPercentile(BackgroundEstimator.percentile);
-      } catch (final Exception e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
+      } catch (final Exception ex) {
+        ex.printStackTrace();
+        throw new RuntimeException(ex);
       }
     }
     IJ.showProgress(1);

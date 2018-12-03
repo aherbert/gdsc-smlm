@@ -236,7 +236,7 @@ public class FixedDimension implements Cloneable, Dimension {
   public FixedDimension clone() {
     try {
       return (FixedDimension) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
 

@@ -748,7 +748,7 @@ public class PeakResult implements Cloneable {
         result.paramStdDevs = paramStdDevs.clone();
       }
       return result;
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

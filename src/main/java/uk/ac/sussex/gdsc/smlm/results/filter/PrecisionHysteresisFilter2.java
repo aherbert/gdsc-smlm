@@ -81,7 +81,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
       calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
           peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION_X);
       useBackground = true;
-    } catch (final ConfigurationException e) {
+    } catch (final ConfigurationException ex) {
       calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
           peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
       useBackground = false;

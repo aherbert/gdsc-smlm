@@ -269,9 +269,9 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
           // outImp.setCalibration(cal);
           saveAsTiff(outImp, path);
         }
-      } catch (final IOException e) {
-        IJ.log(ExceptionUtils.getStackTrace(e));
-        IJ.error(TITLE, "Failed to save image: " + e.getMessage());
+      } catch (final IOException ex) {
+        IJ.log(ExceptionUtils.getStackTrace(ex));
+        IJ.error(TITLE, "Failed to save image: " + ex.getMessage());
         IJ.showStatus("Failed to save image");
         return;
       } finally {

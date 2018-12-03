@@ -279,7 +279,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
             step = solver.solve(maxEval, lsf, 0, uB, 1e-15);
             maxEval -= solver.getEvaluations(); // Subtract used up evaluations.
           }
-        } catch (final MathIllegalStateException e) {
+        } catch (final MathIllegalStateException ex) {
           // System.out.printf("Failed to bracket %s @ %s\n", Arrays.toString(point),
           // Arrays.toString(searchDirection));
 
@@ -287,7 +287,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
           final UnivariatePointValuePair optimum = line.search(point, searchDirection);
           step = optimum.getPoint();
 
-          // throw e;
+          // throw ex;
         }
       } else {
         // Line search without gradient (as per Powell optimiser)

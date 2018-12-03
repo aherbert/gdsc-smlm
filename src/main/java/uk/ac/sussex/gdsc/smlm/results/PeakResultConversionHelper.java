@@ -264,7 +264,7 @@ public class PeakResultConversionHelper {
               list.add(new IdentityTypeConverter<>(p.getUnit()));
           }
         }
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         // Ignore
       }
     }
@@ -292,7 +292,7 @@ public class PeakResultConversionHelper {
           final String name = p.getName();
           list.add(TextUtils.isNullOrEmpty(name) ? "unknown" : name);
         }
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         // Ignore
       }
     }
@@ -340,7 +340,7 @@ public class PeakResultConversionHelper {
               list.add("");
           }
         }
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         // Ignore
       }
     }

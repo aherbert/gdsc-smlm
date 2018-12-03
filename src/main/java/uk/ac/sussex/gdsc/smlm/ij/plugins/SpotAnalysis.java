@@ -502,7 +502,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       blur = Double.parseDouble(blurTextField.getText());
       gain = Double.parseDouble(gainTextField.getText());
       msPerFrame = Double.parseDouble(exposureTextField.getText());
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       IJ.error(TITLE, "Invalid numbers in the input parameters");
       return;
     }
@@ -786,7 +786,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       if (smoothing < 0.01 || smoothing > 0.9) {
         smoothing = 0.25;
       }
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore
     }
 
@@ -1008,9 +1008,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
             s.nextDouble(); // cx
             s.nextDouble(); // cy
             signal = s.nextDouble();
-          } catch (final InputMismatchException e) {
+          } catch (final InputMismatchException ex) {
             // Ignore
-          } catch (final NoSuchElementException e) {
+          } catch (final NoSuchElementException ex) {
             // Ignore
           }
         }
@@ -1080,17 +1080,17 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
           writeLine(files[4], String.format("%d %f", r.getFrame(), r.getIntensity()));
         }
       }
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Q. Add better handling of errors?
-      e.printStackTrace();
+      ex.printStackTrace();
       IJ.log("Failed to save traces to results directory: " + resultsDirectory);
     } finally {
       for (final BufferedWriter tracesFile : files) {
         if (tracesFile != null) {
           try {
             tracesFile.close();
-          } catch (final IOException e) {
-            e.printStackTrace();
+          } catch (final IOException ex) {
+            ex.printStackTrace();
           }
         }
       }

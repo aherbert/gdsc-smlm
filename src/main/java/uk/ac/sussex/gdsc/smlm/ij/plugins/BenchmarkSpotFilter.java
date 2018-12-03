@@ -568,9 +568,9 @@ public class BenchmarkSpotFilter implements PlugIn {
             run(job.intValue());
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -733,9 +733,9 @@ public class BenchmarkSpotFilter implements PlugIn {
             run(job.intValue());
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -1157,8 +1157,8 @@ public class BenchmarkSpotFilter implements PlugIn {
           Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
 
       cameraModel = CreateData.getCameraModel(simulationParameters);
-    } catch (final ConfigurationException e) {
-      IJ.error(TITLE, "Bad configuration: " + e.getMessage());
+    } catch (final ConfigurationException ex) {
+      IJ.error(TITLE, "Bad configuration: " + ex.getMessage());
       return;
     }
 
@@ -1522,7 +1522,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         if (filterResult != null) {
           result.add(new BatchResult(filterResult, dataFilter, param[i], search, param2));
         }
-      } catch (final IllegalArgumentException e) {
+      } catch (final IllegalArgumentException ex) {
         // This can occur during batch processing when the param2 argument is smaller than param
         break;
       }
@@ -1814,8 +1814,8 @@ public class BenchmarkSpotFilter implements PlugIn {
       for (int i = 0; i < threads.size(); i++) {
         try {
           threads.get(i).join();
-        } catch (final InterruptedException e) {
-          e.printStackTrace();
+        } catch (final InterruptedException ex) {
+          ex.printStackTrace();
         }
         actualCoordinates.putAll(workers.get(i).coordinates);
       }
@@ -1890,8 +1890,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     for (int i = 0; i < threads.size(); i++) {
       try {
         threads.get(i).join();
-      } catch (final InterruptedException e) {
-        e.printStackTrace();
+      } catch (final InterruptedException ex) {
+        ex.printStackTrace();
       }
     }
     threads.clear();
@@ -2011,10 +2011,10 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static void put(BlockingQueue<Integer> jobs, int i) {
     try {
       jobs.put(i);
-    } catch (final InterruptedException e) {
+    } catch (final InterruptedException ex) {
       // Restore interrupted state...
       Thread.currentThread().interrupt();
-      throw new RuntimeException("Unexpected interruption", e);
+      throw new RuntimeException("Unexpected interruption", ex);
     }
   }
 

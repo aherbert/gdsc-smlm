@@ -101,7 +101,7 @@ public class PSFImagePeakResults extends IJImagePeakResults {
       isy = indices[1];
       try {
         ia = PSFHelper.getGaussian2DAngleIndex(getPSF());
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         // No rotation angle
         ia = 0;
       }

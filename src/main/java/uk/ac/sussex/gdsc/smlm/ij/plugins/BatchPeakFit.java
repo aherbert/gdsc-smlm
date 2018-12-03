@@ -208,10 +208,10 @@ public class BatchPeakFit implements PlugIn {
         final StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
         xmlSettings.add(writer.getBuffer().toString());
-      } catch (final TransformerConfigurationException e) {
-        e.printStackTrace();
-      } catch (final TransformerException e) {
-        e.printStackTrace();
+      } catch (final TransformerConfigurationException ex) {
+        ex.printStackTrace();
+      } catch (final TransformerException ex) {
+        ex.printStackTrace();
       }
     }
   }
@@ -226,8 +226,8 @@ public class BatchPeakFit implements PlugIn {
       ex.printStackTrace();
     } catch (final XStreamException ex) {
       ex.printStackTrace();
-    } catch (final IOException e) {
-      e.printStackTrace();
+    } catch (final IOException ex) {
+      ex.printStackTrace();
     }
     return settings;
   }
@@ -238,8 +238,8 @@ public class BatchPeakFit implements PlugIn {
     try {
       docBuilder = docFactory.newDocumentBuilder();
       return docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
-    } catch (final Exception e) {
-      e.printStackTrace();
+    } catch (final Exception ex) {
+      ex.printStackTrace();
     }
     return null;
   }
@@ -261,7 +261,7 @@ public class BatchPeakFit implements PlugIn {
       FitEngineConfiguration fitConfig = null;
       try {
         fitConfig = (FitEngineConfiguration) xs.fromXML(xmlSettings.get(i));
-      } catch (final XStreamException e) {
+      } catch (final XStreamException ex) {
         // Ignore
       }
       if (fitConfig == null) {
@@ -291,7 +291,7 @@ public class BatchPeakFit implements PlugIn {
 
           IJ.log(String.format("%s : %s : Size %d : Time = %s", imageFilename, settingsFilename,
               peakFit.getSize(), TextUtils.millisToString(peakFit.getTime())));
-        } catch (final Exception e) {
+        } catch (final Exception ex) {
           // Ignore this as we assume this is from incorrect fit configuration
         }
       }
@@ -312,12 +312,12 @@ public class BatchPeakFit implements PlugIn {
     try (FileOutputStream fs = new FileOutputStream(settingsFilename)) {
       xs.toXML(batchRun, fs);
       return settingsFilename;
-    } catch (final FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (final XStreamException e) {
-      e.printStackTrace();
-    } catch (final IOException e) {
-      e.printStackTrace();
+    } catch (final FileNotFoundException ex) {
+      ex.printStackTrace();
+    } catch (final XStreamException ex) {
+      ex.printStackTrace();
+    } catch (final IOException ex) {
+      ex.printStackTrace();
     }
     return null;
   }

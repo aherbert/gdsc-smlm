@@ -299,8 +299,8 @@ public class PSFCreator implements PlugInFilter {
     // Check arguments
     try {
       Parameters.isAbove("Radius", settings.getRadius(), 2);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return DONE;
     }
 
@@ -461,8 +461,8 @@ public class PSFCreator implements PlugInFilter {
       Parameters.isAbove("Magnification", settings.getMagnification(), 1);
       Parameters.isAbove("Smoothing", settings.getSmoothing(), 0);
       Parameters.isBelow("Smoothing", settings.getSmoothing(), 1);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -477,9 +477,9 @@ public class PSFCreator implements PlugInFilter {
     } else {
       try {
         runUsingAlignment();
-      } catch (final OutOfMemoryError e) {
+      } catch (final OutOfMemoryError ex) {
         MemoryPeakResults.runGC();
-        IJ.log(ExceptionUtils.getStackTrace(e));
+        IJ.log(ExceptionUtils.getStackTrace(ex));
         IJ.showMessage(TITLE, TextUtils.wrap("Out-of-memory. You may be using too many spots or "
             + "too large a PSF projection. The default projection size is 2.", 80));
       }

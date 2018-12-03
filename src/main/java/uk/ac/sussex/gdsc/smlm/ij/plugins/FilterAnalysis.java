@@ -212,8 +212,8 @@ public class FilterAnalysis implements PlugIn {
         }
         IJ.log("No filter sets defined in the specified file: "
             + filterSettings.getFilterSetFilename());
-      } catch (final Exception e) {
-        IJ.log("Unable to load the filter sets from file: " + e.getMessage());
+      } catch (final Exception ex) {
+        IJ.log("Unable to load the filter sets from file: " + ex.getMessage());
       } finally {
         IJ.showStatus("");
       }
@@ -233,8 +233,8 @@ public class FilterAnalysis implements PlugIn {
           new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8")) {
         XStreamWrapper.getInstance().toXML(filterSets, out);
         SettingsManager.writeSettings(filterSettings.build());
-      } catch (final Exception e) {
-        IJ.log("Unable to save the filter sets to file: " + e.getMessage());
+      } catch (final Exception ex) {
+        IJ.log("Unable to save the filter sets to file: " + ex.getMessage());
       }
     }
   }
@@ -415,8 +415,8 @@ public class FilterAnalysis implements PlugIn {
 
       Parameters.isAboveZero("Delta", delta);
       Parameters.isBelow("Delta", delta, 1);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

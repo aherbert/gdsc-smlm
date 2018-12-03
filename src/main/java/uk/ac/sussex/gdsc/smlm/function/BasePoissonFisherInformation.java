@@ -62,7 +62,7 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
       final BasePoissonFisherInformation fi = (BasePoissonFisherInformation) super.clone();
       fi.postClone();
       return fi;
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       // Should not happen
       return null;
     }

@@ -189,9 +189,9 @@ public class CameraModelManager implements PlugIn {
       final float[] gain = (float[]) stack.getPixels(2);
       final float[] variance = (float[]) stack.getPixels(3);
       return PerPixelCameraModel.create(bounds, bias, gain, variance);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       ImageJUtils.log("Failed to load camera model %s from file: %s. %s", name, filename,
-          e.getMessage());
+          ex.getMessage());
     }
     return null;
   }
@@ -334,13 +334,13 @@ public class CameraModelManager implements PlugIn {
       Rectangle bounds;
       try {
         bounds = IJImageSource.getBounds(imp);
-      } catch (final IllegalArgumentException e) {
+      } catch (final IllegalArgumentException ex) {
         bounds = new Rectangle(pluginSettings.getOriginX(), pluginSettings.getOriginY(),
             imp.getWidth(), imp.getHeight());
       }
       cameraModel = PeakFit.cropCameraModel(cameraModel, bounds, null, false);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return;
     }
     final Rectangle bounds = cameraModel.getBounds();
@@ -486,9 +486,9 @@ public class CameraModelManager implements PlugIn {
       }
       logStats("var/g^2", stats2);
       logStats("sqrt(var/g^2)", stats1);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       ImageJUtils.log("Failed to load camera model %s from file: %s. %s", name,
-          resource.getFilename(), e.getMessage());
+          resource.getFilename(), ex.getMessage());
     }
     stack.addSlice("var/g^2", var_g2);
 

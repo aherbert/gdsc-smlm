@@ -264,7 +264,7 @@ public class InterpolatedPoissonFunctionTest {
 
       logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f", gain, mu, o, p));
       // Assertions.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       // double inc = max / 20000.0;
       // for (double x = 0; x <= max; x += inc)
       // {
@@ -273,7 +273,7 @@ public class InterpolatedPoissonFunctionTest {
       // p += pp;
       // }
       // TestLog.fine(logger,"g=%f, mu=%f, o=%f, p=%f", gain, mu, o, p);
-      Assertions.fail(e.getMessage());
+      Assertions.fail(ex.getMessage());
     }
   }
 

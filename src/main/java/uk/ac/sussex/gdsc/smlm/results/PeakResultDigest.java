@@ -134,7 +134,7 @@ public class PeakResultDigest {
     try {
       final MessageDigest d = (MessageDigest) digest.clone();
       return DigestUtils.toHex(d.digest());
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

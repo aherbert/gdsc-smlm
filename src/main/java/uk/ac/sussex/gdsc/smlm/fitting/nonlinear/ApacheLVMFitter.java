@@ -173,14 +173,14 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
       // This is the same as optimum.getCost() * optimum.getCost(); The getCost() function
       // just computes the dot product anyway.
       value = optimum.getResiduals().dotProduct(optimum.getResiduals());
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       return FitStatus.TOO_MANY_EVALUATIONS;
-    } catch (final TooManyIterationsException e) {
+    } catch (final TooManyIterationsException ex) {
       return FitStatus.TOO_MANY_ITERATIONS;
-    } catch (final ConvergenceException e) {
+    } catch (final ConvergenceException ex) {
       // Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
       return FitStatus.SINGULAR_NON_LINEAR_MODEL;
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // TODO - Find out the other exceptions from the fitter and add return values to match.
       return FitStatus.UNKNOWN;
     }

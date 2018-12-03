@@ -608,8 +608,8 @@ public class DensityImage implements PlugIn {
       Parameters.isAboveZero("Radius", radius);
       Parameters.isAboveZero("Image scale", imageScale);
       Parameters.isAboveZero("Resolution", resolution);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

@@ -987,7 +987,7 @@ public class PeakResultsReaderTest {
       file.deleteOnExit();
       final String filename = file.getPath();
       return filename;
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       Assertions.fail("Cannot create temp files for IO testing");
     }
     return null; // Allow compilation but the assert will stop the code

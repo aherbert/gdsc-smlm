@@ -162,7 +162,7 @@ public class SummariseResults implements PlugIn, MouseListener {
         for (final double v : p.precision) {
           stats[0].addValue(v);
         }
-      } catch (final DataException e) {
+      } catch (final DataException ex) {
         // Ignore
       }
 
@@ -173,7 +173,7 @@ public class SummariseResults implements PlugIn, MouseListener {
         for (final double v : p.snr) {
           stats[1].addValue(v);
         }
-      } catch (final DataException e) {
+      } catch (final DataException ex) {
         // Ignore
       }
     }
@@ -339,7 +339,7 @@ public class SummariseResults implements PlugIn, MouseListener {
       if (settings.getPlotSnr()) {
         try {
           plot(wo, "SNR", new SNRResultProcedure(result).getSNR());
-        } catch (final DataException e) {
+        } catch (final DataException ex) {
           // Ignore
         }
       }
@@ -368,7 +368,7 @@ public class SummariseResults implements PlugIn, MouseListener {
           name += " (Stored)";
         }
         plot(wo, "Precision: " + name, StoredDataStatistics.create(p.precision));
-      } catch (final DataException e) {
+      } catch (final DataException ex) {
         // Ignore
       }
     }

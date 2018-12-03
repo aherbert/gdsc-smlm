@@ -483,9 +483,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
             run(job.intValue());
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        // throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        // throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -1796,8 +1796,8 @@ default: multiples++;
     for (int i = 0; i < threads.size(); i++) {
       try {
         threads.get(i).join();
-      } catch (final InterruptedException e) {
-        e.printStackTrace();
+      } catch (final InterruptedException ex) {
+        ex.printStackTrace();
       }
     }
     threads.clear();
@@ -1913,8 +1913,8 @@ default: multiples++;
   private static void put(BlockingQueue<Integer> jobs, int i) {
     try {
       jobs.put(i);
-    } catch (final InterruptedException e) {
-      throw new RuntimeException("Unexpected interruption", e);
+    } catch (final InterruptedException ex) {
+      throw new RuntimeException("Unexpected interruption", ex);
     }
   }
 

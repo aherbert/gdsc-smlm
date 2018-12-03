@@ -1534,7 +1534,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       final Filter f = (Filter) super.clone();
       f.initialiseState();
       return f;
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

@@ -871,7 +871,7 @@ public class Gaussian2DPeakResultHelper {
         // else
         // System.out.printf("Invalid I1 = %f\n", I1);
       }
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       // Ignore
     }
     return getVarianceX(a, s, N, b2, emCCD);

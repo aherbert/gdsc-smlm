@@ -309,8 +309,8 @@ public class CubicSplineManager implements PlugIn {
       saveResource(psfModel, filename, getName(filename));
 
       return true;
-    } catch (final Exception e) {
-      ImageJUtils.log("Failed to save spline model to file: %s. %s", filename, e.getMessage());
+    } catch (final Exception ex) {
+      ImageJUtils.log("Failed to save spline model to file: %s. %s", filename, ex.getMessage());
     }
 
     return false;
@@ -371,9 +371,9 @@ public class CubicSplineManager implements PlugIn {
       final CubicSplineData function = CubicSplineData.read(is, progress);
 
       return new CubicSplinePSF(imagePSF, function);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       ImageJUtils.log("Failed to load spline model %s from file: %s. %s", name, filename,
-          e.getMessage());
+          ex.getMessage());
     } finally {
       IJ.showStatus("");
     }

@@ -755,7 +755,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   public MemoryPeakResults clone() {
     try {
       return (MemoryPeakResults) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       // This should not happen so ignore
     }
     return null;

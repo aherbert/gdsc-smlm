@@ -132,7 +132,7 @@ public class CalibrationHelper {
       CalibrationOrBuilder calibration, DistanceUnit toDistanceUnit) {
     try {
       return getDistanceConverter(calibration, toDistanceUnit);
-    } catch (final ConversionException e) {
+    } catch (final ConversionException ex) {
       if (calibration != null && calibration.hasDistanceCalibration()) {
         return new IdentityTypeConverter<>(
             calibration.getDistanceCalibrationOrBuilder().getDistanceUnit());
@@ -153,7 +153,7 @@ public class CalibrationHelper {
       CalibrationOrBuilder calibration, IntensityUnit toIntensityUnit) {
     try {
       return getIntensityConverter(calibration, toIntensityUnit);
-    } catch (final ConversionException e) {
+    } catch (final ConversionException ex) {
       if (calibration != null && calibration.hasIntensityCalibration()) {
         return new IdentityTypeConverter<>(
             calibration.getIntensityCalibrationOrBuilder().getIntensityUnit());
@@ -174,7 +174,7 @@ public class CalibrationHelper {
       TimeUnit toTimeUnit) {
     try {
       return getTimeConverter(calibration, toTimeUnit);
-    } catch (final ConversionException e) {
+    } catch (final ConversionException ex) {
       // Calibration is assumed to be in frames
       return new IdentityTypeConverter<>(TimeUnit.FRAME);
     }
@@ -192,7 +192,7 @@ public class CalibrationHelper {
       AngleUnit toAngleUnit) {
     try {
       return getAngleConverter(calibration, toAngleUnit);
-    } catch (final ConversionException e) {
+    } catch (final ConversionException ex) {
       if (calibration != null && calibration.hasAngleCalibration()) {
         return new IdentityTypeConverter<>(
             calibration.getAngleCalibrationOrBuilder().getAngleUnit());

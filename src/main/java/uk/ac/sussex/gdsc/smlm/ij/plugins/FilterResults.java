@@ -129,8 +129,8 @@ public class FilterResults implements PlugIn {
       maxWidth = limits[1];
       minWidth = limits[0];
       averageWidth = MathUtils.sum(wp.wx) / wp.size();
-    } catch (final DataException e) {
-      error.add(e.getMessage());
+    } catch (final DataException ex) {
+      error.add(ex.getMessage());
       wp = null;
       maxWidth = minWidth = 0;
     }
@@ -142,8 +142,8 @@ public class FilterResults implements PlugIn {
       final double[] limits = MathUtils.limits(pp.precision);
       maxPrecision = limits[1];
       minPrecision = limits[0];
-    } catch (final DataException e) {
-      error.add(e.getMessage());
+    } catch (final DataException ex) {
+      error.add(ex.getMessage());
       pp = null;
       maxPrecision = minPrecision = 0;
     }
@@ -193,8 +193,8 @@ public class FilterResults implements PlugIn {
         sp.intensity[i] = signal;
         sp.background[i] = snr;
       }
-    } catch (final DataException e) {
-      error.add(e.getMessage());
+    } catch (final DataException ex) {
+      error.add(ex.getMessage());
       sp = null;
     }
 

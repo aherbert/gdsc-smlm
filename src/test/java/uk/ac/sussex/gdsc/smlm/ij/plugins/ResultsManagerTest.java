@@ -104,10 +104,10 @@ public class ResultsManagerTest {
     FileOutputStream out = null;
     try {
       out = new FileOutputStream(filename);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       closeOutput(out);
-      e.printStackTrace();
-      Assertions.fail(e.getMessage());
+      ex.printStackTrace();
+      Assertions.fail(ex.getMessage());
     }
 
     // Write the offsets used in the TSF format
@@ -116,10 +116,10 @@ public class ResultsManagerTest {
       final DataOutputStream dos = new DataOutputStream(out);
       dos.writeInt(0);
       dos.writeLong(0);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       closeOutput(out);
-      e.printStackTrace();
-      Assertions.fail(e.getMessage());
+      ex.printStackTrace();
+      Assertions.fail(ex.getMessage());
     }
 
     // Generate random spots
@@ -149,10 +149,10 @@ public class ResultsManagerTest {
       spots[i - 1] = spot;
       try {
         spot.writeDelimitedTo(out);
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         closeOutput(out);
-        e.printStackTrace();
-        Assertions.fail(e.getMessage());
+        ex.printStackTrace();
+        Assertions.fail(ex.getMessage());
       }
     }
 
@@ -164,10 +164,10 @@ public class ResultsManagerTest {
       // magic number (4 bytes) and long offset (8 bytes)
       // out.flush();
       offset = out.getChannel().position() - 12;
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       closeOutput(out);
-      e.printStackTrace();
-      Assertions.fail(e.getMessage());
+      ex.printStackTrace();
+      Assertions.fail(ex.getMessage());
     }
 
     // Record the SpotList message
@@ -193,9 +193,9 @@ public class ResultsManagerTest {
     final SpotList spotList = builder.build();
     try {
       spotList.writeDelimitedTo(out);
-    } catch (final IOException e) {
-      e.printStackTrace();
-      Assertions.fail(e.getMessage());
+    } catch (final IOException ex) {
+      ex.printStackTrace();
+      Assertions.fail(ex.getMessage());
     } finally {
       closeOutput(out);
     }
@@ -204,9 +204,9 @@ public class ResultsManagerTest {
     try (RandomAccessFile f = new RandomAccessFile(new File(filename), "rw")) {
       f.seek(4);
       f.writeLong(offset);
-    } catch (final Exception e) {
-      e.printStackTrace();
-      Assertions.fail(e.getMessage());
+    } catch (final Exception ex) {
+      ex.printStackTrace();
+      Assertions.fail(ex.getMessage());
     }
 
     // Read each combination
@@ -247,7 +247,7 @@ public class ResultsManagerTest {
 
     try {
       out.close();
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore exception
     } finally {
       out = null;
@@ -332,7 +332,7 @@ public class ResultsManagerTest {
       file.deleteOnExit();
       final String filename = file.getPath();
       return filename;
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       Assertions.fail("Cannot create temp files for IO testing");
     }
     return null; // Allow compilation but the assert will stop the code

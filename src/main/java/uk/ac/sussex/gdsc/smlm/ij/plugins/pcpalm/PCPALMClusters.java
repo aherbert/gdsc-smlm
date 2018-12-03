@@ -397,8 +397,8 @@ public class PCPALMClusters implements PlugIn {
 
       histogramData.filename = filename;
       return true;
-    } catch (final Exception e) {
-      e.printStackTrace();
+    } catch (final Exception ex) {
+      ex.printStackTrace();
       IJ.log("Failed to save histogram to file: " + filename);
     }
     return false;
@@ -503,11 +503,11 @@ public class PCPALMClusters implements PlugIn {
       final HistogramData histogramData = new HistogramData(hist, f, a, u);
       histogramData.filename = filename;
       return histogramData;
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       error("Incorrect fields on line " + count);
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       error("Incorrect fields on line " + count);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       IJ.error(TITLE, "Unable to read from file " + filename);
     }
     return null;

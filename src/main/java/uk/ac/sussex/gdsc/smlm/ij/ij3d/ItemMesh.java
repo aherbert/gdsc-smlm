@@ -531,8 +531,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       final Class<?>[] paramTypes2 = paramTypes.toArray(new Class<?>[paramTypes.size()]);
       final Object[] paramValues2 = paramValues.toArray();
       ga = (GeometryArray) clazz.getConstructor(paramTypes2).newInstance(paramValues2);
-    } catch (final Exception e) {
-      e.printStackTrace();
+    } catch (final Exception ex) {
+      ex.printStackTrace();
       return null;
     }
 

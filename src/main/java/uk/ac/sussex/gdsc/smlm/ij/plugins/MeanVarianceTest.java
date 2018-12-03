@@ -115,7 +115,7 @@ public class MeanVarianceTest implements PlugIn {
           if (exposure >= 0) {
             break;
           }
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException ex) {
           // Ignore
         }
       }
@@ -534,8 +534,8 @@ public class MeanVarianceTest implements PlugIn {
     while (imp != null) {
       try {
         images.add(new ImageSample(imp, c / nImages, (c + 1) / nImages));
-      } catch (final IllegalArgumentException e) {
-        ImageJUtils.log(e.getMessage());
+      } catch (final IllegalArgumentException ex) {
+        ImageJUtils.log(ex.getMessage());
       }
       c++;
       imp.close();
@@ -564,8 +564,8 @@ public class MeanVarianceTest implements PlugIn {
     if (imp != null) {
       try {
         images.add(new ImageSample(imp, 0, 1));
-      } catch (final IllegalArgumentException e) {
-        ImageJUtils.log(e.getMessage());
+      } catch (final IllegalArgumentException ex) {
+        ImageJUtils.log(ex.getMessage());
       }
     }
     IJ.showProgress(1);

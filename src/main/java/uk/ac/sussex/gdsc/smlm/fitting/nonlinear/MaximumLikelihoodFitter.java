@@ -620,25 +620,25 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
 
       // Reverse negative log likelihood for maximum likelihood score
       value = -optimum.getValue();
-    } catch (final TooManyIterationsException e) {
-      // System.out.printf("Too many iterations = %d\n", e.getMax());
-      // e.printStackTrace();
+    } catch (final TooManyIterationsException ex) {
+      // System.out.printf("Too many iterations = %d\n", ex.getMax());
+      // ex.printStackTrace();
       return FitStatus.TOO_MANY_ITERATIONS;
-    } catch (final TooManyEvaluationsException e) {
-      // System.out.printf("Too many evaluations = %d\n", e.getMax());
-      // e.printStackTrace();
+    } catch (final TooManyEvaluationsException ex) {
+      // System.out.printf("Too many evaluations = %d\n", ex.getMax());
+      // ex.printStackTrace();
       return FitStatus.TOO_MANY_EVALUATIONS;
-    } catch (final ConvergenceException e) {
+    } catch (final ConvergenceException ex) {
       // Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
-      // System.out.printf("Singular non linear model = %s\n", e.getMessage());
+      // System.out.printf("Singular non linear model = %s\n", ex.getMessage());
       return FitStatus.SINGULAR_NON_LINEAR_MODEL;
-    } catch (final BFGSOptimizer.LineSearchRoundoffException e) {
-      // System.out.println("BFGS error: " + e.getMessage());
-      // e.printStackTrace();
+    } catch (final BFGSOptimizer.LineSearchRoundoffException ex) {
+      // System.out.println("BFGS error: " + ex.getMessage());
+      // ex.printStackTrace();
       return FitStatus.FAILED_TO_CONVERGE;
-    } catch (final Exception e) {
-      // System.out.printf("Unknown error = %s\n", e.getMessage());
-      e.printStackTrace();
+    } catch (final Exception ex) {
+      // System.out.printf("Unknown error = %s\n", ex.getMessage());
+      ex.printStackTrace();
       return FitStatus.UNKNOWN;
     } finally {
       if (baseOptimiser != null) {

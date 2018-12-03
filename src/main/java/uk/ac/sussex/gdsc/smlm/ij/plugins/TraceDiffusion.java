@@ -498,7 +498,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           n += trace.size();
         }
         precision /= n;
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         // Ignore this and we will ask the user for the precision
       }
     }
@@ -570,7 +570,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           }
           out.newLine();
         }
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Ignore
       }
     }
@@ -598,7 +598,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         out.write(Double.toString(se[i]));
         out.newLine();
       }
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore
     }
   }
@@ -632,7 +632,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           out.newLine();
         }
       }
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore
     }
   }
@@ -657,7 +657,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         out.write(Double.toString(y[i]));
         out.newLine();
       }
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore
     }
   }
@@ -910,8 +910,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     try {
       Parameters.isAboveZero("Distance threshold", settings.getDistanceThreshold());
       Parameters.isAbove("Min trace length", settings.getMinimumTraceLength(), 1);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -1092,8 +1092,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       if (settings.getMle()) {
         Parameters.isAboveZero("Significance level", significanceLevel);
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -1190,10 +1190,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           "Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
           function.getY().length, MathUtils.rounded(gradient, 4), MathUtils.rounded(D, 4),
           MathUtils.rounded(ss), MathUtils.rounded(ic), lvmSolution.getEvaluations());
-    } catch (final TooManyIterationsException e) {
-      ImageJUtils.log("Failed to fit : Too many iterations (%s)", e.getMessage());
-    } catch (final ConvergenceException e) {
-      ImageJUtils.log("Failed to fit : %s", e.getMessage());
+    } catch (final TooManyIterationsException ex) {
+      ImageJUtils.log("Failed to fit : Too many iterations (%s)", ex.getMessage());
+    } catch (final ConvergenceException ex) {
+      ImageJUtils.log("Failed to fit : %s", ex.getMessage());
     }
 
     // Fit with intercept.
@@ -1249,10 +1249,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         D = gradient / 4;
         precision = s;
       }
-    } catch (final TooManyIterationsException e) {
-      ImageJUtils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
-    } catch (final ConvergenceException e) {
-      ImageJUtils.log("Failed to fit with intercept : %s", e.getMessage());
+    } catch (final TooManyIterationsException ex) {
+      ImageJUtils.log("Failed to fit with intercept : Too many iterations (%s)", ex.getMessage());
+    } catch (final ConvergenceException ex) {
+      ImageJUtils.log("Failed to fit with intercept : %s", ex.getMessage());
     }
 
     if (settings.getMsdCorrection()) {
@@ -1329,10 +1329,10 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
           D = gradient / 4;
           precision = s;
         }
-      } catch (final TooManyIterationsException e) {
-        ImageJUtils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
-      } catch (final ConvergenceException e) {
-        ImageJUtils.log("Failed to fit with intercept : %s", e.getMessage());
+      } catch (final TooManyIterationsException ex) {
+        ImageJUtils.log("Failed to fit with intercept : Too many iterations (%s)", ex.getMessage());
+      } catch (final ConvergenceException ex) {
+        ImageJUtils.log("Failed to fit with intercept : %s", ex.getMessage());
       }
     }
 

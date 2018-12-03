@@ -157,7 +157,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
       initialPeakStdDev0 = fitConfig.getInitialXSD();
       initialPeakStdDev1 = fitConfig.getInitialYSD();
       initialPeakAngle = fitConfig.getInitialAngle();
-    } catch (final IllegalStateException e) {
+    } catch (final IllegalStateException ex) {
       // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
     }
 
@@ -308,8 +308,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
       Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
       Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
       Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -478,8 +478,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
           IJ.showStatus("Aborted");
           return ABORTED;
         }
-      } catch (final Exception e) {
-        e.printStackTrace();
+      } catch (final Exception ex) {
+        ex.printStackTrace();
         return EXCEPTION;
       }
     }
@@ -650,7 +650,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
       IJ.showProgress(size(), settings.getNumberOfPeaks());
       try {
         Thread.sleep(50);
-      } catch (final InterruptedException e) {
+      } catch (final InterruptedException ex) {
         break;
       }
     }

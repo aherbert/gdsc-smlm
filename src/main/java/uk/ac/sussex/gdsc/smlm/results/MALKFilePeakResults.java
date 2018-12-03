@@ -88,8 +88,8 @@ public class MALKFilePeakResults extends FilePeakResults {
   protected void openOutput() {
     try {
       out = new OutputStreamWriter(fos, "UTF-8");
-    } catch (final UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+    } catch (final UnsupportedEncodingException ex) {
+      throw new RuntimeException(ex);
     }
   }
 
@@ -97,7 +97,7 @@ public class MALKFilePeakResults extends FilePeakResults {
   protected void write(String data) {
     try {
       out.write(data);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       closeOutput();
     }
   }
@@ -111,7 +111,7 @@ public class MALKFilePeakResults extends FilePeakResults {
     try {
       // Make sure we close the writer since it may be buffered
       out.close();
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore exception
     } finally {
       fos = null;
@@ -129,13 +129,13 @@ public class MALKFilePeakResults extends FilePeakResults {
       try {
         toNMConverter = cw.getDistanceConverter(DistanceUnit.NM);
         cw.setDistanceUnit(DistanceUnit.NM);
-      } catch (final ConversionException e) {
+      } catch (final ConversionException ex) {
         // Gracefully fail so ignore this
       }
       try {
         toPhotonConverter = cw.getIntensityConverter(IntensityUnit.PHOTON);
         cw.setIntensityUnit(IntensityUnit.PHOTON);
-      } catch (final ConversionException e) {
+      } catch (final ConversionException ex) {
         // Gracefully fail so ignore this
       }
 
@@ -326,9 +326,9 @@ public class MALKFilePeakResults extends FilePeakResults {
         scanner.nextFloat(); // Y
         slice = scanner.nextInt();
         scanner.close();
-      } catch (final InputMismatchException e) {
+      } catch (final InputMismatchException ex) {
         // Ignore
-      } catch (final NoSuchElementException e) {
+      } catch (final NoSuchElementException ex) {
         // Ignore
       }
     }

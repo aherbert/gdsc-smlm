@@ -108,8 +108,8 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
     try {
       distanceConverter = results.getDistanceConverter(DistanceUnit.UM);
       timeConverter = results.getTimeConverter(TimeUnit.SECOND);
-    } catch (final Exception e) {
-      IJ.error(TITLE, "Cannot convert units to um or seconds: " + e.getMessage());
+    } catch (final Exception ex) {
+      IJ.error(TITLE, "Cannot convert units to um or seconds: " + ex.getMessage());
       return;
     }
 
@@ -127,8 +127,8 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
                                                                                   // units
       // Get the localisation error (4s^2) in units^2
       error = 4 * rawPrecision * rawPrecision;
-    } catch (final Exception e) {
-      ImageJUtils.log(TITLE + " - Unable to compute precision: " + e.getMessage());
+    } catch (final Exception ex) {
+      ImageJUtils.log(TITLE + " - Unable to compute precision: " + ex.getMessage());
     }
 
     // Analyse the track lengths

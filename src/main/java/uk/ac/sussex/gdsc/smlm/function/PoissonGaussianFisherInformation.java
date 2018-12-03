@@ -479,7 +479,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
       final double oldSum = sum;
       try {
         sum = compute(scale, range, p);
-      } catch (final IllegalArgumentException e) {
+      } catch (final IllegalArgumentException ex) {
         // Occurs when the convolution has grown too big
         return sum;
       }

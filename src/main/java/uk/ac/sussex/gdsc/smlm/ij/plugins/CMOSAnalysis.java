@@ -254,11 +254,11 @@ public class CMOSAnalysis implements PlugIn {
             run(pixels);
           }
         }
-      } catch (final InterruptedException e) {
+      } catch (final InterruptedException ex) {
         if (!finished) {
           // This is not expected
-          System.out.println(e.toString());
-          throw new RuntimeException(e);
+          System.out.println(ex.toString());
+          throw new RuntimeException(ex);
         }
       } finally {
         // Utils.log("Finished");
@@ -496,9 +496,9 @@ public class CMOSAnalysis implements PlugIn {
         try {
           // The future .get() method will block until completed
           futures.get(t).get();
-        } catch (final Exception e) {
+        } catch (final Exception ex) {
           // This should not happen.
-          e.printStackTrace();
+          ex.printStackTrace();
         }
       }
       futures.clear();
@@ -759,9 +759,9 @@ public class CMOSAnalysis implements PlugIn {
             try {
               workers.get(t).finished = true;
               futures.get(t).cancel(true);
-            } catch (final Exception e) {
+            } catch (final Exception ex) {
               // This should not happen.
-              e.printStackTrace();
+              ex.printStackTrace();
             }
           }
           break;
@@ -775,9 +775,9 @@ public class CMOSAnalysis implements PlugIn {
           try {
             // The future .get() method will block until completed
             futures.get(t).get();
-          } catch (final Exception e) {
+          } catch (final Exception ex) {
             // This should not happen.
-            e.printStackTrace();
+            ex.printStackTrace();
           }
         }
 
@@ -959,8 +959,8 @@ public class CMOSAnalysis implements PlugIn {
   private static <T> void put(BlockingQueue<T> jobs, T job) {
     try {
       jobs.put(job);
-    } catch (final InterruptedException e) {
-      throw new RuntimeException("Unexpected interruption", e);
+    } catch (final InterruptedException ex) {
+      throw new RuntimeException("Unexpected interruption", ex);
     }
   }
 

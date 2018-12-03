@@ -361,7 +361,7 @@ public class FIRE implements PlugIn {
             plot.draw();
           }
         }
-      } catch (final OutOfMemoryError e) {
+      } catch (final OutOfMemoryError ex) {
         oom = true;
       }
     }
@@ -474,11 +474,11 @@ public class FIRE implements PlugIn {
           try {
             // The future .get() method will block until completed
             futures.get(t).get();
-          } catch (final Exception e) {
+          } catch (final Exception ex) {
             // This should not happen.
             // Ignore it and allow processing to continue (the number of neighbour samples will just
             // be smaller).
-            e.printStackTrace();
+            ex.printStackTrace();
           }
         }
         IJ.showProgress(1);
@@ -772,8 +772,8 @@ public class FIRE implements PlugIn {
         // Set these for use in FIRE computation
         setCorrectionParameters(qValue, mean, sigma);
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -804,7 +804,7 @@ public class FIRE implements PlugIn {
         nmPerUnit = cal.getDistanceConverter(DistanceUnit.NM).convert(1);
         units = UnitHelper.getShortName(DistanceUnit.NM);
         unit = DistanceUnit.NM;
-      } catch (final ConversionException e) {
+      } catch (final ConversionException ex) {
         IJ.log(TITLE + " Warning: Ignoring invalid distance calibration for primary results");
       }
     } else {
@@ -827,7 +827,7 @@ public class FIRE implements PlugIn {
             // Set to null to mark invalid
             cal2 = null;
           }
-        } catch (final ConversionException e) {
+        } catch (final ConversionException ex) {
           // Set to null to mark invalid
           cal2 = null;
         } finally {
@@ -1545,7 +1545,7 @@ public class FIRE implements PlugIn {
       try {
         final LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
         smooth = loess.smooth(q, l);
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         IJ.error(TITLE, "LOESS smoothing failed");
         return;
       }
@@ -1750,7 +1750,7 @@ public class FIRE implements PlugIn {
         return (next.getValue() < current.getValue()) ? next : current;
       }
       return next;
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       return current;
     }
   }
@@ -1772,7 +1772,7 @@ public class FIRE implements PlugIn {
         return (next.getValue() < current.getValue()) ? next : current;
       }
       return next;
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       return current;
     }
   }
@@ -1792,7 +1792,7 @@ public class FIRE implements PlugIn {
         return (next.getValue() < current.getValue()) ? next : current;
       }
       return next;
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       return current;
     }
   }
@@ -2017,8 +2017,8 @@ public class FIRE implements PlugIn {
         Parameters.isAboveZero("Precision Sigma", sigma);
       }
       Parameters.isAbove("MaxQ", maxQ, minQ);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -2538,7 +2538,7 @@ public class FIRE implements PlugIn {
     try {
       pp = new PrecisionResultProcedure(results);
       pp.getLSEPrecision();
-    } catch (final DataException e) {
+    } catch (final DataException ex) {
       return false;
     }
 
@@ -2585,7 +2585,7 @@ public class FIRE implements PlugIn {
     try {
       initialGuess = guess.guess();
       return fitter.withStartPoint(initialGuess).fit(observations);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // We are expecting TooManyEvaluationsException.
       // Just in case there is another exception type, or the initial estimate failed
       // we catch all exceptions.
@@ -2651,7 +2651,7 @@ public class FIRE implements PlugIn {
     public WorkSettings clone() {
       try {
         return (WorkSettings) super.clone();
-      } catch (final CloneNotSupportedException e) {
+      } catch (final CloneNotSupportedException ex) {
         return null; // Shouldn't happen
       }
     }
@@ -2796,7 +2796,7 @@ public class FIRE implements PlugIn {
             break;
           }
         }
-      } catch (final InterruptedException e) {
+      } catch (final InterruptedException ex) {
         // Ignore
       }
 

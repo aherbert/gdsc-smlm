@@ -398,9 +398,9 @@ public class PrecisionTest {
             new DoubleCircularGaussian(maxx), 1e-3);
         maxx *= 2;
       }
-    } catch (final AssertionError e) {
-      logger.log(TestLogUtils.getRecord(Level.INFO, e.getMessage()));
-      // e.printStackTrace();
+    } catch (final AssertionError ex) {
+      logger.log(TestLogUtils.getRecord(Level.INFO, ex.getMessage()));
+      // ex.printStackTrace();
       return;
     }
     Assertions.fail("Expected different value");
@@ -463,9 +463,9 @@ public class PrecisionTest {
             new DoubleFixedGaussian(maxx), 1e-3);
         maxx *= 2;
       }
-    } catch (final AssertionError e) {
-      logger.log(TestLogUtils.getRecord(Level.INFO, e.getMessage()));
-      // e.printStackTrace();
+    } catch (final AssertionError ex) {
+      logger.log(TestLogUtils.getRecord(Level.INFO, ex.getMessage()));
+      // ex.printStackTrace();
       return;
     }
     Assertions.fail("Expected different value");

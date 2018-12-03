@@ -196,9 +196,9 @@ public class PSFDrift implements PlugIn {
             run(job);
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -577,8 +577,8 @@ public class PSFDrift implements PlugIn {
     for (int i = 0; i < threads.size(); i++) {
       try {
         threads.get(i).join();
-      } catch (final InterruptedException e) {
-        e.printStackTrace();
+      } catch (final InterruptedException ex) {
+        ex.printStackTrace();
       }
     }
     threads.clear();
@@ -904,8 +904,8 @@ public class PSFDrift implements PlugIn {
   private static void put(BlockingQueue<Job> jobs, Job job) {
     try {
       jobs.put(job);
-    } catch (final InterruptedException e) {
-      throw new RuntimeException("Unexpected interruption", e);
+    } catch (final InterruptedException ex) {
+      throw new RuntimeException("Unexpected interruption", ex);
     }
   }
 

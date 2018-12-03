@@ -98,7 +98,7 @@ public class Spot implements Comparable<Spot>, Cloneable {
   public Spot clone() {
     try {
       return (Spot) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       // Ignore
     }
     return null;

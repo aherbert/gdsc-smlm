@@ -131,7 +131,7 @@ public class ImageSourceTest {
     try {
       new MemoryImageSource(w, h, data);
       return true;
-    } catch (final RuntimeException e) {
+    } catch (final RuntimeException ex) {
       return false;
     }
   }

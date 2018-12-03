@@ -1208,7 +1208,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
       try {
         System.out.printf("Waiting for final image\n");
         Thread.sleep(50);
-      } catch (final InterruptedException e) {
+      } catch (final InterruptedException ex) {
         // Ignore
       }
     }

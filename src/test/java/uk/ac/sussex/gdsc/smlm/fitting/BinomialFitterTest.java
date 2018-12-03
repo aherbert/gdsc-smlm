@@ -201,9 +201,9 @@ public class BinomialFitterTest {
       try {
         Assertions.assertEquals(n, fittedN, "Failed to fit n");
         Assertions.assertEquals(p, fittedP, 0.05, "Failed to fit p");
-      } catch (final AssertionError e) {
+      } catch (final AssertionError ex) {
         fail++;
-        logger.info("    " + e.getMessage());
+        logger.info("    " + ex.getMessage());
       }
     }
     Assertions.assertTrue(fail <= FAILURES,
@@ -236,9 +236,9 @@ public class BinomialFitterTest {
       try {
         Assertions.assertEquals(n1, n2, "Failed to match n");
         Assertions.assertEquals(p1, p2, 0.05, "Failed to match p");
-      } catch (final AssertionError e) {
+      } catch (final AssertionError ex) {
         fail++;
-        logger.info("    " + e.getMessage());
+        logger.info("    " + ex.getMessage());
       }
       if (Math.abs(p1 - p) < Math.abs(p2 - p)) {
         c1++;

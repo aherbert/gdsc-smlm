@@ -185,7 +185,7 @@ public class Workflow<S, R> {
               ((WorkStack) outbox[i]).addWork(result);
             }
           }
-        } catch (final InterruptedException e) {
+        } catch (final InterruptedException ex) {
           debug(" Interrupted, stopping");
           break;
         }
@@ -366,9 +366,9 @@ public class Workflow<S, R> {
         // Stop immediately any running worker
         try {
           t.interrupt();
-        } catch (final SecurityException e) {
+        } catch (final SecurityException ex) {
           // We should have permission to interrupt this thread.
-          e.printStackTrace();
+          ex.printStackTrace();
         }
       } else {
         // Stop after the current work in the inbox
@@ -383,7 +383,7 @@ public class Workflow<S, R> {
         // Leave to finish their current work
         try {
           t.join(0);
-        } catch (final InterruptedException e) {
+        } catch (final InterruptedException ex) {
           // Ignore
         }
       }

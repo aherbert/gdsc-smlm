@@ -111,7 +111,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
   protected void write(String data) {
     try {
       fos.write(data.getBytes());
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       closeOutput();
     }
   }
@@ -195,7 +195,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
 
     try {
       fos.close();
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore exception
     } finally {
       fos = null;
@@ -218,7 +218,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
         buffer.flush();
         writeResult(1, bytes);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Do nothing - This result will not be added to the file
       return;
     }
@@ -279,7 +279,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
         buffer.flush();
         writeResult(1, bytes);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Do nothing - This result will not be added to the file
       return;
     }
@@ -318,7 +318,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
         buffer.flush();
         writeResult(count, bytes);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Do nothing - This result will not be added to the file
       return;
     }

@@ -163,8 +163,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
       Parameters.isPositive("Increments", increments);
       Parameters.isAboveZero("Delta", delta);
       Parameters.isPositive("Beta", beta);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -254,7 +254,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
      * PeakResult p2 = ((PeakResultPoint) pair.getPoint2()).peakResult; r1.add(p1); r2.add(p2);
      * o.write(Float.toString(p1.getSignal())); o.write('\t');
      * o.write(Float.toString(p2.getSignal())); o.write('\n'); } o.close(); r1.end(); r2.end(); }
-     * catch (Exception e) { e.printStackTrace(); }
+     * catch (Exception ex) { e.printStackTrace(); }
      */
 
     final boolean doIdAnalysis1 = (idAnalysis) ? haveIds(results1) : false;

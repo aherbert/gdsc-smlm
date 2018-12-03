@@ -181,7 +181,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
           }
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Ignore
     }
 
@@ -274,7 +274,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
     if (new File(filename).exists()) {
       try {
         return new FileInputStream(filename);
-      } catch (final FileNotFoundException e) {
+      } catch (final FileNotFoundException ex) {
         // Ignore and resort to default
       }
     }
@@ -320,7 +320,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
       if (addSpacer) {
         try {
           ij.Menus.getImageJMenu("Plugins").addSeparator();
-        } catch (final NoSuchMethodError e) {
+        } catch (final NoSuchMethodError ex) {
           // Ignore. This ImageJ method is from IJ 1.48+
         }
       }

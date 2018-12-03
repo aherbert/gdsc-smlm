@@ -575,7 +575,7 @@ public class TraceManager {
       if (calibration != null) {
         try {
           converter = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
-        } catch (final ConversionException e) {
+        } catch (final ConversionException ex) {
           // Ignore
         }
       }

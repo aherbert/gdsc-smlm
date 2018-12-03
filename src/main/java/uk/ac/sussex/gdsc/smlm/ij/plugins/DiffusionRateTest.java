@@ -763,8 +763,8 @@ public class DiffusionRateTest implements PlugIn {
       Parameters.isAboveZero("Magnification", magnification);
       Parameters.isAboveZero("Confinement attempts", confinementAttempts);
       Parameters.isAboveZero("Fit N", fitN);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -1326,8 +1326,8 @@ public class DiffusionRateTest implements PlugIn {
         out.write(Double.toString(d));
         out.write(newLine);
       }
-    } catch (final Exception e) {
-      e.printStackTrace(); // Show the error
+    } catch (final Exception ex) {
+      ex.printStackTrace(); // Show the error
     }
   }
 }

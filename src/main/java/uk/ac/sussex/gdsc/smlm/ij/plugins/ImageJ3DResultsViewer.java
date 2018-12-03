@@ -1164,9 +1164,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         }
 
         IJ.showStatus("Drawing 3D content ... " + seconds);
-      } catch (final InterruptedException e) {
+      } catch (final InterruptedException ex) {
         break;
-      } catch (final ExecutionException e) {
+      } catch (final ExecutionException ex) {
         break;
       }
     }
@@ -1253,8 +1253,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         size[j++] = new Point3f(v, v, v);
       }
       return size;
-    } catch (final DataException e) {
-      IJ.error(TITLE, "The results have no precision: " + e.getMessage());
+    } catch (final DataException ex) {
+      IJ.error(TITLE, "The results have no precision: " + ex.getMessage());
       return null;
     }
   }
@@ -1741,7 +1741,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             final int blue = Integer.parseInt(split[2]);
             highlightColor = new Color3f(new Color(red, green, blue));
             return;
-          } catch (final NumberFormatException e) {
+          } catch (final NumberFormatException ex) {
             // Ignore
           }
         }

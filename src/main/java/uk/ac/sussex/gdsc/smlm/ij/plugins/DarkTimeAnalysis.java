@@ -145,8 +145,8 @@ public class DarkTimeAnalysis implements PlugIn {
     try {
       Parameters.isAboveZero("Search distance", searchDistance);
       Parameters.isPositive("Percentile", percentile);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

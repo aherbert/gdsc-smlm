@@ -1127,9 +1127,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       double widthMax;
       try {
         widthMax = getWidthMax();
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         if (getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
-          throw e;
+          throw ex;
         }
         // This is OK as the full astigmatism model may not have been set yet.
         // Just use a dummy value of 1
@@ -2314,7 +2314,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
           // This may be slow due to the integration required within the formula.
           variance = Gaussian2DPeakResultHelper.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal,
               Math.max(0, localBackground), emCCD);
-        } catch (final Exception e) {
+        } catch (final Exception ex) {
           // Catch all exceptions. They are likely to be a TooManyIterationsException and other
           // problems with the integration
           variance = Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, nmPerPixel * sd, signal,
@@ -2329,7 +2329,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         // This may be slow due to the integration required within the formula.
         variance = Gaussian2DPeakResultHelper.getMLVariance(nmPerPixel, nmPerPixel * sd, signal,
             noise, emCCD);
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Catch all exceptions. They are likely to be a TooManyIterationsException and other
         // problems with the integration
         variance = Gaussian2DPeakResultHelper.getVariance(nmPerPixel, nmPerPixel * sd, signal,

@@ -364,7 +364,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
       final double[] pnew;
       try {
         pnew = lineSearch.lineSearch(p, fp, g, xi);
-      } catch (final LineSearchRoundoffException e) {
+      } catch (final LineSearchRoundoffException ex) {
         // This can happen if the Hessian is nearly singular or non-positive-definite.
         // In this case the algorithm should be restarted.
         converged = ROUNDOFF_ERROR;

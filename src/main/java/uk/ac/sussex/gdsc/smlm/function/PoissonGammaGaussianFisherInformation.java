@@ -551,7 +551,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
           sum = oldSum;
           break;
         }
-      } catch (final IllegalArgumentException e) {
+      } catch (final IllegalArgumentException ex) {
         // Occurs when the convolution has grown too big
         break;
       }
@@ -1169,7 +1169,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       final double start = (t < 1) ? 0 : mean;
       pair = opt.optimize(new SearchInterval(0, mean * 1.5, start), GoalType.MAXIMIZE,
           new MaxEval(50000), new UnivariateObjectiveFunction(f));
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       // This should not occur with the quick checker fixed iterations
       // - just get the current best
       pair = checker.getBest();

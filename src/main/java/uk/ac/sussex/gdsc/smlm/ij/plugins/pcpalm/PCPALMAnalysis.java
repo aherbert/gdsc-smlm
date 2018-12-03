@@ -200,7 +200,7 @@ public class PCPALMAnalysis implements PlugInFilter {
     } catch (final XStreamException ex) {
       // ex.printStackTrace();
       IJ.log("Failed to save correlation result to file: " + outputFilename);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       IJ.log("Failed to save correlation result to file: " + outputFilename);
     }
   }
@@ -263,7 +263,7 @@ public class PCPALMAnalysis implements PlugInFilter {
     } catch (final XStreamException ex) {
       // ex.printStackTrace();
       IJ.log("Failed to load correlation result from file: " + path);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       IJ.log("Failed to load correlation result from file: " + path);
     }
     return false;
@@ -649,7 +649,7 @@ public class PCPALMAnalysis implements PlugInFilter {
       try {
         // Use the FFT library as it is multi-threaded. This may not be in the user's path.
         gr = computeAutoCorrelationCurveFFT(im, w, pad, nmPerPixel, peakDensity);
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Default to the ImageJ built-in FHT
         gr = computeAutoCorrelationCurveFHT(im, w, pad, nmPerPixel, peakDensity);
       }

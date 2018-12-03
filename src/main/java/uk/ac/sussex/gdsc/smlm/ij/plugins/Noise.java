@@ -118,8 +118,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
 
     try {
       createCameraModel();
-    } catch (final Exception e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final Exception ex) {
+      IJ.error(TITLE, ex.getMessage());
       return DONE;
     }
 

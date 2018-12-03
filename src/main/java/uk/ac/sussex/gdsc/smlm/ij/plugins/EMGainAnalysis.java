@@ -409,9 +409,9 @@ public class EMGainAnalysis implements PlugInFilter {
           }
           solution = optimum;
         }
-      } catch (final Exception e) {
-        IJ.log("Powell error: " + e.getMessage());
-        if (e instanceof TooManyEvaluationsException) {
+      } catch (final Exception ex) {
+        IJ.log("Powell error: " + ex.getMessage());
+        if (ex instanceof TooManyEvaluationsException) {
           maxEval = (int) (maxEval * 1.5);
         }
       }
@@ -429,9 +429,9 @@ public class EMGainAnalysis implements PlugInFilter {
         if (solution == null || optimum.getValue() < solution.getValue()) {
           solution = optimum;
         }
-      } catch (final Exception e) {
-        IJ.log("Bounded Powell error: " + e.getMessage());
-        if (e instanceof TooManyEvaluationsException) {
+      } catch (final Exception ex) {
+        IJ.log("Bounded Powell error: " + ex.getMessage());
+        if (ex instanceof TooManyEvaluationsException) {
           maxEval = (int) (maxEval * 1.5);
         }
       }

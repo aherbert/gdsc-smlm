@@ -433,7 +433,7 @@ public class CameraModelAnalysis
     double p = Double.NaN;
     try {
       p = 1d - kolmogorovSmirnovTest.cdf(distance, n);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore
     }
 

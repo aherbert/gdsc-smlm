@@ -331,9 +331,9 @@ public class PeakResultTableModel extends AbstractTableModel {
             return 0.0;
           }
         };
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         // Ignore
-      } catch (final ConversionException e) {
+      } catch (final ConversionException ex) {
         // Ignore
       }
       if (p == null) {

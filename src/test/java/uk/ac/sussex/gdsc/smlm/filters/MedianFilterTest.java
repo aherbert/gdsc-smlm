@@ -30,8 +30,8 @@ public class MedianFilterTest extends AbstractFilterTest {
       // TestAssertions.assertArrayTest(data1, data2, TestHelper.almostEqualFloats(boxSize, 0) *
       // boxSize * 1e-3);
       TestAssertions.assertArrayTest(data1, data2, equality);
-    } catch (final AssertionError e) {
-      throw new AssertionError(String.format(format, args), e);
+    } catch (final AssertionError ex) {
+      throw new AssertionError(String.format(format, args), ex);
     }
   }
 

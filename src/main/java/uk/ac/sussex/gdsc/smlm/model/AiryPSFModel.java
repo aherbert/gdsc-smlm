@@ -161,8 +161,8 @@ public class AiryPSFModel extends PSFModel {
       final double d =
           airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, poissonNoise);
       return d;
-    } catch (final IllegalArgumentException e) {
-      // System.out.println(e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      // System.out.println(ex.getMessage());
       return 0;
     }
   }
@@ -177,8 +177,8 @@ public class AiryPSFModel extends PSFModel {
     final double scale = createWidthScale(x2);
     try {
       return airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, poissonNoise);
-    } catch (final IllegalArgumentException e) {
-      // System.out.println(e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      // System.out.println(ex.getMessage());
       return 0;
     }
   }

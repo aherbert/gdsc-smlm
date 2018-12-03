@@ -183,16 +183,16 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
 
       // We should not reach here unless we missed something
       return FitStatus.FAILED_TO_CONVERGE;
-    } catch (final FunctionSolverException e) {
+    } catch (final FunctionSolverException ex) {
       // XXX - debugging
-      final String msg = e.getMessage();
+      final String msg = ex.getMessage();
       if (msg != null) {
-        System.out.printf("%s failed: %s - %s\n", getClass().getSimpleName(), e.fitStatus.getName(),
+        System.out.printf("%s failed: %s - %s\n", getClass().getSimpleName(), ex.fitStatus.getName(),
             msg);
       } else {
-        System.out.printf("%s failed: %s\n", getClass().getSimpleName(), e.fitStatus.getName());
+        System.out.printf("%s failed: %s\n", getClass().getSimpleName(), ex.fitStatus.getName());
       }
-      return e.fitStatus;
+      return ex.fitStatus;
     } finally {
       iterations = tc.getIterations();
       // Allow subclasses to increment this
@@ -217,7 +217,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Prepare y for fitting, e.g. ensure strictly positive values.
+   * Prepare y for fitting, ex.g. ensure strictly positive values.
    *
    * @param y the y
    * @param a the parameters
@@ -277,7 +277,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * {@link #computeFitValue(double[])}. This can be used to set the covariances for each of the
    * fitted parameters. <p> Alternatively a sub-class can override
    * {@link #computeDeviationsAndValues(double[], double[])} directly and provide a dummy
-   * implementation of this function as it will not be used, e.g. throw an exception.
+   * implementation of this function as it will not be used, ex.g. throw an exception.
    *
    * @param yFit the y fit (may be null)
    * @return the Fisher Information matrix
@@ -289,7 +289,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * {@link #computeFitValue(double[])}. <p> Utility method to compute the function values using the
    * preinitialised function. Sub-classes may override this if they have cached the function values
    * from the last execution of a forEach procedure. <p> The base gradient function is used. If
-   * sub-classes wrap the function (e.g. with per-observation weights) then these will be omitted.
+   * sub-classes wrap the function (ex.g. with per-observation weights) then these will be omitted.
    *
    * @param yFit the y fit values
    */
@@ -328,7 +328,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Prepare y for computing the function value, e.g. ensure strictly positive values.
+   * Prepare y for computing the function value, ex.g. ensure strictly positive values.
    *
    * @param y the y
    * @param a the parameters
@@ -354,7 +354,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Prepare y for computing the Fisher information matrix, e.g. ensure strictly positive values.
+   * Prepare y for computing the Fisher information matrix, ex.g. ensure strictly positive values.
    *
    * @param y the y
    * @param a the parameters
@@ -388,7 +388,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   /**
    * Warning: If the function is changed then the clamp values may require updating. However setting
    * a new function does not set the clamp values to null to allow caching when the clamp values are
-   * unchanged, e.g. evaluation of a different function in the same parameter space. <p> Setting a
+   * unchanged, ex.g. evaluation of a different function in the same parameter space. <p> Setting a
    * new function removes the current bounds.
    *
    * @param f the new gradient function
@@ -413,7 +413,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Gets the weights for observations of size n, e.g. the per observation variance term.
+   * Gets the weights for observations of size n, ex.g. the per observation variance term.
    *
    * @param n the size
    * @return the weights

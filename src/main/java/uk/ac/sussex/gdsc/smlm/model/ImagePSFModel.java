@@ -440,7 +440,7 @@ public class ImagePSFModel extends PSFModel {
       double x0, double x1, double x2, boolean poissonNoise) {
     try {
       return drawPSF(data, width, height, sum, x0, x1, x2, poissonNoise);
-    } catch (final IllegalArgumentException e) {
+    } catch (final IllegalArgumentException ex) {
       return 0;
     }
   }
@@ -451,7 +451,7 @@ public class ImagePSFModel extends PSFModel {
       double x0, double x1, double x2, boolean poissonNoise) {
     try {
       return drawPSF(data, width, height, sum, x0, x1, x2, poissonNoise);
-    } catch (final IllegalArgumentException e) {
+    } catch (final IllegalArgumentException ex) {
       return 0;
     }
   }

@@ -427,8 +427,8 @@ public class AstigmatismModelManager implements PlugIn {
     // Check arguments
     try {
       Parameters.isPositive("nm/slice", pluginSettings.getNmPerSlice());
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -576,8 +576,8 @@ public class AstigmatismModelManager implements PlugIn {
         Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
         Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -934,8 +934,8 @@ public class AstigmatismModelManager implements PlugIn {
       plotFit(parameters);
 
       saveResult(optimum);
-    } catch (final Exception e) {
-      IJ.error(TITLE, "Failed to fit curve: " + e.getMessage());
+    } catch (final Exception ex) {
+      IJ.error(TITLE, "Failed to fit curve: " + ex.getMessage());
       return false;
     }
 
@@ -1394,8 +1394,8 @@ public class AstigmatismModelManager implements PlugIn {
 
     try {
       model = convert(model, pluginSettings.getZDistanceUnit(), pluginSettings.getSDistanceUnit());
-    } catch (final ConversionException e) {
-      ImageJUtils.log("Bad conversion (%s), defaulting to native model units", e.getMessage());
+    } catch (final ConversionException ex) {
+      ImageJUtils.log("Bad conversion (%s), defaulting to native model units", ex.getMessage());
     }
 
     ImageJUtils.log("Astigmatism model: %s\n%s", name, model);

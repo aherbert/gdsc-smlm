@@ -87,8 +87,8 @@ public class TranslateResults implements PlugIn {
     TypeConverter<DistanceUnit> c;
     try {
       c = results.getDistanceConverter(settings.getDistanceUnit());
-    } catch (final DataException e) {
-      IJ.error(TITLE, "Unit conversion error: " + e.getMessage());
+    } catch (final DataException ex) {
+      IJ.error(TITLE, "Unit conversion error: " + ex.getMessage());
       return;
     }
 

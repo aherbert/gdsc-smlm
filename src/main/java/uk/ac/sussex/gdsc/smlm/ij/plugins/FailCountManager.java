@@ -477,8 +477,8 @@ public class FailCountManager implements PlugIn {
     settings.setSaveAfterFitting(gd.getNextBoolean());
     try {
       Parameters.isAboveZero("Max frames", settings.getMaxFrames());
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
     return true;
@@ -563,10 +563,10 @@ public class FailCountManager implements PlugIn {
 
       IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(failCountData.size(), "sequence"));
       FailCountManager.failCountData = failCountData;
-    } catch (final NumberFormatException e) {
-      IJ.error(TITLE, "Failed to load data:\n" + e.getMessage());
-    } catch (final IOException e) {
-      IJ.error(TITLE, "Failed to load data:\n" + e.getMessage());
+    } catch (final NumberFormatException ex) {
+      IJ.error(TITLE, "Failed to load data:\n" + ex.getMessage());
+    } catch (final IOException ex) {
+      IJ.error(TITLE, "Failed to load data:\n" + ex.getMessage());
     }
   }
 
@@ -641,8 +641,8 @@ public class FailCountManager implements PlugIn {
           bw.newLine();
         }
       }
-    } catch (final IOException e) {
-      IJ.error(TITLE, "Failed to save data:\n" + e.getMessage());
+    } catch (final IOException ex) {
+      IJ.error(TITLE, "Failed to save data:\n" + ex.getMessage());
     }
   }
 
@@ -725,7 +725,7 @@ public class FailCountManager implements PlugIn {
           }
           run(plotData);
           lastPlotData = plotData;
-        } catch (final InterruptedException e) {
+        } catch (final InterruptedException ex) {
           // Thread.currentThread().interrupt();
           break;
         }
@@ -1194,8 +1194,8 @@ public class FailCountManager implements PlugIn {
           settings.getResettingCounterIncResetFraction());
       Parameters.isAboveZero("Pass rate counter inc pass rate",
           settings.getPassRateCounterIncPassRate());
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
     return true;

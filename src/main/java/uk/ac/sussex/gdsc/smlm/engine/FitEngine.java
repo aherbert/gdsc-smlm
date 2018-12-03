@@ -206,9 +206,9 @@ public class FitEngine {
   private void put(FitJob job) {
     try {
       jobs.put(job);
-    } catch (final InterruptedException e) {
+    } catch (final InterruptedException ex) {
       // TODO - Handle thread errors
-      throw new RuntimeException("Unexpected interruption", e);
+      throw new RuntimeException("Unexpected interruption", ex);
     }
   }
 
@@ -249,9 +249,9 @@ public class FitEngine {
       try {
         threads.get(i).join();
         time += workers.get(i).getTime();
-      } catch (final InterruptedException e) {
+      } catch (final InterruptedException ex) {
         // TODO - Handle thread errors
-        e.printStackTrace();
+        ex.printStackTrace();
       }
     }
 

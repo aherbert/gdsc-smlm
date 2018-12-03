@@ -662,7 +662,7 @@ public class LVMGradientProcedureTest {
         gradientProcedureComputesGradient(seed,
             new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FastLogMLE,
             false);
-      } catch (final AssertionError e) {
+      } catch (final AssertionError ex) {
         continue;
       } finally {
         // Reset

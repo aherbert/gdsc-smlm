@@ -292,7 +292,7 @@ public class FRC {
     public FRCCurveResult clone() {
       try {
         return (FRCCurveResult) super.clone();
-      } catch (final CloneNotSupportedException e) {
+      } catch (final CloneNotSupportedException ex) {
         return null; // This should not happen
       }
     }
@@ -375,7 +375,7 @@ public class FRC {
     protected FRCCurve clone() {
       try {
         return (FRCCurve) super.clone();
-      } catch (final CloneNotSupportedException e) {
+      } catch (final CloneNotSupportedException ex) {
         return null; // This should not happen
       }
     }
@@ -1245,8 +1245,8 @@ public class FRC {
       for (int i = 0; i < frcCurve.getSize(); i++) {
         frcCurve.get(i).setCorrelation(ySmoothed[i]);
       }
-    } catch (final Exception e) {
-      e.printStackTrace();
+    } catch (final Exception ex) {
+      ex.printStackTrace();
     }
 
     return frcCurve;

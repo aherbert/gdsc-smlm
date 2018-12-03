@@ -261,7 +261,7 @@ public class FitType implements Cloneable {
   public FitType clone() {
     try {
       return (FitType) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

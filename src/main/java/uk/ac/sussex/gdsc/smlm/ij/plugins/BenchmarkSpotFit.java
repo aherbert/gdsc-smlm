@@ -675,7 +675,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     public FilterCandidates clone() {
       try {
         return (FilterCandidates) super.clone();
-      } catch (final CloneNotSupportedException e) {
+      } catch (final CloneNotSupportedException ex) {
         return null;
       }
     }
@@ -745,9 +745,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
             run(job.intValue());
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -1367,8 +1367,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     for (int i = 0; i < threads.size(); i++) {
       try {
         threads.get(i).join();
-      } catch (final InterruptedException e) {
-        e.printStackTrace();
+      } catch (final InterruptedException ex) {
+        ex.printStackTrace();
       }
     }
     threads.clear();
@@ -1602,8 +1602,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private static void put(BlockingQueue<Integer> jobs, int i) {
     try {
       jobs.put(i);
-    } catch (final InterruptedException e) {
-      throw new RuntimeException("Unexpected interruption", e);
+    } catch (final InterruptedException ex) {
+      throw new RuntimeException("Unexpected interruption", ex);
     }
   }
 
@@ -2186,8 +2186,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // Use the instance (not .toXML() method) to allow the exception to be caught
       XStreamWrapper.getInstance().toXML(filterList, fos);
       return true;
-    } catch (final Exception e) {
-      IJ.log("Unable to save the filter set to file: " + e.getMessage());
+    } catch (final Exception ex) {
+      IJ.log("Unable to save the filter set to file: " + ex.getMessage());
     }
     return false;
   }
@@ -2539,7 +2539,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
               max2 = diff;
               maxx2 = x;
             }
-          } catch (final OutOfRangeException e) {
+          } catch (final OutOfRangeException ex) {
             // Because we reached the end
             break;
           }

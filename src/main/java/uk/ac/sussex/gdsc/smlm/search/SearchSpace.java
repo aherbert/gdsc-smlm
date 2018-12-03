@@ -544,9 +544,9 @@ public class SearchSpace {
           }
         }
       }
-    } catch (final ArrayIndexOutOfBoundsException e) {
+    } catch (final ArrayIndexOutOfBoundsException ex) {
       // Return false
-      e.printStackTrace();
+      ex.printStackTrace();
       n = -1;
     }
 

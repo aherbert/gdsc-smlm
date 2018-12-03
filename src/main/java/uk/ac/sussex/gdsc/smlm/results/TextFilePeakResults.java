@@ -124,8 +124,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
   protected void openOutput() {
     try {
       out = new OutputStreamWriter(fos, "UTF-8");
-    } catch (final UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+    } catch (final UnsupportedEncodingException ex) {
+      throw new RuntimeException(ex);
     }
   }
 
@@ -133,7 +133,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
   protected void write(String data) {
     try {
       out.write(data);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       closeOutput();
     }
   }
@@ -147,7 +147,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     try {
       // Make sure we close the writer since it may be buffered
       out.close();
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore exception
     } finally {
       fos = null;
@@ -167,9 +167,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
           calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
               Gaussian2DPeakResultHelper.LSE_PRECISION);
           canComputePrecision = true;
-        } catch (final ConfigurationException e) {
+        } catch (final ConfigurationException ex) {
           // Ignore
-        } catch (final ConversionException e) {
+        } catch (final ConversionException ex) {
           // Ignore
         }
       }
@@ -551,9 +551,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
           // The peak is the second column
           slice = scanner.nextInt();
         }
-      } catch (final InputMismatchException e) {
+      } catch (final InputMismatchException ex) {
         // Ignore
-      } catch (final NoSuchElementException e) {
+      } catch (final NoSuchElementException ex) {
         // Ignore
       }
     }

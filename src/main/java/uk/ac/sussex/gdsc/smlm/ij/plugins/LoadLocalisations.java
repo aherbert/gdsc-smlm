@@ -334,18 +334,18 @@ public class LoadLocalisations implements PlugIn {
           }
 
           localisations.add(l);
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException ex) {
           if (errors++ == 0) {
-            ImageJUtils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
+            ImageJUtils.log("%s error on record %d: %s", TITLE, count, ex.getMessage());
           }
-        } catch (final IndexOutOfBoundsException e) {
+        } catch (final IndexOutOfBoundsException ex) {
           if (errors++ == 0) {
-            ImageJUtils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
+            ImageJUtils.log("%s error on record %d: %s", TITLE, count, ex.getMessage());
           }
         }
       }
-    } catch (final IOException e) {
-      ImageJUtils.log("%s IO error: %s", TITLE, e.getMessage());
+    } catch (final IOException ex) {
+      ImageJUtils.log("%s IO error: %s", TITLE, ex.getMessage());
     }
     if (errors != 0) {
       ImageJUtils.log("%s has %d / %d error lines", TITLE, errors, count);

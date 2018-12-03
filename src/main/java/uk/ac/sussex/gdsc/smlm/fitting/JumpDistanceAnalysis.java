@@ -356,12 +356,12 @@ public class JumpDistanceAnalysis {
             lvmSolution.getEvaluations());
 
         return new double[][] {coefficients, fractions};
-      } catch (final TooManyIterationsException e) {
+      } catch (final TooManyIterationsException ex) {
         LoggerUtils.log(logger, Level.INFO,
-            "LVM optimiser failed to fit (N=1) : Too many iterations : %s", e.getMessage());
-      } catch (final ConvergenceException e) {
+            "LVM optimiser failed to fit (N=1) : Too many iterations : %s", ex.getMessage());
+      } catch (final ConvergenceException ex) {
         LoggerUtils.log(logger, Level.INFO, "LVM optimiser failed to fit (N=1) : %s",
-            e.getMessage());
+            ex.getMessage());
       }
     }
 
@@ -392,17 +392,17 @@ public class JumpDistanceAnalysis {
       evaluations = powellOptimizer.getEvaluations();
       LoggerUtils.log(logger, Level.FINE, "Powell optimiser fit (N=%d) : SS = %f (%d evaluations)",
           n, constrainedSolution.getValue(), evaluations);
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       LoggerUtils.log(logger, Level.INFO,
           "Powell optimiser failed to fit (N=%d) : Too many evaluations (%d)", n,
           powellOptimizer.getEvaluations());
-    } catch (final TooManyIterationsException e) {
+    } catch (final TooManyIterationsException ex) {
       LoggerUtils.log(logger, Level.INFO,
           "Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n,
           powellOptimizer.getIterations());
-    } catch (final ConvergenceException e) {
+    } catch (final ConvergenceException ex) {
       LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : %s", n,
-          e.getMessage());
+          ex.getMessage());
     }
 
     if (constrainedSolution == null) {
@@ -437,7 +437,7 @@ public class JumpDistanceAnalysis {
                 "CMAES optimiser [%da] fit (N=%d) : SS = %f (%d evaluations)", i, n,
                 solution.getValue(), evaluations);
           }
-        } catch (final TooManyEvaluationsException e) {
+        } catch (final TooManyEvaluationsException ex) {
           // No solution
         }
 
@@ -457,7 +457,7 @@ public class JumpDistanceAnalysis {
                 "CMAES optimiser [%db] fit (N=%d) : SS = %f (%d evaluations)", i, n,
                 solution.getValue(), evaluations);
           }
-        } catch (final TooManyEvaluationsException e) {
+        } catch (final TooManyEvaluationsException ex) {
           // No solution
         }
       }
@@ -477,11 +477,11 @@ public class JumpDistanceAnalysis {
                 "Powell optimiser re-fit (N=%d) : SS = %f (%d evaluations)", n,
                 constrainedSolution.getValue(), evaluations);
           }
-        } catch (final TooManyEvaluationsException e) {
+        } catch (final TooManyEvaluationsException ex) {
           // No solution
-        } catch (final TooManyIterationsException e) {
+        } catch (final TooManyIterationsException ex) {
           // No solution
-        } catch (final ConvergenceException e) {
+        } catch (final ConvergenceException ex) {
           // No solution
         }
       }
@@ -536,11 +536,11 @@ public class JumpDistanceAnalysis {
         this.ss = ss;
         evaluations += lvmSolution.getEvaluations();
       }
-    } catch (final TooManyIterationsException e) {
+    } catch (final TooManyIterationsException ex) {
       LoggerUtils.log(logger, Level.WARNING, "Failed to re-fit : Too many iterations : %s",
-          e.getMessage());
-    } catch (final ConvergenceException e) {
-      LoggerUtils.log(logger, Level.WARNING, "Failed to re-fit : %s", e.getMessage());
+          ex.getMessage());
+    } catch (final ConvergenceException ex) {
+      LoggerUtils.log(logger, Level.WARNING, "Failed to re-fit : %s", ex.getMessage());
     }
 
     // Since the fractions must sum to one we subtract 1 degree of freedom from the number of
@@ -839,17 +839,17 @@ public class JumpDistanceAnalysis {
             powellOptimizer.getEvaluations());
 
         return new double[][] {coefficients, fractions};
-      } catch (final TooManyEvaluationsException e) {
+      } catch (final TooManyEvaluationsException ex) {
         LoggerUtils.log(logger, Level.INFO,
             "Powell optimiser failed to fit (N=1) : Too many evaluation (%d)",
             powellOptimizer.getEvaluations());
-      } catch (final TooManyIterationsException e) {
+      } catch (final TooManyIterationsException ex) {
         LoggerUtils.log(logger, Level.INFO,
             "Powell optimiser failed to fit (N=1) : Too many iterations (%d)",
             powellOptimizer.getIterations());
-      } catch (final ConvergenceException e) {
+      } catch (final ConvergenceException ex) {
         LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=1) : %s",
-            e.getMessage());
+            ex.getMessage());
       }
 
       return null;
@@ -874,17 +874,17 @@ public class JumpDistanceAnalysis {
       evaluations = powellOptimizer.getEvaluations();
       LoggerUtils.log(logger, Level.FINE, "Powell optimiser fit (N=%d) : MLE = %f (%d evaluations)",
           n, constrainedSolution.getValue(), powellOptimizer.getEvaluations());
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       LoggerUtils.log(logger, Level.INFO,
           "Powell optimiser failed to fit (N=%d) : Too many evaluation (%d)", n,
           powellOptimizer.getEvaluations());
-    } catch (final TooManyIterationsException e) {
+    } catch (final TooManyIterationsException ex) {
       LoggerUtils.log(logger, Level.INFO,
           "Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n,
           powellOptimizer.getIterations());
-    } catch (final ConvergenceException e) {
+    } catch (final ConvergenceException ex) {
       LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : %s", n,
-          e.getMessage());
+          ex.getMessage());
     }
 
     if (constrainedSolution == null) {
@@ -923,7 +923,7 @@ public class JumpDistanceAnalysis {
                 "CMAES optimiser [%da] fit (N=%d) : MLE = %f (%d evaluations)", i, n,
                 solution.getValue(), evaluations);
           }
-        } catch (final TooManyEvaluationsException e) {
+        } catch (final TooManyEvaluationsException ex) {
           // No solution
         }
 
@@ -943,7 +943,7 @@ public class JumpDistanceAnalysis {
                 "CMAES optimiser [%db] fit (N=%d) : MLE = %f (%d evaluations)", i, n,
                 solution.getValue(), evaluations);
           }
-        } catch (final TooManyEvaluationsException e) {
+        } catch (final TooManyEvaluationsException ex) {
           // No solution
         }
       }
@@ -963,11 +963,11 @@ public class JumpDistanceAnalysis {
                 "Powell optimiser re-fit (N=%d) : MLE = %f (%d evaluations)", n,
                 constrainedSolution.getValue(), powellOptimizer.getEvaluations());
           }
-        } catch (final TooManyEvaluationsException e) {
+        } catch (final TooManyEvaluationsException ex) {
           // No solution
-        } catch (final TooManyIterationsException e) {
+        } catch (final TooManyIterationsException ex) {
           // No solution
-        } catch (final ConvergenceException e) {
+        } catch (final ConvergenceException ex) {
           // No solution
         }
       }

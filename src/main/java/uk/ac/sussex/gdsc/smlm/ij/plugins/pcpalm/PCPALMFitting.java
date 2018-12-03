@@ -330,8 +330,8 @@ public class PCPALMFitting implements PlugIn {
       while (selectNextCorrelation(results)) {
         // All processing done in selectNextCorrelation
       }
-    } catch (final Exception e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final Exception ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -414,7 +414,7 @@ public class PCPALMFitting implements PlugIn {
           return true;
         }
       }
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore
     }
     return false;
@@ -645,9 +645,9 @@ public class PCPALMFitting implements PlugIn {
           }
           output.newLine();
         }
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Q. Add better handling of errors?
-        e.printStackTrace();
+        ex.printStackTrace();
         IJ.log("Failed to save correlation curve to file: " + outputFilename);
       }
     }
@@ -716,7 +716,7 @@ public class PCPALMFitting implements PlugIn {
             try {
               peakDensity = Double.parseDouble(match.group(2));
               peakDensitySet = true;
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException ex) {
               // Ignore this.
             }
           }
@@ -750,10 +750,10 @@ public class PCPALMFitting implements PlugIn {
           try {
             r = scanner.nextDouble();
             g = scanner.nextDouble();
-          } catch (final InputMismatchException e) {
+          } catch (final InputMismatchException ex) {
             IJ.error(TITLE, "Incorrect fields on line " + count);
             return false;
-          } catch (final NoSuchElementException e) {
+          } catch (final NoSuchElementException ex) {
             IJ.error(TITLE, "Incorrect fields on line " + count);
             return false;
           }
@@ -761,9 +761,9 @@ public class PCPALMFitting implements PlugIn {
           double error = 0;
           try {
             error = scanner.nextDouble();
-          } catch (final InputMismatchException e) {
+          } catch (final InputMismatchException ex) {
             // Ignore
-          } catch (final NoSuchElementException e) {
+          } catch (final NoSuchElementException ex) {
             // Ignore
           }
           data.add(new double[] {r, g, error});
@@ -787,7 +787,7 @@ public class PCPALMFitting implements PlugIn {
         gr[2][i] = d[2];
       }
 
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       IJ.error(TITLE, "Unable to read from file " + inputFilename);
       return false;
     }
@@ -843,11 +843,11 @@ public class PCPALMFitting implements PlugIn {
       //@formatter:on
 
       optimum = optimizer.optimize(problem);
-    } catch (final TooManyIterationsException e) {
-      log("Failed to fit %s: Too many iterations (%s)", randomModel.getName(), e.getMessage());
+    } catch (final TooManyIterationsException ex) {
+      log("Failed to fit %s: Too many iterations (%s)", randomModel.getName(), ex.getMessage());
       return null;
-    } catch (final ConvergenceException e) {
-      log("Failed to fit %s: %s", randomModel.getName(), e.getMessage());
+    } catch (final ConvergenceException ex) {
+      log("Failed to fit %s: %s", randomModel.getName(), ex.getMessage());
       return null;
     }
 
@@ -1027,11 +1027,11 @@ public class PCPALMFitting implements PlugIn {
                   100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
           parameters = lvmSolution.getPoint().toArray();
         }
-      } catch (final TooManyIterationsException e) {
+      } catch (final TooManyIterationsException ex) {
         log("Failed to re-fit %s: Too many iterations (%s)", clusteredModel.getName(),
-            e.getMessage());
-      } catch (final ConvergenceException e) {
-        log("Failed to re-fit %s: %s", clusteredModel.getName(), e.getMessage());
+            ex.getMessage());
+      } catch (final ConvergenceException ex) {
+        log("Failed to re-fit %s: %s", clusteredModel.getName(), ex.getMessage());
       }
     }
 
@@ -1146,9 +1146,9 @@ public class PCPALMFitting implements PlugIn {
           System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(),
               opt.getEvaluations());
         }
-      } catch (final TooManyEvaluationsException e) {
+      } catch (final TooManyEvaluationsException ex) {
         break; // No need to restart
-      } catch (final RuntimeException e) {
+      } catch (final RuntimeException ex) {
         break; // No need to restart
       } finally {
         if (opt != null) {
@@ -1196,9 +1196,9 @@ public class PCPALMFitting implements PlugIn {
         if (optimum == null || constrainedSolution.getValue() < optimum.getValue()) {
           optimum = constrainedSolution;
         }
-      } catch (final TooManyEvaluationsException e) {
+      } catch (final TooManyEvaluationsException ex) {
         // Ignore
-      } catch (final TooManyIterationsException e) {
+      } catch (final TooManyIterationsException ex) {
         // Ignore
       } finally {
         boundedEvaluations += maxEvaluations.getMaxEval();
@@ -1218,9 +1218,9 @@ public class PCPALMFitting implements PlugIn {
         if (constrainedSolution.getValue() < optimum.getValue()) {
           optimum = constrainedSolution;
         }
-      } catch (final TooManyEvaluationsException e) {
+      } catch (final TooManyEvaluationsException ex) {
         // Ignore
-      } catch (final TooManyIterationsException e) {
+      } catch (final TooManyIterationsException ex) {
         // Ignore
       } finally {
         boundedEvaluations += maxEvaluations.getMaxEval();
@@ -1331,11 +1331,11 @@ public class PCPALMFitting implements PlugIn {
                   100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
           parameters = lvmSolution.getPoint().toArray();
         }
-      } catch (final TooManyIterationsException e) {
+      } catch (final TooManyIterationsException ex) {
         log("Failed to re-fit %s: Too many iterations (%s)", emulsionModel.getName(),
-            e.getMessage());
-      } catch (final ConvergenceException e) {
-        log("Failed to re-fit %s: %s", emulsionModel.getName(), e.getMessage());
+            ex.getMessage());
+      } catch (final ConvergenceException ex) {
+        log("Failed to re-fit %s: %s", emulsionModel.getName(), ex.getMessage());
       }
     }
 

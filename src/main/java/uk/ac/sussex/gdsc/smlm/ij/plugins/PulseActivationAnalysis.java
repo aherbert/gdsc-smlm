@@ -1539,9 +1539,9 @@ public class PulseActivationAnalysis
       try {
         // The future .get() method will block until completed
         futures.get(t).get();
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // This should not happen.
-        e.printStackTrace();
+        ex.printStackTrace();
       }
     }
     futures.clear();
@@ -2256,7 +2256,7 @@ public class PulseActivationAnalysis
     magnification = magnificationChoice.getSelectedItem();
     try {
       return Integer.parseInt(magnification);
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       return 1;
     }
   }

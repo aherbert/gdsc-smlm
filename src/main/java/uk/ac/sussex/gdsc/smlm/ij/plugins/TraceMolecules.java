@@ -654,9 +654,9 @@ public class TraceMolecules implements PlugIn {
         file.append(MathUtils.rounded(d, 4));
         file.newLine();
       }
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Q. Add better handling of errors?
-      e.printStackTrace();
+      ex.printStackTrace();
       IJ.log("Failed to save trace data to results directory: " + settings.getTraceDataDirectory());
     }
   }
@@ -762,8 +762,8 @@ public class TraceMolecules implements PlugIn {
       Parameters.isPositive("Pulse interval", settings.getPulseInterval());
       Parameters.isPositive("Pulse window", settings.getPulseWindow());
       // Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -868,8 +868,8 @@ public class TraceMolecules implements PlugIn {
         Parameters.isPositive("Pulse interval", settings.getPulseInterval());
       }
       // Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

@@ -208,7 +208,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
   public HoltzerAstigmatismZModel clone() {
     try {
       return (HoltzerAstigmatismZModel) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

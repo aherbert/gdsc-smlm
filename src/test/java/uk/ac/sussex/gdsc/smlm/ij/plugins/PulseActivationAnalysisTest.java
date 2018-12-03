@@ -80,8 +80,8 @@ public class PulseActivationAnalysisTest {
           }
         }
       }
-    } catch (final AssertionFailedError e) {
-      TestUtils.wrapAssertionFailedError(e, () -> String.format("channels=%d, crosstalk=%d", n, m));
+    } catch (final AssertionFailedError ex) {
+      TestUtils.wrapAssertionFailedError(ex, () -> String.format("channels=%d, crosstalk=%d", n, m));
     }
   }
 
@@ -157,8 +157,8 @@ public class PulseActivationAnalysisTest {
           }
         }
       }
-    } catch (final AssertionFailedError e) {
-      TestUtils.wrapAssertionFailedError(e, () -> String.format("channels=%d, crosstalk=%d", n, m));
+    } catch (final AssertionFailedError ex) {
+      TestUtils.wrapAssertionFailedError(ex, () -> String.format("channels=%d, crosstalk=%d", n, m));
     }
   }
 

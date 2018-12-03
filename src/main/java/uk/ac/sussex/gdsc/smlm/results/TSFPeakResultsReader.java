@@ -110,9 +110,9 @@ public class TSFPeakResultsReader {
         isGDSC = (spotList.getApplicationId() == TSFPeakResultsWriter.APPLICATION_ID);
         isMulti = isMulti(spotList);
       }
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       System.err.println("Failed to read SpotList message");
-      e.printStackTrace();
+      ex.printStackTrace();
     }
 
     return spotList;
@@ -172,7 +172,7 @@ public class TSFPeakResultsReader {
           return true;
         }
       }
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Fail
     }
 
@@ -355,9 +355,9 @@ public class TSFPeakResultsReader {
         }
         results.add(peakResult);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       System.err.println("Failed to read TSF file: " + filename);
-      e.printStackTrace();
+      ex.printStackTrace();
 
       if (expectedSpots == -1) {
         // No attempt to read the spots was made.
@@ -532,7 +532,7 @@ public class TSFPeakResultsReader {
           final PSF.Builder psfBuilder = PSF.newBuilder();
           parser.merge(spotList.getPSF(), psfBuilder);
           results.setPSF(psfBuilder.build());
-        } catch (final InvalidProtocolBufferException e) {
+        } catch (final InvalidProtocolBufferException ex) {
           // This should be OK
           System.err.println("Unable to deserialise the PSF settings");
         }

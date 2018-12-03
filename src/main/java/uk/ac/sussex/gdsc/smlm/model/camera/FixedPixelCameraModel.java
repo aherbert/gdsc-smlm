@@ -306,7 +306,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
   protected FixedPixelCameraModel clone() {
     try {
       return (FixedPixelCameraModel) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

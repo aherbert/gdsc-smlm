@@ -408,8 +408,8 @@ public class DriftCalculator implements PlugIn {
       }
       Parameters.isEqualOrBelow("Smoothing", smoothing, 1);
       Parameters.isPositive("Smoothing iterations", iterations);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -438,8 +438,8 @@ public class DriftCalculator implements PlugIn {
     // Check arguments
     try {
       Parameters.isAboveZero("Frames", frames);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -472,8 +472,8 @@ public class DriftCalculator implements PlugIn {
     try {
       Parameters.isAboveZero("Start frame", startFrame);
       Parameters.isAboveZero("Frame spacing", frameSpacing);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return null;
     }
 
@@ -1081,7 +1081,7 @@ public class DriftCalculator implements PlugIn {
         }
       }
       ImageJUtils.log("Saved calculated drift to file: " + driftFilename);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Do nothing
     }
   }
@@ -1172,14 +1172,14 @@ public class DriftCalculator implements PlugIn {
             calculatedTimepoints[t] = ++ok;
             lastdx[t] = x;
             lastdy[t] = y;
-          } catch (final InputMismatchException e) {
+          } catch (final InputMismatchException ex) {
             // Do nothing
-          } catch (final NoSuchElementException e) {
+          } catch (final NoSuchElementException ex) {
             // Do nothing
           }
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // ignore
     }
     return ok;

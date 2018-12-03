@@ -236,9 +236,9 @@ public class PeakResultsDigest {
       return future.get();
     } catch (final InterruptedException ie) {
       // Ignore
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Report this
-      e.printStackTrace();
+      ex.printStackTrace();
     }
     return null;
   }

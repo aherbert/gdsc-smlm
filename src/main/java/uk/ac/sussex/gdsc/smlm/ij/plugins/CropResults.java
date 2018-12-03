@@ -217,7 +217,7 @@ public class CropResults implements PlugIn {
         try {
           c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
           unit = UnitHelper.getShortName(DistanceUnit.NM);
-        } catch (final ConversionException e) {
+        } catch (final ConversionException ex) {
           // No native units
         }
       }

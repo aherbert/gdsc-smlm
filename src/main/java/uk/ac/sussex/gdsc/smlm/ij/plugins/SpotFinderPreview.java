@@ -411,11 +411,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
       try {
         filter = config.createSpotFilter();
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         filter = null;
         this.imp.setOverlay(o);
-        throw new RuntimeException(e); // Required for ImageJ to disable the preview
-        // Utils.log("ERROR: " + e.getMessage());
+        throw new RuntimeException(ex); // Required for ImageJ to disable the preview
+        // Utils.log("ERROR: " + ex.getMessage());
         // return;
       }
       ImageJUtils.log(filter.getDescription());

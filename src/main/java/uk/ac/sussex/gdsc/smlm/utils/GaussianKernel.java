@@ -441,7 +441,7 @@ public class GaussianKernel implements Cloneable {
       final GaussianKernel k = (GaussianKernel) super.clone();
       k.halfKernel = new TDoubleArrayList(this.halfKernel);
       return k;
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return new GaussianKernel(s);
     }
   }

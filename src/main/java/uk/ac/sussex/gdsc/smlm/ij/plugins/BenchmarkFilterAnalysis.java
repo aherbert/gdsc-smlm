@@ -449,9 +449,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             run(job);
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -1164,8 +1164,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         setLastFile(filename);
         return filterList;
-      } catch (final Exception e) {
-        IJ.log("Unable to load the filter sets from file: " + e.getMessage());
+      } catch (final Exception ex) {
+        IJ.log("Unable to load the filter sets from file: " + ex.getMessage());
       } finally {
         IJ.showStatus("");
       }
@@ -1430,7 +1430,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         if (lastModified == f.lastModified()) {
           return true;
         }
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Ignore
       }
     }
@@ -1443,7 +1443,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       try {
         final File f = new File(filename);
         lastModified = f.lastModified();
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         lastModified = 0;
       }
     }
@@ -1660,8 +1660,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             signalFactorStats.add(worker.signalFactorStats);
             distanceStats.add(worker.distanceStats);
           }
-        } catch (final InterruptedException e) {
-          e.printStackTrace();
+        } catch (final InterruptedException ex) {
+          ex.printStackTrace();
         }
       }
       threads.clear();
@@ -1976,8 +1976,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       // Parameters.isEqualOrBelow("Partial match distance", partialMatchDistance,
       // upperMatchDistance);
       // Parameters.isEqualOrBelow("Partial signal factor", partialSignalFactor, upperSignalFactor);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -2113,8 +2113,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     try {
       Parameters.isAboveZero("Delta", delta);
       Parameters.isBelow("Delta", delta, 1);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -2199,7 +2199,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     final String xml = gd.getNextText();
     try {
       scoreFilter = (DirectFilter) Filter.fromXML(xml);
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       scoreFilter = null;
       getScoreFilter();
     }
@@ -2245,8 +2245,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     try {
       Parameters.isAboveZero("Delta", delta);
       Parameters.isBelow("Delta", delta, 1);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -2979,8 +2979,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
           final double minIncrement = ss_filter.getParameterIncrement(i);
           try {
             originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower, upper);
-          } catch (final IllegalArgumentException e) {
-            ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(),
+          } catch (final IllegalArgumentException ex) {
+            ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
                 i, ss_filter.getParameterName(i));
             originalDimensions = null;
             rangeInput = false;
@@ -3015,8 +3015,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
           final double minIncrement = ss_filter.getParameterIncrement(i);
           try {
             originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower, upper);
-          } catch (final IllegalArgumentException e) {
-            ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(),
+          } catch (final IllegalArgumentException ex) {
+            ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
                 i, ss_filter.getParameterName(i));
             originalDimensions = null;
             rangeInput = false;
@@ -3071,8 +3071,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
           }
           try {
             originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower[i], upper[i]);
-          } catch (final IllegalArgumentException e) {
-            ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(),
+          } catch (final IllegalArgumentException ex) {
+            ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
                 i, ss_filter.getParameterName(i));
             originalDimensions = null;
             break;
@@ -3406,9 +3406,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
               if (nonInteractive && currentOptimum != null) {
                 dimensions[i].setCentre(currentOptimum.getParameterValue(i));
               }
-            } catch (final IllegalArgumentException e) {
+            } catch (final IllegalArgumentException ex) {
               IJ.error(TITLE,
-                  String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+                  String.format("Unable to configure dimension [%d] %s: " + ex.getMessage(), i,
                       ss_filter.getParameterName(i)));
               return -1;
             }
@@ -3907,8 +3907,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
           dimensions2[i] = new SearchDimension(min, max, minIncrement, 1);
           dimensions2[i].setCentre(value);
           dimensions2[i].setIncrement(minIncrement);
-        } catch (final IllegalArgumentException e) {
-          IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(),
+        } catch (final IllegalArgumentException ex) {
+          IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + ex.getMessage(),
               j, ss_filter.getParameterName(j)));
           dimensions2 = null;
           break;
@@ -3969,8 +3969,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         }
         originalDimensions[i++] =
             new FixedDimension(minDuplicateDistance, maxDuplicateDistance, 0.5);
-      } catch (final IllegalArgumentException e) {
-        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+      } catch (final IllegalArgumentException ex) {
+        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(), i,
             names[i]);
         return null;
       }
@@ -4064,9 +4064,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
               dimensions[i].setReduceFactor((isStepSearch) ? 1 : pRangeSearchReduce);
               // Centre on current optimum
               dimensions[i].setCentre(point[i]);
-            } catch (final IllegalArgumentException e) {
+            } catch (final IllegalArgumentException ex) {
               IJ.error(TITLE, String
-                  .format("Unable to configure dimension [%d] %s: " + e.getMessage(), i, names[i]));
+                  .format("Unable to configure dimension [%d] %s: " + ex.getMessage(), i, names[i]));
               return null;
             }
           } else {
@@ -4215,9 +4215,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         if (originalDimensions[i].isActive()) {
           try {
             dimensions[i] = originalDimensions[i].create(0);
-          } catch (final IllegalArgumentException e) {
+          } catch (final IllegalArgumentException ex) {
             IJ.error(TITLE, String
-                .format("Unable to configure dimension [%d] %s: " + e.getMessage(), i, names[i]));
+                .format("Unable to configure dimension [%d] %s: " + ex.getMessage(), i, names[i]));
             return null;
           }
         } else {
@@ -4750,8 +4750,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       // Use the instance so we can catch the exception
       out.write(uk.ac.sussex.gdsc.core.utils.XmlUtils
           .prettyPrintXml(XStreamWrapper.getInstance().toXML(list)));
-    } catch (final Exception e) {
-      IJ.log("Unable to save the filter sets to file: " + e.getMessage());
+    } catch (final Exception ex) {
+      IJ.log("Unable to save the filter sets to file: " + ex.getMessage());
     }
   }
 
@@ -6010,9 +6010,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             run(job);
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -6068,9 +6068,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             run(job);
           }
         }
-      } catch (final InterruptedException e) {
-        System.out.println(e.toString());
-        throw new RuntimeException(e);
+      } catch (final InterruptedException ex) {
+        System.out.println(ex.toString());
+        throw new RuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -6177,8 +6177,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       for (int i = 0; i < threads.size(); i++) {
         try {
           threads.get(i).join();
-        } catch (final InterruptedException e) {
-          e.printStackTrace();
+        } catch (final InterruptedException ex) {
+          ex.printStackTrace();
         }
       }
       threads.clear();
@@ -6202,8 +6202,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private static <T> void put(BlockingQueue<T> jobs, T job) {
     try {
       jobs.put(job);
-    } catch (final InterruptedException e) {
-      throw new RuntimeException("Unexpected interruption", e);
+    } catch (final InterruptedException ex) {
+      throw new RuntimeException("Unexpected interruption", ex);
     }
   }
 
@@ -6264,8 +6264,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       for (int i = 0; i < threads.size(); i++) {
         try {
           threads.get(i).join();
-        } catch (final InterruptedException e) {
-          e.printStackTrace();
+        } catch (final InterruptedException ex) {
+          ex.printStackTrace();
         }
       }
       threads.clear();

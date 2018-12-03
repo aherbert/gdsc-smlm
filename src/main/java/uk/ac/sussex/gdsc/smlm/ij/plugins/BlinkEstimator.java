@@ -169,8 +169,8 @@ public class BlinkEstimator implements PlugIn {
       Parameters.isAboveZero("Search distance", searchDistance);
       Parameters.isAbove("n-Fitted points", nFittedPoints, 3);
       Parameters.isPositive("Range of fitted points", rangeFittedPoints);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -392,7 +392,7 @@ public class BlinkEstimator implements PlugIn {
       final String title = (verbose) ? TITLE + " Localisation Precision" : null;
 
       fittedAverage = fitter.calculateAveragePrecision(molecules, title, histogramBins, true, true);
-    } catch (final DataException e) {
+    } catch (final DataException ex) {
       // This is thrown when the data cannot be converted for precision computation
     }
 
@@ -494,13 +494,13 @@ public class BlinkEstimator implements PlugIn {
       }
 
       return parameters;
-    } catch (final TooManyIterationsException e) {
+    } catch (final TooManyIterationsException ex) {
       if (log) {
         ImageJUtils.log("  Failed to fit %d points: Too many iterations: (%s)",
-            blinkingModel.size(), e.getMessage());
+            blinkingModel.size(), ex.getMessage());
       }
       return null;
-    } catch (final ConvergenceException e) {
+    } catch (final ConvergenceException ex) {
       if (log) {
         ImageJUtils.log("  Failed to fit %d points", blinkingModel.size());
       }

@@ -467,7 +467,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       ImageJUtils.adjustSourceRect(imp, 0, (int) converter.convert(p.getXPosition()),
           (int) converter.convert(p.getYPosition()));
       imp.getWindow().toFront();
-    } catch (final ConversionException e) {
+    } catch (final ConversionException ex) {
       return;
     }
   }
@@ -633,8 +633,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
           // });
           d2.setDefaultCloseOperation(EXIT_ON_CLOSE);
           d2.setVisible(true);
-        } catch (final Exception e) {
-          e.printStackTrace();
+        } catch (final Exception ex) {
+          ex.printStackTrace();
         }
       }
     });

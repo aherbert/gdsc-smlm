@@ -199,7 +199,7 @@ public class SeriesImageSource extends ImageSource {
 
             // Store if the stream contains in-memory data
             this.inMemory = ss instanceof ByteArraySeekableStream;
-          } catch (final IOException e) {
+          } catch (final IOException ex) {
             canRead = false;
             bytesPerFrame = 0;
             return;
@@ -255,7 +255,7 @@ public class SeriesImageSource extends ImageSource {
 
             // Store if the stream contains in-memory data
             this.inMemory = ss instanceof ByteArraySeekableStream;
-          } catch (final IOException e) {
+          } catch (final IOException ex) {
             canRead = false;
             bytesPerFrame = 0;
             return;
@@ -484,12 +484,12 @@ public class SeriesImageSource extends ImageSource {
         final Object pixels = readPixels();
         // System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
         return pixels;
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         // The reader now throws exceptions. We could set the canRead flag to prevent further IO.
         // However do not do this so that an image can be scrolled up to the point at which
-        // it cannot be read (e.g. in the case of TIFF file truncation during sequential writing).
+        // it cannot be read (ex.g. in the case of TIFF file truncation during sequential writing).
         // canRead = false;
-        throw e;
+        throw ex;
       }
     }
 
@@ -631,7 +631,7 @@ public class SeriesImageSource extends ImageSource {
       if (td != null) {
         try {
           td.close();
-        } catch (final IOException e) {
+        } catch (final IOException ex) {
           // Ignore
         }
         // Reset
@@ -641,7 +641,7 @@ public class SeriesImageSource extends ImageSource {
       if (ss != null) {
         try {
           ss.close();
-        } catch (final IOException e) {
+        } catch (final IOException ex) {
           // Ignore
         }
         // Reset
@@ -747,10 +747,10 @@ public class SeriesImageSource extends ImageSource {
             image.close(true);
           }
         }
-      } catch (final DataException e) {
-        setError(e);
-      } catch (final Exception e) {
-        setError(new DataException(e));
+      } catch (final DataException ex) {
+        setError(ex);
+      } catch (final Exception ex) {
+        setError(new DataException(ex));
       } finally {
         closeInputStream(ss);
       }
@@ -828,10 +828,10 @@ public class SeriesImageSource extends ImageSource {
             break;
           }
         }
-      } catch (final DataException e) {
-        setError(e);
-      } catch (final Exception e) {
-        setError(new DataException(e));
+      } catch (final DataException ex) {
+        setError(ex);
+      } catch (final Exception ex) {
+        setError(new DataException(ex));
       } finally {
         closeInputStream(fs);
       }
@@ -925,10 +925,10 @@ public class SeriesImageSource extends ImageSource {
             break;
           }
         }
-      } catch (final DataException e) {
-        setError(e);
-      } catch (final Exception e) {
-        setError(new DataException(e));
+      } catch (final DataException ex) {
+        setError(ex);
+      } catch (final Exception ex) {
+        setError(new DataException(ex));
       }
       // no finally as there is nothing to close
 
@@ -981,10 +981,10 @@ public class SeriesImageSource extends ImageSource {
             image.close(true);
           }
         }
-      } catch (final DataException e) {
-        setError(e);
-      } catch (final Exception e) {
-        setError(new DataException(e));
+      } catch (final DataException ex) {
+        setError(ex);
+      } catch (final Exception ex) {
+        setError(new DataException(ex));
       }
       // no finally as there is nothing to close
 
@@ -1040,7 +1040,7 @@ public class SeriesImageSource extends ImageSource {
     if (is != null) {
       try {
         is.close();
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         // Ignore
       }
     }
@@ -1053,7 +1053,7 @@ public class SeriesImageSource extends ImageSource {
   private static long getSize(File file) {
     try {
       return file.length();
-    } catch (final SecurityException e) {
+    } catch (final SecurityException ex) {
       // No file size...
     }
     return 0;
@@ -1065,11 +1065,11 @@ public class SeriesImageSource extends ImageSource {
       if (fs.readBytes(buf) == size) {
         return ByteArraySeekableStream.wrap(buf);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // This exception is not bubbled up.
       // At the moment if we ignore this then the ImageWorker will open the file
       // rather than process from the memory stream.
-      e.printStackTrace();
+      ex.printStackTrace();
     }
     return null;
   }
@@ -1316,7 +1316,7 @@ public class SeriesImageSource extends ImageSource {
       if (read < 4) {
         return Opener.UNKNOWN;
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       return Opener.UNKNOWN;
     }
 
@@ -1459,10 +1459,10 @@ public class SeriesImageSource extends ImageSource {
           imageData[ok] = new ImageData(size);
           names[ok] = path;
           ok++;
-        } catch (final Throwable e) {
+        } catch (final Throwable ex) {
           if (estimate) {
             // This is an untested method so log the error
-            e.printStackTrace();
+            ex.printStackTrace();
           }
         } finally {
           if (ss != null) {
@@ -1531,11 +1531,11 @@ public class SeriesImageSource extends ImageSource {
         }
 
         return true;
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Q. Should the problem be reported. Currently if the exception is
         // not bubbled up then the source is not opened.
         if (trackProgress.isLog()) {
-          trackProgress.log("Failed to open: %s", ExceptionUtils.getStackTrace(e));
+          trackProgress.log("Failed to open: %s", ExceptionUtils.getStackTrace(ex));
         }
       }
     }
@@ -1731,9 +1731,9 @@ public class SeriesImageSource extends ImageSource {
           // This thread will be waiting on imageQueue.put() (which has been cleared)
           // or sourceQueue.take() which contains shutdown signals, it should be finished by now
           thread.join();
-        } catch (final InterruptedException e) {
+        } catch (final InterruptedException ex) {
           // Ignore thread errors
-          // e.printStackTrace();
+          // ex.printStackTrace();
         }
       }
       threads.clear();
@@ -1817,12 +1817,12 @@ public class SeriesImageSource extends ImageSource {
       if (error != null) {
         throw error;
       }
-    } catch (final IllegalStateException e) {
+    } catch (final IllegalStateException ex) {
       // We do not expect these as we use the queue without exceptions when closed
-      e.printStackTrace();
-    } catch (final InterruptedException e) {
+      ex.printStackTrace();
+    } catch (final InterruptedException ex) {
       // Maybe if we forced the threads to stop
-      e.printStackTrace();
+      ex.printStackTrace();
     }
 
     // We are here because the pixels were null so shut down sequential reading
@@ -1887,12 +1887,12 @@ public class SeriesImageSource extends ImageSource {
       if (slice < lastImage.size) {
         try {
           return lastImage.getFrame(slice);
-        } catch (final Exception e) {
+        } catch (final Exception ex) {
           // Q. Should the problem be reported. Currently if the exception is
           // not bubbled up then the frame will be null.
           if (trackProgress.isLog()) {
             trackProgress.log("Failed to open frame %d: %s", frame,
-                ExceptionUtils.getStackTrace(e));
+                ExceptionUtils.getStackTrace(ex));
           }
         }
       }

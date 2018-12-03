@@ -235,7 +235,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         if (inputStream != null) {
           imp = opener.openTiff(inputStream, ImageJUtils.removeExtension(file.getName()));
         }
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         // Ignore
       }
 
@@ -427,7 +427,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       )) {
         addTemplate(template.name, builder.build(), TemplateType.RESOURCE, null, template.tifPath);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Ignore
     }
   }
@@ -511,7 +511,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         list.add(new TemplateResource(path, name, tifPath));
       }
       return list.toArray(new TemplateResource[list.size()]);
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Ignore
     }
     return new TemplateResource[0];
@@ -566,7 +566,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
           addTemplate(template.name, builder.build(), TemplateType.RESOURCE, null,
               template.tifPath);
         }
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         // Ignore
       }
     }

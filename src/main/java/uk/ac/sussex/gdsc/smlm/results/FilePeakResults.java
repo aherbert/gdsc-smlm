@@ -66,9 +66,9 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
       fos = new FileOutputStream(filename);
       openOutput();
       write(createResultsHeader());
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // TODO - Add better handling of errors
-      e.printStackTrace();
+      ex.printStackTrace();
       closeOutput();
     }
   }
@@ -170,9 +170,9 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         ;
       }
       sb.append(String.format("#%s %s\n", name, printer.print(msg)));
-    } catch (final InvalidProtocolBufferException e) {
+    } catch (final InvalidProtocolBufferException ex) {
       // This shouldn't happen so throw it
-      throw new NotImplementedException("Unable to serialise the " + name + " settings", e);
+      throw new NotImplementedException("Unable to serialise the " + name + " settings", ex);
     }
     return printer;
   }
@@ -235,7 +235,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 
     try {
       fos.close();
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore exception
     } finally {
       fos = null;
@@ -264,7 +264,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
       }
 
       sort();
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // ignore
     } finally {
       fos = null;

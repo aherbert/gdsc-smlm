@@ -1101,7 +1101,7 @@ public class Image2DAligner implements Cloneable {
       copy.crop = null;
       copy.frequencyDomainCorrelationError = 0;
       return copy;
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }
@@ -1116,7 +1116,7 @@ public class Image2DAligner implements Cloneable {
       final DoubleImage2D image = new DoubleImage2D(nc, nr, buffer);
       image.fillOutside(crop[0], crop[1], crop[2], crop[3], 0);
       return image;
-    } catch (final IllegalArgumentException e) {
+    } catch (final IllegalArgumentException ex) {
       // Thrown when buffer is null or does not match the dimensions.
       return null;
     }

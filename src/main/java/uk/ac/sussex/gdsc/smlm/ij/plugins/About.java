@@ -160,7 +160,7 @@ public class About implements PlugIn, MacroExtension {
           msg.append(line).append("\n");
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Default message
       msg.append("GDSC SMLM Plugins for ImageJ\n");
       msg.append(" \n");
@@ -280,7 +280,7 @@ public class About implements PlugIn, MacroExtension {
       try {
         new File(filename).delete();
         return 1;
-      } catch (final SecurityException e) {
+      } catch (final SecurityException ex) {
         IJ.error("Unable to remove existing file");
       }
       return -1;
@@ -294,8 +294,8 @@ public class About implements PlugIn, MacroExtension {
       while ((line = input.readLine()) != null) {
         contents.add(line);
       }
-    } catch (final IOException e) {
-      IJ.error("Unable to install " + resourceTitle + ".\n \n" + e.getMessage());
+    } catch (final IOException ex) {
+      IJ.error("Unable to install " + resourceTitle + ".\n \n" + ex.getMessage());
       return -1;
     }
 
@@ -328,8 +328,8 @@ public class About implements PlugIn, MacroExtension {
         output.write(content);
         output.newLine();
       }
-    } catch (final IOException e) {
-      IJ.error("Unable to install " + resourceTitle + ".\n \n" + e.getMessage());
+    } catch (final IOException ex) {
+      IJ.error("Unable to install " + resourceTitle + ".\n \n" + ex.getMessage());
     } finally {
       close(output);
     }
@@ -340,7 +340,7 @@ public class About implements PlugIn, MacroExtension {
     if (output != null) {
       try {
         output.close();
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         // Ignore
       }
     }

@@ -145,7 +145,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
 
           currentIndex = job.index;
           drawOverlay();
-        } catch (final InterruptedException e) {
+        } catch (final InterruptedException ex) {
           break;
         }
       }
@@ -403,7 +403,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
       inbox.close();
       try {
         t.join(0);
-      } catch (final InterruptedException e) {
+      } catch (final InterruptedException ex) {
         // Ignore
       }
       t = null;

@@ -750,7 +750,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
   protected PerPixelCameraModel clone() {
     try {
       return (PerPixelCameraModel) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }

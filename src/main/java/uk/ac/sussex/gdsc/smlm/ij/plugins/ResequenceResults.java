@@ -108,8 +108,8 @@ public class ResequenceResults implements PlugIn {
       Parameters.isAboveZero("Start", start);
       Parameters.isAboveZero("Block", block);
       Parameters.isPositive("Skip", skip);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

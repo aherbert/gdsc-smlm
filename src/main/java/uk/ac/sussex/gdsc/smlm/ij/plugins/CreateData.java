@@ -717,9 +717,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         dist = createFixedDistribution();
         try {
           reportAndSaveFittingLimits(dist);
-        } catch (final Exception e) {
+        } catch (final Exception ex) {
           // This will be from the computation of the CRLB
-          IJ.error(TITLE, e.getMessage());
+          IJ.error(TITLE, ex.getMessage());
           return;
         }
       } else if (spotMode) {
@@ -936,7 +936,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       imageModel.setPhotonDistribution(createPhotonDistribution());
       try {
         imageModel.setConfinementDistribution(createConfinementDistribution());
-      } catch (final ConfigurationException e) {
+      } catch (final ConfigurationException ex) {
         // We asked the user if it was OK to continue and they said no
         return;
       }
@@ -1557,9 +1557,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           // Convert for simulation in pixels
           astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL,
               DistanceUnit.PIXEL);
-        } catch (final ConversionException e) {
+        } catch (final ConversionException ex) {
           // Wrap so this can be caught as the same type
-          throw new IllegalArgumentException(e);
+          throw new IllegalArgumentException(ex);
         }
 
         psf = PSFProtosHelper.createPSF(astigmatismModel, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
@@ -1631,7 +1631,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           * Gaussian2DFunction.SD_TO_HWHM_FACTOR
           // Scale appropriately
           * model.getNmPerPixel() / settings.getPixelPitch();
-    } catch (final ConversionException e) {
+    } catch (final ConversionException ex) {
       IJ.error(TITLE, "Unknown PSF FWHM setting for model: " + settings.getAstigmatismModel());
       return -1;
     }
@@ -1810,11 +1810,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
             dist.load(values);
             return dist;
           }
-        } catch (final IOException e) {
+        } catch (final IOException ex) {
           // Ignore
-        } catch (final NullArgumentException e) {
+        } catch (final NullArgumentException ex) {
           // Ignore
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException ex) {
           // Ignore
         }
       }
@@ -2454,8 +2454,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       model.initialiseHWHM();
 
       return model;
-    } catch (final Exception e) {
-      IJ.error(TITLE, "Unable to create the image PSF model:\n" + e.getMessage());
+    } catch (final Exception ex) {
+      IJ.error(TITLE, "Unable to create the image PSF model:\n" + ex.getMessage());
       return null;
     }
   }
@@ -2526,9 +2526,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL,
             DistanceUnit.PIXEL);
         return new GaussianPSFModel(AstigmatismModelManager.create(astigmatismModel));
-      } catch (final ConversionException e) {
+      } catch (final ConversionException ex) {
         // Wrap so this can be caught as the same type
-        throw new IllegalArgumentException(e);
+        throw new IllegalArgumentException(ex);
       }
     }
 
@@ -3453,8 +3453,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         final WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
         wp.getW();
         stats[WIDTH].add(wp.wx);
-      } catch (final DataException e) {
-        ImageJUtils.log("Unable to compute width: " + e.getMessage());
+      } catch (final DataException ex) {
+        ImageJUtils.log("Unable to compute width: " + ex.getMessage());
       }
 
       try {
@@ -3471,8 +3471,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
             stats[PRECISION_IN_FOCUS].add(pp.precision[i]);
           }
         }
-      } catch (final DataException e) {
-        ImageJUtils.log("Unable to compute LSE precision: " + e.getMessage());
+      } catch (final DataException ex) {
+        ImageJUtils.log("Unable to compute LSE precision: " + ex.getMessage());
       }
 
       // Compute density per frame. Multithread for speed
@@ -4012,9 +4012,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           output.write(sb.toString());
           output.newLine();
         }
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Q. Add better handling of errors?
-        e.printStackTrace();
+        ex.printStackTrace();
         IJ.log("Failed to save fluorophores to file: " + settings.getFluorophoresFilename());
       }
     }
@@ -4075,9 +4075,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           output.write(sb.toString());
           output.newLine();
         }
-      } catch (final Exception e) {
+      } catch (final Exception ex) {
         // Q. Add better handling of errors?
-        e.printStackTrace();
+        ex.printStackTrace();
         IJ.log("Failed to save localisations to file: " + settings.getLocalisationsFilename());
       }
     }
@@ -4353,8 +4353,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
       validateCameraOptions();
       validatePSFOptions();
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -4928,8 +4928,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
       validateCameraOptions();
       validatePSFOptions();
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -4986,8 +4986,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         Parameters.isPositive("Max binary distance", settings.getMaxBinaryDistance());
         Parameters.isEqualOrBelow("Min binary distance", settings.getMinBinaryDistance(),
             settings.getMaxBinaryDistance());
-      } catch (final IllegalArgumentException e) {
-        IJ.error(TITLE, e.getMessage());
+      } catch (final IllegalArgumentException ex) {
+        IJ.error(TITLE, ex.getMessage());
         return false;
       }
     }
@@ -5103,8 +5103,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         Parameters.isEqualOrBelow("Correlation", settings.getCorrelation(), 1);
         Parameters.isEqualOrAbove("Correlation", settings.getCorrelation(), -1);
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -5293,7 +5293,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         for (final CompoundMoleculeModel c : compounds) {
           c.scale(scaleFactor);
         }
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         IJ.error(TITLE, "Unable to create compound molecules");
         return null;
       }
@@ -5764,8 +5764,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         IJ.error(TITLE, "Unknown camera type: " + cal.getCameraType());
         return null;
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return null;
     }
 
@@ -5870,8 +5870,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         }
         try {
           cameraModel = cameraModel.crop(parameters.cameraBounds, true);
-        } catch (final IllegalArgumentException e) {
-          throw new ConfigurationException(e);
+        } catch (final IllegalArgumentException ex) {
+          throw new ConfigurationException(ex);
         }
         return cameraModel;
 

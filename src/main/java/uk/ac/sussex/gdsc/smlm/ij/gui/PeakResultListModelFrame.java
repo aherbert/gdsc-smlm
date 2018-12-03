@@ -212,8 +212,8 @@ public class PeakResultListModelFrame extends JFrame {
           // });
           d2.setDefaultCloseOperation(EXIT_ON_CLOSE);
           d2.setVisible(true);
-        } catch (final Exception e) {
-          e.printStackTrace();
+        } catch (final Exception ex) {
+          ex.printStackTrace();
         }
       }
     });

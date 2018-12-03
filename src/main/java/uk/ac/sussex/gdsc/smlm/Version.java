@@ -179,7 +179,7 @@ public class Version {
       try (InputStream in = new URL(manifestPath).openStream()) {
         return new Manifest(in);
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Ignore this
     }
     return null;

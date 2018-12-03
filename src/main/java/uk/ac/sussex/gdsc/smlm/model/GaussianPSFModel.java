@@ -143,8 +143,8 @@ public class GaussianPSFModel extends PSFModel {
       // scale * zeroS1);
       // }
       return d;
-    } catch (final IllegalArgumentException e) {
-      // System.out.println(e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      // System.out.println(ex.getMessage());
       return 0;
     }
   }
@@ -158,8 +158,8 @@ public class GaussianPSFModel extends PSFModel {
     }
     try {
       return gaussian2D(data, width, height, sum, x0, x1, getS0(x2), getS1(x2), poissonNoise);
-    } catch (final IllegalArgumentException e) {
-      // System.out.println(e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      // System.out.println(ex.getMessage());
       return 0;
     }
   }

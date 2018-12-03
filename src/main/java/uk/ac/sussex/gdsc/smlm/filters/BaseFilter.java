@@ -32,7 +32,7 @@ public abstract class BaseFilter implements Cloneable {
   public BaseFilter clone() {
     try {
       return (BaseFilter) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       // Ignore
     }
     return null;

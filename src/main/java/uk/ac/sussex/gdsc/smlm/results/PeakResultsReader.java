@@ -175,7 +175,7 @@ public class PeakResultsReader {
         if (!guessFormatFromVersion()) {
           guessFormat(line);
         }
-      } catch (final IOException e) {
+      } catch (final IOException ex) {
         // ignore
       }
     }
@@ -220,7 +220,7 @@ public class PeakResultsReader {
               readEndFrame = BitFlagUtils.areSet(flags, SMLMFilePeakResults.FLAG_END_FRAME);
               readId = BitFlagUtils.areSet(flags, SMLMFilePeakResults.FLAG_ID);
               readPrecision = BitFlagUtils.areSet(flags, SMLMFilePeakResults.FLAG_PRECISION);
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException ex) {
               // Ignore
             }
           }
@@ -365,7 +365,7 @@ public class PeakResultsReader {
                 calibration = new CalibrationWriter();
                 calibration.setNmPerPixel(nmPerPixel);
               }
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException ex) {
               // Ignore
             }
           }
@@ -424,7 +424,7 @@ public class PeakResultsReader {
                 final Calibration.Builder calibrationBuilder = Calibration.newBuilder();
                 JsonFormat.parser().merge(calibrationString, calibrationBuilder);
                 calibration = new CalibrationWriter(calibrationBuilder);
-              } catch (final InvalidProtocolBufferException e) {
+              } catch (final InvalidProtocolBufferException ex) {
                 // This should be OK
                 System.err.println("Unable to deserialise the Calibration settings");
               }
@@ -467,7 +467,7 @@ public class PeakResultsReader {
             final PSF.Builder psfBuilder = PSF.newBuilder();
             JsonFormat.parser().merge(json, psfBuilder);
             psf = psfBuilder.build();
-          } catch (final InvalidProtocolBufferException e) {
+          } catch (final InvalidProtocolBufferException ex) {
             // This should be OK
             System.err.println("Unable to deserialise the PSF settings");
           }
@@ -846,11 +846,11 @@ public class PeakResultsReader {
           }
         }
       }
-    } catch (final EOFException e) {
+    } catch (final EOFException ex) {
       // Ignore. Binary data does not have a size so it is read until the EOF.
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // Log this but still return the results that have been read
-      e.printStackTrace();
+      ex.printStackTrace();
     }
     return results;
   }
@@ -1040,7 +1040,7 @@ public class PeakResultsReader {
           }
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // ignore
     }
     return results;
@@ -1208,13 +1208,13 @@ public class PeakResultsReader {
             endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1285,13 +1285,13 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1350,13 +1350,13 @@ public class PeakResultsReader {
             endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1422,13 +1422,13 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1493,13 +1493,13 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
           id);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1566,13 +1566,13 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
           endPeak, id);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1639,13 +1639,13 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
           endPeak, id);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1714,13 +1714,13 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
           paramsStdDev, endPeak, id);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1830,7 +1830,7 @@ public class PeakResultsReader {
           }
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // ignore
     }
 
@@ -1988,9 +1988,9 @@ public class PeakResultsReader {
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
       }
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
     return null;
@@ -2068,9 +2068,9 @@ public class PeakResultsReader {
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
       }
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
     return null;
@@ -2144,9 +2144,9 @@ public class PeakResultsReader {
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
       }
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
     return null;
@@ -2198,7 +2198,7 @@ public class PeakResultsReader {
           }
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // ignore
     }
     return results;
@@ -2252,9 +2252,9 @@ public class PeakResultsReader {
         // Store the signal as the original value
         return new PeakResult(peak, (int) x, (int) y, signal, error, 0.0f, 0, params, null);
       }
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
     return null;
@@ -2292,7 +2292,7 @@ public class PeakResultsReader {
           }
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // ignore
     }
 
@@ -2455,9 +2455,9 @@ public class PeakResultsReader {
         return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, 0.0, 0.0f, 0, params, null,
             frame + length - 1, 0);
       }
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore
     }
     return null;
@@ -2512,7 +2512,7 @@ public class PeakResultsReader {
           }
         }
       }
-    } catch (final IOException e) {
+    } catch (final IOException ex) {
       // ignore
     }
 
@@ -2578,13 +2578,13 @@ public class PeakResultsReader {
       params[PeakResult.INTENSITY] = Float.parseFloat(fields[3]);
 
       return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
-    } catch (final InputMismatchException e) {
+    } catch (final InputMismatchException ex) {
       // Ignore and return null
-    } catch (final NoSuchElementException e) {
+    } catch (final NoSuchElementException ex) {
       // Ignore and return null
-    } catch (final IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException ex) {
       // Ignore and return null
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // Ignore and return null
     }
     return null;

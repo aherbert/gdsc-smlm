@@ -161,8 +161,8 @@ public class JumpDistanceAnalysisTest {
           fit(rg, title, samples, 0, new double[] {d}, new double[] {1}, mle);
           error = null;
           continue NEXT_D;
-        } catch (final AssertionError e) {
-          error = e;
+        } catch (final AssertionError ex) {
+          error = ex;
         }
       }
       if (error != null) {
@@ -224,8 +224,8 @@ public class JumpDistanceAnalysisTest {
                 new double[] {fraction, 1 - fraction}, mle);
             error = null;
             continue NEXT_D;
-          } catch (final AssertionError e) {
-            error = e;
+          } catch (final AssertionError ex) {
+            error = ex;
           }
         }
         if (error != null) {
@@ -267,7 +267,7 @@ public class JumpDistanceAnalysisTest {
                   try {
                     fit(rg, title, samples, 0, new double[] {D[i], D[j]},
                         new double[] {fraction, 1 - fraction}, mle);
-                  } catch (final AssertionError e) {
+                  } catch (final AssertionError ex) {
                     // Carry on with the benchmarking
                   }
                   // If the fit had the correct N then no need to repeat
@@ -277,7 +277,7 @@ public class JumpDistanceAnalysisTest {
                   try {
                     fit(rg, title + " Fixed", samples, n, new double[] {D[i], D[j]},
                         new double[] {fraction, 1 - fraction}, mle);
-                  } catch (final AssertionError e) {
+                  } catch (final AssertionError ex) {
                     // Carry on with the benchmarking
                   }
                 }
@@ -286,8 +286,8 @@ public class JumpDistanceAnalysisTest {
           }
         }
       }
-    } catch (final Exception e) {
-      throw new AssertionError("Failed to complete benchmark", e);
+    } catch (final Exception ex) {
+      throw new AssertionError("Failed to complete benchmark", ex);
     } finally {
       closeOutput();
     }
@@ -299,7 +299,7 @@ public class JumpDistanceAnalysisTest {
     }
     try {
       out.close();
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Ignore exception
     } finally {
       out = null;
@@ -351,8 +351,8 @@ public class JumpDistanceAnalysisTest {
       Assertions.assertEquals(d.length, fitD.length, "Failed to fit n");
       TestAssertions.assertArrayTest(d, fitD, deltaD, "Failed to fit d");
       TestAssertions.assertArrayTest(f, fitF, deltaF, "Failed to fit f");
-    } catch (final AssertionError e) {
-      error = e;
+    } catch (final AssertionError ex) {
+      error = ex;
     } finally {
       final double[] e1 = getPercentError(d, fitD);
       final double[] e2 = getPercentError(f, fitF);
@@ -401,8 +401,8 @@ public class JumpDistanceAnalysisTest {
     sb.append(System.getProperty("line.separator"));
     try {
       out.write(sb.toString());
-    } catch (final IOException e) {
-      throw new AssertionError("Failed to write result to file", e);
+    } catch (final IOException ex) {
+      throw new AssertionError("Failed to write result to file", ex);
     }
   }
 
@@ -452,8 +452,8 @@ public class JumpDistanceAnalysisTest {
     sb.append(System.getProperty("line.separator"));
     try {
       out.write(sb.toString());
-    } catch (final IOException e) {
-      throw new AssertionError("Failed to write result to file", e);
+    } catch (final IOException ex) {
+      throw new AssertionError("Failed to write result to file", ex);
     }
   }
 

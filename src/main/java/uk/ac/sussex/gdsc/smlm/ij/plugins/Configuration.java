@@ -289,8 +289,8 @@ public class Configuration
         Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
         Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

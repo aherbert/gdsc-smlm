@@ -129,7 +129,7 @@ public class FreeFilterResults implements PlugIn, ItemListener {
     String text;
     try {
       text = uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(filterSettings.getFreeFilter());
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       text = filterSettings.getFreeFilter();
     }
     gd.addTextAreas(text, null, 20, 80);

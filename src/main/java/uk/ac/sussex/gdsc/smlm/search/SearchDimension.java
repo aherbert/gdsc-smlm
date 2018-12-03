@@ -436,7 +436,7 @@ public class SearchDimension implements Cloneable, Dimension {
   public SearchDimension clone() {
     try {
       return (SearchDimension) super.clone();
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
 

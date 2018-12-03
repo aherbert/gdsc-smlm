@@ -347,14 +347,14 @@ public class TraceExporter implements PlugIn {
               writer.write(Float.toString(y));
               writer.newLine();
             }
-          } catch (final IOException e) {
+          } catch (final IOException ex) {
             // Allow clean-up by passing the exception up
-            throw new RuntimeException(e);
+            throw new RuntimeException(ex);
           }
         }
       });
-    } catch (final Exception e) {
-      e.printStackTrace();
+    } catch (final Exception ex) {
+      ex.printStackTrace();
     }
   }
 }

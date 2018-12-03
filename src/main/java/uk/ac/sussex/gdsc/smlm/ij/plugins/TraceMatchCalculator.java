@@ -151,8 +151,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     try {
       Parameters.isAboveZero("Distance threshold", dThreshold);
       Parameters.isPositive("Beta", beta);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

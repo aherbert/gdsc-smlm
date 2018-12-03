@@ -169,9 +169,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
             calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
                 Gaussian2DPeakResultHelper.LSE_PRECISION);
             canComputePrecision = true;
-          } catch (final ConfigurationException e) {
+          } catch (final ConfigurationException ex) {
             // Cannot compute precision
-          } catch (final ConversionException e) {
+          } catch (final ConversionException ex) {
             // Cannot compute precision
           }
         }
@@ -182,7 +182,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
           toPixelConverter = UnitConverterFactory.createConverter(distanceUnit, DistanceUnit.PIXEL,
               getCalibrationReader().getNmPerPixel());
         }
-      } catch (final ConversionException e) {
+      } catch (final ConversionException ex) {
         // Gracefully fail so ignore this
       }
     }
@@ -674,9 +674,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
       final double x = Double.valueOf(fields[indexX]);
       final double y = Double.valueOf(fields[indexY]);
       return new double[] {startT, toPixelConverter.convert(x), toPixelConverter.convert(y)};
-    } catch (final ArrayIndexOutOfBoundsException e) {
+    } catch (final ArrayIndexOutOfBoundsException ex) {
       // Will happen if any index is still at the default of -1 or if there are not enough fields
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       // In case any field is not a number
     }
     return null;

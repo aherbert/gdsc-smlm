@@ -414,10 +414,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
       if (imageSource == null) {
         try {
           imageSource = new IJImageSource(imp);
-        } catch (final IllegalArgumentException e) {
+        } catch (final IllegalArgumentException ex) {
           // This can happen if the image has an origin not in integer pixels
-          // e.g. the plugin is run on a plot
-          IJ.error(TITLE, "Error using image: " + imp.getTitle() + "\n \n" + e.getMessage());
+          // ex.g. the plugin is run on a plot
+          IJ.error(TITLE, "Error using image: " + imp.getTitle() + "\n \n" + ex.getMessage());
           return DONE;
         }
       }
@@ -555,7 +555,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // The bounds must fit in the image
     try {
       imageSource.checkBounds(bounds);
-    } catch (final RuntimeException e) {
+    } catch (final RuntimeException ex) {
       return false;
     }
 
@@ -1950,8 +1950,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
       Parameters.isAboveZero("Gain", calibration.getCountPerPhoton());
       Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
       Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSD());
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -2283,8 +2283,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
       if (extraOptions) {
         Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
       }
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -2948,7 +2948,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private static double getThresholdNumber(ExtendedGenericDialog gd) {
     try {
       return Double.parseDouble(gd.getNextString());
-    } catch (final NumberFormatException e) {
+    } catch (final NumberFormatException ex) {
       return -1;
     }
   }

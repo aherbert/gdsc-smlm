@@ -770,10 +770,10 @@ public class PCPALMMolecules implements PlugIn {
     try {
       initialGuess = guess.guess();
       return fitter.withStartPoint(initialGuess).fit(observations);
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       // Use the initial estimate
       return initialGuess;
-    } catch (final Exception e) {
+    } catch (final Exception ex) {
       // Just in case there is another exception type, or the initial estimate failed
       return null;
     }
@@ -784,7 +784,7 @@ public class PCPALMMolecules implements PlugIn {
       final double[] skewParameters = (simplexFitting) ? optimiseSimplex(x, y, initialSolution)
           : optimiseLeastSquares(x, y, initialSolution);
       return skewParameters;
-    } catch (final TooManyEvaluationsException e) {
+    } catch (final TooManyEvaluationsException ex) {
       return null;
     }
   }
@@ -1114,7 +1114,7 @@ public class PCPALMMolecules implements PlugIn {
           try {
             maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0, maskScale,
                 maskScale, randomGenerator);
-          } catch (final IllegalArgumentException e) {
+          } catch (final IllegalArgumentException ex) {
             // This can happen when there are no more non-zero pixels
             log("WARNING: No more room for clusters on the mask area (created %d of estimated %d)",
                 clusterCentres.size(), totalSteps);

@@ -293,7 +293,7 @@ public class PSFHelper {
   public static int getParameterCountSafe(PSFOrBuilder psf) {
     try {
       return getParameterCount(psf);
-    } catch (final ConfigurationException e) {
+    } catch (final ConfigurationException ex) {
       return 0;
     }
   }

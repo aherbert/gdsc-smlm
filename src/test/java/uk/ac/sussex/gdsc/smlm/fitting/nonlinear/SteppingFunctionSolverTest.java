@@ -141,8 +141,8 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
     // This test may fail depending on the random number generator.
     try {
       fitSingleGaussian(seed, NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.EMCCD);
-    } catch (final AssertionError e) {
-      logger.log(TestLogUtils.getFailRecord(e));
+    } catch (final AssertionError ex) {
+      logger.log(TestLogUtils.getFailRecord(ex));
     }
   }
 
@@ -341,8 +341,8 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
     // This test may fail depending on the random number generator.
     try {
       fitSingleGaussian(seed, NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.SCMOS);
-    } catch (final AssertionError e) {
-      logger.log(TestLogUtils.getFailRecord(e));
+    } catch (final AssertionError ex) {
+      logger.log(TestLogUtils.getFailRecord(ex));
     }
   }
 

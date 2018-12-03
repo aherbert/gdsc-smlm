@@ -1043,7 +1043,7 @@ public double[] value(double[] point) throws IllegalArgumentException
             }
             return result;
           }
-        } catch (final Exception e) {
+        } catch (final Exception ex) {
           // Ignore this
         }
       }
@@ -1268,7 +1268,7 @@ public double[] value(double[] point) throws IllegalArgumentException
       copy.crop = null;
       copy.frequencyDomainCorrelationError = 0;
       return copy;
-    } catch (final CloneNotSupportedException e) {
+    } catch (final CloneNotSupportedException ex) {
       return null;
     }
   }
@@ -1283,7 +1283,7 @@ public double[] value(double[] point) throws IllegalArgumentException
       final DoubleImage3D image = new DoubleImage3D(nc, nr, ns, buffer);
       image.fillOutside(crop[0], crop[1], crop[2], crop[3], crop[5], crop[5], 0);
       return image;
-    } catch (final IllegalArgumentException e) {
+    } catch (final IllegalArgumentException ex) {
       // Thrown when buffer is null or does not match the dimensions.
       return null;
     }
