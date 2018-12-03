@@ -100,6 +100,8 @@ public class ResultsManagerTest {
   @SuppressWarnings("null")
   private static void writeTSFMatchesRead(RandomSeed seed, int channels, int slices, int positions,
       int types) {
+    Assumptions.assumeFalse(java.awt.GraphicsEnvironment.isHeadless());
+
     final String filename = createFile();
     FileOutputStream out = null;
     try {
