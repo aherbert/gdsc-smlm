@@ -23,6 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
+import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
+import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
+
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.util.Arrays;
@@ -36,14 +44,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
-
-import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
-import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
 
 /**
  * A frame that shows a PeakResultsListModel.

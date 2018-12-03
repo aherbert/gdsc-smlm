@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.settings;
 
-import java.util.ArrayList;
-
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
+
+import java.util.ArrayList;
 
 /**
  * Contain the configuration file settings for the batch fitting plugin.

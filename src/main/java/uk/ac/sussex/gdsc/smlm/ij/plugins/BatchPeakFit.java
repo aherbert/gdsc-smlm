@@ -23,6 +23,31 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
+import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
+import uk.ac.sussex.gdsc.smlm.ij.settings.BatchRun;
+import uk.ac.sussex.gdsc.smlm.ij.settings.BatchSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.ParameterSettings;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.io.OpenDialog;
+import ij.plugin.PlugIn;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,30 +73,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.XStreamException;
-import com.thoughtworks.xstream.io.xml.DomDriver;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.io.OpenDialog;
-import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
-import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
-import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
-import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
-import uk.ac.sussex.gdsc.smlm.ij.settings.BatchRun;
-import uk.ac.sussex.gdsc.smlm.ij.settings.BatchSettings;
-import uk.ac.sussex.gdsc.smlm.ij.settings.ParameterSettings;
 
 /**
  * Runs the Peak Fit plugin in a batch. <p> The batch specifies the set of images to process. For

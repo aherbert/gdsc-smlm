@@ -23,8 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import java.util.Arrays;
-
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
@@ -35,6 +33,8 @@ import org.scijava.java3d.IndexedGeometryStripArray;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
+
+import java.util.Arrays;
 
 /**
  * Use a mesh object to represent a set of points. The object is duplicated, scaled and translated

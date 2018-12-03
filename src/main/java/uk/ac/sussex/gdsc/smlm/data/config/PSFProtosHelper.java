@@ -23,8 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import java.util.List;
-
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
@@ -33,6 +31,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+
+import java.util.List;
 
 /**
  * Contains helper functions for the PSFProtos class.

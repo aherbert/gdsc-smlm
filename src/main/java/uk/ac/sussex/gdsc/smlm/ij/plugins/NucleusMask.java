@@ -23,11 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.AWTEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-import org.apache.commons.math3.random.RandomDataGenerator;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -39,12 +40,12 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.Blitter;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
-import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+
+import org.apache.commons.math3.random.RandomDataGenerator;
+
+import java.awt.AWTEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * This plugin creates a mask image stack using an XY and XZ mask image.

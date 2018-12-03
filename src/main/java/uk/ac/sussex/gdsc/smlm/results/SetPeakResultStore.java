@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
-import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Stores peak results using a set. This is similar to an HashSet but does not have concurrency

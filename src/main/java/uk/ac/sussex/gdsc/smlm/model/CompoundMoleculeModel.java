@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * Contains a model for a compound moving molecule (contains multiple molecules held in a fixed

@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient;
 
-import java.util.Locale;
+import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
 
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -41,7 +41,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
+import java.util.Locale;
 
 /**
  * Implementation of the Broyden-Fletcher-Goldfarb-Shanno (BFGS) variant of the

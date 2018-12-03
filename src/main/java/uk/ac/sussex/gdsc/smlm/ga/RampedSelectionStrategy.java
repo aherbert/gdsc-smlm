@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.ga;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.math3.random.RandomDataGenerator;
 
 /**
  * Selects the individuals using a linear ramp from the highest rank to the lowest to set the

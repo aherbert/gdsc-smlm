@@ -23,7 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
 
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.ColoringAttributes;
@@ -43,12 +46,9 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
-import customnode.CustomMesh;
+import java.util.Arrays;
 
-import uk.ac.sussex.gdsc.core.data.NotImplementedException;
-import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import customnode.CustomMesh;
 
 /**
  * Use a mesh object to represent a set of points. The object is duplicated, scaled and translated

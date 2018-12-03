@@ -23,18 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.Choice;
-import java.awt.Font;
-import java.awt.Label;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
+import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -48,16 +46,19 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
-import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
-import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import java.awt.Choice;
+import java.awt.Font;
+import java.awt.Label;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Reads a TIFF image using the series image source and presents it using a read-only virtual stack

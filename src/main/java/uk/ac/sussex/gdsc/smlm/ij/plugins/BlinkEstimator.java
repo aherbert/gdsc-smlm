@@ -23,8 +23,22 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.Color;
-import java.util.ArrayList;
+import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.Molecule;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;
+import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.TraceManager;
+
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -38,21 +52,8 @@ import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.Molecule;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;
-import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.TraceManager;
+import java.awt.Color;
+import java.util.ArrayList;
 
 /**
  * Estimates the flourophore blinking rate from a set of localisations. <p> Uses the method of

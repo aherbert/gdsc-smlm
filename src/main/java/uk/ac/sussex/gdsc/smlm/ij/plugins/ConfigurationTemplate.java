@@ -23,35 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.AWTEvent;
-import java.awt.Choice;
-import java.awt.Point;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-import ij.IJ;
-import ij.ImageListener;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.gui.DialogListener;
-import ij.gui.GenericDialog;
-import ij.gui.ImageWindow;
-import ij.gui.NonBlockingGenericDialog;
-import ij.io.Opener;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-import ij.util.StringSorter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -68,6 +39,37 @@ import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+
+import gnu.trove.map.hash.TIntObjectHashMap;
+
+import ij.IJ;
+import ij.ImageListener;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.DialogListener;
+import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.NonBlockingGenericDialog;
+import ij.io.Opener;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import ij.util.StringSorter;
+
+import java.awt.AWTEvent;
+import java.awt.Choice;
+import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * This plugin loads configuration templates for the localisation fitting settings.

@@ -23,11 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
@@ -37,6 +34,10 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.plugin.PlugIn;
 
 /**
  * Allows results held in memory to be converted to different units.

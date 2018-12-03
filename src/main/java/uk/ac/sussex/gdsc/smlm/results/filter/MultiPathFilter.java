@@ -23,15 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
@@ -39,6 +30,15 @@ import uk.ac.sussex.gdsc.core.match.RankedScoreCalculator;
 import uk.ac.sussex.gdsc.smlm.results.count.ConsecutiveFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.FailCounter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
+
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Filter a multi-path set of peak results into accepted/rejected.

@@ -23,8 +23,15 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import java.awt.Rectangle;
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
+import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
+import uk.ac.sussex.gdsc.core.ij.process.InfinityMappedFloatProcessor;
+import uk.ac.sussex.gdsc.core.ij.process.MappedFloatProcessor;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -36,15 +43,9 @@ import ij.plugin.LutLoader;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
-import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
-import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.process.InfinityMappedFloatProcessor;
-import uk.ac.sussex.gdsc.core.ij.process.MappedFloatProcessor;
-import uk.ac.sussex.gdsc.core.utils.SoftLock;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+
+import java.awt.Rectangle;
+import java.util.Arrays;
 
 /**
  * Saves the fit results to an ImageJ image.

@@ -23,8 +23,9 @@
  * #L%
  */
 
-import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMTools;
+
+import ij.plugin.PlugIn;
 
 /**
  * Default ImageJ plugin (no Java package) to run the {@link SMLMTools} plugin. <p> This class

@@ -23,7 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -35,8 +36,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import java.util.Arrays;
 
 /**
  * Contains methods for generating models of a Point Spread Function using a Airy pattern. <p>

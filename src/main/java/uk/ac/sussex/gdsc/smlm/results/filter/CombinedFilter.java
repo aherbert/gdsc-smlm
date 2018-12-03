@@ -23,14 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.util.Arrays;
-
-import org.apache.commons.lang3.NotImplementedException;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import org.apache.commons.lang3.NotImplementedException;
+
+import java.util.Arrays;
 
 /**
  * Filter results using the combination of two filters. <p> Note that is the filter is not a

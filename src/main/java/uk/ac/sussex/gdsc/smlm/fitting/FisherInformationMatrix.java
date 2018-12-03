@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
 
 import org.ejml.data.DenseMatrix64F;
 
-import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
+import java.util.Arrays;
 
 /**
  * Container for the Fisher information, a symmetric positive definite matrix containing the amount

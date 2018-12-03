@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.smlm.utils.Pair;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 /**
  * Allow processing work in stages, repeating only the stages necessary to render new results given

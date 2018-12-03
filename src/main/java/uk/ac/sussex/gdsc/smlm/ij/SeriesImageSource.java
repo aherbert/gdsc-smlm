@@ -23,6 +23,32 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij;
 
+import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
+import uk.ac.sussex.gdsc.core.ij.io.BigEndianFastTiffDecoder;
+import uk.ac.sussex.gdsc.core.ij.io.ByteArraySeekableStream;
+import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
+import uk.ac.sussex.gdsc.core.ij.io.FastImageReader;
+import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder;
+import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder.IndexMap;
+import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder.NumberOfImages;
+import uk.ac.sussex.gdsc.core.ij.io.FileSeekableStream;
+import uk.ac.sussex.gdsc.core.ij.io.LittleEndianFastTiffDecoder;
+import uk.ac.sussex.gdsc.core.ij.io.SeekableStream;
+import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource;
+
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import ij.ImagePlus;
+import ij.io.FileInfo;
+import ij.io.Opener;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,31 +57,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
-import ij.ImagePlus;
-import ij.io.FileInfo;
-import ij.io.Opener;
-import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
-import uk.ac.sussex.gdsc.core.ij.io.ByteArraySeekableStream;
-import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
-import uk.ac.sussex.gdsc.core.ij.io.FastImageReader;
-import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder;
-import uk.ac.sussex.gdsc.core.ij.io.BigEndianFastTiffDecoder;
-import uk.ac.sussex.gdsc.core.ij.io.LittleEndianFastTiffDecoder;
-import uk.ac.sussex.gdsc.core.ij.io.FileSeekableStream;
-import uk.ac.sussex.gdsc.core.ij.io.SeekableStream;
-import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder.IndexMap;
-import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder.NumberOfImages;
-import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
-import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
-import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
 /**
  * Represent a series of TIFF image files as a results source. Supports all greyscale images. Only

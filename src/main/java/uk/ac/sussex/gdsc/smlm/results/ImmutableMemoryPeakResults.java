@@ -23,13 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.awt.Rectangle;
-import java.util.Collection;
-
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
+
+import java.awt.Rectangle;
+import java.util.Collection;
 
 /**
  * Wraps peak results in memory and prevents modification of the results size. <p> Any method that

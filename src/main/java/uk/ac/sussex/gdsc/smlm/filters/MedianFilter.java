@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.util.FastMath;
-
 import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
+
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Computes the block median for each point within the array. <p> block algorithm sweeps the entire

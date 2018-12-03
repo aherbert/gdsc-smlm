@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import java.util.Arrays;
-import java.util.List;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Selects the top individuals.

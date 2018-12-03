@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import org.apache.commons.math3.util.FastMath;
+
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an median box

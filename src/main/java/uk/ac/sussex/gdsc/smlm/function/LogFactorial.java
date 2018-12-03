@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
+import org.apache.commons.math3.special.Gamma;
+
 import java.util.Arrays;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.apache.commons.math3.special.Gamma;
 
 /**
  * Compute the log of n!

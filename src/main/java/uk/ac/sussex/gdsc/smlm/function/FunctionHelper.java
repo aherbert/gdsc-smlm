@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
+import java.util.Arrays;
 
 /**
  * Utility class for functions.

@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.ga;
 
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 
 /**
  * Contains a population of individuals that may crossover and mutate to evolve. <p> For simplicity

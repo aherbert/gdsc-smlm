@@ -23,14 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.awt.Rectangle;
+import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
+import java.awt.Rectangle;
 
 /**
  * Abstract base class for the image source for peak results.

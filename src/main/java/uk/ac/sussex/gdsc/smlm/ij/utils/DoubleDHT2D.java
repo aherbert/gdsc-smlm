@@ -23,9 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import ij.process.ImageProcessor;
+
 import org.jtransforms.dht.DoubleDHT_2D;
 
-import ij.process.ImageProcessor;
 import pl.edu.icm.jlargearrays.LargeArray;
 
 /**

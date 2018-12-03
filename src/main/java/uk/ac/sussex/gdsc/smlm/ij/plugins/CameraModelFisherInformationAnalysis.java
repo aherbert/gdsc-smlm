@@ -23,31 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import org.apache.commons.math3.util.FastMath;
-
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
-import ij.IJ;
-import ij.Prefs;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -66,6 +49,25 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFisherInformation;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
+
+import ij.IJ;
+import ij.Prefs;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+
+import org.apache.commons.math3.util.FastMath;
+
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Model the Fisher information from an EM-CCD camera, CCD or sCMOS camera.

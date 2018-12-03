@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
 // import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
-
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Calculate the value of the Skew Normal distribution <p>

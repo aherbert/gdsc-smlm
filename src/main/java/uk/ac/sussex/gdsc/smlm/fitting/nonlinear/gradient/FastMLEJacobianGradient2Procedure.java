@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
+
+import java.util.Arrays;
 
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second

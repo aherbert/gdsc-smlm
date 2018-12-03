@@ -23,11 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import org.jtransforms.dht.FloatDHT_3D;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
 
 import ij.ImageStack;
+
+import org.jtransforms.dht.FloatDHT_3D;
+
 import pl.edu.icm.jlargearrays.LargeArray;
-import uk.ac.sussex.gdsc.core.ij.process.Fht;
 
 /**
  * Wrapper to compute the discrete Hartley transform on 3D data. This uses the JTransforms library.

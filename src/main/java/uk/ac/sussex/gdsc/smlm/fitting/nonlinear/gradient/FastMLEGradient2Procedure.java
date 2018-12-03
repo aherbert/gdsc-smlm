@@ -23,13 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
+
+import java.util.Arrays;
 
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second

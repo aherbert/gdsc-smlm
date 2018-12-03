@@ -23,13 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 
 /**
  * This plugin creates a mask image stack using an XY and XZ mask image.

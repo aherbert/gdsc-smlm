@@ -23,26 +23,32 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.Collections;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
-import org.apache.commons.math3.stat.inference.TestUtils;
-import org.apache.commons.math3.util.MathArrays;
+import uk.ac.sussex.gdsc.core.data.IntegerType;
+import uk.ac.sussex.gdsc.core.data.SiPrefix;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.math.ArrayMoment;
+import uk.ac.sussex.gdsc.core.math.IntegerArrayMoment;
+import uk.ac.sussex.gdsc.core.math.RollingArrayMoment;
+import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
+import uk.ac.sussex.gdsc.core.utils.DoubleData;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.StoredData;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
+import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
+import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -54,32 +60,27 @@ import ij.gui.Plot;
 import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.data.IntegerType;
-import uk.ac.sussex.gdsc.core.data.SiPrefix;
-import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.math.ArrayMoment;
-import uk.ac.sussex.gdsc.core.math.IntegerArrayMoment;
-import uk.ac.sussex.gdsc.core.math.RollingArrayMoment;
-import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
-import uk.ac.sussex.gdsc.core.utils.DoubleData;
-import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.core.utils.StoredData;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
-import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
-import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
+
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
+import org.apache.commons.math3.stat.inference.TestUtils;
+import org.apache.commons.math3.util.MathArrays;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.Collections;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Analyse the per pixel offset, variance and gain from a sCMOS camera. <p> See Huang et al (2013)

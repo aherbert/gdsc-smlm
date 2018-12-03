@@ -23,20 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.Rectangle;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
-import org.apache.commons.math3.util.FastMath;
-import org.jtransforms.fft.DoubleFFT_2D;
-import org.jtransforms.fft.FloatFFT_2D;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
+import uk.ac.sussex.gdsc.core.utils.ImageWindow;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -52,16 +48,21 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.ij.process.Fht;
-import uk.ac.sussex.gdsc.core.utils.ImageWindow;
-import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
-import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
+
+import org.apache.commons.math3.util.FastMath;
+import org.jtransforms.fft.DoubleFFT_2D;
+import org.jtransforms.fft.FloatFFT_2D;
+
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve. <p>

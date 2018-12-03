@@ -23,25 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.EnumSet;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.Prefs;
-import ij.gui.DialogListener;
-import ij.gui.GenericDialog;
-import ij.gui.PointRoi;
-import ij.gui.Roi;
-import ij.measure.Measurements;
-import ij.plugin.filter.ExtendedPlugInFilter;
-import ij.plugin.filter.PlugInFilterRunner;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-import ij.process.ImageStatistics;
 import uk.ac.sussex.gdsc.core.filters.FilteredNonMaximumSuppression;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -68,6 +49,26 @@ import uk.ac.sussex.gdsc.smlm.ij.results.IJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.Prefs;
+import ij.gui.DialogListener;
+import ij.gui.GenericDialog;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.measure.Measurements;
+import ij.plugin.filter.ExtendedPlugInFilter;
+import ij.plugin.filter.PlugInFilterRunner;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
+
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.EnumSet;
 
 /**
  * Fits the selected rectangular ROI using a 2D Gaussian.

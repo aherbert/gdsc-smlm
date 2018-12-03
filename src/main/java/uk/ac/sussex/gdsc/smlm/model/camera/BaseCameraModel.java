@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+
 import java.awt.Rectangle;
 import java.util.Arrays;
-
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
  * Base class for the camera model.

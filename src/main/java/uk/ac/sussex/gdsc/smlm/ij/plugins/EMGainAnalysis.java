@@ -23,10 +23,31 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction;
+import uk.ac.sussex.gdsc.smlm.function.PoissonFunction;
+import uk.ac.sussex.gdsc.smlm.function.PoissonGammaFunction;
+import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction;
+import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFunction2;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
+import uk.ac.sussex.gdsc.smlm.utils.Convolution;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.gui.Roi;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.ImageProcessor;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.distribution.GammaDistribution;
@@ -42,30 +63,10 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.gui.Roi;
-import ij.plugin.filter.PlugInFilter;
-import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction;
-import uk.ac.sussex.gdsc.smlm.function.PoissonFunction;
-import uk.ac.sussex.gdsc.smlm.function.PoissonGammaFunction;
-import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction;
-import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFunction2;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
-import uk.ac.sussex.gdsc.smlm.utils.Convolution;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.Arrays;
 
 /**
  * Analysis a white light image from an EM-CCD camera, construct a histogram of pixel intensity and

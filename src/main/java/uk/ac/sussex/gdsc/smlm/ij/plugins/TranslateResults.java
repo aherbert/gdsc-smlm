@@ -23,8 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import ij.IJ;
-import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -35,6 +33,9 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+
+import ij.IJ;
+import ij.plugin.PlugIn;
 
 /**
  * Translate fit results. This can be used if the reference frame of the results is incorrect.

@@ -23,20 +23,21 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.frc;
 
-import java.util.Arrays;
-
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.util.FastMath;
-import org.jtransforms.fft.FloatFFT_2D;
-
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.RadialStatisticsUtils;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.util.FastMath;
+import org.jtransforms.fft.FloatFFT_2D;
+
+import java.util.Arrays;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image. <p>

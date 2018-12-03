@@ -23,14 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import java.awt.Frame;
-import java.awt.event.MouseListener;
-import java.util.HashMap;
-
-import gnu.trove.list.array.TIntArrayList;
-import ij.WindowManager;
-import ij.text.TextPanel;
-import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
@@ -50,6 +42,16 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultConversionHelper;
 import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
+
+import gnu.trove.list.array.TIntArrayList;
+
+import ij.WindowManager;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
+
+import java.awt.Frame;
+import java.awt.event.MouseListener;
+import java.util.HashMap;
 
 /**
  * Saves the fit results to an ImageJ results table. <p> The table supports mouse click events to

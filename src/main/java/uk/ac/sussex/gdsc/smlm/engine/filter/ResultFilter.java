@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine.filter;
 
-import java.util.List;
-
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+
+import java.util.List;
 
 /**
  * Provides a system for filtering the fitted results using distance to a set of target coordinates.

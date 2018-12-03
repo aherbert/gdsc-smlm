@@ -23,14 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-
-import org.apache.commons.math3.util.FastMath;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -38,6 +30,15 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+
+import org.apache.commons.math3.util.FastMath;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Trace localisations through a time stack to identify single molecules.

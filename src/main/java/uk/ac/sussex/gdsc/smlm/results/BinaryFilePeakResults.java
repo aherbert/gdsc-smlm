@@ -23,6 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -32,8 +34,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
-import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 
 /**
  * Saves the fit results to a binary file format.

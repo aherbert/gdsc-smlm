@@ -23,13 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine.filter;
 
+import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
-
-import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * Filter the results using the distance to a set of coordinates. Positions must be within the

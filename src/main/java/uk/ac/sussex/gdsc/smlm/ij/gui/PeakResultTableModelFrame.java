@@ -23,6 +23,37 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
+import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.XmlUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
+import uk.ac.sussex.gdsc.smlm.results.sort.FramePeakResultComparator;
+
+import gnu.trove.list.array.TFloatArrayList;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
+
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,35 +76,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
-
-import gnu.trove.list.array.TFloatArrayList;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.gui.Overlay;
-import ij.gui.PointRoi;
-import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
-import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.XmlUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
-import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
-import uk.ac.sussex.gdsc.smlm.results.ImageSource;
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
-import uk.ac.sussex.gdsc.smlm.results.sort.FramePeakResultComparator;
 
 /**
  * A frame that shows a PeakResultsTableModel.

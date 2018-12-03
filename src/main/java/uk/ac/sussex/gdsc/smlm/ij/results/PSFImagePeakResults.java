@@ -23,10 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import java.awt.Rectangle;
-
-import org.apache.commons.math3.util.FastMath;
-
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
@@ -36,6 +32,10 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+
+import org.apache.commons.math3.util.FastMath;
+
+import java.awt.Rectangle;
 
 /**
  * Draws the fit results using the Gaussian PSF to an ImageJ image.

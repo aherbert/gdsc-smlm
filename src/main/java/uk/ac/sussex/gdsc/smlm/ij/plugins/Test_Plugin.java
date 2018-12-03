@@ -1,5 +1,11 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
+
+import ij.IJ;
+import ij.plugin.PlugIn;
+
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
@@ -27,11 +33,6 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import java.awt.Choice;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import ij.IJ;
-import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 
 /**
  * A simple class used to test plugin functionality.

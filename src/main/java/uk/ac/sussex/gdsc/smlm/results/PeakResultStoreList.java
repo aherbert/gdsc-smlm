@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.Comparator;
+import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
-import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
+import java.util.Comparator;
 
 /**
  * Stores peak results with list access.

@@ -23,8 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import java.awt.Rectangle;
-
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration.PeakResultValidationData;
@@ -32,6 +30,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
+
+import java.awt.Rectangle;
 
 /**
  * Returns a simple estimate of local background and noise for fitting a Gaussian 2D function. The

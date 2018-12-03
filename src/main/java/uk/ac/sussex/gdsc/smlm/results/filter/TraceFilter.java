@@ -23,16 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
+
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Filter results that can be traced over time frames.

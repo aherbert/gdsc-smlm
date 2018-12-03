@@ -23,13 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Set;
-
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
@@ -71,6 +64,13 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XYResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYZRResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYZResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.ZResultProcedure;
+
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * Stores peak results in memory. <p> The PeakResults interface add methods are not-thread safe. The

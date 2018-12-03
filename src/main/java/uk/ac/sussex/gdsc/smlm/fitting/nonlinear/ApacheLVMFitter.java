@@ -23,6 +23,17 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
+import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
+import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction;
+import uk.ac.sussex.gdsc.smlm.function.MultivariateMatrixFunctionWrapper;
+import uk.ac.sussex.gdsc.smlm.function.MultivariateVectorFunctionWrapper;
+import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
+import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -37,17 +48,6 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.util.Precision;
-
-import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
-import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
-import uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction;
-import uk.ac.sussex.gdsc.smlm.function.MultivariateMatrixFunctionWrapper;
-import uk.ac.sussex.gdsc.smlm.function.MultivariateVectorFunctionWrapper;
-import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
-import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Uses Apache Commons Math Levenberg-Marquardt method to fit a nonlinear model with coefficients

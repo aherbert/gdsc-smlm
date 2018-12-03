@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
+
+import java.util.Arrays;
 
 /**
  * Allow restricting parameter steps. <p> Support bounded parameters using a hard-stop limit. <p>

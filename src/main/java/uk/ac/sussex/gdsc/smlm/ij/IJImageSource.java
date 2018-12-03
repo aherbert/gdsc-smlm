@@ -23,9 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij;
 
-import java.awt.Rectangle;
-
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
@@ -36,7 +34,10 @@ import ij.WindowManager;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.smlm.results.ImageSource;
+
+import org.apache.commons.math3.util.FastMath;
+
+import java.awt.Rectangle;
 
 /**
  * Represent an ImageJ image as a results source. Supports all greyscale images. Only processes

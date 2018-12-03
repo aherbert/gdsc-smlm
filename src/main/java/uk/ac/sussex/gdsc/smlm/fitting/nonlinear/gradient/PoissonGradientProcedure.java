@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
+
+import java.util.Arrays;
 
 /**
  * Calculates the Fisher information matrix for a Poisson process. <p> Ref: Smith et al, (2010).

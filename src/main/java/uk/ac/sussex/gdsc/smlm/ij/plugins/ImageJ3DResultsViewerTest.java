@@ -23,26 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.util.List;
-
-import org.scijava.java3d.Appearance;
-import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.Shape3D;
-import org.scijava.java3d.TransparencyAttributes;
-import org.scijava.java3d.View;
-import org.scijava.java3d.utils.geometry.Primitive;
-import org.scijava.java3d.utils.geometry.Sphere;
-import org.scijava.vecmath.Point3f;
-
-import customnode.CustomMesh;
-import ij.IJ;
-import ij.gui.GUI;
-import ij.plugin.PlugIn;
-import ij3d.ContentInstant;
-import ij3d.DefaultUniverse;
-import ij3d.Image3DUniverse;
-import ij3d.ImageJ_3D_Viewer;
-import ij3d.ImageWindow3D;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
@@ -60,6 +40,28 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
+
+import ij.IJ;
+import ij.gui.GUI;
+import ij.plugin.PlugIn;
+
+import org.scijava.java3d.Appearance;
+import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.Shape3D;
+import org.scijava.java3d.TransparencyAttributes;
+import org.scijava.java3d.View;
+import org.scijava.java3d.utils.geometry.Primitive;
+import org.scijava.java3d.utils.geometry.Sphere;
+import org.scijava.vecmath.Point3f;
+
+import java.util.List;
+
+import customnode.CustomMesh;
+import ij3d.ContentInstant;
+import ij3d.DefaultUniverse;
+import ij3d.Image3DUniverse;
+import ij3d.ImageJ_3D_Viewer;
+import ij3d.ImageWindow3D;
 
 /**
  * Tests for drawing a localisation results set using an ImageJ 3D image.

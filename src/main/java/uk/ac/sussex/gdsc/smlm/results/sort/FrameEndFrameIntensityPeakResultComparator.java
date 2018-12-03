@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.sort;
 
-import java.util.Comparator;
-
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+
+import java.util.Comparator;
 
 /**
  * Compares the results by frame, end frame and then intensity descending.

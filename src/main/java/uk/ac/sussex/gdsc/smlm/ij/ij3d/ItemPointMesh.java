@@ -23,9 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
@@ -34,6 +31,9 @@ import org.scijava.java3d.PointArray;
 import org.scijava.java3d.PointAttributes;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
+
+import java.util.Arrays;
+import java.util.List;
 
 import customnode.CustomPointMesh;
 

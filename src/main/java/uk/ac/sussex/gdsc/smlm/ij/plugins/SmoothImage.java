@@ -23,8 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.AWTEvent;
-import java.awt.Rectangle;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
+import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
+import uk.ac.sussex.gdsc.smlm.filters.DataProcessor;
+import uk.ac.sussex.gdsc.smlm.filters.DifferenceSpotFilter;
+import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
+import uk.ac.sussex.gdsc.smlm.filters.SingleSpotFilter;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -35,13 +40,9 @@ import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
-import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
-import uk.ac.sussex.gdsc.smlm.filters.DataProcessor;
-import uk.ac.sussex.gdsc.smlm.filters.DifferenceSpotFilter;
-import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
-import uk.ac.sussex.gdsc.smlm.filters.SingleSpotFilter;
-import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+
+import java.awt.AWTEvent;
+import java.awt.Rectangle;
 
 /**
  * Smooths the selected rectangular ROI using a mean filter.

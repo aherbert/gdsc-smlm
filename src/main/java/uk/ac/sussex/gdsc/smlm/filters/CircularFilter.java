@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.awt.Rectangle;
-
 import uk.ac.sussex.gdsc.core.utils.StoredData;
+
+import java.awt.Rectangle;
 
 /**
  * Computes the filter using a circular mask. <p> Adapted from ij.plugin.filter.RankFilters

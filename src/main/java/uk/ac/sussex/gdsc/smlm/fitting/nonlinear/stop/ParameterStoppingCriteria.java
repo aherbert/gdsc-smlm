@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
-import org.apache.commons.math3.util.FastMath;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Defines the stopping criteria for the

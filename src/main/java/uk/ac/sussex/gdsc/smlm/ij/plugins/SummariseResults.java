@@ -23,22 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.plugin.PlugIn;
-import ij.text.TextPanel;
-import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
@@ -54,6 +43,18 @@ import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.SNRResultProcedure;
+
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.plugin.PlugIn;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * Produces a summary table of the results that are stored in memory.

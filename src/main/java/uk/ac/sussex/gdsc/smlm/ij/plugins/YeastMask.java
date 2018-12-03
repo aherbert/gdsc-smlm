@@ -23,6 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
@@ -31,7 +33,6 @@ import ij.plugin.PlugIn;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 
 /**
  * This plugin creates a mask image of a Yeast cell for use in diffusion simulations.

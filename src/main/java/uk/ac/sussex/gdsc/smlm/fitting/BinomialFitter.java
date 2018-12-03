@@ -23,7 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
@@ -53,9 +54,7 @@ import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

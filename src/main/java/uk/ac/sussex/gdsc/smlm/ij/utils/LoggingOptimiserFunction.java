@@ -23,8 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import ij.IJ;
 import uk.ac.sussex.gdsc.smlm.function.OptimiserFunction;
+
+import ij.IJ;
 
 /**
  * Allow progress tracking of the Apache Commons Math 3 Optimiser in ImageJ.

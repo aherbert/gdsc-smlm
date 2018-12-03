@@ -23,17 +23,18 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.util.List;
+import ij.gui.GUI;
+import ij.plugin.PlugIn;
 
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 
+import java.util.List;
+
 import customnode.CustomMesh;
 import customnode.CustomTriangleMesh;
 import customnode.MeshMaker;
-import ij.gui.GUI;
-import ij.plugin.PlugIn;
 import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;

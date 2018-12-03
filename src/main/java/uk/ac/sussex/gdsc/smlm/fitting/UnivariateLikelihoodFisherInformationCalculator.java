@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.smlm.function.FisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
+
+import java.util.Arrays;
 
 /**
  * Calculator for the Fisher information, a symmetric positive definite matrix containing the amount

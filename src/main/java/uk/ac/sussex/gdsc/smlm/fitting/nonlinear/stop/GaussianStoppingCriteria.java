@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+
+import java.util.Arrays;
 
 /**
  * Defines the stopping criteria for the

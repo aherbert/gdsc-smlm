@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
+
+import java.util.Arrays;
 
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a

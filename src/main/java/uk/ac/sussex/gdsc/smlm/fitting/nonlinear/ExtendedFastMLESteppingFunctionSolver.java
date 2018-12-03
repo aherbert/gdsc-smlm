@@ -23,10 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
-import org.ejml.data.DenseMatrix64F;
-
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.FastMLEGradient2Procedure;
@@ -36,6 +32,10 @@ import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.OffsetExtendedGradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.OffsetGradient2Function;
+
+import org.ejml.data.DenseMatrix64F;
+
+import java.util.Arrays;
 
 /**
  * Uses the Fast MLE method to fit a gradient function with coefficients (a). <p> Calculates the

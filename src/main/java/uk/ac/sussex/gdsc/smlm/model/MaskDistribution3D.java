@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Samples uniformly from the specified masks. All non-zero pixels are sampled. The centre of the

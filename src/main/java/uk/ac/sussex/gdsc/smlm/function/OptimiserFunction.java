@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.Arrays;
-
 import gnu.trove.list.array.TDoubleArrayList;
+
+import java.util.Arrays;
 
 /**
  * Allow optimisation using Apache Commons Math 3 Optimiser.

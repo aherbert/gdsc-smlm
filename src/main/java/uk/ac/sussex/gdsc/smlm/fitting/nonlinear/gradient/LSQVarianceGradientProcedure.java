@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
+
+import java.util.Arrays;
 
 /**
  * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson

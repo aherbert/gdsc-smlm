@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
-import org.apache.commons.math3.util.FastMath;
-
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.

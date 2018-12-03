@@ -37,7 +37,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
@@ -58,8 +59,7 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
+import java.util.Arrays;
 
 /**
  * Powell's algorithm. <p> The class is based on the

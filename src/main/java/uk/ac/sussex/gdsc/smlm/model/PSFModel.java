@@ -23,13 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.Precision;
 
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import java.util.Arrays;
 
 /**
  * Contains methods for generating models of a Point Spread Function.

@@ -23,13 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
-import java.util.Arrays;
-
-import javax.swing.AbstractListModel;
-
 import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
+
+import java.util.Arrays;
+
+import javax.swing.AbstractListModel;
 
 /**
  * Stores peak results and allows event propagation to listeners of the model.

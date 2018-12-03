@@ -23,10 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Enumeration;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.io.FileInfo;
+import ij.io.OpenDialog;
 
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.Group;
@@ -41,13 +43,13 @@ import org.scijava.vecmath.Matrix3f;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Vector3d;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Enumeration;
+
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.io.FileInfo;
-import ij.io.OpenDialog;
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.ContentNode;

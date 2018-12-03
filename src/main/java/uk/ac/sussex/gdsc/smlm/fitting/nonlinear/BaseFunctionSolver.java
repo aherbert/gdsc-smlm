@@ -23,14 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolverType;
 import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.NamedFunction;
+
+import java.util.Arrays;
 
 /**
  * Abstract class with utility methods for the FunctionSolver interface.

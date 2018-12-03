@@ -23,19 +23,22 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import java.util.List;
-
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
+
+import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Point3f;
+
+import java.util.List;
+
 import vib.InterpolatedImage;
 
 /**

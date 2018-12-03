@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import java.awt.Rectangle;
-import java.util.List;
-
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
+
+import java.awt.Rectangle;
+import java.util.List;
 
 /**
  * Specifies a job for peak fitting.

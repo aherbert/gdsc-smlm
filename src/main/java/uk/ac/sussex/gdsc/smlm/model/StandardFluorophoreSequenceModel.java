@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
-
 import gnu.trove.list.array.TDoubleArrayList;
+
+import org.apache.commons.math3.random.RandomDataGenerator;
 
 /**
  * Contains a continuous-time model for a blinking fluorophore. Assumes a constant activation laser

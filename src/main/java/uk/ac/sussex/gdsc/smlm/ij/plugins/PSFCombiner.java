@@ -23,9 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
+import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePSFHelper;
+import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -38,13 +42,10 @@ import ij.plugin.frame.Recorder;
 import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
-import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePSFHelper;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Produces an average PSF image from multiple PSF images. <p> The input images must be a z-stack of

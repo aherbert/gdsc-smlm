@@ -23,22 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import java.awt.Rectangle;
-import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.concurrent.BlockingQueue;
-
-import org.apache.commons.math3.util.FastMath;
-
 import uk.ac.sussex.gdsc.core.filters.AreaStatistics;
 import uk.ac.sussex.gdsc.core.filters.FloatAreaSum;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -95,6 +84,16 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
+
+import org.apache.commons.math3.util.FastMath;
+
+import java.awt.Rectangle;
+import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Fits local maxima using a 2D Gaussian.

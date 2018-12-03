@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import java.util.List;
-
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter;
+
+import java.util.List;
 
 /**
  * Specifies additional parameters for the job. <p> Can be used to collect additional information

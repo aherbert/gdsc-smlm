@@ -23,39 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.EventQueue;
-import java.awt.Label;
-import java.awt.Panel;
-import java.awt.Rectangle;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-
-import ij.IJ;
-import ij.Prefs;
-import ij.gui.GenericDialog;
-import ij.gui.YesNoCancelDialog;
-import ij.io.OpenDialog;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.Recorder;
-import ij.util.Java2;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
@@ -93,6 +66,34 @@ import uk.ac.sussex.gdsc.smlm.results.TSFPeakResultsWriter;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
+
+import ij.IJ;
+import ij.Prefs;
+import ij.gui.GenericDialog;
+import ij.gui.YesNoCancelDialog;
+import ij.io.OpenDialog;
+import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
+import ij.util.Java2;
+
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.EventQueue;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 
 /**
  * Opens peaks results and displays/converts them.

@@ -23,6 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
+import uk.ac.sussex.gdsc.core.data.utils.Converter;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -35,16 +45,6 @@ import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-
-import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
-import uk.ac.sussex.gdsc.core.data.utils.Converter;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Saves the fit results to file.

@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.Arrays;
 
 /**
  * Populates an image with well spaced unary or binary localisations. <p> Creates a grid layout

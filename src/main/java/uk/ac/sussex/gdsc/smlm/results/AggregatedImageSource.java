@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import java.awt.Rectangle;
 import java.util.Arrays;
-
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Wraps an image source and allows aggregation of consecutive frames.

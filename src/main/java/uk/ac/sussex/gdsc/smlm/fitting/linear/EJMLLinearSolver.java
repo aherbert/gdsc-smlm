@@ -23,14 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+
 import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
-
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 /**
  * Solves (one) linear equation, A x = b. <p> Wraps the LinearSolver class from the EJML (Efficient

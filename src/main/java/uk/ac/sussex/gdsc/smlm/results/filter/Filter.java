@@ -23,12 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
-
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -38,6 +32,12 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import org.apache.commons.math3.util.FastMath;
+
+import java.util.List;
 
 /**
  * Filter a set of peak results into accepted/rejected.

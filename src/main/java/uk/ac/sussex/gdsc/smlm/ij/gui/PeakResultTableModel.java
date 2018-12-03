@@ -23,17 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.swing.SwingConstants;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-
-import gnu.trove.list.array.TIntArrayList;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
@@ -67,6 +56,18 @@ import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataParameterConverter;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataParameterDeviationConverter;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataPrecision;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataSNR;
+
+import gnu.trove.list.array.TIntArrayList;
+
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * Stores peak results and allows event propagation to listeners of the model.

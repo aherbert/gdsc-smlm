@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import org.ejml.data.DenseMatrix64F;
-
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
+import org.ejml.data.DenseMatrix64F;
 
 /**
  * Compute the inertia tensor for a 3D object.

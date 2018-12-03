@@ -23,7 +23,18 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.ImageWindow;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineCalculator;
+import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
+
+import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -35,17 +46,7 @@ import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 
-import ij.ImageStack;
-import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
-import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.ImageWindow;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineCalculator;
-import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
+import java.util.Arrays;
 
 /**
  * Perform 3D image alignment using normalised cross-correlation. <p> Uses the following formula:

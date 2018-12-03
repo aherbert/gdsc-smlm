@@ -23,8 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
@@ -33,6 +31,8 @@ import uk.ac.sussex.gdsc.smlm.function.NamedFunction;
 import uk.ac.sussex.gdsc.smlm.function.NoiseModel;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
+
+import java.util.Arrays;
 
 /**
  * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks. <p>

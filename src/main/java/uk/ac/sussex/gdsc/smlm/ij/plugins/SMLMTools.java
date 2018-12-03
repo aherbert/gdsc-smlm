@@ -23,6 +23,15 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
+
+import ij.Executer;
+import ij.IJ;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GUI;
+import ij.plugin.frame.PlugInFrame;
+
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Component;
@@ -44,14 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import ij.Executer;
-import ij.IJ;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GUI;
-import ij.plugin.frame.PlugInFrame;
-import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 
 /**
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in

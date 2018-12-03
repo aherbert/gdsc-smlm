@@ -23,13 +23,13 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
-import java.util.Arrays;
-
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+
+import java.util.Arrays;
 
 /**
  * Represent a cubic spline function for multiple points.

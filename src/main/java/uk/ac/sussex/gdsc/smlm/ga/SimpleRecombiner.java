@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import java.util.Arrays;
 
 /**
  * Recombine sequence by selecting random positions for crossover.

@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.settings;
 
-import java.util.HashMap;
-
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder;
+
+import java.util.HashMap;
 
 /**
  * Contain helper functions for the ImagePOSF class.

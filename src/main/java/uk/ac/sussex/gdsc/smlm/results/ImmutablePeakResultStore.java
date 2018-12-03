@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.Collection;
-
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+
+import java.util.Collection;
 
 /**
  * Stores peak results and prevents modification.

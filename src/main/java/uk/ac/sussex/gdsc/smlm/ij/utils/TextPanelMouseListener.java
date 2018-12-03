@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import ij.text.TextPanel;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
-import ij.text.TextPanel;
 
 /**
  * Attaches to a text panel and listens for mouse events. Responds to double click on a single line

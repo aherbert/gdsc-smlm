@@ -23,6 +23,39 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
+import uk.ac.sussex.gdsc.core.clustering.Cluster;
+import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
+import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
+import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
+import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+
+import ij.IJ;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
+
+import org.apache.commons.math3.distribution.BinomialDistribution;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.util.FastMath;
+
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,38 +71,6 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-
-import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.util.FastMath;
-
-import ij.IJ;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.Recorder;
-import uk.ac.sussex.gdsc.core.clustering.Cluster;
-import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
-import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
-import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
-import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
-import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
-import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
-import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 /**
  * Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.

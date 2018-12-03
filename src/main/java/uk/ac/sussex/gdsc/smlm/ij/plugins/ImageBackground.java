@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -32,7 +32,8 @@ import ij.plugin.ZProjector;
 import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Produces a background intensity image and a mask from a sample image. <p> The input image should

@@ -23,6 +23,17 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.smlm.Version;
+
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.macro.ExtensionDescriptor;
+import ij.macro.Functions;
+import ij.macro.MacroExtension;
+import ij.plugin.PlugIn;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,17 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
-
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.macro.ExtensionDescriptor;
-import ij.macro.Functions;
-import ij.macro.MacroExtension;
-import ij.plugin.PlugIn;
-
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
-import uk.ac.sussex.gdsc.smlm.Version;
 
 /**
  * Contains help dialogs for the GDSC ImageJ plugins.
