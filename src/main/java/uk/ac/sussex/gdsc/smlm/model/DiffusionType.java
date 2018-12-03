@@ -26,55 +26,52 @@ package uk.ac.sussex.gdsc.smlm.model;
 /**
  * Define the diffusion type.
  */
-public enum DiffusionType
-{
-    //@formatter:off
-	/**
-	 * A random walk
-	 */
-	RANDOM_WALK{ @Override
-	public String getName() { return "Random Walk"; }},
-	/**
-	 * A grid walk using defined step sizes in each dimension
-	 */
-	GRID_WALK{ @Override
-	public String getName() { return "Grid Walk"; }},
-	/**
-	 * A random walk along a linear axis
-	 */
-	LINEAR_WALK{ @Override
-	public String getName() { return "Linear Walk"; }};
-	//@formatter:on
+public enum DiffusionType {
+  //@formatter:off
+  /**
+   * A random walk
+   */
+  RANDOM_WALK{ @Override
+  public String getName() { return "Random Walk"; }},
+  /**
+   * A grid walk using defined step sizes in each dimension
+   */
+  GRID_WALK{ @Override
+  public String getName() { return "Grid Walk"; }},
+  /**
+   * A random walk along a linear axis
+   */
+  LINEAR_WALK{ @Override
+  public String getName() { return "Linear Walk"; }};
+  //@formatter:on
 
-    @Override
-    public String toString()
-    {
-        return getName();
-    }
+  @Override
+  public String toString() {
+    return getName();
+  }
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    abstract public String getName();
+  /**
+   * Gets the name.
+   *
+   * @return the name
+   */
+  abstract public String getName();
 
-    /**
-     * Get the diffusion type from a given string. Returns null if the text is not a valid type.
-     *
-     * @param text
-     *            The text
-     * @return The diffusion type (or null)
-     */
-    public static DiffusionType fromString(String text)
-    {
-        if (text != null)
-        {
-            text = text.trim();
-            for (final DiffusionType type : DiffusionType.values())
-                if (text.equalsIgnoreCase(type.getName()))
-                    return type;
+  /**
+   * Get the diffusion type from a given string. Returns null if the text is not a valid type.
+   *
+   * @param text The text
+   * @return The diffusion type (or null)
+   */
+  public static DiffusionType fromString(String text) {
+    if (text != null) {
+      text = text.trim();
+      for (final DiffusionType type : DiffusionType.values()) {
+        if (text.equalsIgnoreCase(type.getName())) {
+          return type;
         }
-        return null;
+      }
     }
+    return null;
+  }
 }

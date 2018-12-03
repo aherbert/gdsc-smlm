@@ -28,32 +28,27 @@ import java.util.Arrays;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSetFactory
-{
-    /**
-     * Creates the multi filter component set.
-     *
-     * @param components
-     *            the components
-     * @param size
-     *            the size
-     * @return the multi filter component set
-     */
-    public static MultiFilterComponentSet create(MultiFilterComponent[] components, int size)
-    {
-        switch (size)
-        {
-            //@formatter:off
-			case 0: return new MultiFilterComponentSet0(components);
-			case 1: return new MultiFilterComponentSet1(components);
-			case 2: return new MultiFilterComponentSet2(components);
-			case 3: return new MultiFilterComponentSet3(components);
-			case 4: return new MultiFilterComponentSet4(components);
-			case 5: return new MultiFilterComponentSet5(components);
-			case 6: return new MultiFilterComponentSet6(components);
-			case 7: return new MultiFilterComponentSet7(components);
-			//@formatter:on
-        }
-        return new MultiFilterComponentSetDefault(Arrays.copyOf(components, size));
+public class MultiFilterComponentSetFactory {
+  /**
+   * Creates the multi filter component set.
+   *
+   * @param components the components
+   * @param size the size
+   * @return the multi filter component set
+   */
+  public static MultiFilterComponentSet create(MultiFilterComponent[] components, int size) {
+    switch (size) {
+      //@formatter:off
+      case 0: return new MultiFilterComponentSet0(components);
+      case 1: return new MultiFilterComponentSet1(components);
+      case 2: return new MultiFilterComponentSet2(components);
+      case 3: return new MultiFilterComponentSet3(components);
+      case 4: return new MultiFilterComponentSet4(components);
+      case 5: return new MultiFilterComponentSet5(components);
+      case 6: return new MultiFilterComponentSet6(components);
+      case 7: return new MultiFilterComponentSet7(components);
+      //@formatter:on
     }
+    return new MultiFilterComponentSetDefault(Arrays.copyOf(components, size));
+  }
 }

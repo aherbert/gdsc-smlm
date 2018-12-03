@@ -23,17 +23,13 @@
  */
 
 /**
- * Provides classes for computation of 2D Gaussian function.
- * <p>
- * The 2D Gaussian function is used as a model of the Point Spread Function (PSF) of a
- * microscope and can be fit to Single Molecule Localisation Microscopy data.
- * <p>
- * The functions in this package can compute the Gaussian function over a 2D range
- * that represents for example the pixels in an image. This package evaluates the function
- * as a single point for each (X,Y) position. That is the function integral over the
- * 1x1 area surrounding point (X,Y) is approximated using the function value at (X,Y).
- * <p>
- * The functions can support rotated elliptical 2D Gaussians.
+ * Provides classes for computation of 2D Gaussian function. <p> The 2D Gaussian function is used as
+ * a model of the Point Spread Function (PSF) of a microscope and can be fit to Single Molecule
+ * Localisation Microscopy data. <p> The functions in this package can compute the Gaussian function
+ * over a 2D range that represents for example the pixels in an image. This package evaluates the
+ * function as a single point for each (X,Y) position. That is the function integral over the 1x1
+ * area surrounding point (X,Y) is approximated using the function value at (X,Y). <p> The functions
+ * can support rotated elliptical 2D Gaussians.
  *
  * @since 1.0.0
  */

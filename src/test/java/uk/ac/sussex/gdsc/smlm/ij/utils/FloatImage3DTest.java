@@ -25,19 +25,16 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
-@SuppressWarnings({ "javadoc" })
-public class FloatImage3DTest extends Image3DTest
-{
-    @Override
-    protected FloatImage3D createData(int w, int h, int d)
-    {
-        final float[] data = SimpleArrayUtils.newArray(w * h * d, 1f, 1f);
-        return new FloatImage3D(w, h, d, data);
-    }
+@SuppressWarnings({"javadoc"})
+public class FloatImage3DTest extends Image3DTest {
+  @Override
+  protected FloatImage3D createData(int w, int h, int d) {
+    final float[] data = SimpleArrayUtils.newArray(w * h * d, 1f, 1f);
+    return new FloatImage3D(w, h, d, data);
+  }
 
-    @Override
-    protected FloatImage3D createEmptyData(int w, int h, int d)
-    {
-        return new FloatImage3D(w, h, d);
-    }
+  @Override
+  protected FloatImage3D createEmptyData(int w, int h, int d) {
+    return new FloatImage3D(w, h, d);
+  }
 }

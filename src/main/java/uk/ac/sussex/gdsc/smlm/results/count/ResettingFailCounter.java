@@ -24,145 +24,132 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Stop evaluating when a number of cumulative failures occurs. The failures count is reset to a fraction of the current
- * value for each pass.
+ * Stop evaluating when a number of cumulative failures occurs. The failures count is reset to a
+ * fraction of the current value for each pass.
  */
-public class ResettingFailCounter extends BaseFailCounter
-{
-    /** The fail count. */
-    private int failCount = 0;
+public class ResettingFailCounter extends BaseFailCounter {
+  /** The fail count. */
+  private int failCount = 0;
 
-    /** The number of allowed failures. */
-    private final int allowedFailures;
+  /** The number of allowed failures. */
+  private final int allowedFailures;
 
-    /** The fraction of the current failures count to reset to for a pass. */
-    private final double resetFraction;
+  /** The fraction of the current failures count to reset to for a pass. */
+  private final double resetFraction;
 
-    /**
-     * Instantiates a new resetting fail counter.
-     *
-     * @param allowedFailures
-     *            the number of allowed failures
-     * @param resetFraction
-     *            the reset fraction
-     */
-    private ResettingFailCounter(int allowedFailures, double resetFraction)
-    {
-        this.allowedFailures = allowedFailures;
-        this.resetFraction = resetFraction;
+  /**
+   * Instantiates a new resetting fail counter.
+   *
+   * @param allowedFailures the number of allowed failures
+   * @param resetFraction the reset fraction
+   */
+  private ResettingFailCounter(int allowedFailures, double resetFraction) {
+    this.allowedFailures = allowedFailures;
+    this.resetFraction = resetFraction;
+  }
+
+  @Override
+  protected String generateDescription() {
+    return String.format("allowedFailures=%d;resetFraction=%f", allowedFailures, resetFraction);
+  }
+
+  /**
+   * Instantiates a new resetting fail counter.
+   *
+   * @param allowedFailures the number of allowed failures
+   * @param resetFraction The fraction of the current failures count to reset to for a pass.
+   * @return the resetting fail counter
+   */
+  public static ResettingFailCounter create(int allowedFailures, double resetFraction) {
+    if (!(resetFraction >= 0 && resetFraction <= 1)) {
+      throw new IllegalArgumentException("Reset must be in the range 0-1");
     }
+    return new ResettingFailCounter(Math.max(0, allowedFailures), resetFraction);
+  }
 
-    @Override
-    protected String generateDescription()
-    {
-        return String.format("allowedFailures=%d;resetFraction=%f", allowedFailures, resetFraction);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void pass() {
+    failCount = (int) (failCount * resetFraction);
+  }
 
-    /**
-     * Instantiates a new resetting fail counter.
-     *
-     * @param allowedFailures
-     *            the number of allowed failures
-     * @param resetFraction
-     *            The fraction of the current failures count to reset to for a pass.
-     * @return the resetting fail counter
-     */
-    public static ResettingFailCounter create(int allowedFailures, double resetFraction)
-    {
-        if (!(resetFraction >= 0 && resetFraction <= 1))
-            throw new IllegalArgumentException("Reset must be in the range 0-1");
-        return new ResettingFailCounter(Math.max(0, allowedFailures), resetFraction);
+  /** {@inheritDoc} */
+  @Override
+  public void pass(int n) {
+    if (n < 0) {
+      throw new IllegalArgumentException("Number of passes must be positive");
     }
+    while (n-- > 0) {
+      pass();
+      if (failCount == 0) {
+        break;
+      }
+    }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass()
-    {
-        failCount = (int) (failCount * resetFraction);
+  /** {@inheritDoc} */
+  @Override
+  public void fail() {
+    if (failCount == Integer.MAX_VALUE) {
+      throw new IllegalStateException("Unable to increment");
     }
+    failCount++;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass(int n)
-    {
-        if (n < 0)
-            throw new IllegalArgumentException("Number of passes must be positive");
-        while (n-- > 0)
-        {
-            pass();
-            if (failCount == 0)
-                break;
-        }
+  /** {@inheritDoc} */
+  @Override
+  public void fail(int n) {
+    if (n < 0) {
+      throw new IllegalArgumentException("Number of fails must be positive");
     }
+    if (Integer.MAX_VALUE - n < failCount) {
+      throw new IllegalStateException("Unable to increment");
+    }
+    failCount += n;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail()
-    {
-        if (failCount == Integer.MAX_VALUE)
-            throw new IllegalStateException("Unable to increment");
-        failCount++;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isOK() {
+    return failCount <= allowedFailures;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail(int n)
-    {
-        if (n < 0)
-            throw new IllegalArgumentException("Number of fails must be positive");
-        if (Integer.MAX_VALUE - n < failCount)
-            throw new IllegalStateException("Unable to increment");
-        failCount += n;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public FailCounter newCounter() {
+    return new ResettingFailCounter(allowedFailures, resetFraction);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isOK()
-    {
-        return failCount <= allowedFailures;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void reset() {
+    failCount = 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public FailCounter newCounter()
-    {
-        return new ResettingFailCounter(allowedFailures, resetFraction);
-    }
+  /**
+   * Gets the fail count.
+   *
+   * @return the fail count
+   */
+  public long getFailCount() {
+    return failCount;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void reset()
-    {
-        failCount = 0;
-    }
+  /**
+   * Gets the number of allowed failures.
+   *
+   * @return the number of allowed failures.
+   */
+  public int getAllowedFailures() {
+    return allowedFailures;
+  }
 
-    /**
-     * Gets the fail count.
-     *
-     * @return the fail count
-     */
-    public long getFailCount()
-    {
-        return failCount;
-    }
-
-    /**
-     * Gets the number of allowed failures.
-     *
-     * @return the number of allowed failures.
-     */
-    public int getAllowedFailures()
-    {
-        return allowedFailures;
-    }
-
-    /**
-     * Gets the fraction of the current failures count to reset to for a pass.
-     *
-     * @return the reset fraction
-     */
-    public double getResetFraction()
-    {
-        return resetFraction;
-    }
+  /**
+   * Gets the fraction of the current failures count to reset to for a pass.
+   *
+   * @return the reset fraction
+   */
+  public double getResetFraction() {
+    return resetFraction;
+  }
 }

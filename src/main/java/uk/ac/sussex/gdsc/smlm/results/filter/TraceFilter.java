@@ -37,169 +37,157 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager;
 /**
  * Filter results that can be traced over time frames.
  */
-public class TraceFilter extends Filter
-{
-    /** The default distance increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    private static final double DEFAULT_DISTANCE_INCREMENT = 0.05;
-    /** The default time increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    private static final int DEFAULT_TIME_INCREMENT = 1;
-    /** The default distance range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    private static final double DEFAULT_DISTANCE_RANGE = 2;
-    /** The default time range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    private static final int DEFAULT_TIME_RANGE = 10;
+public class TraceFilter extends Filter {
+  /**
+   * The default distance increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome}
+   * interface.
+   */
+  private static final double DEFAULT_DISTANCE_INCREMENT = 0.05;
+  /**
+   * The default time increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
+  private static final int DEFAULT_TIME_INCREMENT = 1;
+  /**
+   * The default distance range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
+  private static final double DEFAULT_DISTANCE_RANGE = 2;
+  /** The default time range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  private static final int DEFAULT_TIME_RANGE = 10;
 
-    @XStreamAsAttribute
-    private final double d;
-    @XStreamAsAttribute
-    private final int t;
-    @XStreamOmitField
-    private Set<PeakResult> ok;
+  @XStreamAsAttribute
+  private final double d;
+  @XStreamAsAttribute
+  private final int t;
+  @XStreamOmitField
+  private Set<PeakResult> ok;
 
-    /**
-     * Instantiates a new trace filter.
-     *
-     * @param d
-     *            the d
-     * @param t
-     *            the t
-     */
-    public TraceFilter(double d, int t)
-    {
-        this.d = Math.max(0, d);
-        this.t = Math.max(0, t);
+  /**
+   * Instantiates a new trace filter.
+   *
+   * @param d the d
+   * @param t the t
+   */
+  public TraceFilter(double d, int t) {
+    this.d = Math.max(0, d);
+    this.t = Math.max(0, t);
+  }
+
+  @Override
+  protected String generateName() {
+    return String.format("Trace d=%.2f, t=%d", d, t);
+  }
+
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    ok = new HashSet<>();
+
+    // Trace molecules. Anything that is part of a trace is OK
+    final TraceManager tm = new TraceManager(peakResults);
+    tm.traceMolecules(d, t);
+    final Trace[] traces = tm.getTraces();
+    for (final Trace trace : traces) {
+      if (trace.size() > 1) {
+        for (int i = 0; i < trace.size(); i++) {
+          ok.add(trace.get(i));
+        }
+      }
     }
+  }
 
-    @Override
-    protected String generateName()
-    {
-        return String.format("Trace d=%.2f, t=%d", d, t);
-    }
+  /**
+   * @throws NullPointerException if not first initialised with a call to
+   *         {@link #setup(MemoryPeakResults)}
+   * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#accept(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+   */
+  @Override
+  public boolean accept(PeakResult peak) throws NullPointerException {
+    return ok.contains(peak);
+  }
 
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        ok = new HashSet<>();
+  @Override
+  public double getNumericalValue() {
+    return t;
+  }
 
-        // Trace molecules. Anything that is part of a trace is OK
-        final TraceManager tm = new TraceManager(peakResults);
-        tm.traceMolecules(d, t);
-        final Trace[] traces = tm.getTraces();
-        for (final Trace trace : traces)
-            if (trace.size() > 1)
-                for (int i = 0; i < trace.size(); i++)
-                    ok.add(trace.get(i));
-    }
+  @Override
+  public String getNumericalValueName() {
+    return ParameterType.TIME_THRESHOLD.toString();
+  }
 
-    /**
-     * @throws NullPointerException
-     *             if not first initialised with a call to {@link #setup(MemoryPeakResults)}
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#accept(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
-    @Override
-    public boolean accept(PeakResult peak) throws NullPointerException
-    {
-        return ok.contains(peak);
-    }
+  @Override
+  public String getDescription() {
+    return "Filter results that can be traced over time frames.";
+  }
 
-    @Override
-    public double getNumericalValue()
-    {
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfParameters() {
+    return 2;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected double getParameterValueInternal(int index) {
+    switch (index) {
+      case 0:
+        return d;
+      default:
         return t;
     }
+  }
 
-    @Override
-    public String getNumericalValueName()
-    {
-        return ParameterType.TIME_THRESHOLD.toString();
+  /** {@inheritDoc} */
+  @Override
+  public double getParameterIncrement(int index) {
+    checkIndex(index);
+    switch (index) {
+      case 0:
+        return DEFAULT_DISTANCE_INCREMENT;
+      default:
+        return DEFAULT_TIME_INCREMENT;
     }
+  }
 
-    @Override
-    public String getDescription()
-    {
-        return "Filter results that can be traced over time frames.";
+  /** {@inheritDoc} */
+  @Override
+  public ParameterType getParameterType(int index) {
+    checkIndex(index);
+    switch (index) {
+      case 0:
+        return ParameterType.DISTANCE_THRESHOLD;
+      default:
+        return ParameterType.TIME_THRESHOLD;
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfParameters()
-    {
-        return 2;
+  /** {@inheritDoc} */
+  @Override
+  public Filter adjustParameter(int index, double delta) {
+    checkIndex(index);
+    switch (index) {
+      case 0:
+        return new TraceFilter(updateParameter(d, delta, DEFAULT_DISTANCE_RANGE), t);
+      default:
+        return new TraceFilter(d, updateParameter(t, delta, DEFAULT_TIME_RANGE));
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected double getParameterValueInternal(int index)
-    {
-        switch (index)
-        {
-            case 0:
-                return d;
-            default:
-                return t;
-        }
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter create(double... parameters) {
+    return new TraceFilter(parameters[0], (int) parameters[1]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getParameterIncrement(int index)
-    {
-        checkIndex(index);
-        switch (index)
-        {
-            case 0:
-                return DEFAULT_DISTANCE_INCREMENT;
-            default:
-                return DEFAULT_TIME_INCREMENT;
-        }
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void weakestParameters(double[] parameters) {
+    setMax(parameters, 0, d);
+    setMax(parameters, 1, t);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public ParameterType getParameterType(int index)
-    {
-        checkIndex(index);
-        switch (index)
-        {
-            case 0:
-                return ParameterType.DISTANCE_THRESHOLD;
-            default:
-                return ParameterType.TIME_THRESHOLD;
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Filter adjustParameter(int index, double delta)
-    {
-        checkIndex(index);
-        switch (index)
-        {
-            case 0:
-                return new TraceFilter(updateParameter(d, delta, DEFAULT_DISTANCE_RANGE), t);
-            default:
-                return new TraceFilter(d, updateParameter(t, delta, DEFAULT_TIME_RANGE));
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Filter create(double... parameters)
-    {
-        return new TraceFilter(parameters[0], (int) parameters[1]);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void weakestParameters(double[] parameters)
-    {
-        setMax(parameters, 0, d);
-        setMax(parameters, 1, t);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double[] mutationStepRange()
-    {
-        return new double[] { DEFAULT_DISTANCE_RANGE, DEFAULT_TIME_RANGE };
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] mutationStepRange() {
+    return new double[] {DEFAULT_DISTANCE_RANGE, DEFAULT_TIME_RANGE};
+  }
 }

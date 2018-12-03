@@ -28,26 +28,22 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Test a result using the frame.
  */
-public class FramePeakResultPredicate implements PeakResultPredicate
-{
-    /** The frame. */
-    private final int frame;
+public class FramePeakResultPredicate implements PeakResultPredicate {
+  /** The frame. */
+  private final int frame;
 
-    /**
-     * Instantiates a new frame peak result predicate.
-     *
-     * @param frame
-     *            the frame
-     */
-    public FramePeakResultPredicate(int frame)
-    {
-        this.frame = frame;
-    }
+  /**
+   * Instantiates a new frame peak result predicate.
+   *
+   * @param frame the frame
+   */
+  public FramePeakResultPredicate(int frame) {
+    this.frame = frame;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean test(PeakResult t)
-    {
-        return t.getFrame() == frame;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean test(PeakResult t) {
+    return t.getFrame() == frame;
+  }
 }

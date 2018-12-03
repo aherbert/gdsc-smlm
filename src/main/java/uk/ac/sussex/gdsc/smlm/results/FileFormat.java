@@ -26,12 +26,11 @@ package uk.ac.sussex.gdsc.smlm.results;
 /**
  * Specify the file format when reading results from file.
  */
-public enum FileFormat
-{
-    //@formatter:off
-	/** SMLM Text. */
+public enum FileFormat {
+  //@formatter:off
+  /** SMLM Text. */
     SMLM_TEXT{
-    	@Override public String getName() { return "SMLM Text"; }
+      @Override public String getName() { return "SMLM Text"; }
         @Override public boolean isSMLM(){return true;}},
     /** SMLM Binary. */
     SMLM_BINARY{
@@ -49,28 +48,26 @@ public enum FileFormat
     TSF_BINARY{ @Override public String getName() { return "TSF Binary"; }},
     /** Unknown. */
     UNKNOWN{ @Override public String getName() { return "Unknown"; }};
-	//@formatter:on
+  //@formatter:on
 
-    @Override
-    public String toString()
-    {
-        return getName();
-    }
+  @Override
+  public String toString() {
+    return getName();
+  }
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    abstract public String getName();
+  /**
+   * Gets the name.
+   *
+   * @return the name
+   */
+  abstract public String getName();
 
-    /**
-     * Checks if is a GDSC SMLM format.
-     *
-     * @return true, if is a GDSC SMLM format
-     */
-    public boolean isSMLM()
-    {
-        return false;
-    }
+  /**
+   * Checks if is a GDSC SMLM format.
+   *
+   * @return true, if is a GDSC SMLM format
+   */
+  public boolean isSMLM() {
+    return false;
+  }
 }

@@ -28,37 +28,26 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 /**
  * Create a gradient procedure.
  */
-abstract class BaseLSQLVMGradientProcedureFactory
-{
-    /**
-     * Create a LSQ LVM procedure.
-     * <p>
-     * Instance methods for testing.
-     *
-     * @param y
-     *            the y
-     * @param func
-     *            the function
-     * @return the LSQ LVM gradient procedure
-     */
-    BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func)
-    {
-        return createProcedure(y, null, func);
-    }
+abstract class BaseLSQLVMGradientProcedureFactory {
+  /**
+   * Create a LSQ LVM procedure. <p> Instance methods for testing.
+   *
+   * @param y the y
+   * @param func the function
+   * @return the LSQ LVM gradient procedure
+   */
+  BaseLSQLVMGradientProcedure createProcedure(final double[] y, final Gradient1Function func) {
+    return createProcedure(y, null, func);
+  }
 
-    /**
-     * Create a LSQ LVM procedure.
-     * <p>
-     * Instance methods for testing.
-     *
-     * @param y
-     *            the y
-     * @param b
-     *            the pre-computed background (can be null)
-     * @param func
-     *            the function
-     * @return the LSQ LVM gradient procedure
-     */
-    abstract BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b,
-            final Gradient1Function func);
+  /**
+   * Create a LSQ LVM procedure. <p> Instance methods for testing.
+   *
+   * @param y the y
+   * @param b the pre-computed background (can be null)
+   * @param func the function
+   * @return the LSQ LVM gradient procedure
+   */
+  abstract BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b,
+      final Gradient1Function func);
 }

@@ -26,39 +26,35 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSet1 extends MultiFilterComponentSet
-{
-    private MultiFilterComponent component0;
+public class MultiFilterComponentSet1 extends MultiFilterComponentSet {
+  private MultiFilterComponent component0;
 
-    /**
-     * Instantiates a new multi filter component set for 1 component.
-     *
-     * @param components
-     *            the components
-     */
-    public MultiFilterComponentSet1(MultiFilterComponent[] components)
-    {
-        this.component0 = components[0];
-    }
+  /**
+   * Instantiates a new multi filter component set for 1 component.
+   *
+   * @param components the components
+   */
+  public MultiFilterComponentSet1(MultiFilterComponent[] components) {
+    this.component0 = components[0];
+  }
 
-    @Override
-    public int getValidationFlags()
-    {
-        return component0.getType();
-    }
+  @Override
+  public int getValidationFlags() {
+    return component0.getType();
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        //@formatter:off
-		if (component0.fail(peak)) return component0.getType();
-		//@formatter:on
-        return 0;
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    //@formatter:off
+    if (component0.fail(peak)) {
+      return component0.getType();
     }
+    //@formatter:on
+    return 0;
+  }
 
-    @Override
-    void replace0(MultiFilterComponent c)
-    {
-        component0 = c;
-    }
+  @Override
+  void replace0(MultiFilterComponent c) {
+    component0 = c;
+  }
 }

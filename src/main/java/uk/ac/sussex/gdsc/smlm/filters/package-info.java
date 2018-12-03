@@ -23,7 +23,8 @@
  */
 
 /**
- * Provide classes to filter 2D data including mean, circular mean, Gaussian, median and kernel filters.
+ * Provide classes to filter 2D data including mean, circular mean, Gaussian, median and kernel
+ * filters.
  *
  * @since 1.0.0
  */

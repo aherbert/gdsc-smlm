@@ -26,97 +26,84 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.List;
 
 /**
- * Identifies candidate spots (local maxima) in an image. The image is pre-processed with a single filter.
+ * Identifies candidate spots (local maxima) in an image. The image is pre-processed with a single
+ * filter.
  */
-public class SingleSpotFilter extends MaximaSpotFilter
-{
-    private DataProcessor processor;
+public class SingleSpotFilter extends MaximaSpotFilter {
+  private DataProcessor processor;
 
-    /**
-     * Constructor.
-     *
-     * @param search
-     *            The search width for non-maximum suppression
-     * @param border
-     *            The border to ignore for maxima
-     * @param processor
-     *            The data processor
-     * @throws IllegalArgumentException
-     *             if processor is null
-     */
-    public SingleSpotFilter(int search, int border, DataProcessor processor)
-    {
-        super(search, border);
-        if (processor == null)
-            throw new IllegalArgumentException("Processor is null");
-        this.processor = processor;
+  /**
+   * Constructor.
+   *
+   * @param search The search width for non-maximum suppression
+   * @param border The border to ignore for maxima
+   * @param processor The data processor
+   * @throws IllegalArgumentException if processor is null
+   */
+  public SingleSpotFilter(int search, int border, DataProcessor processor) {
+    super(search, border);
+    if (processor == null) {
+      throw new IllegalArgumentException("Processor is null");
     }
+    this.processor = processor;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isAbsoluteIntensity()
-    {
-        return true;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isAbsoluteIntensity() {
+    return true;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isWeighted()
-    {
-        return processor.isWeighted();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isWeighted() {
+    return processor.isWeighted();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setWeights(float[] weights, int width, int height)
-    {
-        processor.setWeights(weights, width, height);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setWeights(float[] weights, int width, int height) {
+    processor.setWeights(weights, width, height);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean hasWeights()
-    {
-        return processor.hasWeights();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean hasWeights() {
+    return processor.hasWeights();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public float[] preprocessData(float[] data, int width, int height)
-    {
-        return processor.process(data, width, height);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public float[] preprocessData(float[] data, int width, int height) {
+    return processor.process(data, width, height);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public SingleSpotFilter clone()
-    {
-        final SingleSpotFilter f = (SingleSpotFilter) super.clone();
-        // Ensure the object is duplicated and not passed by reference.
-        f.processor = processor.clone();
-        return f;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public SingleSpotFilter clone() {
+    final SingleSpotFilter f = (SingleSpotFilter) super.clone();
+    // Ensure the object is duplicated and not passed by reference.
+    f.processor = processor.clone();
+    return f;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getName()
-    {
-        return "Single";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getName() {
+    return "Single";
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public List<String> getParameters()
-    {
-        final List<String> list = super.getParameters();
-        list.add("Filter = " + processor.getDescription());
-        return list;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public List<String> getParameters() {
+    final List<String> list = super.getParameters();
+    list.add("Filter = " + processor.getDescription());
+    return list;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getSpread()
-    {
-        return processor.getSpread();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getSpread() {
+    return processor.getSpread();
+  }
 }

@@ -26,23 +26,20 @@ package uk.ac.sussex.gdsc.smlm.results;
 /**
  * Provides access methods for a read-only view of peak results.
  */
-public interface PeakResultView
-{
-    /**
-     * Gets the results by frame.
-     *
-     * @param frame
-     *            the frame
-     * @return the results
-     */
-    public PeakResult[] getResultsByFrame(int frame);
+public interface PeakResultView {
+  /**
+   * Gets the results by frame.
+   *
+   * @param frame the frame
+   * @return the results
+   */
+  public PeakResult[] getResultsByFrame(int frame);
 
-    /**
-     * Gets the results by id.
-     *
-     * @param id
-     *            the id
-     * @return the results
-     */
-    public PeakResult[] getResultsById(int id);
+  /**
+   * Gets the results by id.
+   *
+   * @param id the id
+   * @return the results
+   */
+  public PeakResult[] getResultsById(int id);
 }

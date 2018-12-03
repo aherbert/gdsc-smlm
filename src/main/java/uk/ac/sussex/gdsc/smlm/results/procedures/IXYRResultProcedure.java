@@ -28,19 +28,14 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Interface for accessing the results.
  */
-public interface IXYRResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param intensity
-     *            the intensity
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     * @param result
-     *            the result
-     */
-    public void executeIXYR(float intensity, float x, float y, PeakResult result);
+public interface IXYRResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param intensity the intensity
+   * @param x the x
+   * @param y the y
+   * @param result the result
+   */
+  public void executeIXYR(float intensity, float x, float y, PeakResult result);
 }

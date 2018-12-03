@@ -24,50 +24,44 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Calculate the Fisher information for a Poisson distribution.
- * <p>
- * <a href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
+ * Calculate the Fisher information for a Poisson distribution. <p> <a
+ * href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
-public class PoissonFisherInformation extends BasePoissonFisherInformation
-{
-    /*
-     * {@inheritDoc}
-     * <p>
-     * The input parameter refers to the mean of the Poisson distribution. The Fisher information is 1/mean.
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
-     */
-    @Override
-    public double getFisherInformation(double t)
-    {
-        if (t <= 0)
-            throw new IllegalArgumentException("Poisson mean must be positive");
-        return 1.0 / t;
+public class PoissonFisherInformation extends BasePoissonFisherInformation {
+  /*
+   * {@inheritDoc} <p> The input parameter refers to the mean of the Poisson distribution. The
+   * Fisher information is 1/mean.
+   *
+   * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
+   */
+  @Override
+  public double getFisherInformation(double t) {
+    if (t <= 0) {
+      throw new IllegalArgumentException("Poisson mean must be positive");
     }
+    return 1.0 / t;
+  }
 
-    /**
-     * Gets the Poisson Fisher information.
-     *
-     * @param t
-     *            the poisson mean
-     * @return the poisson Fisher information
-     */
-    public static double getPoissonI(double t)
-    {
-        if (t <= 0)
-            throw new IllegalArgumentException("Poisson mean must be positive");
-        return 1.0 / t;
+  /**
+   * Gets the Poisson Fisher information.
+   *
+   * @param t the poisson mean
+   * @return the poisson Fisher information
+   */
+  public static double getPoissonI(double t) {
+    if (t <= 0) {
+      throw new IllegalArgumentException("Poisson mean must be positive");
     }
+    return 1.0 / t;
+  }
 
-    @Override
-    public double getAlpha(double t)
-    {
-        return 1;
-    }
+  @Override
+  public double getAlpha(double t) {
+    return 1;
+  }
 
-    @Override
-    protected void postClone()
-    {
-        // Nothing to do.
-    }
+  @Override
+  protected void postClone() {
+    // Nothing to do.
+  }
 }

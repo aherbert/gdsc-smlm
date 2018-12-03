@@ -28,52 +28,44 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Filter results using the combination of two filters. Results can pass either filter
  */
-public class OrFilter extends CombinedFilter
-{
+public class OrFilter extends CombinedFilter {
 
-    /**
-     * Instantiates a new or filter.
-     *
-     * @param filter1
-     *            the filter 1
-     * @param filter2
-     *            the filter 2
-     */
-    public OrFilter(Filter filter1, Filter filter2)
-    {
-        super(filter1, filter2);
-    }
+  /**
+   * Instantiates a new or filter.
+   *
+   * @param filter1 the filter 1
+   * @param filter2 the filter 2
+   */
+  public OrFilter(Filter filter1, Filter filter2) {
+    super(filter1, filter2);
+  }
 
-    @Override
-    protected String getOperator()
-    {
-        return "||";
-    }
+  @Override
+  protected String getOperator() {
+    return "||";
+  }
 
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        return accept1(peak) || accept2(peak);
-    }
+  @Override
+  public boolean accept(PeakResult peak) {
+    return accept1(peak) || accept2(peak);
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        if (accept1(peak) || accept2(peak))
-            return 0;
-        // We only get here when both filters failed so we can just combine the results
-        return result1 | result2;
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    if (accept1(peak) || accept2(peak)) {
+      return 0;
     }
+    // We only get here when both filters failed so we can just combine the results
+    return result1 | result2;
+  }
 
-    @Override
-    protected Filter createFilter(Filter f1, Filter f2)
-    {
-        return new OrFilter(f1, f2);
-    }
+  @Override
+  protected Filter createFilter(Filter f1, Filter f2) {
+    return new OrFilter(f1, f2);
+  }
 
-    @Override
-    public Filter clone()
-    {
-        return new OrFilter(filter1.clone(), filter2.clone());
-    }
+  @Override
+  public Filter clone() {
+    return new OrFilter(filter1.clone(), filter2.clone());
+  }
 }

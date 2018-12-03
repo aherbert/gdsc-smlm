@@ -26,13 +26,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface TResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param frame
-     *            the frame
-     */
-    public void executeT(int frame);
+public interface TResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param frame the frame
+   */
+  public void executeT(int frame);
 }

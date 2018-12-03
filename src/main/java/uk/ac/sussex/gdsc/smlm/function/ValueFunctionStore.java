@@ -26,79 +26,69 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Wrap a function and store the values from the procedure.
  */
-public class ValueFunctionStore implements ValueFunction, ValueProcedure
-{
-    private final ValueFunction f;
-    private ValueProcedure procedure;
+public class ValueFunctionStore implements ValueFunction, ValueProcedure {
+  private final ValueFunction f;
+  private ValueProcedure procedure;
 
-    /** The counter i. */
-    protected int i;
-    /** The values from the last call to {@link #forEach(ValueProcedure)} */
-    public double[] values;
+  /** The counter i. */
+  protected int i;
+  /** The values from the last call to {@link #forEach(ValueProcedure)} */
+  public double[] values;
 
-    /**
-     * Instantiates a new value function store.
-     *
-     * @param f
-     *            the f
-     */
-    public ValueFunctionStore(ValueFunction f)
-    {
-        this(f, null);
+  /**
+   * Instantiates a new value function store.
+   *
+   * @param f the f
+   */
+  public ValueFunctionStore(ValueFunction f) {
+    this(f, null);
+  }
+
+  /**
+   * Instantiates a new value function store with storage.
+   *
+   * @param f the f
+   * @param values the values
+   */
+  public ValueFunctionStore(ValueFunction f, double[] values) {
+    this.f = f;
+    this.values = values;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int size() {
+    return f.size();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void initialise0(double[] a) {
+    f.initialise0(a);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void forEach(ValueProcedure procedure) {
+    i = 0;
+    createValues();
+    this.procedure = procedure;
+    f.forEach(this);
+  }
+
+  /**
+   * Creates the {@link #values} array.
+   */
+  protected void createValues() {
+    if (values == null || values.length != f.size()) {
+      values = new double[f.size()];
     }
+  }
 
-    /**
-     * Instantiates a new value function store with storage.
-     *
-     * @param f
-     *            the f
-     * @param values
-     *            the values
-     */
-    public ValueFunctionStore(ValueFunction f, double[] values)
-    {
-        this.f = f;
-        this.values = values;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int size()
-    {
-        return f.size();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void initialise0(double[] a)
-    {
-        f.initialise0(a);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void forEach(ValueProcedure procedure)
-    {
-        i = 0;
-        createValues();
-        this.procedure = procedure;
-        f.forEach(this);
-    }
-
-    /**
-     * Creates the {@link #values} array.
-     */
-    protected void createValues()
-    {
-        if (values == null || values.length != f.size())
-            values = new double[f.size()];
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double value)
-    {
-        values[i++] = value;
-        procedure.execute(value);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value) {
+    values[i++] = value;
+    procedure.execute(value);
+  }
 }

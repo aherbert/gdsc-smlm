@@ -26,13 +26,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface BResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param background
-     *            the background
-     */
-    public void executeB(float background);
+public interface BResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param background the background
+   */
+  public void executeB(float background);
 }

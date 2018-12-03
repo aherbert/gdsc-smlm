@@ -33,145 +33,142 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 /**
  * Selects the top individuals.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser implements SelectionStrategy<T>
-{
-    /** The fraction of the individuals to select (set between 0 and 1). */
-    final double fraction;
-    /** The maximum number of individuals to select. */
-    final int max;
+public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
+    implements SelectionStrategy<T> {
+  /** The fraction of the individuals to select (set between 0 and 1). */
+  final double fraction;
+  /** The maximum number of individuals to select. */
+  final int max;
 
-    private List<? extends Chromosome<T>> individuals = null;
+  private List<? extends Chromosome<T>> individuals = null;
 
-    /** The tracker. */
-    TrackProgress tracker = null;
+  /** The tracker. */
+  TrackProgress tracker = null;
 
-    /**
-     * Instantiates a new simple selection strategy.
-     *
-     * @param random
-     *            the random
-     * @param fraction
-     *            The fraction of the individuals to select (set between 0 and 1)
-     * @param max
-     *            The maximum number of individuals to select
-     */
-    public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max)
-    {
-        super(random);
-        if (fraction > 1)
-            fraction = 1;
-        this.fraction = fraction;
-        this.max = max;
+  /**
+   * Instantiates a new simple selection strategy.
+   *
+   * @param random the random
+   * @param fraction The fraction of the individuals to select (set between 0 and 1)
+   * @param max The maximum number of individuals to select
+   */
+  public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max) {
+    super(random);
+    if (fraction > 1) {
+      fraction = 1;
     }
+    this.fraction = fraction;
+    this.max = max;
+  }
 
-    /**
-     * Select the top individuals using the configured fraction. The resulting subset will be at least size 2 (unless
-     * the input is smaller or there are not enough valid individuals (fitness not null)).
-     *
-     * @param individuals
-     *            the individuals
-     * @return the subset
-     * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
-     */
-    @Override
-    public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals)
-    {
-        if (individuals == null || individuals.size() < 2)
-            return individuals;
-        @SuppressWarnings("unchecked")
-        final Chromosome<T>[] subset = new Chromosome[individuals.size()];
-        int size = 0;
-        // Add only those with a fitness score
-        for (final Chromosome<T> c : individuals)
-            if (c.getFitness() != null)
-                subset[size++] = c;
-        if (size < 3)
-            return Arrays.asList(Arrays.copyOf(subset, size));
-        if (tracker != null)
-            tracker.progress(0.5);
-        ChromosomeComparator.sort(subset, 0, size);
-
-        // Get the fraction relative to the input list size
-        //size = getSize(size);
-        size = Math.min(size, getSize(individuals.size()));
-        if (tracker != null)
-            tracker.progress(1);
-        return Arrays.asList(Arrays.copyOf(subset, size));
+  /**
+   * Select the top individuals using the configured fraction. The resulting subset will be at least
+   * size 2 (unless the input is smaller or there are not enough valid individuals (fitness not
+   * null)).
+   *
+   * @param individuals the individuals
+   * @return the subset
+   * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
+   */
+  @Override
+  public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals) {
+    if (individuals == null || individuals.size() < 2) {
+      return individuals;
     }
-
-    /**
-     * Calculate the new size of the population after selection.
-     *
-     * @param size
-     *            The current size of the population before selection
-     * @return The new size of the population
-     */
-    protected int getSize(int size)
-    {
-        // Get the size using the fraction
-        size = (int) Math.round(size * fraction);
-        // Check against the max number to select
-        if (max > 2 && size > max)
-            size = max;
-        // Check the size is at least 2
-        if (size < 2)
-            size = 2;
-        return size;
+    @SuppressWarnings("unchecked")
+    final Chromosome<T>[] subset = new Chromosome[individuals.size()];
+    int size = 0;
+    // Add only those with a fitness score
+    for (final Chromosome<T> c : individuals) {
+      if (c.getFitness() != null) {
+        subset[size++] = c;
+      }
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public void initialiseBreeding(List<? extends Chromosome<T>> individuals)
-    {
-        if (individuals != null && individuals.size() < 2)
-            individuals = null;
-        this.individuals = individuals;
+    if (size < 3) {
+      return Arrays.asList(Arrays.copyOf(subset, size));
     }
-
-    /**
-     * Select pairs randomly from the population.
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#next()
-     */
-    @Override
-    public ChromosomePair<T> next()
-    {
-        if (individuals == null)
-            return null;
-        int first, second;
-        if (individuals.size() == 2)
-        {
-            first = 0;
-            second = 1;
-        }
-        else
-        {
-            // Bounds are inclusive so subtract 1
-            final int upper = individuals.size() - 1;
-            first = random.nextInt(0, upper);
-            second = random.nextInt(0, upper);
-            // Avoid crossover with the same parent
-            while (second == first)
-                second = random.nextInt(0, upper);
-        }
-        return new ChromosomePair<>(individuals.get(first), individuals.get(second));
+    if (tracker != null) {
+      tracker.progress(0.5);
     }
+    ChromosomeComparator.sort(subset, 0, size);
 
-    /** {@inheritDoc} */
-    @Override
-    public void finishBreeding()
-    {
-        // Free memory
-        individuals = null;
+    // Get the fraction relative to the input list size
+    // size = getSize(size);
+    size = Math.min(size, getSize(individuals.size()));
+    if (tracker != null) {
+      tracker.progress(1);
     }
+    return Arrays.asList(Arrays.copyOf(subset, size));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setTracker(TrackProgress tracker)
-    {
-        this.tracker = tracker;
+  /**
+   * Calculate the new size of the population after selection.
+   *
+   * @param size The current size of the population before selection
+   * @return The new size of the population
+   */
+  protected int getSize(int size) {
+    // Get the size using the fraction
+    size = (int) Math.round(size * fraction);
+    // Check against the max number to select
+    if (max > 2 && size > max) {
+      size = max;
     }
+    // Check the size is at least 2
+    if (size < 2) {
+      size = 2;
+    }
+    return size;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void initialiseBreeding(List<? extends Chromosome<T>> individuals) {
+    if (individuals != null && individuals.size() < 2) {
+      individuals = null;
+    }
+    this.individuals = individuals;
+  }
+
+  /**
+   * Select pairs randomly from the population.
+   *
+   * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#next()
+   */
+  @Override
+  public ChromosomePair<T> next() {
+    if (individuals == null) {
+      return null;
+    }
+    int first, second;
+    if (individuals.size() == 2) {
+      first = 0;
+      second = 1;
+    } else {
+      // Bounds are inclusive so subtract 1
+      final int upper = individuals.size() - 1;
+      first = random.nextInt(0, upper);
+      second = random.nextInt(0, upper);
+      // Avoid crossover with the same parent
+      while (second == first) {
+        second = random.nextInt(0, upper);
+      }
+    }
+    return new ChromosomePair<>(individuals.get(first), individuals.get(second));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void finishBreeding() {
+    // Free memory
+    individuals = null;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setTracker(TrackProgress tracker) {
+    this.tracker = tracker;
+  }
 }

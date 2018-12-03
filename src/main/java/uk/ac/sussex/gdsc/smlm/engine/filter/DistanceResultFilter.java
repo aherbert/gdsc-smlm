@@ -31,91 +31,77 @@ import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter the results using the distance to a set of coordinates. Any fitted position within the distance to the
- * target coordinates is accepted.
+ * Filter the results using the distance to a set of coordinates. Any fitted position within the
+ * distance to the target coordinates is accepted.
  *
  * @deprecated Filtering of the results is no longer supported
  */
 @Deprecated
-public class DistanceResultFilter extends ResultFilter
-{
-    /**
-     * Instantiates a new distance result filter.
-     *
-     * @param filter
-     *            the filter
-     * @param d
-     *            the d
-     * @param nMaxima
-     *            the n maxima
-     */
-    public DistanceResultFilter(List<float[]> filter, float d, int nMaxima)
-    {
-        super(filter, d, nMaxima);
-        filteredFitResults = new FitResult[nMaxima];
-        filteredIndices = new int[nMaxima];
-        peakResults = new ArrayList<>(nMaxima);
-    }
+public class DistanceResultFilter extends ResultFilter {
+  /**
+   * Instantiates a new distance result filter.
+   *
+   * @param filter the filter
+   * @param d the d
+   * @param nMaxima the n maxima
+   */
+  public DistanceResultFilter(List<float[]> filter, float d, int nMaxima) {
+    super(filter, d, nMaxima);
+    filteredFitResults = new FitResult[nMaxima];
+    filteredIndices = new int[nMaxima];
+    peakResults = new ArrayList<>(nMaxima);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
-    {
-        boolean found = false;
-        for (final PeakResult r : results)
-        {
-            if (r == null)
-                continue;
-            for (final float[] coord : filter)
-            {
-                final float dx = r.getXPosition() - coord[0];
-                final float dy = r.getYPosition() - coord[1];
-                if (dx * dx + dy * dy < d2)
-                {
-                    found = true;
-                    peakResults.add(r);
-                    break;
-                }
-            }
+  /** {@inheritDoc} */
+  @Override
+  public void filter(FitResult fitResult, int maxIndex, PeakResult... results) {
+    boolean found = false;
+    for (final PeakResult r : results) {
+      if (r == null) {
+        continue;
+      }
+      for (final float[] coord : filter) {
+        final float dx = r.getXPosition() - coord[0];
+        final float dy = r.getYPosition() - coord[1];
+        if (dx * dx + dy * dy < d2) {
+          found = true;
+          peakResults.add(r);
+          break;
         }
-        if (found)
-        {
-            // Add the result and the fitted index to the filtered results
-            filteredFitResults[filteredCount] = fitResult;
-            filteredIndices[filteredCount] = maxIndex;
-            filteredCount++;
-        }
+      }
     }
+    if (found) {
+      // Add the result and the fitted index to the filtered results
+      filteredFitResults[filteredCount] = fitResult;
+      filteredIndices[filteredCount] = maxIndex;
+      filteredCount++;
+    }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void filter(FitResult fitResult, int maxIndex, float x, float y)
-    {
-        boolean found = false;
-        for (final float[] coord : filter)
-        {
-            final float dx = x - coord[0];
-            final float dy = y - coord[1];
-            if (dx * dx + dy * dy < d2)
-            {
-                found = true;
-                break;
-            }
-        }
-        if (found)
-        {
-            // Add the result and the fitted index to the filtered results
-            filteredFitResults[filteredCount] = fitResult;
-            filteredIndices[filteredCount] = maxIndex;
-            filteredCount++;
-        }
+  /** {@inheritDoc} */
+  @Override
+  public void filter(FitResult fitResult, int maxIndex, float x, float y) {
+    boolean found = false;
+    for (final float[] coord : filter) {
+      final float dx = x - coord[0];
+      final float dy = y - coord[1];
+      if (dx * dx + dy * dy < d2) {
+        found = true;
+        break;
+      }
     }
+    if (found) {
+      // Add the result and the fitted index to the filtered results
+      filteredFitResults[filteredCount] = fitResult;
+      filteredIndices[filteredCount] = maxIndex;
+      filteredCount++;
+    }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void finalise()
-    {
-        filteredFitResults = Arrays.copyOf(filteredFitResults, filteredCount);
-        filteredIndices = Arrays.copyOf(filteredIndices, filteredCount);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void finalise() {
+    filteredFitResults = Arrays.copyOf(filteredFitResults, filteredCount);
+    filteredIndices = Arrays.copyOf(filteredIndices, filteredCount);
+  }
 }

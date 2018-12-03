@@ -28,13 +28,11 @@ import java.util.EnumSet;
 /**
  * Utility methods for checking parameters.
  */
-public class Parameters
-{
-    /**
-     * Define the requirements for the parameter.
-     */
-    public enum Requirement
-    {
+public class Parameters {
+  /**
+   * Define the requirements for the parameter.
+   */
+  public enum Requirement {
     /**
      * Value is greater than zero.
      */
@@ -43,127 +41,103 @@ public class Parameters
      * Value is zero or above.
      */
     POSITIVE
-    }
+  }
 
-    /**
-     * Check if the named parameter value is greater than zero.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public static void isAboveZero(String name, double value)
-    {
-        if (value <= 0)
-            throw new IllegalArgumentException(name + " should be above zero");
+  /**
+   * Check if the named parameter value is greater than zero.
+   *
+   * @param name the name
+   * @param value the value
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public static void isAboveZero(String name, double value) {
+    if (value <= 0) {
+      throw new IllegalArgumentException(name + " should be above zero");
     }
+  }
 
-    /**
-     * Check if the named parameter value is greater than the given limit.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @param limit
-     *            the limit
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public static void isAbove(String name, double value, double limit)
-    {
-        if (value <= limit)
-            throw new IllegalArgumentException(name + " should be > " + limit);
+  /**
+   * Check if the named parameter value is greater than the given limit.
+   *
+   * @param name the name
+   * @param value the value
+   * @param limit the limit
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public static void isAbove(String name, double value, double limit) {
+    if (value <= limit) {
+      throw new IllegalArgumentException(name + " should be > " + limit);
     }
+  }
 
-    /**
-     * Check if the named parameter value is greater than or equal to the given limit.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @param limit
-     *            the limit
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public static void isEqualOrAbove(String name, double value, double limit)
-    {
-        if (value < limit)
-            throw new IllegalArgumentException(name + " should be >= " + limit);
+  /**
+   * Check if the named parameter value is greater than or equal to the given limit.
+   *
+   * @param name the name
+   * @param value the value
+   * @param limit the limit
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public static void isEqualOrAbove(String name, double value, double limit) {
+    if (value < limit) {
+      throw new IllegalArgumentException(name + " should be >= " + limit);
     }
+  }
 
-    /**
-     * Check if the named parameter value is less than the given limit.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @param limit
-     *            the limit
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public static void isBelow(String name, double value, double limit)
-    {
-        if (value >= limit)
-            throw new IllegalArgumentException(name + " should be < " + limit);
+  /**
+   * Check if the named parameter value is less than the given limit.
+   *
+   * @param name the name
+   * @param value the value
+   * @param limit the limit
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public static void isBelow(String name, double value, double limit) {
+    if (value >= limit) {
+      throw new IllegalArgumentException(name + " should be < " + limit);
     }
+  }
 
-    /**
-     * Check if the named parameter value is less then or equal to the given limit.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @param limit
-     *            the limit
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public static void isEqualOrBelow(String name, double value, double limit)
-    {
-        if (value > limit)
-            throw new IllegalArgumentException(name + " should be <= " + limit);
+  /**
+   * Check if the named parameter value is less then or equal to the given limit.
+   *
+   * @param name the name
+   * @param value the value
+   * @param limit the limit
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public static void isEqualOrBelow(String name, double value, double limit) {
+    if (value > limit) {
+      throw new IllegalArgumentException(name + " should be <= " + limit);
     }
+  }
 
-    /**
-     * Check if the named parameter value is zero or greater.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public static void isPositive(String name, double value)
-    {
-        if (value < 0)
-            throw new IllegalArgumentException(name + " should be positive");
+  /**
+   * Check if the named parameter value is zero or greater.
+   *
+   * @param name the name
+   * @param value the value
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public static void isPositive(String name, double value) {
+    if (value < 0) {
+      throw new IllegalArgumentException(name + " should be positive");
     }
+  }
 
-    /**
-     * Check if the named parameter meets the requirements.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @param requirements
-     *            the requirements
-     */
-    public static void isValid(String name, double value, EnumSet<Requirement> requirements)
-    {
-        if (requirements.contains(Requirement.ABOVE_ZERO))
-            isAboveZero(name, value);
-        if (requirements.contains(Requirement.POSITIVE))
-            isPositive(name, value);
+  /**
+   * Check if the named parameter meets the requirements.
+   *
+   * @param name the name
+   * @param value the value
+   * @param requirements the requirements
+   */
+  public static void isValid(String name, double value, EnumSet<Requirement> requirements) {
+    if (requirements.contains(Requirement.ABOVE_ZERO)) {
+      isAboveZero(name, value);
     }
+    if (requirements.contains(Requirement.POSITIVE)) {
+      isPositive(name, value);
+    }
+  }
 }

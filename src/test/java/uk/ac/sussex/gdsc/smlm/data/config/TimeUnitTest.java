@@ -29,38 +29,34 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "unchecked", "javadoc" })
-public class TimeUnitTest
-{
-    @Test
-    public void canConvert()
-    {
-        final double msPerFrame = 35;
-        for (int frame = 1; frame < 10; frame++)
-            //@formatter:off
-    		check(msPerFrame,
-    			new ExpectedUnit<>(TimeUnit.FRAME, frame),
-    			new ExpectedUnit<>(TimeUnit.SECOND, frame * msPerFrame / 1e3),
-    			new ExpectedUnit<>(TimeUnit.MILLISECOND, frame * msPerFrame)
-    			);
-    		//@formatter:on
+@SuppressWarnings({"unchecked", "javadoc"})
+public class TimeUnitTest {
+  @Test
+  public void canConvert() {
+    final double msPerFrame = 35;
+    for (int frame = 1; frame < 10; frame++) {
+      //@formatter:off
+      check(msPerFrame,
+        new ExpectedUnit<>(TimeUnit.FRAME, frame),
+        new ExpectedUnit<>(TimeUnit.SECOND, frame * msPerFrame / 1e3),
+        new ExpectedUnit<>(TimeUnit.MILLISECOND, frame * msPerFrame)
+      );
+      //@formatter:on
     }
+  }
 
-    private static void check(double msPerFrame, ExpectedUnit<TimeUnit>... expectedUnits)
-    {
-        final int n = expectedUnits.length;
-        TypeConverter<TimeUnit> c;
-        for (int i = 0; i < n; i++)
-        {
-            final TimeUnit u1 = expectedUnits[i].u;
-            final double v1 = expectedUnits[i].value;
-            for (int j = 0; j < n; j++)
-            {
-                final TimeUnit u2 = expectedUnits[j].u;
-                c = UnitConverterFactory.createConverter(u1, u2, msPerFrame);
-                final double o = c.convert(v1);
-                Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
-            }
-        }
+  private static void check(double msPerFrame, ExpectedUnit<TimeUnit>... expectedUnits) {
+    final int n = expectedUnits.length;
+    TypeConverter<TimeUnit> c;
+    for (int i = 0; i < n; i++) {
+      final TimeUnit u1 = expectedUnits[i].u;
+      final double v1 = expectedUnits[i].value;
+      for (int j = 0; j < n; j++) {
+        final TimeUnit u2 = expectedUnits[j].u;
+        c = UnitConverterFactory.createConverter(u1, u2, msPerFrame);
+        final double o = c.convert(v1);
+        Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
+      }
     }
+  }
 }

@@ -26,115 +26,103 @@ package uk.ac.sussex.gdsc.smlm.results.count;
 /**
  * Stop evaluating when a number of consecutive failures occurs.
  */
-public class ConsecutiveFailCounter extends BaseFailCounter
-{
-    /** The fail count. */
-    private int failCount = 0;
+public class ConsecutiveFailCounter extends BaseFailCounter {
+  /** The fail count. */
+  private int failCount = 0;
 
-    /** The number of allowed failures. */
-    private final int allowedFailures;
+  /** The number of allowed failures. */
+  private final int allowedFailures;
 
-    /**
-     * Instantiates a new consecutive fail counter.
-     *
-     * @param allowedFailures
-     *            the number of allowed failures
-     */
-    private ConsecutiveFailCounter(int allowedFailures)
-    {
-        this.allowedFailures = allowedFailures;
+  /**
+   * Instantiates a new consecutive fail counter.
+   *
+   * @param allowedFailures the number of allowed failures
+   */
+  private ConsecutiveFailCounter(int allowedFailures) {
+    this.allowedFailures = allowedFailures;
+  }
+
+  @Override
+  protected String generateDescription() {
+    return "consecutiveFailures=" + allowedFailures;
+  }
+
+  /**
+   * Instantiates a new consecutive fail counter.
+   *
+   * @param allowedFailures the number of allowed failures
+   * @return the consecutive fail counter
+   */
+  public static ConsecutiveFailCounter create(int allowedFailures) {
+    return new ConsecutiveFailCounter(Math.max(0, allowedFailures));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void pass() {
+    failCount = 0;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void pass(int n) {
+    failCount = 0;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void fail() {
+    if (failCount == Integer.MAX_VALUE) {
+      throw new IllegalStateException("Unable to increment");
     }
+    failCount++;
+  }
 
-    @Override
-    protected String generateDescription()
-    {
-        return "consecutiveFailures=" + allowedFailures;
+  /** {@inheritDoc} */
+  @Override
+  public void fail(int n) {
+    if (n < 0) {
+      throw new IllegalArgumentException("Number of fails must be positive");
     }
+    if (Integer.MAX_VALUE - n < failCount) {
+      throw new IllegalStateException("Unable to increment");
+    }
+    failCount += n;
+  }
 
-    /**
-     * Instantiates a new consecutive fail counter.
-     *
-     * @param allowedFailures
-     *            the number of allowed failures
-     * @return the consecutive fail counter
-     */
-    public static ConsecutiveFailCounter create(int allowedFailures)
-    {
-        return new ConsecutiveFailCounter(Math.max(0, allowedFailures));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isOK() {
+    return failCount <= allowedFailures;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass()
-    {
-        failCount = 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public FailCounter newCounter() {
+    return new ConsecutiveFailCounter(allowedFailures);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass(int n)
-    {
-        failCount = 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void reset() {
+    failCount = 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail()
-    {
-        if (failCount == Integer.MAX_VALUE)
-            throw new IllegalStateException("Unable to increment");
-        failCount++;
-    }
+  /**
+   * Gets the fail count.
+   *
+   * @return the fail count
+   */
+  public int getFailCount() {
+    return failCount;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail(int n)
-    {
-        if (n < 0)
-            throw new IllegalArgumentException("Number of fails must be positive");
-        if (Integer.MAX_VALUE - n < failCount)
-            throw new IllegalStateException("Unable to increment");
-        failCount += n;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isOK()
-    {
-        return failCount <= allowedFailures;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public FailCounter newCounter()
-    {
-        return new ConsecutiveFailCounter(allowedFailures);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void reset()
-    {
-        failCount = 0;
-    }
-
-    /**
-     * Gets the fail count.
-     *
-     * @return the fail count
-     */
-    public int getFailCount()
-    {
-        return failCount;
-    }
-
-    /**
-     * Gets the number of allowed failures.
-     *
-     * @return the number of allowed failures.
-     */
-    public int getAllowedFailures()
-    {
-        return allowedFailures;
-    }
+  /**
+   * Gets the number of allowed failures.
+   *
+   * @return the number of allowed failures.
+   */
+  public int getAllowedFailures() {
+    return allowedFailures;
+  }
 }

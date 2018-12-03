@@ -26,36 +26,33 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Shift.
  */
-public class MultiFilterShiftComponent extends MultiFilterComponent
-{
-    private static final int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
+public class MultiFilterShiftComponent extends MultiFilterComponent {
+  private static final int type =
+      IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 
-    private final float offset;
+  private final float offset;
 
-    /**
-     * Instantiates a new multi filter shift component.
-     *
-     * @param shift
-     *            the shift
-     */
-    public MultiFilterShiftComponent(double shift)
-    {
-        this.offset = Filter.getUpperSquaredLimit(shift);
+  /**
+   * Instantiates a new multi filter shift component.
+   *
+   * @param shift the shift
+   */
+  public MultiFilterShiftComponent(double shift) {
+    this.offset = Filter.getUpperSquaredLimit(shift);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    if (peak.getXRelativeShift2() > offset) {
+      return true;
     }
+    return (peak.getYRelativeShift2() > offset);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        if (peak.getXRelativeShift2() > offset)
-            return true;
-        return (peak.getYRelativeShift2() > offset);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return type;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return type;
+  }
 }

@@ -27,31 +27,27 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Gets the mean signal from the PeakResult assuming a Gaussian 2D PSF. The result must have the standard deviation for
- * each dimension in the first two additional parameters of the PeakResult parameter array.
- * <p>
- * Assumes that the mean signal is the total signal within 1 standard deviation of the centre divided by the elliptical
- * area of the Gaussian.
+ * Gets the mean signal from the PeakResult assuming a Gaussian 2D PSF. The result must have the
+ * standard deviation for each dimension in the first two additional parameters of the PeakResult
+ * parameter array. <p> Assumes that the mean signal is the total signal within 1 standard deviation
+ * of the centre divided by the elliptical area of the Gaussian.
  */
-public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat
-{
-    /** The index of the x width. */
-    static final int i = PeakResult.STANDARD_PARAMETERS;
-    /** The index of the y width. */
-    static final int j = i + 1;
+public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat {
+  /** The index of the x width. */
+  static final int i = PeakResult.STANDARD_PARAMETERS;
+  /** The index of the y width. */
+  static final int j = i + 1;
 
-    /** {@inheritDoc} */
-    @Override
-    public Float getValue(PeakResult result)
-    {
-        return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getIntensity(), result.getParameter(i),
-                result.getParameter(j)));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Float getValue(PeakResult result) {
+    return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getIntensity(),
+        result.getParameter(i), result.getParameter(j)));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return "Gaussian2D mean signal";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return "Gaussian2D mean signal";
+  }
 }

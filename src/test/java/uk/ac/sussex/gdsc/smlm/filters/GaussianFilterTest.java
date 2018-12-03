@@ -28,366 +28,329 @@ import java.awt.Rectangle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@SuppressWarnings({ "javadoc" })
-public class GaussianFilterTest
-{
-    private static Logger logger;
+@SuppressWarnings({"javadoc"})
+public class GaussianFilterTest {
+  private static Logger logger;
 
-    @BeforeAll
-    public static void beforeAll()
-    {
-        logger = Logger.getLogger(GaussianFilterTest.class.getName());
+  @BeforeAll
+  public static void beforeAll() {
+    logger = Logger.getLogger(GaussianFilterTest.class.getName());
+  }
+
+  @AfterAll
+  public static void afterAll() {
+    logger = null;
+  }
+
+  double[] sigmas = new double[] {12.4, 9.3, 5, 3.2, 2.1, 0.5};
+  int size = 256;
+
+  private abstract class GFilter {
+    boolean internal;
+    String name;
+
+    GFilter(String name, boolean internal) {
+      this.name = name;
+      this.internal = internal;
     }
 
-    @AfterAll
-    public static void afterAll()
-    {
-        logger = null;
+    String getName() {
+      if (internal) {
+        return name + " internal";
+      }
+      return name;
     }
 
-    double[] sigmas = new double[] { 12.4, 9.3, 5, 3.2, 2.1, 0.5 };
-    int size = 256;
-
-    private abstract class GFilter
-    {
-        boolean internal;
-        String name;
-
-        GFilter(String name, boolean internal)
-        {
-            this.name = name;
-            this.internal = internal;
-        }
-
-        String getName()
-        {
-            if (internal)
-                return name + " internal";
-            return name;
-        }
-
-        float[] run(float[] d, double sigma)
-        {
-            if (internal)
-                return filterInternal(d, sigma);
-            return filter(d, sigma);
-        }
-
-        abstract float[] filter(float[] d, double sigma);
-
-        abstract float[] filterInternal(float[] d, double sigma);
-
-        abstract void setWeights(float[] w);
+    float[] run(float[] d, double sigma) {
+      if (internal) {
+        return filterInternal(d, sigma);
+      }
+      return filter(d, sigma);
     }
 
-    private class IJFilter extends GFilter
-    {
-        GaussianBlur gf = new GaussianBlur();
+    abstract float[] filter(float[] d, double sigma);
 
-        IJFilter(boolean internal)
-        {
-            super(GaussianBlur.class.getSimpleName(), internal);
-        }
+    abstract float[] filterInternal(float[] d, double sigma);
 
-        @Override
-        float[] filter(float[] d, double sigma)
-        {
-            final FloatProcessor fp = new FloatProcessor(size, size, d);
-            gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
-            return d;
-        }
+    abstract void setWeights(float[] w);
+  }
 
-        @Override
-        float[] filterInternal(float[] d, double sigma)
-        {
-            final FloatProcessor fp = new FloatProcessor(size, size, d);
-            final int border = GaussianFilter.getBorder(sigma);
-            final Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
-            fp.setRoi(roi);
-            gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
-            return d;
-        }
+  private class IJFilter extends GFilter {
+    GaussianBlur gf = new GaussianBlur();
 
-        @Override
-        void setWeights(float[] w)
-        {
-            // Ignored
-        }
+    IJFilter(boolean internal) {
+      super(GaussianBlur.class.getSimpleName(), internal);
     }
 
-    private class FloatFilter extends GFilter
-    {
-        GaussianFilter gf = new GaussianFilter();
-
-        FloatFilter(boolean internal)
-        {
-            super(GaussianFilter.class.getSimpleName(), internal);
-        }
-
-        @Override
-        float[] filter(float[] d, double sigma)
-        {
-            gf.convolve(d, size, size, sigma);
-            return d;
-        }
-
-        @Override
-        float[] filterInternal(float[] d, double sigma)
-        {
-            gf.convolveInternal(d, size, size, sigma);
-            return d;
-        }
-
-        @Override
-        void setWeights(float[] w)
-        {
-            gf.setWeights(w, size, size);
-        }
+    @Override
+    float[] filter(float[] d, double sigma) {
+      final FloatProcessor fp = new FloatProcessor(size, size, d);
+      gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
+      return d;
     }
 
-    private class DoubleFilter extends GFilter
-    {
-        DoubleGaussianFilter gf = new DoubleGaussianFilter();
-
-        DoubleFilter(boolean internal)
-        {
-            super(DoubleGaussianFilter.class.getSimpleName(), internal);
-        }
-
-        @Override
-        float[] filter(float[] d, double sigma)
-        {
-            gf.convolve(d, size, size, sigma);
-            return d;
-        }
-
-        @Override
-        float[] filterInternal(float[] d, double sigma)
-        {
-            gf.convolveInternal(d, size, size, sigma);
-            return d;
-        }
-
-        @Override
-        void setWeights(float[] w)
-        {
-            gf.setWeights(w, size, size);
-        }
+    @Override
+    float[] filterInternal(float[] d, double sigma) {
+      final FloatProcessor fp = new FloatProcessor(size, size, d);
+      final int border = GaussianFilter.getBorder(sigma);
+      final Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
+      fp.setRoi(roi);
+      gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
+      return d;
     }
 
-    private class DPFilter extends GFilter
-    {
-        DPGaussianFilter gf = new DPGaussianFilter();
+    @Override
+    void setWeights(float[] w) {
+      // Ignored
+    }
+  }
 
-        DPFilter(boolean internal)
-        {
-            super(DPGaussianFilter.class.getSimpleName(), internal);
-        }
+  private class FloatFilter extends GFilter {
+    GaussianFilter gf = new GaussianFilter();
 
-        @Override
-        float[] filter(float[] d, double sigma)
-        {
-            gf.convolve(d, size, size, sigma);
-            return d;
-        }
-
-        @Override
-        float[] filterInternal(float[] d, double sigma)
-        {
-            gf.convolveInternal(d, size, size, sigma);
-            return d;
-        }
-
-        @Override
-        void setWeights(float[] w)
-        {
-            gf.setWeights(w, size, size);
-        }
+    FloatFilter(boolean internal) {
+      super(GaussianFilter.class.getSimpleName(), internal);
     }
 
-    @SeededTest
-    public void floatFilterIsSameAsIJFilter(RandomSeed seed)
-    {
-        filter1IsSameAsFilter2(seed, new FloatFilter(false), new IJFilter(false), false, 1e-2);
+    @Override
+    float[] filter(float[] d, double sigma) {
+      gf.convolve(d, size, size, sigma);
+      return d;
     }
 
-    @SeededTest
-    public void floatFilterInternalIsSameAsIJFilter(RandomSeed seed)
-    {
-        filter1IsSameAsFilter2(seed, new FloatFilter(true), new IJFilter(true), false, 1e-2);
+    @Override
+    float[] filterInternal(float[] d, double sigma) {
+      gf.convolveInternal(d, size, size, sigma);
+      return d;
     }
 
-    @SeededTest
-    public void floatFilterIsSameAsDoubleFilter(RandomSeed seed)
-    {
-        filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), false, 1e-2);
+    @Override
+    void setWeights(float[] w) {
+      gf.setWeights(w, size, size);
+    }
+  }
+
+  private class DoubleFilter extends GFilter {
+    DoubleGaussianFilter gf = new DoubleGaussianFilter();
+
+    DoubleFilter(boolean internal) {
+      super(DoubleGaussianFilter.class.getSimpleName(), internal);
     }
 
-    @SeededTest
-    public void floatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed)
-    {
-        filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), true, 1e-2);
+    @Override
+    float[] filter(float[] d, double sigma) {
+      gf.convolve(d, size, size, sigma);
+      return d;
     }
 
-    @SeededTest
-    public void dpFloatFilterIsSameAsDoubleFilter(RandomSeed seed)
-    {
-        filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), false, 1e-2);
+    @Override
+    float[] filterInternal(float[] d, double sigma) {
+      gf.convolveInternal(d, size, size, sigma);
+      return d;
     }
 
-    @SeededTest
-    public void dpFloatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed)
-    {
-        filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), true, 1e-2);
+    @Override
+    void setWeights(float[] w) {
+      gf.setWeights(w, size, size);
+    }
+  }
+
+  private class DPFilter extends GFilter {
+    DPGaussianFilter gf = new DPGaussianFilter();
+
+    DPFilter(boolean internal) {
+      super(DPGaussianFilter.class.getSimpleName(), internal);
     }
 
-    private void filter1IsSameAsFilter2(RandomSeed seed, GFilter f1, GFilter f2, boolean weighted, double tolerance)
-    {
-        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
-        final float[] data = createData(rand, size, size);
-        float[] w = null;
-        if (weighted)
-        {
-            final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rand, 57);
+    @Override
+    float[] filter(float[] d, double sigma) {
+      gf.convolve(d, size, size, sigma);
+      return d;
+    }
 
-            w = new float[data.length];
-            for (int i = 0; i < w.length; i++)
-                w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
-            //w[i] = (float) (1.0 / Math.max(0.01, rand.nextGaussian() * 0.2 + 2));
-            //w[i] = 0.5f;
-            f1.setWeights(w);
-            f2.setWeights(w);
+    @Override
+    float[] filterInternal(float[] d, double sigma) {
+      gf.convolveInternal(d, size, size, sigma);
+      return d;
+    }
+
+    @Override
+    void setWeights(float[] w) {
+      gf.setWeights(w, size, size);
+    }
+  }
+
+  @SeededTest
+  public void floatFilterIsSameAsIJFilter(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new FloatFilter(false), new IJFilter(false), false, 1e-2);
+  }
+
+  @SeededTest
+  public void floatFilterInternalIsSameAsIJFilter(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new FloatFilter(true), new IJFilter(true), false, 1e-2);
+  }
+
+  @SeededTest
+  public void floatFilterIsSameAsDoubleFilter(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), false, 1e-2);
+  }
+
+  @SeededTest
+  public void floatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), true, 1e-2);
+  }
+
+  @SeededTest
+  public void dpFloatFilterIsSameAsDoubleFilter(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), false, 1e-2);
+  }
+
+  @SeededTest
+  public void dpFloatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), true, 1e-2);
+  }
+
+  private void filter1IsSameAsFilter2(RandomSeed seed, GFilter f1, GFilter f2, boolean weighted,
+      double tolerance) {
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final float[] data = createData(rand, size, size);
+    float[] w = null;
+    if (weighted) {
+      final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rand, 57);
+
+      w = new float[data.length];
+      for (int i = 0; i < w.length; i++) {
+        w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
+      }
+      // w[i] = (float) (1.0 / Math.max(0.01, rand.nextGaussian() * 0.2 + 2));
+      // w[i] = 0.5f;
+      f1.setWeights(w);
+      f2.setWeights(w);
+    }
+
+    for (final double sigma : sigmas) {
+      final float[] e = data.clone();
+      f2.run(e, sigma);
+      final float[] o = data.clone();
+      f1.run(o, sigma);
+
+      double max = 0;
+      for (int i = 0; i < e.length; i++) {
+        final double d = DoubleEquality.relativeError(e[i], o[i]);
+        if (max < d) {
+          max = d;
         }
+      }
 
-        for (final double sigma : sigmas)
-        {
-            final float[] e = data.clone();
-            f2.run(e, sigma);
-            final float[] o = data.clone();
-            f1.run(o, sigma);
+      logger.fine(FunctionUtils.getSupplier("%s vs %s w=%b @ %.1f = %g", f1.getName(), f2.getName(),
+          weighted, sigma, max));
+      Assertions.assertTrue(max < tolerance);
+    }
+  }
 
-            double max = 0;
-            for (int i = 0; i < e.length; i++)
-            {
-                final double d = DoubleEquality.relativeError(e[i], o[i]);
-                if (max < d)
-                    max = d;
-            }
+  private class MyTimingTask extends BaseTimingTask {
+    GFilter filter;
+    float[][] data;
+    double sigma;
 
-            logger.fine(
-                    FunctionUtils.getSupplier("%s vs %s w=%b @ %.1f = %g", f1.getName(), f2.getName(), weighted, sigma, max));
-            Assertions.assertTrue(max < tolerance);
-        }
+    public MyTimingTask(GFilter filter, float[][] data, double sigma) {
+      super(filter.getName() + " " + sigma);
+      this.filter = filter;
+      this.data = data;
+      this.sigma = sigma;
     }
 
-    private class MyTimingTask extends BaseTimingTask
-    {
-        GFilter filter;
-        float[][] data;
-        double sigma;
-
-        public MyTimingTask(GFilter filter, float[][] data, double sigma)
-        {
-            super(filter.getName() + " " + sigma);
-            this.filter = filter;
-            this.data = data;
-            this.sigma = sigma;
-        }
-
-        @Override
-        public int getSize()
-        {
-            return data.length;
-        }
-
-        @Override
-        public Object getData(int i)
-        {
-            return data[i].clone();
-        }
-
-        @Override
-        public Object run(Object data)
-        {
-            final float[] d = (float[]) data;
-            return filter.run(d, sigma);
-        }
+    @Override
+    public int getSize() {
+      return data.length;
     }
 
-    @SpeedTag
-    @SeededTest
-    public void floatFilterIsFasterThanDoubleFilter(RandomSeed seed)
-    {
-        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
-
-        final float[][] data = new float[10][];
-        for (int i = 0; i < data.length; i++)
-            data[i] = createData(rg, size, size);
-
-        final TimingService ts = new TimingService();
-        for (final double sigma : sigmas)
-        {
-            ts.execute(new MyTimingTask(new FloatFilter(false), data, sigma));
-            ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
-            ts.execute(new MyTimingTask(new DoubleFilter(false), data, sigma));
-        }
-        final int size = ts.getSize();
-        ts.repeat();
-        if (logger.isLoggable(Level.INFO))
-            logger.info(ts.getReport(size));
-        final int n = size / sigmas.length;
-        for (int i = 0, j = size; i < sigmas.length; i++, j += n)
-            for (int k = 1; k < n; k++)
-            {
-                TimingResult slow = ts.get(j + k);
-                TimingResult fast = ts.get(j);
-                logger.log(TestLogUtils.getTimingRecord(slow, fast));
-            }
+    @Override
+    public Object getData(int i) {
+      return data[i].clone();
     }
 
-    @SpeedTag
-    @SeededTest
-    public void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed)
-    {
-        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
+    @Override
+    public Object run(Object data) {
+      final float[] d = (float[]) data;
+      return filter.run(d, sigma);
+    }
+  }
 
-        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+  @SpeedTag
+  @SeededTest
+  public void floatFilterIsFasterThanDoubleFilter(RandomSeed seed) {
+    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final float[][] data = new float[10][];
-        for (int i = 0; i < data.length; i++)
-            data[i] = createData(rg, size, size);
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
-        final TimingService ts = new TimingService();
-        for (final double sigma : sigmas)
-        {
-            ts.execute(new MyTimingTask(new FloatFilter(true), data, sigma));
-            ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
-            ts.execute(new MyTimingTask(new DoubleFilter(true), data, sigma));
-        }
-        final int size = ts.getSize();
-        ts.repeat();
-        if (logger.isLoggable(Level.INFO))
-            logger.info(ts.getReport(size));
-        final int n = size / sigmas.length;
-        for (int i = 0, j = size; i < sigmas.length; i++, j += n)
-            for (int k = 1; k < n; k++)
-            {
-                TimingResult slow = ts.get(j + k);
-                TimingResult fast = ts.get(j);
-                logger.log(TestLogUtils.getTimingRecord(slow, fast));
-            }
+    final float[][] data = new float[10][];
+    for (int i = 0; i < data.length; i++) {
+      data[i] = createData(rg, size, size);
     }
 
-    private static float[] createData(UniformRandomProvider rg, int width, int height)
-    {
-        final float[] data = new float[width * height];
-        for (int i = data.length; i-- > 0;)
-            data[i] = i;
-
-        RandomUtils.shuffle(data, rg);
-
-        return data;
+    final TimingService ts = new TimingService();
+    for (final double sigma : sigmas) {
+      ts.execute(new MyTimingTask(new FloatFilter(false), data, sigma));
+      ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
+      ts.execute(new MyTimingTask(new DoubleFilter(false), data, sigma));
     }
+    final int size = ts.getSize();
+    ts.repeat();
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info(ts.getReport(size));
+    }
+    final int n = size / sigmas.length;
+    for (int i = 0, j = size; i < sigmas.length; i++, j += n) {
+      for (int k = 1; k < n; k++) {
+        final TimingResult slow = ts.get(j + k);
+        final TimingResult fast = ts.get(j);
+        logger.log(TestLogUtils.getTimingRecord(slow, fast));
+      }
+    }
+  }
+
+  @SpeedTag
+  @SeededTest
+  public void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed) {
+    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
+
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+
+    final float[][] data = new float[10][];
+    for (int i = 0; i < data.length; i++) {
+      data[i] = createData(rg, size, size);
+    }
+
+    final TimingService ts = new TimingService();
+    for (final double sigma : sigmas) {
+      ts.execute(new MyTimingTask(new FloatFilter(true), data, sigma));
+      ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
+      ts.execute(new MyTimingTask(new DoubleFilter(true), data, sigma));
+    }
+    final int size = ts.getSize();
+    ts.repeat();
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info(ts.getReport(size));
+    }
+    final int n = size / sigmas.length;
+    for (int i = 0, j = size; i < sigmas.length; i++, j += n) {
+      for (int k = 1; k < n; k++) {
+        final TimingResult slow = ts.get(j + k);
+        final TimingResult fast = ts.get(j);
+        logger.log(TestLogUtils.getTimingRecord(slow, fast));
+      }
+    }
+  }
+
+  private static float[] createData(UniformRandomProvider rg, int width, int height) {
+    final float[] data = new float[width * height];
+    for (int i = data.length; i-- > 0;) {
+      data[i] = i;
+    }
+
+    RandomUtils.shuffle(data, rg);
+
+    return data;
+  }
 }

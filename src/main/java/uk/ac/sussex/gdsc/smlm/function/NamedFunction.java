@@ -26,14 +26,12 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Defines function that has named parameters.
  */
-public interface NamedFunction
-{
-    /**
-     * Gets the name of parameter i.
-     *
-     * @param i
-     *            the index
-     * @return the name
-     */
-    public String getParameterName(int i);
+public interface NamedFunction {
+  /**
+   * Gets the name of parameter i.
+   *
+   * @param i the index
+   * @return the name
+   */
+  public String getParameterName(int i);
 }

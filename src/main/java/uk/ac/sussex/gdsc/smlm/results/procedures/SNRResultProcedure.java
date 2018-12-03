@@ -32,47 +32,43 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 //@formatter:off
 public class SNRResultProcedure extends AbstractResultProcedure implements
-	PeakResultProcedure
+  PeakResultProcedure
 //@formatter:on
 {
-    /** The Signal-to-Noise Ratio (SNR). */
-    public float[] snr;
+  /** The Signal-to-Noise Ratio (SNR). */
+  public float[] snr;
 
-    /**
-     * Instantiates a new precision result procedure.
-     *
-     * @param results
-     *            the results
-     * @throws DataException
-     *             if the results have no noise
-     */
-    public SNRResultProcedure(MemoryPeakResults results) throws DataException
-    {
-        super(results);
-        if (!results.hasNoise())
-            throw new DataException("Results do not have noise");
-        if (!results.hasMeanIntensity())
-            throw new DataException("Results do not have mean intensity");
+  /**
+   * Instantiates a new precision result procedure.
+   *
+   * @param results the results
+   * @throws DataException if the results have no noise
+   */
+  public SNRResultProcedure(MemoryPeakResults results) throws DataException {
+    super(results);
+    if (!results.hasNoise()) {
+      throw new DataException("Results do not have noise");
     }
+    if (!results.hasMeanIntensity()) {
+      throw new DataException("Results do not have mean intensity");
+    }
+  }
 
-    /**
-     * Gets the SNR for the results.
-     * <p>
-     * The SNR is computed using the mean signal divided by the noise.
-     *
-     * @return the snr
-     */
-    public float[] getSNR()
-    {
-        i = 0;
-        snr = allocate(snr);
-        results.forEach(this);
-        return snr;
-    }
+  /**
+   * Gets the SNR for the results. <p> The SNR is computed using the mean signal divided by the
+   * noise.
+   *
+   * @return the snr
+   */
+  public float[] getSNR() {
+    i = 0;
+    snr = allocate(snr);
+    results.forEach(this);
+    return snr;
+  }
 
-    @Override
-    public void execute(PeakResult peakResult)
-    {
-        this.snr[i++] = peakResult.getSNR();
-    }
+  @Override
+  public void execute(PeakResult peakResult) {
+    this.snr[i++] = peakResult.getSNR();
+  }
 }

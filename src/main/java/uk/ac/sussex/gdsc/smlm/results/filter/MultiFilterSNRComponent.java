@@ -26,32 +26,27 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using SNR.
  */
-public class MultiFilterSNRComponent extends MultiFilterComponent
-{
-    private final float snr;
+public class MultiFilterSNRComponent extends MultiFilterComponent {
+  private final float snr;
 
-    /**
-     * Instantiates a new multi filter SNR component.
-     *
-     * @param snr
-     *            the snr
-     */
-    public MultiFilterSNRComponent(float snr)
-    {
-        this.snr = snr;
-    }
+  /**
+   * Instantiates a new multi filter SNR component.
+   *
+   * @param snr the snr
+   */
+  public MultiFilterSNRComponent(float snr) {
+    this.snr = snr;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        return peak.getSNR() < this.snr;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    return peak.getSNR() < this.snr;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return IDirectFilter.V_SNR;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return IDirectFilter.V_SNR;
+  }
 }

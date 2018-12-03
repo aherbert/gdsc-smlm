@@ -31,198 +31,181 @@ import org.apache.commons.math3.exception.NumberIsTooSmallException;
 
 /**
  * Calculate the Fisher information for a Poisson-distributed random variable using an interpolation
- * of the alpha scale parameter. The alpha scale parameter is the ratio between the Fisher information
- * for a Poisson distribution and the Fisher information of another Poisson-based distribution,
- * e.g. a Poisson-Gaussian convolution.
+ * of the alpha scale parameter. The alpha scale parameter is the ratio between the Fisher
+ * information for a Poisson distribution and the Fisher information of another Poisson-based
+ * distribution, e.g. a Poisson-Gaussian convolution.
  */
-public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInformation
-{
-    /** The minimum of the interpolation range (log scale). */
-    public final double min;
+public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInformation {
+  /** The minimum of the interpolation range (log scale). */
+  public final double min;
 
-    /** The maximum of the interpolation range (log scale). */
-    public final double max;
+  /** The maximum of the interpolation range (log scale). */
+  public final double max;
 
-    /** The mean at the minimum of the interpolation range. */
-    public final double uMin;
+  /** The mean at the minimum of the interpolation range. */
+  public final double uMin;
 
-    /** The mean at the maximum of the interpolation range. */
-    public final double uMax;
+  /** The mean at the maximum of the interpolation range. */
+  public final double uMax;
 
-    /** The alpha at the minimum of the interpolation range. */
-    private final double alphaMin;
+  /** The alpha at the minimum of the interpolation range. */
+  private final double alphaMin;
 
-    /** The Fisher information at the minimum of the interpolation range. */
-    private final double iMin;
+  /** The Fisher information at the minimum of the interpolation range. */
+  private final double iMin;
 
-    /** The alpha at the maximum of the interpolation range. */
-    private final double alphaMax;
+  /** The alpha at the maximum of the interpolation range. */
+  private final double alphaMax;
 
-    /** Flag indicating if the Fisher information or the alpha is fixed at the minimum of the interpolation range. */
-    private final boolean lowerFixedI;
+  /**
+   * Flag indicating if the Fisher information or the alpha is fixed at the minimum of the
+   * interpolation range.
+   */
+  private final boolean lowerFixedI;
 
-    /** The function to compute the Fisher information above the maximum of the interpolation range. */
-    private BasePoissonFisherInformation upperFI;
+  /**
+   * The function to compute the Fisher information above the maximum of the interpolation range.
+   */
+  private BasePoissonFisherInformation upperFI;
 
-    /** The function to interpolate alpha in the range min-max. */
-    private final PolynomialSplineFunction alphaF;
+  /** The function to interpolate alpha in the range min-max. */
+  private final PolynomialSplineFunction alphaF;
 
-    /** The fast log function. */
-    private final FastLog fastLog;
+  /** The fast log function. */
+  private final FastLog fastLog;
 
-    /**
-     * Instantiates a new interpolated poisson fisher information.
-     * The input series of means must have at least 3 points and be in increasing order.
-     *
-     * @param logU
-     *            the log of the mean
-     * @param alpha
-     *            the alpha for each Poisson mean
-     * @throws DimensionMismatchException
-     *             if {@code x} and {@code y}
-     *             have different sizes.
-     * @throws NumberIsTooSmallException
-     *             if the size of {@code x} is smaller
-     *             than 3.
-     * @throws NonMonotonicSequenceException
-     *             if {@code x} is not sorted in
-     *             strict increasing order.
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public InterpolatedPoissonFisherInformation(double[] logU, double[] alpha)
-            throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException
-    {
-        this(logU, alpha, true, null);
+  /**
+   * Instantiates a new interpolated poisson fisher information. The input series of means must have
+   * at least 3 points and be in increasing order.
+   *
+   * @param logU the log of the mean
+   * @param alpha the alpha for each Poisson mean
+   * @throws DimensionMismatchException if {@code x} and {@code y} have different sizes.
+   * @throws NumberIsTooSmallException if the size of {@code x} is smaller than 3.
+   * @throws NonMonotonicSequenceException if {@code x} is not sorted in strict increasing order.
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public InterpolatedPoissonFisherInformation(double[] logU, double[] alpha)
+      throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException {
+    this(logU, alpha, true, null);
+  }
+
+  /**
+   * Instantiates a new interpolated poisson fisher information. The input series of means must have
+   * at least 3 points and be in increasing order.
+   *
+   * @param logU the log of the mean
+   * @param alpha the alpha for each Poisson mean
+   * @param lowerFixedI Flag indicating if the Fisher information or the alpha is fixed at the
+   *        minimum of the interpolation range.
+   * @param upperFI The function to compute the Fisher information above the maximum of the
+   *        interpolation range. If null then the alpha is considered fixed.
+   * @throws DimensionMismatchException if {@code x} and {@code y} have different sizes.
+   * @throws NumberIsTooSmallException if the size of {@code x} is smaller than 3.
+   * @throws NonMonotonicSequenceException if {@code x} is not sorted in strict increasing order.
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public InterpolatedPoissonFisherInformation(double[] logU, double[] alpha, boolean lowerFixedI,
+      BasePoissonFisherInformation upperFI)
+      throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException {
+    final SplineInterpolator si = new SplineInterpolator();
+    alphaF = si.interpolate(logU, alpha);
+
+    this.lowerFixedI = lowerFixedI;
+    this.upperFI = upperFI;
+
+    min = logU[0];
+    alphaMin = alpha[0];
+
+    final int n_1 = logU.length - 1;
+    max = logU[n_1];
+    alphaMax = alpha[n_1];
+
+    // Store the ends in non-log format
+    uMin = Math.exp(min);
+    uMax = Math.exp(max);
+
+    iMin = alphaMin / uMin;
+
+    fastLog = FastLogFactory.getFastLog();
+  }
+
+  /**
+   * {@inheritDoc} <p> Gets the approximate Poisson-Gaussian Fisher information. Approximate the
+   * Poisson as a Gaussian (u=t, var=t) and convolve with a Gaussian (u=0,var=s*s).
+   * Gaussian-Gaussian convolution: {@code var1 * var2 => var = var1+var2}. The Fisher information
+   * of Gaussian mean is 1/variance. The Poisson-Gaussian Fisher information is therefore 1 / (t +
+   * s*s).
+   *
+   * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
+   */
+  @Override
+  public double getFisherInformation(double t) throws IllegalArgumentException {
+    if (t <= 0) {
+      throw new IllegalArgumentException("Poisson mean must be positive");
+    }
+    // Poisson fisher information
+    double I = 1.0 / t;
+    // The Fisher information is returned using the alpha multiplied by the
+    // Poisson Fisher information.
+    if (I != Double.POSITIVE_INFINITY) {
+      I *= getAlpha(t);
+    }
+    return I;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double getAlpha(double t) {
+    if (t <= 0) {
+      throw new IllegalArgumentException("Poisson mean must be positive");
     }
 
-    /**
-     * Instantiates a new interpolated poisson fisher information.
-     * The input series of means must have at least 3 points and be in increasing order.
-     *
-     * @param logU
-     *            the log of the mean
-     * @param alpha
-     *            the alpha for each Poisson mean
-     * @param lowerFixedI
-     *            Flag indicating if the Fisher information or the alpha is fixed at the minimum of the interpolation
-     *            range.
-     * @param upperFI
-     *            The function to compute the Fisher information above the maximum of the interpolation range. If null
-     *            then the alpha is considered fixed.
-     * @throws DimensionMismatchException
-     *             if {@code x} and {@code y}
-     *             have different sizes.
-     * @throws NumberIsTooSmallException
-     *             if the size of {@code x} is smaller
-     *             than 3.
-     * @throws NonMonotonicSequenceException
-     *             if {@code x} is not sorted in
-     *             strict increasing order.
-     * @throws IllegalArgumentException
-     *             the illegal argument exception
-     */
-    public InterpolatedPoissonFisherInformation(double[] logU, double[] alpha, boolean lowerFixedI,
-            BasePoissonFisherInformation upperFI)
-            throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException
-    {
-        final SplineInterpolator si = new SplineInterpolator();
-        alphaF = si.interpolate(logU, alpha);
-
-        this.lowerFixedI = lowerFixedI;
-        this.upperFI = upperFI;
-
-        min = logU[0];
-        alphaMin = alpha[0];
-
-        final int n_1 = logU.length - 1;
-        max = logU[n_1];
-        alphaMax = alpha[n_1];
-
-        // Store the ends in non-log format
-        uMin = Math.exp(min);
-        uMax = Math.exp(max);
-
-        iMin = alphaMin / uMin;
-
-        fastLog = FastLogFactory.getFastLog();
+    // At the minimum the Fisher information uses a fixed alpha.
+    if (t <= uMin) {
+      return getAlphaMin(t);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Gets the approximate Poisson-Gaussian Fisher information.
-     * Approximate the Poisson as a Gaussian (u=t, var=t) and convolve with a Gaussian (u=0,var=s*s).
-     * Gaussian-Gaussian convolution: {@code var1 * var2 => var = var1+var2}.
-     * The Fisher information of Gaussian mean is 1/variance.
-     * The Poisson-Gaussian Fisher information is therefore 1 / (t + s*s).
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
-     */
-    @Override
-    public double getFisherInformation(double t) throws IllegalArgumentException
-    {
-        if (t <= 0)
-            throw new IllegalArgumentException("Poisson mean must be positive");
-        // Poisson fisher information
-        double I = 1.0 / t;
-        // The Fisher information is returned using the alpha multiplied by the
-        // Poisson Fisher information.
-        if (I != Double.POSITIVE_INFINITY)
-            I *= getAlpha(t);
-        return I;
+    // At the maximum the Fisher information can use a fixed alpha or a approximation
+    // function.
+    if (t >= uMax) {
+      return getAlphaMax(t);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getAlpha(double t)
-    {
-        if (t <= 0)
-            throw new IllegalArgumentException("Poisson mean must be positive");
+    // Within the range the poisson mean is converted to a log scale and alpha is
+    // interpolated. Use a fast log for this as the precision is not critical due
+    // to the assumed error in the interpolation.
+    // At this point t is known to be in the bound >0, but it may be NaN or infinity
+    // so allow the checks (i.e. don't use fastLogD(double)).
+    final double x = fastLog.logD(t);
 
-        // At the minimum the Fisher information uses a fixed alpha.
-        if (t <= uMin)
-            return getAlphaMin(t);
-
-        // At the maximum the Fisher information can use a fixed alpha or a approximation
-        // function.
-        if (t >= uMax)
-            return getAlphaMax(t);
-
-        // Within the range the poisson mean is converted to a log scale and alpha is
-        // interpolated. Use a fast log for this as the precision is not critical due
-        // to the assumed error in the interpolation.
-        // At this point t is known to be in the bound >0, but it may be NaN or infinity
-        // so allow the checks (i.e. don't use fastLogD(double)).
-        final double x = fastLog.logD(t);
-
-        // Check again as fast log may not be precise.
-        // This avoids an out-of-range exception in the interpolating function.
-        if (x <= min)
-            return getAlphaMin(t);
-        if (x >= max)
-            return getAlphaMax(t);
-
-        return alphaF.value(x);
+    // Check again as fast log may not be precise.
+    // This avoids an out-of-range exception in the interpolating function.
+    if (x <= min) {
+      return getAlphaMin(t);
+    }
+    if (x >= max) {
+      return getAlphaMax(t);
     }
 
-    private double getAlphaMin(double t)
-    {
-        // alpha = t * I
-        return (lowerFixedI) ? t * iMin : alphaMin;
-    }
+    return alphaF.value(x);
+  }
 
-    private double getAlphaMax(double t)
-    {
-        return (upperFI != null) ? upperFI.getAlpha(t) : alphaMax;
-    }
+  private double getAlphaMin(double t) {
+    // alpha = t * I
+    return (lowerFixedI) ? t * iMin : alphaMin;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void postClone()
-    {
-        // Ensure the function instance is cloned
-        if (upperFI != null)
-            upperFI = upperFI.clone();
+  private double getAlphaMax(double t) {
+    return (upperFI != null) ? upperFI.getAlpha(t) : alphaMax;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void postClone() {
+    // Ensure the function instance is cloned
+    if (upperFI != null) {
+      upperFI = upperFI.clone();
     }
+  }
 }

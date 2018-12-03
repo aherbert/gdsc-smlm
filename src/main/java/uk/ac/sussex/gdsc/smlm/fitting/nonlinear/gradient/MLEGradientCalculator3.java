@@ -24,72 +24,65 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 /**
- * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
- * and the gradient vector of the function's partial first derivatives with respect to the parameters.
- * This is used within the Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
- * set of data points (x, y).
- * <p>
- * This calculator computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
- * model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input
- * data
- * must be Poisson distributed for this to be relevant.
+ * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a
+ * function) and the gradient vector of the function's partial first derivatives with respect to the
+ * parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model with
+ * coefficients (a) for a set of data points (x, y). <p> This calculator computes a modified
+ * Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson model. See
+ * Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339.
+ * The input data must be Poisson distributed for this to be relevant.
  */
-public class MLEGradientCalculator3 extends MLEGradientCalculator
-{
-    /**
-     * Instantiates a new MLE gradient calculator.
-     */
-    public MLEGradientCalculator3()
-    {
-        super(3);
-    }
+public class MLEGradientCalculator3 extends MLEGradientCalculator {
+  /**
+   * Instantiates a new MLE gradient calculator.
+   */
+  public MLEGradientCalculator3() {
+    super(3);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void zero(final double[][] alpha, final double[] beta)
-    {
-        alpha[0][0] = 0;
-        alpha[1][0] = 0;
-        alpha[1][1] = 0;
-        alpha[2][0] = 0;
-        alpha[2][1] = 0;
-        alpha[2][2] = 0;
+  /** {@inheritDoc} */
+  @Override
+  protected void zero(final double[][] alpha, final double[] beta) {
+    alpha[0][0] = 0;
+    alpha[1][0] = 0;
+    alpha[1][1] = 0;
+    alpha[2][0] = 0;
+    alpha[2][1] = 0;
+    alpha[2][2] = 0;
 
-        beta[0] = 0;
-        beta[1] = 0;
-        beta[2] = 0;
-    }
+    beta[0] = 0;
+    beta[1] = 0;
+    beta[2] = 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
-            final double xi)
-    {
-        final double xi_fi = xi / fi;
-        final double xi_fi2 = xi_fi / fi;
-        final double e = 1 - (xi_fi);
+  /** {@inheritDoc} */
+  @Override
+  protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da,
+      final double fi, final double xi) {
+    final double xi_fi = xi / fi;
+    final double xi_fi2 = xi_fi / fi;
+    final double e = 1 - (xi_fi);
 
-        alpha[0][0] += dfi_da[0] * xi_fi2 * dfi_da[0];
-        double w;
-        w = dfi_da[1] * xi_fi2;
-        alpha[1][0] += w * dfi_da[0];
-        alpha[1][1] += w * dfi_da[1];
-        w = dfi_da[2] * xi_fi2;
-        alpha[2][0] += w * dfi_da[0];
-        alpha[2][1] += w * dfi_da[1];
-        alpha[2][2] += w * dfi_da[2];
+    alpha[0][0] += dfi_da[0] * xi_fi2 * dfi_da[0];
+    double w;
+    w = dfi_da[1] * xi_fi2;
+    alpha[1][0] += w * dfi_da[0];
+    alpha[1][1] += w * dfi_da[1];
+    w = dfi_da[2] * xi_fi2;
+    alpha[2][0] += w * dfi_da[0];
+    alpha[2][1] += w * dfi_da[1];
+    alpha[2][2] += w * dfi_da[2];
 
-        beta[0] -= e * dfi_da[0];
-        beta[1] -= e * dfi_da[1];
-        beta[2] -= e * dfi_da[2];
-    }
+    beta[0] -= e * dfi_da[0];
+    beta[1] -= e * dfi_da[1];
+    beta[2] -= e * dfi_da[2];
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void symmetric(final double[][] alpha)
-    {
-        alpha[0][1] = alpha[1][0];
-        alpha[0][2] = alpha[2][0];
-        alpha[1][2] = alpha[2][1];
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected void symmetric(final double[][] alpha) {
+    alpha[0][1] = alpha[1][0];
+    alpha[0][2] = alpha[2][0];
+    alpha[1][2] = alpha[2][1];
+  }
 }

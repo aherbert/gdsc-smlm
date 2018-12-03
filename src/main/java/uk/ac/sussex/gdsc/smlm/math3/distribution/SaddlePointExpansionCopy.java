@@ -1,18 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
@@ -112,7 +110,7 @@ final class SaddlePointExpansionCopy {
     static double getStirlingError(double z) {
         double ret;
         if (z < 15.0) {
-            double z2 = 2.0 * z;
+            final double z2 = 2.0 * z;
             if (FastMath.floor(z2) == z2) {
                 ret = EXACT_STIRLING_ERRORS[(int) z2];
             } else {
@@ -120,7 +118,7 @@ final class SaddlePointExpansionCopy {
                       z - HALF_LOG_2_PI;
             }
         } else {
-            double z2 = z * z;
+            final double z2 = z * z;
             ret = (0.083333333333333333333 -
                     (0.00277777777777777777778 -
                             (0.00079365079365079365079365 -
@@ -150,7 +148,7 @@ final class SaddlePointExpansionCopy {
     static double getDeviancePart(double x, double mu) {
         double ret;
         if (FastMath.abs(x - mu) < 0.1 * (x + mu)) {
-            double d = x - mu;
+            final double d = x - mu;
             double v = d / (x + mu);
             double s1 = v * d;
             double s = Double.NaN;
@@ -198,7 +196,7 @@ final class SaddlePointExpansionCopy {
             ret = getStirlingError(n) - getStirlingError(x) -
                   getStirlingError(n - x) - getDeviancePart(x, n * p) -
                   getDeviancePart(n - x, n * q);
-            double f = (MathUtils.TWO_PI * x * (n - x)) / n;
+            final double f = (MathUtils.TWO_PI * x * (n - x)) / n;
             ret = -0.5 * FastMath.log(f) + ret;
         }
         return ret;

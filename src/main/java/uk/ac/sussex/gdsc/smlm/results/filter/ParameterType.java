@@ -28,10 +28,9 @@ import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 /**
  * Define the type of parameter.
  */
-public enum ParameterType implements NamedObject
-{
-    //@formatter:off
-	/** Signal. */
+public enum ParameterType implements NamedObject {
+  //@formatter:off
+  /** Signal. */
     SIGNAL("Signal"),
     /** Signal Range. */
     SIGNAL_RANGE("Signal Range"),
@@ -89,41 +88,36 @@ public enum ParameterType implements NamedObject
     MIN_Z("Min Z"),
     /** Max Z. */
     MAX_Z("Max Z"),
-	;
+  ;
 
-	//@formatter:on
+  //@formatter:on
 
-    private final String name;
-    private final String shortName;
+  private final String name;
+  private final String shortName;
 
-    private ParameterType(String name)
-    {
-        this(name, name);
-    }
+  private ParameterType(String name) {
+    this(name, name);
+  }
 
-    private ParameterType(String name, String sname)
-    {
-        this.name = name;
-        this.shortName = sname;
-    }
+  private ParameterType(String name, String sname) {
+    this.name = name;
+    this.shortName = sname;
+  }
 
-    @Override
-    public String toString()
-    {
-        return shortName;
-    }
+  @Override
+  public String toString() {
+    return shortName;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getName()
-    {
-        return name;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getName() {
+    return name;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getShortName()
-    {
-        return shortName;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getShortName() {
+    return shortName;
+  }
 }

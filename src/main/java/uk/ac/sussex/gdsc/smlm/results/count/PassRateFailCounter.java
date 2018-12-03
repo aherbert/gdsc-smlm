@@ -24,158 +24,147 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Stop evaluating when the pass rate falls below a set fraction. A minimum number of pass/fail counts can be specified.
+ * Stop evaluating when the pass rate falls below a set fraction. A minimum number of pass/fail
+ * counts can be specified.
  */
-public class PassRateFailCounter extends BaseFailCounter
-{
-    /** The pass count. */
-    private int passCount = 0;
+public class PassRateFailCounter extends BaseFailCounter {
+  /** The pass count. */
+  private int passCount = 0;
 
-    /** The fail count. */
-    private int failCount = 0;
+  /** The fail count. */
+  private int failCount = 0;
 
-    /** The number of allowed counts. */
-    private final int allowedCounts;
+  /** The number of allowed counts. */
+  private final int allowedCounts;
 
-    /** The pass rate. */
-    private final double passRate;
+  /** The pass rate. */
+  private final double passRate;
 
-    /**
-     * Instantiates a new pass rate fail counter.
-     *
-     * @param allowedCounts
-     *            the number of allowed counts before the pass rate is evaluated
-     * @param passRate
-     *            the reset fraction
-     */
-    private PassRateFailCounter(int allowedCounts, double passRate)
-    {
-        this.allowedCounts = allowedCounts;
-        this.passRate = passRate;
+  /**
+   * Instantiates a new pass rate fail counter.
+   *
+   * @param allowedCounts the number of allowed counts before the pass rate is evaluated
+   * @param passRate the reset fraction
+   */
+  private PassRateFailCounter(int allowedCounts, double passRate) {
+    this.allowedCounts = allowedCounts;
+    this.passRate = passRate;
+  }
+
+  @Override
+  protected String generateDescription() {
+    return String.format("allowedCounts=%d;passRate=%f", allowedCounts, passRate);
+  }
+
+  /**
+   * Instantiates a new pass rate fail counter.
+   *
+   * @param allowedCounts the number of allowed counts before the pass rate is evaluated
+   * @param passRate The fraction of the current failures count to reset to for a pass.
+   * @return the pass rate fail counter
+   */
+  public static PassRateFailCounter create(int allowedCounts, double passRate) {
+    if (!(passRate >= 0 && passRate <= 1)) {
+      throw new IllegalArgumentException("Reset must be in the range 0-1");
     }
+    return new PassRateFailCounter(Math.max(0, allowedCounts), passRate);
+  }
 
-    @Override
-    protected String generateDescription()
-    {
-        return String.format("allowedCounts=%d;passRate=%f", allowedCounts, passRate);
+  /** {@inheritDoc} */
+  @Override
+  public void pass() {
+    passCount++;
+    if (passCount < 0) {
+      throw new IllegalStateException("Unable to increment");
     }
+  }
 
-    /**
-     * Instantiates a new pass rate fail counter.
-     *
-     * @param allowedCounts
-     *            the number of allowed counts before the pass rate is evaluated
-     * @param passRate
-     *            The fraction of the current failures count to reset to for a pass.
-     * @return the pass rate fail counter
-     */
-    public static PassRateFailCounter create(int allowedCounts, double passRate)
-    {
-        if (!(passRate >= 0 && passRate <= 1))
-            throw new IllegalArgumentException("Reset must be in the range 0-1");
-        return new PassRateFailCounter(Math.max(0, allowedCounts), passRate);
+  /** {@inheritDoc} */
+  @Override
+  public void pass(int n) {
+    if (n < 0) {
+      throw new IllegalArgumentException("Number of passes must be positive");
     }
+    passCount += n;
+    if (passCount < 0) {
+      throw new IllegalStateException("Unable to increment");
+    }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass()
-    {
-        passCount++;
-        if (passCount < 0)
-            throw new IllegalStateException("Unable to increment");
+  /** {@inheritDoc} */
+  @Override
+  public void fail() {
+    failCount++;
+    if (failCount < 0) {
+      throw new IllegalStateException("Unable to increment");
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass(int n)
-    {
-        if (n < 0)
-            throw new IllegalArgumentException("Number of passes must be positive");
-        passCount += n;
-        if (passCount < 0)
-            throw new IllegalStateException("Unable to increment");
+  /** {@inheritDoc} */
+  @Override
+  public void fail(int n) {
+    if (n < 0) {
+      throw new IllegalArgumentException("Number of fails must be positive");
     }
+    failCount += n;
+    if (failCount < 0) {
+      throw new IllegalStateException("Unable to increment");
+    }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail()
-    {
-        failCount++;
-        if (failCount < 0)
-            throw new IllegalStateException("Unable to increment");
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isOK() {
+    final double total = failCount + passCount;
+    return total <= allowedCounts || passCount / total >= passRate;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail(int n)
-    {
-        if (n < 0)
-            throw new IllegalArgumentException("Number of fails must be positive");
-        failCount += n;
-        if (failCount < 0)
-            throw new IllegalStateException("Unable to increment");
-    }
+  /** {@inheritDoc} */
+  @Override
+  public FailCounter newCounter() {
+    return new PassRateFailCounter(allowedCounts, passRate);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isOK()
-    {
-        final double total = failCount + passCount;
-        return total <= allowedCounts || passCount / total >= passRate;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void reset() {
+    passCount = 0;
+    failCount = 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public FailCounter newCounter()
-    {
-        return new PassRateFailCounter(allowedCounts, passRate);
-    }
+  /**
+   * Gets the pass count.
+   *
+   * @return the pass count
+   */
+  public int getPassCount() {
+    return passCount;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void reset()
-    {
-        passCount = 0;
-        failCount = 0;
-    }
+  /**
+   * Gets the fail count.
+   *
+   * @return the fail count
+   */
+  public int getFailCount() {
+    return failCount;
+  }
 
-    /**
-     * Gets the pass count.
-     *
-     * @return the pass count
-     */
-    public int getPassCount()
-    {
-        return passCount;
-    }
+  /**
+   * Gets the number of allowed counts before the pass rate is evaluated.
+   *
+   * @return the allowed counts
+   */
+  public int getAllowedCounts() {
+    return allowedCounts;
+  }
 
-    /**
-     * Gets the fail count.
-     *
-     * @return the fail count
-     */
-    public int getFailCount()
-    {
-        return failCount;
-    }
-
-    /**
-     * Gets the number of allowed counts before the pass rate is evaluated.
-     *
-     * @return the allowed counts
-     */
-    public int getAllowedCounts()
-    {
-        return allowedCounts;
-    }
-
-    /**
-     * Gets the pass rate.
-     *
-     * @return the pass rate
-     */
-    public double getPassRate()
-    {
-        return passRate;
-    }
+  /**
+   * Gets the pass rate.
+   *
+   * @return the pass rate
+   */
+  public double getPassRate() {
+    return passRate;
+  }
 }

@@ -24,72 +24,61 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 /**
- * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks.
- * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
- * 2-dimensional
- * data. The dimensions of the data must be specified to allow unpacking to coordinates.
- * <p>
- * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
+ * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks. <p> The
+ * single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index
+ * into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
+ * coordinates. <p> Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y]
+ * = MaxX*y + x.
  */
-public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction
-{
-    /**
-     * Constructor.
-     *
-     * @param npeaks
-     *            The number of peaks
-     * @param maxx
-     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-     * @param maxy
-     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-     */
-    public NBEllipticalGaussian2DFunction(int npeaks, int maxx, int maxy)
-    {
-        super(npeaks, maxx, maxy);
+public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction {
+  /**
+   * Constructor.
+   *
+   * @param npeaks The number of peaks
+   * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
+   *        coordinates)
+   * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
+   *        coordinates)
+   */
+  public NBEllipticalGaussian2DFunction(int npeaks, int maxx, int maxy) {
+    super(npeaks, maxx, maxy);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Gaussian2DFunction copy() {
+    return new NBEllipticalGaussian2DFunction(npeaks, maxx, maxy);
+  }
+
+  /**
+   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks. <p> {@inheritDoc}
+   *
+   * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
+   */
+  @Override
+  public double eval(final int x, final double[] dyda) {
+    // Track the position of the parameters
+    int apos = 0;
+    int dydapos = 0;
+
+    // First parameter is the background level
+    double y = a[BACKGROUND];
+
+    // Unpack the predictor into the dimensions
+    final int x1 = x / maxx;
+    final int x0 = x % maxx;
+
+    for (int j = 0; j < npeaks; j++) {
+      y += gaussian(x0, x1, dyda, apos, dydapos, zeroAngle[j], peakFactors[j]);
+      apos += PARAMETERS_PER_PEAK;
+      dydapos += GRADIENT_PARAMETERS_PER_PEAK;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public Gaussian2DFunction copy()
-    {
-        return new NBEllipticalGaussian2DFunction(npeaks, maxx, maxy);
-    }
+    return y;
+  }
 
-    /**
-     * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
-     * <p>
-     * {@inheritDoc}
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
-     */
-    @Override
-    public double eval(final int x, final double[] dyda)
-    {
-        // Track the position of the parameters
-        int apos = 0;
-        int dydapos = 0;
-
-        // First parameter is the background level
-        double y = a[BACKGROUND];
-
-        // Unpack the predictor into the dimensions
-        final int x1 = x / maxx;
-        final int x0 = x % maxx;
-
-        for (int j = 0; j < npeaks; j++)
-        {
-            y += gaussian(x0, x1, dyda, apos, dydapos, zeroAngle[j], peakFactors[j]);
-            apos += PARAMETERS_PER_PEAK;
-            dydapos += GRADIENT_PARAMETERS_PER_PEAK;
-        }
-
-        return y;
-    }
-
-    @Override
-    public boolean evaluatesBackground()
-    {
-        return false;
-    }
+  @Override
+  public boolean evaluatesBackground() {
+    return false;
+  }
 }

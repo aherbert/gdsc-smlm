@@ -27,32 +27,28 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Gets the SNR from the PeakResult assuming a Gaussian 2D PSF. This is ratio of the average signal value to the
- * standard deviation of the background. The result must have the standard deviation for
- * each dimension in the first two additional parameters of the PeakResult parameter array.
- * <p>
- * Assumes that the mean signal is half the total signal divided by the ellipsoid area of the Gaussian that contains
- * half the signal.
+ * Gets the SNR from the PeakResult assuming a Gaussian 2D PSF. This is ratio of the average signal
+ * value to the standard deviation of the background. The result must have the standard deviation
+ * for each dimension in the first two additional parameters of the PeakResult parameter array. <p>
+ * Assumes that the mean signal is half the total signal divided by the ellipsoid area of the
+ * Gaussian that contains half the signal.
  */
-public class Gaussian2DPeakResultDataSNR extends PeakResultDataFloat
-{
-    /** The index of the x width. */
-    static final int i = PeakResult.STANDARD_PARAMETERS;
-    /** The index of the y width. */
-    static final int j = i + 1;
+public class Gaussian2DPeakResultDataSNR extends PeakResultDataFloat {
+  /** The index of the x width. */
+  static final int i = PeakResult.STANDARD_PARAMETERS;
+  /** The index of the y width. */
+  static final int j = i + 1;
 
-    /** {@inheritDoc} */
-    @Override
-    public Float getValue(PeakResult result)
-    {
-        return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingP05(result.getIntensity(), result.getParameter(i),
-                result.getParameter(j)) / result.getNoise());
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Float getValue(PeakResult result) {
+    return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingP05(result.getIntensity(),
+        result.getParameter(i), result.getParameter(j)) / result.getNoise());
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return "Gaussian2D SNR";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return "Gaussian2D SNR";
+  }
 }

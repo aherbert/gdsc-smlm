@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.results;
 /**
  * Marker interface to specify that the add methods of the PeakResults interface are thread safe.
  */
-public interface ThreadSafePeakResults extends PeakResults
-{
-    // Marker interface
+public interface ThreadSafePeakResults extends PeakResults {
+  // Marker interface
 }

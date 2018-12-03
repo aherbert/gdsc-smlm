@@ -26,9 +26,8 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 /**
  * Define the status of a fit result.
  */
-public enum FitStatus
-{
-    //@formatter:off
+public enum FitStatus {
+  //@formatter:off
     /** OK. */
     OK{ @Override public String getName() { return "OK"; }},
     /** Singular non-linear model */
@@ -77,18 +76,17 @@ public enum FitStatus
     LINE_SEARCH_ERROR{ @Override public String getName() { return "Line search error"; }},
     /** Unknown. */
     UNKNOWN{ @Override public String getName() { return "Unknown"; }};
-	//@formatter:on
+  //@formatter:on
 
-    @Override
-    public String toString()
-    {
-        return getName();
-    }
+  @Override
+  public String toString() {
+    return getName();
+  }
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    abstract public String getName();
+  /**
+   * Gets the name.
+   *
+   * @return the name
+   */
+  abstract public String getName();
 }

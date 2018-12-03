@@ -26,39 +26,34 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Width. Assumes XY width are the same.
  */
-public class MultiFilterWidthComponent extends MultiFilterComponent
-{
-    private final float lowerSigmaThreshold, upperSigmaThreshold;
+public class MultiFilterWidthComponent extends MultiFilterComponent {
+  private final float lowerSigmaThreshold, upperSigmaThreshold;
 
-    /**
-     * Instantiates a new multi filter width component.
-     *
-     * @param minWidth
-     *            the min width
-     * @param maxWidth
-     *            the max width
-     */
-    public MultiFilterWidthComponent(double minWidth, double maxWidth)
-    {
-        if (minWidth > 0 && minWidth < 1)
-            this.lowerSigmaThreshold = (float) minWidth;
-        else
-            lowerSigmaThreshold = 0;
-        this.upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+  /**
+   * Instantiates a new multi filter width component.
+   *
+   * @param minWidth the min width
+   * @param maxWidth the max width
+   */
+  public MultiFilterWidthComponent(double minWidth, double maxWidth) {
+    if (minWidth > 0 && minWidth < 1) {
+      this.lowerSigmaThreshold = (float) minWidth;
+    } else {
+      lowerSigmaThreshold = 0;
     }
+    this.upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        final float xsdf = peak.getXSDFactor();
-        return (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    final float xsdf = peak.getXSDFactor();
+    return (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return IDirectFilter.V_X_SD_FACTOR;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return IDirectFilter.V_X_SD_FACTOR;
+  }
 }

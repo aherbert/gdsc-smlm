@@ -28,15 +28,12 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Represents a predicate (boolean-valued function) of one argument.
  */
-public interface PeakResultPredicate
-{
-    /**
-     * Evaluates this predicate on the given argument.
-     *
-     * @param t
-     *            the input argument
-     * @return {@code true} if the input argument matches the predicate,
-     *         otherwise {@code false}
-     */
-    public boolean test(PeakResult t);
+public interface PeakResultPredicate {
+  /**
+   * Evaluates this predicate on the given argument.
+   *
+   * @param t the input argument
+   * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+   */
+  public boolean test(PeakResult t);
 }

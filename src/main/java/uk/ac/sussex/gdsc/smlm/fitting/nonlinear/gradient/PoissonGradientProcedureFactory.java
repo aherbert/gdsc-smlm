@@ -28,28 +28,24 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 /**
  * Create a Poisson gradient procedure.
  */
-public class PoissonGradientProcedureFactory
-{
-    /**
-     * Create a new gradient procedure.
-     *
-     * @param func
-     *            Gradient function
-     * @return the gradient procedure
-     */
-    public static PoissonGradientProcedure create(final Gradient1Function func)
-    {
-        switch (func.getNumberOfGradients())
-        {
-            case 5:
-                return new PoissonGradientProcedure5(func);
-            case 4:
-                return new PoissonGradientProcedure4(func);
-            case 6:
-                return new PoissonGradientProcedure6(func);
+public class PoissonGradientProcedureFactory {
+  /**
+   * Create a new gradient procedure.
+   *
+   * @param func Gradient function
+   * @return the gradient procedure
+   */
+  public static PoissonGradientProcedure create(final Gradient1Function func) {
+    switch (func.getNumberOfGradients()) {
+      case 5:
+        return new PoissonGradientProcedure5(func);
+      case 4:
+        return new PoissonGradientProcedure4(func);
+      case 6:
+        return new PoissonGradientProcedure6(func);
 
-            default:
-                return new PoissonGradientProcedure(func);
-        }
+      default:
+        return new PoissonGradientProcedure(func);
     }
+  }
 }

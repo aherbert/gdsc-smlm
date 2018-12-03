@@ -26,19 +26,15 @@ package uk.ac.sussex.gdsc.smlm.search;
 /**
  * Defines convergence of a point in space.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public interface ConvergenceChecker<T extends Comparable<T>>
-{
-    /**
-     * Check if the point has converged.
-     *
-     * @param previous
-     *            the previous
-     * @param current
-     *            the current
-     * @return true if the point has converged
-     */
-    public boolean converged(SearchResult<T> previous, SearchResult<T> current);
+public interface ConvergenceChecker<T extends Comparable<T>> {
+  /**
+   * Check if the point has converged.
+   *
+   * @param previous the previous
+   * @param current the current
+   * @return true if the point has converged
+   */
+  public boolean converged(SearchResult<T> previous, SearchResult<T> current);
 }

@@ -46,140 +46,129 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 /**
  * Smooths the selected rectangular ROI using a mean filter.
  */
-public class SmoothImage implements ExtendedPlugInFilter, DialogListener
-{
-    private static final String TITLE = "Smooth Image";
-    private static final String[] filterNames;
-    private static final DataFilterMethod[] filters;
-    static
-    {
-        filters = SettingsManager.getDataFilterMethodValues();
-        filterNames = SettingsManager.getDataFilterMethodNames();
+public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
+  private static final String TITLE = "Smooth Image";
+  private static final String[] filterNames;
+  private static final DataFilterMethod[] filters;
+  static {
+    filters = SettingsManager.getDataFilterMethodValues();
+    filterNames = SettingsManager.getDataFilterMethodNames();
+  }
+
+  private static int filter1 = 0;
+  private static double smooth1 = 1;
+  private static boolean differenceFilter = false;
+  private static int filter2 = 0;
+  private static double smooth2 = 3;
+
+  private final int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
+
+  /** {@inheritDoc} */
+  @Override
+  public int setup(String arg, ImagePlus imp) {
+    if (arg.equals("final")) {
+      // imp.resetDisplayRange();
+      imp.updateAndDraw();
+
+      return DONE;
     }
 
-    private static int filter1 = 0;
-    private static double smooth1 = 1;
-    private static boolean differenceFilter = false;
-    private static int filter2 = 0;
-    private static double smooth2 = 3;
+    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-    private final int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
-
-    /** {@inheritDoc} */
-    @Override
-    public int setup(String arg, ImagePlus imp)
-    {
-        if (arg.equals("final"))
-        {
-            //imp.resetDisplayRange();
-            imp.updateAndDraw();
-
-            return DONE;
-        }
-
-        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-
-        if (imp == null)
-        {
-            IJ.noImage();
-            return DONE;
-        }
-
-        final Roi roi = imp.getRoi();
-        if (roi != null && roi.getType() != Roi.RECTANGLE)
-        {
-            IJ.error("Rectangular ROI required");
-            return DONE;
-        }
-
-        return flags;
+    if (imp == null) {
+      IJ.noImage();
+      return DONE;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
-    {
-        // Note: We cannot use a NonBlockinnericDialog as scrolling through the image
-        // throws away the snap shot. The pixel data for the previous slice is then fixed
-        // with the preview. So we can only support a single slice.
-
-        final GenericDialog gd = new GenericDialog(TITLE);
-        gd.addHelp(About.HELP_URL);
-
-        gd.addMessage("Smooth image:");
-        gd.addChoice("Spot_filter", filterNames, filterNames[filter1]);
-        gd.addSlider("Smoothing", 0, 4.5, smooth1);
-        gd.addCheckbox("Difference_filter", differenceFilter);
-        gd.addChoice("Spot_filter2", filterNames, filterNames[filter2]);
-        gd.addSlider("Smoothing2", 1.5, 6, smooth2);
-
-        gd.addPreviewCheckbox(pfr);
-        gd.addDialogListener(this);
-        gd.showDialog();
-
-        if (gd.wasCanceled() || !dialogItemChanged(gd, null))
-            return DONE;
-
-        return IJ.setupDialog(imp, flags);
+    final Roi roi = imp.getRoi();
+    if (roi != null && roi.getType() != Roi.RECTANGLE) {
+      IJ.error("Rectangular ROI required");
+      return DONE;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
-    {
-        filter1 = gd.getNextChoiceIndex();
-        smooth1 = gd.getNextNumber();
-        differenceFilter = gd.getNextBoolean();
-        if (differenceFilter)
-        {
-            filter2 = gd.getNextChoiceIndex();
-            smooth2 = gd.getNextNumber();
-        }
-        return !gd.invalidNumber();
+    return flags;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
+    // Note: We cannot use a NonBlockinnericDialog as scrolling through the image
+    // throws away the snap shot. The pixel data for the previous slice is then fixed
+    // with the preview. So we can only support a single slice.
+
+    final GenericDialog gd = new GenericDialog(TITLE);
+    gd.addHelp(About.HELP_URL);
+
+    gd.addMessage("Smooth image:");
+    gd.addChoice("Spot_filter", filterNames, filterNames[filter1]);
+    gd.addSlider("Smoothing", 0, 4.5, smooth1);
+    gd.addCheckbox("Difference_filter", differenceFilter);
+    gd.addChoice("Spot_filter2", filterNames, filterNames[filter2]);
+    gd.addSlider("Smoothing2", 1.5, 6, smooth2);
+
+    gd.addPreviewCheckbox(pfr);
+    gd.addDialogListener(this);
+    gd.showDialog();
+
+    if (gd.wasCanceled() || !dialogItemChanged(gd, null)) {
+      return DONE;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void run(ImageProcessor ip)
-    {
-        final Rectangle bounds = ip.getRoi();
+    return IJ.setupDialog(imp, flags);
+  }
 
-        // Crop to the ROI
-        FloatProcessor fp = ip.crop().toFloat(0, null);
-
-        float[] data = (float[]) fp.getPixels();
-
-        final MaximaSpotFilter filter = createSpotFilter();
-        final int width = fp.getWidth();
-        final int height = fp.getHeight();
-        data = filter.preprocessData(data, width, height);
-
-        //System.out.println(filter.getDescription());
-
-        fp = new FloatProcessor(width, height, data);
-        ip.insert(fp, bounds.x, bounds.y);
-        //ip.resetMinAndMax();
-        ip.setMinAndMax(fp.getMin(), fp.getMax());
+  /** {@inheritDoc} */
+  @Override
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    filter1 = gd.getNextChoiceIndex();
+    smooth1 = gd.getNextNumber();
+    differenceFilter = gd.getNextBoolean();
+    if (differenceFilter) {
+      filter2 = gd.getNextChoiceIndex();
+      smooth2 = gd.getNextNumber();
     }
+    return !gd.invalidNumber();
+  }
 
-    private static MaximaSpotFilter createSpotFilter()
-    {
-        final int search = 1;
-        final int border = 0;
-        final DataProcessor processor0 = FitEngineConfiguration.createDataProcessor(border, filters[filter1], smooth1);
-        if (differenceFilter)
-        {
-            final DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border, filters[filter2],
-                    smooth2);
-            return new DifferenceSpotFilter(search, border, processor0, processor1);
-        }
-        return new SingleSpotFilter(search, border, processor0);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void run(ImageProcessor ip) {
+    final Rectangle bounds = ip.getRoi();
 
-    /** {@inheritDoc} */
-    @Override
-    public void setNPasses(int nPasses)
-    {
-        // Nothing to do
+    // Crop to the ROI
+    FloatProcessor fp = ip.crop().toFloat(0, null);
+
+    float[] data = (float[]) fp.getPixels();
+
+    final MaximaSpotFilter filter = createSpotFilter();
+    final int width = fp.getWidth();
+    final int height = fp.getHeight();
+    data = filter.preprocessData(data, width, height);
+
+    // System.out.println(filter.getDescription());
+
+    fp = new FloatProcessor(width, height, data);
+    ip.insert(fp, bounds.x, bounds.y);
+    // ip.resetMinAndMax();
+    ip.setMinAndMax(fp.getMin(), fp.getMax());
+  }
+
+  private static MaximaSpotFilter createSpotFilter() {
+    final int search = 1;
+    final int border = 0;
+    final DataProcessor processor0 =
+        FitEngineConfiguration.createDataProcessor(border, filters[filter1], smooth1);
+    if (differenceFilter) {
+      final DataProcessor processor1 =
+          FitEngineConfiguration.createDataProcessor(border, filters[filter2], smooth2);
+      return new DifferenceSpotFilter(search, border, processor0, processor1);
     }
+    return new SingleSpotFilter(search, border, processor0);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setNPasses(int nPasses) {
+    // Nothing to do
+  }
 }

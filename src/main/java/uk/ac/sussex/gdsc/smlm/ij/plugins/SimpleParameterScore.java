@@ -29,56 +29,56 @@ import uk.ac.sussex.gdsc.smlm.results.filter.FilterScore;
 /**
  * Store the filter score used in benchmarking.
  */
-public class SimpleParameterScore extends FilterScore
-{
-    /** The result. */
-    final ParameterScoreResult r;
+public class SimpleParameterScore extends FilterScore {
+  /** The result. */
+  final ParameterScoreResult r;
 
-    /**
-     * Instantiates a new simple parameter score.
-     *
-     * @param filter
-     *            the filter
-     * @param r
-     *            the result
-     * @param criteriaPassed
-     *            the criteria passed
-     */
-    public SimpleParameterScore(DirectFilter filter, ParameterScoreResult r, boolean criteriaPassed)
-    {
-        super(filter, r.score, r.criteria, true, criteriaPassed);
-        this.r = r;
+  /**
+   * Instantiates a new simple parameter score.
+   *
+   * @param filter the filter
+   * @param r the result
+   * @param criteriaPassed the criteria passed
+   */
+  public SimpleParameterScore(DirectFilter filter, ParameterScoreResult r, boolean criteriaPassed) {
+    super(filter, r.score, r.criteria, true, criteriaPassed);
+    this.r = r;
+  }
+
+  @Override
+  protected int compareParameters(FilterScore that) {
+    // Compare the parameters and return the strongest, those most likely to restrict the output
+
+    // 0 = failCount
+    // 1 = residudalsThreshold
+    // 2 = duplicateDistance
+    final double[] p1 = this.r.parameters;
+    final double[] p2 = ((SimpleParameterScore) that).r.parameters;
+
+    // Lowest fail count
+    if (p1[0] < p2[0]) {
+      return -1;
+    }
+    if (p1[0] > p2[0]) {
+      return 1;
     }
 
-    @Override
-    protected int compareParameters(FilterScore that)
-    {
-        // Compare the parameters and return the strongest, those most likely to restrict the output
-
-        // 0 = failCount
-        // 1 = residudalsThreshold
-        // 2 = duplicateDistance
-        final double[] p1 = this.r.parameters;
-        final double[] p2 = ((SimpleParameterScore) that).r.parameters;
-
-        // Lowest fail count
-        if (p1[0] < p2[0])
-            return -1;
-        if (p1[0] > p2[0])
-            return 1;
-
-        // Lowest duplicate distance
-        if (p1[2] < p2[2])
-            return -1;
-        if (p1[2] > p2[2])
-            return 1;
-
-        // Highest residuals threshold
-        if (p1[2] > p2[2])
-            return -1;
-        if (p1[2] < p2[2])
-            return 1;
-
-        return 0;
+    // Lowest duplicate distance
+    if (p1[2] < p2[2]) {
+      return -1;
     }
+    if (p1[2] > p2[2]) {
+      return 1;
+    }
+
+    // Highest residuals threshold
+    if (p1[2] > p2[2]) {
+      return -1;
+    }
+    if (p1[2] < p2[2]) {
+      return 1;
+    }
+
+    return 0;
+  }
 }

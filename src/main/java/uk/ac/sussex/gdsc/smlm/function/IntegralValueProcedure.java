@@ -26,32 +26,30 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Class for evaluating the integral (sum) of a function.
  */
-public class IntegralValueProcedure implements ValueProcedure
-{
-    /** The integral (sum) or the values from the last call to {@link #getIntegral(ValueFunction, double[])} */
-    public double integral;
+public class IntegralValueProcedure implements ValueProcedure {
+  /**
+   * The integral (sum) or the values from the last call to
+   * {@link #getIntegral(ValueFunction, double[])}
+   */
+  public double integral;
 
-    /**
-     * Gets the integral.
-     *
-     * @param f
-     *            the function
-     * @param a
-     *            the function coefficients
-     * @return the integral
-     */
-    public double getIntegral(ValueFunction f, double[] a)
-    {
-        integral = 0;
-        f.initialise0(a);
-        f.forEach(this);
-        return integral;
-    }
+  /**
+   * Gets the integral.
+   *
+   * @param f the function
+   * @param a the function coefficients
+   * @return the integral
+   */
+  public double getIntegral(ValueFunction f, double[] a) {
+    integral = 0;
+    f.initialise0(a);
+    f.forEach(this);
+    return integral;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double value)
-    {
-        integral += value;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value) {
+    integral += value;
+  }
 }

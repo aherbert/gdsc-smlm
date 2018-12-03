@@ -22,17 +22,13 @@
  * #L%
  */
 /**
- * Provides interfaces and classes for functions that compute values and gradients.
- * <p>
- * Examples of supported function are:
- * <ul>
- * <li>Fast computation of the <a href="https://en.wikipedia.org/wiki/Error_function">Error function</a>.
- * <li>Poisson probability functions with Fisher information.
- * <li>Poisson-Gaussian probability functions with Fisher information (for CCD/sCMOS cameras).
- * <li>Poisson-Gamma-Gaussian probability functions with Fisher information (for EM-CCD cameras).
- * <li>Fast log computation using tabulated values.
- * <li>Camera noise models (e.g. CCD, EM-CCD).
- * </ul>
+ * Provides interfaces and classes for functions that compute values and gradients. <p> Examples of
+ * supported function are: <ul> <li>Fast computation of the <a
+ * href="https://en.wikipedia.org/wiki/Error_function">Error function</a>. <li>Poisson probability
+ * functions with Fisher information. <li>Poisson-Gaussian probability functions with Fisher
+ * information (for CCD/sCMOS cameras). <li>Poisson-Gamma-Gaussian probability functions with Fisher
+ * information (for EM-CCD cameras). <li>Fast log computation using tabulated values. <li>Camera
+ * noise models (e.g. CCD, EM-CCD). </ul>
  *
  * @since 1.0.0
  */

@@ -23,9 +23,9 @@
  */
 
 /**
- * Provides generated configuration objects using
- * <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol
- * Buffers</a> and helper classes to add functionality.
+ * Provides generated configuration objects using <a
+ * href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a> and
+ * helper classes to add functionality.
  *
  * @since 1.0.0
  * @see <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a>

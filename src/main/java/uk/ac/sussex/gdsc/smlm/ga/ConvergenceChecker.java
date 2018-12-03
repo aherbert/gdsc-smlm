@@ -26,19 +26,15 @@ package uk.ac.sussex.gdsc.smlm.ga;
 /**
  * Defines convergence of a chromosome.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public interface ConvergenceChecker<T extends Comparable<T>>
-{
-    /**
-     * Check if the chromosome has converged.
-     *
-     * @param previous
-     *            the previous
-     * @param current
-     *            the current
-     * @return true if the chromosome has converged
-     */
-    public boolean converged(Chromosome<T> previous, Chromosome<T> current);
+public interface ConvergenceChecker<T extends Comparable<T>> {
+  /**
+   * Check if the chromosome has converged.
+   *
+   * @param previous the previous
+   * @param current the current
+   * @return true if the chromosome has converged
+   */
+  public boolean converged(Chromosome<T> previous, Chromosome<T> current);
 }

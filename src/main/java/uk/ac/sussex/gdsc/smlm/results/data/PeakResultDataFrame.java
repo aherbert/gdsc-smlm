@@ -28,19 +28,16 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the frame from a result.
  */
-public class PeakResultDataFrame extends PeakResultDataInteger
-{
-    /** {@inheritDoc} */
-    @Override
-    public Integer getValue(PeakResult result)
-    {
-        return result.getFrame();
-    }
+public class PeakResultDataFrame extends PeakResultDataInteger {
+  /** {@inheritDoc} */
+  @Override
+  public Integer getValue(PeakResult result) {
+    return result.getFrame();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return "Frame";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return "Frame";
+  }
 }

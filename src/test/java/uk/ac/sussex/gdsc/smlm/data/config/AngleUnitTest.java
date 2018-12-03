@@ -29,37 +29,33 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "unchecked", "javadoc" })
-public class AngleUnitTest
-{
-    @Test
-    public void canConvert()
-    {
-        final double degToRad = Math.PI / 180.0;
-        for (int a = -360; a <= 360; a++)
-            //@formatter:off
-    		check(
-    			new ExpectedUnit<>(AngleUnit.DEGREE, a),
-    			new ExpectedUnit<>(AngleUnit.RADIAN, a * degToRad)
-    			);
-    		//@formatter:on
+@SuppressWarnings({"unchecked", "javadoc"})
+public class AngleUnitTest {
+  @Test
+  public void canConvert() {
+    final double degToRad = Math.PI / 180.0;
+    for (int a = -360; a <= 360; a++) {
+      //@formatter:off
+      check(
+        new ExpectedUnit<>(AngleUnit.DEGREE, a),
+        new ExpectedUnit<>(AngleUnit.RADIAN, a * degToRad)
+      );
+      //@formatter:on
     }
+  }
 
-    private static void check(ExpectedUnit<AngleUnit>... expectedUnits)
-    {
-        final int n = expectedUnits.length;
-        TypeConverter<AngleUnit> c;
-        for (int i = 0; i < n; i++)
-        {
-            final AngleUnit u1 = expectedUnits[i].u;
-            final double v1 = expectedUnits[i].value;
-            for (int j = 0; j < n; j++)
-            {
-                final AngleUnit u2 = expectedUnits[j].u;
-                c = UnitConverterFactory.createConverter(u1, u2);
-                final double o = c.convert(v1);
-                Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
-            }
-        }
+  private static void check(ExpectedUnit<AngleUnit>... expectedUnits) {
+    final int n = expectedUnits.length;
+    TypeConverter<AngleUnit> c;
+    for (int i = 0; i < n; i++) {
+      final AngleUnit u1 = expectedUnits[i].u;
+      final double v1 = expectedUnits[i].value;
+      for (int j = 0; j < n; j++) {
+        final AngleUnit u2 = expectedUnits[j].u;
+        c = UnitConverterFactory.createConverter(u1, u2);
+        final double o = c.convert(v1);
+        Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
+      }
     }
+  }
 }

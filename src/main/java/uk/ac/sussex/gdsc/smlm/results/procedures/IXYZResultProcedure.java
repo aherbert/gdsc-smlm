@@ -26,19 +26,14 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface IXYZResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param intensity
-     *            the intensity
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     * @param z
-     *            the z
-     */
-    public void executeIXYZ(float intensity, float x, float y, float z);
+public interface IXYZResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param intensity the intensity
+   * @param x the x
+   * @param y the y
+   * @param z the z
+   */
+  public void executeIXYZ(float intensity, float x, float y, float z);
 }

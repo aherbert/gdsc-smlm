@@ -26,112 +26,106 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
- * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
- * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
- * This is used within the Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
- * set of data points (x, y).
- * <p>
- * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
- * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
+ * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a
+ * function) and the scaled gradient vector of the function's partial first derivatives with respect
+ * to the parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model
+ * with coefficients (a) for a set of data points (x, y). <p> Note that the Hessian matrix is scaled
+ * by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving the non-linear model.
+ * See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
-public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure
-{
-    /**
-     * The scaled Hessian curvature matrix (size n*n)
-     */
-    public final double[] alpha;
+public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure {
+  /**
+   * The scaled Hessian curvature matrix (size n*n)
+   */
+  public final double[] alpha;
 
-    /**
-     * @param y
-     *            Data to fit
-     * @param b
-     *            Baseline pre-computed y-values
-     * @param func
-     *            Gradient function
-     */
-    public LSQLVMGradientProcedureLinear(final double[] y, final double[] b, final Gradient1Function func)
-    {
-        super(y, b, func);
-        alpha = new double[n * n];
+  /**
+   * @param y Data to fit
+   * @param b Baseline pre-computed y-values
+   * @param func Gradient function
+   */
+  public LSQLVMGradientProcedureLinear(final double[] y, final double[] b,
+      final Gradient1Function func) {
+    super(y, b, func);
+    alpha = new double[n * n];
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value, double[] dy_da) {
+    final double dy = y[++yi] - value;
+
+    // Compute:
+    // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
+    // function;
+    // that is, it describes the local curvature of a function of many variables.)
+    // - the scaled gradient vector of the function's partial first derivatives with respect to the
+    // parameters
+
+    for (int i = 0, index = 0; i < n; i++, index += i) {
+      final double wgt = dy_da[i];
+      for (int k = i; k < n; k++) {
+        // System.out.printf("alpha[%d] += dy_da[%d] * dy_da[%d];\n", index, i, k);
+        alpha[index++] += wgt * dy_da[k];
+      }
+      beta[i] += wgt * dy;
     }
+    // if (true) throw new RuntimeException();
 
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double value, double[] dy_da)
-    {
-        final double dy = y[++yi] - value;
+    this.value += dy * dy;
+  }
 
-        // Compute:
-        // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
-        //   that is, it describes the local curvature of a function of many variables.)
-        // - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
+  @Override
+  protected void initialiseGradient() {
+    for (int i = 0, index = 0; i < n; i++, index += i) {
+      beta[i] = 0;
+      for (int k = i; k < n; k++) {
+        // System.out.printf("alpha[%d] = 0;\n", index);
+        alpha[index++] = 0;
+      }
+    }
+    // if (true) throw new RuntimeException();
+  }
 
-        for (int i = 0, index = 0; i < n; i++, index += i)
-        {
-            final double wgt = dy_da[i];
-            for (int k = i; k < n; k++)
-                //System.out.printf("alpha[%d] += dy_da[%d] * dy_da[%d];\n", index, i, k);
-                alpha[index++] += wgt * dy_da[k];
-            beta[i] += wgt * dy;
+  @Override
+  protected void finishGradient() {
+    // Generate symmetric matrix
+    // Adapted from org.ejml.alg.dense.misc.TransposeAlgs.square()
+    for (int i = 0, index = 1; i < n; i++, index += i + 1) {
+      for (int k = i + 1, indexOther = (i + 1) * n + i; k < n; k++, index++, indexOther += n) {
+        // System.out.printf("alpha[%d] = alpha[%d];\n", indexOther, index);
+        alpha[indexOther] = alpha[index];
+      }
+    }
+  }
+
+  @Override
+  protected boolean checkGradients() {
+    for (int i = 0, index = 0; i < n; i++, index += i) {
+      if (Double.isNaN(beta[i])) {
+        return true;
+      }
+      for (int k = i; k < n; k++) {
+        if (Double.isNaN(alpha[index++])) {
+          return true;
         }
-        //if (true) throw new RuntimeException();
-
-        this.value += dy * dy;
+      }
     }
+    return false;
+  }
 
-    @Override
-    protected void initialiseGradient()
-    {
-        for (int i = 0, index = 0; i < n; i++, index += i)
-        {
-            beta[i] = 0;
-            for (int k = i; k < n; k++)
-                //System.out.printf("alpha[%d] = 0;\n", index);
-                alpha[index++] = 0;
-        }
-        //if (true) throw new RuntimeException();
-    }
+  @Override
+  public void getAlphaMatrix(double[][] alpha) {
+    toMatrix(this.alpha, alpha);
+  }
 
-    @Override
-    protected void finishGradient()
-    {
-        // Generate symmetric matrix
-        // Adapted from org.ejml.alg.dense.misc.TransposeAlgs.square()
-        for (int i = 0, index = 1; i < n; i++, index += i + 1)
-            for (int k = i + 1, indexOther = (i + 1) * n + i; k < n; k++, index++, indexOther += n)
-                //System.out.printf("alpha[%d] = alpha[%d];\n", indexOther, index);
-                alpha[indexOther] = alpha[index];
-    }
+  @Override
+  public double[] getAlphaLinear() {
+    return alpha;
+  }
 
-    @Override
-    protected boolean checkGradients()
-    {
-        for (int i = 0, index = 0; i < n; i++, index += i)
-        {
-            if (Double.isNaN(beta[i]))
-                return true;
-            for (int k = i; k < n; k++)
-                if (Double.isNaN(alpha[index++]))
-                    return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void getAlphaMatrix(double[][] alpha)
-    {
-        toMatrix(this.alpha, alpha);
-    }
-
-    @Override
-    public double[] getAlphaLinear()
-    {
-        return alpha;
-    }
-
-    @Override
-    public void getAlphaLinear(double[] alpha)
-    {
-        System.arraycopy(this.alpha, 0, alpha, 0, alpha.length);
-    }
+  @Override
+  public void getAlphaLinear(double[] alpha) {
+    System.arraycopy(this.alpha, 0, alpha, 0, alpha.length);
+  }
 }

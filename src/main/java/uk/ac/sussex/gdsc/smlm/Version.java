@@ -42,20 +42,23 @@ public class Version {
   private static String buildNumber = null;
 
   static {
-    Manifest manifest = loadManifest(Version.class);
+    final Manifest manifest = loadManifest(Version.class);
     if (manifest != null) {
-      Attributes attributes = manifest.getMainAttributes();
+      final Attributes attributes = manifest.getMainAttributes();
       version = attributes.getValue("Specification-Version");
       buildDate = attributes.getValue("Implementation-Date");
       buildNumber = attributes.getValue("Implementation-Build");
     }
 
-    if (version == null)
+    if (version == null) {
       version = UNKNOWN;
-    if (buildDate == null)
+    }
+    if (buildDate == null) {
       buildDate = UNKNOWN;
-    if (buildNumber == null)
+    }
+    if (buildNumber == null) {
       buildNumber = UNKNOWN;
+    }
   }
 
   /**
@@ -107,8 +110,9 @@ public class Version {
   public static int getMajorVersion() {
     final Pattern p = Pattern.compile("^\\d+");
     final Matcher m = p.matcher(version);
-    if (m.find())
+    if (m.find()) {
       return Integer.parseInt(m.group());
+    }
     return 0;
   }
 
@@ -120,8 +124,9 @@ public class Version {
   public static int getMinorVersion() {
     final Pattern p = Pattern.compile("^\\d+\\.(\\d+)");
     final Matcher m = p.matcher(version);
-    if (m.find())
+    if (m.find()) {
       return Integer.parseInt(m.group(1));
+    }
     return 0;
   }
 
@@ -133,8 +138,9 @@ public class Version {
   public static int getPatchVersion() {
     final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
     final Matcher m = p.matcher(version);
-    if (m.find())
+    if (m.find()) {
       return Integer.parseInt(m.group(1));
+    }
     return 0;
   }
 
@@ -146,8 +152,9 @@ public class Version {
   public static String getMajorMinorPatch() {
     final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
     final Matcher m = p.matcher(version);
-    if (m.find())
+    if (m.find()) {
       return m.group();
+    }
     return "";
   }
 
@@ -160,19 +167,19 @@ public class Version {
    * @return the manifest (or null)
    */
   public static Manifest loadManifest(Class<?> clazz) {
-    String resource = "/" + clazz.getName().replace(".", "/") + ".class";
-    String classPath = clazz.getResource(resource).toString();
+    final String resource = "/" + clazz.getName().replace(".", "/") + ".class";
+    final String classPath = clazz.getResource(resource).toString();
     if (!classPath.startsWith("jar")) {
       // Class not from JAR
       return null;
     }
-    String manifestPath =
+    final String manifestPath =
         classPath.substring(0, classPath.lastIndexOf('!') + 1) + "/META-INF/MANIFEST.MF";
     try {
       try (InputStream in = new URL(manifestPath).openStream()) {
         return new Manifest(in);
       }
-    } catch (IOException e) {
+    } catch (final IOException e) {
       // Ignore this
     }
     return null;

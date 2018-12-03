@@ -48,221 +48,215 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 /**
- * Contains speed tests for the methods for calculating the Hessian and gradient vector
- * for use in the LVM algorithm.
+ * Contains speed tests for the methods for calculating the Hessian and gradient vector for use in
+ * the LVM algorithm.
  */
-@SuppressWarnings({ "javadoc" })
-public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2ProcedureTest
-{
-    // Skip super-class tests ...
-    @Override
-    @Test
-    public void gradientProcedureFactoryCreatesOptimisedProcedures()
-    {
-        Assumptions.assumeTrue(false);
+@SuppressWarnings({"javadoc"})
+public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2ProcedureTest {
+  // Skip super-class tests ...
+  @Override
+  @Test
+  public void gradientProcedureFactoryCreatesOptimisedProcedures() {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SeededTest
+  public void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SpeedTag
+  @SeededTest
+  public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SeededTest
+  public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SeededTest
+  public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SpeedTag
+  @SeededTest
+  public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @SeededTest
+  public void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed) {
+    // Test the base functionality of computing the partial derivatives is the same
+    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
+    gradientProcedureComputesSameAsBaseGradientProcedure(seed, 4, equality);
+    gradientProcedureComputesSameAsBaseGradientProcedure(seed, 5, equality);
+    gradientProcedureComputesSameAsBaseGradientProcedure(seed, 6, equality);
+    gradientProcedureComputesSameAsBaseGradientProcedure(seed, 11, equality);
+    gradientProcedureComputesSameAsBaseGradientProcedure(seed, 21, equality);
+  }
+
+  private void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed, int nparams,
+      DoubleDoubleBiPredicate equality) {
+    final int iter = 10;
+
+    final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+    final ArrayList<double[]> yList = new ArrayList<>(iter);
+
+    createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+    final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+
+    for (int i = 0; i < paramsList.size(); i++) {
+      final FastMLEGradient2Procedure p =
+          FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+      final FastMLEJacobianGradient2Procedure p2 =
+          new FastMLEJacobianGradient2Procedure(yList.get(i), func);
+      p.computeSecondDerivative(paramsList.get(i));
+      p2.computeSecondDerivative(paramsList.get(i));
+      // Virtually the same ...
+      TestAssertions.assertArrayTest(p.d1, p2.d1, equality);
+      TestAssertions.assertArrayTest(p.d2, p2.d2, equality);
     }
+  }
 
-    @Override
-    @SeededTest
-    public void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(RandomSeed seed)
-    {
-        Assumptions.assumeTrue(false);
-    }
+  @Override
+  @SeededTest
+  public void gradientCalculatorComputesGradient(RandomSeed seed) {
+    gradientCalculatorComputesGradient(seed, 1,
+        new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
+    gradientCalculatorComputesGradient(seed, 2,
+        new MultiFreeCircularErfGaussian2DFunction(2, blockWidth, blockWidth));
 
-    @Override
-    @SpeedTag
-    @SeededTest
-    public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed)
-    {
-        Assumptions.assumeTrue(false);
-    }
+    // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
+    final double sx = 1.08;
+    final double sy = 1.01;
+    final double gamma = 0.389;
+    final double d = 0.531;
+    final double Ax = -0.0708;
+    final double Bx = -0.073;
+    final double Ay = 0.164;
+    final double By = 0.0417;
+    final HoltzerAstigmatismZModel zModel =
+        HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 
-    @Override
-    @SeededTest
-    public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed)
-    {
-        Assumptions.assumeTrue(false);
-    }
+    gradientCalculatorComputesGradient(seed, 1,
+        new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
+  }
 
-    @Override
-    @SeededTest
-    public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed)
-    {
-        Assumptions.assumeTrue(false);
-    }
+  private void gradientCalculatorComputesGradient(RandomSeed seed, int nPeaks,
+      ErfGaussian2DFunction func) {
+    // Check the first and second derivatives
+    final int nparams = func.getNumberOfGradients();
+    final int[] indices = func.gradientIndices();
 
-    @Override
-    @SpeedTag
-    @SeededTest
-    public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed)
-    {
-        Assumptions.assumeTrue(false);
-    }
+    final int iter = 100;
 
-    @SeededTest
-    public void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed)
-    {
-        // Test the base functionality of computing the partial derivatives is the same
-        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 4, equality);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 5, equality);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 6, equality);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 11, equality);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 21, equality);
-    }
+    final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+    final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    private void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed, int nparams, DoubleDoubleBiPredicate equality)
-    {
-        final int iter = 10;
+    createData(RngUtils.create(seed.getSeedAsLong()), nPeaks, iter, paramsList, yList, true);
 
-        final ArrayList<double[]> paramsList = new ArrayList<>(iter);
-        final ArrayList<double[]> yList = new ArrayList<>(iter);
+    // for the gradients
+    final double delta = 1e-4;
+    final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
 
-        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
-        final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
+    // Must compute most of the time
+    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+    // failureLimit = 0;
+    final TestCounter failCounter = new TestCounter(failureLimit, 2 * nparams);
+    final TestCounter failCounter2 = new TestCounter(failureLimit, nparams * nparams);
 
-        for (int i = 0; i < paramsList.size(); i++)
-        {
-            final FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
-            final FastMLEJacobianGradient2Procedure p2 = new FastMLEJacobianGradient2Procedure(yList.get(i), func);
-            p.computeSecondDerivative(paramsList.get(i));
-            p2.computeSecondDerivative(paramsList.get(i));
-            // Virtually the same ...
-            TestAssertions.assertArrayTest(p.d1, p2.d1, equality);
-            TestAssertions.assertArrayTest(p.d2, p2.d2, equality);
+    for (int i = 0; i < paramsList.size(); i++) {
+      final int ii = i;
+      final double[] y = yList.get(i);
+      final double[] a = paramsList.get(i);
+      final double[] a2 = a.clone();
+      final FastMLEJacobianGradient2Procedure p = new FastMLEJacobianGradient2Procedure(y, func);
+      // double ll = p.computeLogLikelihood(a);
+      p.computeJacobian(a);
+      final double[] d1 = p.d1.clone();
+      final double[] d2 = p.d2.clone();
+      final DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.getJacobianLinear());
+      for (int j = 0; j < nparams; j++) {
+        final int j_ = j;
+        final int k = indices[j];
+        final double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
+        a2[k] = a[k] + d;
+        final double llh = p.computeLogLikelihood(a2);
+        p.computeFirstDerivative(a2);
+        double[] d1h = p.d1.clone();
+        a2[k] = a[k] - d;
+        final double lll = p.computeLogLikelihood(a2);
+        p.computeFirstDerivative(a2);
+        double[] d1l = p.d1.clone();
+        a2[k] = a[k];
+
+        final double gradient1 = (llh - lll) / (2 * d);
+        final double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
+        // logger.fine(FunctionUtils.getSupplier("[%d,%d] ll - %f (%s %f+/-%f) d1 %f ?= %f : d2 %f
+        // ?= %f", i, k, ll, func.getName(k), a[k], d,
+        // gradient1, d1[j], gradient2, d2[j]);
+        failCounter.run(j, () -> {
+          return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
+        }, () -> {
+          Assertions.fail(() -> String.format("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii,
+              j_, gradient1, d1[j_], DoubleEquality.relativeError(gradient1, d1[j_])));
+        });
+        failCounter.run(nparams + j, () -> {
+          return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
+        }, () -> {
+          Assertions.fail(() -> String.format("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii,
+              j_, gradient2, d2[j_], DoubleEquality.relativeError(gradient2, d2[j_])));
+        });
+
+        // Test the Jacobian ...
+
+        for (int jj = 0; jj < nparams; jj++) {
+          if (j == jj) {
+            // This is done above
+            // Check it anyway to ensure the Jacobian is correct
+            // continue;
+          }
+
+          final int jj_ = jj;
+          final int kk = indices[jj];
+          final double dd =
+              Precision.representableDelta(a[kk], (a[kk] == 0) ? delta : a[kk] * delta);
+          a2[kk] = a[kk] + dd;
+          p.computeFirstDerivative(a2);
+          d1h = p.d1.clone();
+          a2[kk] = a[kk] - dd;
+          p.computeFirstDerivative(a2);
+          d1l = p.d1.clone();
+          a2[kk] = a[kk];
+
+          // Use index j even though we adjusted index jj
+          final double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
+          final boolean ok = eq.almostEqualRelativeOrAbsolute(gradient3, J.get(j, jj));
+          // logger.fine(FunctionUtils.getSupplier("[%d,%d,%d] (%s %f %s %f+/-%f) J %f ?= %f %b", i,
+          // k, kk, func.getName(k),
+          // a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);
+          // if (!ok)
+          // {
+          // ExtraAssertions.fail("Not same gradientJ @ [%d,%d]", j, jj);
+          // }
+          failCounter2.run(nparams * j_ + jj_, () -> {
+            return ok;
+          }, () -> {
+            Assertions
+                .fail(() -> String.format("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)",
+                    ii, j_, jj_, gradient3, J.get(j_, jj_),
+                    DoubleEquality.relativeError(gradient3, J.get(j_, jj_))));
+          });
         }
+      }
     }
-
-    @Override
-    @SeededTest
-    public void gradientCalculatorComputesGradient(RandomSeed seed)
-    {
-        gradientCalculatorComputesGradient(seed, 1,
-                new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
-        gradientCalculatorComputesGradient(seed, 2,
-                new MultiFreeCircularErfGaussian2DFunction(2, blockWidth, blockWidth));
-
-        // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
-        final double sx = 1.08;
-        final double sy = 1.01;
-        final double gamma = 0.389;
-        final double d = 0.531;
-        final double Ax = -0.0708;
-        final double Bx = -0.073;
-        final double Ay = 0.164;
-        final double By = 0.0417;
-        final HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
-
-        gradientCalculatorComputesGradient(seed, 1,
-                new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
-    }
-
-    private void gradientCalculatorComputesGradient(RandomSeed seed, int nPeaks, ErfGaussian2DFunction func)
-    {
-        // Check the first and second derivatives
-        final int nparams = func.getNumberOfGradients();
-        final int[] indices = func.gradientIndices();
-
-        final int iter = 100;
-
-        final ArrayList<double[]> paramsList = new ArrayList<>(iter);
-        final ArrayList<double[]> yList = new ArrayList<>(iter);
-
-        createData(RngUtils.create(seed.getSeedAsLong()), nPeaks, iter, paramsList, yList, true);
-
-        // for the gradients
-        final double delta = 1e-4;
-        final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
-
-        // Must compute most of the time
-        final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-        //failureLimit = 0;
-        final TestCounter failCounter = new TestCounter(failureLimit, 2 * nparams);
-        final TestCounter failCounter2 = new TestCounter(failureLimit, nparams * nparams);
-
-        for (int i = 0; i < paramsList.size(); i++)
-        {
-            final int ii = i;
-            final double[] y = yList.get(i);
-            final double[] a = paramsList.get(i);
-            final double[] a2 = a.clone();
-            final FastMLEJacobianGradient2Procedure p = new FastMLEJacobianGradient2Procedure(y, func);
-            //double ll = p.computeLogLikelihood(a);
-            p.computeJacobian(a);
-            final double[] d1 = p.d1.clone();
-            final double[] d2 = p.d2.clone();
-            final DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.getJacobianLinear());
-            for (int j = 0; j < nparams; j++)
-            {
-                final int j_ = j;
-                final int k = indices[j];
-                final double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
-                a2[k] = a[k] + d;
-                final double llh = p.computeLogLikelihood(a2);
-                p.computeFirstDerivative(a2);
-                double[] d1h = p.d1.clone();
-                a2[k] = a[k] - d;
-                final double lll = p.computeLogLikelihood(a2);
-                p.computeFirstDerivative(a2);
-                double[] d1l = p.d1.clone();
-                a2[k] = a[k];
-
-                final double gradient1 = (llh - lll) / (2 * d);
-                final double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
-                //logger.fine(FunctionUtils.getSupplier("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f", i, k, ll, func.getName(k), a[k], d,
-                //		gradient1, d1[j], gradient2, d2[j]);
-                failCounter.run(j, () -> {
-                    return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
-                }, () -> {
-                    Assertions.fail(() -> String.format("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
-                            DoubleEquality.relativeError(gradient1, d1[j_])));
-                });
-                failCounter.run(nparams + j, () -> {
-                    return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
-                }, () -> {
-                    Assertions.fail(() -> String.format("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
-                            DoubleEquality.relativeError(gradient2, d2[j_])));
-                });
-
-                // Test the Jacobian ...
-
-                for (int jj = 0; jj < nparams; jj++)
-                {
-                    if (j == jj)
-                    {
-                        // This is done above
-                        // Check it anyway to ensure the Jacobian is correct
-                        //continue;
-                    }
-
-                    final int jj_ = jj;
-                    final int kk = indices[jj];
-                    final double dd = Precision.representableDelta(a[kk], (a[kk] == 0) ? delta : a[kk] * delta);
-                    a2[kk] = a[kk] + dd;
-                    p.computeFirstDerivative(a2);
-                    d1h = p.d1.clone();
-                    a2[kk] = a[kk] - dd;
-                    p.computeFirstDerivative(a2);
-                    d1l = p.d1.clone();
-                    a2[kk] = a[kk];
-
-                    // Use index j even though we adjusted index jj
-                    final double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
-                    final boolean ok = eq.almostEqualRelativeOrAbsolute(gradient3, J.get(j, jj));
-                    //logger.fine(FunctionUtils.getSupplier("[%d,%d,%d] (%s %f  %s %f+/-%f) J %f ?= %f  %b", i, k, kk, func.getName(k),
-                    //		a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);
-                    //if (!ok)
-                    //{
-                    //	ExtraAssertions.fail("Not same gradientJ @ [%d,%d]", j, jj);
-                    //}
-                    failCounter2.run(nparams * j_ + jj_, () -> {
-                        return ok;
-                    }, () -> {
-                        Assertions.fail(() -> String.format("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)", ii, j_, jj_,
-                                gradient3, J.get(j_, jj_), DoubleEquality.relativeError(gradient3, J.get(j_, jj_))));
-                    });
-                }
-            }
-        }
-    }
+  }
 }

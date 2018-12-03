@@ -29,53 +29,46 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 /**
  * Contains helper functions for the CalibrationProtos class.
  */
-public class CalibrationProtosHelper
-{
-    /** The default Calibration. */
-    public static final Calibration defaultCalibration;
-    static
-    {
-        final Calibration.Builder builder = Calibration.newBuilder();
-        // Note: Ideally we would set QE to be 1 but this will involve creating a
-        // camera calibration and it is more useful to have the default as null.
-        defaultCalibration = builder.build();
-    }
+public class CalibrationProtosHelper {
+  /** The default Calibration. */
+  public static final Calibration defaultCalibration;
+  static {
+    final Calibration.Builder builder = Calibration.newBuilder();
+    // Note: Ideally we would set QE to be 1 but this will involve creating a
+    // camera calibration and it is more useful to have the default as null.
+    defaultCalibration = builder.build();
+  }
 
-    /**
-     * Gets the name.
-     *
-     * @param value
-     *            the value
-     * @return the name
-     */
-    public static String getName(CameraType value)
-    {
-        switch (value)
-        {
-            case CAMERA_TYPE_NA:
-                return "NA";
-            case CCD:
-                return "CCD";
-            case EMCCD:
-                return "EMCCD";
-            case SCMOS:
-                return "sCMOS";
-            case UNRECOGNIZED:
-                return "Unknown";
-            default:
-                throw new IllegalStateException("Unknown name: " + value);
-        }
+  /**
+   * Gets the name.
+   *
+   * @param value the value
+   * @return the name
+   */
+  public static String getName(CameraType value) {
+    switch (value) {
+      case CAMERA_TYPE_NA:
+        return "NA";
+      case CCD:
+        return "CCD";
+      case EMCCD:
+        return "EMCCD";
+      case SCMOS:
+        return "sCMOS";
+      case UNRECOGNIZED:
+        return "Unknown";
+      default:
+        throw new IllegalStateException("Unknown name: " + value);
     }
+  }
 
-    /**
-     * Checks if is CCD camera type.
-     *
-     * @param cameraType
-     *            the camera type
-     * @return true, if is CCD camera type
-     */
-    public static boolean isCCDCameraType(CameraType cameraType)
-    {
-        return cameraType == CameraType.EMCCD || cameraType == CameraType.CCD;
-    }
+  /**
+   * Checks if is CCD camera type.
+   *
+   * @param cameraType the camera type
+   * @return true, if is CCD camera type
+   */
+  public static boolean isCCDCameraType(CameraType cameraType) {
+    return cameraType == CameraType.EMCCD || cameraType == CameraType.CCD;
+  }
 }

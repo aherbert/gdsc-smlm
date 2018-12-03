@@ -30,133 +30,118 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a signal-to-background ratio (SBR) threshold.
- * <p>
- * Requires the bias to be configured at or above zero. If the background is below the configured bias or there is no
- * bias then the filter resorts to a signal-to-noise filter. If there is a background level above the bias then this is
- * assumed to be the variance of the photon shot noise and the noise is taken at the square root of the background
- * level.
+ * Filter results using a signal-to-background ratio (SBR) threshold. <p> Requires the bias to be
+ * configured at or above zero. If the background is below the configured bias or there is no bias
+ * then the filter resorts to a signal-to-noise filter. If there is a background level above the
+ * bias then this is assumed to be the variance of the photon shot noise and the noise is taken at
+ * the square root of the background level.
  */
-public class SBRFilter extends DirectFilter
-{
-    /**
-     * The signal-to-background ratio (SBR).
-     */
-    @XStreamAsAttribute
-    final float sbr;
+public class SBRFilter extends DirectFilter {
+  /**
+   * The signal-to-background ratio (SBR).
+   */
+  @XStreamAsAttribute
+  final float sbr;
 
-    /**
-     * Instantiates a new signal-to-background ratio (SBR) filter.
-     *
-     * @param sbr
-     *            the signal-to-background ratio (SBR)
-     */
-    public SBRFilter(float sbr)
-    {
-        this.sbr = Math.max(0, sbr);
-    }
+  /**
+   * Instantiates a new signal-to-background ratio (SBR) filter.
+   *
+   * @param sbr the signal-to-background ratio (SBR)
+   */
+  public SBRFilter(float sbr) {
+    this.sbr = Math.max(0, sbr);
+  }
 
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        // Do nothing
-    }
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    // Do nothing
+  }
 
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        final double background = peak.getBackground();
-        if (background > 0)
-            return peak.getMeanIntensity() / Math.sqrt(background) >= this.sbr;
-        return peak.getSNR() >= this.sbr;
+  @Override
+  public boolean accept(PeakResult peak) {
+    final double background = peak.getBackground();
+    if (background > 0) {
+      return peak.getMeanIntensity() / Math.sqrt(background) >= this.sbr;
     }
+    return peak.getSNR() >= this.sbr;
+  }
 
-    @Override
-    public int getValidationFlags()
-    {
-        return V_PHOTONS | V_BACKGROUND | V_SNR;
-    }
+  @Override
+  public int getValidationFlags() {
+    return V_PHOTONS | V_BACKGROUND | V_SNR;
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        final double background = peak.getBackground();
-        if (background > 0)
-        {
-            // Get the mean signal assuming the integral / area of 1 SD of the Gaussian
-            if (Gaussian2DPeakResultHelper.getMeanSignalUsingR1(peak.getSignal(), peak.getXSD(), peak.getYSD()) /
-                    Math.sqrt(background) < this.sbr)
-                return V_PHOTONS | V_BACKGROUND;
-            return 0;
-        }
-        if (peak.getSNR() < this.sbr)
-            return V_SNR;
-        return 0;
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    final double background = peak.getBackground();
+    if (background > 0) {
+      // Get the mean signal assuming the integral / area of 1 SD of the Gaussian
+      if (Gaussian2DPeakResultHelper.getMeanSignalUsingR1(peak.getSignal(), peak.getXSD(),
+          peak.getYSD()) / Math.sqrt(background) < this.sbr) {
+        return V_PHOTONS | V_BACKGROUND;
+      }
+      return 0;
     }
+    if (peak.getSNR() < this.sbr) {
+      return V_SNR;
+    }
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        return "Filter results using a lower SBR threshold.";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    return "Filter results using a lower SBR threshold.";
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfParameters()
-    {
-        return 1;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfParameters() {
+    return 1;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected double getParameterValueInternal(int index)
-    {
-        return sbr;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected double getParameterValueInternal(int index) {
+    return sbr;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getParameterIncrement(int index)
-    {
-        checkIndex(index);
-        return SNRFilter.DEFAULT_INCREMENT;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getParameterIncrement(int index) {
+    checkIndex(index);
+    return SNRFilter.DEFAULT_INCREMENT;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public ParameterType getParameterType(int index)
-    {
-        checkIndex(index);
-        return ParameterType.SBR;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public ParameterType getParameterType(int index) {
+    checkIndex(index);
+    return ParameterType.SBR;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter adjustParameter(int index, double delta)
-    {
-        checkIndex(index);
-        return new SBRFilter(updateParameter(sbr, delta, SNRFilter.DEFAULT_RANGE));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter adjustParameter(int index, double delta) {
+    checkIndex(index);
+    return new SBRFilter(updateParameter(sbr, delta, SNRFilter.DEFAULT_RANGE));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter create(double... parameters)
-    {
-        return new SBRFilter((float) parameters[0]);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter create(double... parameters) {
+    return new SBRFilter((float) parameters[0]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void weakestParameters(double[] parameters)
-    {
-        setMin(parameters, 0, sbr);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void weakestParameters(double[] parameters) {
+    setMin(parameters, 0, sbr);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double[] mutationStepRange()
-    {
-        return new double[] { SNRFilter.DEFAULT_RANGE };
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] mutationStepRange() {
+    return new double[] {SNRFilter.DEFAULT_RANGE};
+  }
 }

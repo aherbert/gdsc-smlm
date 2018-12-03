@@ -26,27 +26,25 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 /**
  * Define the type of function solver.
  */
-public enum FunctionSolverType
-{
-    //@formatter:off
-	/** Least Squares Estimator. */
+public enum FunctionSolverType {
+  //@formatter:off
+  /** Least Squares Estimator. */
     LSE{ @Override public String getName() { return "Least Squares Estimator"; }},
     /** Weighted Least Squares Estimator. */
     WLSE{ @Override public String getName() { return "Weighted Least Squares Estimator"; }},
     /** Maximum Likelihood Estimator. */
     MLE{ @Override public String getName() { return "Maximum Likelihood Estimator"; }};
-	//@formatter:on
+  //@formatter:on
 
-    @Override
-    public String toString()
-    {
-        return getName();
-    }
+  @Override
+  public String toString() {
+    return getName();
+  }
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    abstract public String getName();
+  /**
+   * Gets the name.
+   *
+   * @return the name
+   */
+  abstract public String getName();
 }

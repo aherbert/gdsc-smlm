@@ -35,83 +35,82 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "javadoc" })
-public class CalibrationReaderTest
-{
-    double nmPerPixel = 104.5;
-    double gain = 45;
-    double bias = 100;
+@SuppressWarnings({"javadoc"})
+public class CalibrationReaderTest {
+  double nmPerPixel = 104.5;
+  double gain = 45;
+  double bias = 100;
 
-    @Test
-    public void canGetDistanceConverter()
-    {
-        final Calibration.Builder builder = Calibration.newBuilder();
-        final DistanceCalibration.Builder distanceBuilder = builder.getDistanceCalibrationBuilder();
+  @Test
+  public void canGetDistanceConverter() {
+    final Calibration.Builder builder = Calibration.newBuilder();
+    final DistanceCalibration.Builder distanceBuilder = builder.getDistanceCalibrationBuilder();
 
-        distanceBuilder.setNmPerPixel(nmPerPixel);
-        distanceBuilder.setDistanceUnit(DistanceUnit.PIXEL);
+    distanceBuilder.setNmPerPixel(nmPerPixel);
+    distanceBuilder.setDistanceUnit(DistanceUnit.PIXEL);
 
-        final Calibration c = builder.build();
+    final Calibration c = builder.build();
 
-        final CalibrationReader reader = new CalibrationReader(c);
+    final CalibrationReader reader = new CalibrationReader(c);
 
-        final TypeConverter<DistanceUnit> distanceConverter = reader.getDistanceConverter(DistanceUnit.NM);
-        Assertions.assertEquals(distanceConverter.from(), DistanceUnit.PIXEL);
-        Assertions.assertEquals(distanceConverter.to(), DistanceUnit.NM);
+    final TypeConverter<DistanceUnit> distanceConverter =
+        reader.getDistanceConverter(DistanceUnit.NM);
+    Assertions.assertEquals(distanceConverter.from(), DistanceUnit.PIXEL);
+    Assertions.assertEquals(distanceConverter.to(), DistanceUnit.NM);
 
-        final TypeConverter<DistanceUnit> distanceConverter2 = CalibrationHelper.getDistanceConverter(c,
-                DistanceUnit.NM);
-        Assertions.assertEquals(distanceConverter2.from(), DistanceUnit.PIXEL);
-        Assertions.assertEquals(distanceConverter2.to(), DistanceUnit.NM);
+    final TypeConverter<DistanceUnit> distanceConverter2 =
+        CalibrationHelper.getDistanceConverter(c, DistanceUnit.NM);
+    Assertions.assertEquals(distanceConverter2.from(), DistanceUnit.PIXEL);
+    Assertions.assertEquals(distanceConverter2.to(), DistanceUnit.NM);
 
-        Assertions.assertEquals(distanceConverter.getFunction(), distanceConverter2.getFunction());
-    }
+    Assertions.assertEquals(distanceConverter.getFunction(), distanceConverter2.getFunction());
+  }
 
-    @Test
-    public void canGetIntensityConverter()
-    {
-        final Calibration.Builder builder = Calibration.newBuilder();
-        final IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
+  @Test
+  public void canGetIntensityConverter() {
+    final Calibration.Builder builder = Calibration.newBuilder();
+    final IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
 
-        intensityBuilder.setIntensityUnit(IntensityUnit.PHOTON);
-        intensityBuilder.setCountPerPhoton(gain);
+    intensityBuilder.setIntensityUnit(IntensityUnit.PHOTON);
+    intensityBuilder.setCountPerPhoton(gain);
 
-        final Calibration c = builder.build();
+    final Calibration c = builder.build();
 
-        final CalibrationReader reader = new CalibrationReader(c);
+    final CalibrationReader reader = new CalibrationReader(c);
 
-        final TypeConverter<IntensityUnit> intensityConverter = reader.getIntensityConverter(IntensityUnit.COUNT);
-        Assertions.assertEquals(intensityConverter.from(), IntensityUnit.PHOTON);
-        Assertions.assertEquals(intensityConverter.to(), IntensityUnit.COUNT);
+    final TypeConverter<IntensityUnit> intensityConverter =
+        reader.getIntensityConverter(IntensityUnit.COUNT);
+    Assertions.assertEquals(intensityConverter.from(), IntensityUnit.PHOTON);
+    Assertions.assertEquals(intensityConverter.to(), IntensityUnit.COUNT);
 
-        final TypeConverter<IntensityUnit> intensityConverter2 = CalibrationHelper.getIntensityConverter(c,
-                IntensityUnit.COUNT);
-        Assertions.assertEquals(intensityConverter2.from(), IntensityUnit.PHOTON);
-        Assertions.assertEquals(intensityConverter2.to(), IntensityUnit.COUNT);
+    final TypeConverter<IntensityUnit> intensityConverter2 =
+        CalibrationHelper.getIntensityConverter(c, IntensityUnit.COUNT);
+    Assertions.assertEquals(intensityConverter2.from(), IntensityUnit.PHOTON);
+    Assertions.assertEquals(intensityConverter2.to(), IntensityUnit.COUNT);
 
-        Assertions.assertEquals(intensityConverter.getFunction(), intensityConverter2.getFunction());
-    }
+    Assertions.assertEquals(intensityConverter.getFunction(), intensityConverter2.getFunction());
+  }
 
-    @Test
-    public void canGetAngleConverter()
-    {
-        final Calibration.Builder builder = Calibration.newBuilder();
-        final AngleCalibration.Builder psfBuilder = builder.getAngleCalibrationBuilder();
+  @Test
+  public void canGetAngleConverter() {
+    final Calibration.Builder builder = Calibration.newBuilder();
+    final AngleCalibration.Builder psfBuilder = builder.getAngleCalibrationBuilder();
 
-        psfBuilder.setAngleUnit(AngleUnit.RADIAN);
+    psfBuilder.setAngleUnit(AngleUnit.RADIAN);
 
-        final Calibration c = builder.build();
+    final Calibration c = builder.build();
 
-        final CalibrationReader reader = new CalibrationReader(c);
+    final CalibrationReader reader = new CalibrationReader(c);
 
-        final TypeConverter<AngleUnit> angleConverter = reader.getAngleConverter(AngleUnit.DEGREE);
-        Assertions.assertEquals(angleConverter.from(), AngleUnit.RADIAN);
-        Assertions.assertEquals(angleConverter.to(), AngleUnit.DEGREE);
+    final TypeConverter<AngleUnit> angleConverter = reader.getAngleConverter(AngleUnit.DEGREE);
+    Assertions.assertEquals(angleConverter.from(), AngleUnit.RADIAN);
+    Assertions.assertEquals(angleConverter.to(), AngleUnit.DEGREE);
 
-        final TypeConverter<AngleUnit> angleConverter2 = CalibrationHelper.getAngleConverter(c, AngleUnit.DEGREE);
-        Assertions.assertEquals(angleConverter2.from(), AngleUnit.RADIAN);
-        Assertions.assertEquals(angleConverter2.to(), AngleUnit.DEGREE);
+    final TypeConverter<AngleUnit> angleConverter2 =
+        CalibrationHelper.getAngleConverter(c, AngleUnit.DEGREE);
+    Assertions.assertEquals(angleConverter2.from(), AngleUnit.RADIAN);
+    Assertions.assertEquals(angleConverter2.to(), AngleUnit.DEGREE);
 
-        Assertions.assertEquals(angleConverter.getFunction(), angleConverter2.getFunction());
-    }
+    Assertions.assertEquals(angleConverter.getFunction(), angleConverter2.getFunction());
+  }
 }

@@ -33,128 +33,110 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
 /**
  * Specifies a job for peak fitting.
  */
-public class ParameterisedFitJob extends FitJob
-{
-    private final FitParameters parameters;
-    private List<PeakResult> peakResults;
-    private int[] indices = new int[0];
-    private FitResult[] fitResults = null;
-    private MultiPathFitResult[] multiPathResults = null;
+public class ParameterisedFitJob extends FitJob {
+  private final FitParameters parameters;
+  private List<PeakResult> peakResults;
+  private int[] indices = new int[0];
+  private FitResult[] fitResults = null;
+  private MultiPathFitResult[] multiPathResults = null;
 
-    /**
-     * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-     *
-     * @param id
-     *            the id
-     * @param parameters
-     *            the parameters
-     * @param slice
-     *            the slice
-     * @param data
-     *            the data
-     * @param bounds
-     *            the bounds
-     */
-    public ParameterisedFitJob(int id, FitParameters parameters, int slice, float[] data, Rectangle bounds)
-    {
-        super(id, slice, data, bounds);
-        this.parameters = parameters;
-    }
+  /**
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   *
+   * @param id the id
+   * @param parameters the parameters
+   * @param slice the slice
+   * @param data the data
+   * @param bounds the bounds
+   */
+  public ParameterisedFitJob(int id, FitParameters parameters, int slice, float[] data,
+      Rectangle bounds) {
+    super(id, slice, data, bounds);
+    this.parameters = parameters;
+  }
 
-    /**
-     * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-     *
-     * @param parameters
-     *            the parameters
-     * @param slice
-     *            the slice
-     * @param data
-     *            the data
-     * @param bounds
-     *            the bounds
-     */
-    public ParameterisedFitJob(FitParameters parameters, int slice, float[] data, Rectangle bounds)
-    {
-        super(slice, slice, data, bounds);
-        this.parameters = parameters;
-    }
+  /**
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   *
+   * @param parameters the parameters
+   * @param slice the slice
+   * @param data the data
+   * @param bounds the bounds
+   */
+  public ParameterisedFitJob(FitParameters parameters, int slice, float[] data, Rectangle bounds) {
+    super(slice, slice, data, bounds);
+    this.parameters = parameters;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public FitParameters getFitParameters()
-    {
-        return parameters;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public FitParameters getFitParameters() {
+    return parameters;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setResults(List<PeakResult> results)
-    {
-        this.peakResults = results;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setResults(List<PeakResult> results) {
+    this.peakResults = results;
+  }
 
-    /**
-     * @return The results.
-     */
-    public List<PeakResult> getResults()
-    {
-        return peakResults;
-    }
+  /**
+   * @return The results.
+   */
+  public List<PeakResult> getResults() {
+    return peakResults;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setIndices(int[] indices)
-    {
-        this.indices = indices;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setIndices(int[] indices) {
+    this.indices = indices;
+  }
 
-    @Override
-    public void setFitResult(int n, FitResult fitResult)
-    {
-        if (fitResults == null)
-            fitResults = new FitResult[indices.length];
-        if (n < indices.length)
-            fitResults[n] = fitResult;
+  @Override
+  public void setFitResult(int n, FitResult fitResult) {
+    if (fitResults == null) {
+      fitResults = new FitResult[indices.length];
     }
+    if (n < indices.length) {
+      fitResults[n] = fitResult;
+    }
+  }
 
-    @Override
-    public void setMultiPathFitResult(int n, MultiPathFitResult fitResult)
-    {
-        if (multiPathResults == null)
-            multiPathResults = new MultiPathFitResult[indices.length];
-        if (n < indices.length)
-            multiPathResults[n] = fitResult;
+  @Override
+  public void setMultiPathFitResult(int n, MultiPathFitResult fitResult) {
+    if (multiPathResults == null) {
+      multiPathResults = new MultiPathFitResult[indices.length];
     }
+    if (n < indices.length) {
+      multiPathResults[n] = fitResult;
+    }
+  }
 
-    /**
-     * @return The indices of the data that were fitted.
-     */
-    public int[] getIndices()
-    {
-        return indices;
-    }
+  /**
+   * @return The indices of the data that were fitted.
+   */
+  public int[] getIndices() {
+    return indices;
+  }
 
-    /**
-     * The fit result of the specified index in the array of fitted indices.
-     *
-     * @param n
-     *            the index
-     * @return the fit result
-     */
-    public FitResult getFitResult(int n)
-    {
-        return fitResults[n];
-    }
+  /**
+   * The fit result of the specified index in the array of fitted indices.
+   *
+   * @param n the index
+   * @return the fit result
+   */
+  public FitResult getFitResult(int n) {
+    return fitResults[n];
+  }
 
-    /**
-     * The fit result of the specified index in the array of fitted indices.
-     *
-     * @param n
-     *            the index
-     * @return the multi path fit result
-     */
-    public MultiPathFitResult getMultiPathFitResult(int n)
-    {
-        return multiPathResults[n];
-    }
+  /**
+   * The fit result of the specified index in the array of fitted indices.
+   *
+   * @param n the index
+   * @return the multi path fit result
+   */
+  public MultiPathFitResult getMultiPathFitResult(int n) {
+    return multiPathResults[n];
+  }
 }

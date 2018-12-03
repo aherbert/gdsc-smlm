@@ -24,47 +24,42 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
- * Contains a model for an image of fixed lifetime fluorophores. All fluorphores will have the same on time. The
- * activation time will be the incremented by the on-time plus the dark time between fluorophores.
+ * Contains a model for an image of fixed lifetime fluorophores. All fluorphores will have the same
+ * on time. The activation time will be the incremented by the on-time plus the dark time between
+ * fluorophores.
  */
-public class FixedLifetimeImageModel extends ImageModel
-{
-    private double next = 0;
+public class FixedLifetimeImageModel extends ImageModel {
+  private double next = 0;
 
-    /**
-     * Construct a new image model.
-     *
-     * @param tOn
-     *            Fixed on-state time
-     * @param tOff
-     *            Dark time between successive fluorophores
-     */
-    public FixedLifetimeImageModel(double tOn, double tOff)
-    {
-        super(tOn, tOff, 0, 0, 0);
-    }
+  /**
+   * Construct a new image model.
+   *
+   * @param tOn Fixed on-state time
+   * @param tOff Dark time between successive fluorophores
+   */
+  public FixedLifetimeImageModel(double tOn, double tOff) {
+    super(tOn, tOff, 0, 0, 0);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected double createActivationTime(double[] xyz)
-    {
-        final double tAct = next + getRandom().getRandomGenerator().nextDouble();
-        // Ensure at least tOff full dark frames between lifetimes:
-        // Frames:    |      |      |      |
-        //         ------|
-        //              end             |--------
-        //                              start
-        //                     tOff
-        final int unit = (int) Math.ceil(tOff);
-        final int endT = (int) Math.ceil((tAct + tOn) / unit);
-        next = (endT + 1) * unit;
-        return tAct;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected double createActivationTime(double[] xyz) {
+    final double tAct = next + getRandom().getRandomGenerator().nextDouble();
+    // Ensure at least tOff full dark frames between lifetimes:
+    // Frames: | | | |
+    // ------|
+    // end |--------
+    // start
+    // tOff
+    final int unit = (int) Math.ceil(tOff);
+    final int endT = (int) Math.ceil((tAct + tOn) / unit);
+    next = (endT + 1) * unit;
+    return tAct;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
-    {
-        return new SimpleFluorophoreSequenceModel(id, xyz, tAct, tOn);
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct) {
+    return new SimpleFluorophoreSequenceModel(id, xyz, tAct, tOn);
+  }
 }

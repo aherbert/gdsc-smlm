@@ -24,37 +24,32 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Calculate half the Fisher information for a Poisson distribution.
- * This is suitable for modelling an EM-CCD camera (Poisson-Gamma-Gaussian distribution) when the mean is high.
- * <p>
- * <a href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
+ * Calculate half the Fisher information for a Poisson distribution. This is suitable for modelling
+ * an EM-CCD camera (Poisson-Gamma-Gaussian distribution) when the mean is high. <p> <a
+ * href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
-public class HalfPoissonFisherInformation extends BasePoissonFisherInformation
-{
-    /*
-     * {@inheritDoc}
-     * <p>
-     * The input parameter refers to the mean of the Poisson distribution. The Fisher information is 1/(2*mean).
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
-     */
-    @Override
-    public double getFisherInformation(double t)
-    {
-        if (t <= 0)
-            throw new IllegalArgumentException("Poisson mean must be positive");
-        return 0.5 / t;
+public class HalfPoissonFisherInformation extends BasePoissonFisherInformation {
+  /*
+   * {@inheritDoc} <p> The input parameter refers to the mean of the Poisson distribution. The
+   * Fisher information is 1/(2*mean).
+   *
+   * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
+   */
+  @Override
+  public double getFisherInformation(double t) {
+    if (t <= 0) {
+      throw new IllegalArgumentException("Poisson mean must be positive");
     }
+    return 0.5 / t;
+  }
 
-    @Override
-    public double getAlpha(double t)
-    {
-        return 0.5;
-    }
+  @Override
+  public double getAlpha(double t) {
+    return 0.5;
+  }
 
-    @Override
-    protected void postClone()
-    {
-        // Nothing to do.
-    }
+  @Override
+  protected void postClone() {
+    // Nothing to do.
+  }
 }

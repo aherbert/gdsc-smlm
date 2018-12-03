@@ -26,58 +26,53 @@ package uk.ac.sussex.gdsc.smlm.search;
 /**
  * Store the result of scoring a point within a search space. Allows the scores to be compared.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public class SearchResult<T extends Comparable<T>> implements Comparable<SearchResult<T>>
-{
-    private final double[] point;
-    private final T score;
+public class SearchResult<T extends Comparable<T>> implements Comparable<SearchResult<T>> {
+  private final double[] point;
+  private final T score;
 
-    /**
-     * Instantiates a new search result.
-     *
-     * @param point
-     *            the point
-     * @param score
-     *            the score
-     */
-    public SearchResult(double[] point, T score)
-    {
-        if (point == null)
-            throw new IllegalArgumentException("Point is null");
-        if (score == null)
-            throw new IllegalArgumentException("Score is null");
-        this.point = point;
-        this.score = score;
+  /**
+   * Instantiates a new search result.
+   *
+   * @param point the point
+   * @param score the score
+   */
+  public SearchResult(double[] point, T score) {
+    if (point == null) {
+      throw new IllegalArgumentException("Point is null");
     }
+    if (score == null) {
+      throw new IllegalArgumentException("Score is null");
+    }
+    this.point = point;
+    this.score = score;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int compareTo(SearchResult<T> o)
-    {
-        if (o == null)
-            return -1;
-        return getScore().compareTo(o.getScore());
+  /** {@inheritDoc} */
+  @Override
+  public int compareTo(SearchResult<T> o) {
+    if (o == null) {
+      return -1;
     }
+    return getScore().compareTo(o.getScore());
+  }
 
-    /**
-     * Gets the point.
-     *
-     * @return the point
-     */
-    public double[] getPoint()
-    {
-        return point;
-    }
+  /**
+   * Gets the point.
+   *
+   * @return the point
+   */
+  public double[] getPoint() {
+    return point;
+  }
 
-    /**
-     * Gets the score.
-     *
-     * @return the score
-     */
-    public T getScore()
-    {
-        return score;
-    }
+  /**
+   * Gets the score.
+   *
+   * @return the score
+   */
+  public T getScore() {
+    return score;
+  }
 }

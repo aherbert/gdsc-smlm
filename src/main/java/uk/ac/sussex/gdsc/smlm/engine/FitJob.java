@@ -33,265 +33,224 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
 /**
  * Specifies a job for peak fitting.
  */
-public class FitJob
-{
-    /**
-     * Thefit job status.
-     */
-    public enum Status
-    {
-        //@formatter:off
-		/** Pending (waiting to run). */
-		PENDING{ @Override
-		public String getName() { return "Pending"; }},
-		/** In-progress (running) */
-		IN_PROGRESS{ @Override
-		public String getName() { return "In-progress"; }},
-		/** Finished. */
-		FINISHED{ @Override
-		public String getName() { return "Finished"; }};
-		//@formatter:on
+public class FitJob {
+  /**
+   * Thefit job status.
+   */
+  public enum Status {
+    //@formatter:off
+        /** Pending (waiting to run). */
+        PENDING{ @Override
+        public String getName() { return "Pending"; }},
+        /** In-progress (running) */
+        IN_PROGRESS{ @Override
+        public String getName() { return "In-progress"; }},
+        /** Finished. */
+        FINISHED{ @Override
+        public String getName() { return "Finished"; }};
+        //@formatter:on
 
-        @Override
-        public String toString()
-        {
-            return getName();
-        }
-
-        /**
-         * Gets the name.
-         *
-         * @return the name
-         */
-        abstract public String getName();
+    @Override
+    public String toString() {
+      return getName();
     }
 
-    private int id = 0;
-
-    /** The slice. */
-    int slice;
-
-    /** The data. */
-    float[] data;
-
-    /** The bounds. */
-    Rectangle bounds;
-
-    /** The status. */
-    Status status = Status.PENDING;
-
     /**
-     * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+     * Gets the name.
      *
-     * @param id
-     *            the id
-     * @param slice
-     *            the slice
-     * @param data
-     *            the data
-     * @param bounds
-     *            the bounds
+     * @return the name
      */
-    public FitJob(int id, int slice, float[] data, Rectangle bounds)
-    {
-        if (data == null)
-            throw new NullPointerException("Data must not be null");
-        if (bounds == null)
-            throw new NullPointerException("Bounds must not be null");
-        if (bounds.width < 1 || bounds.height < 1)
-            throw new IllegalArgumentException("Bounds width and height must be positive");
-        if (data.length < bounds.width * bounds.height)
-            throw new IllegalArgumentException("Data must be at least equal to the width multiplied by the height");
+    abstract public String getName();
+  }
 
-        this.id = id;
-        this.slice = slice;
-        this.data = data;
-        this.bounds = bounds;
+  private int id = 0;
+
+  /** The slice. */
+  int slice;
+
+  /** The data. */
+  float[] data;
+
+  /** The bounds. */
+  Rectangle bounds;
+
+  /** The status. */
+  Status status = Status.PENDING;
+
+  /**
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   *
+   * @param id the id
+   * @param slice the slice
+   * @param data the data
+   * @param bounds the bounds
+   */
+  public FitJob(int id, int slice, float[] data, Rectangle bounds) {
+    if (data == null) {
+      throw new NullPointerException("Data must not be null");
+    }
+    if (bounds == null) {
+      throw new NullPointerException("Bounds must not be null");
+    }
+    if (bounds.width < 1 || bounds.height < 1) {
+      throw new IllegalArgumentException("Bounds width and height must be positive");
+    }
+    if (data.length < bounds.width * bounds.height) {
+      throw new IllegalArgumentException(
+          "Data must be at least equal to the width multiplied by the height");
     }
 
-    /**
-     * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-     *
-     * @param slice
-     *            the slice
-     * @param data
-     *            the data
-     * @param bounds
-     *            the bounds
-     */
-    public FitJob(int slice, float[] data, Rectangle bounds)
-    {
-        this(slice, slice, data, bounds);
-    }
+    this.id = id;
+    this.slice = slice;
+    this.data = data;
+    this.bounds = bounds;
+  }
 
-    /**
-     * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-     *
-     * @param id
-     *            the id
-     * @param slice
-     *            the slice
-     * @param data
-     *            the data
-     * @param width
-     *            the width
-     * @param height
-     *            the height
-     */
-    public FitJob(int id, int slice, float[] data, int width, int height)
-    {
-        this(id, slice, data, new Rectangle(width, height));
-    }
+  /**
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   *
+   * @param slice the slice
+   * @param data the data
+   * @param bounds the bounds
+   */
+  public FitJob(int slice, float[] data, Rectangle bounds) {
+    this(slice, slice, data, bounds);
+  }
 
-    /**
-     * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-     *
-     * @param slice
-     *            the slice
-     * @param data
-     *            the data
-     * @param width
-     *            the width
-     * @param height
-     *            the height
-     */
-    public FitJob(int slice, float[] data, int width, int height)
-    {
-        this(slice, slice, data, new Rectangle(width, height));
-    }
+  /**
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   *
+   * @param id the id
+   * @param slice the slice
+   * @param data the data
+   * @param width the width
+   * @param height the height
+   */
+  public FitJob(int id, int slice, float[] data, int width, int height) {
+    this(id, slice, data, new Rectangle(width, height));
+  }
 
-    /**
-     * Empty constructor with no data.
-     */
-    public FitJob()
-    {
-        this.id = 0;
-        this.slice = 0;
-        this.data = null;
-        this.bounds = null;
-    }
+  /**
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   *
+   * @param slice the slice
+   * @param data the data
+   * @param width the width
+   * @param height the height
+   */
+  public FitJob(int slice, float[] data, int width, int height) {
+    this(slice, slice, data, new Rectangle(width, height));
+  }
 
-    /**
-     * @return the id.
-     */
-    public int getId()
-    {
-        return id;
-    }
+  /**
+   * Empty constructor with no data.
+   */
+  public FitJob() {
+    this.id = 0;
+    this.slice = 0;
+    this.data = null;
+    this.bounds = null;
+  }
 
-    /**
-     * @return the slice.
-     */
-    public int getSlice()
-    {
-        return slice;
-    }
+  /**
+   * @return the id.
+   */
+  public int getId() {
+    return id;
+  }
 
-    /**
-     * @return the data.
-     */
-    public float[] getData()
-    {
-        return data;
-    }
+  /**
+   * @return the slice.
+   */
+  public int getSlice() {
+    return slice;
+  }
 
-    /**
-     * @return the bounds.
-     */
-    public Rectangle getBounds()
-    {
-        return bounds;
-    }
+  /**
+   * @return the data.
+   */
+  public float[] getData() {
+    return data;
+  }
 
-    /**
-     * Called to indicate that processing of the job is in progress.
-     */
-    public void start()
-    {
-        status = Status.IN_PROGRESS;
-    }
+  /**
+   * @return the bounds.
+   */
+  public Rectangle getBounds() {
+    return bounds;
+  }
 
-    /**
-     * Called to indicate that processing of the job has finished.
-     */
-    public void finished()
-    {
-        status = Status.FINISHED;
-    }
+  /**
+   * Called to indicate that processing of the job is in progress.
+   */
+  public void start() {
+    status = Status.IN_PROGRESS;
+  }
 
-    /**
-     * @return The additional parameters for the job (or null).
-     */
-    public FitParameters getFitParameters()
-    {
-        return null;
-    }
+  /**
+   * Called to indicate that processing of the job has finished.
+   */
+  public void finished() {
+    status = Status.FINISHED;
+  }
 
-    /**
-     * @return The job status.
-     */
-    public Status getStatus()
-    {
-        return status;
-    }
+  /**
+   * @return The additional parameters for the job (or null).
+   */
+  public FitParameters getFitParameters() {
+    return null;
+  }
 
-    /**
-     * Set the indices of the the data that were fitted
-     * <p>
-     * This method is not implemented within this class but can be overridden if necessary to allow access to the
-     * results from the {@link FitWorker}.
-     *
-     * @param indices
-     *            the new indices
-     */
-    public void setIndices(int[] indices)
-    {
-        // Do nothing
-    }
+  /**
+   * @return The job status.
+   */
+  public Status getStatus() {
+    return status;
+  }
 
-    /**
-     * Set the fitting result for the specified fitted index
-     * <p>
-     * This method is not implemented within this class but can be overridden if necessary to allow access to the
-     * results from the {@link FitWorker}.
-     *
-     * @param n
-     *            the index
-     * @param fitResult
-     *            the fit result
-     */
-    public void setFitResult(int n, FitResult fitResult)
-    {
-        // Do nothing
-    }
+  /**
+   * Set the indices of the the data that were fitted <p> This method is not implemented within this
+   * class but can be overridden if necessary to allow access to the results from the
+   * {@link FitWorker}.
+   *
+   * @param indices the new indices
+   */
+  public void setIndices(int[] indices) {
+    // Do nothing
+  }
 
-    /**
-     * Used to store the results of the fitting job.
-     * <p>
-     * This method is not implemented within this class but can be overridden if necessary to allow access to the
-     * results from the {@link FitWorker}.
-     *
-     * @param results
-     *            the new results
-     */
-    public void setResults(List<PeakResult> results)
-    {
-        // Do nothing
-    }
+  /**
+   * Set the fitting result for the specified fitted index <p> This method is not implemented within
+   * this class but can be overridden if necessary to allow access to the results from the
+   * {@link FitWorker}.
+   *
+   * @param n the index
+   * @param fitResult the fit result
+   */
+  public void setFitResult(int n, FitResult fitResult) {
+    // Do nothing
+  }
 
-    /**
-     * Set the multi-path fitting result for the specified fitted index
-     * <p>
-     * This method is not implemented within this class but can be overridden if necessary to allow access to the
-     * benchmarking results from the {@link FitWorker}.
-     *
-     * @param n
-     *            the index
-     * @param fitResult
-     *            the fit result
-     */
-    public void setMultiPathFitResult(int n, MultiPathFitResult fitResult)
-    {
-        // Do nothing
-    }
+  /**
+   * Used to store the results of the fitting job. <p> This method is not implemented within this
+   * class but can be overridden if necessary to allow access to the results from the
+   * {@link FitWorker}.
+   *
+   * @param results the new results
+   */
+  public void setResults(List<PeakResult> results) {
+    // Do nothing
+  }
+
+  /**
+   * Set the multi-path fitting result for the specified fitted index <p> This method is not
+   * implemented within this class but can be overridden if necessary to allow access to the
+   * benchmarking results from the {@link FitWorker}.
+   *
+   * @param n the index
+   * @param fitResult the fit result
+   */
+  public void setMultiPathFitResult(int n, MultiPathFitResult fitResult) {
+    // Do nothing
+  }
 }

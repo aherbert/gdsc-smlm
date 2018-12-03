@@ -35,48 +35,50 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-@SuppressWarnings({ "javadoc" })
-public class CubicSplineDataTest
-{
-    @SeededTest
-    public void canExternaliseDoubleFunction(RandomSeed seed) throws IOException
-    {
-        canExternaliseFunction(seed, false);
+@SuppressWarnings({"javadoc"})
+public class CubicSplineDataTest {
+  @SeededTest
+  public void canExternaliseDoubleFunction(RandomSeed seed) throws IOException {
+    canExternaliseFunction(seed, false);
+  }
+
+  @SeededTest
+  public void canExternaliseFloatFunction(RandomSeed seed) throws IOException {
+    canExternaliseFunction(seed, true);
+  }
+
+  private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision)
+      throws IOException {
+    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final int x = 6, y = 5, z = 4;
+
+    final int size = x * y;
+    final CustomTricubicFunction[][] splines = new CustomTricubicFunction[z][x * y];
+    final double[] a = new double[64];
+    for (int zz = 0; zz < z; zz++) {
+      for (int i = 0; i < size; i++) {
+        for (int j = 0; j < 64; j++) {
+          a[j] = r.nextDouble();
+        }
+        splines[zz][i] = CustomTricubicFunction.create(a.clone());
+        if (singlePrecision) {
+          splines[zz][i] = splines[zz][i].toSinglePrecision();
+        }
+      }
     }
+    final CubicSplineData f1 = new CubicSplineData(x, y, splines);
 
-    @SeededTest
-    public void canExternaliseFloatFunction(RandomSeed seed) throws IOException
-    {
-        canExternaliseFunction(seed, true);
+    final ByteArrayOutputStream b = new ByteArrayOutputStream();
+    f1.write(b);
+
+    final byte[] bytes = b.toByteArray();
+    final CubicSplineData f2 = CubicSplineData.read(new ByteArrayInputStream(bytes));
+
+    for (int zz = 0; zz < z; zz++) {
+      for (int i = 0; i < size; i++) {
+        Assertions.assertArrayEquals(f1.splines[zz][i].getCoefficients(),
+            f2.splines[zz][i].getCoefficients());
+      }
     }
-
-    private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision) throws IOException
-    {
-        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-        final int x = 6, y = 5, z = 4;
-
-        final int size = x * y;
-        final CustomTricubicFunction[][] splines = new CustomTricubicFunction[z][x * y];
-        final double[] a = new double[64];
-        for (int zz = 0; zz < z; zz++)
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = 0; j < 64; j++)
-                    a[j] = r.nextDouble();
-                splines[zz][i] = CustomTricubicFunction.create(a.clone());
-                if (singlePrecision)
-                    splines[zz][i] = splines[zz][i].toSinglePrecision();
-            }
-        final CubicSplineData f1 = new CubicSplineData(x, y, splines);
-
-        final ByteArrayOutputStream b = new ByteArrayOutputStream();
-        f1.write(b);
-
-        final byte[] bytes = b.toByteArray();
-        final CubicSplineData f2 = CubicSplineData.read(new ByteArrayInputStream(bytes));
-
-        for (int zz = 0; zz < z; zz++)
-            for (int i = 0; i < size; i++)
-                Assertions.assertArrayEquals(f1.splines[zz][i].getCoefficients(), f2.splines[zz][i].getCoefficients());
-    }
+  }
 }

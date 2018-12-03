@@ -26,32 +26,27 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Signal.
  */
-public class MultiFilterSignalComponent extends MultiFilterComponent
-{
-    private final float signal;
+public class MultiFilterSignalComponent extends MultiFilterComponent {
+  private final float signal;
 
-    /**
-     * Instantiates a new multi filter signal component.
-     *
-     * @param signal
-     *            the signal
-     */
-    public MultiFilterSignalComponent(double signal)
-    {
-        this.signal = (float) signal;
-    }
+  /**
+   * Instantiates a new multi filter signal component.
+   *
+   * @param signal the signal
+   */
+  public MultiFilterSignalComponent(double signal) {
+    this.signal = (float) signal;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        return peak.getSignal() < this.signal;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    return peak.getSignal() < this.signal;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return IDirectFilter.V_PHOTONS;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return IDirectFilter.V_PHOTONS;
+  }
 }

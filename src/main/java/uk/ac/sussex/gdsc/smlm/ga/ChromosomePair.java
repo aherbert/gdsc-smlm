@@ -26,31 +26,26 @@ package uk.ac.sussex.gdsc.smlm.ga;
 /**
  * Define a pair of chromosomes.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public class ChromosomePair<T extends Comparable<T>>
-{
-    /** The first chromosome. */
-    final Chromosome<T> c1;
-    /** The second chromosome. */
-    final Chromosome<T> c2;
+public class ChromosomePair<T extends Comparable<T>> {
+  /** The first chromosome. */
+  final Chromosome<T> c1;
+  /** The second chromosome. */
+  final Chromosome<T> c2;
 
-    /**
-     * Create a pair.
-     *
-     * @param c1
-     *            the first chromosome
-     * @param c2
-     *            the second chromosome
-     * @throws IllegalArgumentException
-     *             if either chromosome is null
-     */
-    public ChromosomePair(Chromosome<T> c1, Chromosome<T> c2)
-    {
-        if (c1 == null || c2 == null)
-            throw new IllegalArgumentException("Chromosomes must not be null");
-        this.c1 = c1;
-        this.c2 = c2;
+  /**
+   * Create a pair.
+   *
+   * @param c1 the first chromosome
+   * @param c2 the second chromosome
+   * @throws IllegalArgumentException if either chromosome is null
+   */
+  public ChromosomePair(Chromosome<T> c1, Chromosome<T> c2) {
+    if (c1 == null || c2 == null) {
+      throw new IllegalArgumentException("Chromosomes must not be null");
     }
+    this.c1 = c1;
+    this.c2 = c2;
+  }
 }

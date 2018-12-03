@@ -30,21 +30,21 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Compares the results by Id then by frame.
  */
-public class IdFramePeakResultComparator implements Comparator<PeakResult>
-{
-    /** An instance of the comparator. */
-    public static final IdFramePeakResultComparator INSTANCE = new IdFramePeakResultComparator();
+public class IdFramePeakResultComparator implements Comparator<PeakResult> {
+  /** An instance of the comparator. */
+  public static final IdFramePeakResultComparator INSTANCE = new IdFramePeakResultComparator();
 
-    /** {@inheritDoc} */
-    @Override
-    public int compare(PeakResult o1, PeakResult o2)
-    {
-        final int id1 = o1.getId();
-        final int id2 = o2.getId();
-        if (id1 < id2)
-            return -1;
-        if (id1 > id2)
-            return 1;
-        return Integer.compare(o1.getFrame(), o2.getFrame());
+  /** {@inheritDoc} */
+  @Override
+  public int compare(PeakResult o1, PeakResult o2) {
+    final int id1 = o1.getId();
+    final int id2 = o2.getId();
+    if (id1 < id2) {
+      return -1;
     }
+    if (id1 > id2) {
+      return 1;
+    }
+    return Integer.compare(o1.getFrame(), o2.getFrame());
+  }
 }

@@ -26,48 +26,40 @@ package uk.ac.sussex.gdsc.smlm.results;
 /**
  * Does nothing for any of the PeakResults methods.
  */
-public class NullPeakResults extends AbstractPeakResults implements ThreadSafePeakResults
-{
-    @Override
-    public void begin()
-    {
-        // Ignore
-    }
+public class NullPeakResults extends AbstractPeakResults implements ThreadSafePeakResults {
+  @Override
+  public void begin() {
+    // Ignore
+  }
 
-    @Override
-    public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanSignal,
-            float[] params, float[] paramsStdDev)
-    {
-        // Ignore
-    }
+  @Override
+  public void add(int peak, int origX, int origY, float origValue, double error, float noise,
+      float meanSignal, float[] params, float[] paramsStdDev) {
+    // Ignore
+  }
 
-    @Override
-    public void add(PeakResult result)
-    {
-        // Ignore
-    }
+  @Override
+  public void add(PeakResult result) {
+    // Ignore
+  }
 
-    @Override
-    public void addAll(PeakResult[] results)
-    {
-        // Ignore
-    }
+  @Override
+  public void addAll(PeakResult[] results) {
+    // Ignore
+  }
 
-    @Override
-    public int size()
-    {
-        return 0;
-    }
+  @Override
+  public int size() {
+    return 0;
+  }
 
-    @Override
-    public void end()
-    {
-        // Ignore
-    }
+  @Override
+  public void end() {
+    // Ignore
+  }
 
-    @Override
-    public boolean isActive()
-    {
-        return true;
-    }
+  @Override
+  public boolean isActive() {
+    return true;
+  }
 }

@@ -24,313 +24,271 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Specifies a the result of fitting a position using different fitting methods.
- * <p>
- * The multi-path result can be evaluated by the MultiPathFilter to determine which result from the different paths
- * should be accepted.
- * <p>
- * This class is used for benchmarking the fitting path options in the PeakFit algorithm.
+ * Specifies a the result of fitting a position using different fitting methods. <p> The multi-path
+ * result can be evaluated by the MultiPathFilter to determine which result from the different paths
+ * should be accepted. <p> This class is used for benchmarking the fitting path options in the
+ * PeakFit algorithm.
  */
-public class MultiPathFitResult implements Cloneable
-{
+public class MultiPathFitResult implements Cloneable {
+  /**
+   * The fit result.
+   */
+  public static class FitResult implements Cloneable {
     /**
-     * The fit result.
+     * Fitting status of the fit. Zero for OK.
      */
-    public static class FitResult implements Cloneable
-    {
-        /**
-         * Fitting status of the fit. Zero for OK.
-         */
-        final public int status;
+    final public int status;
 
-        /**
-         * The results from the fit. It is expected that one or more results will be true for isNewResult() and zero or
-         * more could be true for isExistingResult().
-         */
-        public PreprocessedPeakResult[] results;
+    /**
+     * The results from the fit. It is expected that one or more results will be true for
+     * isNewResult() and zero or more could be true for isExistingResult().
+     */
+    public PreprocessedPeakResult[] results;
 
-        /**
-         * Allows storing any data associated with the fit result.
-         */
-        final public Object data;
+    /**
+     * Allows storing any data associated with the fit result.
+     */
+    final public Object data;
 
-        /**
-         * Instantiates a new fit result.
-         *
-         * @param status
-         *            the status
-         */
-        public FitResult(int status)
-        {
-            this(status, null);
-        }
-
-        /**
-         * Instantiates a new fit result.
-         *
-         * @param status
-         *            the status
-         * @param data
-         *            the data
-         */
-        public FitResult(int status, Object data)
-        {
-            this.status = status;
-            this.data = data;
-        }
-
-        /**
-         * Gets the status.
-         *
-         * @return the status
-         */
-        public int getStatus()
-        {
-            return status;
-        }
-
-        /**
-         * Gets the results.
-         *
-         * @return the results
-         */
-        public PreprocessedPeakResult[] getResults()
-        {
-            return results;
-        }
-
-        /**
-         * Gets the data.
-         *
-         * @return the data
-         */
-        public Object getData()
-        {
-            return data;
-        }
-
-        @Override
-        public FitResult clone()
-        {
-            try
-            {
-                return (FitResult) super.clone();
-            }
-            catch (final CloneNotSupportedException e)
-            {
-                return null;
-            }
-        }
+    /**
+     * Instantiates a new fit result.
+     *
+     * @param status the status
+     */
+    public FitResult(int status) {
+      this(status, null);
     }
 
     /**
-     * The frame containing the result.
+     * Instantiates a new fit result.
+     *
+     * @param status the status
+     * @param data the data
      */
-    public int frame;
+    public FitResult(int status, Object data) {
+      this.status = status;
+      this.data = data;
+    }
 
     /**
-     * The width of the fit region.
+     * Gets the status.
+     *
+     * @return the status
      */
-    public int width;
+    public int getStatus() {
+      return status;
+    }
 
     /**
-     * The height of the fit region.
+     * Gets the results.
+     *
+     * @return the results
      */
-    public int height;
+    public PreprocessedPeakResult[] getResults() {
+      return results;
+    }
 
     /**
-     * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
+     * Gets the data.
+     *
+     * @return the data
      */
-    public int candidateId;
-
-    /**
-     * The score from residuals analysis on the residuals of the multi fit. This can be used to choose if the doublet
-     * fit should be considered.
-     */
-    private double multiQAScore = -1;
-
-    /**
-     * The score from residuals analysis on the residuals of the single fit. This can be used to choose if the doublet
-     * fit should be considered.
-     */
-    private double singleQAScore = -1;
-
-    /**
-     * The results from the multi-fit. It is expected that one result will be true for isNewResult() and zero or more
-     * could be true for isExistingResult().
-     */
-    private FitResult multiFitResult;
-
-    /**
-     * The results from the doublet-fit on the multi-fit residuals. It is expected that this should be one or two
-     * results that are true for isNewResult().
-     */
-    private FitResult multiDoubletFitResult;
-
-    /**
-     * The results from the single-fit. It is expected that this should be one result that is true for isNewResult().
-     */
-    private FitResult singleFitResult;
-
-    /**
-     * The results from the doublet-fit. It is expected that this should be one or two results that are true for
-     * isNewResult().
-     */
-    private FitResult doubletFitResult;
+    public Object getData() {
+      return data;
+    }
 
     @Override
-    public MultiPathFitResult clone()
-    {
-        try
-        {
-            return (MultiPathFitResult) super.clone();
-        }
-        catch (final CloneNotSupportedException e)
-        {
-            return null;
-        }
+    public FitResult clone() {
+      try {
+        return (FitResult) super.clone();
+      } catch (final CloneNotSupportedException e) {
+        return null;
+      }
     }
+  }
 
-    /**
-     * Copy the class level field values into a new object. Ignores the fail count fields.
-     * <p>
-     * To copy sub-class fields use {@link #clone()}.
-     *
-     * @param deep
-     *            Set to true to do a clone of the FitResult objects. Their array objects will not be copied.
-     * @return A copy
-     */
-    public MultiPathFitResult copy(boolean deep)
-    {
-        final MultiPathFitResult r = new MultiPathFitResult();
-        r.candidateId = candidateId;
-        r.frame = frame;
-        r.width = width;
-        r.height = height;
-        r.candidateId = candidateId;
-        r.multiQAScore = multiQAScore;
-        r.singleQAScore = singleQAScore;
-        if (deep)
-        {
-            r.multiFitResult = clone(multiFitResult);
-            r.multiDoubletFitResult = clone(multiDoubletFitResult);
-            r.singleFitResult = clone(singleFitResult);
-            r.doubletFitResult = clone(doubletFitResult);
-        }
-        else
-        {
-            r.multiFitResult = multiFitResult;
-            r.multiDoubletFitResult = multiDoubletFitResult;
-            r.singleFitResult = singleFitResult;
-            r.doubletFitResult = doubletFitResult;
-        }
-        return r;
-    }
+  /**
+   * The frame containing the result.
+   */
+  public int frame;
 
-    private static FitResult clone(FitResult f)
-    {
-        return (f == null) ? null : f.clone();
-    }
+  /**
+   * The width of the fit region.
+   */
+  public int width;
 
-    /**
-     * @return the multiFitResult.
-     */
-    public FitResult getMultiFitResult()
-    {
-        return multiFitResult;
-    }
+  /**
+   * The height of the fit region.
+   */
+  public int height;
 
-    /**
-     * @param multiFitResult
-     *            the multiFitResult to set
-     */
-    protected void setMultiFitResult(FitResult multiFitResult)
-    {
-        this.multiFitResult = multiFitResult;
-    }
+  /**
+   * Return the candidate Id of this result (i.e. the candidate used to identify this position for
+   * fitting)
+   */
+  public int candidateId;
 
-    /**
-     * @return the multiQAScore.
-     */
-    public double getMultiQAScore()
-    {
-        return multiQAScore;
-    }
+  /**
+   * The score from residuals analysis on the residuals of the multi fit. This can be used to choose
+   * if the doublet fit should be considered.
+   */
+  private double multiQAScore = -1;
 
-    /**
-     * @param multiQAScore
-     *            the multiQAScore to set
-     */
-    protected void setMultiQAScore(double multiQAScore)
-    {
-        this.multiQAScore = multiQAScore;
-    }
+  /**
+   * The score from residuals analysis on the residuals of the single fit. This can be used to
+   * choose if the doublet fit should be considered.
+   */
+  private double singleQAScore = -1;
 
-    /**
-     * @return the multiDoubletFitResult.
-     */
-    public FitResult getMultiDoubletFitResult()
-    {
-        return multiDoubletFitResult;
-    }
+  /**
+   * The results from the multi-fit. It is expected that one result will be true for isNewResult()
+   * and zero or more could be true for isExistingResult().
+   */
+  private FitResult multiFitResult;
 
-    /**
-     * @param multiDoubletFitResult
-     *            the multiDoubletFitResult to set
-     */
-    protected void setMultiDoubletFitResult(FitResult multiDoubletFitResult)
-    {
-        this.multiDoubletFitResult = multiDoubletFitResult;
-    }
+  /**
+   * The results from the doublet-fit on the multi-fit residuals. It is expected that this should be
+   * one or two results that are true for isNewResult().
+   */
+  private FitResult multiDoubletFitResult;
 
-    /**
-     * @return the singleFitResult.
-     */
-    public FitResult getSingleFitResult()
-    {
-        return singleFitResult;
-    }
+  /**
+   * The results from the single-fit. It is expected that this should be one result that is true for
+   * isNewResult().
+   */
+  private FitResult singleFitResult;
 
-    /**
-     * @param singleFitResult
-     *            the singleFitResult to set
-     */
-    protected void setSingleFitResult(FitResult singleFitResult)
-    {
-        this.singleFitResult = singleFitResult;
-    }
+  /**
+   * The results from the doublet-fit. It is expected that this should be one or two results that
+   * are true for isNewResult().
+   */
+  private FitResult doubletFitResult;
 
-    /**
-     * @return the singleQAScore.
-     */
-    public double getSingleQAScore()
-    {
-        return singleQAScore;
+  @Override
+  public MultiPathFitResult clone() {
+    try {
+      return (MultiPathFitResult) super.clone();
+    } catch (final CloneNotSupportedException e) {
+      return null;
     }
+  }
 
-    /**
-     * @param singleQAScore
-     *            the singleQAScore to set
-     */
-    protected void setSingleQAScore(double singleQAScore)
-    {
-        this.singleQAScore = singleQAScore;
+  /**
+   * Copy the class level field values into a new object. Ignores the fail count fields. <p> To copy
+   * sub-class fields use {@link #clone()}.
+   *
+   * @param deep Set to true to do a clone of the FitResult objects. Their array objects will not be
+   *        copied.
+   * @return A copy
+   */
+  public MultiPathFitResult copy(boolean deep) {
+    final MultiPathFitResult r = new MultiPathFitResult();
+    r.candidateId = candidateId;
+    r.frame = frame;
+    r.width = width;
+    r.height = height;
+    r.candidateId = candidateId;
+    r.multiQAScore = multiQAScore;
+    r.singleQAScore = singleQAScore;
+    if (deep) {
+      r.multiFitResult = clone(multiFitResult);
+      r.multiDoubletFitResult = clone(multiDoubletFitResult);
+      r.singleFitResult = clone(singleFitResult);
+      r.doubletFitResult = clone(doubletFitResult);
+    } else {
+      r.multiFitResult = multiFitResult;
+      r.multiDoubletFitResult = multiDoubletFitResult;
+      r.singleFitResult = singleFitResult;
+      r.doubletFitResult = doubletFitResult;
     }
+    return r;
+  }
 
-    /**
-     * @return the doubletFitResult.
-     */
-    public FitResult getDoubletFitResult()
-    {
-        return doubletFitResult;
-    }
+  private static FitResult clone(FitResult f) {
+    return (f == null) ? null : f.clone();
+  }
 
-    /**
-     * @param doubletFitResult
-     *            the doubletFitResult to set
-     */
-    protected void setDoubletFitResult(FitResult doubletFitResult)
-    {
-        this.doubletFitResult = doubletFitResult;
-    }
+  /**
+   * @return the multiFitResult.
+   */
+  public FitResult getMultiFitResult() {
+    return multiFitResult;
+  }
+
+  /**
+   * @param multiFitResult the multiFitResult to set
+   */
+  protected void setMultiFitResult(FitResult multiFitResult) {
+    this.multiFitResult = multiFitResult;
+  }
+
+  /**
+   * @return the multiQAScore.
+   */
+  public double getMultiQAScore() {
+    return multiQAScore;
+  }
+
+  /**
+   * @param multiQAScore the multiQAScore to set
+   */
+  protected void setMultiQAScore(double multiQAScore) {
+    this.multiQAScore = multiQAScore;
+  }
+
+  /**
+   * @return the multiDoubletFitResult.
+   */
+  public FitResult getMultiDoubletFitResult() {
+    return multiDoubletFitResult;
+  }
+
+  /**
+   * @param multiDoubletFitResult the multiDoubletFitResult to set
+   */
+  protected void setMultiDoubletFitResult(FitResult multiDoubletFitResult) {
+    this.multiDoubletFitResult = multiDoubletFitResult;
+  }
+
+  /**
+   * @return the singleFitResult.
+   */
+  public FitResult getSingleFitResult() {
+    return singleFitResult;
+  }
+
+  /**
+   * @param singleFitResult the singleFitResult to set
+   */
+  protected void setSingleFitResult(FitResult singleFitResult) {
+    this.singleFitResult = singleFitResult;
+  }
+
+  /**
+   * @return the singleQAScore.
+   */
+  public double getSingleQAScore() {
+    return singleQAScore;
+  }
+
+  /**
+   * @param singleQAScore the singleQAScore to set
+   */
+  protected void setSingleQAScore(double singleQAScore) {
+    this.singleQAScore = singleQAScore;
+  }
+
+  /**
+   * @return the doubletFitResult.
+   */
+  public FitResult getDoubletFitResult() {
+    return doubletFitResult;
+  }
+
+  /**
+   * @param doubletFitResult the doubletFitResult to set
+   */
+  protected void setDoubletFitResult(FitResult doubletFitResult) {
+    this.doubletFitResult = doubletFitResult;
+  }
 }

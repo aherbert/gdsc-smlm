@@ -26,65 +26,55 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 /**
  * Used to store all the information required for the PC-PALM analysis.
  */
-public class Molecule
-{
-    /** The x. */
-    public double x;
-    /** The y. */
-    public double y;
-    /** The precision. */
-    public double precision;
-    /** The photons. */
-    public double photons;
+public class Molecule {
+  /** The x. */
+  public double x;
+  /** The y. */
+  public double y;
+  /** The precision. */
+  public double precision;
+  /** The photons. */
+  public double photons;
 
-    /** Used to construct a single linked list of molecules. */
-    public Molecule next = null;
+  /** Used to construct a single linked list of molecules. */
+  public Molecule next = null;
 
-    /**
-     * Instantiates a new molecule.
-     *
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     * @param precision
-     *            the precision
-     * @param photons
-     *            the photons
-     */
-    public Molecule(double x, double y, double precision, double photons)
-    {
-        this.x = x;
-        this.y = y;
-        this.precision = precision;
-        this.photons = photons;
-    }
+  /**
+   * Instantiates a new molecule.
+   *
+   * @param x the x
+   * @param y the y
+   * @param precision the precision
+   * @param photons the photons
+   */
+  public Molecule(double x, double y, double precision, double photons) {
+    this.x = x;
+    this.y = y;
+    this.precision = precision;
+    this.photons = photons;
+  }
 
-    /**
-     * Get the distance.
-     *
-     * @param other
-     *            the other
-     * @return the distance
-     */
-    public double distance(Molecule other)
-    {
-        final double dx = x - other.x;
-        final double dy = y - other.y;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
+  /**
+   * Get the distance.
+   *
+   * @param other the other
+   * @return the distance
+   */
+  public double distance(Molecule other) {
+    final double dx = x - other.x;
+    final double dy = y - other.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 
-    /**
-     * Get the squared distance.
-     *
-     * @param other
-     *            the other
-     * @return the squared distance
-     */
-    public double distance2(Molecule other)
-    {
-        final double dx = x - other.x;
-        final double dy = y - other.y;
-        return dx * dx + dy * dy;
-    }
+  /**
+   * Get the squared distance.
+   *
+   * @param other the other
+   * @return the squared distance
+   */
+  public double distance2(Molecule other) {
+    final double dx = x - other.x;
+    final double dy = y - other.y;
+    return dx * dx + dy * dy;
+  }
 }

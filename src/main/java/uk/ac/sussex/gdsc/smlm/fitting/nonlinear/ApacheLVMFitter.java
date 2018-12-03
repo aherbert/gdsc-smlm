@@ -50,179 +50,164 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
- * Uses Apache Commons Math Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
- * set of data points (x, y).
+ * Uses Apache Commons Math Levenberg-Marquardt method to fit a nonlinear model with coefficients
+ * (a) for a set of data points (x, y).
  */
-public class ApacheLVMFitter extends LSEBaseFunctionSolver
-{
-    /**
-     * Default constructor.
-     *
-     * @param gf
-     *            the Gaussian function
-     */
-    public ApacheLVMFitter(Gaussian2DFunction gf)
-    {
-        super(gf);
+public class ApacheLVMFitter extends LSEBaseFunctionSolver {
+  /**
+   * Default constructor.
+   *
+   * @param gf the Gaussian function
+   */
+  public ApacheLVMFitter(Gaussian2DFunction gf) {
+    super(gf);
+  }
+
+  @Override
+  public FitStatus computeFit(double[] y, final double[] yFit, double[] a, double[] aDev) {
+    final int n = y.length;
+    try {
+      // Different convergence thresholds seem to have no effect on the resulting fit, only the
+      // number of
+      // iterations for convergence
+      final double initialStepBoundFactor = 100;
+      final double costRelativeTolerance = 1e-10;
+      final double parRelativeTolerance = 1e-10;
+      final double orthoTolerance = 1e-10;
+      final double threshold = Precision.SAFE_MIN;
+
+      // Extract the parameters to be fitted
+      final double[] initialSolution = getInitialSolution(a);
+
+      // TODO - Pass in more advanced stopping criteria.
+
+      // Create the target and weight arrays
+      final double[] yd = new double[n];
+      // final double[] w = new double[n];
+      for (int i = 0; i < n; i++) {
+        yd[i] = y[i];
+        // w[i] = 1;
+      }
+
+      final LevenbergMarquardtOptimizer optimizer =
+          new LevenbergMarquardtOptimizer(initialStepBoundFactor, costRelativeTolerance,
+              parRelativeTolerance, orthoTolerance, threshold);
+
+      //@formatter:off
+      final LeastSquaresBuilder builder = new LeastSquaresBuilder()
+          .maxEvaluations(Integer.MAX_VALUE)
+          .maxIterations(getMaxEvaluations())
+          .start(initialSolution)
+          .target(yd);
+          // This is not required
+          //.weight(new DiagonalMatrix(w));
+      //@formatter:on
+
+      if (f instanceof ExtendedNonLinearFunction
+          && ((ExtendedNonLinearFunction) f).canComputeValuesAndJacobian()) {
+        // Compute together, or each individually
+        builder.model(new ValueAndJacobianFunction() {
+          final ExtendedNonLinearFunction fun = (ExtendedNonLinearFunction) f;
+
+          @Override
+          public Pair<RealVector, RealMatrix> value(RealVector point) {
+            final double[] p = point.toArray();
+            final uk.ac.sussex.gdsc.smlm.utils.Pair<double[], double[][]> result =
+                fun.computeValuesAndJacobian(p);
+            return new Pair<>(new ArrayRealVector(result.a, false),
+                new Array2DRowRealMatrix(result.b, false));
+          }
+
+          @Override
+          public RealVector computeValue(double[] params) {
+            return new ArrayRealVector(fun.computeValues(params), false);
+          }
+
+          @Override
+          public RealMatrix computeJacobian(double[] params) {
+            return new Array2DRowRealMatrix(fun.computeJacobian(params), false);
+          }
+        });
+      } else {
+        // Compute separately
+        builder.model(new MultivariateVectorFunctionWrapper((NonLinearFunction) f, a, n),
+            new MultivariateMatrixFunctionWrapper((NonLinearFunction) f, a, n));
+      }
+
+      final LeastSquaresProblem problem = builder.build();
+
+      final Optimum optimum = optimizer.optimize(problem);
+
+      final double[] parameters = optimum.getPoint().toArray();
+      setSolution(a, parameters);
+      iterations = optimum.getIterations();
+      evaluations = optimum.getEvaluations();
+      if (aDev != null) {
+        // Set up the Jacobian.
+        final RealMatrix j = optimum.getJacobian();
+
+        // Compute transpose(J)J.
+        final RealMatrix jTj = j.transpose().multiply(j);
+
+        final double[][] data =
+            (jTj instanceof Array2DRowRealMatrix) ? ((Array2DRowRealMatrix) jTj).getDataRef()
+                : jTj.getData();
+        final FisherInformationMatrix m = new FisherInformationMatrix(data);
+        setDeviations(aDev, m);
+      }
+      // Compute function value
+      if (yFit != null) {
+        final Gaussian2DFunction f = (Gaussian2DFunction) this.f;
+        f.initialise0(a);
+        f.forEach(new ValueProcedure() {
+          int i = 0;
+
+          @Override
+          public void execute(double value) {
+            yFit[i] = value;
+          }
+        });
+      }
+
+      // As this is unweighted then we can do this to get the sum of squared residuals
+      // This is the same as optimum.getCost() * optimum.getCost(); The getCost() function
+      // just computes the dot product anyway.
+      value = optimum.getResiduals().dotProduct(optimum.getResiduals());
+    } catch (final TooManyEvaluationsException e) {
+      return FitStatus.TOO_MANY_EVALUATIONS;
+    } catch (final TooManyIterationsException e) {
+      return FitStatus.TOO_MANY_ITERATIONS;
+    } catch (final ConvergenceException e) {
+      // Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
+      return FitStatus.SINGULAR_NON_LINEAR_MODEL;
+    } catch (final Exception e) {
+      // TODO - Find out the other exceptions from the fitter and add return values to match.
+      return FitStatus.UNKNOWN;
     }
 
-    @Override
-    public FitStatus computeFit(double[] y, final double[] yFit, double[] a, double[] aDev)
-    {
-        final int n = y.length;
-        try
-        {
-            // Different convergence thresholds seem to have no effect on the resulting fit, only the number of
-            // iterations for convergence
-            final double initialStepBoundFactor = 100;
-            final double costRelativeTolerance = 1e-10;
-            final double parRelativeTolerance = 1e-10;
-            final double orthoTolerance = 1e-10;
-            final double threshold = Precision.SAFE_MIN;
+    return FitStatus.OK;
+  }
 
-            // Extract the parameters to be fitted
-            final double[] initialSolution = getInitialSolution(a);
+  @Override
+  public boolean computeValue(double[] y, double[] yFit, double[] a) {
+    final GradientCalculator calculator =
+        GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
 
-            // TODO - Pass in more advanced stopping criteria.
+    // Since we know the function is a Gaussian2DFunction from the constructor
+    value = calculator.findLinearised(y.length, y, yFit, a, (NonLinearFunction) f);
 
-            // Create the target and weight arrays
-            final double[] yd = new double[n];
-            //final double[] w = new double[n];
-            for (int i = 0; i < n; i++)
-                yd[i] = y[i];
-            //w[i] = 1;
+    return true;
+  }
 
-            final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
-                    costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
-
-            //@formatter:off
-			final LeastSquaresBuilder builder = new LeastSquaresBuilder()
-					.maxEvaluations(Integer.MAX_VALUE)
-					.maxIterations(getMaxEvaluations())
-					.start(initialSolution)
-					.target(yd);
-					// This is not required
-					//.weight(new DiagonalMatrix(w));
-			//@formatter:on
-
-            if (f instanceof ExtendedNonLinearFunction && ((ExtendedNonLinearFunction) f).canComputeValuesAndJacobian())
-                // Compute together, or each individually
-                builder.model(new ValueAndJacobianFunction()
-                {
-                    final ExtendedNonLinearFunction fun = (ExtendedNonLinearFunction) f;
-
-                    @Override
-                    public Pair<RealVector, RealMatrix> value(RealVector point)
-                    {
-                        final double[] p = point.toArray();
-                        final uk.ac.sussex.gdsc.smlm.utils.Pair<double[], double[][]> result = fun
-                                .computeValuesAndJacobian(p);
-                        return new Pair<>(new ArrayRealVector(result.a, false),
-                                new Array2DRowRealMatrix(result.b, false));
-                    }
-
-                    @Override
-                    public RealVector computeValue(double[] params)
-                    {
-                        return new ArrayRealVector(fun.computeValues(params), false);
-                    }
-
-                    @Override
-                    public RealMatrix computeJacobian(double[] params)
-                    {
-                        return new Array2DRowRealMatrix(fun.computeJacobian(params), false);
-                    }
-                });
-            else
-                // Compute separately
-                builder.model(new MultivariateVectorFunctionWrapper((NonLinearFunction) f, a, n),
-                        new MultivariateMatrixFunctionWrapper((NonLinearFunction) f, a, n));
-
-            final LeastSquaresProblem problem = builder.build();
-
-            final Optimum optimum = optimizer.optimize(problem);
-
-            final double[] parameters = optimum.getPoint().toArray();
-            setSolution(a, parameters);
-            iterations = optimum.getIterations();
-            evaluations = optimum.getEvaluations();
-            if (aDev != null)
-            {
-                // Set up the Jacobian.
-                final RealMatrix j = optimum.getJacobian();
-
-                // Compute transpose(J)J.
-                final RealMatrix jTj = j.transpose().multiply(j);
-
-                final double[][] data = (jTj instanceof Array2DRowRealMatrix)
-                        ? ((Array2DRowRealMatrix) jTj).getDataRef()
-                        : jTj.getData();
-                final FisherInformationMatrix m = new FisherInformationMatrix(data);
-                setDeviations(aDev, m);
-            }
-            // Compute function value
-            if (yFit != null)
-            {
-                final Gaussian2DFunction f = (Gaussian2DFunction) this.f;
-                f.initialise0(a);
-                f.forEach(new ValueProcedure()
-                {
-                    int i = 0;
-
-                    @Override
-                    public void execute(double value)
-                    {
-                        yFit[i] = value;
-                    }
-                });
-            }
-
-            // As this is unweighted then we can do this to get the sum of squared residuals
-            // This is the same as optimum.getCost() * optimum.getCost(); The getCost() function
-            // just computes the dot product anyway.
-            value = optimum.getResiduals().dotProduct(optimum.getResiduals());
-        }
-        catch (final TooManyEvaluationsException e)
-        {
-            return FitStatus.TOO_MANY_EVALUATIONS;
-        }
-        catch (final TooManyIterationsException e)
-        {
-            return FitStatus.TOO_MANY_ITERATIONS;
-        }
-        catch (final ConvergenceException e)
-        {
-            // Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
-            return FitStatus.SINGULAR_NON_LINEAR_MODEL;
-        }
-        catch (final Exception e)
-        {
-            // TODO - Find out the other exceptions from the fitter and add return values to match.
-            return FitStatus.UNKNOWN;
-        }
-
-        return FitStatus.OK;
+  @Override
+  protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a) {
+    final GradientCalculator c =
+        GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
+    // Since we know the function is a Gaussian2DFunction from the constructor
+    final double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
+    if (c.isNaNGradients()) {
+      throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
     }
-
-    @Override
-    public boolean computeValue(double[] y, double[] yFit, double[] a)
-    {
-        final GradientCalculator calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
-
-        // Since we know the function is a Gaussian2DFunction from the constructor
-        value = calculator.findLinearised(y.length, y, yFit, a, (NonLinearFunction) f);
-
-        return true;
-    }
-
-    @Override
-    protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
-    {
-        final GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
-        // Since we know the function is a Gaussian2DFunction from the constructor
-        final double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
-        if (c.isNaNGradients())
-            throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
-        return new FisherInformationMatrix(I);
-    }
+    return new FisherInformationMatrix(I);
+  }
 }

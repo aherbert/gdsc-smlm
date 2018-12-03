@@ -24,161 +24,148 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Stop evaluating when a number of cumulative failures occurs. The counting is weighted so that fails increment and
- * passes decrement different amounts.
+ * Stop evaluating when a number of cumulative failures occurs. The counting is weighted so that
+ * fails increment and passes decrement different amounts.
  */
-public class WeightedFailCounter extends BaseFailCounter
-{
-    /** The fail count. Use a long to avoid overflow errors. */
-    private long failCount = 0L;
+public class WeightedFailCounter extends BaseFailCounter {
+  /** The fail count. Use a long to avoid overflow errors. */
+  private long failCount = 0L;
 
-    /** The number of allowed failures. */
-    private final int allowedFailures;
+  /** The number of allowed failures. */
+  private final int allowedFailures;
 
-    /** The amount to increment for a fail. */
-    private final int failIncrement;
+  /** The amount to increment for a fail. */
+  private final int failIncrement;
 
-    /** The amount to decrement for a pass. */
-    private final int passDecrement;
+  /** The amount to decrement for a pass. */
+  private final int passDecrement;
 
-    /**
-     * Instantiates a new weighted fail counter.
-     *
-     * @param allowedFailures
-     *            the number of allowed failures
-     * @param failIncrement
-     *            the fail increment
-     * @param passDecrement
-     *            the pass decrement
-     */
-    private WeightedFailCounter(int allowedFailures, int failIncrement, int passDecrement)
-    {
-        this.allowedFailures = allowedFailures;
-        this.failIncrement = failIncrement;
-        this.passDecrement = passDecrement;
+  /**
+   * Instantiates a new weighted fail counter.
+   *
+   * @param allowedFailures the number of allowed failures
+   * @param failIncrement the fail increment
+   * @param passDecrement the pass decrement
+   */
+  private WeightedFailCounter(int allowedFailures, int failIncrement, int passDecrement) {
+    this.allowedFailures = allowedFailures;
+    this.failIncrement = failIncrement;
+    this.passDecrement = passDecrement;
+  }
+
+  @Override
+  protected String generateDescription() {
+    return String.format("weightedFailures=%d;fail+%d;pass-%d", allowedFailures, failIncrement,
+        passDecrement);
+  }
+
+  /**
+   * Instantiates a new weighted fail counter.
+   *
+   * @param allowedFailures the number of allowed failures
+   * @param failIncrement the amount to increment for a fail (set to 1 if below 1)
+   * @param passDecrement the amount to decrement for a pass (set to 0 if below 0)
+   * @return the weighted fail counter
+   */
+  public static WeightedFailCounter create(int allowedFailures, int failIncrement,
+      int passDecrement) {
+    return new WeightedFailCounter(Math.max(0, allowedFailures), Math.max(1, failIncrement),
+        Math.max(0, passDecrement));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void pass() {
+    failCount -= passDecrement;
+    if (failCount < 0L) {
+      failCount = 0L;
     }
+  }
 
-    @Override
-    protected String generateDescription()
-    {
-        return String.format("weightedFailures=%d;fail+%d;pass-%d", allowedFailures, failIncrement, passDecrement);
+  /** {@inheritDoc} */
+  @Override
+  public void pass(int n) {
+    if (n < 0) {
+      throw new IllegalArgumentException("Number of passes must be positive");
     }
+    failCount -= n * passDecrement;
+    if (failCount < 0L) {
+      failCount = 0L;
+    }
+  }
 
-    /**
-     * Instantiates a new weighted fail counter.
-     *
-     * @param allowedFailures
-     *            the number of allowed failures
-     * @param failIncrement
-     *            the amount to increment for a fail (set to 1 if below 1)
-     * @param passDecrement
-     *            the amount to decrement for a pass (set to 0 if below 0)
-     * @return the weighted fail counter
-     */
-    public static WeightedFailCounter create(int allowedFailures, int failIncrement, int passDecrement)
-    {
-        return new WeightedFailCounter(Math.max(0, allowedFailures), Math.max(1, failIncrement),
-                Math.max(0, passDecrement));
+  /** {@inheritDoc} */
+  @Override
+  public void fail() {
+    failCount += failIncrement;
+    if (failCount < 0L) {
+      throw new IllegalStateException("Unable to increment");
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass()
-    {
-        failCount -= passDecrement;
-        if (failCount < 0L)
-            failCount = 0L;
+  /** {@inheritDoc} */
+  @Override
+  public void fail(int n) {
+    if (n < 0) {
+      throw new IllegalArgumentException("Number of fails must be positive");
     }
+    failCount += n * failIncrement;
+    if (failCount < 0L) {
+      throw new IllegalStateException("Unable to increment");
+    }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass(int n)
-    {
-        if (n < 0)
-            throw new IllegalArgumentException("Number of passes must be positive");
-        failCount -= n * passDecrement;
-        if (failCount < 0L)
-            failCount = 0L;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isOK() {
+    return failCount <= allowedFailures;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail()
-    {
-        failCount += failIncrement;
-        if (failCount < 0L)
-            throw new IllegalStateException("Unable to increment");
-    }
+  /** {@inheritDoc} */
+  @Override
+  public FailCounter newCounter() {
+    return new WeightedFailCounter(allowedFailures, failIncrement, passDecrement);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail(int n)
-    {
-        if (n < 0)
-            throw new IllegalArgumentException("Number of fails must be positive");
-        failCount += n * failIncrement;
-        if (failCount < 0L)
-            throw new IllegalStateException("Unable to increment");
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void reset() {
+    failCount = 0L;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isOK()
-    {
-        return failCount <= allowedFailures;
-    }
+  /**
+   * Gets the fail count.
+   *
+   * @return the fail count
+   */
+  public long getFailCount() {
+    return failCount;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public FailCounter newCounter()
-    {
-        return new WeightedFailCounter(allowedFailures, failIncrement, passDecrement);
-    }
+  /**
+   * Gets the number of allowed failures.
+   *
+   * @return the number of allowed failures.
+   */
+  public int getAllowedFailures() {
+    return allowedFailures;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void reset()
-    {
-        failCount = 0L;
-    }
+  /**
+   * Gets the amount to increment for a fail.
+   *
+   * @return the fail increment
+   */
+  public int getFailIncrement() {
+    return failIncrement;
+  }
 
-    /**
-     * Gets the fail count.
-     *
-     * @return the fail count
-     */
-    public long getFailCount()
-    {
-        return failCount;
-    }
-
-    /**
-     * Gets the number of allowed failures.
-     *
-     * @return the number of allowed failures.
-     */
-    public int getAllowedFailures()
-    {
-        return allowedFailures;
-    }
-
-    /**
-     * Gets the amount to increment for a fail.
-     *
-     * @return the fail increment
-     */
-    public int getFailIncrement()
-    {
-        return failIncrement;
-    }
-
-    /**
-     * Gets the amount to decrement for a pass.
-     *
-     * @return the pass decrement
-     */
-    public int getPassDecrement()
-    {
-        return passDecrement;
-    }
+  /**
+   * Gets the amount to decrement for a pass.
+   *
+   * @return the pass decrement
+   */
+  public int getPassDecrement() {
+    return passDecrement;
+  }
 }

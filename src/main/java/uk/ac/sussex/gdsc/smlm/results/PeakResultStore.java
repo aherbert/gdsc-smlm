@@ -31,184 +31,166 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 /**
  * Stores peak results.
  */
-public interface PeakResultStore
-{
-    /**
-     * Get the size.
-     *
-     * @return the size
-     */
-    public int size();
+public interface PeakResultStore {
+  /**
+   * Get the size.
+   *
+   * @return the size
+   */
+  public int size();
 
-    /**
-     * Add a result. Not synchronized.
-     *
-     * @param result
-     *            the result
-     * @return true if the store is changed
-     */
-    public boolean add(PeakResult result);
+  /**
+   * Add a result. Not synchronized.
+   *
+   * @param result the result
+   * @return true if the store is changed
+   */
+  public boolean add(PeakResult result);
 
-    /**
-     * Add all results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean addCollection(Collection<PeakResult> results);
+  /**
+   * Add all results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean addCollection(Collection<PeakResult> results);
 
-    /**
-     * Add all results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean addArray(PeakResult[] results);
+  /**
+   * Add all results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean addArray(PeakResult[] results);
 
-    /**
-     * Adds the results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean addStore(PeakResultStore results);
+  /**
+   * Adds the results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean addStore(PeakResultStore results);
 
-    /**
-     * Remove a result. Not synchronized.
-     *
-     * @param result
-     *            the result
-     * @return true if the store is changed
-     */
-    public boolean remove(PeakResult result);
+  /**
+   * Remove a result. Not synchronized.
+   *
+   * @param result the result
+   * @return true if the store is changed
+   */
+  public boolean remove(PeakResult result);
 
-    /**
-     * Remove all results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean removeCollection(Collection<PeakResult> results);
+  /**
+   * Remove all results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean removeCollection(Collection<PeakResult> results);
 
-    /**
-     * Remove all results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean removeArray(PeakResult[] results);
+  /**
+   * Remove all results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean removeArray(PeakResult[] results);
 
-    /**
-     * Removes the results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean removeStore(PeakResultStore results);
+  /**
+   * Removes the results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean removeStore(PeakResultStore results);
 
-    /**
-     * Retain all results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean retainCollection(Collection<PeakResult> results);
+  /**
+   * Retain all results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean retainCollection(Collection<PeakResult> results);
 
-    /**
-     * Retain all results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean retainArray(PeakResult[] results);
+  /**
+   * Retain all results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean retainArray(PeakResult[] results);
 
-    /**
-     * Retains the results.
-     *
-     * @param results
-     *            the results
-     * @return true if the store is changed
-     */
-    public boolean retainStore(PeakResultStore results);
+  /**
+   * Retains the results.
+   *
+   * @param results the results
+   * @return true if the store is changed
+   */
+  public boolean retainStore(PeakResultStore results);
 
-    /**
-     * Clear the results.
-     */
-    public void clear();
+  /**
+   * Clear the results.
+   */
+  public void clear();
 
-    /**
-     * Trims the capacity of this instance to be the current size. An application can use this operation to minimize
-     * the storage of an instance.
-     */
-    public void trimToSize();
+  /**
+   * Trims the capacity of this instance to be the current size. An application can use this
+   * operation to minimize the storage of an instance.
+   */
+  public void trimToSize();
 
-    /**
-     * Convert to an array. This is a new allocation of storage space.
-     *
-     * @return the peak result array
-     */
-    public PeakResult[] toArray();
+  /**
+   * Convert to an array. This is a new allocation of storage space.
+   *
+   * @return the peak result array
+   */
+  public PeakResult[] toArray();
 
-    /**
-     * Copy the results.
-     *
-     * @return the copy
-     */
-    public PeakResultStore copy();
+  /**
+   * Copy the results.
+   *
+   * @return the copy
+   */
+  public PeakResultStore copy();
 
-    /**
-     * Copy the results.
-     *
-     * @param deepCopy
-     *            Set to true to perform a deep copy
-     * @return the copy
-     */
-    public PeakResultStore copy(boolean deepCopy);
+  /**
+   * Copy the results.
+   *
+   * @param deepCopy Set to true to perform a deep copy
+   * @return the copy
+   */
+  public PeakResultStore copy(boolean deepCopy);
 
-    /**
-     * Removes the result if it matches the filter. If objects are removed then the order of elements may change.
-     *
-     * @param filter
-     *            the filter
-     * @return true, if any were removed
-     */
-    public boolean removeIf(PeakResultPredicate filter);
+  /**
+   * Removes the result if it matches the filter. If objects are removed then the order of elements
+   * may change.
+   *
+   * @param filter the filter
+   * @return true, if any were removed
+   */
+  public boolean removeIf(PeakResultPredicate filter);
 
-    /**
-     * Execute the procedure on each result in the store.
-     *
-     * @param procedure
-     *            the procedure
-     */
-    public void forEach(PeakResultProcedure procedure);
+  /**
+   * Execute the procedure on each result in the store.
+   *
+   * @param procedure the procedure
+   */
+  public void forEach(PeakResultProcedure procedure);
 
-    /**
-     * Get a subset of the results if they match the filter.
-     *
-     * @param filter
-     *            the filter
-     * @return the results
-     */
-    public PeakResult[] subset(PeakResultPredicate filter);
+  /**
+   * Get a subset of the results if they match the filter.
+   *
+   * @param filter the filter
+   * @return the results
+   */
+  public PeakResult[] subset(PeakResultPredicate filter);
 
-    /**
-     * Returns <tt>true</tt> if this store contains the specified result.
-     * More formally, returns <tt>true</tt> if and only if this store contains
-     * at least one element <tt>e</tt> such that
-     * <tt>(result==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;result.equals(e))</tt>.
-     *
-     * @param result
-     *            the result
-     * @return <tt>true</tt> if this list contains the specified result
-     *         true, if successful
-     */
-    public boolean contains(PeakResult result);
+  /**
+   * Returns <tt>true</tt> if this store contains the specified result. More formally, returns
+   * <tt>true</tt> if and only if this store contains at least one element <tt>e</tt> such that
+   * <tt>(result==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;result.equals(e))</tt>.
+   *
+   * @param result the result
+   * @return <tt>true</tt> if this list contains the specified result true, if successful
+   */
+  public boolean contains(PeakResult result);
 }

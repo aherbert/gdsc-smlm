@@ -29,52 +29,45 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 /**
  * Create a gradient procedure.
  */
-public class LSQVarianceGradientProcedureFactory
-{
-    /**
-     * Create a new gradient procedure.
-     *
-     * @param func
-     *            Gradient function
-     * @return the gradient procedure
-     */
-    public static LSQVarianceGradientProcedure create(final Gradient1Function func)
-    {
-        switch (func.getNumberOfGradients())
-        {
-            case 5:
-                return new LSQVarianceGradientProcedure5(func);
-            case 4:
-                return new LSQVarianceGradientProcedure4(func);
-            case 6:
-                return new LSQVarianceGradientProcedure6(func);
-            default:
-                return new LSQVarianceGradientProcedure(func);
-        }
+public class LSQVarianceGradientProcedureFactory {
+  /**
+   * Create a new gradient procedure.
+   *
+   * @param func Gradient function
+   * @return the gradient procedure
+   */
+  public static LSQVarianceGradientProcedure create(final Gradient1Function func) {
+    switch (func.getNumberOfGradients()) {
+      case 5:
+        return new LSQVarianceGradientProcedure5(func);
+      case 4:
+        return new LSQVarianceGradientProcedure4(func);
+      case 6:
+        return new LSQVarianceGradientProcedure6(func);
+      default:
+        return new LSQVarianceGradientProcedure(func);
     }
+  }
 
-    /**
-     * Create a new gradient procedure.
-     *
-     * @param func
-     *            Gradient function
-     * @param solver
-     *            The solver used to invert the Fisher information matrix to find
-     *            the Cramér–Rao lower bound (CRLB).
-     * @return the gradient procedure
-     */
-    public static LSQVarianceGradientProcedure create(final Gradient1Function func, EJMLLinearSolver solver)
-    {
-        switch (func.getNumberOfGradients())
-        {
-            case 5:
-                return new LSQVarianceGradientProcedure5(func, solver);
-            case 4:
-                return new LSQVarianceGradientProcedure4(func, solver);
-            case 6:
-                return new LSQVarianceGradientProcedure6(func, solver);
-            default:
-                return new LSQVarianceGradientProcedure(func, solver);
-        }
+  /**
+   * Create a new gradient procedure.
+   *
+   * @param func Gradient function
+   * @param solver The solver used to invert the Fisher information matrix to find the Cramér–Rao
+   *        lower bound (CRLB).
+   * @return the gradient procedure
+   */
+  public static LSQVarianceGradientProcedure create(final Gradient1Function func,
+      EJMLLinearSolver solver) {
+    switch (func.getNumberOfGradients()) {
+      case 5:
+        return new LSQVarianceGradientProcedure5(func, solver);
+      case 4:
+        return new LSQVarianceGradientProcedure4(func, solver);
+      case 6:
+        return new LSQVarianceGradientProcedure6(func, solver);
+      default:
+        return new LSQVarianceGradientProcedure(func, solver);
     }
+  }
 }

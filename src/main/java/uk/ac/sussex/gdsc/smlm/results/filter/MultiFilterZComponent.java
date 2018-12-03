@@ -26,36 +26,30 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using z-depth.
  */
-public class MultiFilterZComponent extends MultiFilterComponent
-{
-    private final float minZ, maxZ;
+public class MultiFilterZComponent extends MultiFilterComponent {
+  private final float minZ, maxZ;
 
-    /**
-     * Instantiates a new multi filter Z component.
-     *
-     * @param minZ
-     *            the min Z
-     * @param maxZ
-     *            the max Z
-     */
-    public MultiFilterZComponent(double minZ, double maxZ)
-    {
-        this.minZ = (float) minZ;
-        this.maxZ = (float) maxZ;
-    }
+  /**
+   * Instantiates a new multi filter Z component.
+   *
+   * @param minZ the min Z
+   * @param maxZ the max Z
+   */
+  public MultiFilterZComponent(double minZ, double maxZ) {
+    this.minZ = (float) minZ;
+    this.maxZ = (float) maxZ;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        final float z = peak.getZ();
-        return (z > maxZ || z < minZ);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    final float z = peak.getZ();
+    return (z > maxZ || z < minZ);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return IDirectFilter.V_Z;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return IDirectFilter.V_Z;
+  }
 }

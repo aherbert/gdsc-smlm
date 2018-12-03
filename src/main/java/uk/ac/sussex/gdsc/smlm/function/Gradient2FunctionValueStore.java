@@ -27,159 +27,134 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Wrap a function and store the only the values from the procedure.
  */
 public class Gradient2FunctionValueStore extends ValueFunctionStore
-        implements Gradient1Function, Gradient1Procedure, Gradient2Function, Gradient2Procedure
-{
-    private Gradient1Function f1;
-    private Gradient1Procedure p1;
-    private Gradient2Function f2;
-    private Gradient2Procedure p2;
+    implements Gradient1Function, Gradient1Procedure, Gradient2Function, Gradient2Procedure {
+  private Gradient1Function f1;
+  private Gradient1Procedure p1;
+  private Gradient2Function f2;
+  private Gradient2Procedure p2;
 
-    /**
-     * Instantiates a new gradient 2 function store.
-     *
-     * @param f
-     *            the f
-     */
-    public Gradient2FunctionValueStore(ValueFunction f)
-    {
-        super(f);
-    }
+  /**
+   * Instantiates a new gradient 2 function store.
+   *
+   * @param f the f
+   */
+  public Gradient2FunctionValueStore(ValueFunction f) {
+    super(f);
+  }
 
-    /**
-     * Instantiates a new gradient 2 function store.
-     *
-     * @param f
-     *            the f
-     */
-    public Gradient2FunctionValueStore(Gradient1Function f)
-    {
-        super(f);
-        this.f1 = f;
-    }
+  /**
+   * Instantiates a new gradient 2 function store.
+   *
+   * @param f the f
+   */
+  public Gradient2FunctionValueStore(Gradient1Function f) {
+    super(f);
+    this.f1 = f;
+  }
 
-    /**
-     * Instantiates a new gradient 2 function store.
-     *
-     * @param f
-     *            the f
-     */
-    public Gradient2FunctionValueStore(Gradient2Function f)
-    {
-        super(f);
-        this.f1 = f;
-        this.f2 = f;
-    }
+  /**
+   * Instantiates a new gradient 2 function store.
+   *
+   * @param f the f
+   */
+  public Gradient2FunctionValueStore(Gradient2Function f) {
+    super(f);
+    this.f1 = f;
+    this.f2 = f;
+  }
 
-    /**
-     * Instantiates a new gradient 2 function store.
-     *
-     * @param f
-     *            the f
-     * @param values
-     *            the values
-     */
-    public Gradient2FunctionValueStore(ValueFunction f, double[] values)
-    {
-        super(f, values);
-    }
+  /**
+   * Instantiates a new gradient 2 function store.
+   *
+   * @param f the f
+   * @param values the values
+   */
+  public Gradient2FunctionValueStore(ValueFunction f, double[] values) {
+    super(f, values);
+  }
 
-    /**
-     * Instantiates a new gradient 2 function store.
-     *
-     * @param f
-     *            the f
-     * @param values
-     *            the values
-     */
-    public Gradient2FunctionValueStore(Gradient1Function f, double[] values)
-    {
-        super(f, values);
-        this.f1 = f;
-    }
+  /**
+   * Instantiates a new gradient 2 function store.
+   *
+   * @param f the f
+   * @param values the values
+   */
+  public Gradient2FunctionValueStore(Gradient1Function f, double[] values) {
+    super(f, values);
+    this.f1 = f;
+  }
 
-    /**
-     * Instantiates a new gradient 2 function store.
-     *
-     * @param f
-     *            the f
-     * @param values
-     *            the values
-     */
-    public Gradient2FunctionValueStore(Gradient2Function f, double[] values)
-    {
-        super(f, values);
-        this.f1 = f;
-        this.f2 = f;
-    }
+  /**
+   * Instantiates a new gradient 2 function store.
+   *
+   * @param f the f
+   * @param values the values
+   */
+  public Gradient2FunctionValueStore(Gradient2Function f, double[] values) {
+    super(f, values);
+    this.f1 = f;
+    this.f2 = f;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void initialise(double[] a)
-    {
-        f1.initialise(a);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void initialise(double[] a) {
+    f1.initialise(a);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void initialise1(double[] a)
-    {
-        f1.initialise(a);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void initialise1(double[] a) {
+    f1.initialise(a);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int[] gradientIndices()
-    {
-        return f1.gradientIndices();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int[] gradientIndices() {
+    return f1.gradientIndices();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfGradients()
-    {
-        return f1.getNumberOfGradients();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfGradients() {
+    return f1.getNumberOfGradients();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void forEach(Gradient1Procedure procedure)
-    {
-        i = 0;
-        createValues();
-        this.p1 = procedure;
-        f1.forEach((Gradient1Procedure) this);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void forEach(Gradient1Procedure procedure) {
+    i = 0;
+    createValues();
+    this.p1 = procedure;
+    f1.forEach((Gradient1Procedure) this);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double value, double[] dy_da)
-    {
-        values[i++] = value;
-        p1.execute(value, dy_da);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value, double[] dy_da) {
+    values[i++] = value;
+    p1.execute(value, dy_da);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void initialise2(double[] a)
-    {
-        f2.initialise2(a);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void initialise2(double[] a) {
+    f2.initialise2(a);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void forEach(Gradient2Procedure procedure)
-    {
-        i = 0;
-        createValues();
-        this.p2 = procedure;
-        f2.forEach((Gradient2Procedure) this);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void forEach(Gradient2Procedure procedure) {
+    i = 0;
+    createValues();
+    this.p2 = procedure;
+    f2.forEach((Gradient2Procedure) this);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double value, double[] dy_da, double[] d2y_da2)
-    {
-        values[i++] = value;
-        p2.execute(value, dy_da, d2y_da2);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value, double[] dy_da, double[] d2y_da2) {
+    values[i++] = value;
+    p2.execute(value, dy_da, d2y_da2);
+  }
 }

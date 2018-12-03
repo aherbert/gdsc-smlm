@@ -26,19 +26,15 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Interface for functions to produce a value, first and second partial derivatives.
  */
-public interface Gradient2Procedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param value
-     *            the value of the function
-     * @param dy_da
-     *            Partial first derivative of function with respect to each coefficient identified by
-     *            {@link GradientFunction#gradientIndices()}
-     * @param d2y_da2
-     *            Partial second derivative of function with respect to each coefficient identified by
-     *            {@link GradientFunction#gradientIndices()}
-     */
-    public void execute(double value, double[] dy_da, double[] d2y_da2);
+public interface Gradient2Procedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param value the value of the function
+   * @param dy_da Partial first derivative of function with respect to each coefficient identified
+   *        by {@link GradientFunction#gradientIndices()}
+   * @param d2y_da2 Partial second derivative of function with respect to each coefficient
+   *        identified by {@link GradientFunction#gradientIndices()}
+   */
+  public void execute(double value, double[] dy_da, double[] d2y_da2);
 }

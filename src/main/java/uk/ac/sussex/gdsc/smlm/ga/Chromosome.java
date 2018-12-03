@@ -26,93 +26,86 @@ package uk.ac.sussex.gdsc.smlm.ga;
 /**
  * Define the genetic sequence that can evolve.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public interface Chromosome<T extends Comparable<T>>
-{
-    /**
-     * Get the chromosome length.
-     *
-     * @return The chromosome length
-     */
-    public int length();
+public interface Chromosome<T extends Comparable<T>> {
+  /**
+   * Get the chromosome length.
+   *
+   * @return The chromosome length
+   */
+  public int length();
 
-    /**
-     * Get the chromosome sequence.
-     *
-     * @return the chromosome sequence (must equal the length)
-     */
-    public double[] sequence();
+  /**
+   * Get the chromosome sequence.
+   *
+   * @return the chromosome sequence (must equal the length)
+   */
+  public double[] sequence();
 
-    /**
-     * Create a new chromosome.
-     *
-     * @param sequence
-     *            the chromosome sequence (must equal the current length)
-     * @return A new chromosome with the given sequence
-     */
-    public Chromosome<T> newChromosome(double[] sequence);
+  /**
+   * Create a new chromosome.
+   *
+   * @param sequence the chromosome sequence (must equal the current length)
+   * @return A new chromosome with the given sequence
+   */
+  public Chromosome<T> newChromosome(double[] sequence);
 
-    /**
-     * Get the range for mutation at each position in the sequence. This defines how far each position in the sequence
-     * can mutate in a single step.
-     *
-     * @return The range for mutation at each position in the sequence (must equal length)
-     */
-    public double[] mutationStepRange();
+  /**
+   * Get the range for mutation at each position in the sequence. This defines how far each position
+   * in the sequence can mutate in a single step.
+   *
+   * @return The range for mutation at each position in the sequence (must equal length)
+   */
+  public double[] mutationStepRange();
 
-    /**
-     * Get the lower limit at each position in the sequence. It is valid to return negative infinity for any position or
-     * null for no limit.
-     *
-     * @return The lower limit for each position in the sequence (must equal length)
-     */
-    public double[] lowerLimit();
+  /**
+   * Get the lower limit at each position in the sequence. It is valid to return negative infinity
+   * for any position or null for no limit.
+   *
+   * @return The lower limit for each position in the sequence (must equal length)
+   */
+  public double[] lowerLimit();
 
-    /**
-     * Get the upper limit at each position in the sequence. It is valid to return positive infinity for any position or
-     * null for no limit.
-     *
-     * @return The upper limit for each position in the sequence (must equal length)
-     */
-    public double[] upperLimit();
+  /**
+   * Get the upper limit at each position in the sequence. It is valid to return positive infinity
+   * for any position or null for no limit.
+   *
+   * @return The upper limit for each position in the sequence (must equal length)
+   */
+  public double[] upperLimit();
 
-    // Note: Default implementation of the getter/setter to store the double would require using Java 8.
+  // Note: Default implementation of the getter/setter to store the double would require using Java
+  // 8.
 
-    /**
-     * Set the fitness.
-     *
-     * @param fitness
-     *            The fitness of the sequence
-     */
-    public void setFitness(T fitness);
+  /**
+   * Set the fitness.
+   *
+   * @param fitness The fitness of the sequence
+   */
+  public void setFitness(T fitness);
 
-    /**
-     * Get the fitness
-     * <p>
-     * This should be null for an uninitialised score. The comparable should rank in ascending order with the first item
-     * the fittest individual.
-     *
-     * @return The fitness of the sequence
-     */
-    public T getFitness();
+  /**
+   * Get the fitness <p> This should be null for an uninitialised score. The comparable should rank
+   * in ascending order with the first item the fittest individual.
+   *
+   * @return The fitness of the sequence
+   */
+  public T getFitness();
 
-    /**
-     * Calculate the distance to another chromosome.
-     *
-     * @param other
-     *            the other chromosome
-     * @return the distance (zero is a match)
-     */
-    public double distance(Chromosome<T> other);
+  /**
+   * Calculate the distance to another chromosome.
+   *
+   * @param other the other chromosome
+   * @return the distance (zero is a match)
+   */
+  public double distance(Chromosome<T> other);
 
-    /**
-     * Calculate if equal to another chromosome.
-     *
-     * @param other
-     *            the other chromosome
-     * @return true if the same
-     */
-    public boolean equals(Chromosome<T> other);
+  /**
+   * Calculate if equal to another chromosome.
+   *
+   * @param other the other chromosome
+   * @return true if the same
+   */
+  public boolean equals(Chromosome<T> other);
 }

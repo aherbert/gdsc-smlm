@@ -23,13 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-@SuppressWarnings({ "javadoc" })
-public class SingleNBCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest
-{
-    @Override
-    protected void init()
-    {
-        flags = GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE;
-        f1 = new SingleNBCircularGaussian2DFunction(maxx, maxx);
-    }
+@SuppressWarnings({"javadoc"})
+public class SingleNBCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest {
+  @Override
+  protected void init() {
+    flags = GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE;
+    f1 = new SingleNBCircularGaussian2DFunction(maxx, maxx);
+  }
 }

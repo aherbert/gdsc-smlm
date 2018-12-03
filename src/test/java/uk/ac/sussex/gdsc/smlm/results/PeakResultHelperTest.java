@@ -26,51 +26,46 @@ package uk.ac.sussex.gdsc.smlm.results;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "javadoc" })
-public class PeakResultHelperTest
-{
-    @Test
-    public void canConvertLocalBackgroundToNoise()
-    {
-        final double gain = 6;
+@SuppressWarnings({"javadoc"})
+public class PeakResultHelperTest {
+  @Test
+  public void canConvertLocalBackgroundToNoise() {
+    final double gain = 6;
 
-        final double[] photons = { 0, 1, 2, 4, 10, 50, 100 };
+    final double[] photons = {0, 1, 2, 4, 10, 50, 100};
 
-        // CCD
-        for (final double p : photons)
-        {
-            // Assuming a Poisson distribution N photons should have a noise of sqrt(N).
-            // However the input and output are in ADU counts so we apply the gain.
-            final double n = PeakResultHelper.localBackgroundToNoise(p * gain, gain, false);
-            Assertions.assertEquals(Math.sqrt(p) * gain, n, () -> "CCD " + p);
-        }
-
-        // EM-CCD
-        for (final double p : photons)
-        {
-            // Assuming a Poisson distribution N photons should have a noise of sqrt(N * 2)
-            // (due to the EM-CCD noise factor of 2).
-            // However the input and output are in ADU counts so we apply the gain.
-            final double n = PeakResultHelper.localBackgroundToNoise(p * gain, gain, true);
-            Assertions.assertEquals(Math.sqrt(2 * p) * gain, n, () -> "EM-CCD " + p);
-        }
+    // CCD
+    for (final double p : photons) {
+      // Assuming a Poisson distribution N photons should have a noise of sqrt(N).
+      // However the input and output are in ADU counts so we apply the gain.
+      final double n = PeakResultHelper.localBackgroundToNoise(p * gain, gain, false);
+      Assertions.assertEquals(Math.sqrt(p) * gain, n, () -> "CCD " + p);
     }
 
-    @Test
-    public void canConvertLocalBackgroundToNoiseAndBack()
-    {
-        final double gain = 6;
-
-        final double[] photons = { 0, 1, 2, 4, 10, 50, 100 };
-
-        for (final boolean emCCD : new boolean[] { false, true })
-            for (final double p : photons)
-            {
-                final double b = p * gain;
-                final double n = PeakResultHelper.localBackgroundToNoise(b, gain, emCCD);
-                final double b2 = PeakResultHelper.noiseToLocalBackground(n, gain, emCCD);
-                Assertions.assertEquals(b, b2, 1e-6, () -> emCCD + " " + p);
-            }
+    // EM-CCD
+    for (final double p : photons) {
+      // Assuming a Poisson distribution N photons should have a noise of sqrt(N * 2)
+      // (due to the EM-CCD noise factor of 2).
+      // However the input and output are in ADU counts so we apply the gain.
+      final double n = PeakResultHelper.localBackgroundToNoise(p * gain, gain, true);
+      Assertions.assertEquals(Math.sqrt(2 * p) * gain, n, () -> "EM-CCD " + p);
     }
+  }
+
+  @Test
+  public void canConvertLocalBackgroundToNoiseAndBack() {
+    final double gain = 6;
+
+    final double[] photons = {0, 1, 2, 4, 10, 50, 100};
+
+    for (final boolean emCCD : new boolean[] {false, true}) {
+      for (final double p : photons) {
+        final double b = p * gain;
+        final double n = PeakResultHelper.localBackgroundToNoise(b, gain, emCCD);
+        final double b2 = PeakResultHelper.noiseToLocalBackground(n, gain, emCCD);
+        Assertions.assertEquals(b, b2, 1e-6, () -> emCCD + " " + p);
+      }
+    }
+  }
 
 }

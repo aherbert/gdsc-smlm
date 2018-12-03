@@ -26,123 +26,110 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 import java.util.List;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * Identifies candidate spots (local maxima) in an image. The image is smoothed with a Gaussian filter.
+ * Identifies candidate spots (local maxima) in an image. The image is smoothed with a Gaussian
+ * filter.
  */
-public class GaussianDataProcessor extends DataProcessor
-{
-    private final double sigma;
-    private GaussianFilter filter;
+public class GaussianDataProcessor extends DataProcessor {
+  private final double sigma;
+  private GaussianFilter filter;
 
-    /**
-     * Constructor.
-     *
-     * @param border
-     *            The border to ignore for maxima
-     * @param smooth
-     *            The distance into neighbouring pixels to extend. The resulting standard deviation can be found using
-     *            {@link #getSigma()}
-     */
-    public GaussianDataProcessor(int border, double smooth)
-    {
-        super(border);
-        this.sigma = getSigma(smooth);
-        filter = new GaussianFilter(0.02);
-    }
+  /**
+   * Constructor.
+   *
+   * @param border The border to ignore for maxima
+   * @param smooth The distance into neighbouring pixels to extend. The resulting standard deviation
+   *        can be found using {@link #getSigma()}
+   */
+  public GaussianDataProcessor(int border, double smooth) {
+    super(border);
+    this.sigma = getSigma(smooth);
+    filter = new GaussianFilter(0.02);
+  }
 
-    /**
-     * Get the Gaussian standard deviation for the desired smoothing distance.
-     *
-     * @param smooth
-     *            the smoothing distance
-     * @return the Gaussian standard deviation for the desired smoothing distance.
-     */
-    public static double getSigma(double smooth)
-    {
-        if (smooth < 0)
-            return 0;
-        return smooth;
+  /**
+   * Get the Gaussian standard deviation for the desired smoothing distance.
+   *
+   * @param smooth the smoothing distance
+   * @return the Gaussian standard deviation for the desired smoothing distance.
+   */
+  public static double getSigma(double smooth) {
+    if (smooth < 0) {
+      return 0;
     }
+    return smooth;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isWeighted()
-    {
-        return true;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isWeighted() {
+    return true;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setWeights(float[] weights, int width, int height)
-    {
-        filter.setWeights(weights, width, height);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setWeights(float[] weights, int width, int height) {
+    filter.setWeights(weights, width, height);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean hasWeights()
-    {
-        return filter.hasWeights();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean hasWeights() {
+    return filter.hasWeights();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public float[] process(float[] data, int width, int height)
-    {
-        float[] smoothData = data;
-        if (sigma > 0)
-        {
-            // Smoothing destructively modifies the data so create a copy
-            smoothData = Arrays.copyOf(data, width * height);
-            if (GaussianFilter.getBorder(sigma) <= getBorder())
-                filter.convolveInternal(smoothData, width, height, sigma);
-            else
-                filter.convolve(smoothData, width, height, sigma);
-        }
-        return smoothData;
+  /** {@inheritDoc} */
+  @Override
+  public float[] process(float[] data, int width, int height) {
+    float[] smoothData = data;
+    if (sigma > 0) {
+      // Smoothing destructively modifies the data so create a copy
+      smoothData = Arrays.copyOf(data, width * height);
+      if (GaussianFilter.getBorder(sigma) <= getBorder()) {
+        filter.convolveInternal(smoothData, width, height, sigma);
+      } else {
+        filter.convolve(smoothData, width, height, sigma);
+      }
     }
+    return smoothData;
+  }
 
-    /**
-     * @return the Gaussian standard deviation.
-     */
-    public double getSigma()
-    {
-        return sigma;
-    }
+  /**
+   * @return the Gaussian standard deviation.
+   */
+  public double getSigma() {
+    return sigma;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public GaussianDataProcessor clone()
-    {
-        final GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
-        // Ensure the object is duplicated and not passed by reference.
-        f.filter = filter.clone();
-        return f;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public GaussianDataProcessor clone() {
+    final GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
+    // Ensure the object is duplicated and not passed by reference.
+    f.filter = filter.clone();
+    return f;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getName()
-    {
-        return "Gaussian";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getName() {
+    return "Gaussian";
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public List<String> getParameters()
-    {
-        final List<String> list = super.getParameters();
-        list.add("sigma = " + MathUtils.rounded(sigma));
-        list.add("width = " + MathUtils.rounded(filter.getHalfWidth(sigma)));
-        return list;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public List<String> getParameters() {
+    final List<String> list = super.getParameters();
+    list.add("sigma = " + MathUtils.rounded(sigma));
+    list.add("width = " + MathUtils.rounded(filter.getHalfWidth(sigma)));
+    return list;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getSpread()
-    {
-        return 6 * sigma;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getSpread() {
+    return 6 * sigma;
+  }
 }

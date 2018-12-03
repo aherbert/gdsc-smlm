@@ -27,77 +27,67 @@ import uk.ac.sussex.gdsc.smlm.function.FastLog;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
- * Calculates the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function)
- * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
- * This is used within the Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
- * set of data points (x, y).
- * <p>
- * This procedure computes a modified Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson
- * model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input
- * data
- * must be Poisson distributed for this to be relevant.
+ * Calculates the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
+ * function) and the scaled gradient vector of the function's partial first derivatives with respect
+ * to the parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model
+ * with coefficients (a) for a set of data points (x, y). <p> This procedure computes a modified
+ * Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson model. See
+ * Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339.
+ * The input data must be Poisson distributed for this to be relevant.
  */
-public class FastLogMLELVMGradientProcedureX extends FastLogMLELVMGradientProcedure
-{
-    /**
-     * Instantiates a new fast log MLELVM gradient procedure X.
-     *
-     * @param y
-     *            Data to fit (assumed to be strictly positive)
-     * @param func
-     *            Gradient function
-     * @param fastLog
-     *            the fast log
-     */
-    public FastLogMLELVMGradientProcedureX(final double[] y, final Gradient1Function func, FastLog fastLog)
-    {
-        super(y, func, fastLog);
-        // We could check that y is positive ...
-    }
+public class FastLogMLELVMGradientProcedureX extends FastLogMLELVMGradientProcedure {
+  /**
+   * Instantiates a new fast log MLELVM gradient procedure X.
+   *
+   * @param y Data to fit (assumed to be strictly positive)
+   * @param func Gradient function
+   * @param fastLog the fast log
+   */
+  public FastLogMLELVMGradientProcedureX(final double[] y, final Gradient1Function func,
+      FastLog fastLog) {
+    super(y, func, fastLog);
+    // We could check that y is positive ...
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double fi, double[] dfi_da)
-    {
-        ++yi;
-        // Function must produce a strictly positive output.
-        // ---
-        // The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-        // effectively ignores any function value below zero. This could lead to a
-        // situation where the best chisq value can be achieved by setting the output
-        // function to produce 0 for all evaluations.
-        // Optimally the function should be bounded to always produce a positive number.
-        // ---
-        if (fi > 0.0)
-        {
-            final double xi = y[yi];
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double fi, double[] dfi_da) {
+    ++yi;
+    // Function must produce a strictly positive output.
+    // ---
+    // The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+    // effectively ignores any function value below zero. This could lead to a
+    // situation where the best chisq value can be achieved by setting the output
+    // function to produce 0 for all evaluations.
+    // Optimally the function should be bounded to always produce a positive number.
+    // ---
+    if (fi > 0.0) {
+      final double xi = y[yi];
 
-            // We assume y[i] is strictly positive
-            value += (fi - xi - xi * fastLog.fastLog(fi / xi));
-            final double xi_fi2 = xi / fi / fi;
-            final double e = 1 - (xi / fi);
-            for (int k = 0, i = 0; k < n; k++)
-            {
-                beta[k] -= e * dfi_da[k];
-                final double w = dfi_da[k] * xi_fi2;
-                for (int l = 0; l <= k; l++)
-                    alpha[i++] += w * dfi_da[l];
-            }
+      // We assume y[i] is strictly positive
+      value += (fi - xi - xi * fastLog.fastLog(fi / xi));
+      final double xi_fi2 = xi / fi / fi;
+      final double e = 1 - (xi / fi);
+      for (int k = 0, i = 0; k < n; k++) {
+        beta[k] -= e * dfi_da[k];
+        final double w = dfi_da[k] * xi_fi2;
+        for (int l = 0; l <= k; l++) {
+          alpha[i++] += w * dfi_da[l];
         }
+      }
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double fi)
-    {
-        ++yi;
-        // Function must produce a strictly positive output.
-        if (fi > 0.0)
-        {
-            final double xi = y[yi];
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double fi) {
+    ++yi;
+    // Function must produce a strictly positive output.
+    if (fi > 0.0) {
+      final double xi = y[yi];
 
-            // We assume y[i] is strictly positive
-            value += (fi - xi - xi * fastLog.fastLog(fi / xi));
-        }
+      // We assume y[i] is strictly positive
+      value += (fi - xi - xi * fastLog.fastLog(fi / xi));
     }
+  }
 }

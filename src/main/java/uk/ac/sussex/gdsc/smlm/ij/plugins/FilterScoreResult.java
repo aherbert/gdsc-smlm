@@ -28,34 +28,28 @@ import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 /**
  * Store the score from analysis of the direct filter.
  */
-public class FilterScoreResult
-{
-    /** The score. */
-    final double score;
-    /** The criteria. */
-    final double criteria;
-    /** The filter. */
-    final DirectFilter filter;
-    /** The text. */
-    final String text;
+public class FilterScoreResult {
+  /** The score. */
+  final double score;
+  /** The criteria. */
+  final double criteria;
+  /** The filter. */
+  final DirectFilter filter;
+  /** The text. */
+  final String text;
 
-    /**
-     * Instantiates a new filter score result.
-     *
-     * @param score
-     *            the score
-     * @param criteria
-     *            the criteria
-     * @param filter
-     *            the filter
-     * @param text
-     *            the text
-     */
-    public FilterScoreResult(double score, double criteria, DirectFilter filter, String text)
-    {
-        this.score = score;
-        this.criteria = criteria;
-        this.filter = filter;
-        this.text = text;
-    }
+  /**
+   * Instantiates a new filter score result.
+   *
+   * @param score the score
+   * @param criteria the criteria
+   * @param filter the filter
+   * @param text the text
+   */
+  public FilterScoreResult(double score, double criteria, DirectFilter filter, String text) {
+    this.score = score;
+    this.criteria = criteria;
+    this.filter = filter;
+    this.text = text;
+  }
 }

@@ -27,46 +27,40 @@ import uk.ac.sussex.gdsc.smlm.results.predicates.FramePeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.IdPeakResultPredicate;
 
 /**
- * Provides a dynamic view of the results. Changes to the underlying results store will be reflected in the view.
+ * Provides a dynamic view of the results. Changes to the underlying results store will be reflected
+ * in the view.
  */
-public class DynamicPeakResultView implements PeakResultView
-{
-    private final PeakResultStore store;
+public class DynamicPeakResultView implements PeakResultView {
+  private final PeakResultStore store;
 
-    /**
-     * Instantiates a new cached peak result view.
-     *
-     * @param store
-     *            the store
-     */
-    public DynamicPeakResultView(PeakResultStore store)
-    {
-        this.store = store;
-    }
+  /**
+   * Instantiates a new cached peak result view.
+   *
+   * @param store the store
+   */
+  public DynamicPeakResultView(PeakResultStore store) {
+    this.store = store;
+  }
 
-    /**
-     * Gets the results by frame.
-     *
-     * @param frame
-     *            the frame
-     * @return the results
-     */
-    @Override
-    public PeakResult[] getResultsByFrame(int frame)
-    {
-        return store.subset(new FramePeakResultPredicate(frame));
-    }
+  /**
+   * Gets the results by frame.
+   *
+   * @param frame the frame
+   * @return the results
+   */
+  @Override
+  public PeakResult[] getResultsByFrame(int frame) {
+    return store.subset(new FramePeakResultPredicate(frame));
+  }
 
-    /**
-     * Gets the results by id.
-     *
-     * @param id
-     *            the id
-     * @return the results
-     */
-    @Override
-    public PeakResult[] getResultsById(int id)
-    {
-        return store.subset(new IdPeakResultPredicate(id));
-    }
+  /**
+   * Gets the results by id.
+   *
+   * @param id the id
+   * @return the results
+   */
+  @Override
+  public PeakResult[] getResultsById(int id) {
+    return store.subset(new IdPeakResultPredicate(id));
+  }
 }

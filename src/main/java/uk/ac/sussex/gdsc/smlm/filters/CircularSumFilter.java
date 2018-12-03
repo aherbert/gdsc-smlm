@@ -24,31 +24,25 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
- * Computes the sum using a circular mask.
- * <p>
- * Adapted from ij.plugin.filter.RankFilters
+ * Computes the sum using a circular mask. <p> Adapted from ij.plugin.filter.RankFilters
  */
-public class CircularSumFilter extends CircularFilter
-{
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeWeightedNormaliser(double radius)
-    {
-        return NonNormaliser.INSTANCE;
-    }
+public class CircularSumFilter extends CircularFilter {
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeWeightedNormaliser(double radius) {
+    return NonNormaliser.INSTANCE;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeNormaliser(int nPoints)
-    {
-        return NonNormaliser.INSTANCE;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeNormaliser(int nPoints) {
+    return NonNormaliser.INSTANCE;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public CircularSumFilter clone()
-    {
-        final CircularSumFilter o = (CircularSumFilter) super.clone();
-        return o;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public CircularSumFilter clone() {
+    final CircularSumFilter o = (CircularSumFilter) super.clone();
+    return o;
+  }
 }

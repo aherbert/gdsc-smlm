@@ -37,211 +37,190 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2FunctionValueStore;
 
 /**
- * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using least squares estimation.
+ * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using least
+ * squares estimation.
  */
-public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements LSEFunctionSolver
-{
-    /**
-     * The solver used to invert the Fisher information matrix to find
-     * the Cramér–Rao lower bound (CRLB).
-     */
-    protected EJMLLinearSolver inversionSolver;
+public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
+    implements LSEFunctionSolver {
+  /**
+   * The solver used to invert the Fisher information matrix to find the Cramér–Rao lower bound
+   * (CRLB).
+   */
+  protected EJMLLinearSolver inversionSolver;
 
-    /** The total sum of squares. */
-    protected double totalSumOfSquares = Double.NaN;
+  /** The total sum of squares. */
+  protected double totalSumOfSquares = Double.NaN;
 
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param f
-     *            the function
-     * @throws NullPointerException
-     *             if the function is null
-     */
-    public LSELVMSteppingFunctionSolver(Gradient1Function f)
-    {
-        super(FunctionSolverType.LSE, f);
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param f the function
+   * @throws NullPointerException if the function is null
+   */
+  public LSELVMSteppingFunctionSolver(Gradient1Function f) {
+    super(FunctionSolverType.LSE, f);
+  }
+
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param f the function
+   * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum relative error
+   * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum absolute error
+   * @throws NullPointerException if the function is null
+   */
+  public LSELVMSteppingFunctionSolver(Gradient1Function f, double maxRelativeError,
+      double maxAbsoluteError) {
+    super(FunctionSolverType.LSE, f, maxRelativeError, maxAbsoluteError);
+  }
+
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param f the function
+   * @param tc the tolerance checker
+   * @param bounds the bounds
+   * @throws NullPointerException if the function or tolerance checker is null
+   */
+  public LSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+      ParameterBounds bounds) {
+    super(FunctionSolverType.LSE, f, tc, bounds);
+  }
+
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param f the function
+   * @param tc the tolerance checker
+   * @param bounds the bounds
+   * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum relative error
+   * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum absolute error
+   * @throws NullPointerException if the function or tolerance checker is null
+   */
+  public LSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+      ParameterBounds bounds, double maxRelativeError, double maxAbsoluteError) {
+    super(FunctionSolverType.LSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void preProcess() {
+    totalSumOfSquares = Double.NaN;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected LVMGradientProcedure createGradientProcedure(double[] y) {
+    return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) f);
+  }
+
+  @Override
+  protected void computeDeviationsAndValues(double[] aDev, double[] yFit) {
+    Gradient1Function f1 = (Gradient1Function) this.f;
+    // Capture the y-values if necessary
+    if (yFit != null && yFit.length == f1.size()) {
+      f1 = new Gradient2FunctionValueStore(f1, yFit);
     }
-
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param f
-     *            the function
-     * @param maxRelativeError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum relative error
-     * @param maxAbsoluteError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
-     * @throws NullPointerException
-     *             if the function is null
-     */
-    public LSELVMSteppingFunctionSolver(Gradient1Function f, double maxRelativeError, double maxAbsoluteError)
-    {
-        super(FunctionSolverType.LSE, f, maxRelativeError, maxAbsoluteError);
+    final LSQVarianceGradientProcedure p = createVarianceProcedure(f1);
+    if (p.variance(null) == LSQVarianceGradientProcedure.STATUS_OK) {
+      setDeviations(aDev, p.variance);
     }
+  }
 
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param f
-     *            the function
-     * @param tc
-     *            the tolerance checker
-     * @param bounds
-     *            the bounds
-     * @throws NullPointerException
-     *             if the function or tolerance checker is null
-     */
-    public LSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc, ParameterBounds bounds)
-    {
-        super(FunctionSolverType.LSE, f, tc, bounds);
+  private LSQVarianceGradientProcedure createVarianceProcedure(Gradient1Function f) {
+    if (inversionSolver == null) {
+      inversionSolver = EJMLLinearSolver.createForInversion(1e-2);
     }
+    return LSQVarianceGradientProcedureFactory.create(f, inversionSolver);
+  }
 
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param f
-     *            the function
-     * @param tc
-     *            the tolerance checker
-     * @param bounds
-     *            the bounds
-     * @param maxRelativeError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum relative error
-     * @param maxAbsoluteError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
-     * @throws NullPointerException
-     *             if the function or tolerance checker is null
-     */
-    public LSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc, ParameterBounds bounds,
-            double maxRelativeError, double maxAbsoluteError)
-    {
-        super(FunctionSolverType.LSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
+  @Override
+  public boolean computeDeviations(double[] y, double[] a, double[] aDev) {
+    final LSQVarianceGradientProcedure p = createVarianceProcedure((Gradient1Function) f);
+    if (p.variance(a) == LSQVarianceGradientProcedure.STATUS_OK) {
+      setDeviations(aDev, p.variance);
+      return true;
     }
+    return false;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void preProcess()
-    {
-        totalSumOfSquares = Double.NaN;
+  @Override
+  protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit) {
+    // This solver directly implements computation of the deviations
+    throw new NotImplementedException();
+  }
+
+  @Override
+  protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a) {
+    // This solver directly implements computation of the deviations
+    throw new NotImplementedException();
+  }
+
+  // @Override
+  // protected FisherInformationMatrix computeFisherInformationMatrix()
+  // {
+  // // TODO. Check if these deviations are correct.
+  // // The last Hessian matrix should be stored in the working alpha.
+  // return new FisherInformationMatrix(walpha, beta.length);
+  // }
+  //
+  // @Override
+  // protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[]
+  // a)
+  // {
+  // // Compute using the scaled Hessian as per the above method .
+  // // TODO - Use a dedicated procedure that omits computing beta.
+  // if (gradientProcedure == null)
+  // gradientProcedure = createGradientProcedure(y);
+  // gradientProcedure.gradient(a);
+  // if (gradientProcedure.isNaNGradients())
+  // throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+  // return new FisherInformationMatrix(gradientProcedure.getAlphaLinear(),
+  // f.getNumberOfGradients());
+  // }
+
+  /** {@inheritDoc} */
+  @Override
+  public double getTotalSumOfSquares() {
+    if (Double.isNaN(totalSumOfSquares) && lastY != null) {
+      totalSumOfSquares = LSEBaseFunctionSolver.getTotalSumOfSquares(lastY);
     }
+    return totalSumOfSquares;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected LVMGradientProcedure createGradientProcedure(double[] y)
-    {
-        return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) f);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getResidualSumOfSquares() {
+    return value;
+  }
 
-    @Override
-    protected void computeDeviationsAndValues(double[] aDev, double[] yFit)
-    {
-        Gradient1Function f1 = (Gradient1Function) this.f;
-        // Capture the y-values if necessary
-        if (yFit != null && yFit.length == f1.size())
-            f1 = new Gradient2FunctionValueStore(f1, yFit);
-        final LSQVarianceGradientProcedure p = createVarianceProcedure(f1);
-        if (p.variance(null) == LSQVarianceGradientProcedure.STATUS_OK)
-            setDeviations(aDev, p.variance);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getCoefficientOfDetermination() {
+    return 1.0 - (value / getTotalSumOfSquares());
+  }
 
-    private LSQVarianceGradientProcedure createVarianceProcedure(Gradient1Function f)
-    {
-        if (inversionSolver == null)
-            inversionSolver = EJMLLinearSolver.createForInversion(1e-2);
-        return LSQVarianceGradientProcedureFactory.create(f, inversionSolver);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getAdjustedCoefficientOfDetermination() {
+    return MathUtils.getAdjustedCoefficientOfDetermination(value, getTotalSumOfSquares(),
+        getNumberOfFittedPoints(), getNumberOfFittedParameters());
+  }
 
-    @Override
-    public boolean computeDeviations(double[] y, double[] a, double[] aDev)
-    {
-        final LSQVarianceGradientProcedure p = createVarianceProcedure((Gradient1Function) f);
-        if (p.variance(a) == LSQVarianceGradientProcedure.STATUS_OK)
-        {
-            setDeviations(aDev, p.variance);
-            return true;
-        }
-        return false;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getMeanSquaredError() {
+    return value / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
+  }
 
-    @Override
-    protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
-    {
-        // This solver directly implements computation of the deviations
-        throw new NotImplementedException();
-    }
-
-    @Override
-    protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
-    {
-        // This solver directly implements computation of the deviations
-        throw new NotImplementedException();
-    }
-
-    //	@Override
-    //	protected FisherInformationMatrix computeFisherInformationMatrix()
-    //	{
-    //		// TODO. Check if these deviations are correct.
-    //		// The last Hessian matrix should be stored in the working alpha.
-    //		return new FisherInformationMatrix(walpha, beta.length);
-    //	}
-    //
-    //	@Override
-    //	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
-    //	{
-    //		// Compute using the scaled Hessian as per the above method .
-    //		// TODO - Use a dedicated procedure that omits computing beta.
-    //		if (gradientProcedure == null)
-    //			gradientProcedure = createGradientProcedure(y);
-    //		gradientProcedure.gradient(a);
-    //		if (gradientProcedure.isNaNGradients())
-    //			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
-    //		return new FisherInformationMatrix(gradientProcedure.getAlphaLinear(), f.getNumberOfGradients());
-    //	}
-
-    /** {@inheritDoc} */
-    @Override
-    public double getTotalSumOfSquares()
-    {
-        if (Double.isNaN(totalSumOfSquares) && lastY != null)
-            totalSumOfSquares = LSEBaseFunctionSolver.getTotalSumOfSquares(lastY);
-        return totalSumOfSquares;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getResidualSumOfSquares()
-    {
-        return value;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getCoefficientOfDetermination()
-    {
-        return 1.0 - (value / getTotalSumOfSquares());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getAdjustedCoefficientOfDetermination()
-    {
-        return MathUtils.getAdjustedCoefficientOfDetermination(value, getTotalSumOfSquares(), getNumberOfFittedPoints(),
-                getNumberOfFittedParameters());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getMeanSquaredError()
-    {
-        return value / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isWeighted()
-    {
-        // This is a stepping solver that is not weighted
-        return false;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isWeighted() {
+    // This is a stepping solver that is not weighted
+    return false;
+  }
 }

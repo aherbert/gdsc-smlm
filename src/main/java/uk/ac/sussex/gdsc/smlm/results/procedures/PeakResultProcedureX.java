@@ -28,16 +28,13 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Interface for accessing the results with fast exit.
  */
-public interface PeakResultProcedureX
-{
-    /**
-     * Executes this procedure. A true return value indicates that
-     * the application executing this procedure should not invoke this
-     * procedure again.
-     *
-     * @param peakResult
-     *            the peak result
-     * @return true, if the execution should stop
-     */
-    public boolean execute(PeakResult peakResult);
+public interface PeakResultProcedureX {
+  /**
+   * Executes this procedure. A true return value indicates that the application executing this
+   * procedure should not invoke this procedure again.
+   *
+   * @param peakResult the peak result
+   * @return true, if the execution should stop
+   */
+  public boolean execute(PeakResult peakResult);
 }

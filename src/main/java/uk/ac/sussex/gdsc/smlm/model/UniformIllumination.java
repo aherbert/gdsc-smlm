@@ -26,59 +26,51 @@ package uk.ac.sussex.gdsc.smlm.model;
 /**
  * Specifies the same illumination for any position.
  */
-public class UniformIllumination implements SpatialIllumination
-{
-    private final double photons;
-    private final double pulsePhotons;
-    private final int pulseInterval;
+public class UniformIllumination implements SpatialIllumination {
+  private final double photons;
+  private final double pulsePhotons;
+  private final int pulseInterval;
 
-    /**
-     * @param photons
-     *            The number of photons in a time frame
-     */
-    public UniformIllumination(double photons)
-    {
-        this(photons, 0, 0);
+  /**
+   * @param photons The number of photons in a time frame
+   */
+  public UniformIllumination(double photons) {
+    this(photons, 0, 0);
+  }
+
+  /**
+   * @param photons The number of photons in a time frame
+   * @param pulsePhotons The number of photons in a pulse
+   * @param pulseInterval The interval between pulses (t=1 is the first pulse). Must be above 1.
+   */
+  public UniformIllumination(double photons, double pulsePhotons, int pulseInterval) {
+    this.photons = photons;
+    this.pulsePhotons = pulsePhotons;
+    this.pulseInterval = pulseInterval;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double getPhotons(double[] xyz) {
+    return photons;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double[] getPulsedPhotons(double[] xyz, int t) {
+
+    if (pulseInterval > 1) {
+      return new double[] {(t % pulseInterval == 1) ? pulsePhotons : 0, photons};
     }
+    return new double[] {0, photons};
+  }
 
-    /**
-     * @param photons
-     *            The number of photons in a time frame
-     * @param pulsePhotons
-     *            The number of photons in a pulse
-     * @param pulseInterval
-     *            The interval between pulses (t=1 is the first pulse). Must be above 1.
-     */
-    public UniformIllumination(double photons, double pulsePhotons, int pulseInterval)
-    {
-        this.photons = photons;
-        this.pulsePhotons = pulsePhotons;
-        this.pulseInterval = pulseInterval;
+  /** {@inheritDoc} */
+  @Override
+  public double getAveragePhotons() {
+    if (pulseInterval > 1) {
+      return photons + pulsePhotons / pulseInterval;
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getPhotons(double[] xyz)
-    {
-        return photons;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double[] getPulsedPhotons(double[] xyz, int t)
-    {
-
-        if (pulseInterval > 1)
-            return new double[] { (t % pulseInterval == 1) ? pulsePhotons : 0, photons };
-        return new double[] { 0, photons };
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getAveragePhotons()
-    {
-        if (pulseInterval > 1)
-            return photons + pulsePhotons / pulseInterval;
-        return photons;
-    }
+    return photons;
+  }
 }

@@ -26,25 +26,21 @@ package uk.ac.sussex.gdsc.smlm.ij.settings;
 /**
  * Contain the settings for a parameter for the batch fitting plugin.
  */
-public class ParameterSettings
-{
-    /** The name. */
-    public String name = "";
+public class ParameterSettings {
+  /** The name. */
+  public String name = "";
 
-    /** The value. */
-    public String value = "";
+  /** The value. */
+  public String value = "";
 
-    /**
-     * Instantiates a new parameter settings.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     */
-    public ParameterSettings(String name, String value)
-    {
-        this.name = name;
-        this.value = value;
-    }
+  /**
+   * Instantiates a new parameter settings.
+   *
+   * @param name the name
+   * @param value the value
+   */
+  public ParameterSettings(String name, String value) {
+    this.name = name;
+    this.value = value;
+  }
 }

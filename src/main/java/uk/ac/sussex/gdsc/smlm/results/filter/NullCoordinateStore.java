@@ -26,125 +26,106 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Null implementation of the CoordinateStore interface.
  */
-public class NullCoordinateStore implements CoordinateStore
-{
-    /** An instance to ignore calls to the CoordinateStore interface. */
-    public static final NullCoordinateStore INSTANCE = new NullCoordinateStore();
+public class NullCoordinateStore implements CoordinateStore {
+  /** An instance to ignore calls to the CoordinateStore interface. */
+  public static final NullCoordinateStore INSTANCE = new NullCoordinateStore();
 
-    /**
-     * Instantiates a new null coordinate store.
-     */
-    private NullCoordinateStore()
-    {
-    }
+  /**
+   * Instantiates a new null coordinate store.
+   */
+  private NullCoordinateStore() {}
 
-    /**
-     * Creates an instance if the argument is null, else return the argument.
-     *
-     * @param coordinateStore
-     *            the coordinate store (may be null)
-     * @return the coordinate store (not null)
-     */
-    public static CoordinateStore replaceIfNull(CoordinateStore coordinateStore)
-    {
-        return (coordinateStore == null) ? INSTANCE : coordinateStore;
-    }
+  /**
+   * Creates an instance if the argument is null, else return the argument.
+   *
+   * @param coordinateStore the coordinate store (may be null)
+   * @return the coordinate store (not null)
+   */
+  public static CoordinateStore replaceIfNull(CoordinateStore coordinateStore) {
+    return (coordinateStore == null) ? INSTANCE : coordinateStore;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getXYResolution()
-    {
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getXYResolution() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getZResolution()
-    {
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getZResolution() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void addToQueue(double x, double y, double z)
-    {
-        // Do nothing
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void addToQueue(double x, double y, double z) {
+    // Do nothing
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void flush()
-    {
-        // Do nothing
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void flush() {
+    // Do nothing
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void add(double x, double y, double z)
-    {
-        // Do nothing
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void add(double x, double y, double z) {
+    // Do nothing
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void clear()
-    {
-        // Do nothing
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void clear() {
+    // Do nothing
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean contains(double x, double y, double z)
-    {
-        return false;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean contains(double x, double y, double z) {
+    return false;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double[] find(double x, double y, double z)
-    {
-        return null;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] find(double x, double y, double z) {
+    return null;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public CoordinateStore newInstance()
-    {
-        return this;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public CoordinateStore newInstance() {
+    return this;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public CoordinateStore resize(int minx, int miny, int maxx, int maxy)
-    {
-        return this;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public CoordinateStore resize(int minx, int miny, int maxx, int maxy) {
+    return this;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getMinX()
-    {
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getMinX() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getMinY()
-    {
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getMinY() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getWidth()
-    {
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getWidth() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getHeight()
-    {
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getHeight() {
+    return 0;
+  }
 }

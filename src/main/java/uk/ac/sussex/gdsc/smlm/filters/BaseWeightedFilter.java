@@ -26,54 +26,48 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Contains common functionality for weighted filters.
  */
-public abstract class BaseWeightedFilter extends BaseFilter
-{
-    /** The weights. */
-    protected float[] weights;
+public abstract class BaseWeightedFilter extends BaseFilter {
+  /** The weights. */
+  protected float[] weights;
 
-    /** The width of the weights. */
-    protected int weightWidth;
+  /** The width of the weights. */
+  protected int weightWidth;
 
-    /** The height of the weights. */
-    protected int weightHeight;
+  /** The height of the weights. */
+  protected int weightHeight;
 
-    /**
-     * Sets the weights of the data. This should be called before filtering data samples.
-     *
-     * @param weights
-     *            the weights of the data (can be null)
-     * @param width
-     *            The width of the data
-     * @param height
-     *            The height of the data
-     */
-    public void setWeights(final float[] weights, final int width, final int height)
-    {
-        this.weights = weights;
-        this.weightWidth = width;
-        this.weightHeight = height;
-        newWeights();
-    }
+  /**
+   * Sets the weights of the data. This should be called before filtering data samples.
+   *
+   * @param weights the weights of the data (can be null)
+   * @param width The width of the data
+   * @param height The height of the data
+   */
+  public void setWeights(final float[] weights, final int width, final int height) {
+    this.weights = weights;
+    this.weightWidth = width;
+    this.weightHeight = height;
+    newWeights();
+  }
 
-    /**
-     * Checks for weights.
-     *
-     * @return true, if successful
-     */
-    public boolean hasWeights()
-    {
-        return weights != null;
-    }
+  /**
+   * Checks for weights.
+   *
+   * @return true, if successful
+   */
+  public boolean hasWeights() {
+    return weights != null;
+  }
 
-    /**
-     * Signal that new weight parameters have been set. Sub-classes can re-initialise for the new weights.
-     */
-    protected abstract void newWeights();
+  /**
+   * Signal that new weight parameters have been set. Sub-classes can re-initialise for the new
+   * weights.
+   */
+  protected abstract void newWeights();
 
-    /** {@inheritDoc} */
-    @Override
-    public BaseWeightedFilter clone()
-    {
-        return (BaseWeightedFilter) super.clone();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public BaseWeightedFilter clone() {
+    return (BaseWeightedFilter) super.clone();
+  }
 }

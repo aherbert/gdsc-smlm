@@ -28,32 +28,27 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 /**
  * Create a weighted Poisson gradient procedure.
  */
-public class WPoissonGradientProcedureFactory
-{
-    /**
-     * Create a new gradient procedure.
-     *
-     * @param y
-     *            Data to fit
-     * @param var
-     *            the base variance of each observation (must be positive)
-     * @param func
-     *            Gradient function
-     * @return the gradient procedure
-     */
-    public static WPoissonGradientProcedure create(final double[] y, final double[] var, final Gradient1Function func)
-    {
-        switch (func.getNumberOfGradients())
-        {
-            case 5:
-                return new WPoissonGradientProcedure5(y, var, func);
-            case 4:
-                return new WPoissonGradientProcedure4(y, var, func);
-            case 6:
-                return new WPoissonGradientProcedure6(y, var, func);
+public class WPoissonGradientProcedureFactory {
+  /**
+   * Create a new gradient procedure.
+   *
+   * @param y Data to fit
+   * @param var the base variance of each observation (must be positive)
+   * @param func Gradient function
+   * @return the gradient procedure
+   */
+  public static WPoissonGradientProcedure create(final double[] y, final double[] var,
+      final Gradient1Function func) {
+    switch (func.getNumberOfGradients()) {
+      case 5:
+        return new WPoissonGradientProcedure5(y, var, func);
+      case 4:
+        return new WPoissonGradientProcedure4(y, var, func);
+      case 6:
+        return new WPoissonGradientProcedure6(y, var, func);
 
-            default:
-                return new WPoissonGradientProcedure(y, var, func);
-        }
+      default:
+        return new WPoissonGradientProcedure(y, var, func);
     }
+  }
 }

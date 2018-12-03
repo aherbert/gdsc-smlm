@@ -28,19 +28,18 @@ import java.util.Collection;
 /**
  * Marker interface for PeakResultStore objects that use a collection.
  */
-public interface PeakResultStoreCollection
-{
-    /**
-     * Gets the collection.
-     *
-     * @return the collection
-     */
-    public Collection<PeakResult> getCollection();
+public interface PeakResultStoreCollection {
+  /**
+   * Gets the collection.
+   *
+   * @return the collection
+   */
+  public Collection<PeakResult> getCollection();
 
-    /**
-     * Gets the collection by reference.
-     *
-     * @return the collection
-     */
-    public Collection<PeakResult> getCollectionReference();
+  /**
+   * Gets the collection by reference.
+   *
+   * @return the collection
+   */
+  public Collection<PeakResult> getCollectionReference();
 }

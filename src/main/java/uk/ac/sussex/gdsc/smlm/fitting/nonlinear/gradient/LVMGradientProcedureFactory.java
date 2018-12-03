@@ -29,64 +29,55 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 /**
  * Create a gradient procedure for use in the Levenberg–Marquardt (LVM) algorithm
  */
-public class LVMGradientProcedureFactory
-{
-    /**
-     * The type of LVM gradient procedure.
-     */
-    public enum Type
-    {
-        //@formatter:off
-		/** Least-squares */
-		LSQ,
-		/** Maximum Likelihood Estimation (using LVM). */
-		MLE { @Override public boolean isMLE()	{return true;} },
-		/** Weighted least-squares */
-		WLSQ,
-		/** Fast Maximum Likelihood Estimation (using Newton iteration). */
-		FastLogMLE { @Override public boolean isMLE()	{return true;} };
-		//@formatter:on
-
-        /**
-         * Checks if is MLE.
-         *
-         * @return true, if is MLE
-         */
-        public boolean isMLE()
-        {
-            return false;
-        }
-    }
+public class LVMGradientProcedureFactory {
+  /**
+   * The type of LVM gradient procedure.
+   */
+  public enum Type {
+    //@formatter:off
+    /** Least-squares */
+    LSQ,
+    /** Maximum Likelihood Estimation (using LVM). */
+    MLE { @Override public boolean isMLE()  {return true;} },
+    /** Weighted least-squares */
+    WLSQ,
+    /** Fast Maximum Likelihood Estimation (using Newton iteration). */
+    FastLogMLE { @Override public boolean isMLE()  {return true;} };
+    //@formatter:on
 
     /**
-     * Create a new gradient calculator.
+     * Checks if is MLE.
      *
-     * @param y
-     *            Data to fit
-     * @param func
-     *            Gradient function
-     * @param type
-     *            the type
-     * @param fastLog
-     *            the fast log
-     * @return the gradient procedure
+     * @return true, if is MLE
      */
-    public static LVMGradientProcedure create(final double[] y, final Gradient1Function func, Type type,
-            FastLog fastLog)
-    {
-        switch (type)
-        {
-            case WLSQ:
-                // Do not support per observation weights
-                return WLSQLVMGradientProcedureFactory.create(y, null, func);
-            case MLE:
-                return MLELVMGradientProcedureFactory.create(y, func);
-            case LSQ:
-                return LSQLVMGradientProcedureFactory.create(y, func);
-            case FastLogMLE:
-                return MLELVMGradientProcedureFactory.create(y, func, fastLog);
-            default:
-                throw new IllegalStateException("Unknown type: " + type);
-        }
+    public boolean isMLE() {
+      return false;
     }
+  }
+
+  /**
+   * Create a new gradient calculator.
+   *
+   * @param y Data to fit
+   * @param func Gradient function
+   * @param type the type
+   * @param fastLog the fast log
+   * @return the gradient procedure
+   */
+  public static LVMGradientProcedure create(final double[] y, final Gradient1Function func,
+      Type type, FastLog fastLog) {
+    switch (type) {
+      case WLSQ:
+        // Do not support per observation weights
+        return WLSQLVMGradientProcedureFactory.create(y, null, func);
+      case MLE:
+        return MLELVMGradientProcedureFactory.create(y, func);
+      case LSQ:
+        return LSQLVMGradientProcedureFactory.create(y, func);
+      case FastLogMLE:
+        return MLELVMGradientProcedureFactory.create(y, func, fastLog);
+      default:
+        throw new IllegalStateException("Unknown type: " + type);
+    }
+  }
 }

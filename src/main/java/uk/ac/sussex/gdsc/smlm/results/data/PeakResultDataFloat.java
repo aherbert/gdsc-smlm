@@ -28,19 +28,16 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
 /**
  * Gets a float data value from a result.
  */
-public abstract class PeakResultDataFloat implements PeakResultData<Float>
-{
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return "";
-    }
+public abstract class PeakResultDataFloat implements PeakResultData<Float> {
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return "";
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Class<?> getValueClass()
-    {
-        return Float.class;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Class<?> getValueClass() {
+    return Float.class;
+  }
 }

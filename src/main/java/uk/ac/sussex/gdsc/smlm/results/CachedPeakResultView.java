@@ -31,81 +31,75 @@ import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 /**
  * Provides a cache of the view of the results.
  */
-public class CachedPeakResultView implements PeakResultView
-{
-    private final PeakResultStore store;
+public class CachedPeakResultView implements PeakResultView {
+  private final PeakResultStore store;
 
-    private TIntObjectHashMap<PeakResult[]> frameMap;
-    private TIntObjectHashMap<PeakResult[]> idMap;
+  private TIntObjectHashMap<PeakResult[]> frameMap;
+  private TIntObjectHashMap<PeakResult[]> idMap;
 
-    /**
-     * Instantiates a new cached peak result view.
-     *
-     * @param store
-     *            the store
-     */
-    public CachedPeakResultView(PeakResultStore store)
-    {
-        this.store = store;
+  /**
+   * Instantiates a new cached peak result view.
+   *
+   * @param store the store
+   */
+  public CachedPeakResultView(PeakResultStore store) {
+    this.store = store;
+  }
+
+  /**
+   * Gets the results by frame.
+   *
+   * @param frame the frame
+   * @return the results
+   */
+  @Override
+  public PeakResult[] getResultsByFrame(int frame) {
+    if (frameMap == null) {
+      frameMap = new TIntObjectHashMap<>();
+      return findResults(frameMap, frame, new FramePeakResultPredicate(frame));
     }
-
-    /**
-     * Gets the results by frame.
-     *
-     * @param frame
-     *            the frame
-     * @return the results
-     */
-    @Override
-    public PeakResult[] getResultsByFrame(int frame)
-    {
-        if (frameMap == null)
-        {
-            frameMap = new TIntObjectHashMap<>();
-            return findResults(frameMap, frame, new FramePeakResultPredicate(frame));
-        }
-        PeakResult[] results = frameMap.get(frame);
-        if (results == null)
-            results = findResults(frameMap, frame, new FramePeakResultPredicate(frame));
-        return results;
+    PeakResult[] results = frameMap.get(frame);
+    if (results == null) {
+      results = findResults(frameMap, frame, new FramePeakResultPredicate(frame));
     }
+    return results;
+  }
 
-    /**
-     * Gets the results by id.
-     *
-     * @param id
-     *            the id
-     * @return the results
-     */
-    @Override
-    public PeakResult[] getResultsById(int id)
-    {
-        if (idMap == null)
-        {
-            idMap = new TIntObjectHashMap<>();
-            return findResults(idMap, id, new IdPeakResultPredicate(id));
-        }
-        PeakResult[] results = idMap.get(id);
-        if (results == null)
-            results = findResults(idMap, id, new IdPeakResultPredicate(id));
-        return results;
+  /**
+   * Gets the results by id.
+   *
+   * @param id the id
+   * @return the results
+   */
+  @Override
+  public PeakResult[] getResultsById(int id) {
+    if (idMap == null) {
+      idMap = new TIntObjectHashMap<>();
+      return findResults(idMap, id, new IdPeakResultPredicate(id));
     }
+    PeakResult[] results = idMap.get(id);
+    if (results == null) {
+      results = findResults(idMap, id, new IdPeakResultPredicate(id));
+    }
+    return results;
+  }
 
-    private PeakResult[] findResults(TIntObjectHashMap<PeakResult[]> map, int key, PeakResultPredicate filter)
-    {
-        final PeakResult[] results = store.subset(filter);
-        map.put(key, results);
-        return results;
-    }
+  private PeakResult[] findResults(TIntObjectHashMap<PeakResult[]> map, int key,
+      PeakResultPredicate filter) {
+    final PeakResult[] results = store.subset(filter);
+    map.put(key, results);
+    return results;
+  }
 
-    /**
-     * Clear the cache.
-     */
-    public void clear()
-    {
-        if (frameMap != null)
-            frameMap.clear();
-        if (idMap != null)
-            idMap.clear();
+  /**
+   * Clear the cache.
+   */
+  public void clear() {
+    if (frameMap != null) {
+      frameMap.clear();
     }
+    if (idMap != null) {
+      idMap.clear();
+    }
+  }
 }

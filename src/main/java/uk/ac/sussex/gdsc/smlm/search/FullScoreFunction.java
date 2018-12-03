@@ -26,29 +26,25 @@ package uk.ac.sussex.gdsc.smlm.search;
 /**
  * Calculate the score of points within a search space.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunction<T>
-{
-    /**
-     * Return the score of the input points.
-     *
-     * @param points
-     *            the points
-     * @return the scores
-     */
-    public SearchResult<T>[] score(double[][] points);
+public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunction<T> {
+  /**
+   * Return the score of the input points.
+   *
+   * @param points the points
+   * @return the scores
+   */
+  public SearchResult<T>[] score(double[][] points);
 
-    /**
-     * Cut the list of scores down to the given size by selecting only the best results. The input list may not be
-     * sorted. The results should contain the best result at position 0 in the output array.
-     *
-     * @param scores
-     *            The scores
-     * @param size
-     *            The size
-     * @return The reduced list
-     */
-    public SearchResult<T>[] cut(SearchResult<T>[] scores, int size);
+  /**
+   * Cut the list of scores down to the given size by selecting only the best results. The input
+   * list may not be sorted. The results should contain the best result at position 0 in the output
+   * array.
+   *
+   * @param scores The scores
+   * @param size The size
+   * @return The reduced list
+   */
+  public SearchResult<T>[] cut(SearchResult<T>[] scores, int size);
 }

@@ -24,50 +24,43 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 /**
- * Abstract base class for an N-dimensional Gaussian function for a configured number of peaks.
- * <p>
- * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
- * specify which of the following parameters the function will evaluate:<br>
- * background, amplitude, angle[N-1], position[N], sd[N]
- * <p>
- * The class provides the number of peaks and the gradient indices.
+ * Abstract base class for an N-dimensional Gaussian function for a configured number of peaks. <p>
+ * The function will calculate the value of the Gaussian and evaluate the gradient of a set of
+ * parameters. The class can specify which of the following parameters the function will
+ * evaluate:<br> background, amplitude, angle[N-1], position[N], sd[N] <p> The class provides the
+ * number of peaks and the gradient indices.
  */
-public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction
-{
-    /** The number of peaks. */
-    protected final int npeaks;
+public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction {
+  /** The number of peaks. */
+  protected final int npeaks;
 
-    /** The gradient indices. */
-    protected final int[] gradientIndices;
+  /** The gradient indices. */
+  protected final int[] gradientIndices;
 
-    /**
-     * Instantiates a new multi peak gaussian 2D function.
-     *
-     * @param npeaks
-     *            The number of peaks
-     * @param maxx
-     *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)
-     * @param maxy
-     *            The maximum y value of the 2-dimensional data (used to unpack a linear index into coordinates)
-     */
-    public MultiPeakGaussian2DFunction(int npeaks, int maxx, int maxy)
-    {
-        super(maxx, maxy);
-        this.npeaks = npeaks;
-        this.gradientIndices = createGradientIndices(npeaks);
-    }
+  /**
+   * Instantiates a new multi peak gaussian 2D function.
+   *
+   * @param npeaks The number of peaks
+   * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
+   *        coordinates)
+   * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
+   *        coordinates)
+   */
+  public MultiPeakGaussian2DFunction(int npeaks, int maxx, int maxy) {
+    super(maxx, maxy);
+    this.npeaks = npeaks;
+    this.gradientIndices = createGradientIndices(npeaks);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNPeaks()
-    {
-        return npeaks;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getNPeaks() {
+    return npeaks;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int[] gradientIndices()
-    {
-        return gradientIndices;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int[] gradientIndices() {
+    return gradientIndices;
+  }
 }

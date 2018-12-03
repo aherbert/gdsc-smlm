@@ -28,174 +28,173 @@ import org.apache.commons.math3.special.Gamma;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 
 /**
- * Implements the probability density function for a Poisson distribution.
- * <p>
- * This is a simple implementation of the LikelihoodFunction interface.
- * <p>
- * The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a
- * Poisson process of emitted light, converted to electrons on the camera chip, amplified by a gain and then read.
- * <p>
- * This function is a scaled Poisson PMF, i.e. using a gain of 2 the integers 1, 3, 5, etc should have no probability
- * from the scaled Poisson PMF.
+ * Implements the probability density function for a Poisson distribution. <p> This is a simple
+ * implementation of the LikelihoodFunction interface. <p> The likelihood function is designed to
+ * model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a Poisson process of
+ * emitted light, converted to electrons on the camera chip, amplified by a gain and then read. <p>
+ * This function is a scaled Poisson PMF, i.e. using a gain of 2 the integers 1, 3, 5, etc should
+ * have no probability from the scaled Poisson PMF.
  */
-public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunction
-{
-    private final CustomPoissonDistribution pd;
+public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunction {
+  private final CustomPoissonDistribution pd;
 
-    /**
-     * The inverse of the on-chip gain multiplication factor.
-     */
-    final double alpha;
+  /**
+   * The inverse of the on-chip gain multiplication factor.
+   */
+  final double alpha;
 
-    /**
-     * Set to true if the gain was above 1 (inverse gain below 1)
-     * and the Poisson distribution should be expanded.
-     */
-    final boolean expand;
+  /**
+   * Set to true if the gain was above 1 (inverse gain below 1) and the Poisson distribution should
+   * be expanded.
+   */
+  final boolean expand;
 
-    /**
-     * Instantiates a new poisson function.
-     *
-     * @param alpha
-     *            The inverse of the on-chip gain multiplication factor
-     */
-    public PoissonFunction(double alpha)
-    {
-        this.alpha = Math.abs(alpha);
-        expand = (alpha < 1);
-        pd = new CustomPoissonDistribution(null, 1);
+  /**
+   * Instantiates a new poisson function.
+   *
+   * @param alpha The inverse of the on-chip gain multiplication factor
+   */
+  public PoissonFunction(double alpha) {
+    this.alpha = Math.abs(alpha);
+    expand = (alpha < 1);
+    pd = new CustomPoissonDistribution(null, 1);
+  }
+
+  /**
+   * {@inheritDoc} <p> This is a PMF.
+   *
+   * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
+   */
+  @Override
+  public double likelihood(double o, double e) {
+    if (e <= 0) {
+      return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This is a PMF.
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
-     */
-    @Override
-    public double likelihood(double o, double e)
-    {
-        if (e <= 0)
-            return 0;
-
-        final int x = getX(o);
-        if (x < 0)
-            return 0;
-
-        // Compute the integer intervals of the Poisson to sample
-        // The entire P(x) of the scaled Poisson is assigned to the nearest integer
-        // Find the limits of the integer range.
-        final double min = (x - 0.5) * alpha;
-        final double max = (x + 0.5) * alpha;
-
-        // The first integer that would be rounded to x
-        int imin = (int) Math.ceil(min);
-        if (imin < 0)
-            imin = 0;
-
-        if (expand)
-        {
-            // The PMF was expanded so either 1 or 0 values fall in this range
-            // When rounding an equality at the upper edge should be assigned
-            // to the next interval.
-            if (imin >= max)
-                return 0;
-
-            pd.setMeanUnsafe(e);
-            return pd.probability(imin);
-        }
-        // The PMF was contracted so 1 or more values fall in this range
-
-        int imax = (int) Math.floor(max);
-        // When rounding an equality at the upper edge should be assigned
-        // to the next interval.
-        if (imax == max)
-            imax--;
-
-        pd.setMeanUnsafe(e);
-        if (imin == imax)
-            return pd.probability(imin);
-
-        double p = 0;
-        for (int i = imin; i <= imax; i++)
-            p += pd.probability(i);
-        return p;
+    final int x = getX(o);
+    if (x < 0) {
+      return 0;
     }
 
-    private static int getX(double o)
-    {
-        // This could throw an exception if o is not an integer
-        return (int) Math.round(o);
+    // Compute the integer intervals of the Poisson to sample
+    // The entire P(x) of the scaled Poisson is assigned to the nearest integer
+    // Find the limits of the integer range.
+    final double min = (x - 0.5) * alpha;
+    final double max = (x + 0.5) * alpha;
+
+    // The first integer that would be rounded to x
+    int imin = (int) Math.ceil(min);
+    if (imin < 0) {
+      imin = 0;
     }
 
-    /**
-     * Return the log of the factorial for the given real number, using the gamma function.
-     *
-     * @param k
-     *            the number
-     * @return the log factorial
-     */
-    public static double logFactorial(double k)
-    {
-        if (k <= 1)
-            return 0;
-        return Gamma.logGamma(k + 1);
+    if (expand) {
+      // The PMF was expanded so either 1 or 0 values fall in this range
+      // When rounding an equality at the upper edge should be assigned
+      // to the next interval.
+      if (imin >= max) {
+        return 0;
+      }
+
+      pd.setMeanUnsafe(e);
+      return pd.probability(imin);
+    }
+    // The PMF was contracted so 1 or more values fall in this range
+
+    int imax = (int) Math.floor(max);
+    // When rounding an equality at the upper edge should be assigned
+    // to the next interval.
+    if (imax == max) {
+      imax--;
     }
 
-    /**
-     * Return the factorial for the given real number, using the gamma function.
-     *
-     * @param k
-     *            the number
-     * @return the factorial
-     */
-    public static double factorial(double k)
-    {
-        if (k <= 1)
-            return 1;
-        return Gamma.gamma(k + 1);
+    pd.setMeanUnsafe(e);
+    if (imin == imax) {
+      return pd.probability(imin);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public double logLikelihood(double o, double e)
-    {
-        // As above but with log output
-        if (e <= 0)
-            return Double.NEGATIVE_INFINITY;
-
-        final int x = getX(o);
-        if (x < 0)
-            return Double.NEGATIVE_INFINITY;
-
-        final double min = (x - 0.5) * alpha;
-        final double max = (x + 0.5) * alpha;
-
-        int imin = (int) Math.ceil(min);
-        if (imin < 0)
-            imin = 0;
-
-        if (expand)
-        {
-            if (imin >= max)
-                return Double.NEGATIVE_INFINITY;
-
-            pd.setMeanUnsafe(e);
-            return pd.logProbability(imin);
-        }
-
-        int imax = (int) Math.floor(max);
-        if (imax == max)
-            imax--;
-
-        pd.setMeanUnsafe(e);
-        if (imin == imax)
-            return pd.logProbability(imin);
-
-        double p = 0;
-        for (int i = imin; i <= imax; i++)
-            p += pd.probability(i);
-        return Math.log(p);
+    double p = 0;
+    for (int i = imin; i <= imax; i++) {
+      p += pd.probability(i);
     }
+    return p;
+  }
+
+  private static int getX(double o) {
+    // This could throw an exception if o is not an integer
+    return (int) Math.round(o);
+  }
+
+  /**
+   * Return the log of the factorial for the given real number, using the gamma function.
+   *
+   * @param k the number
+   * @return the log factorial
+   */
+  public static double logFactorial(double k) {
+    if (k <= 1) {
+      return 0;
+    }
+    return Gamma.logGamma(k + 1);
+  }
+
+  /**
+   * Return the factorial for the given real number, using the gamma function.
+   *
+   * @param k the number
+   * @return the factorial
+   */
+  public static double factorial(double k) {
+    if (k <= 1) {
+      return 1;
+    }
+    return Gamma.gamma(k + 1);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double logLikelihood(double o, double e) {
+    // As above but with log output
+    if (e <= 0) {
+      return Double.NEGATIVE_INFINITY;
+    }
+
+    final int x = getX(o);
+    if (x < 0) {
+      return Double.NEGATIVE_INFINITY;
+    }
+
+    final double min = (x - 0.5) * alpha;
+    final double max = (x + 0.5) * alpha;
+
+    int imin = (int) Math.ceil(min);
+    if (imin < 0) {
+      imin = 0;
+    }
+
+    if (expand) {
+      if (imin >= max) {
+        return Double.NEGATIVE_INFINITY;
+      }
+
+      pd.setMeanUnsafe(e);
+      return pd.logProbability(imin);
+    }
+
+    int imax = (int) Math.floor(max);
+    if (imax == max) {
+      imax--;
+    }
+
+    pd.setMeanUnsafe(e);
+    if (imin == imax) {
+      return pd.logProbability(imin);
+    }
+
+    double p = 0;
+    for (int i = imin; i <= imax; i++) {
+      p += pd.probability(i);
+    }
+    return Math.log(p);
+  }
 }

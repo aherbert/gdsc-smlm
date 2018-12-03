@@ -26,96 +26,85 @@ package uk.ac.sussex.gdsc.smlm.results.count;
 /**
  * Combine the result of two fail counters.
  */
-public abstract class CombinedFailCounter extends BaseFailCounter
-{
-    /** The first fail counter . */
-    protected final FailCounter c1;
-    /** The second fail counter . */
-    protected final FailCounter c2;
+public abstract class CombinedFailCounter extends BaseFailCounter {
+  /** The first fail counter . */
+  protected final FailCounter c1;
+  /** The second fail counter . */
+  protected final FailCounter c2;
 
-    /**
-     * Instantiates a new combined fail counter.
-     *
-     * @param c1
-     *            the first counter
-     * @param c2
-     *            the second counter
-     */
-    public CombinedFailCounter(FailCounter c1, FailCounter c2)
-    {
-        if (c1 == null || c2 == null)
-            throw new NullPointerException();
-        this.c1 = c1;
-        this.c2 = c2;
+  /**
+   * Instantiates a new combined fail counter.
+   *
+   * @param c1 the first counter
+   * @param c2 the second counter
+   */
+  public CombinedFailCounter(FailCounter c1, FailCounter c2) {
+    if (c1 == null || c2 == null) {
+      throw new NullPointerException();
     }
+    this.c1 = c1;
+    this.c2 = c2;
+  }
 
-    @Override
-    protected String generateDescription()
-    {
-        final StringBuilder sb = new StringBuilder();
-        add(sb, c1);
-        sb.append(" ").append(getOperator()).append(" ");
-        add(sb, c2);
-        return sb.toString();
+  @Override
+  protected String generateDescription() {
+    final StringBuilder sb = new StringBuilder();
+    add(sb, c1);
+    sb.append(" ").append(getOperator()).append(" ");
+    add(sb, c2);
+    return sb.toString();
+  }
+
+  private static void add(StringBuilder sb, FailCounter c) {
+    if (c instanceof CombinedFailCounter) {
+      sb.append("(");
+      sb.append(c.getDescription());
+      sb.append(")");
+    } else {
+      sb.append(c.getDescription());
     }
+  }
 
-    private static void add(StringBuilder sb, FailCounter c)
-    {
-        if (c instanceof CombinedFailCounter)
-        {
-            sb.append("(");
-            sb.append(c.getDescription());
-            sb.append(")");
-        }
-        else
-            sb.append(c.getDescription());
-    }
+  /**
+   * Get the string representation of the operator used to combine the two fail counters. This is
+   * used in the filter name.
+   *
+   * @return The operator
+   */
+  protected abstract String getOperator();
 
-    /**
-     * Get the string representation of the operator used to combine the two fail counters. This is used in the filter
-     * name.
-     *
-     * @return The operator
-     */
-    protected abstract String getOperator();
+  /** {@inheritDoc} */
+  @Override
+  public void pass() {
+    c1.pass();
+    c2.pass();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass()
-    {
-        c1.pass();
-        c2.pass();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void pass(int n) {
+    c1.pass(n);
+    c2.pass(n);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void pass(int n)
-    {
-        c1.pass(n);
-        c2.pass(n);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void fail() {
+    c1.fail();
+    c2.fail();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail()
-    {
-        c1.fail();
-        c2.fail();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void fail(int n) {
+    c1.fail(n);
+    c2.fail(n);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void fail(int n)
-    {
-        c1.fail(n);
-        c2.fail(n);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void reset()
-    {
-        c1.reset();
-        c2.reset();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void reset() {
+    c1.reset();
+    c2.reset();
+  }
 }

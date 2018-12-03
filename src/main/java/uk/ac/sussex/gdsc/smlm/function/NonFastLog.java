@@ -26,98 +26,82 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Implement the FastLog methods using Math.log
  */
-public class NonFastLog extends FastLog
-{
-    /** An instance of the class. */
-    public static final NonFastLog INSTANCE = new NonFastLog();
+public class NonFastLog extends FastLog {
+  /** An instance of the class. */
+  public static final NonFastLog INSTANCE = new NonFastLog();
 
-    @Override
-    public double getBase()
-    {
-        return Math.E;
-    }
+  @Override
+  public double getBase() {
+    return Math.E;
+  }
 
-    @Override
-    public double getScale()
-    {
-        return LN2;
-    }
+  @Override
+  public double getScale() {
+    return LN2;
+  }
 
-    @Override
-    public int getN()
-    {
-        return 52;
-    }
+  @Override
+  public int getN() {
+    return 52;
+  }
 
-    @Override
-    public float log2(float x)
-    {
-        return (float) (Math.log(x) / LN2);
-    }
+  @Override
+  public float log2(float x) {
+    return (float) (Math.log(x) / LN2);
+  }
 
-    @Override
-    public float fastLog2(float x)
-    {
-        return (float) (Math.log(x) / LN2);
-    }
+  @Override
+  public float fastLog2(float x) {
+    return (float) (Math.log(x) / LN2);
+  }
 
-    @Override
-    public float log(float x)
-    {
-        return (float) Math.log(x);
-    }
+  @Override
+  public float log(float x) {
+    return (float) Math.log(x);
+  }
 
-    @Override
-    public float fastLog(float x)
-    {
-        return (float) Math.log(x);
-    }
+  @Override
+  public float fastLog(float x) {
+    return (float) Math.log(x);
+  }
 
-    @Override
-    public float log2(double x)
-    {
-        return (float) (Math.log(x) / LN2);
-    }
+  @Override
+  public float log2(double x) {
+    return (float) (Math.log(x) / LN2);
+  }
 
-    @Override
-    public float fastLog2(double x)
-    {
-        return (float) (Math.log(x) / LN2);
-    }
+  @Override
+  public float fastLog2(double x) {
+    return (float) (Math.log(x) / LN2);
+  }
 
-    @Override
-    public float log(double x)
-    {
-        return (float) Math.log(x);
-    }
+  @Override
+  public float log(double x) {
+    return (float) Math.log(x);
+  }
 
-    @Override
-    public float fastLog(double x)
-    {
-        return (float) Math.log(x);
-    }
+  @Override
+  public float fastLog(double x) {
+    return (float) Math.log(x);
+  }
 
-    @Override
-    public double log2D(double x)
-    {
-        return Math.log(x) / LN2;
-    }
+  @Override
+  public double log2D(double x) {
+    return Math.log(x) / LN2;
+  }
 
-    @Override
-    public double fastLog2D(double x)
-    {
-        return Math.log(x) / LN2;
-    }
+  @Override
+  public double fastLog2D(double x) {
+    return Math.log(x) / LN2;
+  }
 
-    @Override
-    public double logD(double x)
-    {
-        return Math.log(x);
-    }
+  @Override
+  public double logD(double x) {
+    return Math.log(x);
+  }
 
-    @Override
-    public double fastLogD(double x)
-    {
-        return Math.log(x);
-    }
+  @Override
+  public double fastLogD(double x) {
+    return Math.log(x);
+  }
 }

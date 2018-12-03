@@ -30,32 +30,29 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
-@SuppressWarnings({ "javadoc" })
-public class NormaliserTest extends AbstractFilterTest
-{
-    @SeededTest
-    public void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed)
-    {
-        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+@SuppressWarnings({"javadoc"})
+public class NormaliserTest extends AbstractFilterTest {
+  @SeededTest
+  public void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed) {
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
-        for (final int width : primes)
-            for (final int height : primes)
-            {
-                final float[] data = createData(rg, width, height);
-                for (final int boxSize : boxSizes)
-                {
-                    //logger.fine(() -> String.format("%dx%d : border=%d", width, height, boxSize);
+    for (final int width : primes) {
+      for (final int height : primes) {
+        final float[] data = createData(rg, width, height);
+        for (final int boxSize : boxSizes) {
+          // logger.fine(() -> String.format("%dx%d : border=%d", width, height, boxSize);
 
-                    // Assume fixed normaliser works
-                    final FixedNormaliser n = new FixedNormaliser(1);
-                    final NonNormaliser nn = new NonNormaliser();
-                    final float[] e = new float[data.length];
-                    final float[] o = new float[data.length];
-                    n.normalise(data, e, width, height, boxSize);
-                    nn.normalise(data, o, width, height, boxSize);
-                    Assertions.assertArrayEquals(o, e,
-                            () -> String.format("%dx%d : border=%d", width, height, boxSize));
-                }
-            }
+          // Assume fixed normaliser works
+          final FixedNormaliser n = new FixedNormaliser(1);
+          final NonNormaliser nn = new NonNormaliser();
+          final float[] e = new float[data.length];
+          final float[] o = new float[data.length];
+          n.normalise(data, e, width, height, boxSize);
+          nn.normalise(data, o, width, height, boxSize);
+          Assertions.assertArrayEquals(o, e,
+              () -> String.format("%dx%d : border=%d", width, height, boxSize));
+        }
+      }
     }
+  }
 }

@@ -34,199 +34,172 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Filter results using a precision threshold.
  */
-public class PrecisionFilter extends DirectFilter implements IMultiFilter
-{
-    /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    public static final double DEFAULT_INCREMENT = 1;
-    /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    public static final double DEFAULT_RANGE = 10;
-    /** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    public static final double UPPER_LIMIT = 70;
+public class PrecisionFilter extends DirectFilter implements IMultiFilter {
+  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  public static final double DEFAULT_INCREMENT = 1;
+  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  public static final double DEFAULT_RANGE = 10;
+  /** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  public static final double UPPER_LIMIT = 70;
 
-    @XStreamAsAttribute
-    private final double precision;
-    @XStreamOmitField
-    private double variance;
-    @XStreamOmitField
-    private Gaussian2DPeakResultCalculator calculator;
+  @XStreamAsAttribute
+  private final double precision;
+  @XStreamOmitField
+  private double variance;
+  @XStreamOmitField
+  private Gaussian2DPeakResultCalculator calculator;
 
-    /**
-     * Instantiates a new precision filter.
-     *
-     * @param precision
-     *            the precision
-     */
-    public PrecisionFilter(double precision)
-    {
-        this.precision = Math.max(0, precision);
+  /**
+   * Instantiates a new precision filter.
+   *
+   * @param precision the precision
+   */
+  public PrecisionFilter(double precision) {
+    this.precision = Math.max(0, precision);
+  }
+
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+        peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
+    variance = Filter.getDUpperSquaredLimit(precision);
+  }
+
+  @Override
+  public boolean accept(PeakResult peak) {
+    // Use the background noise to estimate precision
+    return calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) <= variance;
+  }
+
+  @Override
+  public int getValidationFlags() {
+    return V_LOCATION_VARIANCE;
+  }
+
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    if (peak.getLocationVariance() > variance) {
+      return V_LOCATION_VARIANCE;
     }
+    return 0;
+  }
 
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-                Gaussian2DPeakResultHelper.LSE_PRECISION);
-        variance = Filter.getDUpperSquaredLimit(precision);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    return "Filter results using an upper precision threshold.";
+  }
 
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        // Use the background noise to estimate precision
-        return calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) <= variance;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfParameters() {
+    return 1;
+  }
 
-    @Override
-    public int getValidationFlags()
-    {
-        return V_LOCATION_VARIANCE;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected double getParameterValueInternal(int index) {
+    return precision;
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        if (peak.getLocationVariance() > variance)
-            return V_LOCATION_VARIANCE;
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getParameterIncrement(int index) {
+    checkIndex(index);
+    return PrecisionFilter.DEFAULT_INCREMENT;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        return "Filter results using an upper precision threshold.";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public ParameterType getParameterType(int index) {
+    checkIndex(index);
+    return ParameterType.PRECISION;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfParameters()
-    {
-        return 1;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter adjustParameter(int index, double delta) {
+    checkIndex(index);
+    return new PrecisionFilter(updateParameter(precision, delta, DEFAULT_RANGE));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected double getParameterValueInternal(int index)
-    {
-        return precision;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter create(double... parameters) {
+    return new PrecisionFilter(parameters[0]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getParameterIncrement(int index)
-    {
-        checkIndex(index);
-        return PrecisionFilter.DEFAULT_INCREMENT;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void weakestParameters(double[] parameters) {
+    setMax(parameters, 0, precision);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public ParameterType getParameterType(int index)
-    {
-        checkIndex(index);
-        return ParameterType.PRECISION;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int lowerBoundOrientation(int index) {
+    return 1;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter adjustParameter(int index, double delta)
-    {
-        checkIndex(index);
-        return new PrecisionFilter(updateParameter(precision, delta, DEFAULT_RANGE));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] upperLimit() {
+    return new double[] {UPPER_LIMIT};
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter create(double... parameters)
-    {
-        return new PrecisionFilter(parameters[0]);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] mutationStepRange() {
+    return new double[] {DEFAULT_RANGE};
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void weakestParameters(double[] parameters)
-    {
-        setMax(parameters, 0, precision);
-    }
+  @Override
+  public double getSignal() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int lowerBoundOrientation(int index)
-    {
-        return 1;
-    }
+  @Override
+  public double getSNR() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double[] upperLimit()
-    {
-        return new double[] { UPPER_LIMIT };
-    }
+  @Override
+  public double getMinWidth() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double[] mutationStepRange()
-    {
-        return new double[] { DEFAULT_RANGE };
-    }
+  @Override
+  public double getMaxWidth() {
+    return 0;
+  }
 
-    @Override
-    public double getSignal()
-    {
-        return 0;
-    }
+  @Override
+  public double getShift() {
+    return 0;
+  }
 
-    @Override
-    public double getSNR()
-    {
-        return 0;
-    }
+  @Override
+  public double getEShift() {
+    return 0;
+  }
 
-    @Override
-    public double getMinWidth()
-    {
-        return 0;
-    }
+  @Override
+  public double getPrecision() {
+    return precision;
+  }
 
-    @Override
-    public double getMaxWidth()
-    {
-        return 0;
-    }
+  @Override
+  public PrecisionType getPrecisionType() {
+    return PrecisionType.ESTIMATE;
+  }
 
-    @Override
-    public double getShift()
-    {
-        return 0;
-    }
+  @Override
+  public double getMinZ() {
+    return 0;
+  }
 
-    @Override
-    public double getEShift()
-    {
-        return 0;
-    }
-
-    @Override
-    public double getPrecision()
-    {
-        return precision;
-    }
-
-    @Override
-    public PrecisionType getPrecisionType()
-    {
-        return PrecisionType.ESTIMATE;
-    }
-
-    @Override
-    public double getMinZ()
-    {
-        return 0;
-    }
-
-    @Override
-    public double getMaxZ()
-    {
-        return 0;
-    }
+  @Override
+  public double getMaxZ() {
+    return 0;
+  }
 }

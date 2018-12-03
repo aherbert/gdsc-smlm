@@ -43,453 +43,422 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
- * Filter results using a precision threshold. Any results below the lower
- * precision limit are included. Any results above the upper precision limit are
- * excluded. Any results between the limits are included only if they can be
- * traced through time, optionally via other candidates, to a valid result.
+ * Filter results using a precision threshold. Any results below the lower precision limit are
+ * included. Any results above the upper precision limit are excluded. Any results between the
+ * limits are included only if they can be traced through time, optionally via other candidates, to
+ * a valid result.
  */
-public abstract class HysteresisFilter extends Filter
-{
-    /** The default absolute distance increment. */
-    public static final double DEFAULT_ABSOLUTE_DISTANCE_INCREMENT = 5;
-    /** The default relative distance increment. */
-    public static final double DEFAULT_RELATIVE_DISTANCE_INCREMENT = 0.05;
-    /** The default time increment (in seconds). */
-    public static final double DEFAULT_SECONDS_TIME_INCREMENT = 0.05;
-    /** The default time increment (in frames). */
-    public static final double DEFAULT_FRAMES_TIME_INCREMENT = 1;
-    /** The default range for absolute distance. */
-    public static final double DEFAULT_ABSOLUTE_DISTANCE_RANGE = 200;
-    /** The default range for relative distance. */
-    public static final double DEFAULT_RELATIVE_DISTANCE_RANGE = 1;
-    /** The default range for time (in seconds). */
-    public static final double DEFAULT_SECONDS_TIME_RANGE = 5;
-    /** The default range for time (in frames). */
-    public static final double DEFAULT_FRAMES_TIME_RANGE = 10;
+public abstract class HysteresisFilter extends Filter {
+  /** The default absolute distance increment. */
+  public static final double DEFAULT_ABSOLUTE_DISTANCE_INCREMENT = 5;
+  /** The default relative distance increment. */
+  public static final double DEFAULT_RELATIVE_DISTANCE_INCREMENT = 0.05;
+  /** The default time increment (in seconds). */
+  public static final double DEFAULT_SECONDS_TIME_INCREMENT = 0.05;
+  /** The default time increment (in frames). */
+  public static final double DEFAULT_FRAMES_TIME_INCREMENT = 1;
+  /** The default range for absolute distance. */
+  public static final double DEFAULT_ABSOLUTE_DISTANCE_RANGE = 200;
+  /** The default range for relative distance. */
+  public static final double DEFAULT_RELATIVE_DISTANCE_RANGE = 1;
+  /** The default range for time (in seconds). */
+  public static final double DEFAULT_SECONDS_TIME_RANGE = 5;
+  /** The default range for time (in frames). */
+  public static final double DEFAULT_FRAMES_TIME_RANGE = 10;
 
-    /** The search distance. */
-    @XStreamAsAttribute
-    final double searchDistance;
+  /** The search distance. */
+  @XStreamAsAttribute
+  final double searchDistance;
 
-    /** The search distance mode. */
-    @XStreamAsAttribute
-    final int searchDistanceMode;
+  /** The search distance mode. */
+  @XStreamAsAttribute
+  final int searchDistanceMode;
 
-    /** The time threshold. */
-    @XStreamAsAttribute
-    final double timeThreshold;
+  /** The time threshold. */
+  @XStreamAsAttribute
+  final double timeThreshold;
 
-    /** The time threshold mode. */
-    @XStreamAsAttribute
-    final int timeThresholdMode;
+  /** The time threshold mode. */
+  @XStreamAsAttribute
+  final int timeThresholdMode;
 
-    /** The ok. */
-    @XStreamOmitField
-    Set<PeakResult> ok;
+  /** The ok. */
+  @XStreamOmitField
+  Set<PeakResult> ok;
 
-    /**
-     * The peak status.
-     */
-    protected enum PeakStatus
-    {
-        /** A valid peak. */
-        OK,
-        /** A candidate peak. */
-        CANDIDATE,
-        /** Marked for rejection. */
-        REJECT
+  /**
+   * The peak status.
+   */
+  protected enum PeakStatus {
+    /** A valid peak. */
+    OK,
+    /** A candidate peak. */
+    CANDIDATE,
+    /** Marked for rejection. */
+    REJECT
+  }
+
+  /**
+   * Instantiates a new hysteresis filter.
+   *
+   * @param searchDistance the search distance
+   * @param searchDistanceMode 0 = relative to the precision of the candidates; 1 = Absolute (in nm)
+   * @param timeThreshold the time threshold
+   * @param timeThresholdMode 0 = frames; 1 = seconds
+   */
+  public HysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold,
+      int timeThresholdMode) {
+    this.searchDistance = Math.max(0, searchDistance);
+    this.searchDistanceMode = searchDistanceMode;
+    this.timeThreshold = Math.max(0, timeThreshold);
+    this.timeThresholdMode = timeThresholdMode;
+  }
+
+  /**
+   * Gets the search name.
+   *
+   * @return The name of the configured search distance mode
+   */
+  public String getSearchName() {
+    switch (searchDistanceMode) {
+      case 1:
+        return "Absolute";
+
+      case 0:
+      default:
+        return "Candidate precision";
     }
+  }
 
-    /**
-     * Instantiates a new hysteresis filter.
-     *
-     * @param searchDistance
-     *            the search distance
-     * @param searchDistanceMode
-     *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
-     * @param timeThreshold
-     *            the time threshold
-     * @param timeThresholdMode
-     *            0 = frames; 1 = seconds
-     */
-    public HysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold, int timeThresholdMode)
-    {
-        this.searchDistance = Math.max(0, searchDistance);
-        this.searchDistanceMode = searchDistanceMode;
-        this.timeThreshold = Math.max(0, timeThreshold);
-        this.timeThresholdMode = timeThresholdMode;
+  /**
+   * Gets the default search range.
+   *
+   * @return the default search range
+   */
+  protected double getDefaultSearchRange() {
+    switch (searchDistanceMode) {
+      case 1:
+        return DEFAULT_ABSOLUTE_DISTANCE_RANGE;
+
+      case 0:
+      default:
+        return DEFAULT_RELATIVE_DISTANCE_RANGE;
     }
+  }
 
-    /**
-     * Gets the search name.
-     *
-     * @return The name of the configured search distance mode
-     */
-    public String getSearchName()
-    {
-        switch (searchDistanceMode)
-        {
-            case 1:
-                return "Absolute";
+  /**
+   * Gets the time name.
+   *
+   * @return The name of the configured time threshold mode
+   */
+  public String getTimeName() {
+    switch (timeThresholdMode) {
+      case 1:
+        return "Seconds";
 
-            case 0:
-            default:
-                return "Candidate precision";
+      case 0:
+      default:
+        return "Frames";
+    }
+  }
+
+  /**
+   * Gets the default time range.
+   *
+   * @return the default time range
+   */
+  protected double getDefaultTimeRange() {
+    switch (timeThresholdMode) {
+      case 1:
+        return DEFAULT_SECONDS_TIME_RANGE;
+
+      case 0:
+      default:
+        return DEFAULT_FRAMES_TIME_RANGE;
+    }
+  }
+
+  /**
+   * Gets the trace parameters.
+   *
+   * @return the trace parameters
+   */
+  protected String getTraceParameters() {
+    return String.format("@%.2f %s, %.2f %s", searchDistance, getSearchName(), timeThreshold,
+        getTimeName());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfParameters() {
+    return 4;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected double getParameterValueInternal(int index) {
+    switch (index) {
+      case 0:
+        return searchDistance;
+      case 1:
+        return searchDistanceMode;
+      case 2:
+        return timeThreshold;
+      default:
+        return timeThresholdMode;
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double getParameterIncrement(int index) {
+    checkIndex(index);
+    switch (index) {
+      case 0:
+        return (searchDistanceMode == 1) ? DEFAULT_RELATIVE_DISTANCE_INCREMENT
+            : DEFAULT_ABSOLUTE_DISTANCE_INCREMENT;
+      case 1:
+        return 1;
+      case 2:
+        return (timeThresholdMode == 1) ? DEFAULT_SECONDS_TIME_INCREMENT
+            : DEFAULT_FRAMES_TIME_INCREMENT;
+      default:
+        return 1;
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double getDisabledParameterValue(int index) {
+    throw new NotImplementedException("Parameters in hysteresis filters cannot be disabled");
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ParameterType getParameterType(int index) {
+    checkIndex(index);
+    switch (index) {
+      case 0:
+        return ParameterType.DISTANCE_THRESHOLD;
+      case 1:
+        return ParameterType.DISTANCE_THRESHOLD_MODE;
+      case 2:
+        return ParameterType.TIME_THRESHOLD;
+      default:
+        return ParameterType.TIME_THRESHOLD_MODE;
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void weakestParameters(double[] parameters) {
+    setMax(parameters, 0, searchDistance);
+    setMax(parameters, 2, timeThreshold);
+  }
+
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    ok = new HashSet<>();
+
+    // Create a set of candidates and valid peaks
+    final MemoryPeakResults traceResults = new MemoryPeakResults();
+
+    // Initialise peaks to check
+    final LinkedList<PeakResult> candidates = new LinkedList<>();
+    peakResults.forEach(new PeakResultProcedure() {
+      @Override
+      public void execute(PeakResult result) {
+        switch (getStatus(result)) {
+          case OK:
+            ok.add(result);
+            traceResults.add(result);
+            break;
+          case CANDIDATE:
+            candidates.add(result);
+            traceResults.add(result);
+            break;
+          default:
+            break;
         }
+      }
+    });
+
+    if (candidates.isEmpty()) {
+      // No candidates for tracing so just return
+      return;
     }
 
-    /**
-     * Gets the default search range.
-     *
-     * @return the default search range
-     */
-    protected double getDefaultSearchRange()
-    {
-        switch (searchDistanceMode)
-        {
-            case 1:
-                return DEFAULT_ABSOLUTE_DISTANCE_RANGE;
+    double distanceThreshold;
+    switch (searchDistanceMode) {
+      case 1:
+        distanceThreshold = searchDistance / peakResults.getNmPerPixel();
+        break;
 
-            case 0:
-            default:
-                return DEFAULT_RELATIVE_DISTANCE_RANGE;
-        }
+      case 0:
+      default:
+        distanceThreshold = getSearchDistanceUsingCandidates(peakResults, candidates);
     }
 
-    /**
-     * Gets the time name.
-     *
-     * @return The name of the configured time threshold mode
-     */
-    public String getTimeName()
-    {
-        switch (timeThresholdMode)
-        {
-            case 1:
-                return "Seconds";
-
-            case 0:
-            default:
-                return "Frames";
-        }
+    if (distanceThreshold <= 0) {
+      return;
     }
 
-    /**
-     * Gets the default time range.
-     *
-     * @return the default time range
-     */
-    protected double getDefaultTimeRange()
-    {
-        switch (timeThresholdMode)
-        {
-            case 1:
-                return DEFAULT_SECONDS_TIME_RANGE;
-
-            case 0:
-            default:
-                return DEFAULT_FRAMES_TIME_RANGE;
-        }
-    }
-
-    /**
-     * Gets the trace parameters.
-     *
-     * @return the trace parameters
-     */
-    protected String getTraceParameters()
-    {
-        return String.format("@%.2f %s, %.2f %s", searchDistance, getSearchName(), timeThreshold, getTimeName());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfParameters()
-    {
-        return 4;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected double getParameterValueInternal(int index)
-    {
-        switch (index)
-        {
-            case 0:
-                return searchDistance;
-            case 1:
-                return searchDistanceMode;
-            case 2:
-                return timeThreshold;
-            default:
-                return timeThresholdMode;
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getParameterIncrement(int index)
-    {
-        checkIndex(index);
-        switch (index)
-        {
-            case 0:
-                return (searchDistanceMode == 1) ? DEFAULT_RELATIVE_DISTANCE_INCREMENT
-                        : DEFAULT_ABSOLUTE_DISTANCE_INCREMENT;
-            case 1:
-                return 1;
-            case 2:
-                return (timeThresholdMode == 1) ? DEFAULT_SECONDS_TIME_INCREMENT : DEFAULT_FRAMES_TIME_INCREMENT;
-            default:
-                return 1;
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getDisabledParameterValue(int index)
-    {
-        throw new NotImplementedException("Parameters in hysteresis filters cannot be disabled");
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public ParameterType getParameterType(int index)
-    {
-        checkIndex(index);
-        switch (index)
-        {
-            case 0:
-                return ParameterType.DISTANCE_THRESHOLD;
-            case 1:
-                return ParameterType.DISTANCE_THRESHOLD_MODE;
-            case 2:
-                return ParameterType.TIME_THRESHOLD;
-            default:
-                return ParameterType.TIME_THRESHOLD_MODE;
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void weakestParameters(double[] parameters)
-    {
-        setMax(parameters, 0, searchDistance);
-        setMax(parameters, 2, timeThreshold);
-    }
-
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        ok = new HashSet<>();
-
-        // Create a set of candidates and valid peaks
-        final MemoryPeakResults traceResults = new MemoryPeakResults();
-
-        // Initialise peaks to check
-        final LinkedList<PeakResult> candidates = new LinkedList<>();
-        peakResults.forEach(new PeakResultProcedure()
-        {
-            @Override
-            public void execute(PeakResult result)
-            {
-                switch (getStatus(result))
-                {
-                    case OK:
-                        ok.add(result);
-                        traceResults.add(result);
-                        break;
-                    case CANDIDATE:
-                        candidates.add(result);
-                        traceResults.add(result);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-
-        if (candidates.isEmpty())
-            // No candidates for tracing so just return
-            return;
-
-        double distanceThreshold;
-        switch (searchDistanceMode)
-        {
-            case 1:
-                distanceThreshold = searchDistance / peakResults.getNmPerPixel();
-                break;
-
-            case 0:
-            default:
-                distanceThreshold = getSearchDistanceUsingCandidates(peakResults, candidates);
+    int myTimeThreshold;
+    switch (timeThresholdMode) {
+      case 1:
+        myTimeThreshold = 1;
+        if (peakResults.hasCalibration()) {
+          final CalibrationReader cr = peakResults.getCalibrationReader();
+          final double et = cr.getExposureTime();
+          if (et > 0) {
+            myTimeThreshold = (int) Math.round((this.timeThreshold / et));
+          }
+        } else {
+          break;
         }
 
-        if (distanceThreshold <= 0)
-            return;
+      case 0:
+      default:
+        myTimeThreshold = (int) this.timeThreshold;
+    }
 
-        int myTimeThreshold;
-        switch (timeThresholdMode)
-        {
-            case 1:
-                myTimeThreshold = 1;
-                if (peakResults.hasCalibration())
-                {
-                    final CalibrationReader cr = peakResults.getCalibrationReader();
-                    final double et = cr.getExposureTime();
-                    if (et > 0)
-                        myTimeThreshold = (int) Math.round((this.timeThreshold / et));
-                }
-                else
+    if (myTimeThreshold <= 0) {
+      return;
+    }
 
-                    break;
+    // Trace through candidates
+    final TraceManager tm = new TraceManager(traceResults);
+    tm.setTraceMode(TraceMode.LATEST_FORERUNNER);
+    tm.traceMolecules(distanceThreshold, myTimeThreshold);
+    final Trace[] traces = tm.getTraces();
 
-            case 0:
-            default:
-                myTimeThreshold = (int) this.timeThreshold;
+    for (final Trace trace : traces) {
+      if (trace.size() > 1) {
+        // Check if the trace touches a valid point
+        boolean isOk = false;
+        for (int i = 0; i < trace.size(); i++) {
+          if (ok.contains(trace.get(i))) {
+            isOk = true;
+            break;
+          }
         }
-
-        if (myTimeThreshold <= 0)
-            return;
-
-        // Trace through candidates
-        final TraceManager tm = new TraceManager(traceResults);
-        tm.setTraceMode(TraceMode.LATEST_FORERUNNER);
-        tm.traceMolecules(distanceThreshold, myTimeThreshold);
-        final Trace[] traces = tm.getTraces();
-
-        for (final Trace trace : traces)
-            if (trace.size() > 1)
-            {
-                // Check if the trace touches a valid point
-                boolean isOk = false;
-                for (int i = 0; i < trace.size(); i++)
-                    if (ok.contains(trace.get(i)))
-                    {
-                        isOk = true;
-                        break;
-                    }
-                // Add the entire trace to the OK points
-                if (isOk)
-                    for (int i = 0; i < trace.size(); i++)
-                        ok.add(trace.get(i));
-            }
+        // Add the entire trace to the OK points
+        if (isOk) {
+          for (int i = 0; i < trace.size(); i++) {
+            ok.add(trace.get(i));
+          }
+        }
+      }
     }
+  }
 
-    /**
-     * Find average precision of the candidates and use it for the search
-     * distance.
-     *
-     * @param peakResults
-     *            the peak results
-     * @param candidates
-     *            the candidates
-     * @return the search distance using candidates
-     */
-    private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults, LinkedList<PeakResult> candidates)
-    {
-        final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
-                peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
-        double sum = 0;
-        for (final PeakResult peakResult : candidates)
-            sum += calculator.getLSEPrecision(peakResult.getParameters(), peakResult.getNoise());
-        final double nmPerPixel = peakResults.getNmPerPixel();
-        final double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;
-        return distanceThreshold;
+  /**
+   * Find average precision of the candidates and use it for the search distance.
+   *
+   * @param peakResults the peak results
+   * @param candidates the candidates
+   * @return the search distance using candidates
+   */
+  private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults,
+      LinkedList<PeakResult> candidates) {
+    final Gaussian2DPeakResultCalculator calculator =
+        Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+            Gaussian2DPeakResultHelper.LSE_PRECISION);
+    double sum = 0;
+    for (final PeakResult peakResult : candidates) {
+      sum += calculator.getLSEPrecision(peakResult.getParameters(), peakResult.getNoise());
     }
+    final double nmPerPixel = peakResults.getNmPerPixel();
+    final double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;
+    return distanceThreshold;
+  }
 
-    /**
-     * Gets the status.
-     *
-     * @param result
-     *            the result
-     * @return the status
-     */
-    protected abstract PeakStatus getStatus(PeakResult result);
+  /**
+   * Gets the status.
+   *
+   * @param result the result
+   * @return the status
+   */
+  protected abstract PeakStatus getStatus(PeakResult result);
 
-    /**
-     * @throws NullPointerException
-     *             if not first initialised with a call to {@link #setup(MemoryPeakResults)}
-     * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#accept(uk.ac.sussex.gdsc.smlm.results.PeakResult)
-     */
-    @Override
-    public boolean accept(PeakResult peak) throws NullPointerException
-    {
-        return ok.contains(peak);
+  /**
+   * @throws NullPointerException if not first initialised with a call to
+   *         {@link #setup(MemoryPeakResults)}
+   * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#accept(uk.ac.sussex.gdsc.smlm.results.PeakResult)
+   */
+  @Override
+  public boolean accept(PeakResult peak) throws NullPointerException {
+    return ok.contains(peak);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void end() {
+    ok.clear();
+    ok = null;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    return "Any results between the limits (candidates) are included only if they can be traced "
+        + "through time, potentially via other candidates, to a valid result. The distance used for "
+        + "tracing is the search distance multiplied by the average precision of the candidates.";
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean subsetWithFailCount() {
+    return false;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Chromosome<FilterScore> newChromosome(double[] sequence) {
+    // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
+    // so add it back
+    final double[] parameters = new double[sequence.length];
+    parameters[0] = sequence[0];
+    parameters[1] = searchDistanceMode;
+    parameters[2] = sequence[1];
+    parameters[3] = timeThresholdMode;
+    System.arraycopy(sequence, 2, parameters, 4, sequence.length - 2);
+    return create(parameters);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int[] getChromosomeParameters() {
+    // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
+    // Skip the search mode [param 1]
+    // Skip the time mode [param 3]
+    final int[] indices = new int[length()];
+    indices[1] = 2;
+    for (int i = 2; i < indices.length; i++) {
+      indices[i] = i + 2;
     }
+    return indices;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void end()
-    {
-        ok.clear();
-        ok = null;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int length() {
+    // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
+    return getNumberOfParameters() - 2;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        return "Any results between the limits (candidates) are included only if they can be traced " +
-                "through time, potentially via other candidates, to a valid result. The distance used for " +
-                "tracing is the search distance multiplied by the average precision of the candidates.";
+  @Override
+  public double[] sequence() {
+    // Remind derived classes to implement this.
+    // throw new NotImplementedException();
+    // Implement a default version using the results of getChromosomeParameters() and
+    // getParameters().
+    final double[] sequence = new double[length()];
+    final double[] params = getParameters();
+    final int[] indices = getChromosomeParameters();
+    for (int i = 0; i < indices.length; i++) {
+      sequence[i] = params[indices[i]];
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean subsetWithFailCount()
-    {
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Chromosome<FilterScore> newChromosome(double[] sequence)
-    {
-        // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
-        // so add it back
-        final double[] parameters = new double[sequence.length];
-        parameters[0] = sequence[0];
-        parameters[1] = searchDistanceMode;
-        parameters[2] = sequence[1];
-        parameters[3] = timeThresholdMode;
-        System.arraycopy(sequence, 2, parameters, 4, sequence.length - 2);
-        return create(parameters);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int[] getChromosomeParameters()
-    {
-        // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
-        // Skip the search mode [param 1]
-        // Skip the time mode [param 3]
-        final int[] indices = new int[length()];
-        indices[1] = 2;
-        for (int i = 2; i < indices.length; i++)
-            indices[i] = i + 2;
-        return indices;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int length()
-    {
-        // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
-        return getNumberOfParameters() - 2;
-    }
-
-    @Override
-    public double[] sequence()
-    {
-        // Remind derived classes to implement this.
-        //throw new NotImplementedException();
-        // Implement a default version using the results of getChromosomeParameters() and getParameters().
-        final double[] sequence = new double[length()];
-        final double[] params = getParameters();
-        final int[] indices = getChromosomeParameters();
-        for (int i = 0; i < indices.length; i++)
-            sequence[i] = params[indices[i]];
-        return sequence;
-    }
+    return sequence;
+  }
 }

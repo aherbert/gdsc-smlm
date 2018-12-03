@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Interface used to mark data passed in to the set-up routine of a filter.
  */
-public interface FilterSetupData
-{
-    // Marker interface
+public interface FilterSetupData {
+  // Marker interface
 }

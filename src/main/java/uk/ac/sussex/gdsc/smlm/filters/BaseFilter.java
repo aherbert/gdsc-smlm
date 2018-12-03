@@ -26,20 +26,15 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Contains common functionality for filters.
  */
-public abstract class BaseFilter implements Cloneable
-{
-    /** {@inheritDoc} */
-    @Override
-    public BaseFilter clone()
-    {
-        try
-        {
-            return (BaseFilter) super.clone();
-        }
-        catch (final CloneNotSupportedException e)
-        {
-            // Ignore
-        }
-        return null;
+public abstract class BaseFilter implements Cloneable {
+  /** {@inheritDoc} */
+  @Override
+  public BaseFilter clone() {
+    try {
+      return (BaseFilter) super.clone();
+    } catch (final CloneNotSupportedException e) {
+      // Ignore
     }
+    return null;
+  }
 }

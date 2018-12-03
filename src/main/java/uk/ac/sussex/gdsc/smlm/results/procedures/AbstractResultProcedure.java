@@ -29,82 +29,71 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Contains core functionality to for result procedures.
  */
-public abstract class AbstractResultProcedure
-{
-    /** The results. */
-    final MemoryPeakResults results;
+public abstract class AbstractResultProcedure {
+  /** The results. */
+  final MemoryPeakResults results;
 
-    /** The counter for procedures. */
-    protected int i;
+  /** The counter for procedures. */
+  protected int i;
 
-    /**
-     * Instantiates a new abstract result procedure.
-     *
-     * @param results
-     *            the results
-     */
-    public AbstractResultProcedure(MemoryPeakResults results)
-    {
-        if (results == null)
-            throw new IllegalArgumentException("results must not be null");
-        this.results = results;
+  /**
+   * Instantiates a new abstract result procedure.
+   *
+   * @param results the results
+   */
+  public AbstractResultProcedure(MemoryPeakResults results) {
+    if (results == null) {
+      throw new IllegalArgumentException("results must not be null");
     }
+    this.results = results;
+  }
 
-    /**
-     * Get the size of the results.
-     *
-     * @return the size
-     */
-    public int size()
-    {
-        return results.size();
-    }
+  /**
+   * Get the size of the results.
+   *
+   * @return the size
+   */
+  public int size() {
+    return results.size();
+  }
 
-    /**
-     * Allocate the array to store the data based on the current results size.
-     *
-     * @param data
-     *            the data
-     * @return the (new) data
-     */
-    protected int[] allocate(int[] data)
-    {
-        return (data == null || data.length < size()) ? new int[size()] : data;
-    }
+  /**
+   * Allocate the array to store the data based on the current results size.
+   *
+   * @param data the data
+   * @return the (new) data
+   */
+  protected int[] allocate(int[] data) {
+    return (data == null || data.length < size()) ? new int[size()] : data;
+  }
 
-    /**
-     * Allocate the array to store the data based on the current results size.
-     *
-     * @param data
-     *            the data
-     * @return the (new) data
-     */
-    protected float[] allocate(float[] data)
-    {
-        return (data == null || data.length < size()) ? new float[size()] : data;
-    }
+  /**
+   * Allocate the array to store the data based on the current results size.
+   *
+   * @param data the data
+   * @return the (new) data
+   */
+  protected float[] allocate(float[] data) {
+    return (data == null || data.length < size()) ? new float[size()] : data;
+  }
 
-    /**
-     * Allocate the array to store the data based on the current results size.
-     *
-     * @param data
-     *            the data
-     * @return the (new) data
-     */
-    protected double[] allocate(double[] data)
-    {
-        return (data == null || data.length < size()) ? new double[size()] : data;
-    }
+  /**
+   * Allocate the array to store the data based on the current results size.
+   *
+   * @param data the data
+   * @return the (new) data
+   */
+  protected double[] allocate(double[] data) {
+    return (data == null || data.length < size()) ? new double[size()] : data;
+  }
 
-    /**
-     * Allocate the array to store the data based on the current results size.
-     *
-     * @param data
-     *            the data
-     * @return the (new) data
-     */
-    protected PeakResult[] allocate(PeakResult[] data)
-    {
-        return (data == null || data.length < size()) ? new PeakResult[size()] : data;
-    }
+  /**
+   * Allocate the array to store the data based on the current results size.
+   *
+   * @param data the data
+   * @return the (new) data
+   */
+  protected PeakResult[] allocate(PeakResult[] data) {
+    return (data == null || data.length < size()) ? new PeakResult[size()] : data;
+  }
 }

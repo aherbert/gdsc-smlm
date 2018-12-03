@@ -30,91 +30,94 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
-@SuppressWarnings({ "javadoc" })
-public class PeakResultTest
-{
-    @SeededTest
-    public void sameResultIsEqual(RandomSeed seed)
-    {
-        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-        final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
-        final PeakResult p = r1[0];
-        Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
-        Assertions.assertTrue(PeakResult.equals(null, null), "Null object");
-    }
+@SuppressWarnings({"javadoc"})
+public class PeakResultTest {
+  @SeededTest
+  public void sameResultIsEqual(RandomSeed seed) {
+    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
+    final PeakResult p = r1[0];
+    Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
+    Assertions.assertTrue(PeakResult.equals(null, null), "Null object");
+  }
 
-    @SeededTest
-    public void sameResultsAreEqual(RandomSeed seed)
-    {
-        UniformRandomProvider r;
-        final int size = 10;
-        final int n = 5;
-        final boolean[] both = { true, false };
-        for (final boolean withDeviations : both)
-            for (final boolean withId : both)
-                for (final boolean withEndFrame : both)
-                    for (final boolean withPrecision : both)
-                    {
-                        r = RngUtils.create(seed.getSeedAsLong());
-                        final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
-                                withPrecision);
-                        r = RngUtils.create(seed.getSeedAsLong());
-                        final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
-                                withPrecision);
-                        for (int i = 0; i < r1.length; i++)
-                            Assertions.assertTrue(PeakResult.equals(r1[i], r2[i]));
-                    }
-    }
-
-    @SeededTest
-    public void differentResultsAreNotEqual(RandomSeed seed)
-    {
-        UniformRandomProvider r;
-        final int size = 1;
-        final int n = 5;
-        final boolean[] both = { true, false };
-        for (final boolean withDeviations : both)
-            for (final boolean withId : both)
-                for (final boolean withEndFrame : both)
-                    for (final boolean withPrecision : both)
-                    {
-                        r = RngUtils.create(seed.getSeedAsLong());
-                        final PeakResult[] r1 = createResults(r, size, n, withDeviations, withId, withEndFrame,
-                                withPrecision);
-                        final PeakResult[] r2 = createResults(r, size, n, withDeviations, withId, withEndFrame,
-                                withPrecision);
-                        for (int i = 0; i < r1.length; i++)
-                            Assertions.assertFalse(PeakResult.equals(r1[i], r2[i]));
-                    }
-    }
-
-    private static PeakResult[] createResults(UniformRandomProvider r, int size, int n, boolean withDeviations,
-            boolean withId, boolean withEndFrame, boolean withPrecision)
-    {
-        final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
-        while (size-- > 0)
-        {
-            final float[] params = createParams(n, r);
-            final float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
-            final AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
-                    r.nextDouble(), r.nextFloat(), r.nextFloat(), params, paramsDev);
-            if (withId)
-                p.setId(r.nextInt());
-            if (withEndFrame)
-                //p.setEndFrame(p.getFrame() +  1 + r.nextInt(5));
-                p.setEndFrame(r.nextInt());
-            if (withPrecision)
-                p.setPrecision(r.nextDouble());
-            store.add(p);
+  @SeededTest
+  public void sameResultsAreEqual(RandomSeed seed) {
+    UniformRandomProvider r;
+    final int size = 10;
+    final int n = 5;
+    final boolean[] both = {true, false};
+    for (final boolean withDeviations : both) {
+      for (final boolean withId : both) {
+        for (final boolean withEndFrame : both) {
+          for (final boolean withPrecision : both) {
+            r = RngUtils.create(seed.getSeedAsLong());
+            final PeakResult[] r1 =
+                createResults(r, size, n, withDeviations, withId, withEndFrame, withPrecision);
+            r = RngUtils.create(seed.getSeedAsLong());
+            final PeakResult[] r2 =
+                createResults(r, size, n, withDeviations, withId, withEndFrame, withPrecision);
+            for (int i = 0; i < r1.length; i++) {
+              Assertions.assertTrue(PeakResult.equals(r1[i], r2[i]));
+            }
+          }
         }
-        return store.toArray();
+      }
     }
+  }
 
-    private static float[] createParams(int n, UniformRandomProvider r)
-    {
-        final float[] p = new float[n];
-        while (n-- > 0)
-            p[n] = r.nextFloat();
-        return p;
+  @SeededTest
+  public void differentResultsAreNotEqual(RandomSeed seed) {
+    UniformRandomProvider r;
+    final int size = 1;
+    final int n = 5;
+    final boolean[] both = {true, false};
+    for (final boolean withDeviations : both) {
+      for (final boolean withId : both) {
+        for (final boolean withEndFrame : both) {
+          for (final boolean withPrecision : both) {
+            r = RngUtils.create(seed.getSeedAsLong());
+            final PeakResult[] r1 =
+                createResults(r, size, n, withDeviations, withId, withEndFrame, withPrecision);
+            final PeakResult[] r2 =
+                createResults(r, size, n, withDeviations, withId, withEndFrame, withPrecision);
+            for (int i = 0; i < r1.length; i++) {
+              Assertions.assertFalse(PeakResult.equals(r1[i], r2[i]));
+            }
+          }
+        }
+      }
     }
+  }
+
+  private static PeakResult[] createResults(UniformRandomProvider r, int size, int n,
+      boolean withDeviations, boolean withId, boolean withEndFrame, boolean withPrecision) {
+    final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
+    while (size-- > 0) {
+      final float[] params = createParams(n, r);
+      final float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
+      final AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(),
+          r.nextFloat(), r.nextDouble(), r.nextFloat(), r.nextFloat(), params, paramsDev);
+      if (withId) {
+        p.setId(r.nextInt());
+      }
+      if (withEndFrame) {
+        // p.setEndFrame(p.getFrame() + 1 + r.nextInt(5));
+        p.setEndFrame(r.nextInt());
+      }
+      if (withPrecision) {
+        p.setPrecision(r.nextDouble());
+      }
+      store.add(p);
+    }
+    return store.toArray();
+  }
+
+  private static float[] createParams(int n, UniformRandomProvider r) {
+    final float[] p = new float[n];
+    while (n-- > 0) {
+      p[n] = r.nextFloat();
+    }
+    return p;
+  }
 }

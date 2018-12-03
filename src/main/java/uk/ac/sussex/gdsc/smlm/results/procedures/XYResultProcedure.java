@@ -26,15 +26,12 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface XYResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     */
-    public void executeXY(float x, float y);
+public interface XYResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param x the x
+   * @param y the y
+   */
+  public void executeXY(float x, float y);
 }

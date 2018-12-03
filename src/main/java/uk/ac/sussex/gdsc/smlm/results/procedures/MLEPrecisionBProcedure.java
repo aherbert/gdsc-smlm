@@ -24,18 +24,15 @@
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 /**
- * Interface for accessing the localisation precision of Gaussian 2D fitting computed using the Mortensen formula for
- * Maximum Likelihood Estimation using local background photons to estimate noise.
- * <p>
- * See Mortensen, et al (2010) Nature Methods 7, 377-383, equation 6.
+ * Interface for accessing the localisation precision of Gaussian 2D fitting computed using the
+ * Mortensen formula for Maximum Likelihood Estimation using local background photons to estimate
+ * noise. <p> See Mortensen, et al (2010) Nature Methods 7, 377-383, equation 6.
  */
-public interface MLEPrecisionBProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param precision
-     *            the precision
-     */
-    public void executeMLEPrecisionB(double precision);
+public interface MLEPrecisionBProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param precision the precision
+   */
+  public void executeMLEPrecisionB(double precision);
 }

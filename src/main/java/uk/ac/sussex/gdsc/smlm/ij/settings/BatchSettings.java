@@ -30,40 +30,36 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 /**
  * Contain the configuration file settings for the batch fitting plugin.
  */
-public class BatchSettings
-{
-    /** The images. */
-    public ArrayList<String> images = new ArrayList<>();
+public class BatchSettings {
+  /** The images. */
+  public ArrayList<String> images = new ArrayList<>();
 
-    /** The parameters. */
-    public ArrayList<ParameterSettings> parameters = new ArrayList<>();
+  /** The parameters. */
+  public ArrayList<ParameterSettings> parameters = new ArrayList<>();
 
-    /** The results directory. */
-    public String resultsDirectory = null;
+  /** The results directory. */
+  public String resultsDirectory = null;
 
-    /** Set to true to run the peak fit plugin. */
-    public boolean runPeakFit = true;
+  /** Set to true to run the peak fit plugin. */
+  public boolean runPeakFit = true;
 
-    private Calibration calibration = null;
+  private Calibration calibration = null;
 
-    /**
-     * Gets the calibration.
-     *
-     * @return the calibration
-     */
-    public Calibration getCalibration()
-    {
-        return (calibration != null) ? calibration : Calibration.getDefaultInstance();
-    }
+  /**
+   * Gets the calibration.
+   *
+   * @return the calibration
+   */
+  public Calibration getCalibration() {
+    return (calibration != null) ? calibration : Calibration.getDefaultInstance();
+  }
 
-    /**
-     * Sets the calibration.
-     *
-     * @param calibration
-     *            the calibration to set
-     */
-    public void setCalibration(Calibration calibration)
-    {
-        this.calibration = calibration;
-    }
+  /**
+   * Sets the calibration.
+   *
+   * @param calibration the calibration to set
+   */
+  public void setCalibration(Calibration calibration) {
+    this.calibration = calibration;
+  }
 }

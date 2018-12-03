@@ -28,153 +28,139 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
 /**
  * Wrap the NonLinearFunction to remove the parameters that are fixed from the evaluation methods.
  */
-public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
-{
-    private final NonLinearFunction fun;
-    private final double[] a;
-    private final int n;
-    private final int[] gradientIndices;
+public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
+  private final NonLinearFunction fun;
+  private final double[] a;
+  private final int n;
+  private final int[] gradientIndices;
 
-    /**
-     * Create a new instance using the full set of parameters for the function and the number of points the function
-     * evaluates. The parameters that are not within the function gradient indices array will be fixed.
-     *
-     * @param fun
-     *            The function
-     * @param a
-     *            The parameters
-     * @param n
-     *            The number of data points to evaluate
-     */
-    public NonLinearFunctionWrapper(NonLinearFunction fun, double[] a, int n)
-    {
-        this.fun = fun;
-        this.a = a.clone();
-        this.n = n;
-        // This wrapper will evaluate all the indices that are not fixed
-        gradientIndices = new int[fun.getNumberOfGradients()];
-        for (int i = 0; i < gradientIndices.length; i++)
-            gradientIndices[i] = i;
+  /**
+   * Create a new instance using the full set of parameters for the function and the number of
+   * points the function evaluates. The parameters that are not within the function gradient indices
+   * array will be fixed.
+   *
+   * @param fun The function
+   * @param a The parameters
+   * @param n The number of data points to evaluate
+   */
+  public NonLinearFunctionWrapper(NonLinearFunction fun, double[] a, int n) {
+    this.fun = fun;
+    this.a = a.clone();
+    this.n = n;
+    // This wrapper will evaluate all the indices that are not fixed
+    gradientIndices = new int[fun.getNumberOfGradients()];
+    for (int i = 0; i < gradientIndices.length; i++) {
+      gradientIndices[i] = i;
+    }
+  }
+
+  /**
+   * Set the predictor coefficients for the function that are not fixed (i.e. those corresponding to
+   * the gradient indices in the wrapped function). The fixed coefficients are set in the
+   * constructor.
+   *
+   * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#initialise(double[])
+   */
+  @Override
+  public void initialise(double[] variables) {
+    final int[] gradientIndices = fun.gradientIndices();
+    for (int i = 0; i < gradientIndices.length; i++) {
+      a[gradientIndices[i]] = variables[i];
+    }
+    fun.initialise(a);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int[] gradientIndices() {
+    return gradientIndices;
+  }
+
+  @Override
+  public int getNumberOfGradients() {
+    return gradientIndices.length;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double eval(int x, double[] dyda) {
+    return fun.eval(x, dyda);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double eval(int x) {
+    return fun.eval(x);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double eval(int x, double[] dyda, double[] w) {
+    return fun.eval(x, dyda, w);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double evalw(int x, double[] w) {
+    return fun.eval(x, w);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean canComputeWeights() {
+    return fun.canComputeWeights();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double[] computeValues(double[] variables) {
+    initialise(variables);
+    final double[] values = new double[n];
+    for (int i = 0; i < values.length; i++) {
+      // Assume linear X from 0..N
+      values[i] = fun.eval(i);
+    }
+    return values;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double[][] computeJacobian(double[] variables) {
+    initialise(variables);
+
+    final double[][] jacobian = new double[n][];
+
+    for (int i = 0; i < n; ++i) {
+      // Assume linear X from 0..N
+      final double[] dyda = new double[variables.length];
+      fun.eval(i, dyda);
+      jacobian[i] = dyda;
     }
 
-    /**
-     * Set the predictor coefficients for the function that are not fixed (i.e. those corresponding to the gradient
-     * indices in the wrapped function). The fixed coefficients are set in the constructor.
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#initialise(double[])
-     */
-    @Override
-    public void initialise(double[] variables)
-    {
-        final int[] gradientIndices = fun.gradientIndices();
-        for (int i = 0; i < gradientIndices.length; i++)
-            a[gradientIndices[i]] = variables[i];
-        fun.initialise(a);
+    return jacobian;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean canComputeValuesAndJacobian() {
+    return true;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables) {
+    initialise(variables);
+
+    final double[][] jacobian = new double[n][];
+    final double[] values = new double[n];
+
+    for (int i = 0; i < n; ++i) {
+      // Assume linear X from 0..N
+      final double[] dyda = new double[variables.length];
+      values[i] = fun.eval(i, dyda);
+      jacobian[i] = dyda;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public int[] gradientIndices()
-    {
-        return gradientIndices;
-    }
-
-    @Override
-    public int getNumberOfGradients()
-    {
-        return gradientIndices.length;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double eval(int x, double[] dyda)
-    {
-        return fun.eval(x, dyda);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double eval(int x)
-    {
-        return fun.eval(x);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double eval(int x, double[] dyda, double[] w)
-    {
-        return fun.eval(x, dyda, w);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double evalw(int x, double[] w)
-    {
-        return fun.eval(x, w);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canComputeWeights()
-    {
-        return fun.canComputeWeights();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double[] computeValues(double[] variables)
-    {
-        initialise(variables);
-        final double[] values = new double[n];
-        for (int i = 0; i < values.length; i++)
-            // Assume linear X from 0..N
-            values[i] = fun.eval(i);
-        return values;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double[][] computeJacobian(double[] variables)
-    {
-        initialise(variables);
-
-        final double[][] jacobian = new double[n][];
-
-        for (int i = 0; i < n; ++i)
-        {
-            // Assume linear X from 0..N
-            final double[] dyda = new double[variables.length];
-            fun.eval(i, dyda);
-            jacobian[i] = dyda;
-        }
-
-        return jacobian;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canComputeValuesAndJacobian()
-    {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
-    {
-        initialise(variables);
-
-        final double[][] jacobian = new double[n][];
-        final double[] values = new double[n];
-
-        for (int i = 0; i < n; ++i)
-        {
-            // Assume linear X from 0..N
-            final double[] dyda = new double[variables.length];
-            values[i] = fun.eval(i, dyda);
-            jacobian[i] = dyda;
-        }
-
-        return new Pair<>(values, jacobian);
-    }
+    return new Pair<>(values, jacobian);
+  }
 }

@@ -26,32 +26,27 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Precision with local background.
  */
-public class MultiFilterVariance2Component extends MultiFilterComponent
-{
-    private final double variance;
+public class MultiFilterVariance2Component extends MultiFilterComponent {
+  private final double variance;
 
-    /**
-     * Instantiates a new multi filter variance 2 component.
-     *
-     * @param precision
-     *            the precision
-     */
-    public MultiFilterVariance2Component(double precision)
-    {
-        this.variance = Filter.getDUpperSquaredLimit(precision);
-    }
+  /**
+   * Instantiates a new multi filter variance 2 component.
+   *
+   * @param precision the precision
+   */
+  public MultiFilterVariance2Component(double precision) {
+    this.variance = Filter.getDUpperSquaredLimit(precision);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        return (peak.getLocationVariance2() > variance);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    return (peak.getLocationVariance2() > variance);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return IDirectFilter.V_LOCATION_VARIANCE2;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return IDirectFilter.V_LOCATION_VARIANCE2;
+  }
 }

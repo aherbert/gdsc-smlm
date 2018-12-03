@@ -26,31 +26,29 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Define the type of filter.
  */
-public enum FilterType
-{
-    //@formatter:off
-	/**
-	 * A basic filter
-	 */
-	STANDARD{ @Override
-	public String getName() { return "Standard"; }},
-	/**
-	 * A direct filter. This can perform filtering on PreprocessedPeakResult objects.
-	 */
-	DIRECT{ @Override
-	public String getName() { return "Direct"; }};
-	//@formatter:on
+public enum FilterType {
+  //@formatter:off
+  /**
+   * A basic filter
+   */
+  STANDARD{ @Override
+  public String getName() { return "Standard"; }},
+  /**
+   * A direct filter. This can perform filtering on PreprocessedPeakResult objects.
+   */
+  DIRECT{ @Override
+  public String getName() { return "Direct"; }};
+  //@formatter:on
 
-    @Override
-    public String toString()
-    {
-        return getName();
-    }
+  @Override
+  public String toString() {
+    return getName();
+  }
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    abstract public String getName();
+  /**
+   * Gets the name.
+   *
+   * @return the name
+   */
+  abstract public String getName();
 }

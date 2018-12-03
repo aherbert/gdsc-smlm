@@ -23,14 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-@SuppressWarnings({ "javadoc" })
-public class EllipticalGaussian2DFunctionTest extends Gaussian2DFunctionTest
-{
-    @Override
-    protected void init()
-    {
-        flags = GaussianFunctionFactory.FIT_SIMPLE_ELLIPTICAL;
-        f1 = new EllipticalGaussian2DFunction(1, maxx, maxy);
-        f2 = new EllipticalGaussian2DFunction(2, maxx, maxy);
-    }
+@SuppressWarnings({"javadoc"})
+public class EllipticalGaussian2DFunctionTest extends Gaussian2DFunctionTest {
+  @Override
+  protected void init() {
+    flags = GaussianFunctionFactory.FIT_SIMPLE_ELLIPTICAL;
+    f1 = new EllipticalGaussian2DFunction(1, maxx, maxy);
+    f2 = new EllipticalGaussian2DFunction(2, maxx, maxy);
+  }
 }

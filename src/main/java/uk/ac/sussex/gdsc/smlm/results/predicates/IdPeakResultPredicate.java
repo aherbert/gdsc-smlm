@@ -28,26 +28,22 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Test a result using the id.
  */
-public class IdPeakResultPredicate implements PeakResultPredicate
-{
-    /** The id. */
-    private final int id;
+public class IdPeakResultPredicate implements PeakResultPredicate {
+  /** The id. */
+  private final int id;
 
-    /**
-     * Instantiates a new id peak result predicate.
-     *
-     * @param id
-     *            the id
-     */
-    public IdPeakResultPredicate(int id)
-    {
-        this.id = id;
-    }
+  /**
+   * Instantiates a new id peak result predicate.
+   *
+   * @param id the id
+   */
+  public IdPeakResultPredicate(int id) {
+    this.id = id;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean test(PeakResult t)
-    {
-        return t.getId() == id;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean test(PeakResult t) {
+    return t.getId() == id;
+  }
 }

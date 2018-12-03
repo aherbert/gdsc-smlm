@@ -26,103 +26,93 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
- * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
- * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
- * This is used within the Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
- * set of data points (x, y).
- * <p>
- * Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving
- * the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
+ * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a
+ * function) and the scaled gradient vector of the function's partial first derivatives with respect
+ * to the parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model
+ * with coefficients (a) for a set of data points (x, y). <p> Note that the Hessian matrix is scaled
+ * by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving the non-linear model.
+ * See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
  */
-public class LSQLVMGradientProcedure6 extends LSQLVMGradientProcedure
-{
-    /**
-     * @param y
-     *            Data to fit
-     * @param func
-     *            Gradient function
-     */
-    public LSQLVMGradientProcedure6(final double[] y, final Gradient1Function func)
-    {
-        super(y, func);
-        if (n != 6)
-            throw new IllegalArgumentException("Function must compute 6 gradients");
+public class LSQLVMGradientProcedure6 extends LSQLVMGradientProcedure {
+  /**
+   * @param y Data to fit
+   * @param func Gradient function
+   */
+  public LSQLVMGradientProcedure6(final double[] y, final Gradient1Function func) {
+    super(y, func);
+    if (n != 6) {
+      throw new IllegalArgumentException("Function must compute 6 gradients");
     }
+  }
 
-    /**
-     * @param y
-     *            Data to fit
-     * @param b
-     *            Baseline pre-computed y-values
-     * @param func
-     *            Gradient function
-     */
-    public LSQLVMGradientProcedure6(final double[] y, final double[] b, final Gradient1Function func)
-    {
-        super(y, b, func);
-        if (n != 6)
-            throw new IllegalArgumentException("Function must compute 6 gradients");
+  /**
+   * @param y Data to fit
+   * @param b Baseline pre-computed y-values
+   * @param func Gradient function
+   */
+  public LSQLVMGradientProcedure6(final double[] y, final double[] b,
+      final Gradient1Function func) {
+    super(y, b, func);
+    if (n != 6) {
+      throw new IllegalArgumentException("Function must compute 6 gradients");
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double value, double[] dy_da)
-    {
-        final double dy = y[++yi] - value;
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value, double[] dy_da) {
+    final double dy = y[++yi] - value;
 
-        alpha[0] += dy_da[0] * dy_da[0];
-        alpha[1] += dy_da[1] * dy_da[0];
-        alpha[2] += dy_da[1] * dy_da[1];
-        alpha[3] += dy_da[2] * dy_da[0];
-        alpha[4] += dy_da[2] * dy_da[1];
-        alpha[5] += dy_da[2] * dy_da[2];
-        alpha[6] += dy_da[3] * dy_da[0];
-        alpha[7] += dy_da[3] * dy_da[1];
-        alpha[8] += dy_da[3] * dy_da[2];
-        alpha[9] += dy_da[3] * dy_da[3];
-        alpha[10] += dy_da[4] * dy_da[0];
-        alpha[11] += dy_da[4] * dy_da[1];
-        alpha[12] += dy_da[4] * dy_da[2];
-        alpha[13] += dy_da[4] * dy_da[3];
-        alpha[14] += dy_da[4] * dy_da[4];
-        alpha[15] += dy_da[5] * dy_da[0];
-        alpha[16] += dy_da[5] * dy_da[1];
-        alpha[17] += dy_da[5] * dy_da[2];
-        alpha[18] += dy_da[5] * dy_da[3];
-        alpha[19] += dy_da[5] * dy_da[4];
-        alpha[20] += dy_da[5] * dy_da[5];
+    alpha[0] += dy_da[0] * dy_da[0];
+    alpha[1] += dy_da[1] * dy_da[0];
+    alpha[2] += dy_da[1] * dy_da[1];
+    alpha[3] += dy_da[2] * dy_da[0];
+    alpha[4] += dy_da[2] * dy_da[1];
+    alpha[5] += dy_da[2] * dy_da[2];
+    alpha[6] += dy_da[3] * dy_da[0];
+    alpha[7] += dy_da[3] * dy_da[1];
+    alpha[8] += dy_da[3] * dy_da[2];
+    alpha[9] += dy_da[3] * dy_da[3];
+    alpha[10] += dy_da[4] * dy_da[0];
+    alpha[11] += dy_da[4] * dy_da[1];
+    alpha[12] += dy_da[4] * dy_da[2];
+    alpha[13] += dy_da[4] * dy_da[3];
+    alpha[14] += dy_da[4] * dy_da[4];
+    alpha[15] += dy_da[5] * dy_da[0];
+    alpha[16] += dy_da[5] * dy_da[1];
+    alpha[17] += dy_da[5] * dy_da[2];
+    alpha[18] += dy_da[5] * dy_da[3];
+    alpha[19] += dy_da[5] * dy_da[4];
+    alpha[20] += dy_da[5] * dy_da[5];
 
-        beta[0] += dy_da[0] * dy;
-        beta[1] += dy_da[1] * dy;
-        beta[2] += dy_da[2] * dy;
-        beta[3] += dy_da[3] * dy;
-        beta[4] += dy_da[4] * dy;
-        beta[5] += dy_da[5] * dy;
+    beta[0] += dy_da[0] * dy;
+    beta[1] += dy_da[1] * dy;
+    beta[2] += dy_da[2] * dy;
+    beta[3] += dy_da[3] * dy;
+    beta[4] += dy_da[4] * dy;
+    beta[5] += dy_da[5] * dy;
 
-        this.value += dy * dy;
-    }
+    this.value += dy * dy;
+  }
 
-    @Override
-    protected void initialiseGradient()
-    {
-        GradientProcedureHelper.initialiseWorkingMatrix6(alpha);
-        beta[0] = 0;
-        beta[1] = 0;
-        beta[2] = 0;
-        beta[3] = 0;
-        beta[4] = 0;
-        beta[5] = 0;
-    }
+  @Override
+  protected void initialiseGradient() {
+    GradientProcedureHelper.initialiseWorkingMatrix6(alpha);
+    beta[0] = 0;
+    beta[1] = 0;
+    beta[2] = 0;
+    beta[3] = 0;
+    beta[4] = 0;
+    beta[5] = 0;
+  }
 
-    @Override
-    public void getAlphaMatrix(double[][] alpha)
-    {
-        GradientProcedureHelper.getMatrix6(this.alpha, alpha);
-    }
+  @Override
+  public void getAlphaMatrix(double[][] alpha) {
+    GradientProcedureHelper.getMatrix6(this.alpha, alpha);
+  }
 
-    @Override
-    public void getAlphaLinear(double[] alpha)
-    {
-        GradientProcedureHelper.getMatrix6(this.alpha, alpha);
-    }
+  @Override
+  public void getAlphaLinear(double[] alpha) {
+    GradientProcedureHelper.getMatrix6(this.alpha, alpha);
+  }
 }

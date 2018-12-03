@@ -24,34 +24,28 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
- * Computes the mean using a circular mask.
- * <p>
- * Adapted from ij.plugin.filter.RankFilters
+ * Computes the mean using a circular mask. <p> Adapted from ij.plugin.filter.RankFilters
  */
-public class CircularMeanFilter extends CircularFilter
-{
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeWeightedNormaliser(double radius)
-    {
-        final float[] nPoints = weights.clone();
-        final CircularSumFilter sum = new CircularSumFilter();
-        sum.convolve(nPoints, weightWidth, weightHeight, radius);
-        return new PerPixelNormaliser(nPoints);
-    }
+public class CircularMeanFilter extends CircularFilter {
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeWeightedNormaliser(double radius) {
+    final float[] nPoints = weights.clone();
+    final CircularSumFilter sum = new CircularSumFilter();
+    sum.convolve(nPoints, weightWidth, weightHeight, radius);
+    return new PerPixelNormaliser(nPoints);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeNormaliser(int nPoints)
-    {
-        return new FixedNormaliser(nPoints);
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeNormaliser(int nPoints) {
+    return new FixedNormaliser(nPoints);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public CircularMeanFilter clone()
-    {
-        final CircularMeanFilter o = (CircularMeanFilter) super.clone();
-        return o;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public CircularMeanFilter clone() {
+    final CircularMeanFilter o = (CircularMeanFilter) super.clone();
+    return o;
+  }
 }

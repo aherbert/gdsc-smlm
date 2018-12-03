@@ -25,13 +25,11 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
-@SuppressWarnings({ "javadoc" })
-public class SingleCircularErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
-{
-    @Override
-    protected void init()
-    {
-        flags = GaussianFunctionFactory.FIT_ERF_CIRCLE;
-        f1 = new SingleCircularErfGaussian2DFunction(maxx, maxy);
-    }
+@SuppressWarnings({"javadoc"})
+public class SingleCircularErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest {
+  @Override
+  protected void init() {
+    flags = GaussianFunctionFactory.FIT_ERF_CIRCLE;
+    f1 = new SingleCircularErfGaussian2DFunction(maxx, maxy);
+  }
 }

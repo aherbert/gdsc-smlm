@@ -34,196 +34,189 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 /**
  * Wrapper class to output to multiple results destinations.
  */
-public class PeakResultsList extends AbstractPeakResults implements PeakResults
-{
-    private final List<PeakResults> results = new ArrayList<>();
+public class PeakResultsList extends AbstractPeakResults implements PeakResults {
+  private final List<PeakResults> results = new ArrayList<>();
 
-    /**
-     * Add a result format to the output. If a PeakResultsList is passed then it will be
-     * separated into the child PeakResults instances. This will break the size() function
-     * of any input PeakResultsList since only the children will remain within this list.
-     * <p>
-     * Sets the settings (source and configuration) of the child to the same as this list
-     *
-     * @param peakResults
-     *            the peak results
-     */
-    public void addOutput(PeakResults peakResults)
-    {
-        if (peakResults instanceof PeakResultsList)
-            for (final PeakResults r : ((PeakResultsList) peakResults).results)
-                addOutput(r);
-        else
-        {
-            peakResults.copySettings(this);
-            results.add(peakResults);
-        }
+  /**
+   * Add a result format to the output. If a PeakResultsList is passed then it will be separated
+   * into the child PeakResults instances. This will break the size() function of any input
+   * PeakResultsList since only the children will remain within this list. <p> Sets the settings
+   * (source and configuration) of the child to the same as this list
+   *
+   * @param peakResults the peak results
+   */
+  public void addOutput(PeakResults peakResults) {
+    if (peakResults instanceof PeakResultsList) {
+      for (final PeakResults r : ((PeakResultsList) peakResults).results) {
+        addOutput(r);
+      }
+    } else {
+      peakResults.copySettings(this);
+      results.add(peakResults);
     }
+  }
 
-    /**
-     * @return The number of outputs contained in the list.
-     */
-    public int numberOfOutputs()
-    {
-        return results.size();
+  /**
+   * @return The number of outputs contained in the list.
+   */
+  public int numberOfOutputs() {
+    return results.size();
+  }
+
+  /**
+   * Gets the output.
+   *
+   * @param index the index
+   * @return the output
+   */
+  public PeakResults getOutput(int index) {
+    return results.get(index);
+  }
+
+  /**
+   * @return The outputs.
+   */
+  public PeakResults[] toArray() {
+    return results.toArray(new PeakResults[results.size()]);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void begin() {
+    for (final PeakResults peakResults : results) {
+      peakResults.begin();
     }
+  }
 
-    /**
-     * Gets the output.
-     *
-     * @param index
-     *            the index
-     * @return the output
-     */
-    public PeakResults getOutput(int index)
-    {
-        return results.get(index);
+  /** {@inheritDoc} */
+  @Override
+  public void add(int peak, int origX, int origY, float origValue, double error, float noise,
+      float meanIntensity, float[] params, float[] paramsStdDev) {
+    for (final PeakResults peakResults : results) {
+      peakResults.add(peak, origX, origY, origValue, error, noise, meanIntensity, params,
+          paramsStdDev);
     }
+  }
 
-    /**
-     * @return The outputs.
-     */
-    public PeakResults[] toArray()
-    {
-        return results.toArray(new PeakResults[results.size()]);
+  @Override
+  public void add(PeakResult result) {
+    for (final PeakResults peakResults : results) {
+      peakResults.add(result);
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void begin()
-    {
-        for (final PeakResults peakResults : results)
-            peakResults.begin();
+  @Override
+  public void addAll(PeakResult[] results) {
+    for (final PeakResults peakResults : this.results) {
+      peakResults.addAll(results);
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
-            float[] params, float[] paramsStdDev)
-    {
-        for (final PeakResults peakResults : results)
-            peakResults.add(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
+  @Override
+  public void addAll(Collection<PeakResult> results) {
+    for (final PeakResults peakResults : this.results) {
+      peakResults.addAll(results);
     }
+  }
 
-    @Override
-    public void add(PeakResult result)
-    {
-        for (final PeakResults peakResults : results)
-            peakResults.add(result);
+  /** {@inheritDoc} */
+  @Override
+  public int size() {
+    return (results.isEmpty()) ? 0 : results.get(0).size();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void end() {
+    for (final PeakResults peakResults : results) {
+      peakResults.end();
     }
+  }
 
-    @Override
-    public void addAll(PeakResult[] results)
-    {
-        for (final PeakResults peakResults : this.results)
-            peakResults.addAll(results);
+  /** {@inheritDoc} */
+  @Override
+  public boolean isActive() {
+    for (final PeakResults peakResults : this.results) {
+      if (peakResults.isActive()) {
+        return true;
+      }
     }
+    return false;
+  }
 
-    @Override
-    public void addAll(Collection<PeakResult> results)
-    {
-        for (final PeakResults peakResults : this.results)
-            peakResults.addAll(results);
+  /**
+   * Checks all the results in the list. If any are not thread safe then they are wrapped with a
+   * SynchronizedPeakResults container.
+   *
+   * @return the thread safe list
+   */
+  public PeakResultsList getThreadSafeList() {
+    final PeakResultsList newList = new PeakResultsList();
+    newList.copySettings(this);
+    for (final PeakResults peakResults : this.results) {
+      // This assumes the settings are OK, i.e. the result was added
+      // using addOutput(...).
+      newList.results.add(SynchronizedPeakResults.create(peakResults));
     }
+    return newList;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int size()
-    {
-        return (results.isEmpty()) ? 0 : results.get(0).size();
+  // Pass through all the modifications to the list objects as well as this
+  // so that any new list objects can copy the settings.
+
+  @Override
+  public void setSource(ImageSource source) {
+    super.setSource(source);
+    for (final PeakResults peakResults : results) {
+      peakResults.setSource(source);
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void end()
-    {
-        for (final PeakResults peakResults : results)
-            peakResults.end();
+  @Override
+  public void setBounds(Rectangle bounds) {
+    super.setBounds(bounds);
+    for (final PeakResults peakResults : results) {
+      peakResults.setBounds(bounds);
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isActive()
-    {
-        for (final PeakResults peakResults : this.results)
-            if (peakResults.isActive())
-                return true;
-        return false;
+  @Override
+  public void setCalibration(Calibration calibration) {
+    super.setCalibration(calibration);
+    for (final PeakResults peakResults : results) {
+      peakResults.setCalibration(calibration);
     }
+  }
 
-    /**
-     * Checks all the results in the list. If any are not thread safe then they are wrapped with a
-     * SynchronizedPeakResults container.
-     *
-     * @return the thread safe list
-     */
-    public PeakResultsList getThreadSafeList()
-    {
-        final PeakResultsList newList = new PeakResultsList();
-        newList.copySettings(this);
-        for (final PeakResults peakResults : this.results)
-            // This assumes the settings are OK, i.e. the result was added
-            // using addOutput(...).
-            newList.results.add(SynchronizedPeakResults.create(peakResults));
-        return newList;
+  @Override
+  public void setPSF(PSF psf) {
+    super.setPSF(psf);
+    for (final PeakResults peakResults : results) {
+      peakResults.setPSF(psf);
     }
+  }
 
-    // Pass through all the modifications to the list objects as well as this
-    // so that any new list objects can copy the settings.
-
-    @Override
-    public void setSource(ImageSource source)
-    {
-        super.setSource(source);
-        for (final PeakResults peakResults : results)
-            peakResults.setSource(source);
+  @Override
+  public void setConfiguration(String configuration) {
+    super.setConfiguration(configuration);
+    for (final PeakResults peakResults : results) {
+      peakResults.setConfiguration(configuration);
     }
+  }
 
-    @Override
-    public void setBounds(Rectangle bounds)
-    {
-        super.setBounds(bounds);
-        for (final PeakResults peakResults : results)
-            peakResults.setBounds(bounds);
+  @Override
+  public void setName(String name) {
+    super.setName(name);
+    for (final PeakResults peakResults : results) {
+      peakResults.setName(name);
     }
+  }
 
-    @Override
-    public void setCalibration(Calibration calibration)
-    {
-        super.setCalibration(calibration);
-        for (final PeakResults peakResults : results)
-            peakResults.setCalibration(calibration);
+  @Override
+  public void copySettings(PeakResults results) {
+    super.copySettings(results);
+    for (final PeakResults peakResults : this.results) {
+      peakResults.copySettings(results);
     }
-
-    @Override
-    public void setPSF(PSF psf)
-    {
-        super.setPSF(psf);
-        for (final PeakResults peakResults : results)
-            peakResults.setPSF(psf);
-    }
-
-    @Override
-    public void setConfiguration(String configuration)
-    {
-        super.setConfiguration(configuration);
-        for (final PeakResults peakResults : results)
-            peakResults.setConfiguration(configuration);
-    }
-
-    @Override
-    public void setName(String name)
-    {
-        super.setName(name);
-        for (final PeakResults peakResults : results)
-            peakResults.setName(name);
-    }
-
-    @Override
-    public void copySettings(PeakResults results)
-    {
-        super.copySettings(results);
-        for (final PeakResults peakResults : this.results)
-            peakResults.copySettings(results);
-    }
+  }
 }

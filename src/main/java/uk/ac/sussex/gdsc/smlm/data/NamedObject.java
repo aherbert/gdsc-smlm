@@ -26,19 +26,18 @@ package uk.ac.sussex.gdsc.smlm.data;
 /**
  * Interface for any object that has a name.
  */
-public interface NamedObject
-{
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    public String getName();
+public interface NamedObject {
+  /**
+   * Gets the name.
+   *
+   * @return the name
+   */
+  public String getName();
 
-    /**
-     * Gets the short name. This may be the same as {@link #getName()}.
-     *
-     * @return the short name
-     */
-    public String getShortName();
+  /**
+   * Gets the short name. This may be the same as {@link #getName()}.
+   *
+   * @return the short name
+   */
+  public String getShortName();
 }

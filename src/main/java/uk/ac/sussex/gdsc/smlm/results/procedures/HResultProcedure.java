@@ -26,13 +26,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface HResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param h
-     *            the height
-     */
-    public void executeH(float h);
+public interface HResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param h the height
+   */
+  public void executeH(float h);
 }

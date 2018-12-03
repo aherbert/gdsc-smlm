@@ -30,109 +30,92 @@ import gnu.trove.list.array.TDoubleArrayList;
 /**
  * Allow optimisation using Apache Commons Math 3 Optimiser.
  */
-public abstract class OptimiserFunction
-{
-    /** The x. */
-    protected TDoubleArrayList x = null;
-    /** The y. */
-    protected TDoubleArrayList y = null;
+public abstract class OptimiserFunction {
+  /** The x. */
+  protected TDoubleArrayList x = null;
+  /** The y. */
+  protected TDoubleArrayList y = null;
 
-    /**
-     * Adds the point.
-     *
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     */
-    public void addPoint(double x, double y)
-    {
-        if (this.x == null)
-        {
-            this.x = new TDoubleArrayList();
-            this.y = new TDoubleArrayList();
-        }
-        this.x.add(x);
-        this.y.add(y);
+  /**
+   * Adds the point.
+   *
+   * @param x the x
+   * @param y the y
+   */
+  public void addPoint(double x, double y) {
+    if (this.x == null) {
+      this.x = new TDoubleArrayList();
+      this.y = new TDoubleArrayList();
     }
+    this.x.add(x);
+    this.y.add(y);
+  }
 
-    /**
-     * Adds the data.
-     *
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     */
-    public void addData(float[] x, float[] y)
-    {
-        this.x = new TDoubleArrayList();
-        this.y = new TDoubleArrayList();
-        for (int i = 0; i < x.length; i++)
-        {
-            this.x.add(x[i]);
-            this.y.add(y[i]);
-        }
+  /**
+   * Adds the data.
+   *
+   * @param x the x
+   * @param y the y
+   */
+  public void addData(float[] x, float[] y) {
+    this.x = new TDoubleArrayList();
+    this.y = new TDoubleArrayList();
+    for (int i = 0; i < x.length; i++) {
+      this.x.add(x[i]);
+      this.y.add(y[i]);
     }
+  }
 
-    /**
-     * Adds the data.
-     *
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     */
-    public void addData(double[] x, double[] y)
-    {
-        this.x = new TDoubleArrayList();
-        this.y = new TDoubleArrayList();
-        for (int i = 0; i < x.length; i++)
-        {
-            this.x.add(x[i]);
-            this.y.add(y[i]);
-        }
+  /**
+   * Adds the data.
+   *
+   * @param x the x
+   * @param y the y
+   */
+  public void addData(double[] x, double[] y) {
+    this.x = new TDoubleArrayList();
+    this.y = new TDoubleArrayList();
+    for (int i = 0; i < x.length; i++) {
+      this.x.add(x[i]);
+      this.y.add(y[i]);
     }
+  }
 
-    /**
-     * Gets the x data.
-     *
-     * @return the x
-     */
-    public double[] getX()
-    {
-        return x.toArray();
-    }
+  /**
+   * Gets the x data.
+   *
+   * @return the x
+   */
+  public double[] getX() {
+    return x.toArray();
+  }
 
-    /**
-     * Gets the y data.
-     *
-     * @return the y
-     */
-    public double[] getY()
-    {
-        return y.toArray();
-    }
+  /**
+   * Gets the y data.
+   *
+   * @return the y
+   */
+  public double[] getY() {
+    return y.toArray();
+  }
 
-    /**
-     * Gets the weights array. This is an array filled with ones.
-     *
-     * @return the weights
-     */
-    public double[] getWeights()
-    {
-        final double[] w = new double[y.size()];
-        Arrays.fill(w, 1);
-        return w;
-    }
+  /**
+   * Gets the weights array. This is an array filled with ones.
+   *
+   * @return the weights
+   */
+  public double[] getWeights() {
+    final double[] w = new double[y.size()];
+    Arrays.fill(w, 1);
+    return w;
+  }
 
-    /**
-     * Get the size.
-     *
-     * @return the size
-     */
-    public int size()
-    {
-        return x.size();
-    }
+  /**
+   * Get the size.
+   *
+   * @return the size
+   */
+  public int size() {
+    return x.size();
+  }
 }

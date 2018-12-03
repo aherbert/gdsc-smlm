@@ -24,93 +24,81 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
- * Contains a model for an image of blinking fluorophores under pulsed activation illumination. Activation energy is
- * sampled from an exponential distribution. Fluorophores are created when the activation energy has been achieved under
- * the given illumination.
- * <p>
- * Based on the work of Coltharp et al (2012) Accurate Construction of photoactivated localization microscopy images for
+ * Contains a model for an image of blinking fluorophores under pulsed activation illumination.
+ * Activation energy is sampled from an exponential distribution. Fluorophores are created when the
+ * activation energy has been achieved under the given illumination. <p> Based on the work of
+ * Coltharp et al (2012) Accurate Construction of photoactivated localization microscopy images for
  * quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
-public class ActivationEnergyImageModel extends ImageModel
-{
-    private double eAct;
-    private SpatialIllumination illumination;
+public class ActivationEnergyImageModel extends ImageModel {
+  private double eAct;
+  private SpatialIllumination illumination;
 
-    /**
-     * Construct a new image model.
-     *
-     * @param eAct
-     *            Average energy for activation
-     * @param illumination
-     *            The illumination model
-     * @param tOn
-     *            Average on-state time
-     * @param tOff
-     *            Average off-state time for the first dark state
-     * @param tOff2
-     *            Average off-state time for the second dark state
-     * @param nBlinks
-     *            Average number of blinks int the first dark state (used for each burst between second dark states)
-     * @param nBlinks2
-     *            Average number of blinks into the second dark state
-     */
-    public ActivationEnergyImageModel(double eAct, SpatialIllumination illumination, double tOn, double tOff,
-            double tOff2, double nBlinks, double nBlinks2)
-    {
-        super(tOn, tOff, tOff2, nBlinks, nBlinks2);
-        init(eAct, illumination);
+  /**
+   * Construct a new image model.
+   *
+   * @param eAct Average energy for activation
+   * @param illumination The illumination model
+   * @param tOn Average on-state time
+   * @param tOff Average off-state time for the first dark state
+   * @param tOff2 Average off-state time for the second dark state
+   * @param nBlinks Average number of blinks int the first dark state (used for each burst between
+   *        second dark states)
+   * @param nBlinks2 Average number of blinks into the second dark state
+   */
+  public ActivationEnergyImageModel(double eAct, SpatialIllumination illumination, double tOn,
+      double tOff, double tOff2, double nBlinks, double nBlinks2) {
+    super(tOn, tOff, tOff2, nBlinks, nBlinks2);
+    init(eAct, illumination);
+  }
+
+  private void init(double eAct, SpatialIllumination illumination) {
+    checkParameter("eAct", eAct);
+    if (illumination == null) {
+      throw new IllegalArgumentException("SpatialIllumination is null");
     }
+    this.eAct = eAct;
+    this.illumination = illumination;
+  }
 
-    private void init(double eAct, SpatialIllumination illumination)
-    {
-        checkParameter("eAct", eAct);
-        if (illumination == null)
-            throw new IllegalArgumentException("SpatialIllumination is null");
-        this.eAct = eAct;
-        this.illumination = illumination;
+  /**
+   * @return the average energy for activation.
+   */
+  public double getActivationEnergy() {
+    return eAct;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected double createActivationTime(double[] xyz) {
+    return getActivationTime(xyz, frameLimit);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct) {
+    return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
+        isUseGeometricDistribution(), getRandom());
+  }
+
+  private double getActivationTime(double[] xyz, int frames) {
+    final double activation = getRandom().nextExponential(eAct);
+    double e = 0;
+    for (int t = 0; t < frames; t++) {
+      // Q. Should the molecule be moving during the activation phase?
+      final double[] photons = illumination.getPulsedPhotons(xyz, t + 1);
+
+      e += photons[0]; // pulse energy
+      if (e > activation) {
+        return t;
+      }
+
+      e += photons[1]; // during energy
+      if (e > activation) {
+        // Interpolate
+        return t + 1 - (e - activation) / photons[1];
+      }
     }
-
-    /**
-     * @return the average energy for activation.
-     */
-    public double getActivationEnergy()
-    {
-        return eAct;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected double createActivationTime(double[] xyz)
-    {
-        return getActivationTime(xyz, frameLimit);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
-    {
-        return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
-                isUseGeometricDistribution(), getRandom());
-    }
-
-    private double getActivationTime(double[] xyz, int frames)
-    {
-        final double activation = getRandom().nextExponential(eAct);
-        double e = 0;
-        for (int t = 0; t < frames; t++)
-        {
-            // Q. Should the molecule be moving during the activation phase?
-            final double[] photons = illumination.getPulsedPhotons(xyz, t + 1);
-
-            e += photons[0]; // pulse energy
-            if (e > activation)
-                return t;
-
-            e += photons[1]; // during energy
-            if (e > activation)
-                // Interpolate
-                return t + 1 - (e - activation) / photons[1];
-        }
-        return frames; // default to the number of frames.
-    }
+    return frames; // default to the number of frames.
+  }
 }

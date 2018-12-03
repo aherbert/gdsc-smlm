@@ -28,51 +28,43 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Filter results using the combination of two filters. Results must pass both filters
  */
-public class AndFilter extends CombinedFilter
-{
-    /**
-     * Instantiates a new and filter.
-     *
-     * @param filter1
-     *            the filter 1
-     * @param filter2
-     *            the filter 2
-     */
-    public AndFilter(Filter filter1, Filter filter2)
-    {
-        super(filter1, filter2);
-    }
+public class AndFilter extends CombinedFilter {
+  /**
+   * Instantiates a new and filter.
+   *
+   * @param filter1 the filter 1
+   * @param filter2 the filter 2
+   */
+  public AndFilter(Filter filter1, Filter filter2) {
+    super(filter1, filter2);
+  }
 
-    @Override
-    protected String getOperator()
-    {
-        return "&&";
-    }
+  @Override
+  protected String getOperator() {
+    return "&&";
+  }
 
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        return accept1(peak) && accept2(peak);
-    }
+  @Override
+  public boolean accept(PeakResult peak) {
+    return accept1(peak) && accept2(peak);
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        if (accept1(peak) && accept2(peak))
-            return 0;
-        // We get here if filter 1 failed; or filter 1 passed but filter 2 failed.
-        return (result1 == 0) ? result2 : result1;
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    if (accept1(peak) && accept2(peak)) {
+      return 0;
     }
+    // We get here if filter 1 failed; or filter 1 passed but filter 2 failed.
+    return (result1 == 0) ? result2 : result1;
+  }
 
-    @Override
-    protected Filter createFilter(Filter f1, Filter f2)
-    {
-        return new AndFilter(f1, f2);
-    }
+  @Override
+  protected Filter createFilter(Filter f1, Filter f2) {
+    return new AndFilter(f1, f2);
+  }
 
-    @Override
-    public Filter clone()
-    {
-        return new AndFilter(filter1.clone(), filter2.clone());
-    }
+  @Override
+  public Filter clone() {
+    return new AndFilter(filter1.clone(), filter2.clone());
+  }
 }

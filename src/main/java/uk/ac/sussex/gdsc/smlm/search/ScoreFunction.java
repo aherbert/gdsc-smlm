@@ -26,18 +26,15 @@ package uk.ac.sussex.gdsc.smlm.search;
 /**
  * Calculate the optimum point within a search space.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public interface ScoreFunction<T extends Comparable<T>>
-{
-    /**
-     * Find the optimum point. Return the best point from the input points with a score that can be compared to other
-     * results.
-     *
-     * @param points
-     *            the points
-     * @return the result for the optimum of the points
-     */
-    public SearchResult<T> findOptimum(double[][] points);
+public interface ScoreFunction<T extends Comparable<T>> {
+  /**
+   * Find the optimum point. Return the best point from the input points with a score that can be
+   * compared to other results.
+   *
+   * @param points the points
+   * @return the result for the optimum of the points
+   */
+  public SearchResult<T> findOptimum(double[][] points);
 }

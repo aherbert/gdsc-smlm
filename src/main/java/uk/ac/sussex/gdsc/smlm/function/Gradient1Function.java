@@ -26,22 +26,19 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Defines function that can produce first order gradients.
  */
-public interface Gradient1Function extends ValueFunction, GradientFunction
-{
-    /**
-     * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
-     * initialisation for computing the first order gradients.
-     *
-     * @param a
-     *            An array of coefficients
-     */
-    public void initialise1(final double[] a);
+public interface Gradient1Function extends ValueFunction, GradientFunction {
+  /**
+   * Set the predictor coefficients (a) that will be used to predict each value. Allows the function
+   * to perform initialisation for computing the first order gradients.
+   *
+   * @param a An array of coefficients
+   */
+  public void initialise1(final double[] a);
 
-    /**
-     * Applies the procedure for the valid range of the function.
-     *
-     * @param procedure
-     *            the procedure
-     */
-    public void forEach(Gradient1Procedure procedure);
+  /**
+   * Applies the procedure for the valid range of the function.
+   *
+   * @param procedure the procedure
+   */
+  public void forEach(Gradient1Procedure procedure);
 }

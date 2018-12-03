@@ -28,12 +28,11 @@ import org.apache.commons.math3.random.RandomGenerator;
 /**
  * Specify methods for building RandomGenerators.
  */
-public interface RandomGeneratorFactory
-{
-    /**
-     * Create a new random generator.
-     *
-     * @return a new random generator
-     */
-    public RandomGenerator createRandomGenerator();
+public interface RandomGeneratorFactory {
+  /**
+   * Create a new random generator.
+   *
+   * @return a new random generator
+   */
+  public RandomGenerator createRandomGenerator();
 }

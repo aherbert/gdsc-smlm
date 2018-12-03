@@ -26,13 +26,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the stored localisation precision of fitting results.
  */
-public interface StoredPrecisionProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param precision
-     *            the precision
-     */
-    public void executeStoredPrecision(double precision);
+public interface StoredPrecisionProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param precision the precision
+   */
+  public void executeStoredPrecision(double precision);
 }

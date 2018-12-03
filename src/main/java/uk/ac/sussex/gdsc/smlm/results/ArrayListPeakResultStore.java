@@ -42,283 +42,253 @@ import java.util.function.Predicate;
 /**
  * Stores peak results using an ArrayList.
  */
-public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResultStoreCollection
-{
-    /** The results. */
-    private ArrayList<PeakResult> results;
+public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResultStoreCollection {
+  /** The results. */
+  private ArrayList<PeakResult> results;
 
-    /**
-     * Instantiates a new array list peak results store.
-     *
-     * @param capacity
-     *            the capacity
-     */
-    public ArrayListPeakResultStore(int capacity)
-    {
-        this.results = new ArrayList<>(capacity);
-    }
+  /**
+   * Instantiates a new array list peak results store.
+   *
+   * @param capacity the capacity
+   */
+  public ArrayListPeakResultStore(int capacity) {
+    this.results = new ArrayList<>(capacity);
+  }
 
-    /**
-     * Instantiates a new array list peak result store.
-     *
-     * @param store
-     *            the store to copy
-     */
-    public ArrayListPeakResultStore(ArrayListPeakResultStore store)
-    {
-        this.results = new ArrayList<>(store.results);
-    }
+  /**
+   * Instantiates a new array list peak result store.
+   *
+   * @param store the store to copy
+   */
+  public ArrayListPeakResultStore(ArrayListPeakResultStore store) {
+    this.results = new ArrayList<>(store.results);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public PeakResult get(int index)
-    {
-        return results.get(index);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public PeakResult get(int index) {
+    return results.get(index);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int size()
-    {
-        return results.size();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int size() {
+    return results.size();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean add(PeakResult result)
-    {
-        return results.add(result);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean add(PeakResult result) {
+    return results.add(result);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean addCollection(Collection<PeakResult> results)
-    {
-        return this.results.addAll(results);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean addCollection(Collection<PeakResult> results) {
+    return this.results.addAll(results);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean addArray(PeakResult[] results)
-    {
-        return this.results.addAll(Arrays.asList(results));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean addArray(PeakResult[] results) {
+    return this.results.addAll(Arrays.asList(results));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean addStore(PeakResultStore results)
-    {
-        if (results instanceof PeakResultStoreCollection)
-            return this.results.addAll(((PeakResultStoreCollection) results).getCollectionReference());
-        return addArray(results.toArray());
+  /** {@inheritDoc} */
+  @Override
+  public boolean addStore(PeakResultStore results) {
+    if (results instanceof PeakResultStoreCollection) {
+      return this.results.addAll(((PeakResultStoreCollection) results).getCollectionReference());
     }
+    return addArray(results.toArray());
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public PeakResult remove(int index)
-    {
-        return results.remove(index);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public PeakResult remove(int index) {
+    return results.remove(index);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void remove(int fromIndex, int toIndex)
-    {
-        if (fromIndex > toIndex)
-            throw new IllegalArgumentException("fromIndex must be <= toIndex");
-        for (int i = toIndex; i >= fromIndex; i--)
-            results.remove(i);
+  /** {@inheritDoc} */
+  @Override
+  public void remove(int fromIndex, int toIndex) {
+    if (fromIndex > toIndex) {
+      throw new IllegalArgumentException("fromIndex must be <= toIndex");
     }
+    for (int i = toIndex; i >= fromIndex; i--) {
+      results.remove(i);
+    }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean remove(PeakResult result)
-    {
-        return results.remove(result);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean remove(PeakResult result) {
+    return results.remove(result);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean removeCollection(Collection<PeakResult> results)
-    {
-        return this.results.removeAll(results);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean removeCollection(Collection<PeakResult> results) {
+    return this.results.removeAll(results);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean removeArray(PeakResult[] results)
-    {
-        return this.results.removeAll(Arrays.asList(results));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean removeArray(PeakResult[] results) {
+    return this.results.removeAll(Arrays.asList(results));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean removeStore(PeakResultStore results)
-    {
-        if (results instanceof PeakResultStoreCollection)
-            return this.results.removeAll(((PeakResultStoreCollection) results).getCollectionReference());
-        return removeArray(results.toArray());
+  /** {@inheritDoc} */
+  @Override
+  public boolean removeStore(PeakResultStore results) {
+    if (results instanceof PeakResultStoreCollection) {
+      return this.results.removeAll(((PeakResultStoreCollection) results).getCollectionReference());
     }
+    return removeArray(results.toArray());
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean retainCollection(Collection<PeakResult> results)
-    {
-        return this.results.retainAll(results);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean retainCollection(Collection<PeakResult> results) {
+    return this.results.retainAll(results);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean retainArray(PeakResult[] results)
-    {
-        return this.results.retainAll(Arrays.asList(results));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean retainArray(PeakResult[] results) {
+    return this.results.retainAll(Arrays.asList(results));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean retainStore(PeakResultStore results)
-    {
-        if (results instanceof PeakResultStoreCollection)
-            return this.results.retainAll(((PeakResultStoreCollection) results).getCollectionReference());
-        return retainArray(results.toArray());
+  /** {@inheritDoc} */
+  @Override
+  public boolean retainStore(PeakResultStore results) {
+    if (results instanceof PeakResultStoreCollection) {
+      return this.results.retainAll(((PeakResultStoreCollection) results).getCollectionReference());
     }
+    return retainArray(results.toArray());
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void clear()
-    {
-        results.clear();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void clear() {
+    results.clear();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void trimToSize()
-    {
-        results.trimToSize();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void trimToSize() {
+    results.trimToSize();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void sort(Comparator<PeakResult> comparator)
-    {
-        Collections.sort(results, comparator);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void sort(Comparator<PeakResult> comparator) {
+    Collections.sort(results, comparator);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public PeakResult[] toArray()
-    {
-        return results.toArray(new PeakResult[size()]);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public PeakResult[] toArray() {
+    return results.toArray(new PeakResult[size()]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public PeakResultStore copy()
-    {
-        return new ArrayListPeakResultStore(this);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public PeakResultStore copy() {
+    return new ArrayListPeakResultStore(this);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public PeakResultStore copy(boolean deepCopy)
-    {
-        if (deepCopy)
-        {
-            final ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
-            for (int i = 0, size = size(); i < size; i++)
-                copy.add(results.get(i).clone());
-            return copy;
-        }
-        return copy();
+  /** {@inheritDoc} */
+  @Override
+  public PeakResultStore copy(boolean deepCopy) {
+    if (deepCopy) {
+      final ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
+      for (int i = 0, size = size(); i < size; i++) {
+        copy.add(results.get(i).clone());
+      }
+      return copy;
     }
+    return copy();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean removeIf(final PeakResultPredicate filter)
-    {
-        // Util we upgrade the Java version to 1.8 the ArrayList does not support
-        // predicates so use a TurboList
-        final TurboList<PeakResult> temp = new TurboList<>(this.results);
-        if (temp.removeIf(new Predicate<PeakResult>()
-        {
-            @Override
-            public boolean test(PeakResult t)
-            {
-                return filter.test(t);
-            }
-        }))
-        {
-            this.results = new ArrayList<>(temp);
-            return true;
-        }
-        return false;
+  /** {@inheritDoc} */
+  @Override
+  public boolean removeIf(final PeakResultPredicate filter) {
+    // Util we upgrade the Java version to 1.8 the ArrayList does not support
+    // predicates so use a TurboList
+    final TurboList<PeakResult> temp = new TurboList<>(this.results);
+    if (temp.removeIf(new Predicate<PeakResult>() {
+      @Override
+      public boolean test(PeakResult t) {
+        return filter.test(t);
+      }
+    })) {
+      this.results = new ArrayList<>(temp);
+      return true;
     }
+    return false;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void forEach(PeakResultProcedure procedure)
-    {
-        for (int i = 0, size = size(); i < size; i++)
-            procedure.execute(results.get(i));
+  /** {@inheritDoc} */
+  @Override
+  public void forEach(PeakResultProcedure procedure) {
+    for (int i = 0, size = size(); i < size; i++) {
+      procedure.execute(results.get(i));
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public PeakResult[] subset(PeakResultPredicate filter)
-    {
-        final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
-        for (int i = 0, size = size(); i < size; i++)
-            if (filter.test(results.get(i)))
-                list.add(results.get(i));
-        return list.toArray();
+  /** {@inheritDoc} */
+  @Override
+  public PeakResult[] subset(PeakResultPredicate filter) {
+    final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
+    for (int i = 0, size = size(); i < size; i++) {
+      if (filter.test(results.get(i))) {
+        list.add(results.get(i));
+      }
     }
+    return list.toArray();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void shuffle(RandomGenerator randomSource)
-    {
-        Collections.shuffle(results, RandomAdaptor.createAdaptor(randomSource));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void shuffle(RandomGenerator randomSource) {
+    Collections.shuffle(results, RandomAdaptor.createAdaptor(randomSource));
+  }
 
-    @Override
-    public void shuffle(UniformRandomProvider randomSource)
-    {
-        Collections.shuffle(results, RandomAdaptor.createAdaptor(new RandomGeneratorAdapter(randomSource)));
-    }
+  @Override
+  public void shuffle(UniformRandomProvider randomSource) {
+    Collections.shuffle(results,
+        RandomAdaptor.createAdaptor(new RandomGeneratorAdapter(randomSource)));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int indexOf(PeakResult result)
-    {
-        return results.indexOf(result);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int indexOf(PeakResult result) {
+    return results.indexOf(result);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int lastIndexOf(PeakResult result)
-    {
-        return results.lastIndexOf(result);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int lastIndexOf(PeakResult result) {
+    return results.lastIndexOf(result);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean contains(PeakResult result)
-    {
-        return results.contains(result);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean contains(PeakResult result) {
+    return results.contains(result);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Collection<PeakResult> getCollection()
-    {
-        return (Collection<PeakResult>) results.clone();
-    }
+  /** {@inheritDoc} */
+  @Override
+  @SuppressWarnings("unchecked")
+  public Collection<PeakResult> getCollection() {
+    return (Collection<PeakResult>) results.clone();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Collection<PeakResult> getCollectionReference()
-    {
-        return results;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Collection<PeakResult> getCollectionReference() {
+    return results;
+  }
 }

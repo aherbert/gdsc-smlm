@@ -26,34 +26,30 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Euclidian Shift.
  */
-public class MultiFilterEShiftComponent extends MultiFilterComponent
-{
-    private static final int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
+public class MultiFilterEShiftComponent extends MultiFilterComponent {
+  private static final int type =
+      IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 
-    private final float eoffset;
+  private final float eoffset;
 
-    /**
-     * Instantiates a new multi filter E shift component.
-     *
-     * @param eshift
-     *            the eshift
-     */
-    public MultiFilterEShiftComponent(double eshift)
-    {
-        this.eoffset = Filter.getUpperSquaredLimit(eshift);
-    }
+  /**
+   * Instantiates a new multi filter E shift component.
+   *
+   * @param eshift the eshift
+   */
+  public MultiFilterEShiftComponent(double eshift) {
+    this.eoffset = Filter.getUpperSquaredLimit(eshift);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        return (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    return (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return type;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return type;
+  }
 }

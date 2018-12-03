@@ -24,34 +24,30 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Filter results using Precision using the Cramér-Rao lower bound (CRLB) on the variance of the estimators.
+ * Filter results using Precision using the Cramér-Rao lower bound (CRLB) on the variance of the
+ * estimators.
  */
-public class MultiFilterVarianceCRLBComponent extends MultiFilterComponent
-{
-    private final double variance;
+public class MultiFilterVarianceCRLBComponent extends MultiFilterComponent {
+  private final double variance;
 
-    /**
-     * Instantiates a new multi filter variance CRLB component.
-     *
-     * @param precision
-     *            the precision
-     */
-    public MultiFilterVarianceCRLBComponent(double precision)
-    {
-        this.variance = Filter.getDUpperSquaredLimit(precision);
-    }
+  /**
+   * Instantiates a new multi filter variance CRLB component.
+   *
+   * @param precision the precision
+   */
+  public MultiFilterVarianceCRLBComponent(double precision) {
+    this.variance = Filter.getDUpperSquaredLimit(precision);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        return (peak.getLocationVarianceCRLB() > variance);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    return (peak.getLocationVarianceCRLB() > variance);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return IDirectFilter.V_LOCATION_VARIANCE_CRLB;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return IDirectFilter.V_LOCATION_VARIANCE_CRLB;
+  }
 }

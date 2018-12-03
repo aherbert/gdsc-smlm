@@ -31,62 +31,59 @@ import ij.process.ImageProcessor;
 /**
  * Set the display values of an image to render it as a binary mask, all non-zero values are white.
  */
-public class BinaryDisplay implements PlugInFilter
-{
-    private ImagePlus imp;
+public class BinaryDisplay implements PlugInFilter {
+  private ImagePlus imp;
 
-    /** {@inheritDoc} */
-    @Override
-    public int setup(String arg, ImagePlus imp)
-    {
-        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+  /** {@inheritDoc} */
+  @Override
+  public int setup(String arg, ImagePlus imp) {
+    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        if (imp == null)
-            return DONE;
-
-        if (arg.equals("reset"))
-        {
-            final ImageProcessor ip = imp.getProcessor();
-            ip.reset();
-            imp.setProcessor(ip);
-            imp.resetDisplayRange();
-            imp.updateAndDraw();
-            return DONE;
-        }
-
-        this.imp = imp;
-        return DOES_ALL;
+    if (imp == null) {
+      return DONE;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void run(ImageProcessor ip)
-    {
-        //		float min = Float.POSITIVE_INFINITY;
-        //		for (int i=0; i<ip.getPixelCount(); i++)
-        //		{
-        //			final float value = ip.getf(i);
-        //			if (value == 0)
-        //				continue;
-        //			if (value < min)
-        //				min = value;
-        //		}
-        //		ip.setMinAndMax(0, min);
-        //		imp.updateAndDraw();
-
-        final FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
-        final float[] data = (float[]) fp.getPixels();
-        for (int i = 0; i < ip.getPixelCount(); i++)
-        {
-            final float value = ip.getf(i);
-            if (value == 0)
-                continue;
-            data[i] = 1;
-        }
-
-        ip.snapshot();
-        ip.setPixels(0, fp);
-        ip.setMinAndMax(0, 1);
-        imp.updateAndDraw();
+    if (arg.equals("reset")) {
+      final ImageProcessor ip = imp.getProcessor();
+      ip.reset();
+      imp.setProcessor(ip);
+      imp.resetDisplayRange();
+      imp.updateAndDraw();
+      return DONE;
     }
+
+    this.imp = imp;
+    return DOES_ALL;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void run(ImageProcessor ip) {
+    // float min = Float.POSITIVE_INFINITY;
+    // for (int i=0; i<ip.getPixelCount(); i++)
+    // {
+    // final float value = ip.getf(i);
+    // if (value == 0)
+    // continue;
+    // if (value < min)
+    // min = value;
+    // }
+    // ip.setMinAndMax(0, min);
+    // imp.updateAndDraw();
+
+    final FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
+    final float[] data = (float[]) fp.getPixels();
+    for (int i = 0; i < ip.getPixelCount(); i++) {
+      final float value = ip.getf(i);
+      if (value == 0) {
+        continue;
+      }
+      data[i] = 1;
+    }
+
+    ip.snapshot();
+    ip.setPixels(0, fp);
+    ip.setMinAndMax(0, 1);
+    imp.updateAndDraw();
+  }
 }

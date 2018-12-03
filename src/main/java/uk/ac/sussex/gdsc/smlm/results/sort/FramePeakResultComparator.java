@@ -30,15 +30,13 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Compares the results by frame.
  */
-public class FramePeakResultComparator implements Comparator<PeakResult>
-{
-    /** An instance of the comparator. */
-    public static final FramePeakResultComparator INSTANCE = new FramePeakResultComparator();
+public class FramePeakResultComparator implements Comparator<PeakResult> {
+  /** An instance of the comparator. */
+  public static final FramePeakResultComparator INSTANCE = new FramePeakResultComparator();
 
-    /** {@inheritDoc} */
-    @Override
-    public int compare(PeakResult o1, PeakResult o2)
-    {
-        return Integer.compare(o1.getFrame(), o2.getFrame());
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int compare(PeakResult o1, PeakResult o2) {
+    return Integer.compare(o1.getFrame(), o2.getFrame());
+  }
 }

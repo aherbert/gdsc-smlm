@@ -26,83 +26,72 @@ package uk.ac.sussex.gdsc.smlm.results;
 /**
  * Contains the options to set before reading the results.
  */
-public class ResultOption
-{
-    /** The id. */
-    public final int id;
+public class ResultOption {
+  /** The id. */
+  public final int id;
 
-    /** The name. */
-    public final String name;
+  /** The name. */
+  public final String name;
 
-    /** The set of valid values. This can be null. */
-    public final Object[] values;
+  /** The set of valid values. This can be null. */
+  public final Object[] values;
 
-    /** The value. */
-    private Object value;
+  /** The value. */
+  private Object value;
 
-    /**
-     * Instantiates a new result option.
-     *
-     * @param id
-     *            the id
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @param values
-     *            the values
-     */
-    ResultOption(int id, String name, Object value, Object[] values)
-    {
-        this.id = id;
-        this.name = name;
-        this.values = values;
-        this.setValue(value);
-    }
+  /**
+   * Instantiates a new result option.
+   *
+   * @param id the id
+   * @param name the name
+   * @param value the value
+   * @param values the values
+   */
+  ResultOption(int id, String name, Object value, Object[] values) {
+    this.id = id;
+    this.name = name;
+    this.values = values;
+    this.setValue(value);
+  }
 
-    /**
-     * Gets the value.
-     *
-     * @return the value
-     */
-    public Object getValue()
-    {
-        return value;
-    }
+  /**
+   * Gets the value.
+   *
+   * @return the value
+   */
+  public Object getValue() {
+    return value;
+  }
 
-    /**
-     * Sets the value. If the list of valid values is not empty then an exception will be thrown if the value is one of
-     * the valid values.
-     *
-     * @param value
-     *            the new value
-     * @throws IllegalArgumentException
-     *             If the value is not in the list of valid values
-     */
-    public void setValue(Object value)
-    {
-        checkValue(value);
-        this.value = value;
-    }
+  /**
+   * Sets the value. If the list of valid values is not empty then an exception will be thrown if
+   * the value is one of the valid values.
+   *
+   * @param value the new value
+   * @throws IllegalArgumentException If the value is not in the list of valid values
+   */
+  public void setValue(Object value) {
+    checkValue(value);
+    this.value = value;
+  }
 
-    private void checkValue(Object value)
-    {
-        if (hasValues())
-        {
-            for (int i = 0; i < values.length; i++)
-                if (values[i].equals(value))
-                    return;
-            throw new IllegalArgumentException("Not a valid value: " + value);
+  private void checkValue(Object value) {
+    if (hasValues()) {
+      for (int i = 0; i < values.length; i++) {
+        if (values[i].equals(value)) {
+          return;
         }
+      }
+      throw new IllegalArgumentException("Not a valid value: " + value);
     }
+  }
 
-    /**
-     * Checks for valid values.
-     *
-     * @return true, if the list of valid values is not empty
-     */
-    public boolean hasValues()
-    {
-        return values != null && values.length > 0;
-    }
+  /**
+   * Checks for valid values.
+   *
+   * @return true, if the list of valid values is not empty
+   */
+  public boolean hasValues() {
+    return values != null && values.length > 0;
+  }
 }

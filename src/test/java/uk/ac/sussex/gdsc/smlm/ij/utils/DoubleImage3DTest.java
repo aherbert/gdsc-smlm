@@ -25,19 +25,16 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
-@SuppressWarnings({ "javadoc" })
-public class DoubleImage3DTest extends Image3DTest
-{
-    @Override
-    protected DoubleImage3D createData(int w, int h, int d)
-    {
-        final double[] data = SimpleArrayUtils.newArray(w * h * d, 1.0, 1.0);
-        return new DoubleImage3D(w, h, d, data);
-    }
+@SuppressWarnings({"javadoc"})
+public class DoubleImage3DTest extends Image3DTest {
+  @Override
+  protected DoubleImage3D createData(int w, int h, int d) {
+    final double[] data = SimpleArrayUtils.newArray(w * h * d, 1.0, 1.0);
+    return new DoubleImage3D(w, h, d, data);
+  }
 
-    @Override
-    protected DoubleImage3D createEmptyData(int w, int h, int d)
-    {
-        return new DoubleImage3D(w, h, d);
-    }
+  @Override
+  protected DoubleImage3D createEmptyData(int w, int h, int d) {
+    return new DoubleImage3D(w, h, d);
+  }
 }

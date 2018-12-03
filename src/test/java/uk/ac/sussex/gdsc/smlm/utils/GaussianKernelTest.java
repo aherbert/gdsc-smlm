@@ -32,212 +32,204 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "javadoc" })
-public class GaussianKernelTest
-{
-    @Test
-    public void canGetConversionFactor()
-    {
-        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
+@SuppressWarnings({"javadoc"})
+public class GaussianKernelTest {
+  @Test
+  public void canGetConversionFactor() {
+    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
 
-            final double norm = 1.0 / (Math.sqrt(2 * Math.PI) * s);
-            final double var2 = 2 * s * s;
+      final double norm = 1.0 / (Math.sqrt(2 * Math.PI) * s);
+      final double var2 = 2 * s * s;
 
-            final GaussianKernel k = new GaussianKernel(s);
-            final double[] o = k.getGaussianKernel(1, 5, false);
-            final double f = k.getConversionFactor(o);
-            for (int u = o.length / 2, x = u; x >= 0; x--)
-            {
-                final double e = norm * FastMath.exp(-(x - u) * (x - u) / var2);
-                TestAssertions.assertTest(e, f * o[x], predicate);
+      final GaussianKernel k = new GaussianKernel(s);
+      final double[] o = k.getGaussianKernel(1, 5, false);
+      final double f = k.getConversionFactor(o);
+      for (int u = o.length / 2, x = u; x >= 0; x--) {
+        final double e = norm * FastMath.exp(-(x - u) * (x - u) / var2);
+        TestAssertions.assertTest(e, f * o[x], predicate);
+      }
+    }
+  }
+
+  @Test
+  public void canComputeGaussianKernelIncScaleIncRange() {
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
+
+      final GaussianKernel k = new GaussianKernel(s);
+
+      for (int scale = 1; scale < 16; scale *= 2) {
+        for (int range = 3; range < 5; range++) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+            final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+
+            Assertions.assertArrayEquals(e, o);
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void canComputeGaussianKernelDecScaleIncRange() {
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
+
+      final GaussianKernel k = new GaussianKernel(s);
+
+      for (int scale = 16; scale > 1; scale /= 2) {
+        for (int range = 3; range < 5; range++) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+            final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+
+            Assertions.assertArrayEquals(e, o);
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void canComputeGaussianKernelIncRangeIncScale() {
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
+
+      final GaussianKernel k = new GaussianKernel(s);
+
+      for (int range = 3; range < 5; range++) {
+        for (int scale = 1; scale < 16; scale *= 2) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+            final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+
+            Assertions.assertArrayEquals(e, o);
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void canComputeGaussianKernelIncRangeDecScale() {
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
+
+      final GaussianKernel k = new GaussianKernel(s);
+
+      for (int range = 3; range < 5; range++) {
+        for (int scale = 16; scale > 1; scale /= 2) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
+            final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+
+            Assertions.assertArrayEquals(e, o);
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void canComputeDownscaleGaussianKernelIncScaleIncRange() {
+    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
+
+      final GaussianKernel k = new GaussianKernel(s);
+
+      for (int scale = 1; scale <= 5; scale++) {
+        for (int range = 3; range < 5; range++) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+            final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
+
+            if (MathUtils.isPow2(scale)) {
+              Assertions.assertArrayEquals(e, o);
+            } else {
+              TestAssertions.assertArrayTest(e, o, predicate);
             }
+          }
         }
+      }
     }
+  }
 
-    @Test
-    public void canComputeGaussianKernelIncScaleIncRange()
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
+  @Test
+  public void canComputeDownscaleGaussianKernelDecScaleIncRange() {
+    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
 
-            final GaussianKernel k = new GaussianKernel(s);
+      final GaussianKernel k = new GaussianKernel(s);
 
-            for (int scale = 1; scale < 16; scale *= 2)
-                for (int range = 3; range < 5; range++)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-                        final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+      for (int scale = 5; scale >= 1; scale--) {
+        for (int range = 3; range < 5; range++) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+            final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-                        Assertions.assertArrayEquals(e, o);
-                    }
+            if (MathUtils.isPow2(scale)) {
+              Assertions.assertArrayEquals(e, o);
+            } else {
+              TestAssertions.assertArrayTest(e, o, predicate);
+            }
+          }
         }
+      }
     }
+  }
 
-    @Test
-    public void canComputeGaussianKernelDecScaleIncRange()
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
+  @Test
+  public void canComputeDownscaleGaussianKernelIncRangeIncScale() {
+    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
 
-            final GaussianKernel k = new GaussianKernel(s);
+      final GaussianKernel k = new GaussianKernel(s);
 
-            for (int scale = 16; scale > 1; scale /= 2)
-                for (int range = 3; range < 5; range++)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-                        final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+      for (int range = 3; range < 5; range++) {
+        for (int scale = 1; scale <= 5; scale++) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+            final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-                        Assertions.assertArrayEquals(e, o);
-                    }
+            if (MathUtils.isPow2(scale)) {
+              Assertions.assertArrayEquals(e, o);
+            } else {
+              TestAssertions.assertArrayTest(e, o, predicate);
+            }
+          }
         }
+      }
     }
+  }
 
-    @Test
-    public void canComputeGaussianKernelIncRangeIncScale()
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
+  @Test
+  public void canComputeDownscaleGaussianKernelIncRangeDecScale() {
+    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    for (int i = 0; i < 5; i++) {
+      final double s = 0.33 * (1 << i);
 
-            final GaussianKernel k = new GaussianKernel(s);
+      final GaussianKernel k = new GaussianKernel(s);
 
-            for (int range = 3; range < 5; range++)
-                for (int scale = 1; scale < 16; scale *= 2)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-                        final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
+      for (int range = 3; range < 5; range++) {
+        for (int scale = 5; scale >= 1; scale--) {
+          for (final boolean edgeCorrection : new boolean[] {true, false}) {
+            final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
+            final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-                        Assertions.assertArrayEquals(e, o);
-                    }
+            if (MathUtils.isPow2(scale)) {
+              Assertions.assertArrayEquals(e, o);
+            } else {
+              TestAssertions.assertArrayTest(e, o, predicate);
+            }
+          }
         }
+      }
     }
-
-    @Test
-    public void canComputeGaussianKernelIncRangeDecScale()
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
-
-            final GaussianKernel k = new GaussianKernel(s);
-
-            for (int range = 3; range < 5; range++)
-                for (int scale = 16; scale > 1; scale /= 2)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s * scale, range, edgeCorrection);
-                        final double[] o = k.getGaussianKernel(scale, range, edgeCorrection);
-
-                        Assertions.assertArrayEquals(e, o);
-                    }
-        }
-    }
-
-    @Test
-    public void canComputeDownscaleGaussianKernelIncScaleIncRange()
-    {
-        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
-
-            final GaussianKernel k = new GaussianKernel(s);
-
-            for (int scale = 1; scale <= 5; scale++)
-                for (int range = 3; range < 5; range++)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-                        final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
-
-                        if (MathUtils.isPow2(scale))
-                            Assertions.assertArrayEquals(e, o);
-                        else
-                            TestAssertions.assertArrayTest(e, o, predicate);
-                    }
-        }
-    }
-
-    @Test
-    public void canComputeDownscaleGaussianKernelDecScaleIncRange()
-    {
-        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
-
-            final GaussianKernel k = new GaussianKernel(s);
-
-            for (int scale = 5; scale >= 1; scale--)
-                for (int range = 3; range < 5; range++)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-                        final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
-
-                        if (MathUtils.isPow2(scale))
-                            Assertions.assertArrayEquals(e, o);
-                        else
-                            TestAssertions.assertArrayTest(e, o, predicate);
-                    }
-        }
-    }
-
-    @Test
-    public void canComputeDownscaleGaussianKernelIncRangeIncScale()
-    {
-        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
-
-            final GaussianKernel k = new GaussianKernel(s);
-
-            for (int range = 3; range < 5; range++)
-                for (int scale = 1; scale <= 5; scale++)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-                        final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
-
-                        if (MathUtils.isPow2(scale))
-                            Assertions.assertArrayEquals(e, o);
-                        else
-                            TestAssertions.assertArrayTest(e, o, predicate);
-                    }
-        }
-    }
-
-    @Test
-    public void canComputeDownscaleGaussianKernelIncRangeDecScale()
-    {
-        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
-        for (int i = 0; i < 5; i++)
-        {
-            final double s = 0.33 * (1 << i);
-
-            final GaussianKernel k = new GaussianKernel(s);
-
-            for (int range = 3; range < 5; range++)
-                for (int scale = 5; scale >= 1; scale--)
-                    for (final boolean edgeCorrection : new boolean[] { true, false })
-                    {
-                        final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
-                        final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
-
-                        if (MathUtils.isPow2(scale))
-                            Assertions.assertArrayEquals(e, o);
-                        else
-                            TestAssertions.assertArrayTest(e, o, predicate);
-                    }
-        }
-    }
+  }
 }

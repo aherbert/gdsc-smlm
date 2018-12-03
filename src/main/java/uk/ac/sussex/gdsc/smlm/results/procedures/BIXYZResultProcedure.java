@@ -26,21 +26,15 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface BIXYZResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param background
-     *            the background
-     * @param intensity
-     *            the intensity
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     * @param z
-     *            the z
-     */
-    public void executeBIXYZ(float background, float intensity, float x, float y, float z);
+public interface BIXYZResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param background the background
+   * @param intensity the intensity
+   * @param x the x
+   * @param y the y
+   * @param z the z
+   */
+  public void executeBIXYZ(float background, float intensity, float x, float y, float z);
 }

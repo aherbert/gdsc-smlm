@@ -34,143 +34,123 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold.
  */
-public class ANRFilter extends DirectFilter
-{
-    /** The amplitude-to-noise ratio (ANR). */
-    @XStreamAsAttribute
-    private final float anr;
+public class ANRFilter extends DirectFilter {
+  /** The amplitude-to-noise ratio (ANR). */
+  @XStreamAsAttribute
+  private final float anr;
 
-    @XStreamOmitField
-    private Gaussian2DPeakResultCalculator calculator;
+  @XStreamOmitField
+  private Gaussian2DPeakResultCalculator calculator;
 
-    /**
-     * Instantiates a new amplitude-to-noise ratio (ANR) filter.
-     *
-     * @param anr
-     *            the amplitude-to-noise ratio (ANR) threshold
-     */
-    public ANRFilter(float anr)
-    {
-        this.anr = Math.max(0, anr);
+  /**
+   * Instantiates a new amplitude-to-noise ratio (ANR) filter.
+   *
+   * @param anr the amplitude-to-noise ratio (ANR) threshold
+   */
+  public ANRFilter(float anr) {
+    this.anr = Math.max(0, anr);
+  }
+
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+        peakResults.getCalibration(), Gaussian2DPeakResultHelper.AMPLITUDE);
+  }
+
+  @Override
+  public boolean accept(PeakResult peak) {
+    return getANR(calculator, peak) >= this.anr;
+  }
+
+  /**
+   * Gets the amplitude-to-noise ratio (ANR).
+   *
+   * @param calculator the calculator
+   * @param peak the peak
+   * @return the amplitude-to-noise ratio (ANR)
+   */
+  static float getANR(Gaussian2DPeakResultCalculator calculator, PeakResult peak) {
+    return (peak.getNoise() > 0) ? calculator.getAmplitude(peak.getParameters()) / peak.getNoise()
+        : Float.POSITIVE_INFINITY;
+  }
+
+  @Override
+  public int getValidationFlags() {
+    return V_AMPLITUDE | V_NOISE;
+  }
+
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    if (getANR(peak) < this.anr) {
+      return V_AMPLITUDE | V_NOISE;
     }
+    return 0;
+  }
 
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-                Gaussian2DPeakResultHelper.AMPLITUDE);
-    }
+  /**
+   * Gets the amplitude-to-noise ratio (ANR).
+   *
+   * @param peak the peak
+   * @return the amplitude-to-noise ratio (ANR)
+   */
+  static float getANR(PreprocessedPeakResult peak) {
+    return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
+  }
 
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        return getANR(calculator, peak) >= this.anr;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    return "Filter results using a lower ANR threshold.";
+  }
 
-    /**
-     * Gets the amplitude-to-noise ratio (ANR).
-     *
-     * @param calculator
-     *            the calculator
-     * @param peak
-     *            the peak
-     * @return the amplitude-to-noise ratio (ANR)
-     */
-    static float getANR(Gaussian2DPeakResultCalculator calculator, PeakResult peak)
-    {
-        return (peak.getNoise() > 0) ? calculator.getAmplitude(peak.getParameters()) / peak.getNoise()
-                : Float.POSITIVE_INFINITY;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfParameters() {
+    return 1;
+  }
 
-    @Override
-    public int getValidationFlags()
-    {
-        return V_AMPLITUDE | V_NOISE;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected double getParameterValueInternal(int index) {
+    return anr;
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        if (getANR(peak) < this.anr)
-            return V_AMPLITUDE | V_NOISE;
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getParameterIncrement(int index) {
+    checkIndex(index);
+    return SNRFilter.DEFAULT_INCREMENT;
+  }
 
-    /**
-     * Gets the amplitude-to-noise ratio (ANR).
-     *
-     * @param peak
-     *            the peak
-     * @return the amplitude-to-noise ratio (ANR)
-     */
-    static float getANR(PreprocessedPeakResult peak)
-    {
-        return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public ParameterType getParameterType(int index) {
+    checkIndex(index);
+    return ParameterType.ANR;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        return "Filter results using a lower ANR threshold.";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter adjustParameter(int index, double delta) {
+    checkIndex(index);
+    return new ANRFilter(updateParameter(anr, delta, SNRFilter.DEFAULT_RANGE));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfParameters()
-    {
-        return 1;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter create(double... parameters) {
+    return new ANRFilter((float) parameters[0]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected double getParameterValueInternal(int index)
-    {
-        return anr;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void weakestParameters(double[] parameters) {
+    setMin(parameters, 0, anr);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getParameterIncrement(int index)
-    {
-        checkIndex(index);
-        return SNRFilter.DEFAULT_INCREMENT;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public ParameterType getParameterType(int index)
-    {
-        checkIndex(index);
-        return ParameterType.ANR;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Filter adjustParameter(int index, double delta)
-    {
-        checkIndex(index);
-        return new ANRFilter(updateParameter(anr, delta, SNRFilter.DEFAULT_RANGE));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Filter create(double... parameters)
-    {
-        return new ANRFilter((float) parameters[0]);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void weakestParameters(double[] parameters)
-    {
-        setMin(parameters, 0, anr);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double[] mutationStepRange()
-    {
-        return new double[] { SNRFilter.DEFAULT_RANGE };
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] mutationStepRange() {
+    return new double[] {SNRFilter.DEFAULT_RANGE};
+  }
 }

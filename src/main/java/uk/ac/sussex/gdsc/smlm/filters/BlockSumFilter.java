@@ -26,37 +26,34 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Computes the sum using a square block mask.
  */
-public class BlockSumFilter extends BlockFilter
-{
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeWeightedNormaliser(float n)
-    {
-        final float[] divisor = weights.clone();
+public class BlockSumFilter extends BlockFilter {
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeWeightedNormaliser(float n) {
+    final float[] divisor = weights.clone();
 
-        // Use a mean filter to get the mean of the weights in the region
-        final BlockMeanFilter sum = new BlockMeanFilter();
-        if ((int) n == n)
-            sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
-        //sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
-        else
-            sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
-        //sum.blockFilter(divisor, weightWidth, weightHeight, n);
-        return new PerPixelNormaliser(divisor);
+    // Use a mean filter to get the mean of the weights in the region
+    final BlockMeanFilter sum = new BlockMeanFilter();
+    if ((int) n == n) {
+      sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
+      // sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
+    } else {
+      sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
     }
+    // sum.blockFilter(divisor, weightWidth, weightHeight, n);
+    return new PerPixelNormaliser(divisor);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeNormaliser(float n)
-    {
-        return NonNormaliser.INSTANCE;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeNormaliser(float n) {
+    return NonNormaliser.INSTANCE;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public BlockSumFilter clone()
-    {
-        final BlockSumFilter o = (BlockSumFilter) super.clone();
-        return o;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public BlockSumFilter clone() {
+    final BlockSumFilter o = (BlockSumFilter) super.clone();
+    return o;
+  }
 }

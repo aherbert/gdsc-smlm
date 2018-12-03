@@ -26,49 +26,44 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Computes the mean using a square block mask.
  */
-public class BlockMeanFilter extends BlockFilter
-{
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeWeightedNormaliser(float n)
-    {
-        final float[] divisor = weights.clone();
+public class BlockMeanFilter extends BlockFilter {
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeWeightedNormaliser(float n) {
+    final float[] divisor = weights.clone();
 
-        // Use a sum filter to get the sum of the weights in the region
-        final BlockSumFilter sum = new BlockSumFilter();
-        if ((int) n == n)
-            sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
-        //sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
-        else
-            sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
-        //sum.blockFilter(divisor, weightWidth, weightHeight, n);
-        return new PerPixelNormaliser(divisor);
+    // Use a sum filter to get the sum of the weights in the region
+    final BlockSumFilter sum = new BlockSumFilter();
+    if ((int) n == n) {
+      sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
+      // sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
+    } else {
+      sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
     }
+    // sum.blockFilter(divisor, weightWidth, weightHeight, n);
+    return new PerPixelNormaliser(divisor);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected Normaliser computeNormaliser(float n)
-    {
-        return new FixedNormaliser(pow2(2 * n + 1));
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected Normaliser computeNormaliser(float n) {
+    return new FixedNormaliser(pow2(2 * n + 1));
+  }
 
-    /**
-     * Get the value squared.
-     *
-     * @param f
-     *            the value
-     * @return the value squared
-     */
-    private static float pow2(float f)
-    {
-        return f * f;
-    }
+  /**
+   * Get the value squared.
+   *
+   * @param f the value
+   * @return the value squared
+   */
+  private static float pow2(float f) {
+    return f * f;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public BlockMeanFilter clone()
-    {
-        final BlockMeanFilter o = (BlockMeanFilter) super.clone();
-        return o;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public BlockMeanFilter clone() {
+    final BlockMeanFilter o = (BlockMeanFilter) super.clone();
+    return o;
+  }
 }

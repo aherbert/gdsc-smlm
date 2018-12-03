@@ -36,132 +36,125 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Provide methods to track code usage within ImageJ.
  */
-public class SMLMUsageTracker implements PlugIn
-{
-    private static final String TITLE = "SMLM Usage Tracker";
+public class SMLMUsageTracker implements PlugIn {
+  private static final String TITLE = "SMLM Usage Tracker";
 
-    /** A flag used when the dialog is shown. */
-    private static final AtomicBoolean dialogShown = new AtomicBoolean();
+  /** A flag used when the dialog is shown. */
+  private static final AtomicBoolean dialogShown = new AtomicBoolean();
 
+  static {
+    // This ensures all GDSC loggers redirect from the console to the ImageJ log window.
+    // This is here to ensure all GDSC plugins that use this tracking class set-up logging
+    // redirection.
+    ImageJPluginLoggerHelper.getLogger(SMLMUsageTracker.class.getName());
+  }
+
+  /**
+   * Initialise on demand the analytics code.
+   * 
+   * <p>This is used to avoid synchronisation during initialisation.
+   *
+   * <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialisation on
+   * demand</a>
+   */
+  private static class LazyAnalyticsHolder {
     static {
-      // This ensures all GDSC loggers redirect from the console to the ImageJ log window.
-      // This is here to ensure all GDSC plugins that use this tracking class set-up logging
-      // redirection. 
-      ImageJPluginLoggerHelper.getLogger(SMLMUsageTracker.class.getName());
-    }
-
-    /**
-     * Initialise on demand the analytics code.
-     * 
-     * <p>This is used to avoid synchronisation during initialisation.
-     *
-     * <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialisation on
-     * demand</a>
-     */
-    private static class LazyAnalyticsHolder {
-      static {
-        // Record the version of the GDSC SMLM plugins
-        ImageJAnalyticsUtils.addCustomDimension(7, Version.getVersion());
-        // Prompt the user to opt-in/out of analytics if the status is unknown
-        if (ImageJAnalyticsUtils.unknownStatus()) {
-            showDialog(true);
-        }
-      }
-
-      /**
-       * Checks if is disabled.
-       *
-       * @return true, if is disabled
-       */
-      static boolean isDisabled() {
-        return ImageJAnalyticsUtils.isDisabled();
+      // Record the version of the GDSC SMLM plugins
+      ImageJAnalyticsUtils.addCustomDimension(7, Version.getVersion());
+      // Prompt the user to opt-in/out of analytics if the status is unknown
+      if (ImageJAnalyticsUtils.unknownStatus()) {
+        showDialog(true);
       }
     }
 
     /**
-     * Initialise on demand the plugin map.
-     * 
-     * <p>This is used to avoid synchronisation during initialisation.
+     * Checks if is disabled.
      *
-     * <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialisation on
-     * demand</a>
+     * @return true, if is disabled
      */
-    private static class LazyMapHolder {
-      private static final HashMap<String, String[]> map;
-      static {
-        HashMap<String, String[]> localMap = new HashMap<>();
-        ImageJAnalyticsUtils.buildPluginMap(localMap, SMLMTools.getPluginsConfig(),
-            StandardCharsets.UTF_8);
-        map = localMap;
-      }
+    static boolean isDisabled() {
+      return ImageJAnalyticsUtils.isDisabled();
+    }
+  }
+
+  /**
+   * Initialise on demand the plugin map.
+   * 
+   * <p>This is used to avoid synchronisation during initialisation.
+   *
+   * <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialisation on
+   * demand</a>
+   */
+  private static class LazyMapHolder {
+    private static final HashMap<String, String[]> map;
+    static {
+      final HashMap<String, String[]> localMap = new HashMap<>();
+      ImageJAnalyticsUtils.buildPluginMap(localMap, SMLMTools.getPluginsConfig(),
+          StandardCharsets.UTF_8);
+      map = localMap;
+    }
+  }
+
+  /**
+   * Record the use of the ImageJ plugin using the raw class and argument passed by ImageJ. The
+   * plugins config file will be used to identify the correct ImageJ plugin path and title.
+   *
+   * @param clazz The class
+   * @param argument The plugin argument
+   */
+  public static void recordPlugin(@SuppressWarnings("rawtypes") Class clazz, String argument) {
+    if (LazyAnalyticsHolder.isDisabled()) {
+      return;
     }
 
-    /**
-     * Record the use of the ImageJ plugin using the raw class and argument passed by ImageJ. The plugins config
-     * file will be used to identify the correct ImageJ plugin path and title.
-     *
-     * @param clazz
-     *            The class
-     * @param argument
-     *            The plugin argument
-     */
-    public static void recordPlugin(@SuppressWarnings("rawtypes") Class clazz, String argument)
-    {
-        if (LazyAnalyticsHolder.isDisabled())
-            return;
-
-        final String[] pair = LazyMapHolder.map.get(ImageJAnalyticsUtils.getKey(clazz.getName(),
-            argument));
-        if (pair == null)
-            recordPlugin(clazz.getName().replace('.', '/'), argument);
-        else
-            trackPageView(pair[0], pair[1]);
+    final String[] pair =
+        LazyMapHolder.map.get(ImageJAnalyticsUtils.getKey(clazz.getName(), argument));
+    if (pair == null) {
+      recordPlugin(clazz.getName().replace('.', '/'), argument);
+    } else {
+      trackPageView(pair[0], pair[1]);
     }
+  }
 
-    /**
-     * Record the use of the ImageJ plugin.
-     *
-     * @param name
-     *            The plugin name
-     * @param argument
-     *            The plugin argument
-     */
-    private static void recordPlugin(String name, String argument)
-    {
-        StringBuilder url = new StringBuilder(name.length() + 16);
-        // Assume plugin name has no '/' prefix
-        url.append('/').append(name);
-        if (argument != null && argument.length() > 0) {
-            url.append("?arg=").append(argument);
-        }
-        trackPageView(url.toString(), name);
+  /**
+   * Record the use of the ImageJ plugin.
+   *
+   * @param name The plugin name
+   * @param argument The plugin argument
+   */
+  private static void recordPlugin(String name, String argument) {
+    final StringBuilder url = new StringBuilder(name.length() + 16);
+    // Assume plugin name has no '/' prefix
+    url.append('/').append(name);
+    if (argument != null && argument.length() > 0) {
+      url.append("?arg=").append(argument);
     }
+    trackPageView(url.toString(), name);
+  }
 
-    private static void trackPageView(String pageUrl, String pageTitle)
-    {
-        ImageJAnalyticsUtils.pageview(pageUrl, pageTitle);
-    }
+  private static void trackPageView(String pageUrl, String pageTitle) {
+    ImageJAnalyticsUtils.pageview(pageUrl, pageTitle);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void run(String arg)
-    {
-        // If this is the first plugin to call recordPlugin(...) then the dialog may be shown.
-        dialogShown.set(false);
-        recordPlugin(this.getClass(), arg);
-        if (!dialogShown.get()) {
-            showDialog(false);
-        }
+  /** {@inheritDoc} */
+  @Override
+  public void run(String arg) {
+    // If this is the first plugin to call recordPlugin(...) then the dialog may be shown.
+    dialogShown.set(false);
+    recordPlugin(this.getClass(), arg);
+    if (!dialogShown.get()) {
+      showDialog(false);
     }
+  }
 
-    /**
-     * Show a dialog allowing users to opt in/out of Google Analytics.
-     *
-     * @param autoMessage Set to true to display the message about automatically showing when the
-     *        status is unknown
-     */
-    static void showDialog(boolean autoMessage) {
-      dialogShown.set(true);
-      ImageJAnalyticsUtils.showDialog(TITLE, autoMessage);
-    }
+  /**
+   * Show a dialog allowing users to opt in/out of Google Analytics.
+   *
+   * @param autoMessage Set to true to display the message about automatically showing when the
+   *        status is unknown
+   */
+  static void showDialog(boolean autoMessage) {
+    dialogShown.set(true);
+    ImageJAnalyticsUtils.showDialog(TITLE, autoMessage);
+  }
 }

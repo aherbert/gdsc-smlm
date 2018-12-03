@@ -28,33 +28,28 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets a parameter data value from a result.
  */
-public class PeakResultDataParameter extends PeakResultDataFloat
-{
-    /** The parameter index. */
-    public final int index;
+public class PeakResultDataParameter extends PeakResultDataFloat {
+  /** The parameter index. */
+  public final int index;
 
-    /**
-     * Instantiates a new peak result parameter value.
-     *
-     * @param index
-     *            the index
-     */
-    public PeakResultDataParameter(int index)
-    {
-        this.index = index;
-    }
+  /**
+   * Instantiates a new peak result parameter value.
+   *
+   * @param index the index
+   */
+  public PeakResultDataParameter(int index) {
+    this.index = index;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Float getValue(PeakResult result)
-    {
-        return result.getParameter(index);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Float getValue(PeakResult result) {
+    return result.getParameter(index);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return PeakResult.getParameterName(index);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return PeakResult.getParameterName(index);
+  }
 }

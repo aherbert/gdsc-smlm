@@ -30,21 +30,21 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Compares the results by frame and then intensity descending.
  */
-public class FrameIdPeakResultComparator implements Comparator<PeakResult>
-{
-    /** An instance of the comparator. */
-    public static final FrameIdPeakResultComparator INSTANCE = new FrameIdPeakResultComparator();
+public class FrameIdPeakResultComparator implements Comparator<PeakResult> {
+  /** An instance of the comparator. */
+  public static final FrameIdPeakResultComparator INSTANCE = new FrameIdPeakResultComparator();
 
-    /** {@inheritDoc} */
-    @Override
-    public int compare(PeakResult o1, PeakResult o2)
-    {
-        final int f1 = o1.getFrame();
-        final int f2 = o2.getFrame();
-        if (f1 < f2)
-            return -1;
-        if (f1 > f2)
-            return 1;
-        return Integer.compare(o2.getId(), o1.getId());
+  /** {@inheritDoc} */
+  @Override
+  public int compare(PeakResult o1, PeakResult o2) {
+    final int f1 = o1.getFrame();
+    final int f2 = o2.getFrame();
+    if (f1 < f2) {
+      return -1;
     }
+    if (f1 > f2) {
+      return 1;
+    }
+    return Integer.compare(o2.getId(), o1.getId());
+  }
 }

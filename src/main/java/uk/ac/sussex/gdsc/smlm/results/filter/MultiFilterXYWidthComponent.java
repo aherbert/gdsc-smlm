@@ -26,39 +26,34 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Width. Assume XY width are different.
  */
-public class MultiFilterXYWidthComponent extends MultiFilterComponent
-{
-    private final float lowerSigmaThreshold, upperSigmaThreshold;
+public class MultiFilterXYWidthComponent extends MultiFilterComponent {
+  private final float lowerSigmaThreshold, upperSigmaThreshold;
 
-    /**
-     * Instantiates a new multi filter XY width component.
-     *
-     * @param minWidth
-     *            the min width
-     * @param maxWidth
-     *            the max width
-     */
-    public MultiFilterXYWidthComponent(double minWidth, double maxWidth)
-    {
-        if (minWidth > 0 && minWidth < 1)
-            lowerSigmaThreshold = (float) (minWidth * minWidth);
-        else
-            lowerSigmaThreshold = 0;
-        upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
+  /**
+   * Instantiates a new multi filter XY width component.
+   *
+   * @param minWidth the min width
+   * @param maxWidth the max width
+   */
+  public MultiFilterXYWidthComponent(double minWidth, double maxWidth) {
+    if (minWidth > 0 && minWidth < 1) {
+      lowerSigmaThreshold = (float) (minWidth * minWidth);
+    } else {
+      lowerSigmaThreshold = 0;
     }
+    upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean fail(final PreprocessedPeakResult peak)
-    {
-        final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
-        return (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean fail(final PreprocessedPeakResult peak) {
+    final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
+    return (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getType()
-    {
-        return IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_Y_SD_FACTOR;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getType() {
+    return IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_Y_SD_FACTOR;
+  }
 }

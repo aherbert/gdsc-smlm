@@ -28,17 +28,13 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Interface for accessing the results.
  */
-public interface BIRResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param background
-     *            the background
-     * @param intensity
-     *            the intensity
-     * @param result
-     *            the result
-     */
-    public void executeBIR(float background, float intensity, PeakResult result);
+public interface BIRResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param background the background
+   * @param intensity the intensity
+   * @param result the result
+   */
+  public void executeBIR(float background, float intensity, PeakResult result);
 }

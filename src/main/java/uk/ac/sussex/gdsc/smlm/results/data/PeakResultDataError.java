@@ -28,19 +28,16 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the error from a result.
  */
-public class PeakResultDataError extends PeakResultDataDouble
-{
-    /** {@inheritDoc} */
-    @Override
-    public Double getValue(PeakResult result)
-    {
-        return result.getError();
-    }
+public class PeakResultDataError extends PeakResultDataDouble {
+  /** {@inheritDoc} */
+  @Override
+  public Double getValue(PeakResult result) {
+    return result.getError();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return "Error";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return "Error";
+  }
 }

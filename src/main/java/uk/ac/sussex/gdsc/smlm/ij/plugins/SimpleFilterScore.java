@@ -29,31 +29,25 @@ import uk.ac.sussex.gdsc.smlm.results.filter.FilterScore;
 /**
  * Store the filter score used in benchmarking.
  */
-public class SimpleFilterScore extends FilterScore
-{
-    /** The result. */
-    final FilterScoreResult r;
+public class SimpleFilterScore extends FilterScore {
+  /** The result. */
+  final FilterScoreResult r;
 
-    /**
-     * Instantiates a new simple filter score.
-     *
-     * @param r
-     *            the result
-     * @param allSameType
-     *            the all same type
-     * @param criteriaPassed
-     *            the criteria passed
-     */
-    public SimpleFilterScore(FilterScoreResult r, boolean allSameType, boolean criteriaPassed)
-    {
-        super(r.filter, r.score, r.criteria, allSameType, criteriaPassed);
-        this.r = r;
-    }
+  /**
+   * Instantiates a new simple filter score.
+   *
+   * @param r the result
+   * @param allSameType the all same type
+   * @param criteriaPassed the criteria passed
+   */
+  public SimpleFilterScore(FilterScoreResult r, boolean allSameType, boolean criteriaPassed) {
+    super(r.filter, r.score, r.criteria, allSameType, criteriaPassed);
+    this.r = r;
+  }
 
-    @Override
-    protected int compareParameters(FilterScore that)
-    {
-        // We only use this class with DirectFilter
-        return ((DirectFilter) that.filter).weakestUnsafe((DirectFilter) this.filter);
-    }
+  @Override
+  protected int compareParameters(FilterScore that) {
+    // We only use this class with DirectFilter
+    return ((DirectFilter) that.filter).weakestUnsafe((DirectFilter) this.filter);
+  }
 }

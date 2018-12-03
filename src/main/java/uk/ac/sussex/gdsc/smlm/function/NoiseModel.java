@@ -26,14 +26,12 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Defines the expected variance of a function value (i.e. the noise)
  */
-public interface NoiseModel
-{
-    /**
-     * Calculate the expected variance of a function value, i.e. the noise.
-     *
-     * @param value
-     *            The model value
-     * @return The expected variance of the value
-     */
-    double variance(final double value);
+public interface NoiseModel {
+  /**
+   * Calculate the expected variance of a function value, i.e. the noise.
+   *
+   * @param value The model value
+   * @return The expected variance of the value
+   */
+  double variance(final double value);
 }

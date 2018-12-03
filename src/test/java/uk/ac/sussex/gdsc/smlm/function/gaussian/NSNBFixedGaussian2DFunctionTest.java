@@ -23,14 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-@SuppressWarnings({ "javadoc" })
-public class NSNBFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest
-{
-    @Override
-    protected void init()
-    {
-        flags = GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED;
-        f1 = new NSNBFixedGaussian2DFunction(1, maxx, maxy);
-        f2 = new NSNBFixedGaussian2DFunction(2, maxx, maxy);
-    }
+@SuppressWarnings({"javadoc"})
+public class NSNBFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest {
+  @Override
+  protected void init() {
+    flags = GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED;
+    f1 = new NSNBFixedGaussian2DFunction(1, maxx, maxy);
+    f2 = new NSNBFixedGaussian2DFunction(2, maxx, maxy);
+  }
 }

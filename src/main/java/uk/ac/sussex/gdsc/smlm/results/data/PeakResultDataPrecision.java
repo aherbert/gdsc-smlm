@@ -28,19 +28,16 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the precision from a result.
  */
-public class PeakResultDataPrecision extends PeakResultDataDouble
-{
-    /** {@inheritDoc} */
-    @Override
-    public Double getValue(PeakResult result)
-    {
-        return (result.hasPrecision()) ? result.getPrecision() : 0.0;
-    }
+public class PeakResultDataPrecision extends PeakResultDataDouble {
+  /** {@inheritDoc} */
+  @Override
+  public Double getValue(PeakResult result) {
+    return (result.hasPrecision()) ? result.getPrecision() : 0.0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return "Precision";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return "Precision";
+  }
 }

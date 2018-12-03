@@ -24,25 +24,23 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Specifies a peak fitting result for use in filtering. Any result implementing this interface can be directly filtered
- * without requiring the filter to be initialised with calibration data. This result can be assigned matches to actual
- * data.
+ * Specifies a peak fitting result for use in filtering. Any result implementing this interface can
+ * be directly filtered without requiring the filter to be initialised with calibration data. This
+ * result can be assigned matches to actual data.
  */
-public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
-{
-    /**
-     * Set the assignments between this result and the true data.
-     *
-     * @param assignments
-     *            The assignments
-     */
-    public void setAssignments(ResultAssignment[] assignments);
+public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult {
+  /**
+   * Set the assignments between this result and the true data.
+   *
+   * @param assignments The assignments
+   */
+  public void setAssignments(ResultAssignment[] assignments);
 
-    /**
-     * Sets the ignore flag. If true then the result should be ignored from the total counts when scoring.
-     *
-     * @param ignore
-     *            the new ignore flag
-     */
-    public void setIgnore(boolean ignore);
+  /**
+   * Sets the ignore flag. If true then the result should be ignored from the total counts when
+   * scoring.
+   *
+   * @param ignore the new ignore flag
+   */
+  public void setIgnore(boolean ignore);
 }

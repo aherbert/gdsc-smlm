@@ -31,176 +31,151 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Filter results using a signal-to-noise ratio (SNR) threshold.
  */
-public class SNRFilter extends DirectFilter implements IMultiFilter
-{
-    /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    public static final double DEFAULT_INCREMENT = 1;
-    /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    public static final double DEFAULT_RANGE = 10;
+public class SNRFilter extends DirectFilter implements IMultiFilter {
+  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  public static final double DEFAULT_INCREMENT = 1;
+  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  public static final double DEFAULT_RANGE = 10;
 
-    @XStreamAsAttribute
-    private final float snr;
+  @XStreamAsAttribute
+  private final float snr;
 
-    /**
-     * Instantiates a new signal-to-noise ratio (SNR) filter.
-     *
-     * @param snr
-     *            the signal-to-noise ratio (SNR)
-     */
-    public SNRFilter(float snr)
-    {
-        this.snr = Math.max(0, snr);
+  /**
+   * Instantiates a new signal-to-noise ratio (SNR) filter.
+   *
+   * @param snr the signal-to-noise ratio (SNR)
+   */
+  public SNRFilter(float snr) {
+    this.snr = Math.max(0, snr);
+  }
+
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    // Do nothing
+  }
+
+  @Override
+  public boolean accept(PeakResult peak) {
+    return peak.getSNR() >= this.snr;
+  }
+
+  @Override
+  public int getValidationFlags() {
+    return V_SNR;
+  }
+
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    if (peak.getSNR() < this.snr) {
+      return V_SNR;
     }
+    return 0;
+  }
 
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        // Do nothing
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    return "Filter results using a lower SNR threshold.";
+  }
 
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        return peak.getSNR() >= this.snr;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfParameters() {
+    return 1;
+  }
 
-    @Override
-    public int getValidationFlags()
-    {
-        return V_SNR;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected double getParameterValueInternal(int index) {
+    return snr;
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        if (peak.getSNR() < this.snr)
-            return V_SNR;
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getParameterIncrement(int index) {
+    checkIndex(index);
+    return SNRFilter.DEFAULT_INCREMENT;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        return "Filter results using a lower SNR threshold.";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public ParameterType getParameterType(int index) {
+    checkIndex(index);
+    return ParameterType.SNR;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfParameters()
-    {
-        return 1;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter adjustParameter(int index, double delta) {
+    checkIndex(index);
+    return new SNRFilter(updateParameter(snr, delta, DEFAULT_RANGE));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected double getParameterValueInternal(int index)
-    {
-        return snr;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter create(double... parameters) {
+    return new SNRFilter((float) parameters[0]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getParameterIncrement(int index)
-    {
-        checkIndex(index);
-        return SNRFilter.DEFAULT_INCREMENT;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void weakestParameters(double[] parameters) {
+    setMin(parameters, 0, snr);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public ParameterType getParameterType(int index)
-    {
-        checkIndex(index);
-        return ParameterType.SNR;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] mutationStepRange() {
+    return new double[] {DEFAULT_RANGE};
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter adjustParameter(int index, double delta)
-    {
-        checkIndex(index);
-        return new SNRFilter(updateParameter(snr, delta, DEFAULT_RANGE));
-    }
+  @Override
+  public double getSignal() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter create(double... parameters)
-    {
-        return new SNRFilter((float) parameters[0]);
-    }
+  @Override
+  public double getSNR() {
+    return snr;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void weakestParameters(double[] parameters)
-    {
-        setMin(parameters, 0, snr);
-    }
+  @Override
+  public double getMinWidth() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double[] mutationStepRange()
-    {
-        return new double[] { DEFAULT_RANGE };
-    }
+  @Override
+  public double getMaxWidth() {
+    return 0;
+  }
 
-    @Override
-    public double getSignal()
-    {
-        return 0;
-    }
+  @Override
+  public double getShift() {
+    return 0;
+  }
 
-    @Override
-    public double getSNR()
-    {
-        return snr;
-    }
+  @Override
+  public double getEShift() {
+    return 0;
+  }
 
-    @Override
-    public double getMinWidth()
-    {
-        return 0;
-    }
+  @Override
+  public double getPrecision() {
+    return 0;
+  }
 
-    @Override
-    public double getMaxWidth()
-    {
-        return 0;
-    }
+  @Override
+  public PrecisionType getPrecisionType() {
+    return PrecisionType.NONE;
+  }
 
-    @Override
-    public double getShift()
-    {
-        return 0;
-    }
+  @Override
+  public double getMinZ() {
+    return 0;
+  }
 
-    @Override
-    public double getEShift()
-    {
-        return 0;
-    }
-
-    @Override
-    public double getPrecision()
-    {
-        return 0;
-    }
-
-    @Override
-    public PrecisionType getPrecisionType()
-    {
-        return PrecisionType.NONE;
-    }
-
-    @Override
-    public double getMinZ()
-    {
-        return 0;
-    }
-
-    @Override
-    public double getMaxZ()
-    {
-        return 0;
-    }
+  @Override
+  public double getMaxZ() {
+    return 0;
+  }
 }

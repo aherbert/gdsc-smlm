@@ -26,46 +26,38 @@ package uk.ac.sussex.gdsc.smlm.function;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Defines the expected variance of a signal recorded on a CCD or EM-CCD Camera. The model assumes a Gaussian read
- * noise, photon shot noise and an EM-gain noise factor.
+ * Defines the expected variance of a signal recorded on a CCD or EM-CCD Camera. The model assumes a
+ * Gaussian read noise, photon shot noise and an EM-gain noise factor.
  */
-public class EMCCDCameraNoiseModel extends CameraNoiseModel
-{
-    /**
-     * Instantiates a new EM-CCD camera noise model.
-     *
-     * @param readNoise
-     *            the read noise
-     */
-    public EMCCDCameraNoiseModel(final double readNoise)
-    {
-        super(readNoise);
-    }
+public class EMCCDCameraNoiseModel extends CameraNoiseModel {
+  /**
+   * Instantiates a new EM-CCD camera noise model.
+   *
+   * @param readNoise the read noise
+   */
+  public EMCCDCameraNoiseModel(final double readNoise) {
+    super(readNoise);
+  }
 
-    /**
-     * Instantiates a new EM-CCD camera noise model.
-     *
-     * @param readNoise
-     *            the read noise
-     * @param bias
-     *            the bias
-     */
-    public EMCCDCameraNoiseModel(final double readNoise, final double bias)
-    {
-        super(readNoise, bias);
-    }
+  /**
+   * Instantiates a new EM-CCD camera noise model.
+   *
+   * @param readNoise the read noise
+   * @param bias the bias
+   */
+  public EMCCDCameraNoiseModel(final double readNoise, final double bias) {
+    super(readNoise, bias);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double variance(final double value)
-    {
-        return readNoise2 + FastMath.max(value - bias, 0.0) * 2.0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double variance(final double value) {
+    return readNoise2 + FastMath.max(value - bias, 0.0) * 2.0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isEmCCD()
-    {
-        return true;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isEmCCD() {
+    return true;
+  }
 }

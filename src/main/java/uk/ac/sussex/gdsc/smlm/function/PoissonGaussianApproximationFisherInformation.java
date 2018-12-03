@@ -24,59 +24,53 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Calculate the Fisher information for a Poisson-Gaussian distribution using an approximation of the Poisson (mean=t)
- * as a Gaussian (u=t, var=t).
+ * Calculate the Fisher information for a Poisson-Gaussian distribution using an approximation of
+ * the Poisson (mean=t) as a Gaussian (u=t, var=t).
  */
-public class PoissonGaussianApproximationFisherInformation extends BasePoissonFisherInformation
-{
-    /** The variance of the Gaussian. */
-    public final double variance;
+public class PoissonGaussianApproximationFisherInformation extends BasePoissonFisherInformation {
+  /** The variance of the Gaussian. */
+  public final double variance;
 
-    /**
-     * Instantiates a new poisson gaussian fisher information.
-     *
-     * @param s
-     *            the standard deviation of the Gaussian
-     * @throws IllegalArgumentException
-     *             If the standard deviation is not strictly positive
-     */
-    public PoissonGaussianApproximationFisherInformation(double s) throws IllegalArgumentException
-    {
-        if (!(s > 0 && s <= Double.MAX_VALUE))
-            throw new IllegalArgumentException("Gaussian variance must be strictly positive");
-        this.variance = s * s;
+  /**
+   * Instantiates a new poisson gaussian fisher information.
+   *
+   * @param s the standard deviation of the Gaussian
+   * @throws IllegalArgumentException If the standard deviation is not strictly positive
+   */
+  public PoissonGaussianApproximationFisherInformation(double s) throws IllegalArgumentException {
+    if (!(s > 0 && s <= Double.MAX_VALUE)) {
+      throw new IllegalArgumentException("Gaussian variance must be strictly positive");
     }
+    this.variance = s * s;
+  }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Gets the approximate Poisson-Gaussian Fisher information.
-     * Approximate the Poisson as a Gaussian (u=t, var=t) and convolve with a Gaussian (u=0,var=s*s).
-     * Gaussian-Gaussian convolution: var1 * var2 =&gt; var = var1+var2.
-     * The Fisher information of Gaussian mean is 1/variance.
-     * The Poisson-Gaussian Fisher information is therefore 1 / (t + s*s).
-     *
-     * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
-     */
-    @Override
-    public double getFisherInformation(double t) throws IllegalArgumentException
-    {
-        if (t <= 0)
-            throw new IllegalArgumentException("Poisson mean must be positive");
-        return 1.0 / (t + variance);
+  /**
+   * {@inheritDoc} <p> Gets the approximate Poisson-Gaussian Fisher information. Approximate the
+   * Poisson as a Gaussian (u=t, var=t) and convolve with a Gaussian (u=0,var=s*s).
+   * Gaussian-Gaussian convolution: var1 * var2 =&gt; var = var1+var2. The Fisher information of
+   * Gaussian mean is 1/variance. The Poisson-Gaussian Fisher information is therefore 1 / (t +
+   * s*s).
+   *
+   * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
+   */
+  @Override
+  public double getFisherInformation(double t) throws IllegalArgumentException {
+    if (t <= 0) {
+      throw new IllegalArgumentException("Poisson mean must be positive");
     }
+    return 1.0 / (t + variance);
+  }
 
-    @Override
-    public double getAlpha(double t)
-    {
-        if (t <= 0)
-            throw new IllegalArgumentException("Poisson mean must be positive");
-        return t / (t + variance);
+  @Override
+  public double getAlpha(double t) {
+    if (t <= 0) {
+      throw new IllegalArgumentException("Poisson mean must be positive");
     }
+    return t / (t + variance);
+  }
 
-    @Override
-    protected void postClone()
-    {
-        // Nothing to do
-    }
+  @Override
+  protected void postClone() {
+    // Nothing to do
+  }
 }

@@ -26,29 +26,27 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Defines a function that can compute gradients.
  */
-public interface GradientFunction
-{
-    /**
-     * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
-     * initialisation.
-     *
-     * @param a
-     *            An array of coefficients
-     */
-    public void initialise(final double[] a);
+public interface GradientFunction {
+  /**
+   * Set the predictor coefficients (a) that will be used to predict each value. Allows the function
+   * to perform initialisation.
+   *
+   * @param a An array of coefficients
+   */
+  public void initialise(final double[] a);
 
-    /**
-     * The function will evaluate the gradient for up to {@code n} parameters where {@code n <= a.length}.
-     * This method returns the indices that are evaluated.
-     *
-     * @return The gradient indices
-     */
-    public int[] gradientIndices();
+  /**
+   * The function will evaluate the gradient for up to {@code n} parameters where
+   * {@code n <= a.length}. This method returns the indices that are evaluated.
+   *
+   * @return The gradient indices
+   */
+  public int[] gradientIndices();
 
-    /**
-     * Gets the number of gradients. The function will evaluate this many partial derivatives.
-     *
-     * @return the number of gradients
-     */
-    public int getNumberOfGradients();
+  /**
+   * Gets the number of gradients. The function will evaluate this many partial derivatives.
+   *
+   * @return the number of gradients
+   */
+  public int getNumberOfGradients();
 }

@@ -24,10 +24,10 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
- * Calculator for the Fisher information, a symmetric positive definite matrix containing the amount of information that
- * an observable random variable X carries about an unknown parameter θ of a distribution that models X.
- * <p>
- * The calculator will compute the Fisher Information Matrix (I) using numerical gradients:
+ * Calculator for the Fisher information, a symmetric positive definite matrix containing the amount
+ * of information that an observable random variable X carries about an unknown parameter θ of a
+ * distribution that models X. <p> The calculator will compute the Fisher Information Matrix (I)
+ * using numerical gradients:
  *
  * <pre>
  * Iij = E [ (d log f(X;θ) / dθi) (d log f(X;θ) / dθj) | θ ]
@@ -35,15 +35,14 @@ package uk.ac.sussex.gdsc.smlm.fitting;
  * f(X;θ) = Likelihood function for data X given parameters θ
  * </pre>
  */
-public interface FisherInformationCalculator
-{
-    /**
-     * Compute the Fisher information, a symmetric positive definite matrix containing the amount of information that
-     * an observable random variable X carries about an unknown parameter θ of a distribution that models X.
-     *
-     * @param parameters
-     *            the parameters (θ)
-     * @return the fisher information matrix
-     */
-    public FisherInformationMatrix compute(double[] parameters);
+public interface FisherInformationCalculator {
+  /**
+   * Compute the Fisher information, a symmetric positive definite matrix containing the amount of
+   * information that an observable random variable X carries about an unknown parameter θ of a
+   * distribution that models X.
+   *
+   * @param parameters the parameters (θ)
+   * @return the fisher information matrix
+   */
+  public FisherInformationMatrix compute(double[] parameters);
 }

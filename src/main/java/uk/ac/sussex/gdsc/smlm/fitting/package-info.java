@@ -23,8 +23,8 @@
  */
 
 /**
- * Provides classes to fit (optimise) parameters of a function that models the given the data
- * and compute the <a href="https://en.wikipedia.org/wiki/Fisher_information">Fisher information</a>.
+ * Provides classes to fit (optimise) parameters of a function that models the given the data and
+ * compute the <a href="https://en.wikipedia.org/wiki/Fisher_information">Fisher information</a>.
  *
  * @since 1.0.0
  */

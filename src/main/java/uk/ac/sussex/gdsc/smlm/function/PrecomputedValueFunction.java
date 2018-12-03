@@ -26,52 +26,46 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Wraps a set of function values to implement the forEach procedure.
  */
-public class PrecomputedValueFunction implements ValueFunction
-{
-    /** The values. */
-    protected final double[] values;
+public class PrecomputedValueFunction implements ValueFunction {
+  /** The values. */
+  protected final double[] values;
 
-    /**
-     * Instantiates a new pre-computed value function.
-     *
-     * @param values
-     *            the pre-computed values
-     * @throws IllegalArgumentException
-     *             if the values length does not match the function size
-     */
-    public PrecomputedValueFunction(double[] values)
-    {
-        if (values == null)
-            throw new IllegalArgumentException("Value is null");
-        this.values = values;
+  /**
+   * Instantiates a new pre-computed value function.
+   *
+   * @param values the pre-computed values
+   * @throws IllegalArgumentException if the values length does not match the function size
+   */
+  public PrecomputedValueFunction(double[] values) {
+    if (values == null) {
+      throw new IllegalArgumentException("Value is null");
     }
+    this.values = values;
+  }
 
-    /**
-     * Gets a reference to the first order gradients.
-     *
-     * @return the values
-     */
-    public double[] getValuesRef()
-    {
-        return values;
-    }
+  /**
+   * Gets a reference to the first order gradients.
+   *
+   * @return the values
+   */
+  public double[] getValuesRef() {
+    return values;
+  }
 
-    @Override
-    public int size()
-    {
-        return values.length;
-    }
+  @Override
+  public int size() {
+    return values.length;
+  }
 
-    @Override
-    public void initialise0(double[] a)
-    {
-        // Ignore
-    }
+  @Override
+  public void initialise0(double[] a) {
+    // Ignore
+  }
 
-    @Override
-    public void forEach(ValueProcedure procedure)
-    {
-        for (int i = 0; i < values.length; i++)
-            procedure.execute(values[i]);
+  @Override
+  public void forEach(ValueProcedure procedure) {
+    for (int i = 0; i < values.length; i++) {
+      procedure.execute(values[i]);
     }
+  }
 }

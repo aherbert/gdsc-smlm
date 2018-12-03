@@ -26,30 +26,27 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Defines function that can produce values.
  */
-public interface ValueFunction
-{
-    /**
-     * Returns the size of the valid range of the function. Procedures passed to the forEach methods will be expected to
-     * be called this number of times.
-     *
-     * @return the size
-     */
-    public int size();
+public interface ValueFunction {
+  /**
+   * Returns the size of the valid range of the function. Procedures passed to the forEach methods
+   * will be expected to be called this number of times.
+   *
+   * @return the size
+   */
+  public int size();
 
-    /**
-     * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
-     * initialisation.
-     *
-     * @param a
-     *            An array of coefficients
-     */
-    public void initialise0(final double[] a);
+  /**
+   * Set the predictor coefficients (a) that will be used to predict each value. Allows the function
+   * to perform initialisation.
+   *
+   * @param a An array of coefficients
+   */
+  public void initialise0(final double[] a);
 
-    /**
-     * Applies the procedure for the valid range of the function.
-     *
-     * @param procedure
-     *            the procedure
-     */
-    public void forEach(ValueProcedure procedure);
+  /**
+   * Applies the procedure for the valid range of the function.
+   *
+   * @param procedure the procedure
+   */
+  public void forEach(ValueProcedure procedure);
 }

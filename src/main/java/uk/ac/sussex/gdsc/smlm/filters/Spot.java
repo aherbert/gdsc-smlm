@@ -26,117 +26,95 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Identify a candidate spot (local maximum).
  */
-public class Spot implements Comparable<Spot>, Cloneable
-{
-    /** The x. */
-    final public int x;
+public class Spot implements Comparable<Spot>, Cloneable {
+  /** The x. */
+  final public int x;
 
-    /** The y. */
-    final public int y;
+  /** The y. */
+  final public int y;
 
-    /** The intensity. */
-    final public float intensity;
+  /** The intensity. */
+  final public float intensity;
 
-    /** The score. */
-    private float score;
+  /** The score. */
+  private float score;
 
-    /**
-     * Constructor that sets the score (for sorting) equal to the intensity.
-     *
-     * @param x
-     *            The x-coordinate
-     * @param y
-     *            The y-coordinate
-     * @param intensity
-     *            The intensity of the spot
-     */
-    public Spot(int x, int y, float intensity)
-    {
-        this.x = x;
-        this.y = y;
-        this.intensity = score = intensity;
+  /**
+   * Constructor that sets the score (for sorting) equal to the intensity.
+   *
+   * @param x The x-coordinate
+   * @param y The y-coordinate
+   * @param intensity The intensity of the spot
+   */
+  public Spot(int x, int y, float intensity) {
+    this.x = x;
+    this.y = y;
+    this.intensity = score = intensity;
+  }
+
+  /**
+   * @param x The x-coordinate
+   * @param y The y-coordinate
+   * @param intensity The intensity of the spot
+   * @param score The score used for sorting
+   */
+  public Spot(int x, int y, float intensity, float score) {
+    this.x = x;
+    this.y = y;
+    this.intensity = intensity;
+    this.score = score;
+  }
+
+  /**
+   * Get the distance between the two spots.
+   *
+   * @param o the other spot
+   * @return The distance
+   */
+  public double distance(Spot o) {
+    return Math.sqrt(distance2(o));
+  }
+
+  /**
+   * Get the squared distance between the two spots.
+   *
+   * @param o the other spot
+   * @return The squared distance
+   */
+  public double distance2(Spot o) {
+    final int dx = x - o.x;
+    final int dy = y - o.y;
+    return dx * dx + dy * dy;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int compareTo(Spot o) {
+    return Double.compare(o.score, score);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Spot clone() {
+    try {
+      return (Spot) super.clone();
+    } catch (final CloneNotSupportedException e) {
+      // Ignore
     }
+    return null;
+  }
 
-    /**
-     * @param x
-     *            The x-coordinate
-     * @param y
-     *            The y-coordinate
-     * @param intensity
-     *            The intensity of the spot
-     * @param score
-     *            The score used for sorting
-     */
-    public Spot(int x, int y, float intensity, float score)
-    {
-        this.x = x;
-        this.y = y;
-        this.intensity = intensity;
-        this.score = score;
-    }
+  /**
+   * @return the score used for sorting the spots.
+   */
+  public float getScore() {
+    return score;
+  }
 
-    /**
-     * Get the distance between the two spots.
-     *
-     * @param o
-     *            the other spot
-     * @return The distance
-     */
-    public double distance(Spot o)
-    {
-        return Math.sqrt(distance2(o));
-    }
-
-    /**
-     * Get the squared distance between the two spots.
-     *
-     * @param o
-     *            the other spot
-     * @return The squared distance
-     */
-    public double distance2(Spot o)
-    {
-        final int dx = x - o.x;
-        final int dy = y - o.y;
-        return dx * dx + dy * dy;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int compareTo(Spot o)
-    {
-        return Double.compare(o.score, score);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Spot clone()
-    {
-        try
-        {
-            return (Spot) super.clone();
-        }
-        catch (final CloneNotSupportedException e)
-        {
-            // Ignore
-        }
-        return null;
-    }
-
-    /**
-     * @return the score used for sorting the spots.
-     */
-    public float getScore()
-    {
-        return score;
-    }
-
-    /**
-     * @param score
-     *            the score to set for sorting the spots
-     */
-    public void setScore(float score)
-    {
-        this.score = score;
-    }
+  /**
+   * @param score the score to set for sorting the spots
+   */
+  public void setScore(float score) {
+    this.score = score;
+  }
 }

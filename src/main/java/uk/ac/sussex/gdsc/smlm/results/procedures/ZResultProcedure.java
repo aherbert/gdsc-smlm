@@ -26,13 +26,11 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface ZResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param z
-     *            the z
-     */
-    public void executeZ(float z);
+public interface ZResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param z the z
+   */
+  public void executeZ(float z);
 }

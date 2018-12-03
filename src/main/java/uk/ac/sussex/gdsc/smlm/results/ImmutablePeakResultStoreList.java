@@ -33,89 +33,76 @@ import uk.ac.sussex.gdsc.core.data.DataException;
 /**
  * Stores peak results and prevents modification.
  */
-public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore implements PeakResultStoreList
-{
-    private final PeakResultStoreList store;
+public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore
+    implements PeakResultStoreList {
+  private final PeakResultStoreList store;
 
-    /**
-     * Instantiates a new immutable peak result store.
-     *
-     * @param store
-     *            the store
-     */
-    public ImmutablePeakResultStoreList(PeakResultStoreList store)
-    {
-        super(store);
-        this.store = store;
-    }
+  /**
+   * Instantiates a new immutable peak result store.
+   *
+   * @param store the store
+   */
+  public ImmutablePeakResultStoreList(PeakResultStoreList store) {
+    super(store);
+    this.store = store;
+  }
 
-    @Override
-    public PeakResult get(int index)
-    {
-        return new ImmutablePeakResult(store.get(index));
-    }
+  @Override
+  public PeakResult get(int index) {
+    return new ImmutablePeakResult(store.get(index));
+  }
 
-    @Override
-    public PeakResult remove(int index)
-    {
-        throw new DataException("This result store is immutable");
-    }
+  @Override
+  public PeakResult remove(int index) {
+    throw new DataException("This result store is immutable");
+  }
 
-    @Override
-    public void remove(int fromIndex, int toIndex)
-    {
-        throw new DataException("This result store is immutable");
-    }
+  @Override
+  public void remove(int fromIndex, int toIndex) {
+    throw new DataException("This result store is immutable");
+  }
 
-    @Override
-    public void sort()
-    {
-        //store.sort();
-        throw new DataException("This result store is immutable");
-    }
+  @Override
+  public void sort() {
+    // store.sort();
+    throw new DataException("This result store is immutable");
+  }
 
-    @Override
-    public void sort(Comparator<PeakResult> comparator)
-    {
-        //store.sort(comparator);
-        throw new DataException("This result store is immutable");
-    }
+  @Override
+  public void sort(Comparator<PeakResult> comparator) {
+    // store.sort(comparator);
+    throw new DataException("This result store is immutable");
+  }
 
-    @Override
-    public PeakResultStoreList copy()
-    {
-        return new ImmutablePeakResultStoreList((PeakResultStoreList) store.copy());
-    }
+  @Override
+  public PeakResultStoreList copy() {
+    return new ImmutablePeakResultStoreList((PeakResultStoreList) store.copy());
+  }
 
-    @Override
-    public PeakResultStoreList copy(boolean deepCopy)
-    {
-        return new ImmutablePeakResultStoreList((PeakResultStoreList) store.copy(deepCopy));
-    }
+  @Override
+  public PeakResultStoreList copy(boolean deepCopy) {
+    return new ImmutablePeakResultStoreList((PeakResultStoreList) store.copy(deepCopy));
+  }
 
-    @Override
-    public void shuffle(final RandomGenerator randomSource)
-    {
-        //store.shuffle(randomGenerator);
-        throw new DataException("This result store is immutable");
-    }
+  @Override
+  public void shuffle(final RandomGenerator randomSource) {
+    // store.shuffle(randomGenerator);
+    throw new DataException("This result store is immutable");
+  }
 
-    @Override
-    public void shuffle(UniformRandomProvider randomSource)
-    {
-        //store.shuffle(randomSource);
-        throw new DataException("This result store is immutable");
-    }
+  @Override
+  public void shuffle(UniformRandomProvider randomSource) {
+    // store.shuffle(randomSource);
+    throw new DataException("This result store is immutable");
+  }
 
-    @Override
-    public int indexOf(PeakResult result)
-    {
-        return store.indexOf(result);
-    }
+  @Override
+  public int indexOf(PeakResult result) {
+    return store.indexOf(result);
+  }
 
-    @Override
-    public int lastIndexOf(PeakResult result)
-    {
-        return store.lastIndexOf(result);
-    }
+  @Override
+  public int lastIndexOf(PeakResult result) {
+    return store.lastIndexOf(result);
+  }
 }

@@ -26,51 +26,47 @@ package uk.ac.sussex.gdsc.smlm.results.count;
 /**
  * Base class for fail counters.
  */
-public abstract class BaseFailCounter implements FailCounter
-{
-    private String description;
+public abstract class BaseFailCounter implements FailCounter {
+  private String description;
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        if (description == null)
-            description = generateDescription();
-        return description;
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    if (description == null) {
+      description = generateDescription();
     }
+    return description;
+  }
 
-    /**
-     * Generate the description.
-     *
-     * @return the description
-     */
-    protected abstract String generateDescription();
+  /**
+   * Generate the description.
+   *
+   * @return the description
+   */
+  protected abstract String generateDescription();
 
-    /**
-     * Check the number is positive.
-     *
-     * @param c
-     *            the number
-     * @throws IllegalStateException
-     *             if not positive
-     */
-    protected static void checkPositive(int c) throws IllegalStateException
-    {
-        if (c < 0)
-            throw new IllegalStateException("Negative count: " + c);
+  /**
+   * Check the number is positive.
+   *
+   * @param c the number
+   * @throws IllegalStateException if not positive
+   */
+  protected static void checkPositive(int c) throws IllegalStateException {
+    if (c < 0) {
+      throw new IllegalStateException("Negative count: " + c);
     }
+  }
 
-    /**
-     * Adds the result.
-     *
-     * @param pass
-     *            Set to true if a pass
-     */
-    public void addResult(boolean pass)
-    {
-        if (pass)
-            pass();
-        else
-            fail();
+  /**
+   * Adds the result.
+   *
+   * @param pass Set to true if a pass
+   */
+  public void addResult(boolean pass) {
+    if (pass) {
+      pass();
+    } else {
+      fail();
     }
+  }
 }

@@ -29,53 +29,48 @@ import uk.ac.sussex.gdsc.smlm.function.OptimiserFunction;
 /**
  * Allow progress tracking of the Apache Commons Math 3 Optimiser in ImageJ.
  */
-public abstract class LoggingOptimiserFunction extends OptimiserFunction
-{
-    private boolean logging = false;
-    private int evalCount = 0;
+public abstract class LoggingOptimiserFunction extends OptimiserFunction {
+  private boolean logging = false;
+  private int evalCount = 0;
 
-    /** The name. */
-    protected String name = "Optimiser";
+  /** The name. */
+  protected String name = "Optimiser";
 
-    /**
-     * Instantiates a new logging optimiser function.
-     *
-     * @param name
-     *            the name
-     */
-    public LoggingOptimiserFunction(String name)
-    {
-        this.name = name;
+  /**
+   * Instantiates a new logging optimiser function.
+   *
+   * @param name the name
+   */
+  public LoggingOptimiserFunction(String name) {
+    this.name = name;
+  }
+
+  /**
+   * Log the count of evaluations to the ImageJ status bar.
+   *
+   * @param b the new logging
+   */
+  public void setLogging(boolean b) {
+    logging = b;
+    if (b) {
+      evalCount = 0;
     }
+  }
 
-    /**
-     * Log the count of evaluations to the ImageJ status bar.
-     *
-     * @param b
-     *            the new logging
-     */
-    public void setLogging(boolean b)
-    {
-        logging = b;
-        if (b)
-            evalCount = 0;
+  /**
+   * Increment the evaluations count.
+   */
+  public void increment() {
+    evalCount++;
+    if (logging) {
+      IJ.showStatus(name + " Evaluation " + evalCount);
     }
+  }
 
-    /**
-     * Increment the evaluations count.
-     */
-    public void increment()
-    {
-        evalCount++;
-        if (logging)
-            IJ.showStatus(name + " Evaluation " + evalCount);
-    }
-
-    /**
-     * @return The function name.
-     */
-    public String getName()
-    {
-        return name;
-    }
+  /**
+   * @return The function name.
+   */
+  public String getName() {
+    return name;
+  }
 }

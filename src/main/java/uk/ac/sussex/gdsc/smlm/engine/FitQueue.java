@@ -26,36 +26,34 @@ package uk.ac.sussex.gdsc.smlm.engine;
 /**
  * Define the type of queue used within the fit engine.
  */
-public enum FitQueue
-{
-    //@formatter:off
-	/**
-	 * Block additions if there is a backlog
-	 */
-	BLOCKING{ @Override
-	public String getName() { return "Blocking"; }},
-	/**
-	 * Allow all additions if there is a backlog
-	 */
-	NON_BLOCKING{ @Override
-	public String getName() { return "Non-blocking"; }},
-	/**
-	 * Ignore additions if there is a backlog
-	 */
-	IGNORE{ @Override
-	public String getName() { return "Ignore"; }};
-	//@formatter:on
+public enum FitQueue {
+  //@formatter:off
+  /**
+   * Block additions if there is a backlog
+   */
+  BLOCKING{ @Override
+  public String getName() { return "Blocking"; }},
+  /**
+   * Allow all additions if there is a backlog
+   */
+  NON_BLOCKING{ @Override
+  public String getName() { return "Non-blocking"; }},
+  /**
+   * Ignore additions if there is a backlog
+   */
+  IGNORE{ @Override
+  public String getName() { return "Ignore"; }};
+  //@formatter:on
 
-    @Override
-    public String toString()
-    {
-        return getName();
-    }
+  @Override
+  public String toString() {
+    return getName();
+  }
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    abstract public String getName();
+  /**
+   * Gets the name.
+   *
+   * @return the name
+   */
+  abstract public String getName();
 }

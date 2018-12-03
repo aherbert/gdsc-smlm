@@ -29,39 +29,34 @@ import org.scijava.vecmath.Point3f;
 /**
  * Interface for shape objects that represent a set of items.
  */
-public interface ItemShape
-{
-    /**
-     * Gets the number of items.
-     *
-     * @return the size
-     */
-    public int size();
+public interface ItemShape {
+  /**
+   * Gets the number of items.
+   *
+   * @return the size
+   */
+  public int size();
 
-    /**
-     * Gets the coordinate of the specified item.
-     *
-     * @param i
-     *            the index
-     * @return the coordinate
-     */
-    public Point3f getCoordinate(int i);
+  /**
+   * Gets the coordinate of the specified item.
+   *
+   * @param i the index
+   * @return the coordinate
+   */
+  public Point3f getCoordinate(int i);
 
-    /**
-     * Sets the color for each item.
-     *
-     * @param color
-     *            the new color
-     */
-    public void setItemColor(final Color3f color);
+  /**
+   * Sets the color for each item.
+   *
+   * @param color the new color
+   */
+  public void setItemColor(final Color3f color);
 
-    /**
-     * Sets the color for each item.
-     *
-     * @param color
-     *            the new color
-     * @throws IllegalArgumentException
-     *             if the number of colours is incorrect
-     */
-    public void setItemColor(final Color3f[] color) throws IllegalArgumentException;
+  /**
+   * Sets the color for each item.
+   *
+   * @param color the new color
+   * @throws IllegalArgumentException if the number of colours is incorrect
+   */
+  public void setItemColor(final Color3f[] color) throws IllegalArgumentException;
 }

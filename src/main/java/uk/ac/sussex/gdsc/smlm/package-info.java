@@ -23,8 +23,8 @@
  */
 
 /**
- * Provides code for the GDSC Single-Molecule Localisation Microscopy (SMLM)
- * <a href="https://imagej.nih.gov/ij/">ImageJ</a> plugins.
+ * Provides code for the GDSC Single-Molecule Localisation Microscopy (SMLM) <a
+ * href="https://imagej.nih.gov/ij/">ImageJ</a> plugins.
  *
  * @see <a href="https://imagej.nih.gov/ij/">ImageJ</a>
  * @since 1.0.0

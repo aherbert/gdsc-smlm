@@ -23,8 +23,8 @@
  */
 
 /**
- * Extend the functionality of the <a href="http://commons.apache.org/proper/commons-math/">
- * Apache Commons Math</a> {@link org.apache.commons.math3.analysis.integration} package.
+ * Extend the functionality of the <a href="http://commons.apache.org/proper/commons-math/"> Apache
+ * Commons Math</a> {@link org.apache.commons.math3.analysis.integration} package.
  *
  * @see <a href="http://commons.apache.org/proper/commons-math/">Apache Commons Math</a>
  * @since 1.0.0

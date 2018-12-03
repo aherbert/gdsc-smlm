@@ -23,8 +23,8 @@
  */
 
 /**
- * Provides modelling classes for localisation microscopy including
- * Point Spread Functions (PSFs), fluorophores and molecule diffusion.
+ * Provides modelling classes for localisation microscopy including Point Spread Functions (PSFs),
+ * fluorophores and molecule diffusion.
  *
  * @since 1.0.0
  */

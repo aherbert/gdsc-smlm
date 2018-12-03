@@ -26,17 +26,13 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 /**
  * Interface for accessing the results.
  */
-public interface TXYResultProcedure
-{
-    /**
-     * Executes this procedure.
-     *
-     * @param frame
-     *            the frame
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     */
-    public void executeTXY(int frame, float x, float y);
+public interface TXYResultProcedure {
+  /**
+   * Executes this procedure.
+   *
+   * @param frame the frame
+   * @param x the x
+   * @param y the y
+   */
+  public void executeTXY(int frame, float x, float y);
 }

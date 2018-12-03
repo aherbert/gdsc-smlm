@@ -28,32 +28,27 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 /**
  * Create a gradient procedure.
  */
-public class WLSQLVMGradientProcedureFactory
-{
-    /**
-     * Create a new gradient procedure.
-     *
-     * @param y
-     *            Data to fit
-     * @param var
-     *            the base variance of each observation (must be positive)
-     * @param func
-     *            Gradient function
-     * @return the gradient procedure
-     */
-    public static WLSQLVMGradientProcedure create(final double[] y, final double[] var, final Gradient1Function func)
-    {
-        switch (func.getNumberOfGradients())
-        {
-            case 5:
-                return new WLSQLVMGradientProcedure5(y, var, func);
-            case 4:
-                return new WLSQLVMGradientProcedure4(y, var, func);
-            case 6:
-                return new WLSQLVMGradientProcedure6(y, var, func);
+public class WLSQLVMGradientProcedureFactory {
+  /**
+   * Create a new gradient procedure.
+   *
+   * @param y Data to fit
+   * @param var the base variance of each observation (must be positive)
+   * @param func Gradient function
+   * @return the gradient procedure
+   */
+  public static WLSQLVMGradientProcedure create(final double[] y, final double[] var,
+      final Gradient1Function func) {
+    switch (func.getNumberOfGradients()) {
+      case 5:
+        return new WLSQLVMGradientProcedure5(y, var, func);
+      case 4:
+        return new WLSQLVMGradientProcedure4(y, var, func);
+      case 6:
+        return new WLSQLVMGradientProcedure6(y, var, func);
 
-            default:
-                return new WLSQLVMGradientProcedure(y, var, func);
-        }
+      default:
+        return new WLSQLVMGradientProcedure(y, var, func);
     }
+  }
 }

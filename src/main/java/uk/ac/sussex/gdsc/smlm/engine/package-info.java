@@ -23,15 +23,13 @@
  */
 
 /**
- * Provides the engine to perform filtering and fitting of Single Molecule
- * Localisation Microscopy (SMLM) data.
- * <p>
- * Data is processed as 2D frames from an image source. The engine distributes the
- * input image frames to workers for analysis. Each worker filters the frames to
- * identify candidate localisations and then fits the candidates using a Gaussian 2D function.
- * The fits are assessed using criteria such as localisation precision, Signal-to-Noise Ratio (SNR),
- * drift, and spot width. Fitting may not process all candidates due to the use of smart
- * stopping criteria based on the acceptance rate.
+ * Provides the engine to perform filtering and fitting of Single Molecule Localisation Microscopy
+ * (SMLM) data. <p> Data is processed as 2D frames from an image source. The engine distributes the
+ * input image frames to workers for analysis. Each worker filters the frames to identify candidate
+ * localisations and then fits the candidates using a Gaussian 2D function. The fits are assessed
+ * using criteria such as localisation precision, Signal-to-Noise Ratio (SNR), drift, and spot
+ * width. Fitting may not process all candidates due to the use of smart stopping criteria based on
+ * the acceptance rate.
  *
  * @since 1.0.0
  */

@@ -26,106 +26,100 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Defines normalisation of an area around a point using a per-pixel normalisation.
  */
-public class PerPixelNormaliser implements Normaliser
-{
-    /** The normalisation. */
-    public final float[] normalisation;
+public class PerPixelNormaliser implements Normaliser {
+  /** The normalisation. */
+  public final float[] normalisation;
 
-    /**
-     * Instantiates a new fixed normaliser.
-     *
-     * @param normalisation
-     *            the normalisation
-     */
-    public PerPixelNormaliser(float[] normalisation)
-    {
-        this.normalisation = normalisation;
-    }
+  /**
+   * Instantiates a new fixed normaliser.
+   *
+   * @param normalisation the normalisation
+   */
+  public PerPixelNormaliser(float[] normalisation) {
+    this.normalisation = normalisation;
+  }
 
-    /**
-     * Normalise the sum.
-     *
-     * @param sum
-     *            the sum
-     * @param index
-     *            the index
-     * @return the normalised value
-     */
-    @Override
-    public float normalise(double sum, int index)
-    {
-        return (float) (sum / normalisation[index]);
-    }
+  /**
+   * Normalise the sum.
+   *
+   * @param sum the sum
+   * @param index the index
+   * @return the normalised value
+   */
+  @Override
+  public float normalise(double sum, int index) {
+    return (float) (sum / normalisation[index]);
+  }
 
-    /**
-     * Normalise the sum.
-     *
-     * @param sum
-     *            the sum
-     * @param index
-     *            the index
-     * @return the normalised value
-     */
-    @Override
-    public float normalise(float sum, int index)
-    {
-        return sum / normalisation[index];
-    }
+  /**
+   * Normalise the sum.
+   *
+   * @param sum the sum
+   * @param index the index
+   * @return the normalised value
+   */
+  @Override
+  public float normalise(float sum, int index) {
+    return sum / normalisation[index];
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void normalise(float[] data, int size)
-    {
-        for (int i = 0; i < size; i++)
-            data[i] /= normalisation[i];
+  /** {@inheritDoc} */
+  @Override
+  public void normalise(float[] data, int size) {
+    for (int i = 0; i < size; i++) {
+      data[i] /= normalisation[i];
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void normalise(float[] data, float[] out, int size)
-    {
-        for (int i = 0; i < size; i++)
-            out[i] = data[i] / normalisation[i];
+  /** {@inheritDoc} */
+  @Override
+  public void normalise(float[] data, float[] out, int size) {
+    for (int i = 0; i < size; i++) {
+      out[i] = data[i] / normalisation[i];
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void normalise(float[] data, int maxx, int maxy, int border)
-    {
-        final int xlimit = maxx - border;
-        final int ylimit = maxy - border;
-        for (int y = border; y < ylimit; y++)
-            for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-                data[i] /= normalisation[i];
+  /** {@inheritDoc} */
+  @Override
+  public void normalise(float[] data, int maxx, int maxy, int border) {
+    final int xlimit = maxx - border;
+    final int ylimit = maxy - border;
+    for (int y = border; y < ylimit; y++) {
+      for (int x = border, i = y * maxx + border; x < xlimit; x++, i++) {
+        data[i] /= normalisation[i];
+      }
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
-    {
-        final int xlimit = maxx - border;
-        final int ylimit = maxy - border;
-        for (int y = border; y < ylimit; y++)
-            for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-                out[i] = data[i] / normalisation[i];
+  /** {@inheritDoc} */
+  @Override
+  public void normalise(float[] data, float[] out, int maxx, int maxy, int border) {
+    final int xlimit = maxx - border;
+    final int ylimit = maxy - border;
+    for (int y = border; y < ylimit; y++) {
+      for (int x = border, i = y * maxx + border; x < xlimit; x++, i++) {
+        out[i] = data[i] / normalisation[i];
+      }
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void normalise(double[] data, float[] out, int size)
-    {
-        for (int i = 0; i < size; i++)
-            out[i] = (float) (data[i] / normalisation[i]);
+  /** {@inheritDoc} */
+  @Override
+  public void normalise(double[] data, float[] out, int size) {
+    for (int i = 0; i < size; i++) {
+      out[i] = (float) (data[i] / normalisation[i]);
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
-    {
-        final int xlimit = maxx - border;
-        final int ylimit = maxy - border;
-        for (int y = border; y < ylimit; y++)
-            for (int x = border, i = y * maxx + border; x < xlimit; x++, i++)
-                out[i] = (float) (data[i] / normalisation[i]);
+  /** {@inheritDoc} */
+  @Override
+  public void normalise(double[] data, float[] out, int maxx, int maxy, int border) {
+    final int xlimit = maxx - border;
+    final int ylimit = maxy - border;
+    for (int y = border; y < ylimit; y++) {
+      for (int x = border, i = y * maxx + border; x < xlimit; x++, i++) {
+        out[i] = (float) (data[i] / normalisation[i]);
+      }
     }
+  }
 }

@@ -34,59 +34,57 @@ import org.junit.jupiter.api.Assertions;
 import java.io.File;
 import java.io.IOException;
 
-@SuppressWarnings({ "javadoc" })
-public class SettingsManagerTest
-{
-    @SeededTest
-    public void canReadWriteConfiguration(RandomSeed seed) throws IOException
-    {
-        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+@SuppressWarnings({"javadoc"})
+public class SettingsManagerTest {
+  @SeededTest
+  public void canReadWriteConfiguration(RandomSeed seed) throws IOException {
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
 
-        final Calibration.Builder builder = Calibration.newBuilder();
-        builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());
-        final Calibration e = builder.build();
-        Calibration o;
+    final Calibration.Builder builder = Calibration.newBuilder();
+    builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());
+    final Calibration e = builder.build();
+    Calibration o;
 
-        final String dir = SettingsManager.getSettingsDirectory();
-        //System.out.println(dir);
-        final File tmp = createTempDirectory(false);
-        try
-        {
-            SettingsManager.setSettingsDirectory(tmp.getPath());
-            o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
-            Assertions.assertTrue(o == null, "Failed to read null");
-            o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT);
-            Assertions.assertTrue(e.getDefaultInstanceForType().equals(o), "Failed to read default");
-            Assertions.assertTrue(SettingsManager.writeSettings(e), "Failed to write");
-            o = SettingsManager.readCalibration(0);
-            Assertions.assertTrue(e.equals(o), "Not equal");
-            SettingsManager.clearSettings(e.getClass());
-            o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
-            Assertions.assertTrue(o == null, "Failed to clear");
-        }
-        finally
-        {
-            // Reset
-            tmp.delete(); // Will work if the directory is empty
-            SettingsManager.setSettingsDirectory(dir);
-        }
+    final String dir = SettingsManager.getSettingsDirectory();
+    // System.out.println(dir);
+    final File tmp = createTempDirectory(false);
+    try {
+      SettingsManager.setSettingsDirectory(tmp.getPath());
+      o = SettingsManager
+          .readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
+      Assertions.assertTrue(o == null, "Failed to read null");
+      o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT);
+      Assertions.assertTrue(e.getDefaultInstanceForType().equals(o), "Failed to read default");
+      Assertions.assertTrue(SettingsManager.writeSettings(e), "Failed to write");
+      o = SettingsManager.readCalibration(0);
+      Assertions.assertTrue(e.equals(o), "Not equal");
+      SettingsManager.clearSettings(e.getClass());
+      o = SettingsManager
+          .readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
+      Assertions.assertTrue(o == null, "Failed to clear");
+    } finally {
+      // Reset
+      tmp.delete(); // Will work if the directory is empty
+      SettingsManager.setSettingsDirectory(dir);
+    }
+  }
+
+  public static File createTempDirectory(boolean create) throws IOException {
+    final File temp;
+
+    temp = File.createTempFile(SettingsManagerTest.class.getSimpleName(), ".tmp");
+    temp.deleteOnExit();
+
+    if (!(temp.delete())) {
+      throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
     }
 
-    public static File createTempDirectory(boolean create) throws IOException
-    {
-        final File temp;
-
-        temp = File.createTempFile(SettingsManagerTest.class.getSimpleName(), ".tmp");
-        temp.deleteOnExit();
-
-        if (!(temp.delete()))
-            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
-
-        if (create && !(temp.mkdir()))
-            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
-
-        //System.out.println(temp.getPath());
-
-        return (temp);
+    if (create && !(temp.mkdir())) {
+      throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
     }
+
+    // System.out.println(temp.getPath());
+
+    return (temp);
+  }
 }

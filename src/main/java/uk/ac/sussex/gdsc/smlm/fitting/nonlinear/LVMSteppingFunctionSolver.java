@@ -34,290 +34,249 @@ import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a).
  */
-public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
-{
-    /**
-     * The solver used for solving A x = b to find the update x.
-     * <ul>
-     * <li>A = Scaled Hessian matrix (Alpha)
-     * <li>b = Gradient vector (beta)
-     * <li>x = Update vector to modify the parameters
-     * </ul>
-     */
-    protected EJMLLinearSolver solver = new EJMLLinearSolver();
+public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver {
+  /**
+   * The solver used for solving A x = b to find the update x. <ul> <li>A = Scaled Hessian matrix
+   * (Alpha) <li>b = Gradient vector (beta) <li>x = Update vector to modify the parameters </ul>
+   */
+  protected EJMLLinearSolver solver = new EJMLLinearSolver();
 
-    /** The gradient procedure. */
-    protected LVMGradientProcedure gradientProcedure;
+  /** The gradient procedure. */
+  protected LVMGradientProcedure gradientProcedure;
 
-    /** The initial lambda value for the LVM algorithm. */
-    protected double initialLambda = 0.01;
+  /** The initial lambda value for the LVM algorithm. */
+  protected double initialLambda = 0.01;
 
-    /** The current lambda value for the LVM algorithm. */
-    protected double lambda;
+  /** The current lambda value for the LVM algorithm. */
+  protected double lambda;
 
+  // Alpha = Scaled Hessian matrix
+  // beta = Gradient vector
+  // We want to solve: A x = b to find the update x
+
+  /** Current best alpha (Scaled Hessian matrix). */
+  protected double[] alpha;
+  /** Current best beta (Gradient vector). */
+  protected double[] beta;
+
+  /** Working alpha. */
+  protected double[] walpha;
+  /** Working beta. */
+  protected double[] wbeta;
+
+  // TODO - Determine what a good solution tolerance would be.
+  // We may not need to be that strict to accept the solution.
+
+  /** The default max relative error. */
+  public static final double DEFAULT_MAX_RELATIVE_ERROR = 1e-3;
+  /** The default max absolute error. */
+  public static final double DEFAULT_MAX_ABSOLUTE_ERROR = 1e-4;
+
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param type the type
+   * @param f the function
+   * @throws NullPointerException if the function is null
+   */
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f) {
+    this(type, f, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
+  }
+
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param type the type
+   * @param f the function
+   * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum relative error
+   * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum absolute error
+   * @throws NullPointerException if the function is null
+   */
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f,
+      double maxRelativeError, double maxAbsoluteError) {
+    super(type, f);
+    solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
+  }
+
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param type the type
+   * @param f the function
+   * @param tc the tolerance checker
+   * @param bounds the bounds
+   * @throws NullPointerException if the function or tolerance checker is null
+   */
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f,
+      ToleranceChecker tc, ParameterBounds bounds) {
+    this(type, f, tc, bounds, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
+  }
+
+  /**
+   * Create a new stepping function solver.
+   *
+   * @param type the type
+   * @param f the function
+   * @param tc the tolerance checker
+   * @param bounds the bounds
+   * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum relative error
+   * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
+   *        maximum absolute error
+   * @throws NullPointerException if the function or tolerance checker is null
+   */
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f,
+      ToleranceChecker tc, ParameterBounds bounds, double maxRelativeError,
+      double maxAbsoluteError) {
+    super(type, f, tc, bounds);
+    solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
+  }
+
+  @Override
+  protected double[] prepareFitValue(double[] y, double[] a) {
+    // Ensure the gradient procedure is created
+    y = prepareY(y);
+    gradientProcedure = createGradientProcedure(y);
+
+    // Ensure minimisation
+    tc.setMinimiseValue(true);
+
+    // Set up the current best Hessian matrix and gradient parameter
+    lambda = initialLambda;
+    final int n = gradientProcedure.n;
+    alpha = null;
+    beta = null;
+    walpha = new double[n * n];
+    wbeta = new double[n];
+
+    return y;
+  }
+
+  /**
+   * Prepare Y for the gradient procedure, e.g. ensure positive values.
+   *
+   * @param y the y
+   * @return the new y
+   */
+  protected double[] prepareY(double[] y) {
+    return y;
+  }
+
+  /**
+   * Creates the gradient procedure.
+   *
+   * @param y the y
+   * @return the LVM gradient procedure
+   */
+  protected abstract LVMGradientProcedure createGradientProcedure(double[] y);
+
+  @Override
+  protected double computeFitValue(double[] a) {
+    gradientProcedure.gradient(a);
+
+    if (gradientProcedure.isNaNGradients()) {
+      throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+    }
+
+    if (alpha == null) {
+      // This is the first computation:
+      // Set the current alpha and beta
+      alpha = gradientProcedure.getAlphaLinear();
+      beta = gradientProcedure.beta.clone();
+    } else {
+      // This is a subsequent computation:
+      // Store the working alpha and beta which may be accepted
+      gradientProcedure.getAlphaLinear(walpha);
+      gradientProcedure.getBeta(wbeta);
+    }
+
+    return gradientProcedure.value;
+  }
+
+  @Override
+  protected void computeStep(double[] step) {
     // Alpha = Scaled Hessian matrix
-    // beta  = Gradient vector
+    // beta = Gradient vector
     // We want to solve: A x = b to find the update x
 
-    /** Current best alpha (Scaled Hessian matrix). */
-    protected double[] alpha;
-    /** Current best beta (Gradient vector). */
-    protected double[] beta;
+    final int n = gradientProcedure.n;
+    System.arraycopy(beta, 0, step, 0, n);
+    System.arraycopy(alpha, 0, walpha, 0, alpha.length);
+    final double scale = (1.0 + lambda);
+    for (int i = 0, j = 0; i < n; i++, j += (n + 1)) {
+      // Scale the diagonal of the Hessian to favour direct descent
+      walpha[j] *= scale;
+    }
+    if (!solver.solve(walpha, step)) {
+      throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_MODEL);
+    }
+  }
 
-    /** Working alpha. */
-    protected double[] walpha;
-    /** Working beta. */
-    protected double[] wbeta;
+  @Override
+  protected boolean accept(double currentValue, double[] a, double newValue, double[] newA) {
+    if (newValue <= currentValue) {
+      // Update the current alpha and beta:
+      // We can do this by swapping storage.
+      double[] tmp = alpha;
+      alpha = walpha;
+      walpha = tmp;
+      tmp = beta;
+      beta = wbeta;
+      wbeta = tmp;
 
-    // TODO - Determine what a good solution tolerance would be.
-    // We may not need to be that strict to accept the solution.
-
-    /** The default max relative error. */
-    public static final double DEFAULT_MAX_RELATIVE_ERROR = 1e-3;
-    /** The default max absolute error. */
-    public static final double DEFAULT_MAX_ABSOLUTE_ERROR = 1e-4;
-
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param type
-     *            the type
-     * @param f
-     *            the function
-     * @throws NullPointerException
-     *             if the function is null
-     */
-    public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f)
-    {
-        this(type, f, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
+      // Decrease Lambda
+      lambda *= 0.1;
+      return true;
     }
 
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param type
-     *            the type
-     * @param f
-     *            the function
-     * @param maxRelativeError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum relative error
-     * @param maxAbsoluteError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
-     * @throws NullPointerException
-     *             if the function is null
-     */
-    public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, double maxRelativeError,
-            double maxAbsoluteError)
-    {
-        super(type, f);
-        solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
-    }
+    // Increase Lambda
+    lambda *= 10.0;
+    return false;
+  }
 
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param type
-     *            the type
-     * @param f
-     *            the function
-     * @param tc
-     *            the tolerance checker
-     * @param bounds
-     *            the bounds
-     * @throws NullPointerException
-     *             if the function or tolerance checker is null
-     */
-    public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, ToleranceChecker tc,
-            ParameterBounds bounds)
-    {
-        this(type, f, tc, bounds, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
-    }
+  @Override
+  protected double[] prepareFunctionValue(double[] y, double[] a) {
+    // Ensure the gradient procedure is created
+    y = prepareY(y);
+    gradientProcedure = createGradientProcedure(y);
+    return y;
+  }
 
-    /**
-     * Create a new stepping function solver.
-     *
-     * @param type
-     *            the type
-     * @param f
-     *            the function
-     * @param tc
-     *            the tolerance checker
-     * @param bounds
-     *            the bounds
-     * @param maxRelativeError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum relative error
-     * @param maxAbsoluteError
-     *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
-     * @throws NullPointerException
-     *             if the function or tolerance checker is null
-     */
-    public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, ToleranceChecker tc,
-            ParameterBounds bounds, double maxRelativeError, double maxAbsoluteError)
-    {
-        super(type, f, tc, bounds);
-        solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
-    }
+  @Override
+  protected double computeFunctionValue(double[] a) {
+    gradientProcedure.value(a);
+    return gradientProcedure.value;
+  }
 
-    @Override
-    protected double[] prepareFitValue(double[] y, double[] a)
-    {
-        // Ensure the gradient procedure is created
-        y = prepareY(y);
-        gradientProcedure = createGradientProcedure(y);
+  /**
+   * {@inheritDoc} <p> Note: In contrast to {@link #prepareFunctionValue(double[], double[])} this
+   * does not create the gradient procedure.
+   */
+  @Override
+  protected double[] prepareFunctionFisherInformationMatrix(double[] y, double[] a) {
+    // Do not create the gradient procedure. Sub-classes will create the correct one required.
+    return prepareY(y);
+  }
 
-        // Ensure minimisation
-        tc.setMinimiseValue(true);
+  /**
+   * @param initialLambda the initial lambda for the Levenberg-Marquardt fitting routine
+   */
+  public void setInitialLambda(double initialLambda) {
+    this.initialLambda = initialLambda;
+  }
 
-        // Set up the current best Hessian matrix and gradient parameter
-        lambda = initialLambda;
-        final int n = gradientProcedure.n;
-        alpha = null;
-        beta = null;
-        walpha = new double[n * n];
-        wbeta = new double[n];
+  /**
+   * @return the initialLambda.
+   */
+  public double getInitialLambda() {
+    return initialLambda;
+  }
 
-        return y;
-    }
-
-    /**
-     * Prepare Y for the gradient procedure, e.g. ensure positive values.
-     *
-     * @param y
-     *            the y
-     * @return the new y
-     */
-    protected double[] prepareY(double[] y)
-    {
-        return y;
-    }
-
-    /**
-     * Creates the gradient procedure.
-     *
-     * @param y
-     *            the y
-     * @return the LVM gradient procedure
-     */
-    protected abstract LVMGradientProcedure createGradientProcedure(double[] y);
-
-    @Override
-    protected double computeFitValue(double[] a)
-    {
-        gradientProcedure.gradient(a);
-
-        if (gradientProcedure.isNaNGradients())
-            throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
-
-        if (alpha == null)
-        {
-            // This is the first computation:
-            // Set the current alpha and beta
-            alpha = gradientProcedure.getAlphaLinear();
-            beta = gradientProcedure.beta.clone();
-        }
-        else
-        {
-            // This is a subsequent computation:
-            // Store the working alpha and beta which may be accepted
-            gradientProcedure.getAlphaLinear(walpha);
-            gradientProcedure.getBeta(wbeta);
-        }
-
-        return gradientProcedure.value;
-    }
-
-    @Override
-    protected void computeStep(double[] step)
-    {
-        // Alpha = Scaled Hessian matrix
-        // beta  = Gradient vector
-        // We want to solve: A x = b to find the update x
-
-        final int n = gradientProcedure.n;
-        System.arraycopy(beta, 0, step, 0, n);
-        System.arraycopy(alpha, 0, walpha, 0, alpha.length);
-        final double scale = (1.0 + lambda);
-        for (int i = 0, j = 0; i < n; i++, j += (n + 1))
-            // Scale the diagonal of the Hessian to favour direct descent
-            walpha[j] *= scale;
-        if (!solver.solve(walpha, step))
-            throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_MODEL);
-    }
-
-    @Override
-    protected boolean accept(double currentValue, double[] a, double newValue, double[] newA)
-    {
-        if (newValue <= currentValue)
-        {
-            // Update the current alpha and beta:
-            // We can do this by swapping storage.
-            double[] tmp = alpha;
-            alpha = walpha;
-            walpha = tmp;
-            tmp = beta;
-            beta = wbeta;
-            wbeta = tmp;
-
-            // Decrease Lambda
-            lambda *= 0.1;
-            return true;
-        }
-
-        // Increase Lambda
-        lambda *= 10.0;
-        return false;
-    }
-
-    @Override
-    protected double[] prepareFunctionValue(double[] y, double[] a)
-    {
-        // Ensure the gradient procedure is created
-        y = prepareY(y);
-        gradientProcedure = createGradientProcedure(y);
-        return y;
-    }
-
-    @Override
-    protected double computeFunctionValue(double[] a)
-    {
-        gradientProcedure.value(a);
-        return gradientProcedure.value;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Note: In contrast to {@link #prepareFunctionValue(double[], double[])} this does not create the gradient
-     * procedure.
-     */
-    @Override
-    protected double[] prepareFunctionFisherInformationMatrix(double[] y, double[] a)
-    {
-        // Do not create the gradient procedure. Sub-classes will create the correct one required.
-        return prepareY(y);
-    }
-
-    /**
-     * @param initialLambda
-     *            the initial lambda for the Levenberg-Marquardt fitting routine
-     */
-    public void setInitialLambda(double initialLambda)
-    {
-        this.initialLambda = initialLambda;
-    }
-
-    /**
-     * @return the initialLambda.
-     */
-    public double getInitialLambda()
-    {
-        return initialLambda;
-    }
-
-    @Override
-    public void setGradientFunction(GradientFunction f)
-    {
-        super.setGradientFunction(f);
-        gradientProcedure = null;
-    }
+  @Override
+  public void setGradientFunction(GradientFunction f) {
+    super.setGradientFunction(f);
+    gradientProcedure = null;
+  }
 }

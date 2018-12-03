@@ -23,33 +23,27 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-@SuppressWarnings({ "javadoc" })
-public class StripedBlockMeanWeightedFilterTest extends WeightedMeanFilterTest
-{
-    @Override
-    DataFilter createDataFilter()
-    {
-        return new DataFilter("stripedBlockMean", true)
-        {
-            BlockMeanFilter f = new BlockMeanFilter();
+@SuppressWarnings({"javadoc"})
+public class StripedBlockMeanWeightedFilterTest extends WeightedMeanFilterTest {
+  @Override
+  DataFilter createDataFilter() {
+    return new DataFilter("stripedBlockMean", true) {
+      BlockMeanFilter f = new BlockMeanFilter();
 
-            @Override
-            public void filter(float[] data, int width, int height, float boxSize)
-            {
-                f.stripedBlockFilter(data, width, height, boxSize);
-            }
+      @Override
+      public void filter(float[] data, int width, int height, float boxSize) {
+        f.stripedBlockFilter(data, width, height, boxSize);
+      }
 
-            @Override
-            public void filterInternal(float[] data, int width, int height, float boxSize)
-            {
-                f.stripedBlockFilterInternal(data, width, height, boxSize);
-            }
+      @Override
+      public void filterInternal(float[] data, int width, int height, float boxSize) {
+        f.stripedBlockFilterInternal(data, width, height, boxSize);
+      }
 
-            @Override
-            public void setWeights(float[] w, int width, int height)
-            {
-                f.setWeights(w, width, height);
-            }
-        };
-    }
+      @Override
+      public void setWeights(float[] w, int width, int height) {
+        f.setWeights(w, width, height);
+      }
+    };
+  }
 }

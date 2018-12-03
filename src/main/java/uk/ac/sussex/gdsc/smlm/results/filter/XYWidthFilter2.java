@@ -29,114 +29,100 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a width range. Assumes width is different on the X and Y axis and they are combined
- * using s = sqrt(s0*s1).
+ * Filter results using a width range. Assumes width is different on the X and Y axis and they are
+ * combined using s = sqrt(s0*s1).
  */
-public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter
-{
+public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter {
 
-    /**
-     * Instantiates a new XY width filter 2.
-     *
-     * @param minWidth
-     *            the min width
-     * @param maxWidth
-     *            the max width
-     */
-    public XYWidthFilter2(double minWidth, double maxWidth)
-    {
-        super(minWidth, maxWidth);
+  /**
+   * Instantiates a new XY width filter 2.
+   *
+   * @param minWidth the min width
+   * @param maxWidth the max width
+   */
+  public XYWidthFilter2(double minWidth, double maxWidth) {
+    super(minWidth, maxWidth);
+  }
+
+  @Override
+  protected String generateName() {
+    return "XYWidth " + minWidth + "-" + maxWidth;
+  }
+
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    calculator =
+        Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
+
+    // Set the width limit
+    final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+    final double s2 = s[0] * s[1];
+    lowerSigmaThreshold = (float) (s2 * minWidth * minWidth);
+    upperSigmaThreshold = Filter.getUpperLimit(s2 * maxWidth * maxWidth);
+  }
+
+  @Override
+  protected void setup(final double minWidth, double maxWidth) {
+    widthEnabled = false;
+    if (maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY) {
+      upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
+      widthEnabled = upperSigmaThreshold != Float.POSITIVE_INFINITY;
+    } else {
+      upperSigmaThreshold = Float.POSITIVE_INFINITY;
+    }
+    if (minWidth < 1) {
+      widthEnabled = true;
+      lowerSigmaThreshold = (float) (minWidth * minWidth);
+    } else {
+      lowerSigmaThreshold = 0f;
     }
 
-    @Override
-    protected String generateName()
-    {
-        return "XYWidth " + minWidth + "-" + maxWidth;
-    }
+  }
 
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
+  @Override
+  public boolean accept(PeakResult peak) {
+    final float sd2 = calculator.getStandardDeviation2(peak.getParameters());
+    return sd2 <= upperSigmaThreshold && sd2 >= lowerSigmaThreshold;
+  }
 
-        // Set the width limit
-        final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
-        final double s2 = s[0] * s[1];
-        lowerSigmaThreshold = (float) (s2 * minWidth * minWidth);
-        upperSigmaThreshold = Filter.getUpperLimit(s2 * maxWidth * maxWidth);
-    }
+  @Override
+  public int getValidationFlags() {
+    return V_X_SD_FACTOR | V_Y_SD_FACTOR;
+  }
 
-    @Override
-    protected void setup(final double minWidth, double maxWidth)
-    {
-        widthEnabled = false;
-        if (maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY)
-        {
-            upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
-            widthEnabled = upperSigmaThreshold != Float.POSITIVE_INFINITY;
-        }
-        else
-            upperSigmaThreshold = Float.POSITIVE_INFINITY;
-        if (minWidth < 1)
-        {
-            widthEnabled = true;
-            lowerSigmaThreshold = (float) (minWidth * minWidth);
-        }
-        else
-            lowerSigmaThreshold = 0f;
-
-    }
-
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        final float sd2 = calculator.getStandardDeviation2(peak.getParameters());
-        return sd2 <= upperSigmaThreshold && sd2 >= lowerSigmaThreshold;
-    }
-
-    @Override
-    public int getValidationFlags()
-    {
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    if (widthEnabled) {
+      final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
+      if (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold) {
         return V_X_SD_FACTOR | V_Y_SD_FACTOR;
+      }
     }
+    return 0;
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        if (widthEnabled)
-        {
-            final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
-            if (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold)
-                return V_X_SD_FACTOR | V_Y_SD_FACTOR;
-        }
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    return "Filter results using an XY width range. (Width is relative to initial peak width.)";
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        return "Filter results using an XY width range. (Width is relative to initial peak width.)";
+  /** {@inheritDoc} */
+  @Override
+  public Filter adjustParameter(int index, double delta) {
+    checkIndex(index);
+    switch (index) {
+      case 0:
+        return new XYWidthFilter2(updateParameter(minWidth, delta, DEFAULT_MIN_RANGE), maxWidth);
+      default:
+        return new XYWidthFilter2(minWidth,
+            updateParameter(maxWidth, delta, WidthFilter.DEFAULT_RANGE));
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter adjustParameter(int index, double delta)
-    {
-        checkIndex(index);
-        switch (index)
-        {
-            case 0:
-                return new XYWidthFilter2(updateParameter(minWidth, delta, DEFAULT_MIN_RANGE), maxWidth);
-            default:
-                return new XYWidthFilter2(minWidth, updateParameter(maxWidth, delta, WidthFilter.DEFAULT_RANGE));
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Filter create(double... parameters)
-    {
-        return new XYWidthFilter2(parameters[0], parameters[1]);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter create(double... parameters) {
+    return new XYWidthFilter2(parameters[0], parameters[1]);
+  }
 }

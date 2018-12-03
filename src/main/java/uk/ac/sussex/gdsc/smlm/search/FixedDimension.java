@@ -28,253 +28,235 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 /**
  * Specify the dimensions for a search.
  */
-public class FixedDimension implements Cloneable, Dimension
-{
-    /** The minimum of the range. */
-    public final double min;
+public class FixedDimension implements Cloneable, Dimension {
+  /** The minimum of the range. */
+  public final double min;
 
-    /** The maximum of the range. */
-    public final double max;
+  /** The maximum of the range. */
+  public final double max;
 
-    /** The current lower bound of the range (will be clipped to min./max). */
-    public final double lower;
+  /** The current lower bound of the range (will be clipped to min./max). */
+  public final double lower;
 
-    /** The current upper bound of the range (will be clipped to min./max). */
-    public final double upper;
+  /** The current upper bound of the range (will be clipped to min./max). */
+  public final double upper;
 
-    /** The min increment to use around the centre. */
-    public final double minIncrement;
+  /** The min increment to use around the centre. */
+  public final double minIncrement;
 
-    /** Set to true if {@link #min} &lt; {@link #max}. */
-    public final boolean active;
+  /** Set to true if {@link #min} &lt; {@link #max}. */
+  public final boolean active;
 
-    /**
-     * Instantiates a new inactive search dimension. The centre is set to zero.
-     */
-    public FixedDimension()
-    {
-        this(0);
+  /**
+   * Instantiates a new inactive search dimension. The centre is set to zero.
+   */
+  public FixedDimension() {
+    this(0);
+  }
+
+  /**
+   * Instantiates a new inactive search dimension. The centre can be set to any value.
+   *
+   * @param centre the centre
+   */
+  public FixedDimension(double centre) {
+    this(centre, centre, 0);
+  }
+
+  /**
+   * Instantiates a new search dimension.
+   *
+   * @param min the minimum of the range
+   * @param max the maximum of the range
+   * @param minIncrement the min increment to use around the centre
+   */
+  public FixedDimension(double min, double max, double minIncrement) {
+    this(min, max, minIncrement, min, max);
+  }
+
+  /**
+   * Instantiates a new search dimension.
+   *
+   * @param min the minimum of the range
+   * @param max the maximum of the range
+   * @param minIncrement the min increment to use around the centre
+   * @param lower the current lower bound of the range (will be clipped to min/max)
+   * @param upper the current upper bound of the range (will be clipped to min/max)
+   */
+  public FixedDimension(double min, double max, double minIncrement, double lower, double upper) {
+    if (isInvalid(min)) {
+      throw new IllegalArgumentException("Min is not a valid number: " + min);
+    }
+    if (isInvalid(max)) {
+      throw new IllegalArgumentException("Max is not a valid number: " + max);
+    }
+    if (isInvalid(lower)) {
+      throw new IllegalArgumentException("Lower is not a valid number: " + lower);
+    }
+    if (isInvalid(upper)) {
+      throw new IllegalArgumentException("Upper is not a valid number: " + upper);
+    }
+    if (isInvalid(minIncrement)) {
+      throw new IllegalArgumentException("Min increment is not a valid number: " + minIncrement);
+    }
+    if (max < min) {
+      throw new IllegalArgumentException("Max is less than min");
+    }
+    this.active = min < max;
+    if (minIncrement < 0) {
+      throw new IllegalArgumentException("Min increment is negative: " + minIncrement);
+    }
+    if (upper < lower) {
+      throw new IllegalArgumentException("Upper is less than lower");
+      // if (upper < min || upper > max)
+      // throw new IllegalArgumentException("Upper is outside min/max range");
+      // if (lower < min || lower > max)
+      // throw new IllegalArgumentException("Lower is outside min/max range");
     }
 
-    /**
-     * Instantiates a new inactive search dimension. The centre can be set to any value.
-     *
-     * @param centre
-     *            the centre
-     */
-    public FixedDimension(double centre)
-    {
-        this(centre, centre, 0);
+    // Clip to range
+    lower = Math.min(max, Math.max(lower, min));
+    upper = Math.min(max, Math.max(upper, min));
+
+    // We round to the min increment so that the values returned should be identical if the centre
+    // is moved by a factor of the increment.
+    this.minIncrement = minIncrement;
+    this.min = round(min);
+    this.max = round(max);
+    this.lower = round(lower);
+    this.upper = round(upper);
+  }
+
+  /**
+   * Creates a new fixed dimension, respecting the current min/max and the increment settings. If
+   * the current search dimension is not active then an inactive dimension is returned centred
+   * between the lower and upper bounds.
+   *
+   * @param lower the lower
+   * @param upper the upper
+   * @return the fixed dimension
+   * @see uk.ac.sussex.gdsc.smlm.search.Dimension#create(double, double)
+   */
+  @Override
+  public FixedDimension create(double lower, double upper) {
+    if (!active) {
+      return new FixedDimension((upper + lower) / 2);
+    }
+    if (lower < min) {
+      lower = min;
+    }
+    if (upper > max) {
+      upper = max;
+    }
+    return new FixedDimension(min, max, minIncrement, lower, upper);
+  }
+
+  /**
+   * Creates a new search dimension, respecting the current settings.
+   *
+   * @param nIncrement the number of increments to use around the centre
+   * @return the search dimension
+   */
+  public SearchDimension create(int nIncrement) {
+    if (nIncrement <= 0) {
+      // Compute the maximum number of increments to cover the range from the centre
+      nIncrement = (int) Math.ceil(Math.ceil((max - min) / minIncrement) / 2);
+    }
+    return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
+  }
+
+  private static boolean isInvalid(double d) {
+    return Double.isNaN(d) || Double.isInfinite(d);
+  }
+
+  /**
+   * Round the value to the nearest min increment. If min increment is zero no rounding is
+   * performed.
+   *
+   * @param value the value
+   * @return the rounded value
+   */
+  @Override
+  public double round(double value) {
+    if (canRound()) {
+      return MathUtils.round(value, minIncrement);
+    }
+    return value;
+  }
+
+  /**
+   * If the dimension is not active or min increment is zero no rounding is performed.
+   *
+   * @return true, if successful
+   * @see uk.ac.sussex.gdsc.smlm.search.Dimension#canRound()
+   */
+  @Override
+  public boolean canRound() {
+    return (active && minIncrement != 0);
+  }
+
+  /**
+   * Gets the centre of the range in the dimension.
+   *
+   * @return the centre of the range in the dimension
+   */
+  @Override
+  public double getCentre() {
+    return round((upper + lower) / 2);
+  }
+
+  /**
+   * Gets the current lower bound of the range.
+   *
+   * @return the current lower bound of the range
+   */
+  @Override
+  public double getLower() {
+    return lower;
+  }
+
+  /**
+   * Gets the current upper bound of the range.
+   *
+   * @return the current upper bound of the range
+   */
+  @Override
+  public double getUpper() {
+    return upper;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean isAtBounds(double v) {
+    return (v <= lower || v >= upper);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public FixedDimension clone() {
+    try {
+      return (FixedDimension) super.clone();
+    } catch (final CloneNotSupportedException e) {
+      return null;
     }
 
-    /**
-     * Instantiates a new search dimension.
-     *
-     * @param min
-     *            the minimum of the range
-     * @param max
-     *            the maximum of the range
-     * @param minIncrement
-     *            the min increment to use around the centre
-     */
-    public FixedDimension(double min, double max, double minIncrement)
-    {
-        this(min, max, minIncrement, min, max);
-    }
+  }
 
-    /**
-     * Instantiates a new search dimension.
-     *
-     * @param min
-     *            the minimum of the range
-     * @param max
-     *            the maximum of the range
-     * @param minIncrement
-     *            the min increment to use around the centre
-     * @param lower
-     *            the current lower bound of the range (will be clipped to min/max)
-     * @param upper
-     *            the current upper bound of the range (will be clipped to min/max)
-     */
-    public FixedDimension(double min, double max, double minIncrement, double lower, double upper)
-    {
-        if (isInvalid(min))
-            throw new IllegalArgumentException("Min is not a valid number: " + min);
-        if (isInvalid(max))
-            throw new IllegalArgumentException("Max is not a valid number: " + max);
-        if (isInvalid(lower))
-            throw new IllegalArgumentException("Lower is not a valid number: " + lower);
-        if (isInvalid(upper))
-            throw new IllegalArgumentException("Upper is not a valid number: " + upper);
-        if (isInvalid(minIncrement))
-            throw new IllegalArgumentException("Min increment is not a valid number: " + minIncrement);
-        if (max < min)
-            throw new IllegalArgumentException("Max is less than min");
-        this.active = min < max;
-        if (minIncrement < 0)
-            throw new IllegalArgumentException("Min increment is negative: " + minIncrement);
-        if (upper < lower)
-            throw new IllegalArgumentException("Upper is less than lower");
-        //		if (upper < min || upper > max)
-        //			throw new IllegalArgumentException("Upper is outside min/max range");
-        //		if (lower < min || lower > max)
-        //			throw new IllegalArgumentException("Lower is outside min/max range");
+  /** {@inheritDoc} */
+  @Override
+  public double getMin() {
+    return min;
+  }
 
-        // Clip to range
-        lower = Math.min(max, Math.max(lower, min));
-        upper = Math.min(max, Math.max(upper, min));
+  /** {@inheritDoc} */
+  @Override
+  public double getMax() {
+    return max;
+  }
 
-        // We round to the min increment so that the values returned should be identical if the centre is moved by a factor of the increment.
-        this.minIncrement = minIncrement;
-        this.min = round(min);
-        this.max = round(max);
-        this.lower = round(lower);
-        this.upper = round(upper);
-    }
-
-    /**
-     * Creates a new fixed dimension, respecting the current min/max and the increment settings. If the current search
-     * dimension is not active then an inactive dimension is returned centred between the lower and upper bounds.
-     *
-     * @param lower
-     *            the lower
-     * @param upper
-     *            the upper
-     * @return the fixed dimension
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#create(double, double)
-     */
-    @Override
-    public FixedDimension create(double lower, double upper)
-    {
-        if (!active)
-            return new FixedDimension((upper + lower) / 2);
-        if (lower < min)
-            lower = min;
-        if (upper > max)
-            upper = max;
-        return new FixedDimension(min, max, minIncrement, lower, upper);
-    }
-
-    /**
-     * Creates a new search dimension, respecting the current settings.
-     *
-     * @param nIncrement
-     *            the number of increments to use around the centre
-     * @return the search dimension
-     */
-    public SearchDimension create(int nIncrement)
-    {
-        if (nIncrement <= 0)
-            // Compute the maximum number of increments to cover the range from the centre
-            nIncrement = (int) Math.ceil(Math.ceil((max - min) / minIncrement) / 2);
-        return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
-    }
-
-    private static boolean isInvalid(double d)
-    {
-        return Double.isNaN(d) || Double.isInfinite(d);
-    }
-
-    /**
-     * Round the value to the nearest min increment. If min increment is zero no rounding is performed.
-     *
-     * @param value
-     *            the value
-     * @return the rounded value
-     */
-    @Override
-    public double round(double value)
-    {
-        if (canRound())
-            return MathUtils.round(value, minIncrement);
-        return value;
-    }
-
-    /**
-     * If the dimension is not active or min increment is zero no rounding is performed.
-     *
-     * @return true, if successful
-     * @see uk.ac.sussex.gdsc.smlm.search.Dimension#canRound()
-     */
-    @Override
-    public boolean canRound()
-    {
-        return (active && minIncrement != 0);
-    }
-
-    /**
-     * Gets the centre of the range in the dimension.
-     *
-     * @return the centre of the range in the dimension
-     */
-    @Override
-    public double getCentre()
-    {
-        return round((upper + lower) / 2);
-    }
-
-    /**
-     * Gets the current lower bound of the range.
-     *
-     * @return the current lower bound of the range
-     */
-    @Override
-    public double getLower()
-    {
-        return lower;
-    }
-
-    /**
-     * Gets the current upper bound of the range.
-     *
-     * @return the current upper bound of the range
-     */
-    @Override
-    public double getUpper()
-    {
-        return upper;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isAtBounds(double v)
-    {
-        return (v <= lower || v >= upper);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public FixedDimension clone()
-    {
-        try
-        {
-            return (FixedDimension) super.clone();
-        }
-        catch (final CloneNotSupportedException e)
-        {
-            return null;
-        }
-
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getMin()
-    {
-        return min;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public double getMax()
-    {
-        return max;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isActive()
-    {
-        return active;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isActive() {
+    return active;
+  }
 }

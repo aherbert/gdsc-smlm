@@ -57,338 +57,317 @@ import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in
  * /uk/ac/sussex/gdsc/smlm/plugins.config. Also add these commands to the plugins menu.
  */
-public class SMLMTools extends PlugInFrame implements ActionListener
-{
-    private static final long serialVersionUID = -5457127382849923056L;
-    private static final String TITLE = "GDSC SMLM ImageJ Plugins";
-    private static final String OPT_LOCATION = "SMLM_Plugins.location";
+public class SMLMTools extends PlugInFrame implements ActionListener {
+  private static final long serialVersionUID = -5457127382849923056L;
+  private static final String TITLE = "GDSC SMLM ImageJ Plugins";
+  private static final String OPT_LOCATION = "SMLM_Plugins.location";
 
-    private static PlugInFrame instance;
+  private static PlugInFrame instance;
 
-    // Store the screen dimension
-    private static Dimension screenDimension;
-    static
-    {
-        screenDimension = IJ.getScreenSize();
+  // Store the screen dimension
+  private static Dimension screenDimension;
+  static {
+    screenDimension = IJ.getScreenSize();
+  }
+
+  private final HashMap<String, String[]> plugins = new HashMap<>();
+  private boolean addSpacer = false;
+
+  /**
+   * Constructor. <p> Create a frame showing all the available plugins within the user
+   * [ImageJ]/plugins/smlm.config file or the default /uk/ac/sussex/gdsc/smlm/plugins.config file.
+   */
+  public SMLMTools() {
+    super(TITLE);
+
+    // Only allow one instance to run
+    if (isFrameVisible()) {
+      if (!(instance.getTitle().equals(getTitle()))) {
+        closeFrame();
+      } else {
+        instance.toFront();
+        return;
+      }
     }
 
-    private final HashMap<String, String[]> plugins = new HashMap<>();
-    private boolean addSpacer = false;
-
-    /**
-     * Constructor.
-     * <p>
-     * Create a frame showing all the available plugins within the user [ImageJ]/plugins/smlm.config file or the default
-     * /uk/ac/sussex/gdsc/smlm/plugins.config file.
-     */
-    public SMLMTools()
-    {
-        super(TITLE);
-
-        // Only allow one instance to run
-        if (isFrameVisible())
-            if (!(instance.getTitle().equals(getTitle())))
-                closeFrame();
-            else
-            {
-                instance.toFront();
-                return;
-            }
-
-        if (!createFrame())
-            return;
-
-        instance = this;
-        WindowManager.addWindow(this);
-
-        pack();
-        final Point loc = Prefs.getLocation(OPT_LOCATION);
-        if (loc != null)
-            setLocation(loc);
-        else
-            GUI.center(this);
-        if (IJ.isMacOSX())
-            setResizable(false);
-        setVisible(true);
+    if (!createFrame()) {
+      return;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void windowClosing(WindowEvent e)
-    {
-        Prefs.saveLocation(OPT_LOCATION, getLocation());
-        instance = null;
-        close();
+    instance = this;
+    WindowManager.addWindow(this);
+
+    pack();
+    final Point loc = Prefs.getLocation(OPT_LOCATION);
+    if (loc != null) {
+      setLocation(loc);
+    } else {
+      GUI.center(this);
     }
-
-    /**
-     * @return True if the instance of the SMLM Tools Frame is visible.
-     */
-    public static boolean isFrameVisible()
-    {
-        return (instance != null && instance.isVisible());
+    if (IJ.isMacOSX()) {
+      setResizable(false);
     }
+    setVisible(true);
+  }
 
-    /**
-     * Close the instance of the SMLM Tools Frame.
-     */
-    public static void closeFrame()
-    {
-        if (instance != null)
-        {
-            Prefs.saveLocation(OPT_LOCATION, instance.getLocation());
-            instance.close();
-            instance = null;
-        }
+  /** {@inheritDoc} */
+  @Override
+  public void windowClosing(WindowEvent e) {
+    Prefs.saveLocation(OPT_LOCATION, getLocation());
+    instance = null;
+    close();
+  }
+
+  /**
+   * @return True if the instance of the SMLM Tools Frame is visible.
+   */
+  public static boolean isFrameVisible() {
+    return (instance != null && instance.isVisible());
+  }
+
+  /**
+   * Close the instance of the SMLM Tools Frame.
+   */
+  public static void closeFrame() {
+    if (instance != null) {
+      Prefs.saveLocation(OPT_LOCATION, instance.getLocation());
+      instance.close();
+      instance = null;
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void run(String arg)
-    {
-        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+  /** {@inheritDoc} */
+  @Override
+  public void run(String arg) {
+    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        // Do nothing. The frame has been created and the buttons run the plugins.
-    }
+    // Do nothing. The frame has been created and the buttons run the plugins.
+  }
 
-    private boolean createFrame()
-    {
-        final ArrayList<String[]> plugins = new ArrayList<>();
+  private boolean createFrame() {
+    final ArrayList<String[]> plugins = new ArrayList<>();
 
-        // Locate all the GDSC SMLM plugins using the plugins.config:
-        try (InputStream readmeStream = getToolsPluginsConfig())
-        {
-            // Read into memory
-            int gaps = 0;
-            try (BufferedReader input = new BufferedReader(new UnicodeReader(readmeStream, null)))
-            {
-                String line;
-                while ((line = input.readLine()) != null)
-                {
-                    if (line.startsWith("#"))
-                        continue;
-                    final String[] tokens = line.split(",");
-                    if (tokens.length == 3)
-                    {
-                        // Only copy the entries from the Plugins menu
-                        if (!ignore(tokens))
-                        {
-                            if (!plugins.isEmpty())
-                                // Multiple gaps indicates a new column
-                                if (gaps > 1)
-                                    plugins.add(new String[] { "next", "" });
-                            gaps = 0;
-                            plugins.add(new String[] { tokens[1].trim(), tokens[2].trim() });
-                        }
-                    }
-                    else
-                        gaps++;
-
-                    // Put a spacer between plugins if specified
-                    if ((tokens.length == 2 && tokens[0].startsWith("Plugins") && tokens[1].trim().equals("\"-\"")) ||
-                            line.length() == 0)
-                        plugins.add(new String[] { "spacer", "" });
+    // Locate all the GDSC SMLM plugins using the plugins.config:
+    try (InputStream readmeStream = getToolsPluginsConfig()) {
+      // Read into memory
+      int gaps = 0;
+      try (BufferedReader input = new BufferedReader(new UnicodeReader(readmeStream, null))) {
+        String line;
+        while ((line = input.readLine()) != null) {
+          if (line.startsWith("#")) {
+            continue;
+          }
+          final String[] tokens = line.split(",");
+          if (tokens.length == 3) {
+            // Only copy the entries from the Plugins menu
+            if (!ignore(tokens)) {
+              if (!plugins.isEmpty()) {
+                // Multiple gaps indicates a new column
+                if (gaps > 1) {
+                  plugins.add(new String[] {"next", ""});
                 }
+              }
+              gaps = 0;
+              plugins.add(new String[] {tokens[1].trim(), tokens[2].trim()});
             }
+          } else {
+            gaps++;
+          }
+
+          // Put a spacer between plugins if specified
+          if ((tokens.length == 2 && tokens[0].startsWith("Plugins")
+              && tokens[1].trim().equals("\"-\"")) || line.length() == 0) {
+            plugins.add(new String[] {"spacer", ""});
+          }
         }
-        catch (final IOException e)
-        {
-            // Ignore
+      }
+    } catch (final IOException e) {
+      // Ignore
+    }
+
+    if (plugins.isEmpty()) {
+      return false;
+    }
+
+    // Put a spacer on the menu
+    ij.Menus.installPlugin("", ij.Menus.PLUGINS_MENU, "-", "", IJ.getInstance());
+
+    // Arrange on a grid.
+    final Panel mainPanel = new Panel();
+    final GridBagLayout grid = new GridBagLayout();
+
+    mainPanel.setLayout(grid);
+
+    addSpacer = false;
+    int col = 0, row = 0;
+    for (final String[] plugin : plugins) {
+      if (plugin[0].equals("next")) {
+        col++;
+        row = 0;
+      } else if (plugin[0].equals("spacer")) {
+        addSpacer = true;
+      } else {
+        row = addPlugin(mainPanel, grid, plugin[0], plugin[1], col, row);
+      }
+    }
+
+    // Allow scrollbars to handle small screens.
+    // Appropriately size the scrollpane from the default of 100x100.
+    // The preferred size is only obtained if the panel is packed.
+    add(mainPanel);
+    pack();
+    final Dimension d = mainPanel.getPreferredSize();
+    remove(0); // Assume this is the only component
+
+    final ScrollPane scroll = new ScrollPane();
+    scroll.getHAdjustable().setUnitIncrement(16);
+    scroll.getVAdjustable().setUnitIncrement(16);
+    scroll.add(mainPanel);
+    add(scroll, BorderLayout.CENTER);
+
+    // Scale to the screen size
+    d.width = Math.min(d.width, screenDimension.width - 100);
+    d.height = Math.min(d.height, screenDimension.height - 150);
+
+    final Insets insets = scroll.getInsets();
+    d.width += insets.left + insets.right;
+    d.height += insets.top + insets.bottom;
+
+    if (IJ.isMacintosh()) {
+      // This is needed as the OSX scroll pane adds scrollbars when the panel
+      // is close in size to the scroll pane
+      final int padding = 15;
+      d.width += padding;
+      d.height += padding;
+    }
+
+    scroll.setPreferredSize(d);
+    scroll.setSize(d);
+
+    return true;
+  }
+
+  /**
+   * Selectively ignore certain plugins.
+   *
+   * @param tokens The tokens from the plugins.config file
+   * @return true if the plugin should be ignored
+   */
+  private static boolean ignore(String[] tokens) {
+    // Only copy the entries from the Plugins menu
+    if (!tokens[0].startsWith("Plugins")) {
+      return true;
+    }
+
+    // This plugin cannot be run unless in a macro
+    if (tokens[1].contains("SMLM Macro Extensions")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private static InputStream getToolsPluginsConfig() {
+    // Look for smlm.config in the plugin directory
+    final String pluginsDir = IJ.getDirectory("plugins");
+    final String filename = pluginsDir + File.separator + "smlm.config";
+    if (new File(filename).exists()) {
+      try {
+        return new FileInputStream(filename);
+      } catch (final FileNotFoundException e) {
+        // Ignore and resort to default
+      }
+    }
+
+    // Fall back to the embedded config in the jar file
+    return getPluginsConfig();
+  }
+
+  /**
+   * Gets the plugins.config embedded in the jar.
+   *
+   * @return the plugins config
+   */
+  public static InputStream getPluginsConfig() {
+    // Get the embedded config in the jar file
+    final Class<SMLMTools> resourceClass = SMLMTools.class;
+    final InputStream readmeStream =
+        resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/plugins.config");
+    return readmeStream;
+  }
+
+  private int addPlugin(Panel mainPanel, GridBagLayout grid, String commandName,
+      final String command, int col, int row) {
+    // Disect the ImageJ plugins.config string, e.g.:
+    // Plugins>GDSC SMLM, "Peak Fit", uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit
+
+    commandName = commandName.replaceAll("\"", "");
+    final Button button = new Button(commandName);
+    String className = command;
+    String arg = "";
+    final int index = command.indexOf('(');
+    if (index > 0) {
+      className = command.substring(0, index);
+      final int argStart = command.indexOf('"');
+      if (argStart > 0) {
+        final int argEnd = command.lastIndexOf('"');
+        arg = command.substring(argStart + 1, argEnd);
+      }
+    }
+
+    // Add to Plugins menu so that the macros/toolset will work
+    if (!ij.Menus.commandInUse(commandName)) {
+      if (addSpacer) {
+        try {
+          ij.Menus.getImageJMenu("Plugins").addSeparator();
+        } catch (final NoSuchMethodError e) {
+          // Ignore. This ImageJ method is from IJ 1.48+
         }
-
-        if (plugins.isEmpty())
-            return false;
-
-        // Put a spacer on the menu
-        ij.Menus.installPlugin("", ij.Menus.PLUGINS_MENU, "-", "", IJ.getInstance());
-
-        // Arrange on a grid.
-        final Panel mainPanel = new Panel();
-        final GridBagLayout grid = new GridBagLayout();
-
-        mainPanel.setLayout(grid);
-
-        addSpacer = false;
-        int col = 0, row = 0;
-        for (final String[] plugin : plugins)
-            if (plugin[0].equals("next"))
-            {
-                col++;
-                row = 0;
-            }
-            else if (plugin[0].equals("spacer"))
-                addSpacer = true;
-            else
-                row = addPlugin(mainPanel, grid, plugin[0], plugin[1], col, row);
-
-        // Allow scrollbars to handle small screens.
-        // Appropriately size the scrollpane from the default of 100x100.
-        // The preferred size is only obtained if the panel is packed.
-        add(mainPanel);
-        pack();
-        final Dimension d = mainPanel.getPreferredSize();
-        remove(0); // Assume this is the only component
-
-        final ScrollPane scroll = new ScrollPane();
-        scroll.getHAdjustable().setUnitIncrement(16);
-        scroll.getVAdjustable().setUnitIncrement(16);
-        scroll.add(mainPanel);
-        add(scroll, BorderLayout.CENTER);
-
-        // Scale to the screen size
-        d.width = Math.min(d.width, screenDimension.width - 100);
-        d.height = Math.min(d.height, screenDimension.height - 150);
-
-        final Insets insets = scroll.getInsets();
-        d.width += insets.left + insets.right;
-        d.height += insets.top + insets.bottom;
-
-        if (IJ.isMacintosh())
-        {
-            // This is needed as the OSX scroll pane adds scrollbars when the panel
-            // is close in size to the scroll pane
-            final int padding = 15;
-            d.width += padding;
-            d.height += padding;
-        }
-
-        scroll.setPreferredSize(d);
-        scroll.setSize(d);
-
-        return true;
+      }
+      ij.Menus.installPlugin(command, ij.Menus.PLUGINS_MENU, commandName, "", IJ.getInstance());
     }
 
-    /**
-     * Selectively ignore certain plugins.
-     *
-     * @param tokens
-     *            The tokens from the plugins.config file
-     * @return true if the plugin should be ignored
-     */
-    private static boolean ignore(String[] tokens)
-    {
-        // Only copy the entries from the Plugins menu
-        if (!tokens[0].startsWith("Plugins"))
-            return true;
+    // Store the command to be invoked when the button is clicked
+    plugins.put(commandName, new String[] {className, arg});
+    button.addActionListener(this);
 
-        // This plugin cannot be run unless in a macro
-        if (tokens[1].contains("SMLM Macro Extensions"))
-            return true;
-
-        return false;
+    if (addSpacer) {
+      addSpacer = false;
+      if (row != 0) {
+        row = add(mainPanel, grid, new Panel(), col, row);
+      }
     }
 
-    private static InputStream getToolsPluginsConfig()
-    {
-        // Look for smlm.config in the plugin directory
-        final String pluginsDir = IJ.getDirectory("plugins");
-        final String filename = pluginsDir + File.separator + "smlm.config";
-        if (new File(filename).exists())
-            try
-            {
-                return new FileInputStream(filename);
-            }
-            catch (final FileNotFoundException e)
-            {
-                // Ignore and resort to default
-            }
+    row = add(mainPanel, grid, button, col, row);
 
-        // Fall back to the embedded config in the jar file
-        return getPluginsConfig();
+    return row;
+  }
+
+  private static int add(Panel mainPanel, GridBagLayout grid, Component comp, int col, int row) {
+    final GridBagConstraints c = new GridBagConstraints();
+    c.gridx = col;
+    c.gridy = row++;
+    c.fill = GridBagConstraints.BOTH;
+    if (col > 0) {
+      c.insets.left = 10;
     }
+    grid.setConstraints(comp, c);
+    mainPanel.add(comp);
+    return row;
+  }
 
-    /**
-     * Gets the plugins.config embedded in the jar.
-     *
-     * @return the plugins config
-     */
-    public static InputStream getPluginsConfig()
-    {
-        // Get the embedded config in the jar file
-        final Class<SMLMTools> resourceClass = SMLMTools.class;
-        final InputStream readmeStream = resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/plugins.config");
-        return readmeStream;
-    }
+  @SuppressWarnings("unused")
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // Get the plugin from the button label and run it
+    final Button button = (Button) e.getSource();
+    final String commandName = button.getLabel();
 
-    private int addPlugin(Panel mainPanel, GridBagLayout grid, String commandName, final String command, int col,
-            int row)
-    {
-        // Disect the ImageJ plugins.config string, e.g.:
-        // Plugins>GDSC SMLM, "Peak Fit", uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit
+    // String[] args = plugins.get(commandName);
+    // IJ.runPlugIn(commandName, args[0], args[1]); // Only in IJ 1.47+
+    // IJ.runPlugIn(args[0], args[1]);
 
-        commandName = commandName.replaceAll("\"", "");
-        final Button button = new Button(commandName);
-        String className = command;
-        String arg = "";
-        final int index = command.indexOf('(');
-        if (index > 0)
-        {
-            className = command.substring(0, index);
-            final int argStart = command.indexOf('"');
-            if (argStart > 0)
-            {
-                final int argEnd = command.lastIndexOf('"');
-                arg = command.substring(argStart + 1, argEnd);
-            }
-        }
-
-        // Add to Plugins menu so that the macros/toolset will work
-        if (!ij.Menus.commandInUse(commandName))
-        {
-            if (addSpacer)
-                try
-                {
-                    ij.Menus.getImageJMenu("Plugins").addSeparator();
-                }
-                catch (final NoSuchMethodError e)
-                {
-                    // Ignore. This ImageJ method is from IJ 1.48+
-                }
-            ij.Menus.installPlugin(command, ij.Menus.PLUGINS_MENU, commandName, "", IJ.getInstance());
-        }
-
-        // Store the command to be invoked when the button is clicked
-        plugins.put(commandName, new String[] { className, arg });
-        button.addActionListener(this);
-
-        if (addSpacer)
-        {
-            addSpacer = false;
-            if (row != 0)
-                row = add(mainPanel, grid, new Panel(), col, row);
-        }
-
-        row = add(mainPanel, grid, button, col, row);
-
-        return row;
-    }
-
-    private static int add(Panel mainPanel, GridBagLayout grid, Component comp, int col, int row)
-    {
-        final GridBagConstraints c = new GridBagConstraints();
-        c.gridx = col;
-        c.gridy = row++;
-        c.fill = GridBagConstraints.BOTH;
-        if (col > 0)
-            c.insets.left = 10;
-        grid.setConstraints(comp, c);
-        mainPanel.add(comp);
-        return row;
-    }
-
-    @SuppressWarnings("unused")
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-        // Get the plugin from the button label and run it
-        final Button button = (Button) e.getSource();
-        final String commandName = button.getLabel();
-
-        //String[] args = plugins.get(commandName);
-        //IJ.runPlugIn(commandName, args[0], args[1]); // Only in IJ 1.47+
-        //IJ.runPlugIn(args[0], args[1]);
-
-        // Use the IJ executer to run in a background thread
-        new Executer(commandName, null);
-    }
+    // Use the IJ executer to run in a background thread
+    new Executer(commandName, null);
+  }
 }

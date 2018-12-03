@@ -23,73 +23,61 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-@SuppressWarnings({ "javadoc" })
-public class DummyGradientFunction implements Gradient1Function, Gradient2Function
-{
-    int n;
+@SuppressWarnings({"javadoc"})
+public class DummyGradientFunction implements Gradient1Function, Gradient2Function {
+  int n;
 
-    public DummyGradientFunction(int n)
-    {
-        this.n = n;
-    }
+  public DummyGradientFunction(int n) {
+    this.n = n;
+  }
 
-    @Override
-    public int size()
-    {
-        return 0;
-    }
+  @Override
+  public int size() {
+    return 0;
+  }
 
-    @Override
-    public void initialise0(double[] a)
-    {
-        // Ignore
-    }
+  @Override
+  public void initialise0(double[] a) {
+    // Ignore
+  }
 
-    @Override
-    public void initialise1(double[] a)
-    {
-        // Ignore
-    }
+  @Override
+  public void initialise1(double[] a) {
+    // Ignore
+  }
 
-    @Override
-    public void initialise2(double[] a)
-    {
-        // Ignore
-    }
+  @Override
+  public void initialise2(double[] a) {
+    // Ignore
+  }
 
-    @Override
-    public int[] gradientIndices()
-    {
-        return null;
-    }
+  @Override
+  public int[] gradientIndices() {
+    return null;
+  }
 
-    @Override
-    public int getNumberOfGradients()
-    {
-        return n;
-    }
+  @Override
+  public int getNumberOfGradients() {
+    return n;
+  }
 
-    @Override
-    public void forEach(ValueProcedure procedure)
-    {
-        // Ignore
-    }
+  @Override
+  public void forEach(ValueProcedure procedure) {
+    // Ignore
+  }
 
-    @Override
-    public void forEach(Gradient1Procedure procedure)
-    {
-        // Ignore
-    }
+  @Override
+  public void forEach(Gradient1Procedure procedure) {
+    // Ignore
+  }
 
-    @Override
-    public void forEach(Gradient2Procedure procedure)
-    {
-        // Ignore
-    }
+  @Override
+  public void forEach(Gradient2Procedure procedure) {
+    // Ignore
+  }
 
-    @Override
-    public void initialise(double[] a)
-    {
-        // Ignore
-    }
+  @Override
+  public void initialise(double[] a) {
+    // Ignore
+  }
 }

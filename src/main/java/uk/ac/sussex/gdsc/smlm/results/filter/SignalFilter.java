@@ -32,179 +32,154 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Filter results using a signal threshold.
  */
-public class SignalFilter extends DirectFilter implements IMultiFilter
-{
-    /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    public static final double DEFAULT_INCREMENT = 5;
-    /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-    public static final double DEFAULT_RANGE = 30;
+public class SignalFilter extends DirectFilter implements IMultiFilter {
+  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  public static final double DEFAULT_INCREMENT = 5;
+  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  public static final double DEFAULT_RANGE = 30;
 
-    @XStreamAsAttribute
-    private final double signal;
-    @XStreamOmitField
-    private float signalThreshold;
+  @XStreamAsAttribute
+  private final double signal;
+  @XStreamOmitField
+  private float signalThreshold;
 
-    /**
-     * Instantiates a new signal filter.
-     *
-     * @param signal
-     *            the signal
-     */
-    public SignalFilter(double signal)
-    {
-        this.signal = Math.max(0, signal);
+  /**
+   * Instantiates a new signal filter.
+   *
+   * @param signal the signal
+   */
+  public SignalFilter(double signal) {
+    this.signal = Math.max(0, signal);
+  }
+
+  @Override
+  public void setup(MemoryPeakResults peakResults) {
+    // Set the signal limit using the gain
+    signalThreshold = (float) (signal * peakResults.getGain());
+  }
+
+  @Override
+  public boolean accept(PeakResult peak) {
+    return peak.getIntensity() >= signalThreshold;
+  }
+
+  @Override
+  public int getValidationFlags() {
+    return V_PHOTONS;
+  }
+
+  @Override
+  public int validate(final PreprocessedPeakResult peak) {
+    if (peak.getSignal() < signal) {
+      return V_PHOTONS;
     }
+    return 0;
+  }
 
-    @Override
-    public void setup(MemoryPeakResults peakResults)
-    {
-        // Set the signal limit using the gain
-        signalThreshold = (float) (signal * peakResults.getGain());
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getDescription() {
+    return "Filter results using a lower signal threshold. The threshold is applied in photons (i.e. the signal is divided by the calibrated gain).";
+  }
 
-    @Override
-    public boolean accept(PeakResult peak)
-    {
-        return peak.getIntensity() >= signalThreshold;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfParameters() {
+    return 1;
+  }
 
-    @Override
-    public int getValidationFlags()
-    {
-        return V_PHOTONS;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected double getParameterValueInternal(int index) {
+    return signal;
+  }
 
-    @Override
-    public int validate(final PreprocessedPeakResult peak)
-    {
-        if (peak.getSignal() < signal)
-            return V_PHOTONS;
-        return 0;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double getParameterIncrement(int index) {
+    checkIndex(index);
+    return SignalFilter.DEFAULT_INCREMENT;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getDescription()
-    {
-        return "Filter results using a lower signal threshold. The threshold is applied in photons (i.e. the signal is divided by the calibrated gain).";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public ParameterType getParameterType(int index) {
+    checkIndex(index);
+    return ParameterType.SIGNAL;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfParameters()
-    {
-        return 1;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter adjustParameter(int index, double delta) {
+    checkIndex(index);
+    return new SignalFilter(updateParameter(signal, delta, DEFAULT_RANGE));
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected double getParameterValueInternal(int index)
-    {
-        return signal;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Filter create(double... parameters) {
+    return new SignalFilter(parameters[0]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double getParameterIncrement(int index)
-    {
-        checkIndex(index);
-        return SignalFilter.DEFAULT_INCREMENT;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void weakestParameters(double[] parameters) {
+    setMin(parameters, 0, signal);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public ParameterType getParameterType(int index)
-    {
-        checkIndex(index);
-        return ParameterType.SIGNAL;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] mutationStepRange() {
+    return new double[] {DEFAULT_RANGE};
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter adjustParameter(int index, double delta)
-    {
-        checkIndex(index);
-        return new SignalFilter(updateParameter(signal, delta, DEFAULT_RANGE));
-    }
+  @Override
+  public double getSignal() {
+    return signal;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Filter create(double... parameters)
-    {
-        return new SignalFilter(parameters[0]);
-    }
+  @Override
+  public double getSNR() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void weakestParameters(double[] parameters)
-    {
-        setMin(parameters, 0, signal);
-    }
+  @Override
+  public double getMinWidth() {
+    return 0;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double[] mutationStepRange()
-    {
-        return new double[] { DEFAULT_RANGE };
-    }
+  @Override
+  public double getMaxWidth() {
+    return 0;
+  }
 
-    @Override
-    public double getSignal()
-    {
-        return signal;
-    }
+  @Override
+  public double getShift() {
+    return 0;
+  }
 
-    @Override
-    public double getSNR()
-    {
-        return 0;
-    }
+  @Override
+  public double getEShift() {
+    return 0;
+  }
 
-    @Override
-    public double getMinWidth()
-    {
-        return 0;
-    }
+  @Override
+  public double getPrecision() {
+    return 0;
+  }
 
-    @Override
-    public double getMaxWidth()
-    {
-        return 0;
-    }
+  @Override
+  public PrecisionType getPrecisionType() {
+    return PrecisionType.NONE;
+  }
 
-    @Override
-    public double getShift()
-    {
-        return 0;
-    }
+  @Override
+  public double getMinZ() {
+    return 0;
+  }
 
-    @Override
-    public double getEShift()
-    {
-        return 0;
-    }
-
-    @Override
-    public double getPrecision()
-    {
-        return 0;
-    }
-
-    @Override
-    public PrecisionType getPrecisionType()
-    {
-        return PrecisionType.NONE;
-    }
-
-    @Override
-    public double getMinZ()
-    {
-        return 0;
-    }
-
-    @Override
-    public double getMaxZ()
-    {
-        return 0;
-    }
+  @Override
+  public double getMaxZ() {
+    return 0;
+  }
 }

@@ -26,101 +26,89 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Wrap a function and store the values from the procedure.
  */
-public class Gradient1FunctionStore extends ValueFunctionStore implements Gradient1Function, Gradient1Procedure
-{
-    private final Gradient1Function f;
-    private Gradient1Procedure procedure;
+public class Gradient1FunctionStore extends ValueFunctionStore
+    implements Gradient1Function, Gradient1Procedure {
+  private final Gradient1Function f;
+  private Gradient1Procedure procedure;
 
-    /** The number of gradients. */
-    protected final int length;
+  /** The number of gradients. */
+  protected final int length;
 
-    /** The gradients from the last call to {@link #forEach(Gradient1Procedure)}. */
-    public double[][] dyda;
+  /** The gradients from the last call to {@link #forEach(Gradient1Procedure)}. */
+  public double[][] dyda;
 
-    /**
-     * Instantiates a new gradient 1 function store.
-     *
-     * @param f
-     *            the f
-     */
-    public Gradient1FunctionStore(Gradient1Function f)
-    {
-        this(f, null, null);
+  /**
+   * Instantiates a new gradient 1 function store.
+   *
+   * @param f the f
+   */
+  public Gradient1FunctionStore(Gradient1Function f) {
+    this(f, null, null);
+  }
+
+  /**
+   * Instantiates a new gradient 1 function store with storage.
+   *
+   * @param f the f
+   * @param values the values
+   * @param dyda the dyda
+   */
+  public Gradient1FunctionStore(Gradient1Function f, double[] values, double[][] dyda) {
+    super(f, values);
+    this.f = f;
+    this.dyda = dyda;
+    length = f.getNumberOfGradients();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void initialise(double[] a) {
+    f.initialise(a);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void initialise1(double[] a) {
+    f.initialise(a);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int[] gradientIndices() {
+    return f.gradientIndices();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int getNumberOfGradients() {
+    return f.getNumberOfGradients();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void forEach(Gradient1Procedure procedure) {
+    i = 0;
+    createValues();
+    createDYDA();
+    this.procedure = procedure;
+    f.forEach((Gradient1Procedure) this);
+  }
+
+  /**
+   * Creates the {@link #dyda} matrix.
+   */
+  protected void createDYDA() {
+    if (dyda == null || dyda.length != f.size()) {
+      dyda = new double[values.length][length];
     }
+  }
 
-    /**
-     * Instantiates a new gradient 1 function store with storage.
-     *
-     * @param f
-     *            the f
-     * @param values
-     *            the values
-     * @param dyda
-     *            the dyda
-     */
-    public Gradient1FunctionStore(Gradient1Function f, double[] values, double[][] dyda)
-    {
-        super(f, values);
-        this.f = f;
-        this.dyda = dyda;
-        length = f.getNumberOfGradients();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void initialise(double[] a)
-    {
-        f.initialise(a);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void initialise1(double[] a)
-    {
-        f.initialise(a);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int[] gradientIndices()
-    {
-        return f.gradientIndices();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getNumberOfGradients()
-    {
-        return f.getNumberOfGradients();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void forEach(Gradient1Procedure procedure)
-    {
-        i = 0;
-        createValues();
-        createDYDA();
-        this.procedure = procedure;
-        f.forEach((Gradient1Procedure) this);
-    }
-
-    /**
-     * Creates the {@link #dyda} matrix.
-     */
-    protected void createDYDA()
-    {
-        if (dyda == null || dyda.length != f.size())
-            dyda = new double[values.length][length];
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void execute(double value, double[] dy_da)
-    {
-        values[i] = value;
-        System.arraycopy(dy_da[i], 0, dyda[i], 0, length);
-        i++;
-        procedure.execute(value, dy_da);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value, double[] dy_da) {
+    values[i] = value;
+    System.arraycopy(dy_da[i], 0, dyda[i], 0, length);
+    i++;
+    procedure.execute(value, dy_da);
+  }
 }

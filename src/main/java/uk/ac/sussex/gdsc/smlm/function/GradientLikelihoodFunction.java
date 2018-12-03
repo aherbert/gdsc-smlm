@@ -26,21 +26,16 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Provides functions to compute the gradient of the likelihood for a univariate distribution.
  */
-public interface GradientLikelihoodFunction extends LikelihoodFunction
-{
-    /**
-     * Compute the likelihood of an observation x given a parameter value theta.
-     * <p>
-     * This is the probability mass function P(X=x|θ) or the probability density function f(x|θ) depending on parameter
-     * θ.
-     *
-     * @param o
-     *            The observed value (x)
-     * @param t
-     *            The parameter value (θ)
-     * @param dp_dt
-     *            the gradient d P(X=x|θ) dθ
-     * @return The likelihood
-     */
-    public double likelihood(final double o, final double t, final double[] dp_dt);
+public interface GradientLikelihoodFunction extends LikelihoodFunction {
+  /**
+   * Compute the likelihood of an observation x given a parameter value theta. <p> This is the
+   * probability mass function P(X=x|θ) or the probability density function f(x|θ) depending on
+   * parameter θ.
+   *
+   * @param o The observed value (x)
+   * @param t The parameter value (θ)
+   * @param dp_dt the gradient d P(X=x|θ) dθ
+   * @return The likelihood
+   */
+  public double likelihood(final double o, final double t, final double[] dp_dt);
 }

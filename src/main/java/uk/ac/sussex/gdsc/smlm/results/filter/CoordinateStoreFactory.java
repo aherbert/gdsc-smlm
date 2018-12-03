@@ -26,61 +26,52 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Creates a coordinate store.
  */
-public class CoordinateStoreFactory
-{
-    /**
-     * Creates the coordinate store.
-     *
-     * @param minx
-     *            the min x coordinate value
-     * @param miny
-     *            the min y coordinate value
-     * @param width
-     *            the width
-     * @param height
-     *            the height
-     * @param xyResolution
-     *            the xy resolution (if negative then nothing is stored)
-     * @return the coordinate store
-     * @deprecated The z resolution should be specified using {@link #create(int, int, int, int, double, double)}
-     */
-    @Deprecated
-    public static CoordinateStore create(int minx, int miny, int width, int height, double xyResolution)
-    {
-        return create(minx, miny, width, height, xyResolution, -1);
+public class CoordinateStoreFactory {
+  /**
+   * Creates the coordinate store.
+   *
+   * @param minx the min x coordinate value
+   * @param miny the min y coordinate value
+   * @param width the width
+   * @param height the height
+   * @param xyResolution the xy resolution (if negative then nothing is stored)
+   * @return the coordinate store
+   * @deprecated The z resolution should be specified using
+   *             {@link #create(int, int, int, int, double, double)}
+   */
+  @Deprecated
+  public static CoordinateStore create(int minx, int miny, int width, int height,
+      double xyResolution) {
+    return create(minx, miny, width, height, xyResolution, -1);
+  }
+
+  /**
+   * Creates the coordinate store.
+   *
+   * @param minx the min x coordinate value
+   * @param miny the min y coordinate value
+   * @param width the width
+   * @param height the height
+   * @param xyResolution the xy resolution (if negative then nothing is stored)
+   * @param zResolution the z resolution (if negative then this is ignored and the store behaves as
+   *        if processing 2D coordinates)
+   * @return the coordinate store
+   */
+  public static CoordinateStore create(int minx, int miny, int width, int height,
+      double xyResolution, double zResolution) {
+    if (xyResolution < 0) {
+      return NullCoordinateStore.INSTANCE;
     }
 
-    /**
-     * Creates the coordinate store.
-     *
-     * @param minx
-     *            the min x coordinate value
-     * @param miny
-     *            the min y coordinate value
-     * @param width
-     *            the width
-     * @param height
-     *            the height
-     * @param xyResolution
-     *            the xy resolution (if negative then nothing is stored)
-     * @param zResolution
-     *            the z resolution (if negative then this is ignored and the store behaves as if processing 2D
-     *            coordinates)
-     * @return the coordinate store
-     */
-    public static CoordinateStore create(int minx, int miny, int width, int height, double xyResolution,
-            double zResolution)
-    {
-        if (xyResolution < 0)
-            return NullCoordinateStore.INSTANCE;
-
-        // This should be faster (for additions and block lookup) as it has a fixed block resolution of 1.
-        // However it may be slower if the distance is much lower than 1 and there are many points close
-        // to the resolution distance as it will have to compute the distance for each. As a compromise
-        // we only use it when the resolution is above the min block size of the default store.
-        if (xyResolution >= GridCoordinateStore.MINIMUM_BLOCK_SIZE && xyResolution <= 1)
-            return new GridCoordinateStore1(minx, miny, width, height, xyResolution, zResolution);
-
-        return new GridCoordinateStore(minx, miny, width, height, xyResolution, zResolution);
+    // This should be faster (for additions and block lookup) as it has a fixed block resolution of
+    // 1.
+    // However it may be slower if the distance is much lower than 1 and there are many points close
+    // to the resolution distance as it will have to compute the distance for each. As a compromise
+    // we only use it when the resolution is above the min block size of the default store.
+    if (xyResolution >= GridCoordinateStore.MINIMUM_BLOCK_SIZE && xyResolution <= 1) {
+      return new GridCoordinateStore1(minx, miny, width, height, xyResolution, zResolution);
     }
+
+    return new GridCoordinateStore(minx, miny, width, height, xyResolution, zResolution);
+  }
 }

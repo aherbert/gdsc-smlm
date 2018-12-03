@@ -36,14 +36,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Assertions;
 
-@SuppressWarnings({ "javadoc" })
-public class ChiSquaredDistributionTableTest
-{
-    // Taken from:
-    // https://en.wikipedia.org/wiki/Chi-squared_distribution#Table_of_.CF.872_values_vs_p-values
-    //@formatter:off
-	double[] p = {0.95,0.90,0.80,0.70,0.50,0.30,0.20,0.10,0.05,0.01,0.001};
-	double[][] chi2 = new double[][] {
+@SuppressWarnings({"javadoc"})
+public class ChiSquaredDistributionTableTest {
+  // Taken from:
+  // https://en.wikipedia.org/wiki/Chi-squared_distribution#Table_of_.CF.872_values_vs_p-values
+  //@formatter:off
+  double[] p = {0.95,0.90,0.80,0.70,0.50,0.30,0.20,0.10,0.05,0.01,0.001};
+  double[][] chi2 = new double[][] {
         {0.004,0.02,0.06,0.15,0.46,1.07,1.64,2.71,3.84,6.64,10.83},
         {0.10,0.21,0.45,0.71,1.39,2.41,3.22,4.60,5.99,9.21,13.82},
         {0.35,0.58,1.01,1.42,2.37,3.66,4.64,6.25,7.82,11.34,16.27},
@@ -54,96 +53,92 @@ public class ChiSquaredDistributionTableTest
         {2.73,3.49,4.59,5.53,7.34,9.52,11.03,13.36,15.51,20.09,26.12},
         {3.32,4.17,5.38,6.39,8.34,10.66,12.24,14.68,16.92,21.67,27.88},
         {3.94,4.87,6.18,7.27,9.34,11.78,13.44,15.99,18.31,23.21,29.59},
-	};
-	//@formatter:on
+  };
+  //@formatter:on
 
-    @SeededTest
-    public void canComputeProbability()
-    {
-        for (final int df : new int[] { 5, 10 })
-        {
-            double o, e, chi = 0;
-            final ChiSquaredDistribution d = new ChiSquaredDistribution(null, df);
+  @SeededTest
+  public void canComputeProbability() {
+    for (final int df : new int[] {5, 10}) {
+      double o, e, chi = 0;
+      final ChiSquaredDistribution d = new ChiSquaredDistribution(null, df);
 
-            o = ChiSquaredDistributionTable.computePValue(chi, df);
-            e = d.cumulativeProbability(chi);
-            Assertions.assertEquals(e, o, 1e-10);
+      o = ChiSquaredDistributionTable.computePValue(chi, df);
+      e = d.cumulativeProbability(chi);
+      Assertions.assertEquals(e, o, 1e-10);
 
-            chi = 1;
-            for (int i = 0; i < 10; i++, chi *= 2)
-            {
-                o = ChiSquaredDistributionTable.computePValue(chi, df);
-                e = d.cumulativeProbability(chi);
-                Assertions.assertEquals(e, o, 1e-10);
+      chi = 1;
+      for (int i = 0; i < 10; i++, chi *= 2) {
+        o = ChiSquaredDistributionTable.computePValue(chi, df);
+        e = d.cumulativeProbability(chi);
+        Assertions.assertEquals(e, o, 1e-10);
 
-                o = ChiSquaredDistributionTable.computeQValue(chi, df);
-                e = 1 - e;
-                Assertions.assertEquals(e, o, 1e-10);
-            }
-        }
+        o = ChiSquaredDistributionTable.computeQValue(chi, df);
+        e = 1 - e;
+        Assertions.assertEquals(e, o, 1e-10);
+      }
     }
+  }
 
-    @SeededTest
-    public void canComputeChiSquared()
-    {
-        // We have to use the transpose of the table
-        final DenseMatrix64F m = new DenseMatrix64F(chi2);
-        CommonOps.transpose(m);
-        final int max = m.numCols;
-        final double[] et = m.data;
-        for (int i = 0, j = 0; i < p.length; i++)
-        {
-            final ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(p[i], max);
-            // Use 1-p as the significance level to get the same critical values
-            final ChiSquaredDistributionTable lowerTable = ChiSquaredDistributionTable.createLowerTailed(1 - p[i], max);
-            for (int df = 1; df <= max; df++)
-            {
-                final double o = upperTable.getCrititalValue(df);
-                final double e = et[j++];
-                //logger.fine(FunctionUtils.getSupplier("p=%.3f,df=%d = %f", p[i], df, o);
-                Assertions.assertEquals(e, o, 1e-2);
+  @SeededTest
+  public void canComputeChiSquared() {
+    // We have to use the transpose of the table
+    final DenseMatrix64F m = new DenseMatrix64F(chi2);
+    CommonOps.transpose(m);
+    final int max = m.numCols;
+    final double[] et = m.data;
+    for (int i = 0, j = 0; i < p.length; i++) {
+      final ChiSquaredDistributionTable upperTable =
+          ChiSquaredDistributionTable.createUpperTailed(p[i], max);
+      // Use 1-p as the significance level to get the same critical values
+      final ChiSquaredDistributionTable lowerTable =
+          ChiSquaredDistributionTable.createLowerTailed(1 - p[i], max);
+      for (int df = 1; df <= max; df++) {
+        final double o = upperTable.getCrititalValue(df);
+        final double e = et[j++];
+        // logger.fine(FunctionUtils.getSupplier("p=%.3f,df=%d = %f", p[i], df, o);
+        Assertions.assertEquals(e, o, 1e-2);
 
-                // The test only stores 2 decimal places so use the computed value to set upper/lower
-                final double upper = o * 1.01;
-                final double lower = o * 0.99;
+        // The test only stores 2 decimal places so use the computed value to set upper/lower
+        final double upper = o * 1.01;
+        final double lower = o * 0.99;
 
-                Assertions.assertTrue(upperTable.reject(upper, df), "Upper did not reject higher");
-                Assertions.assertFalse(upperTable.reject(o, df), "Upper did not reject actual value");
-                Assertions.assertFalse(upperTable.reject(lower, df), "Upper did not accept lower");
+        Assertions.assertTrue(upperTable.reject(upper, df), "Upper did not reject higher");
+        Assertions.assertFalse(upperTable.reject(o, df), "Upper did not reject actual value");
+        Assertions.assertFalse(upperTable.reject(lower, df), "Upper did not accept lower");
 
-                Assertions.assertTrue(lowerTable.reject(lower, df), "Lower did not reject lower");
-                Assertions.assertFalse(lowerTable.reject(o, df), "Lower did not accept actual value");
-                Assertions.assertFalse(lowerTable.reject(upper, df), "Lower did not accept higher");
-            }
-        }
+        Assertions.assertTrue(lowerTable.reject(lower, df), "Lower did not reject lower");
+        Assertions.assertFalse(lowerTable.reject(o, df), "Lower did not accept actual value");
+        Assertions.assertFalse(lowerTable.reject(upper, df), "Lower did not accept higher");
+      }
     }
+  }
 
-    @SeededTest
-    public void canPerformChiSquaredTest(RandomSeed seed)
-    {
-        final RandomDataGenerator rdg = new RandomDataGenerator(
-                new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())));
-        final ChiSquareTest test = new ChiSquareTest();
-        for (final int n : new int[] { 10, 50, 100 })
-        {
-            final double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
-            final long[] l = new long[x.length];
-            for (int i = 0; i < x.length; i++)
-                l[i] = rdg.nextPoisson(x[i]);
-            final double chi2 = test.chiSquare(x, l);
-            final double ep = test.chiSquareTest(x, l);
-            final int df = x.length - 1;
-            final double o = ChiSquaredDistributionTable.computeQValue(chi2, df);
-            Assertions.assertEquals(ep, o, 1e-10);
+  @SeededTest
+  public void canPerformChiSquaredTest(RandomSeed seed) {
+    final RandomDataGenerator rdg =
+        new RandomDataGenerator(new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())));
+    final ChiSquareTest test = new ChiSquareTest();
+    for (final int n : new int[] {10, 50, 100}) {
+      final double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
+      final long[] l = new long[x.length];
+      for (int i = 0; i < x.length; i++) {
+        l[i] = rdg.nextPoisson(x[i]);
+      }
+      final double chi2 = test.chiSquare(x, l);
+      final double ep = test.chiSquareTest(x, l);
+      final int df = x.length - 1;
+      final double o = ChiSquaredDistributionTable.computeQValue(chi2, df);
+      Assertions.assertEquals(ep, o, 1e-10);
 
-            final ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(o, df);
+      final ChiSquaredDistributionTable upperTable =
+          ChiSquaredDistributionTable.createUpperTailed(o, df);
 
-            final double upper = chi2 * 1.01;
-            final double lower = chi2 * 0.99;
+      final double upper = chi2 * 1.01;
+      final double lower = chi2 * 0.99;
 
-            Assertions.assertTrue(upperTable.reject(upper, df), "Upper did not reject higher");
-            Assertions.assertFalse(upperTable.reject(o, df), "Upper did not reject actual value");
-            Assertions.assertFalse(upperTable.reject(lower, df), "Upper did not accept lower");
-        }
+      Assertions.assertTrue(upperTable.reject(upper, df), "Upper did not reject higher");
+      Assertions.assertFalse(upperTable.reject(o, df), "Upper did not reject actual value");
+      Assertions.assertFalse(upperTable.reject(lower, df), "Upper did not accept lower");
     }
+  }
 }

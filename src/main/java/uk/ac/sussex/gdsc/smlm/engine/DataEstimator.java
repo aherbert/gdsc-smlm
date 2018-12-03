@@ -34,251 +34,230 @@ import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 
 /**
- * Provide methods to estimate parameters of the data. Data is partitioned into foreground and background using
- * thresholding. The background region must be a minimum fraction of the total data. If this is not achieved then the
- * estimates are made using all the data.
+ * Provide methods to estimate parameters of the data. Data is partitioned into foreground and
+ * background using thresholding. The background region must be a minimum fraction of the total
+ * data. If this is not achieved then the estimates are made using all the data.
  */
-public class DataEstimator
-{
-    private final int ESTIMATE_LARGE_ENOUGH = 0;
-    private final int ESTIMATE_BACKGROUND = 1;
-    private final int ESTIMATE_NOISE = 2;
-    private final int ESTIMATE_THRESHOLD = 3;
-    private final int ESTIMATE_BACKGROUND_SIZE = 4;
+public class DataEstimator {
+  private final int ESTIMATE_LARGE_ENOUGH = 0;
+  private final int ESTIMATE_BACKGROUND = 1;
+  private final int ESTIMATE_NOISE = 2;
+  private final int ESTIMATE_THRESHOLD = 3;
+  private final int ESTIMATE_BACKGROUND_SIZE = 4;
 
-    private final float[] data;
-    private Histogram h;
-    private final int width, height;
-    private float fraction = 0.25f;
-    private int histogramSize = 2048;
-    private AutoThreshold.Method thresholdMethod = Method.DEFAULT;
-    private float[] estimate = null;
+  private final float[] data;
+  private Histogram h;
+  private final int width, height;
+  private float fraction = 0.25f;
+  private int histogramSize = 2048;
+  private AutoThreshold.Method thresholdMethod = Method.DEFAULT;
+  private float[] estimate = null;
 
-    /**
-     * Create a new DataEstimator.
-     *
-     * @param data
-     *            The data
-     * @param width
-     *            The width of the data
-     * @param height
-     *            The height of the data
-     */
-    public DataEstimator(float[] data, int width, int height)
-    {
-        if (data == null)
-            throw new IllegalArgumentException("Input data must not be null");
-        if (data.length < width * height)
-            throw new IllegalArgumentException("Input data must not be smaller than width * height");
-        this.data = data;
-        this.width = width;
-        this.height = height;
+  /**
+   * Create a new DataEstimator.
+   *
+   * @param data The data
+   * @param width The width of the data
+   * @param height The height of the data
+   */
+  public DataEstimator(float[] data, int width, int height) {
+    if (data == null) {
+      throw new IllegalArgumentException("Input data must not be null");
     }
-
-    /**
-     * Gets a clone of the data.
-     *
-     * @return the data (or null)
-     */
-    public float[] getData()
-    {
-        return data.clone();
+    if (data.length < width * height) {
+      throw new IllegalArgumentException("Input data must not be smaller than width * height");
     }
+    this.data = data;
+    this.width = width;
+    this.height = height;
+  }
 
-    /**
-     * Checks if the background region is large enough to produce estimates.
-     *
-     * @return true, if there is a background
-     */
-    public boolean isBackgroundRegion()
-    {
-        getEstimate();
-        return estimate[ESTIMATE_LARGE_ENOUGH] == 1;
-    }
+  /**
+   * Gets a clone of the data.
+   *
+   * @return the data (or null)
+   */
+  public float[] getData() {
+    return data.clone();
+  }
 
-    /**
-     * Gets the background. This is the mean of the data in the background region.
-     *
-     * @return the background
-     */
-    public float getBackground()
-    {
-        getEstimate();
-        return estimate[ESTIMATE_BACKGROUND];
-    }
+  /**
+   * Checks if the background region is large enough to produce estimates.
+   *
+   * @return true, if there is a background
+   */
+  public boolean isBackgroundRegion() {
+    getEstimate();
+    return estimate[ESTIMATE_LARGE_ENOUGH] == 1;
+  }
 
-    /**
-     * Gets the noise. This is the standard deviation of the data in the background region.
-     *
-     * @return the noise
-     */
-    public float getNoise()
-    {
-        getEstimate();
-        return estimate[ESTIMATE_NOISE];
-    }
+  /**
+   * Gets the background. This is the mean of the data in the background region.
+   *
+   * @return the background
+   */
+  public float getBackground() {
+    getEstimate();
+    return estimate[ESTIMATE_BACKGROUND];
+  }
 
-    /**
-     * Gets the threshold for the background region.
-     *
-     * @return the noise
-     */
-    public float getThreshold()
-    {
-        getEstimate();
-        return estimate[ESTIMATE_THRESHOLD];
-    }
+  /**
+   * Gets the noise. This is the standard deviation of the data in the background region.
+   *
+   * @return the noise
+   */
+  public float getNoise() {
+    getEstimate();
+    return estimate[ESTIMATE_NOISE];
+  }
 
-    /**
-     * Gets the size of the background region.
-     *
-     * @return the size
-     */
-    public float getBackgroundSize()
-    {
-        getEstimate();
-        return estimate[ESTIMATE_BACKGROUND_SIZE];
-    }
+  /**
+   * Gets the threshold for the background region.
+   *
+   * @return the noise
+   */
+  public float getThreshold() {
+    getEstimate();
+    return estimate[ESTIMATE_THRESHOLD];
+  }
 
-    private void getEstimate()
-    {
-        if (estimate == null)
-        {
-            estimate = new float[5];
+  /**
+   * Gets the size of the background region.
+   *
+   * @return the size
+   */
+  public float getBackgroundSize() {
+    getEstimate();
+    return estimate[ESTIMATE_BACKGROUND_SIZE];
+  }
 
-            if (h == null)
-            {
-                h = FloatHistogram.buildHistogram(data.clone(), true);
-                h = h.compact(histogramSize);
-            }
+  private void getEstimate() {
+    if (estimate == null) {
+      estimate = new float[5];
 
-            // Threshold the data
-            final float t = estimate[ESTIMATE_THRESHOLD] = h.getAutoThreshold(thresholdMethod);
+      if (h == null) {
+        h = FloatHistogram.buildHistogram(data.clone(), true);
+        h = h.compact(histogramSize);
+      }
 
-            // Get stats below the threshold
-            Statistics stats = new Statistics();
-            for (int i = h.minBin; i <= h.maxBin; i++)
-            {
-                if (h.getValue(i) >= t)
-                    break;
-                stats.add(h.histogramCounts[i], h.getValue(i));
-            }
+      // Threshold the data
+      final float t = estimate[ESTIMATE_THRESHOLD] = h.getAutoThreshold(thresholdMethod);
 
-            // Check if background region is large enough
-            estimate[ESTIMATE_BACKGROUND_SIZE] = stats.getN();
-            if (stats.getN() > fraction * data.length)
-                // Background region is large enough
-                estimate[ESTIMATE_LARGE_ENOUGH] = 1;
-            else
-                // Recompute with all the data
-                stats = Statistics.create(data);
-
-            estimate[ESTIMATE_BACKGROUND] = (float) stats.getMean();
-            estimate[ESTIMATE_NOISE] = (float) stats.getStandardDeviation();
+      // Get stats below the threshold
+      Statistics stats = new Statistics();
+      for (int i = h.minBin; i <= h.maxBin; i++) {
+        if (h.getValue(i) >= t) {
+          break;
         }
+        stats.add(h.histogramCounts[i], h.getValue(i));
+      }
+
+      // Check if background region is large enough
+      estimate[ESTIMATE_BACKGROUND_SIZE] = stats.getN();
+      if (stats.getN() > fraction * data.length) {
+        // Background region is large enough
+        estimate[ESTIMATE_LARGE_ENOUGH] = 1;
+      } else {
+        // Recompute with all the data
+        stats = Statistics.create(data);
+      }
+
+      estimate[ESTIMATE_BACKGROUND] = (float) stats.getMean();
+      estimate[ESTIMATE_NOISE] = (float) stats.getStandardDeviation();
+    }
+  }
+
+  /**
+   * Estimate the noise in the all the data.
+   *
+   * @param method the method
+   * @return the noise
+   */
+  public float getNoise(NoiseEstimator.Method method) {
+    final NoiseEstimator ne = NoiseEstimator.wrap(data, width, height);
+    return (float) ne.getNoise(method);
+  }
+
+  /**
+   * Get the percentile value of the data.
+   *
+   * @param percentile The percentile
+   * @return the percentile value
+   */
+  public float getPercentile(double percentile) {
+    // Check the input
+    if (percentile <= 0) {
+      percentile = Double.MIN_NORMAL;
+    }
+    if (percentile > 100) {
+      percentile = 100;
     }
 
-    /**
-     * Estimate the noise in the all the data.
-     *
-     * @param method
-     *            the method
-     * @return the noise
-     */
-    public float getNoise(NoiseEstimator.Method method)
-    {
-        final NoiseEstimator ne = NoiseEstimator.wrap(data, width, height);
-        return (float) ne.getNoise(method);
+    // The data should not have NaN so we ignore them for speed.
+    final Percentile p = new Percentile(percentile).withNaNStrategy(NaNStrategy.FIXED);
+    final int size = width * height;
+    final double[] values = new double[size];
+    for (int i = 0; i < size; i++) {
+      values[i] = data[i];
     }
+    return (float) p.evaluate(values);
+  }
 
-    /**
-     * Get the percentile value of the data.
-     *
-     * @param percentile
-     *            The percentile
-     * @return the percentile value
-     */
-    public float getPercentile(double percentile)
-    {
-        // Check the input
-        if (percentile <= 0)
-            percentile = Double.MIN_NORMAL;
-        if (percentile > 100)
-            percentile = 100;
+  /**
+   * Gets the fraction of the data size that the background region must achieve to be used.
+   *
+   * @return the fraction
+   */
+  public float getFraction() {
+    return fraction;
+  }
 
-        // The data should not have NaN so we ignore them for speed.
-        final Percentile p = new Percentile(percentile).withNaNStrategy(NaNStrategy.FIXED);
-        final int size = width * height;
-        final double[] values = new double[size];
-        for (int i = 0; i < size; i++)
-            values[i] = data[i];
-        return (float) p.evaluate(values);
-    }
+  /**
+   * Sets the fraction of the data size that the background region must achieve to be used.
+   *
+   * @param fraction the new fraction
+   */
+  public void setFraction(float fraction) {
+    this.fraction = fraction;
+    this.estimate = null;
+  }
 
-    /**
-     * Gets the fraction of the data size that the background region must achieve to be used.
-     *
-     * @return the fraction
-     */
-    public float getFraction()
-    {
-        return fraction;
-    }
+  /**
+   * Gets the threshold method.
+   *
+   * @return the threshold method
+   */
+  public AutoThreshold.Method getThresholdMethod() {
+    return thresholdMethod;
+  }
 
-    /**
-     * Sets the fraction of the data size that the background region must achieve to be used.
-     *
-     * @param fraction
-     *            the new fraction
-     */
-    public void setFraction(float fraction)
-    {
-        this.fraction = fraction;
-        this.estimate = null;
-    }
+  /**
+   * Sets the threshold method.
+   *
+   * @param thresholdMethod the new threshold method
+   */
+  public void setThresholdMethod(AutoThreshold.Method thresholdMethod) {
+    this.thresholdMethod = thresholdMethod;
+    this.estimate = null;
+  }
 
-    /**
-     * Gets the threshold method.
-     *
-     * @return the threshold method
-     */
-    public AutoThreshold.Method getThresholdMethod()
-    {
-        return thresholdMethod;
-    }
+  /**
+   * SGet the size of the histogram used to compute the threshold.
+   *
+   * @return the histogram size
+   */
+  public int getHistogramSize() {
+    return histogramSize;
+  }
 
-    /**
-     * Sets the threshold method.
-     *
-     * @param thresholdMethod
-     *            the new threshold method
-     */
-    public void setThresholdMethod(AutoThreshold.Method thresholdMethod)
-    {
-        this.thresholdMethod = thresholdMethod;
-        this.estimate = null;
-    }
-
-    /**
-     * SGet the size of the histogram used to compute the threshold.
-     *
-     * @return the histogram size
-     */
-    public int getHistogramSize()
-    {
-        return histogramSize;
-    }
-
-    /**
-     * Set the size of the histogram used to compute the threshold.
-     *
-     * @param histogramSize
-     *            the histogram size
-     */
-    public void setHistogramSize(int histogramSize)
-    {
-        this.histogramSize = histogramSize;
-        this.estimate = null;
-        this.h = null;
-    }
+  /**
+   * Set the size of the histogram used to compute the threshold.
+   *
+   * @param histogramSize the histogram size
+   */
+  public void setHistogramSize(int histogramSize) {
+    this.histogramSize = histogramSize;
+    this.estimate = null;
+    this.h = null;
+  }
 }

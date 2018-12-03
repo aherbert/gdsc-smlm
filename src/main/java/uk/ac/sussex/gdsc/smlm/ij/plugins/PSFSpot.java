@@ -27,56 +27,49 @@ import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Stores details of a simulated localisation. Contains details of the amount of signal that occurs due to overlap
- * with neighbour PSFs.
+ * Stores details of a simulated localisation. Contains details of the amount of signal that occurs
+ * due to overlap with neighbour PSFs.
  */
-public class PSFSpot extends BasePoint
-{
-    /** The time. */
-    public final int t;
+public class PSFSpot extends BasePoint {
+  /** The time. */
+  public final int t;
 
-    /** The peak result. */
-    public final PeakResult peakResult;
-    /**
-     * The amount of total intensity contributed within the region of this spot from overlapping PSFs, i.e. how much
-     * more signal is in the area of this spot due to other PSFs.
-     */
-    public float intensityOffset = 0;
-    /**
-     * The amount of total background contributed within the region of this spot from overlapping PSFs, i.e. how much
-     * higher is this spot due to other PSFs.
-     */
-    public float backgroundOffset = 0;
+  /** The peak result. */
+  public final PeakResult peakResult;
+  /**
+   * The amount of total intensity contributed within the region of this spot from overlapping PSFs,
+   * i.e. how much more signal is in the area of this spot due to other PSFs.
+   */
+  public float intensityOffset = 0;
+  /**
+   * The amount of total background contributed within the region of this spot from overlapping
+   * PSFs, i.e. how much higher is this spot due to other PSFs.
+   */
+  public float backgroundOffset = 0;
 
-    /** The amplitude. */
-    public double amplitude = 0;
+  /** The amplitude. */
+  public double amplitude = 0;
 
-    /**
-     * Instantiates a new PSF spot.
-     *
-     * @param t
-     *            the time
-     * @param x
-     *            the x
-     * @param y
-     *            the y
-     * @param peakResult
-     *            the peak result
-     */
-    public PSFSpot(int t, float x, float y, PeakResult peakResult)
-    {
-        super(x, y);
-        this.t = t;
-        this.peakResult = peakResult;
-    }
+  /**
+   * Instantiates a new PSF spot.
+   *
+   * @param t the time
+   * @param x the x
+   * @param y the y
+   * @param peakResult the peak result
+   */
+  public PSFSpot(int t, float x, float y, PeakResult peakResult) {
+    super(x, y);
+    this.t = t;
+    this.peakResult = peakResult;
+  }
 
-    /**
-     * Gets the time.
-     *
-     * @return the time
-     */
-    public int getTime()
-    {
-        return t;
-    }
+  /**
+   * Gets the time.
+   *
+   * @return the time
+   */
+  public int getTime() {
+    return t;
+  }
 }

@@ -28,33 +28,28 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets a parameter deviation data value from a result.
  */
-public class PeakResultDataParameterDeviation extends PeakResultDataFloat
-{
-    /** The parameter index. */
-    public final int index;
+public class PeakResultDataParameterDeviation extends PeakResultDataFloat {
+  /** The parameter index. */
+  public final int index;
 
-    /**
-     * Instantiates a new peak result parameter value.
-     *
-     * @param index
-     *            the index
-     */
-    public PeakResultDataParameterDeviation(int index)
-    {
-        this.index = index;
-    }
+  /**
+   * Instantiates a new peak result parameter value.
+   *
+   * @param index the index
+   */
+  public PeakResultDataParameterDeviation(int index) {
+    this.index = index;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Float getValue(PeakResult result)
-    {
-        return result.getParameterDeviation(index);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Float getValue(PeakResult result) {
+    return result.getParameterDeviation(index);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getValueName()
-    {
-        return PeakResult.getParameterName(index) + " Deviation";
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getValueName() {
+    return PeakResult.getParameterName(index) + " Deviation";
+  }
 }

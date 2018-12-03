@@ -32,120 +32,110 @@ import ij.plugin.ZProjector;
 import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 
 /**
- * Produces a background intensity image and a mask from a sample image.
- * <p>
- * The input image should be representative of the super-resolution imaging conditions and so will produce suitable
- * input for the Create Data plugin to create realistic images.
+ * Produces a background intensity image and a mask from a sample image. <p> The input image should
+ * be representative of the super-resolution imaging conditions and so will produce suitable input
+ * for the Create Data plugin to create realistic images.
  */
-public class ImageBackground implements PlugInFilter
-{
-    private static final String TITLE = "Image Background";
+public class ImageBackground implements PlugInFilter {
+  private static final String TITLE = "Image Background";
 
-    private static float bias = 500;
-    private static double sigma = 2;
+  private static float bias = 500;
+  private static double sigma = 2;
 
-    private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-    private ImagePlus imp;
+  private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+  private ImagePlus imp;
 
-    /** {@inheritDoc} */
-    @Override
-    public int setup(String arg, ImagePlus imp)
-    {
-        SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+  /** {@inheritDoc} */
+  @Override
+  public int setup(String arg, ImagePlus imp) {
+    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        if (imp == null)
-        {
-            IJ.noImage();
-            return DONE;
-        }
-
-        this.imp = imp;
-
-        return showDialog();
+    if (imp == null) {
+      IJ.noImage();
+      return DONE;
     }
 
-    private int showDialog()
-    {
-        final GenericDialog gd = new GenericDialog(TITLE);
-        gd.addHelp(About.HELP_URL);
+    this.imp = imp;
 
-        gd.addMessage("Creates a background and mask image from a sample input stack\nusing a median projection");
+    return showDialog();
+  }
 
-        gd.addNumericField("Bias", bias, 0);
-        gd.addSlider("Blur", 0, 20, sigma);
+  private int showDialog() {
+    final GenericDialog gd = new GenericDialog(TITLE);
+    gd.addHelp(About.HELP_URL);
 
-        gd.showDialog();
+    gd.addMessage(
+        "Creates a background and mask image from a sample input stack\nusing a median projection");
 
-        if (gd.wasCanceled())
-            return DONE;
+    gd.addNumericField("Bias", bias, 0);
+    gd.addSlider("Blur", 0, 20, sigma);
 
-        bias = (float) gd.getNextNumber();
-        sigma = gd.getNextNumber();
+    gd.showDialog();
 
-        // Check arguments
-        try
-        {
-            Parameters.isPositive("Bias", bias);
-        }
-        catch (final IllegalArgumentException e)
-        {
-            IJ.error(TITLE, e.getMessage());
-            return DONE;
-        }
-
-        return flags;
+    if (gd.wasCanceled()) {
+      return DONE;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void run(ImageProcessor ip)
-    {
-        final ImageProcessor median = getProjection();
-        //Utils.display("Median", median);
+    bias = (float) gd.getNextNumber();
+    sigma = gd.getNextNumber();
 
-        final ImageProcessor background = applyBlur(median);
-        subtractBias(background);
-
-        ImageJUtils.display("Background", background);
-
-        // Q. Is there a better way to do the thresholding for foreground pixels.
-        // Ideally we want to outline cell shapes.
-        final ImageProcessor mask = median.convertToByte(true);
-        mask.autoThreshold();
-
-        ImageJUtils.display("Mask", mask);
+    // Check arguments
+    try {
+      Parameters.isPositive("Bias", bias);
+    } catch (final IllegalArgumentException e) {
+      IJ.error(TITLE, e.getMessage());
+      return DONE;
     }
 
-    private ImageProcessor getProjection()
-    {
-        // Get median intensity projection
-        final ZProjector p = new ZProjector(imp);
-        p.setMethod(ZProjector.MEDIAN_METHOD);
-        p.doProjection();
-        final ImageProcessor median = p.getProjection().getProcessor();
-        return median;
-    }
+    return flags;
+  }
 
-    private static ImageProcessor applyBlur(ImageProcessor median)
-    {
-        ImageProcessor blur = median;
-        if (sigma > 0)
-        {
-            blur = median.duplicate();
-            final GaussianBlur gb = new GaussianBlur();
-            gb.blurGaussian(blur, sigma, sigma, 0.0002);
-        }
-        return blur;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void run(ImageProcessor ip) {
+    final ImageProcessor median = getProjection();
+    // Utils.display("Median", median);
 
-    private static void subtractBias(ImageProcessor background)
-    {
-        final float[] data = (float[]) background.getPixels();
-        for (int i = 0; i < data.length; i++)
-            data[i] = FastMath.max(0f, data[i] - bias);
-        background.resetMinAndMax();
+    final ImageProcessor background = applyBlur(median);
+    subtractBias(background);
+
+    ImageJUtils.display("Background", background);
+
+    // Q. Is there a better way to do the thresholding for foreground pixels.
+    // Ideally we want to outline cell shapes.
+    final ImageProcessor mask = median.convertToByte(true);
+    mask.autoThreshold();
+
+    ImageJUtils.display("Mask", mask);
+  }
+
+  private ImageProcessor getProjection() {
+    // Get median intensity projection
+    final ZProjector p = new ZProjector(imp);
+    p.setMethod(ZProjector.MEDIAN_METHOD);
+    p.doProjection();
+    final ImageProcessor median = p.getProjection().getProcessor();
+    return median;
+  }
+
+  private static ImageProcessor applyBlur(ImageProcessor median) {
+    ImageProcessor blur = median;
+    if (sigma > 0) {
+      blur = median.duplicate();
+      final GaussianBlur gb = new GaussianBlur();
+      gb.blurGaussian(blur, sigma, sigma, 0.0002);
     }
+    return blur;
+  }
+
+  private static void subtractBias(ImageProcessor background) {
+    final float[] data = (float[]) background.getPixels();
+    for (int i = 0; i < data.length; i++) {
+      data[i] = FastMath.max(0f, data[i] - bias);
+    }
+    background.resetMinAndMax();
+  }
 }

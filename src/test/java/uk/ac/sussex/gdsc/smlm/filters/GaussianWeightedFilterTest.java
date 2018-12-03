@@ -23,33 +23,27 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-@SuppressWarnings({ "javadoc" })
-public class GaussianWeightedFilterTest extends WeightedKernelFilterTest
-{
-    @Override
-    DataFilter createDataFilter()
-    {
-        return new DataFilter("gaussian", true)
-        {
-            GaussianFilter f = new GaussianFilter();
+@SuppressWarnings({"javadoc"})
+public class GaussianWeightedFilterTest extends WeightedKernelFilterTest {
+  @Override
+  DataFilter createDataFilter() {
+    return new DataFilter("gaussian", true) {
+      GaussianFilter f = new GaussianFilter();
 
-            @Override
-            public void filter(float[] data, int width, int height, float boxSize)
-            {
-                f.convolve(data, width, height, boxSize);
-            }
+      @Override
+      public void filter(float[] data, int width, int height, float boxSize) {
+        f.convolve(data, width, height, boxSize);
+      }
 
-            @Override
-            public void filterInternal(float[] data, int width, int height, float boxSize)
-            {
-                f.convolveInternal(data, width, height, boxSize);
-            }
+      @Override
+      public void filterInternal(float[] data, int width, int height, float boxSize) {
+        f.convolveInternal(data, width, height, boxSize);
+      }
 
-            @Override
-            public void setWeights(float[] w, int width, int height)
-            {
-                f.setWeights(w, width, height);
-            }
-        };
-    }
+      @Override
+      public void setWeights(float[] w, int width, int height) {
+        f.setWeights(w, width, height);
+      }
+    };
+  }
 }

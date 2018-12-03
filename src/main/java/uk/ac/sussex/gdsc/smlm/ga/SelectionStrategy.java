@@ -30,46 +30,43 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 /**
  * Defines a selection strategy of a population of individuals.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public interface SelectionStrategy<T extends Comparable<T>>
-{
-    /**
-     * Select a subset from the population using the fitness.
-     *
-     * @param individuals
-     *            the individuals
-     * @return a selection of individuals
-     */
-    public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals);
+public interface SelectionStrategy<T extends Comparable<T>> {
+  /**
+   * Select a subset from the population using the fitness.
+   *
+   * @param individuals the individuals
+   * @return a selection of individuals
+   */
+  public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals);
 
-    /**
-     * Initialise the selection of pairs for breeding using the fitness.
-     *
-     * @param individuals
-     *            the population of individuals
-     */
-    public void initialiseBreeding(List<? extends Chromosome<T>> individuals);
+  /**
+   * Initialise the selection of pairs for breeding using the fitness.
+   *
+   * @param individuals the population of individuals
+   */
+  public void initialiseBreeding(List<? extends Chromosome<T>> individuals);
 
-    /**
-     * Get the next pair of individuals for breeding. Must be called after {@link #initialiseBreeding(List)}.
-     *
-     * @return The next pair
-     */
-    public ChromosomePair<T> next();
+  /**
+   * Get the next pair of individuals for breeding. Must be called after
+   * {@link #initialiseBreeding(List)}.
+   *
+   * @return The next pair
+   */
+  public ChromosomePair<T> next();
 
-    /**
-     * Finish selection of pairs for breeding.
-     */
-    public void finishBreeding();
+  /**
+   * Finish selection of pairs for breeding.
+   */
+  public void finishBreeding();
 
-    /**
-     * Set the tracker used to track progress. This should be used in the {@link #select(List)} method. It is possible
-     * to know the end point when breeding and so it is not advised to use the tracker in the {@link #next()} method.
-     *
-     * @param tracker
-     *            the new tracker
-     */
-    public void setTracker(TrackProgress tracker);
+  /**
+   * Set the tracker used to track progress. This should be used in the {@link #select(List)}
+   * method. It is possible to know the end point when breeding and so it is not advised to use the
+   * tracker in the {@link #next()} method.
+   *
+   * @param tracker the new tracker
+   */
+  public void setTracker(TrackProgress tracker);
 }

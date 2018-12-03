@@ -26,41 +26,41 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 /**
  * Defines methods to fit a function with coefficients (a) using least-squares estimation.
  */
-public interface LSEFunctionSolver extends FunctionSolver
-{
-    /**
-     * Gets the total sum of squares.
-     *
-     * @return the total sum of squares
-     */
-    public double getTotalSumOfSquares();
+public interface LSEFunctionSolver extends FunctionSolver {
+  /**
+   * Gets the total sum of squares.
+   *
+   * @return the total sum of squares
+   */
+  public double getTotalSumOfSquares();
 
-    /**
-     * Gets the residual sum of squares.
-     *
-     * @return the residual sum of squares
-     */
-    public double getResidualSumOfSquares();
+  /**
+   * Gets the residual sum of squares.
+   *
+   * @return the residual sum of squares
+   */
+  public double getResidualSumOfSquares();
 
-    /**
-     * Gets the coefficient of determination (R^2 = 1 - SSresiduals / SStotal).
-     *
-     * @return the coefficient of determination
-     */
-    public double getCoefficientOfDetermination();
+  /**
+   * Gets the coefficient of determination (R^2 = 1 - SSresiduals / SStotal).
+   *
+   * @return the coefficient of determination
+   */
+  public double getCoefficientOfDetermination();
 
-    /**
-     * Gets the adjusted coefficient of determination (Adjusted R^2 = 1 - [SSresiduals / SStotal] * [[n - 1] / [n - p -
-     * 1]])
-     *
-     * @return the adjusted coefficient of determination
-     */
-    public double getAdjustedCoefficientOfDetermination();
+  /**
+   * Gets the adjusted coefficient of determination (Adjusted R^2 = 1 - [SSresiduals / SStotal] *
+   * [[n - 1] / [n - p - 1]])
+   *
+   * @return the adjusted coefficient of determination
+   */
+  public double getAdjustedCoefficientOfDetermination();
 
-    /**
-     * Gets the mean squared error. This is the residual sum of squares divided by the degrees of freedom.
-     *
-     * @return the mean squared error
-     */
-    public double getMeanSquaredError();
+  /**
+   * Gets the mean squared error. This is the residual sum of squares divided by the degrees of
+   * freedom.
+   *
+   * @return the mean squared error
+   */
+  public double getMeanSquaredError();
 }

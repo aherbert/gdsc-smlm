@@ -28,27 +28,22 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 /**
  * Wrap the NonLinearFunction to allow use with the Apache Commons Math library.
  */
-public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper implements MultivariateVectorFunction
-{
-    /**
-     * Instantiates a new multivariate vector function wrapper.
-     *
-     * @param fun
-     *            The function
-     * @param a
-     *            The parameters
-     * @param n
-     *            The number of data points to evaluate
-     */
-    public MultivariateVectorFunctionWrapper(NonLinearFunction fun, double[] a, int n)
-    {
-        super(fun, a, n);
-    }
+public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper
+    implements MultivariateVectorFunction {
+  /**
+   * Instantiates a new multivariate vector function wrapper.
+   *
+   * @param fun The function
+   * @param a The parameters
+   * @param n The number of data points to evaluate
+   */
+  public MultivariateVectorFunctionWrapper(NonLinearFunction fun, double[] a, int n) {
+    super(fun, a, n);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public double[] value(double[] point)
-    {
-        return computeValues(point);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public double[] value(double[] point) {
+    return computeValues(point);
+  }
 }

@@ -26,19 +26,15 @@ package uk.ac.sussex.gdsc.smlm.ga;
 /**
  * Defines recombination crossover of a chromosome pair.
  *
- * @param <T>
- *            the generic type
+ * @param <T> the generic type
  */
-public interface Recombiner<T extends Comparable<T>>
-{
-    /**
-     * Crossover the provided chromosomes to produce one or more new sequences.
-     *
-     * @param chromosome1
-     *            the chromosome 1
-     * @param chromosome2
-     *            the chromosome 2
-     * @return one or more new sequences
-     */
-    public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2);
+public interface Recombiner<T extends Comparable<T>> {
+  /**
+   * Crossover the provided chromosomes to produce one or more new sequences.
+   *
+   * @param chromosome1 the chromosome 1
+   * @param chromosome2 the chromosome 2
+   * @return one or more new sequences
+   */
+  public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2);
 }

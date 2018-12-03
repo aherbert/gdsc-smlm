@@ -24,74 +24,59 @@
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
 /**
- * A per-pixel camera model with all pixels treated equally. Note that this concept is invalid since this model reports
- * itself as a per-pixel model even though all pixels are treated equally. This allows testing algorithms that require a
- * per-pixel model with a fixed-pixel model, e.g. for performance comparison.
+ * A per-pixel camera model with all pixels treated equally. Note that this concept is invalid since
+ * this model reports itself as a per-pixel model even though all pixels are treated equally. This
+ * allows testing algorithms that require a per-pixel model with a fixed-pixel model, e.g. for
+ * performance comparison.
  *
  * @author Alex Herbert
  */
-public class FakePerPixelCameraModel extends FixedPixelCameraModel
-{
-    /**
-     * Instantiates a new fake per pixel camera model.
-     *
-     * @param bias
-     *            the bias (in counts)
-     * @param gain
-     *            the gain (count/photon)
-     */
-    public FakePerPixelCameraModel(float bias, float gain)
-    {
-        super(bias, gain);
-    }
+public class FakePerPixelCameraModel extends FixedPixelCameraModel {
+  /**
+   * Instantiates a new fake per pixel camera model.
+   *
+   * @param bias the bias (in counts)
+   * @param gain the gain (count/photon)
+   */
+  public FakePerPixelCameraModel(float bias, float gain) {
+    super(bias, gain);
+  }
 
-    /**
-     * Instantiates a new fake per pixel camera model.
-     *
-     * @param bias
-     *            the bias (in counts)
-     * @param gain
-     *            the gain (count/photon)
-     * @param variance
-     *            the variance (in counts)
-     */
-    public FakePerPixelCameraModel(float bias, float gain, float variance)
-    {
-        super(bias, gain, variance);
-    }
+  /**
+   * Instantiates a new fake per pixel camera model.
+   *
+   * @param bias the bias (in counts)
+   * @param gain the gain (count/photon)
+   * @param variance the variance (in counts)
+   */
+  public FakePerPixelCameraModel(float bias, float gain, float variance) {
+    super(bias, gain, variance);
+  }
 
-    /**
-     * Instantiates a new fake per pixel camera model.
-     *
-     * @param bias
-     *            the bias (in counts)
-     * @param gain
-     *            the gain (count/photon)
-     */
-    public FakePerPixelCameraModel(double bias, double gain)
-    {
-        super(bias, gain);
-    }
+  /**
+   * Instantiates a new fake per pixel camera model.
+   *
+   * @param bias the bias (in counts)
+   * @param gain the gain (count/photon)
+   */
+  public FakePerPixelCameraModel(double bias, double gain) {
+    super(bias, gain);
+  }
 
-    /**
-     * Instantiates a new fake per pixel camera model.
-     *
-     * @param bias
-     *            the bias (in counts)
-     * @param gain
-     *            the gain (count/photon)
-     * @param variance
-     *            the variance (in counts)
-     */
-    public FakePerPixelCameraModel(double bias, double gain, double variance)
-    {
-        super(bias, gain, variance);
-    }
+  /**
+   * Instantiates a new fake per pixel camera model.
+   *
+   * @param bias the bias (in counts)
+   * @param gain the gain (count/photon)
+   * @param variance the variance (in counts)
+   */
+  public FakePerPixelCameraModel(double bias, double gain, double variance) {
+    super(bias, gain, variance);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isPerPixelModel()
-    {
-        return true;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isPerPixelModel() {
+    return true;
+  }
 }

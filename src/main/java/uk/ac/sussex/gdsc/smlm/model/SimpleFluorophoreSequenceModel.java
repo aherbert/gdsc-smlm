@@ -26,25 +26,20 @@ package uk.ac.sussex.gdsc.smlm.model;
 /**
  * Contains a single-time model for a non-blinking fluorophore.
  */
-public class SimpleFluorophoreSequenceModel extends FluorophoreSequenceModel
-{
-    /**
-     * Construct a new flourophore.
-     *
-     * @param id
-     *            The identifier
-     * @param xyz
-     *            The [x,y,z] coordinates
-     * @param tAct
-     *            The time the fluorophore turned on
-     * @param tOn
-     *            The time the fluorophore was on
-     */
-    public SimpleFluorophoreSequenceModel(int id, double[] xyz, double tAct, double tOn)
-    {
-        super(id, xyz);
-        if (tOn < 0)
-            tOn = 0;
-        setBurstSequence(new double[] { tAct, tAct + tOn });
+public class SimpleFluorophoreSequenceModel extends FluorophoreSequenceModel {
+  /**
+   * Construct a new flourophore.
+   *
+   * @param id The identifier
+   * @param xyz The [x,y,z] coordinates
+   * @param tAct The time the fluorophore turned on
+   * @param tOn The time the fluorophore was on
+   */
+  public SimpleFluorophoreSequenceModel(int id, double[] xyz, double tAct, double tOn) {
+    super(id, xyz);
+    if (tOn < 0) {
+      tOn = 0;
     }
+    setBurstSequence(new double[] {tAct, tAct + tOn});
+  }
 }

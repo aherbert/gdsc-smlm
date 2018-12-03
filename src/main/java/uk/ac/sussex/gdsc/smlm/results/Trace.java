@@ -28,144 +28,126 @@ import gnu.trove.list.linked.TIntLinkedList;
 /**
  * Define a cluster of localisations from different frames that represent a single molecule trace.
  */
-public class Trace extends Cluster
-{
-    private int nBlinks = -1;
-    private int[] onTimes, offTimes;
+public class Trace extends Cluster {
+  private int nBlinks = -1;
+  private int[] onTimes, offTimes;
 
-    /**
-     * Instantiates a new trace.
-     */
-    public Trace()
-    {
-        super();
-    }
+  /**
+   * Instantiates a new trace.
+   */
+  public Trace() {
+    super();
+  }
 
-    /**
-     * Instantiates a new trace.
-     *
-     * @param peakResult
-     *            the peak result
-     */
-    public Trace(PeakResult peakResult)
-    {
-        super(peakResult);
-    }
+  /**
+   * Instantiates a new trace.
+   *
+   * @param peakResult the peak result
+   */
+  public Trace(PeakResult peakResult) {
+    super(peakResult);
+  }
 
-    @Override
-    public void add(PeakResult result)
-    {
-        super.add(result);
-        nBlinks = -1; // Invalidate the analysis
-    }
+  @Override
+  public void add(PeakResult result) {
+    super.add(result);
+    nBlinks = -1; // Invalidate the analysis
+  }
 
-    private void analyse()
-    {
-        if (nBlinks == -1)
-        {
-            if (isEmpty())
-            {
-                nBlinks = 0;
-                onTimes = offTimes = null;
-                return;
-            }
-            if (results.size() == 1)
-            {
-                nBlinks = 1;
-                onTimes = new int[] { 1 };
-                offTimes = null;
-                return;
-            }
+  private void analyse() {
+    if (nBlinks == -1) {
+      if (isEmpty()) {
+        nBlinks = 0;
+        onTimes = offTimes = null;
+        return;
+      }
+      if (results.size() == 1) {
+        nBlinks = 1;
+        onTimes = new int[] {1};
+        offTimes = null;
+        return;
+      }
 
-            // Ensure in the correct time-order
-            sort();
-            final TIntLinkedList on = new TIntLinkedList();
-            final TIntLinkedList off = new TIntLinkedList();
+      // Ensure in the correct time-order
+      sort();
+      final TIntLinkedList on = new TIntLinkedList();
+      final TIntLinkedList off = new TIntLinkedList();
 
-            nBlinks = 1;
-            int t1 = results.get(0).getFrame();
-            int onStart = t1;
-            for (int i = 0; i < results.size() - 1; i++)
-            {
-                final int t2 = results.get(i + 1).getFrame();
-                final int diff = t2 - t1;
-                if (diff > 1)
-                {
-                    off.add(diff - 1);
-                    on.add(t1 - onStart + 1);
-                    nBlinks++;
-                    onStart = t2;
-                }
-                t1 = t2;
-            }
-            on.add(t1 - onStart + 1);
-
-            onTimes = on.toArray();
-            offTimes = off.toArray();
+      nBlinks = 1;
+      int t1 = results.get(0).getFrame();
+      int onStart = t1;
+      for (int i = 0; i < results.size() - 1; i++) {
+        final int t2 = results.get(i + 1).getFrame();
+        final int diff = t2 - t1;
+        if (diff > 1) {
+          off.add(diff - 1);
+          on.add(t1 - onStart + 1);
+          nBlinks++;
+          onStart = t2;
         }
-    }
+        t1 = t2;
+      }
+      on.add(t1 - onStart + 1);
 
-    /**
-     * @return The number of times the molecule blinked.
-     */
-    public int getNBlinks()
-    {
-        analyse();
-        return nBlinks;
+      onTimes = on.toArray();
+      offTimes = off.toArray();
     }
+  }
 
-    /**
-     * @return The average on time for the molecule.
-     */
-    public double getOnTime()
-    {
-        analyse();
-        return getAverage(onTimes);
-    }
+  /**
+   * @return The number of times the molecule blinked.
+   */
+  public int getNBlinks() {
+    analyse();
+    return nBlinks;
+  }
 
-    /**
-     * @return The average off time for the molecule.
-     */
-    public double getOffTime()
-    {
-        analyse();
-        return getAverage(offTimes);
-    }
+  /**
+   * @return The average on time for the molecule.
+   */
+  public double getOnTime() {
+    analyse();
+    return getAverage(onTimes);
+  }
 
-    private static double getAverage(int[] times)
-    {
-        if (times != null)
-        {
-            double av = 0;
-            for (final int t : times)
-                av += t;
-            return av / times.length;
-        }
-        return 0;
-    }
+  /**
+   * @return The average off time for the molecule.
+   */
+  public double getOffTime() {
+    analyse();
+    return getAverage(offTimes);
+  }
 
-    /**
-     * @return the on-times.
-     */
-    public int[] getOnTimes()
-    {
-        analyse();
-        return onTimes;
+  private static double getAverage(int[] times) {
+    if (times != null) {
+      double av = 0;
+      for (final int t : times) {
+        av += t;
+      }
+      return av / times.length;
     }
+    return 0;
+  }
 
-    /**
-     * @return the off-times.
-     */
-    public int[] getOffTimes()
-    {
-        analyse();
-        return offTimes;
-    }
+  /**
+   * @return the on-times.
+   */
+  public int[] getOnTimes() {
+    analyse();
+    return onTimes;
+  }
 
-    @Override
-    public void removeEnds()
-    {
-        super.removeEnds();
-        nBlinks = -1; // Invalidate the analysis
-    }
+  /**
+   * @return the off-times.
+   */
+  public int[] getOffTimes() {
+    analyse();
+    return offTimes;
+  }
+
+  @Override
+  public void removeEnds() {
+    super.removeEnds();
+    nBlinks = -1; // Invalidate the analysis
+  }
 }
