@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
 /**
- * Factory for creating unit converters
+ * Factory for creating unit converters.
  */
 public class UnitConverterFactory
 {

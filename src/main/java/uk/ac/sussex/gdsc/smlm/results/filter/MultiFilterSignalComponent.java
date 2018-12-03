@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Filter results using Signal
+ * Filter results using Signal.
  */
 public class MultiFilterSignalComponent extends MultiFilterComponent
 {

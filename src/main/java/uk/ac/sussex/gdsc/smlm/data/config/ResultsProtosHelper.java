@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
  */
 public class ResultsProtosHelper
 {
-    /** The default ResultsSettings */
+    /** The default ResultsSettings. */
     public static final ResultsSettings defaultResultsSettings;
     static
     {

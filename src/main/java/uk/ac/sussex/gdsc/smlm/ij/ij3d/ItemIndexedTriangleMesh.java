@@ -284,7 +284,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
     }
 
     /**
-     * Gets the normals assuming triangle vertices on the given faces
+     * Gets the normals assuming triangle vertices on the given faces.
      *
      * @param vertices
      *            the vertices

@@ -43,7 +43,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
     private final CustomPoissonDistribution pd;
 
     /**
-     * The inverse of the on-chip gain multiplication factor
+     * The inverse of the on-chip gain multiplication factor.
      */
     final double alpha;
 
@@ -144,7 +144,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
     }
 
     /**
-     * Return the factorial for the given real number, using the gamma function
+     * Return the factorial for the given real number, using the gamma function.
      *
      * @param k
      *            the number

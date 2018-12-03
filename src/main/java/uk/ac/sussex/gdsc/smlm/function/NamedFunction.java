@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Defines function that has named parameters
+ * Defines function that has named parameters.
  */
 public interface NamedFunction
 {

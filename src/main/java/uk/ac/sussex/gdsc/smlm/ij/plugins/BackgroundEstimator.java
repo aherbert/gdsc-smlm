@@ -45,12 +45,12 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
@@ -213,11 +213,11 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
             String title, String title1, String title2, String title3)
     {
         // Get limits
-        final double[] a = Maths.limits(xValues);
-        double[] b = Maths.limits(data1);
-        b = Maths.limits(b, data2);
+        final double[] a = MathUtils.limits(xValues);
+        double[] b = MathUtils.limits(data1);
+        b = MathUtils.limits(b, data2);
         if (data3 != null)
-            b = Maths.limits(b, data3);
+            b = MathUtils.limits(b, data3);
 
         title = imp.getTitle() + " " + title;
         final Plot2 plot = new Plot2(title, "Slice", title);
@@ -229,31 +229,29 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
         plot.setColor(Color.blue);
         plot.addPoints(xValues, data1, Plot.LINE);
         plot.draw();
-        Statistics stats = new Statistics(data1);
-        String label = String.format("%s (Blue) = %s +/- %s", title1, Utils.rounded(stats.getMean()),
-                Utils.rounded(stats.getStandardDeviation()));
+        Statistics stats = Statistics.create(data1);
+        String label = String.format("%s (Blue) = %s +/- %s", title1, MathUtils.rounded(stats.getMean()),
+                MathUtils.rounded(stats.getStandardDeviation()));
 
         plot.setColor(Color.red);
         plot.addPoints(xValues, data2, Plot.LINE);
-        stats = new Statistics(data2);
-        label += String.format(", %s (Red) = %s +/- %s", title2, Utils.rounded(stats.getMean()),
-                Utils.rounded(stats.getStandardDeviation()));
+        stats = Statistics.create(data2);
+        label += String.format(", %s (Red) = %s +/- %s", title2, MathUtils.rounded(stats.getMean()),
+                MathUtils.rounded(stats.getStandardDeviation()));
 
         if (data3 != null)
         {
             plot.setColor(Color.green);
             plot.addPoints(xValues, data3, Plot.LINE);
-            stats = new Statistics(data3);
-            label += String.format(", %s (Green) = %s +/- %s", title3, Utils.rounded(stats.getMean()),
-                    Utils.rounded(stats.getStandardDeviation()));
+            stats = Statistics.create(data3);
+            label += String.format(", %s (Green) = %s +/- %s", title3, MathUtils.rounded(stats.getMean()),
+                    MathUtils.rounded(stats.getStandardDeviation()));
         }
 
         plot.setColor(Color.black);
         plot.addLabel(0, 0, label);
 
-        final PlotWindow pw = Utils.display(title, plot);
-        if (Utils.isNewWindow())
-            wo.add(pw);
+        ImageJUtils.display(title, plot, wo);
     }
 
     /** {@inheritDoc} */
@@ -309,10 +307,10 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     private String createHeader()
     {
         StringBuilder sb = new StringBuilder(imp.getTitle());
-        sb.append('\t').append(Utils.rounded(percentile));
+        sb.append('\t').append(MathUtils.rounded(percentile));
         sb.append('\t').append(noiseMethod.toString());
         sb.append('\t').append(thresholdMethod.toString());
-        sb.append('\t').append(Utils.rounded(fraction));
+        sb.append('\t').append(MathUtils.rounded(fraction));
         sb.append('\t').append(histogramSize).append('\t');
         prefix = sb.toString();
 
@@ -340,7 +338,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
         final StringBuilder sb = new StringBuilder(prefix);
         sb.append((int) result[0]);
         for (int i = 1; i < result.length; i++)
-            sb.append('\t').append(Utils.rounded(result[i]));
+            sb.append('\t').append(MathUtils.rounded(result[i]));
         return sb.toString();
     }
 }

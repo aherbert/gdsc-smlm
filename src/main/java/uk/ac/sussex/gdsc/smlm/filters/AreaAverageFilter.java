@@ -323,7 +323,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
     }
 
     /**
-     * @return true for simple interpolation
+     * @return true for simple interpolation.
      */
     public boolean isSimpleInterpolation()
     {

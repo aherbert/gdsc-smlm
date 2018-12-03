@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 /**
- * Contains methods for generating models of a Point Spread Function using a Gaussian approximation
+ * Contains methods for generating models of a Point Spread Function using a Gaussian approximation.
  */
 public class GaussianPSFModel extends PSFModel
 {
@@ -338,7 +338,7 @@ public class GaussianPSFModel extends PSFModel
         return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
     }
 
-    private final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
+    private static final double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
 
     /**
      * Construct a Gaussian 2D function based at the origin using the specified range in each dimension.
@@ -417,7 +417,7 @@ public class GaussianPSFModel extends PSFModel
     }
 
     /**
-     * @return The standard deviation dimension 0 for the last drawn Gaussian
+     * @return The standard deviation dimension 0 for the last drawn Gaussian.
      */
     public double getS0()
     {
@@ -425,7 +425,7 @@ public class GaussianPSFModel extends PSFModel
     }
 
     /**
-     * @return The standard deviation dimension 1 for the last drawn Gaussian
+     * @return The standard deviation dimension 1 for the last drawn Gaussian.
      */
     public double getS1()
     {
@@ -460,7 +460,7 @@ public class GaussianPSFModel extends PSFModel
     }
 
     /**
-     * Sample from a Gaussian distribution
+     * Sample from a Gaussian distribution.
      *
      * @param n
      *            The number of samples

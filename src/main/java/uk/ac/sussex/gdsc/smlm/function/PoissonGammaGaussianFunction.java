@@ -65,7 +65,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
 
     /**
-     * Define the convolution mode for combining the Poisson-Gamma PMF with the Gaussian PDF
+     * Define the convolution mode for combining the Poisson-Gamma PMF with the Gaussian PDF.
      */
     public enum ConvolutionMode
     {
@@ -132,11 +132,11 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     /**
      * The scale of the Gamma distribution (e.g. the on-chip gain multiplication factor)
      */
-    final private double m;
+    private final double m;
     /**
      * The standard deviation of the Gaussian (e.g. Width of the noise distribution in the EMCCD output)
      */
-    final private double sigma;
+    private final double sigma;
 
     /** The two sigma 2. */
     private final double twoSigma2;

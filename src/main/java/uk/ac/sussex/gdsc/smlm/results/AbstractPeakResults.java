@@ -38,11 +38,11 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
  */
 public abstract class AbstractPeakResults implements PeakResults
 {
-    /** The default for nm/pixel */
+    /** The default for nm./pixel */
     public static final double DEFAULT_NM_PER_PIXEL = 0;
-    /** The default for gain */
+    /** The default for gain. */
     public static final double DEFAULT_GAIN = 0;
-    /** The default for emCCD */
+    /** The default for emCCD. */
     public static final boolean DEFAULT_EMCCD = true;
 
     private ImageSource source = null;
@@ -203,7 +203,7 @@ public abstract class AbstractPeakResults implements PeakResults
     }
 
     /**
-     * @return The name of the results set (or the source if empty)
+     * @return The name of the results set (or the source if empty).
      */
     @Override
     public String getName()

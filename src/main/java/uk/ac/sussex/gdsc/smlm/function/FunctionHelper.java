@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import java.util.Arrays;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Utility class for functions.
@@ -51,7 +51,7 @@ public class FunctionHelper
     public static double getMeanValue(double[] values, double fraction) throws DataException
     {
         if (fraction <= 0)
-            return Maths.max(values);
+            return MathUtils.max(values);
         double sum = 0;
         for (int i = 0; i < values.length; i++)
         {
@@ -71,7 +71,7 @@ public class FunctionHelper
             {
                 // Interpolate the count X to obtain the target
                 final int x = values.length - i;
-                return target / Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
+                return target / MathUtils.interpolateX(x - 1, sum - values[i], x, sum, target);
             }
         }
         // Edge case
@@ -116,7 +116,7 @@ public class FunctionHelper
             {
                 // Interpolate the count X to obtain the target
                 final int x = values.length - i;
-                return Maths.interpolateX(x - 1, sum - values[i], x, sum, target);
+                return MathUtils.interpolateX(x - 1, sum - values[i], x, sum, target);
             }
         }
         // Edge case

@@ -26,13 +26,13 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.util.Arrays;
 
 /**
- * Specifies a peak fitting result
+ * Specifies a peak fitting result.
  */
 public class PeakResult implements Cloneable
 {
-    /** Index of the background in the parameters array */
+    /** Index of the background in the parameters array. */
     public static final int BACKGROUND = 0;
-    /** Index of the intensity in the parameters array */
+    /** Index of the intensity in the parameters array. */
     public static final int INTENSITY = 1;
     /** Index of the x-position in the parameters array */
     public static final int X = 2;
@@ -40,7 +40,7 @@ public class PeakResult implements Cloneable
     public static final int Y = 3;
     /** Index of the z-position in the parameters array */
     public static final int Z = 4;
-    /** Number of standard parameters */
+    /** Number of standard parameters. */
     public static final int STANDARD_PARAMETERS = 5;
 
     private static final String[] NAMES = { "Background", "Intensity", "X", "Y", "Z" };
@@ -256,7 +256,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * @return The background for the first peak
+     * @return The background for the first peak.
      */
     public float getBackground()
     {
@@ -275,7 +275,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * Get the intensity
+     * Get the intensity.
      *
      * @return The intensity of the first peak
      */
@@ -296,7 +296,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * @return The x position for the first peak
+     * @return The x position for the first peak.
      */
     public float getXPosition()
     {
@@ -315,7 +315,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * @return The y position for the first peak
+     * @return The y position for the first peak.
      */
     public float getYPosition()
     {
@@ -334,7 +334,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * @return The z position for the first peak
+     * @return The z position for the first peak.
      */
     public float getZPosition()
     {
@@ -601,7 +601,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * Return the true positive score for use in classification analysis
+     * Return the true positive score for use in classification analysis.
      *
      * @return The true positive score
      */
@@ -611,7 +611,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * Return the false positive score for use in classification analysis
+     * Return the false positive score for use in classification analysis.
      *
      * @return The false positive score
      */
@@ -621,7 +621,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * Return the true negative score for use in classification analysis
+     * Return the true negative score for use in classification analysis.
      *
      * @return The true negative score
      */
@@ -631,7 +631,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * Return the false negative score for use in classification analysis
+     * Return the false negative score for use in classification analysis.
      *
      * @return The false negative score
      */
@@ -641,7 +641,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * Return the squared distance to the other peak result
+     * Return the squared distance to the other peak result.
      *
      * @param r
      *            The result
@@ -655,7 +655,7 @@ public class PeakResult implements Cloneable
     }
 
     /**
-     * Return the distance to the other peak result
+     * Return the distance to the other peak result.
      *
      * @param r
      *            The result

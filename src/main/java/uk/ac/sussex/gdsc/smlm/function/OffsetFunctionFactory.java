@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
+ * Wraps a value function to add a pre-computed offset to the value during the forEach procedure.
  */
 public class OffsetFunctionFactory
 {

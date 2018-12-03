@@ -42,7 +42,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -148,19 +148,19 @@ public class BenchmarkFit implements PlugIn
     public class BenchmarkResult
     {
         /**
-         * The parameters used to create the data
+         * The parameters used to create the data.
          */
         final BenchmarkParameters benchmarkParameters;
         /**
-         * The actual parameters (with XY position adjusted for the region size)
+         * The actual parameters (with XY position adjusted for the region size).
          */
         final double[] answer;
         /**
-         * The string description of the parameters used to create and then fit the data
+         * The string description of the parameters used to create and then fit the data.
          */
         final String parameters;
         /**
-         * Results conversion factors
+         * Results conversion factors.
          */
         final double[] convert;
         /**
@@ -201,12 +201,12 @@ public class BenchmarkFit implements PlugIn
     }
 
     /**
-     * Store all the results from fitting on the same benchmark dataset
+     * Store all the results from fitting on the same benchmark dataset.
      */
     public static LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<>();
 
     /**
-     * Used to allow multi-threading of the fitting method
+     * Used to allow multi-threading of the fitting method.
      */
     private class Worker implements Runnable
     {
@@ -278,7 +278,7 @@ public class BenchmarkFit implements PlugIn
 
         private void run(int frame)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
             {
                 finished = true;
                 return;
@@ -626,7 +626,7 @@ public class BenchmarkFit implements PlugIn
         final double sa = getSa();
         gd.addMessage(
                 String.format("Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
-                        Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa)));
+                        MathUtils.rounded(benchmarkParameters.s / benchmarkParameters.a), MathUtils.rounded(sa)));
 
         final FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
         fitConfig = config.getFitConfiguration();
@@ -899,7 +899,7 @@ public class BenchmarkFit implements PlugIn
     private synchronized void showProgress()
     {
         if (progress % stepProgress == 0)
-            if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+            if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress))
                 IJ.showProgress(progress, totalProgress);
         progress++;
     }
@@ -923,7 +923,7 @@ public class BenchmarkFit implements PlugIn
             // Check if it is incorrect by only 1 pixel
             if (region.width <= imp.getWidth() + 1 && region.height <= imp.getHeight() + 1)
             {
-                Utils.log("Adjusting region %s to fit within image bounds (%dx%d)", region.toString(), imp.getWidth(),
+                ImageJUtils.log("Adjusting region %s to fit within image bounds (%dx%d)", region.toString(), imp.getWidth(),
                         imp.getHeight());
                 region = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
             }
@@ -974,7 +974,7 @@ public class BenchmarkFit implements PlugIn
 
         // Fit the frames
         totalProgress = totalFrames;
-        stepProgress = Utils.getProgressInterval(totalProgress);
+        stepProgress = ImageJUtils.getProgressInterval(totalProgress);
         progress = 0;
         for (int i = 0; i < totalFrames; i++)
             // Only fit if there were simulated photons
@@ -997,8 +997,8 @@ public class BenchmarkFit implements PlugIn
         threads.clear();
 
         if (hasOffsetXY())
-            Utils.log(TITLE + ": CoM within start offset = %d / %d (%s%%)", comValid.intValue(), totalFrames,
-                    Utils.rounded((100.0 * comValid.intValue()) / totalFrames));
+            ImageJUtils.log(TITLE + ": CoM within start offset = %d / %d (%s%%)", comValid.intValue(), totalFrames,
+                    MathUtils.rounded((100.0 * comValid.intValue()) / totalFrames));
 
         IJ.showProgress(1);
         IJ.showStatus("Collecting results ...");
@@ -1026,11 +1026,10 @@ public class BenchmarkFit implements PlugIn
         {
             IJ.showStatus("Calculating histograms ...");
 
-            int[] idList = new int[NAMES.length];
-            int count = 0;
+            WindowOrganiser windowOrganiser = new WindowOrganiser();
             final double[] convert = getConversionFactors();
 
-            boolean requireRetile = false;
+            final HistogramPlotBuilder builder = new HistogramPlotBuilder(TITLE).setNumberOfBins(histogramBins);
             for (int i = 0; i < NAMES.length; i++)
                 if (displayHistograms[i] && convert[i] != 0)
                 {
@@ -1038,23 +1037,19 @@ public class BenchmarkFit implements PlugIn
                     final double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
                     for (int j = 0; j < tmp.length; j++)
                         tmp[j] *= convert[i];
-                    final StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
-                    idList[count++] = Utils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
-                            String.format("%s +/- %s", Utils.rounded(tmpStats.getMean()),
-                                    Utils.rounded(tmpStats.getStandardDeviation())));
-                    requireRetile = requireRetile || Utils.isNewWindow();
+                    final StoredDataStatistics tmpStats = StoredDataStatistics.create(tmp);
+                    builder.setData(tmpStats).setName(NAMES[i])
+                        .setPlotLabel(
+                            String.format("%s +/- %s", MathUtils.rounded(tmpStats.getMean()),
+                                    MathUtils.rounded(tmpStats.getStandardDeviation()))).show(windowOrganiser);
                 }
 
-            if (count > 0 && requireRetile)
-            {
-                idList = Arrays.copyOf(idList, count);
-                WindowOrganiser.tileWindows(idList);
-            }
+            windowOrganiser.tile();
         }
 
         if (saveRawData)
         {
-            final String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
+            final String dir = ImageJUtils.getDirectory("Data_directory", rawDataDirectory);
             if (dir != null)
                 saveData(stats, dir);
         }
@@ -1081,7 +1076,7 @@ public class BenchmarkFit implements PlugIn
             Arrays.sort(data);
             for (final double d : data)
             {
-                //out.write(Utils.rounded(d, 4)); // rounded
+                //out.write(MathUtils.rounded(d, 4)); // rounded
                 out.write(Double.toString(d));
                 out.newLine();
             }
@@ -1237,14 +1232,14 @@ public class BenchmarkFit implements PlugIn
 
         // Create the benchmark settings and the fitting settings
         sb.append(benchmarkParameters.getMolecules()).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.getSignal())).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.s)).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.a)).append('\t');
-        sb.append(Utils.rounded(getSa() * benchmarkParameters.a)).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.getSignal())).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.s)).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.a)).append('\t');
+        sb.append(MathUtils.rounded(getSa() * benchmarkParameters.a)).append('\t');
         // Report XY in nm from the pixel centre
-        sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append('\t');
-        sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append('\t');
+        sb.append(MathUtils.rounded(distanceFromCentre(benchmarkParameters.x))).append('\t');
+        sb.append(MathUtils.rounded(distanceFromCentre(benchmarkParameters.y))).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append('\t');
 
         final CameraType cameraType = benchmarkParameters.cameraType;
         if (cameraType == CameraType.SCMOS)
@@ -1263,16 +1258,16 @@ public class BenchmarkFit implements PlugIn
         }
         sb.append('\t');
 
-        sb.append(Utils.rounded(benchmarkParameters.getBackground())).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.noise)).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.getBackground())).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.noise)).append('\t');
 
-        sb.append(Utils.rounded(benchmarkParameters.getSignal() / benchmarkParameters.noise)).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.precisionN)).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.precisionX)).append('\t');
-        sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.getSignal() / benchmarkParameters.noise)).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.precisionN)).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.precisionX)).append('\t');
+        sb.append(MathUtils.rounded(benchmarkParameters.precisionXML)).append('\t');
         sb.append(region.width).append("x");
         sb.append(region.height).append('\t');
-        sb.append(Utils.rounded(fitConfig.getInitialPeakStdDev() * benchmarkParameters.a)).append('\t');
+        sb.append(MathUtils.rounded(fitConfig.getInitialPeakStdDev() * benchmarkParameters.a)).append('\t');
         sb.append(PSFProtosHelper.getName(fitConfig.getPSF().getPsfType()));
         if (fitConfig.isFixedPSF())
             // Only fixed fitting can ignore the signal
@@ -1309,12 +1304,12 @@ public class BenchmarkFit implements PlugIn
         // Now output the actual results ...
         sb.append('\t');
         final double recall = (stats[0].getN() / (double) startPoints.length) / benchmarkParameters.getMolecules();
-        sb.append(Utils.rounded(recall));
+        sb.append(MathUtils.rounded(recall));
 
         for (int i = 0; i < stats.length; i++)
             if (convert[i] != 0)
-                sb.append('\t').append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
-                        .append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
+                sb.append('\t').append(MathUtils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
+                        .append(MathUtils.rounded(stats[i].getStandardDeviation() * convert[i]));
             else
                 sb.append("\t0\t0");
         summaryTable.append(sb.toString());
@@ -1453,19 +1448,19 @@ public class BenchmarkFit implements PlugIn
             // Now output the actual results ...
             sb.append('\t');
             final double recall = (stats[0].getN() / numberOfStartPoints) / benchmarkParameters.getMolecules();
-            sb.append(Utils.rounded(recall));
+            sb.append(MathUtils.rounded(recall));
             // Add the original recall
             sb.append('\t');
             final double recall2 = (count[j++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
-            sb.append(Utils.rounded(recall2));
+            sb.append(MathUtils.rounded(recall2));
 
             // Convert to units of the image (ADUs and pixels)
             final double[] convert = benchmarkResult.convert;
 
             for (int i = 0; i < stats.length; i++)
                 if (convert[i] != 0)
-                    sb.append('\t').append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
-                            .append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
+                    sb.append('\t').append(MathUtils.rounded(stats[i].getMean() * convert[i], 6)).append('\t')
+                            .append(MathUtils.rounded(stats[i].getStandardDeviation() * convert[i]));
                 else
                     sb.append("\t0\t0");
             analysisTable.append(sb.toString());

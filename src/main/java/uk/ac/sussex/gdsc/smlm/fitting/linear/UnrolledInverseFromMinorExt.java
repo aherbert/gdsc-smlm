@@ -44,7 +44,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 import org.ejml.data.DenseMatrix64F;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Alex Herbert created this extension of {@link org.ejml.alg.dense.misc.UnrolledInverseFromMinor}
@@ -55,7 +55,7 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
  */
 public class UnrolledInverseFromMinorExt
 {
-    /** The maximum supported matrix size */
+    /** The maximum supported matrix size. */
     public static final int MAX = 5;
 
     /**
@@ -113,7 +113,7 @@ public class UnrolledInverseFromMinorExt
         final double m12 = -(a21);
 
         final double det_recip = scale / (a11 * m11 + a12 * m12);
-        if (!Maths.isFinite(det_recip))
+        if (!Double.isFinite(det_recip))
             return null;
 
         final double m22 = a11;
@@ -149,7 +149,7 @@ public class UnrolledInverseFromMinorExt
         final double m13 = a21 * a32 - a22 * a31;
 
         final double det_recip = scale / (a11 * m11 + a12 * m12 + a13 * m13);
-        if (!Maths.isFinite(det_recip))
+        if (!Double.isFinite(det_recip))
             return null;
 
         final double m22 = a11 * a33 - a13 * a31;
@@ -198,7 +198,7 @@ public class UnrolledInverseFromMinorExt
                 a23 * (a31 * a42 - a32 * a41));
 
         final double det_recip = scale / (a11 * m11 + a12 * m12 + a13 * m13 + a14 * m14);
-        if (!Maths.isFinite(det_recip))
+        if (!Double.isFinite(det_recip))
             return null;
 
         final double m22 = +a11 * (a33 * a44 - a34 * a43) - a13 * (a31 * a44 - a34 * a41) +
@@ -277,7 +277,7 @@ public class UnrolledInverseFromMinorExt
                 a24 * (+a31 * (a42 * a53 - a43 * a52) - a32 * (a41 * a53 - a43 * a51) + a33 * (a41 * a52 - a42 * a51));
 
         final double det_recip = scale / (a11 * m11 + a12 * m12 + a13 * m13 + a14 * m14 + a15 * m15);
-        if (!Maths.isFinite(det_recip))
+        if (!Double.isFinite(det_recip))
             return null;
 
         final double m22 = +a11 *

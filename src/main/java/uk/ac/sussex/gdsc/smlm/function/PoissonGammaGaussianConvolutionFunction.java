@@ -25,7 +25,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Implements the probability density function for a Poisson-Gamma-Gaussian Mixture. The Gaussian is assumed to have
@@ -50,7 +50,7 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
 public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
     /**
-     * The on-chip gain multiplication factor
+     * The on-chip gain multiplication factor.
      */
     final double g;
 
@@ -170,7 +170,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
                     // Poisson-Gamma
                     PoissonGammaFunction.logPoissonGamma(cmin, e, g)
                     // Gaussian
-                            - (Maths.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
+                            - (MathUtils.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
 
         double p = 0;
 
@@ -213,7 +213,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
                     // Poisson-Gamma
                     PoissonGammaFunction.logPoissonGamma(c, e, g)
                     // Gaussian
-                            - (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
+                            - (MathUtils.pow2(c - o) / var_by_2) + logNormalisationGaussian);
 
         //		}
 

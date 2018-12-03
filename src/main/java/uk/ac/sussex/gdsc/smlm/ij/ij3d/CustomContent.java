@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 import ij3d.Content;
 
 /**
- * Extend the Content class to use CustomContentInstant
+ * Extend the Content class to use CustomContentInstant.
  */
 public class CustomContent extends Content
 {

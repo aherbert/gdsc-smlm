@@ -23,17 +23,17 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
-import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 @SuppressWarnings({ "javadoc" })
 public class CubicSplineDataTest
@@ -52,7 +52,7 @@ public class CubicSplineDataTest
 
     private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision) throws IOException
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final int x = 6, y = 5, z = 4;
 
         final int size = x * y;
@@ -77,6 +77,6 @@ public class CubicSplineDataTest
 
         for (int zz = 0; zz < z; zz++)
             for (int i = 0; i < size; i++)
-                Assertions.assertArrayEquals(f1.splines[zz][i].getA(), f2.splines[zz][i].getA());
+                Assertions.assertArrayEquals(f1.splines[zz][i].getCoefficients(), f2.splines[zz][i].getCoefficients());
     }
 }

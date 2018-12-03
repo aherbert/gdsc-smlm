@@ -36,18 +36,18 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
 public class FitJob
 {
     /**
-     * Thefit job status
+     * Thefit job status.
      */
     public enum Status
     {
         //@formatter:off
-		/** Pending (waiting to run) */
+		/** Pending (waiting to run). */
 		PENDING{ @Override
 		public String getName() { return "Pending"; }},
 		/** In-progress (running) */
 		IN_PROGRESS{ @Override
 		public String getName() { return "In-progress"; }},
-		/** Finished */
+		/** Finished. */
 		FINISHED{ @Override
 		public String getName() { return "Finished"; }};
 		//@formatter:on
@@ -161,7 +161,7 @@ public class FitJob
     }
 
     /**
-     * Empty constructor with no data
+     * Empty constructor with no data.
      */
     public FitJob()
     {
@@ -172,7 +172,7 @@ public class FitJob
     }
 
     /**
-     * @return the id
+     * @return the id.
      */
     public int getId()
     {
@@ -180,7 +180,7 @@ public class FitJob
     }
 
     /**
-     * @return the slice
+     * @return the slice.
      */
     public int getSlice()
     {
@@ -188,7 +188,7 @@ public class FitJob
     }
 
     /**
-     * @return the data
+     * @return the data.
      */
     public float[] getData()
     {
@@ -196,7 +196,7 @@ public class FitJob
     }
 
     /**
-     * @return the bounds
+     * @return the bounds.
      */
     public Rectangle getBounds()
     {
@@ -204,7 +204,7 @@ public class FitJob
     }
 
     /**
-     * Called to indicate that processing of the job is in progress
+     * Called to indicate that processing of the job is in progress.
      */
     public void start()
     {
@@ -212,7 +212,7 @@ public class FitJob
     }
 
     /**
-     * Called to indicate that processing of the job has finished
+     * Called to indicate that processing of the job has finished.
      */
     public void finished()
     {
@@ -220,7 +220,7 @@ public class FitJob
     }
 
     /**
-     * @return The additional parameters for the job (or null)
+     * @return The additional parameters for the job (or null).
      */
     public FitParameters getFitParameters()
     {
@@ -228,7 +228,7 @@ public class FitJob
     }
 
     /**
-     * @return The job status
+     * @return The job status.
      */
     public Status getStatus()
     {

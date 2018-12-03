@@ -33,7 +33,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
     private DataProcessor processor;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param search
      *            The search width for non-maximum suppression

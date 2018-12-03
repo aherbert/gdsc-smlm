@@ -75,7 +75,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     private int maxRows = 0;
 
     /**
-     * Instantiates a new table column adjuster and use default spacing
+     * Instantiates a new table column adjuster and use default spacing.
      *
      * @param table
      *            the table
@@ -121,7 +121,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     }
 
     /**
-     * Adjust the widths of all the columns in the table
+     * Adjust the widths of all the columns in the table.
      */
     public void adjustColumns()
     {
@@ -275,7 +275,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     }
 
     /**
-     * Restore the widths of the columns in the table to its previous width
+     * Restore the widths of the columns in the table to its previous width.
      */
     public void restoreColumns()
     {
@@ -463,7 +463,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     }
 
     /**
-     * Action to adjust or restore the width of a single column or all columns
+     * Action to adjust or restore the width of a single column or all columns.
      */
     private class ColumnAction extends AbstractAction
     {

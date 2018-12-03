@@ -75,7 +75,7 @@ public class Workflow<S, R>
     }
 
     /**
-     * Allow work to be added to a FIFO stack in a synchronised manner
+     * Allow work to be added to a FIFO stack in a synchronised manner.
      */
     private class WorkStack
     {

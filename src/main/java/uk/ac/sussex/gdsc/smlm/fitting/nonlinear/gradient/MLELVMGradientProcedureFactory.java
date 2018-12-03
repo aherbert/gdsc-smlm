@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 public class MLELVMGradientProcedureFactory
 {
     /**
-     * Create a new gradient procedure
+     * Create a new gradient procedure.
      *
      * @param y
      *            Data to fit

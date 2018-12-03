@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+
 import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 @SuppressWarnings({ "javadoc" })
 public class InterpolatedPoissonFisherInformationTest

@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
- * Contains helper functions for working with peak results
+ * Contains helper functions for working with peak results.
  */
 public class PeakResultHelper
 {

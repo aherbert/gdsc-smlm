@@ -23,28 +23,31 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.junit.jupiter.api.Assertions;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.Arrays;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedFilterTest
 {
-    /** The primes used for the width/height of images during filter testing. */
+    /** The primes used for the width./height of images during filter testing. */
     static int[] primes = new int[] { 113, /* 97, 53, */ 29 };
     /**
      * The box sizes used during filter testing.
@@ -60,7 +63,7 @@ public abstract class WeightedFilterTest
         final float[] data = new float[width * height];
         for (int i = data.length; i-- > 0;)
             data[i] = i;
-        Random.shuffle(data, rg);
+        RandomUtils.shuffle(data, rg);
         return data;
     }
 
@@ -69,7 +72,7 @@ public abstract class WeightedFilterTest
     @SeededTest
     public void evenWeightsDoesNotAlterFiltering(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final DataFilter filter1 = createDataFilter();
         final DataFilter filter2 = createDataFilter();
@@ -78,6 +81,8 @@ public abstract class WeightedFilterTest
 
         final int[] primes = Arrays.copyOf(WeightedFilterTest.primes, WeightedFilterTest.primes.length - 1);
 
+        final FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-4, 0);
+        
         for (final int width : primes)
             for (final int height : primes)
             {
@@ -96,7 +101,7 @@ public abstract class WeightedFilterTest
                             final float[] o = filter(data, width, height, boxSize - offset, internal, filter2);
                             try
                             {
-                                ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-4f);
+                                TestAssertions.assertArrayTest(e, o, equality);
                             }
                             catch (final AssertionError ex)
                             {
@@ -128,7 +133,7 @@ public abstract class WeightedFilterTest
     @SeededTest
     public void filterDoesNotAlterFilteredImageMean(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         //ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
         //		ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
@@ -138,7 +143,7 @@ public abstract class WeightedFilterTest
 
         final TDoubleArrayList l1 = new TDoubleArrayList();
 
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, 2, 0.2);
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
         for (final int width : primes)
             for (final int height : primes)
@@ -194,7 +199,7 @@ public abstract class WeightedFilterTest
     protected static double getMean(float[] data, int width, int height, float boxSize, boolean internal,
             DataFilter filter)
     {
-        return Maths.sum(filter(data, width, height, boxSize, internal, filter)) / data.length;
+        return MathUtils.sum(filter(data, width, height, boxSize, internal, filter)) / data.length;
     }
 
     protected static double testMean(float[] data, int width, int height, float boxSize, boolean internal,

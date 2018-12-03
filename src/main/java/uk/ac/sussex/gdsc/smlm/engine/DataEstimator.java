@@ -46,7 +46,7 @@ public class DataEstimator
     private final int ESTIMATE_THRESHOLD = 3;
     private final int ESTIMATE_BACKGROUND_SIZE = 4;
 
-    final private float[] data;
+    private final float[] data;
     private Histogram h;
     private final int width, height;
     private float fraction = 0.25f;
@@ -55,7 +55,7 @@ public class DataEstimator
     private float[] estimate = null;
 
     /**
-     * Create a new DataEstimator
+     * Create a new DataEstimator.
      *
      * @param data
      *            The data
@@ -76,7 +76,7 @@ public class DataEstimator
     }
 
     /**
-     * Gets a clone of the data
+     * Gets a clone of the data.
      *
      * @return the data (or null)
      */
@@ -161,7 +161,7 @@ public class DataEstimator
             {
                 if (h.getValue(i) >= t)
                     break;
-                stats.add(h.h[i], h.getValue(i));
+                stats.add(h.histogramCounts[i], h.getValue(i));
             }
 
             // Check if background region is large enough
@@ -171,7 +171,7 @@ public class DataEstimator
                 estimate[ESTIMATE_LARGE_ENOUGH] = 1;
             else
                 // Recompute with all the data
-                stats = new Statistics(data);
+                stats = Statistics.create(data);
 
             estimate[ESTIMATE_BACKGROUND] = (float) stats.getMean();
             estimate[ESTIMATE_NOISE] = (float) stats.getStandardDeviation();
@@ -179,7 +179,7 @@ public class DataEstimator
     }
 
     /**
-     * Estimate the noise in the all the data
+     * Estimate the noise in the all the data.
      *
      * @param method
      *            the method
@@ -187,12 +187,12 @@ public class DataEstimator
      */
     public float getNoise(NoiseEstimator.Method method)
     {
-        final NoiseEstimator ne = new NoiseEstimator(data, width, height);
+        final NoiseEstimator ne = NoiseEstimator.wrap(data, width, height);
         return (float) ne.getNoise(method);
     }
 
     /**
-     * Get the percentile value of the data
+     * Get the percentile value of the data.
      *
      * @param percentile
      *            The percentile
@@ -260,7 +260,7 @@ public class DataEstimator
     }
 
     /**
-     * SGet the size of the histogram used to compute the threshold
+     * SGet the size of the histogram used to compute the threshold.
      *
      * @return the histogram size
      */
@@ -270,7 +270,7 @@ public class DataEstimator
     }
 
     /**
-     * Set the size of the histogram used to compute the threshold
+     * Set the size of the histogram used to compute the threshold.
      *
      * @param histogramSize
      *            the histogram size

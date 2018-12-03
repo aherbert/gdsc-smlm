@@ -40,7 +40,7 @@ public class FloatDHT2D extends FloatImage2D
     private int[] jj;
 
     /**
-     * Instantiates a new 2D discrete Hartley transform
+     * Instantiates a new 2D discrete Hartley transform.
      *
      * @param image
      *            the stack
@@ -591,7 +591,7 @@ public class FloatDHT2D extends FloatImage2D
     }
 
     /**
-     * Convert a discrete Fourier transform (DFT) to a DHT
+     * Convert a discrete Fourier transform (DFT) to a DHT.
      *
      * @param real
      *            the real component

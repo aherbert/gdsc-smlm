@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 public class ImagePeakResultsFactory
 {
     /**
-     * Create a PeakResults image using the specified parameters
+     * Create a PeakResults image using the specified parameters.
      *
      * @param resultsImage
      *            The type of image

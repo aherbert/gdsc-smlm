@@ -1,20 +1,21 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.math3.util.FastMath;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
+
+import org.apache.commons.math3.util.FastMath;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class FastMathTest
@@ -86,7 +87,7 @@ public class FastMathTest
     @Test
     public void cbrtIsFaster()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         // Q. What is a suitable range for this test?
         final int range = 5;
@@ -111,7 +112,7 @@ public class FastMathTest
         for (int k = 2; k <= 3; k++)
         {
             TimingResult slow = ts.get(-k);
-            logger.log(TestLog.getTimingRecord(slow, fast));
+            logger.log(TestLogUtils.getTimingRecord(slow, fast));
         }
     }
 }

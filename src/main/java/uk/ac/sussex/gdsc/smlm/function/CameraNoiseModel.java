@@ -101,7 +101,7 @@ public abstract class CameraNoiseModel implements NoiseModel
     public abstract double variance(final double value);
 
     /**
-     * @return the bias
+     * @return the bias.
      */
     public double getBias()
     {
@@ -118,7 +118,7 @@ public abstract class CameraNoiseModel implements NoiseModel
     }
 
     /**
-     * @return the read noise
+     * @return the read noise.
      */
     public double getReadNoise()
     {
@@ -135,7 +135,7 @@ public abstract class CameraNoiseModel implements NoiseModel
     }
 
     /**
-     * @return true if the camera is an Electron Multiplying CCD camera
+     * @return true if the camera is an Electron Multiplying CCD camera.
      */
     public abstract boolean isEmCCD();
 }

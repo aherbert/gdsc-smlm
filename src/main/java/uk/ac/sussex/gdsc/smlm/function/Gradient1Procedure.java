@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Interface for functions to produce a value and first partial derivative
+ * Interface for functions to produce a value and first partial derivative.
  */
 public interface Gradient1Procedure
 {

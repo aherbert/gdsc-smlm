@@ -32,18 +32,18 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 public class LVMGradientProcedureFactory
 {
     /**
-     * The type of LVM gradient procedure
+     * The type of LVM gradient procedure.
      */
     public enum Type
     {
         //@formatter:off
 		/** Least-squares */
 		LSQ,
-		/** Maximum Likelihood Estimation (using LVM) */
+		/** Maximum Likelihood Estimation (using LVM). */
 		MLE { @Override public boolean isMLE()	{return true;} },
 		/** Weighted least-squares */
 		WLSQ,
-		/** Fast Maximum Likelihood Estimation (using Newton iteration) */
+		/** Fast Maximum Likelihood Estimation (using Newton iteration). */
 		FastLogMLE { @Override public boolean isMLE()	{return true;} };
 		//@formatter:on
 

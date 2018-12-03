@@ -26,14 +26,14 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-import uk.ac.sussex.gdsc.core.utils.Digest;
+import uk.ac.sussex.gdsc.core.utils.DigestUtils;
 
 /**
- * Provide digest functionality for ImageJ images to digest the pixels array
+ * Provide digest functionality for ImageJ images to digest the pixels array.
  */
 public class PeakResultDigest
 {
-    /** The expected data bytes without the parameters */
+    /** The expected data bytes without the parameters. */
     private static final int EXPECTED_DATA_BYTES = 48;
 
     private final MessageDigest digest;
@@ -45,7 +45,7 @@ public class PeakResultDigest
      */
     public PeakResultDigest()
     {
-        this(Digest.MD5);
+        this(DigestUtils.MD5);
     }
 
     /**
@@ -56,7 +56,7 @@ public class PeakResultDigest
      */
     public PeakResultDigest(String algorithm)
     {
-        digest = Digest.getDigest(algorithm);
+        digest = DigestUtils.getDigest(algorithm);
     }
 
     /**
@@ -121,7 +121,7 @@ public class PeakResultDigest
      */
     public String digest()
     {
-        return Digest.toHex(digest.digest());
+        return DigestUtils.toHex(digest.digest());
     }
 
     /**
@@ -135,7 +135,7 @@ public class PeakResultDigest
         try
         {
             final MessageDigest d = (MessageDigest) digest.clone();
-            return Digest.toHex(d.digest());
+            return DigestUtils.toHex(d.digest());
         }
         catch (final CloneNotSupportedException e)
         {

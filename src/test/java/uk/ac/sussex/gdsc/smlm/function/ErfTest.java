@@ -1,27 +1,30 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class ErfTest
@@ -41,7 +44,7 @@ public class ErfTest
     }
 
     //@formatter:off
-	private static abstract class BaseErf
+	private abstract static class BaseErf
 	{
 		String name;
 		BaseErf(String name) { this.name = name; }
@@ -102,7 +105,7 @@ public class ErfTest
 
     private static void erfxHasLowError(RandomSeed seed, BaseErf erf, double expected)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final int range = 8;
         double max = 0;
 
@@ -118,7 +121,7 @@ public class ErfTest
                 //logger.fine(FunctionUtils.getSupplier("x=%f, e=%f, o=%f, error=%f", x, e, o, error);
                 Assertions.assertTrue(error < expected);
             }
-        logger.log(TestLog.getRecord(Level.INFO, "erfx %s max error = %g", erf.name, max));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "erfx %s max error = %g", erf.name, max));
     }
 
     @Test
@@ -147,7 +150,7 @@ public class ErfTest
 
     private static void erfxIndistinguishableFrom1(BaseErf erf)
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
 
         // Find switch using a binary search
         double lower = 1;
@@ -186,7 +189,7 @@ public class ErfTest
 
     private static void erfxxHasLowError(RandomSeed seed, BaseErf erf, double expected)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final int range = 3;
         double max = 0;
@@ -210,7 +213,7 @@ public class ErfTest
                     }
                 }
 
-        logger.log(TestLog.getRecord(Level.INFO, "erfxx %s max error = %g", erf.name, max));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "erfxx %s max error = %g", erf.name, max));
     }
 
     @Test
@@ -249,7 +252,7 @@ public class ErfTest
             Assertions.assertTrue(error < expected);
         }
 
-        logger.log(TestLog.getRecord(Level.INFO, "erfxx %s unit max error = %g", erf.name, max));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "erfxx %s unit max error = %g", erf.name, max));
     }
 
     @Test
@@ -320,8 +323,8 @@ public class ErfTest
         Assertions.assertTrue(DoubleEquality.relativeError(sum1, sum3) < 1e-3,
                 () -> erf.name + " Gaussian approx integral is incorrect");
 
-        logger.log(TestLog.getRecord(Level.INFO, "%s Erf approx pixel unit max error = %f", erf.name, max));
-        logger.log(TestLog.getRecord(Level.INFO, "%s Gaussian approx pixel unit max error = %f", erf.name, max2));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "%s Erf approx pixel unit max error = %f", erf.name, max));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "%s Gaussian approx pixel unit max error = %f", erf.name, max2));
     }
 
     private static class ErfTimingTask extends BaseTimingTask
@@ -360,7 +363,7 @@ public class ErfTest
     @Test
     public void erfApproxIsFaster()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int range = 5;
         final int steps = 10000;
@@ -454,10 +457,10 @@ public class ErfTest
 
             final int n = steps * steps;
             o = norm * sum / n;
-            logger.log(TestLog.getRecord(Level.INFO, "n=%d, e=%f, o=%f, error=%f", n, e, o, DoubleEquality.relativeError(e, o)));
+            logger.log(TestLogUtils.getRecord(Level.INFO, "n=%d, e=%f, o=%f, error=%f", n, e, o, DoubleEquality.relativeError(e, o)));
         }
 
-        ExtraAssertions.assertEqualsRelative(e, o, 1e-2);
+        TestAssertions.assertTest(e, o, TestHelper.doublesAreClose(1e-2, 0));
     }
 
     @Test
@@ -487,33 +490,35 @@ public class ErfTest
     @Test
     public void canComputePower4()
     {
+        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = -10; i <= 10; i++)
             for (final double d : new double[] { 0, 0.1, 0.01, 0.001 })
             {
                 final double f = i + d;
                 final double e = Math.pow(f, 4);
                 final double o = uk.ac.sussex.gdsc.smlm.function.Erf.pow4(f);
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, () -> "x="+ f);
+                TestAssertions.assertTest(e, o, equality, () -> "x="+ f);
             }
     }
 
     @Test
     public void canComputePower16()
     {
+        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = -10; i <= 10; i++)
             for (final double d : new double[] { 0, 0.1, 0.01, 0.001 })
             {
                 final double f = i + d;
                 final double e = Math.pow(f, 16);
                 final double o = uk.ac.sussex.gdsc.smlm.function.Erf.pow16(f);
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, () -> "x=" + f);
+                TestAssertions.assertTest(e, o, equality, () -> "x=" + f);
             }
     }
 
     // See if power functions are faster
 
     //@formatter:off
-	private static abstract class BasePow
+	private abstract static class BasePow
 	{
 		String name;
 		BasePow(String name) { this.name = name; }
@@ -593,7 +598,7 @@ public class ErfTest
     @Test
     public void powerApproxIsFaster()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int range = 5000;
         final int steps = 100000;

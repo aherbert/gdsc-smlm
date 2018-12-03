@@ -42,7 +42,7 @@ public class Gaussian2DFitter
     protected FunctionSolver solver;
     /** The last successful fit. Used to compute the residuals. */
     protected double[] residuals = null;
-    /** Allow calculation of residuals to be turned off (overwrite constructor fit configuration) */
+    /** Allow calculation of residuals to be turned off (overwrite constructor fit configuration). */
     protected boolean computeResiduals = true;
     /** The lower bounds for function solvers. */
     protected double[] lower;
@@ -957,7 +957,7 @@ public class Gaussian2DFitter
     }
 
     /**
-     * Gets the min width factor for the lower bounds
+     * Gets the min width factor for the lower bounds.
      *
      * @return the min width factor
      */
@@ -971,7 +971,7 @@ public class Gaussian2DFitter
     }
 
     /**
-     * Gets the max width factor for the upper bounds
+     * Gets the max width factor for the upper bounds.
      *
      * @return the max width factor
      */
@@ -1124,7 +1124,7 @@ public class Gaussian2DFitter
     }
 
     /**
-     * @return the computeResiduals
+     * @return the computeResiduals.
      */
     public boolean isComputeResiduals()
     {
@@ -1185,7 +1185,7 @@ public class Gaussian2DFitter
     }
 
     /**
-     * @return the optimised function value for the last fit
+     * @return the optimised function value for the last fit.
      */
     public double getValue()
     {

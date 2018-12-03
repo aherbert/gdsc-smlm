@@ -207,7 +207,7 @@ public class LocalisationModel implements Comparable<LocalisationModel>
     }
 
     /**
-     * Allow the package to set the id
+     * Allow the package to set the id.
      *
      * @param id
      *            The Id

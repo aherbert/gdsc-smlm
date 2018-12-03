@@ -28,7 +28,7 @@ import java.util.Arrays;
 import gnu.trove.list.array.TDoubleArrayList;
 
 /**
- * Allow optimisation using Apache Commons Math 3 Optimiser
+ * Allow optimisation using Apache Commons Math 3 Optimiser.
  */
 public abstract class OptimiserFunction
 {
@@ -95,7 +95,7 @@ public abstract class OptimiserFunction
     }
 
     /**
-     * Gets the x data
+     * Gets the x data.
      *
      * @return the x
      */
@@ -105,7 +105,7 @@ public abstract class OptimiserFunction
     }
 
     /**
-     * Gets the y data
+     * Gets the y data.
      *
      * @return the y
      */

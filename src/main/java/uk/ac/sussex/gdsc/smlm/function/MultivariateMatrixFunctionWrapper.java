@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 
 /**
- * Wrap the NonLinearFunction to allow use with the Apache Commons Math library
+ * Wrap the NonLinearFunction to allow use with the Apache Commons Math library.
  */
 public class MultivariateMatrixFunctionWrapper extends NonLinearFunctionWrapper implements MultivariateMatrixFunction
 {

@@ -1,10 +1,10 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.FloatEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -12,15 +12,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-import uk.ac.sussex.gdsc.core.utils.FloatEquality;
-import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
-public class AbstractFilterTest implements Function<RandomSeed, Object>
+public class AbstractFilterTest
 {
     protected static Logger logger;
 
@@ -46,10 +45,10 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
 
     // TODO - The test data should be representative of the final use case
 
-    /** The primes used for the width/height of images during filter testing. */
+    /** The primes used for the width./height of images during filter testing. */
     static int[] primes = new int[] { 113, /* 97, 53, */ 29 };
 
-    /** The primes used for the width/height of images during speed testing. */
+    /** The primes used for the width./height of images during speed testing. */
     static int[] speedPrimes = new int[] { 113 };
 
     /**
@@ -71,7 +70,7 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
     static boolean[] checkInternal = new boolean[] { true, false };
 
     /**
-     * Create random float data
+     * Create random float data.
      *
      * @param rg
      *            the random generator
@@ -90,7 +89,7 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
     }
 
     /**
-     * Create random int data
+     * Create random int data.
      *
      * @param rg
      *            the random generator
@@ -105,12 +104,12 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
         final int[] data = new int[width * height];
         for (int i = data.length; i-- > 0;)
             data[i] = i;
-        Random.shuffle(data, rg);
+        RandomUtils.shuffle(data, rg);
         return data;
     }
 
     // Cache data
-    private class FloatData
+    private static class FloatData
     {
         final ArrayList<float[]> dataSet = new ArrayList<>();
         final UniformRandomProvider rg;
@@ -121,7 +120,7 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
         }
     }
 
-    private static DataCache<RandomSeed, Object> dataCache = new DataCache<>();
+    private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap = new ConcurrentHashMap<>();
 
     /**
      * Create random float data.
@@ -134,7 +133,8 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
      */
     ArrayList<float[]> getSpeedData(RandomSeed seed, int size)
     {
-        final FloatData data = (FloatData) dataCache.getOrComputeIfAbsent(seed, this);
+        final FloatData data = (FloatData) ConcurrentHashMap.computeIfAbsent(seed,
+            AbstractFilterTest::createSpeedData);
         final ArrayList<float[]> dataSet = data.dataSet;
         if (dataSet.size() < size)
         {
@@ -152,11 +152,10 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
         return dataSet2;
     }
 
-    @Override
-    public Object apply(RandomSeed source)
+    private static Object createSpeedData(RandomSeed source)
     {
         // Just store the random generator and the empty data
-        return new FloatData(RNGFactory.create(source.getSeed()));
+        return new FloatData(RngUtils.create(source.getSeed()));
     }
 
     /**
@@ -170,7 +169,8 @@ public class AbstractFilterTest implements Function<RandomSeed, Object>
      */
     ArrayList<int[]> getIntSpeedData(RandomSeed seed, int size)
     {
-        final FloatData data = (FloatData) dataCache.getOrComputeIfAbsent(seed, this);
+        final FloatData data = (FloatData) ConcurrentHashMap.computeIfAbsent(seed,
+            AbstractFilterTest::createSpeedData);
         final ArrayList<float[]> dataSet = data.dataSet;
         if (dataSet.size() < size)
         {

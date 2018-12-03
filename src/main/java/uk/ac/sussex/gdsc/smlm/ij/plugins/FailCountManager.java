@@ -46,22 +46,24 @@ import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ags.utils.dataStructures.trees.secondGenKD.IntResultHeap;
-import uk.ac.sussex.gdsc.core.generics.ConcurrentMonoStack;
+
+import uk.ac.sussex.gdsc.core.ags.utils.data.trees.gen2.IntResultHeap;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.BooleanArray;
 import uk.ac.sussex.gdsc.core.utils.BooleanRollingArray;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
@@ -122,14 +124,14 @@ public class FailCountManager implements PlugIn
     private static String[] OPTIONS = SettingsManager.getNames((Object[]) FailCountOption.values());
 
     /**
-     * Hold the fail count data for a single sequential analysis routine
+     * Hold the fail count data for a single sequential analysis routine.
      */
     private static class FailCountData
     {
         /** The id of the data. */
         public final int id;
 
-        /** The results (pass/fail). */
+        /** The results (pass./fail). */
         private final boolean[] results;
 
         private int maxConsFailCount = -1;
@@ -416,7 +418,7 @@ public class FailCountManager implements PlugIn
 
         // Run
         final int totalFrames = Math.min(source.getFrames(), settings.getMaxFrames());
-        final int step = Utils.getProgressInterval(totalFrames);
+        final int step = ImageJUtils.getProgressInterval(totalFrames);
         IJ.showProgress(0);
         boolean shutdown = false;
         int slice = 0;
@@ -428,7 +430,7 @@ public class FailCountManager implements PlugIn
                 break;
 
             if (slice++ % step == 0)
-                if (Utils.showStatus("Fitting slice: " + slice + " / " + totalFrames))
+                if (ImageJUtils.showStatus("Fitting slice: " + slice + " / " + totalFrames))
                     IJ.showProgress(slice, totalFrames);
 
             final ParameterisedFitJob job = createJob(source.getStartFrameNumber(), data, bounds);
@@ -438,7 +440,7 @@ public class FailCountManager implements PlugIn
             shutdown = escapePressed();
         }
 
-        Utils.showStatus("Extracting fail count data");
+        ImageJUtils.showStatus("Extracting fail count data");
         engine.end(shutdown);
         IJ.showProgress(1);
         source.close();
@@ -464,7 +466,7 @@ public class FailCountManager implements PlugIn
             }
         }
         FailCountManager.failCountData = failCountData;
-        Utils.showStatus("");
+        ImageJUtils.showStatus("");
 
         // Save for the future
         if (settings.getSaveAfterFitting())
@@ -523,7 +525,7 @@ public class FailCountManager implements PlugIn
      */
     private void loadData()
     {
-        final String filename = Utils.getFilename("Fail_count_data_filename", settings.getFilename());
+        final String filename = ImageJUtils.getFilename("Fail_count_data_filename", settings.getFilename());
         if (filename == null)
             return;
         settings.setFilename(filename);
@@ -637,7 +639,7 @@ public class FailCountManager implements PlugIn
             IJ.error(TITLE, "No fail count data in memory");
             return;
         }
-        final String filename = Utils.getFilename("Fail_count_data_filename", settings.getFilename());
+        final String filename = ImageJUtils.getFilename("Fail_count_data_filename", settings.getFilename());
         if (filename == null)
             return;
         settings.setFilename(filename);
@@ -799,11 +801,11 @@ public class FailCountManager implements PlugIn
             final String title = TITLE + " " + string;
             final Plot plot = new Plot(title, "Candidate", string);
             final double maxx = (fixedXAxis) ? maxSize : x[x.length - 1];
-            final double maxy = Maths.max(y);
+            final double maxy = MathUtils.max(y);
             plot.setLimits(x[0], maxx, 0, maxy * 1.05);
             plot.addPoints(x, y, Plot.LINE);
             plot.addLabel(0, 0, "Max = " + maxy);
-            Utils.display(title, plot, 0, wo);
+            ImageJUtils.display(title, plot, 0, wo);
         }
     }
 
@@ -917,7 +919,7 @@ public class FailCountManager implements PlugIn
 
         // Note that 0 failures in a window can be scored using the consecutive fail counter.
         int max = Math.min(maxFail, settings.getRollingCounterMaxAllowedFailures());
-        for (int fail = Maths.min(maxFail,
+        for (int fail = MathUtils.min(maxFail,
                 Math.max(1, settings.getRollingCounterMinAllowedFailures())); fail <= max; fail++)
         {
             // Note that n-1 failures in window n can be scored using the consecutive fail counter.
@@ -939,7 +941,7 @@ public class FailCountManager implements PlugIn
         fill(type, counters, 1);
 
         max = Math.min(maxFail, settings.getWeightedCounterMaxAllowedFailures());
-        for (int fail = Maths.min(maxFail, settings.getWeightedCounterMinAllowedFailures()); fail <= max; fail++)
+        for (int fail = MathUtils.min(maxFail, settings.getWeightedCounterMinAllowedFailures()); fail <= max; fail++)
         {
             for (int w = settings.getWeightedCounterMinPassDecrement(); w <= settings
                     .getWeightedCounterMaxPassDecrement(); w++)
@@ -959,7 +961,7 @@ public class FailCountManager implements PlugIn
         fill(type, counters, 2);
 
         max = Math.min(maxFail, settings.getResettingCounterMaxAllowedFailures());
-        for (int fail = Maths.min(maxFail, settings.getResettingCounterMinAllowedFailures()); fail <= max; fail++)
+        for (int fail = MathUtils.min(maxFail, settings.getResettingCounterMinAllowedFailures()); fail <= max; fail++)
         {
             for (double f = settings.getResettingCounterMinResetFraction(); f <= settings
                     .getResettingCounterMaxResetFraction(); f += settings.getResettingCounterIncResetFraction())
@@ -1009,7 +1011,7 @@ public class FailCountManager implements PlugIn
         final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
         final TurboList<Future<?>> futures = new TurboList<>(nThreads);
 
-        final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), failCountData.size(), nThreads > 1);
+        final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), failCountData.size(), nThreads > 1);
         IJ.showStatus("Analysing " + TextUtils.pleural(counters.size(), "counter"));
         for (int i = 0; i < failCountData.size(); i++)
         {
@@ -1056,7 +1058,7 @@ public class FailCountManager implements PlugIn
             }));
         }
 
-        Utils.waitForCompletion(futures);
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
         executor.shutdown();
         IJ.showProgress(1);
         if (IJ.escapePressed())
@@ -1069,7 +1071,7 @@ public class FailCountManager implements PlugIn
 
         // TODO - check if the top filter is at the bounds of the range
         final int minIndex = SimpleArrayUtils.findMinIndex(score);
-        Utils.log(TITLE + " Analysis : Best counter = %s (Score = %f)", counters.getf(minIndex).getDescription(),
+        ImageJUtils.log(TITLE + " Analysis : Best counter = %s (Score = %f)", counters.getf(minIndex).getDescription(),
                 score[minIndex]);
 
         // Show a table of results for the top N for each type
@@ -1091,7 +1093,7 @@ public class FailCountManager implements PlugIn
                     continue;
                 indices = heap.getData();
                 // Ensure sorted
-                Sort.sortAscending(indices, score);
+                SortUtils.sortIndices(indices, score, false);
 
                 final StringBuilder sb = new StringBuilder();
                 final BufferedTextWindow tw = new BufferedTextWindow(resultsWindow);
@@ -1116,7 +1118,7 @@ public class FailCountManager implements PlugIn
     private static void fill(TByteArrayList type, TurboList<FailCounter> counters, int b)
     {
         final int n = counters.size() - type.size();
-        Utils.log("Type %d = %d", b, n);
+        ImageJUtils.log("Type %d = %d", b, n);
         type.fill(type.size(), counters.size(), (byte) b);
     }
 

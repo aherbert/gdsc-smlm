@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
@@ -49,13 +49,13 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
     /** The x1 position. */
     protected double x1pos;
 
-    /** The amplitude/height. */
+    /** The amplitude./height. */
     protected double height;
     /** position pre-factor */
     protected double aa;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param maxx
      *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)

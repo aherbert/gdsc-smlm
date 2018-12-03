@@ -25,10 +25,10 @@ package uk.ac.sussex.gdsc.smlm.search;
 
 import java.util.Arrays;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * Specify the dimensions for a search
+ * Specify the dimensions for a search.
  */
 public class SearchDimension implements Cloneable, Dimension
 {
@@ -139,8 +139,8 @@ public class SearchDimension implements Cloneable, Dimension
         this.nIncrement = nIncrement;
 
         // Rounding changes the range so bring the upper and lower back within
-        lower = Maths.clip(this.min, this.max, lower);
-        upper = Maths.clip(this.min, this.max, upper);
+        lower = MathUtils.clip(this.min, this.max, lower);
+        upper = MathUtils.clip(this.min, this.max, upper);
 
         setCentre((upper + lower) / 2);
         setIncrement((upper - lower) / (2 * nIncrement));
@@ -196,7 +196,7 @@ public class SearchDimension implements Cloneable, Dimension
     public double round(double value)
     {
         if (canRound())
-            return Maths.round(value, minIncrement);
+            return MathUtils.round(value, minIncrement);
         return value;
     }
 
@@ -226,7 +226,7 @@ public class SearchDimension implements Cloneable, Dimension
     }
 
     /**
-     * Gets the centre of the range in the dimension
+     * Gets the centre of the range in the dimension.
      *
      * @return the centre of the range in the dimension
      */
@@ -261,7 +261,7 @@ public class SearchDimension implements Cloneable, Dimension
     }
 
     /**
-     * Gets the current lower bound of the range
+     * Gets the current lower bound of the range.
      *
      * @return the current lower bound of the range
      */
@@ -272,7 +272,7 @@ public class SearchDimension implements Cloneable, Dimension
     }
 
     /**
-     * Gets the current upper bound of the range
+     * Gets the current upper bound of the range.
      *
      * @return the current upper bound of the range
      */
@@ -406,7 +406,7 @@ public class SearchDimension implements Cloneable, Dimension
     }
 
     /**
-     * Gets the max length of the values array
+     * Gets the max length of the values array.
      *
      * @return the max length
      */
@@ -416,7 +416,7 @@ public class SearchDimension implements Cloneable, Dimension
     }
 
     /**
-     * @return the reduceFactor
+     * @return the reduceFactor.
      */
     public double getReduceFactor()
     {
@@ -437,7 +437,7 @@ public class SearchDimension implements Cloneable, Dimension
     }
 
     /**
-     * Reduce the size of the increment by multiplying by the reduce factor
+     * Reduce the size of the increment by multiplying by the reduce factor.
      */
     public void reduce()
     {

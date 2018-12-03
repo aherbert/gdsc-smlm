@@ -35,7 +35,7 @@ import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
 /**
- * Create an object to represent a set of points
+ * Create an object to represent a set of points.
  */
 public class TransparentItemPointMesh extends ItemPointMesh implements TransparentItemShape
 {

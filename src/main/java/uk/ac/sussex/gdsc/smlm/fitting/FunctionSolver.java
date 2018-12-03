@@ -67,12 +67,12 @@ public interface FunctionSolver
     public int getNumberOfFittedPoints();
 
     /**
-     * @return The number of iterations used to solve the function
+     * @return The number of iterations used to solve the function.
      */
     public int getIterations();
 
     /**
-     * @return The number of function evaluations used to solve the function
+     * @return The number of function evaluations used to solve the function.
      */
     public int getEvaluations();
 

@@ -47,9 +47,10 @@ import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -183,7 +184,7 @@ public class MeanVarianceTest implements PlugIn
             // Cache data
             means = new double[size];
             for (int slice1 = 0; slice1 < size; slice1++)
-                means[slice1] = new Statistics(slices[slice1]).getMean();
+                means[slice1] = Statistics.create(slices[slice1]).getMean();
 
             // Compute mean and variance.
             // See http://www.photometrics.com/resources/whitepapers/mean-variance.php
@@ -216,7 +217,7 @@ public class MeanVarianceTest implements PlugIn
     {
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        if (Utils.isExtraOptions())
+        if (ImageJUtils.isExtraOptions())
         {
             final ImagePlus imp = WindowManager.getCurrentImage();
             if (imp.getStackSize() > 1)
@@ -255,7 +256,7 @@ public class MeanVarianceTest implements PlugIn
             if (inputDirectory == null)
                 return;
 
-            final SeriesOpener series = new SeriesOpener(inputDirectory, false, 0);
+            final SeriesOpener series = new SeriesOpener(inputDirectory);
             series.setVariableSize(true);
             if (series.getNumberOfImages() < 3)
             {
@@ -388,7 +389,7 @@ public class MeanVarianceTest implements PlugIn
                     sb.append(IJ.d2s(pair.mean2, 2)).append('\t');
                     sb.append(IJ.d2s(mean[j], 2)).append('\t');
                     sb.append(IJ.d2s(variance[j], 2)).append('\t');
-                    sb.append(Utils.rounded(gain, 4)).append("\n");
+                    sb.append(MathUtils.rounded(gain, 4)).append("\n");
                 }
                 j++;
             }
@@ -400,12 +401,12 @@ public class MeanVarianceTest implements PlugIn
         if (singleImage)
         {
             StoredDataStatistics stats = (StoredDataStatistics) gainStats;
-            Utils.log(TITLE);
+            ImageJUtils.log(TITLE);
             if (emMode)
             {
                 final double[] values = stats.getValues();
                 MathArrays.scaleInPlace(0.5, values);
-                stats = new StoredDataStatistics(values);
+                stats = StoredDataStatistics.create(values);
             }
 
             if (showCharts)
@@ -414,36 +415,38 @@ public class MeanVarianceTest implements PlugIn
                 final String title = TITLE + " Gain vs Frame";
                 final Plot2 plot = new Plot2(title, "Slice", "Gain",
                         SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0), stats.getValues());
-                final PlotWindow pw = Utils.display(title, plot);
+                final PlotWindow pw = ImageJUtils.display(title, plot);
 
                 // Show a histogram
-                final String label = String.format("Mean = %s, Median = %s", Utils.rounded(stats.getMean()),
-                        Utils.rounded(stats.getMedian()));
-                final int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
-                if (Utils.isNewWindow())
+                final String label = String.format("Mean = %s, Median = %s", MathUtils.rounded(stats.getMean()),
+                        MathUtils.rounded(stats.getMedian()));
+                final WindowOrganiser wo = new WindowOrganiser();
+                final PlotWindow pw2 = new HistogramPlotBuilder(TITLE, stats, "Gain").setRemoveOutliersOption(1)
+                    .setPlotLabel(label).show(wo);
+                if (wo.isNotEmpty())
                 {
                     final Point point = pw.getLocation();
                     point.x = pw.getLocation().x;
                     point.y += pw.getHeight();
-                    WindowManager.getImage(id).getWindow().setLocation(point);
+                    pw2.setLocation(point);
                 }
             }
 
-            Utils.log("Single-image mode: %s camera", (emMode) ? "EM-CCD" : "Standard");
+            ImageJUtils.log("Single-image mode: %s camera", (emMode) ? "EM-CCD" : "Standard");
             final double gain = stats.getMedian();
 
             if (emMode)
             {
                 final double totalGain = gain;
                 final double emGain = totalGain / cameraGain;
-                Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(cameraGain, 4));
-                Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
-                Utils.log("  Total Gain = %s (Count/e-)", Utils.rounded(totalGain, 4));
+                ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(cameraGain, 4));
+                ImageJUtils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
+                ImageJUtils.log("  Total Gain = %s (Count/e-)", MathUtils.rounded(totalGain, 4));
             }
             else
             {
                 cameraGain = gain;
-                Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(cameraGain, 4));
+                ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(cameraGain, 4));
             }
         }
         else
@@ -468,8 +471,8 @@ public class MeanVarianceTest implements PlugIn
                 // Plot mean verses variance. Gradient is gain in Count/e.
                 final String title = TITLE + " results";
                 final Plot2 plot = new Plot2(title, "Mean", "Variance");
-                final double[] xlimits = Maths.limits(mean);
-                final double[] ylimits = Maths.limits(variance);
+                final double[] xlimits = MathUtils.limits(mean);
+                final double[] ylimits = MathUtils.limits(variance);
                 double xrange = (xlimits[1] - xlimits[0]) * 0.05;
                 if (xrange == 0)
                     xrange = 0.05;
@@ -482,15 +485,15 @@ public class MeanVarianceTest implements PlugIn
                 plot.setColor(Color.red);
                 plot.addPoints(new double[] { mean[0], mean[mean.length - 1] },
                         new double[] { fitted.value(mean[0]), fitted.value(mean[mean.length - 1]) }, Plot.LINE);
-                Utils.display(title, plot);
+                ImageJUtils.display(title, plot);
             }
 
             final double avBiasNoise = Math.sqrt(noiseStats.getMean());
 
-            Utils.log(TITLE);
-            Utils.log("  Directory = %s", inputDirectory);
-            Utils.log("  Bias = %s +/- %s (Count)", Utils.rounded(bias, 4), Utils.rounded(avBiasNoise, 4));
-            Utils.log("  Variance = %s + %s * mean", Utils.rounded(best[0], 4), Utils.rounded(best[1], 4));
+            ImageJUtils.log(TITLE);
+            ImageJUtils.log("  Directory = %s", inputDirectory);
+            ImageJUtils.log("  Bias = %s +/- %s (Count)", MathUtils.rounded(bias, 4), MathUtils.rounded(avBiasNoise, 4));
+            ImageJUtils.log("  Variance = %s + %s * mean", MathUtils.rounded(best[0], 4), MathUtils.rounded(best[1], 4));
             if (emMode)
             {
                 // The gradient is the observed gain of the noise.
@@ -507,13 +510,13 @@ public class MeanVarianceTest implements PlugIn
                 final double readNoise = avBiasNoise / cameraGain;
                 // Effective noise is standard deviation of the bias image divided by the total gain (in Count/e-)
                 final double readNoiseE = avBiasNoise / totalGain;
-                Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(readNoise, 4),
-                        Utils.rounded(avBiasNoise, 4));
+                ImageJUtils.log("  Read Noise = %s (e-) [%s (Count)]", MathUtils.rounded(readNoise, 4),
+                        MathUtils.rounded(avBiasNoise, 4));
 
-                Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(1 / cameraGain, 4));
-                Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
-                Utils.log("  Total Gain = %s (Count/e-)", Utils.rounded(totalGain, 4));
-                Utils.log("  Effective Read Noise = %s (e-) (Read Noise/Total Gain)", Utils.rounded(readNoiseE, 4));
+                ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(1 / cameraGain, 4));
+                ImageJUtils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
+                ImageJUtils.log("  Total Gain = %s (Count/e-)", MathUtils.rounded(totalGain, 4));
+                ImageJUtils.log("  Effective Read Noise = %s (e-) (Read Noise/Total Gain)", MathUtils.rounded(readNoiseE, 4));
             }
             else
             {
@@ -521,10 +524,10 @@ public class MeanVarianceTest implements PlugIn
                 cameraGain = best[1];
                 // Noise is standard deviation of the bias image divided by the gain (in Count/e-)
                 final double readNoise = avBiasNoise / cameraGain;
-                Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(readNoise, 4),
-                        Utils.rounded(avBiasNoise, 4));
+                ImageJUtils.log("  Read Noise = %s (e-) [%s (Count)]", MathUtils.rounded(readNoise, 4),
+                        MathUtils.rounded(avBiasNoise, 4));
 
-                Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(1 / cameraGain, 4));
+                ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(1 / cameraGain, 4));
             }
         }
         IJ.showStatus("");
@@ -553,7 +556,7 @@ public class MeanVarianceTest implements PlugIn
             }
             catch (final IllegalArgumentException e)
             {
-                Utils.log(e.getMessage());
+                ImageJUtils.log(e.getMessage());
             }
             c++;
             imp.close();
@@ -587,7 +590,7 @@ public class MeanVarianceTest implements PlugIn
             }
             catch (final IllegalArgumentException e)
             {
-                Utils.log(e.getMessage());
+                ImageJUtils.log(e.getMessage());
             }
         IJ.showProgress(1);
         return images;

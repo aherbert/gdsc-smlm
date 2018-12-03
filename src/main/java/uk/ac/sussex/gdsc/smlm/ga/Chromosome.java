@@ -32,21 +32,21 @@ package uk.ac.sussex.gdsc.smlm.ga;
 public interface Chromosome<T extends Comparable<T>>
 {
     /**
-     * Get the chromosome length
+     * Get the chromosome length.
      *
      * @return The chromosome length
      */
     public int length();
 
     /**
-     * Get the chromosome sequence
+     * Get the chromosome sequence.
      *
      * @return the chromosome sequence (must equal the length)
      */
     public double[] sequence();
 
     /**
-     * Create a new chromosome
+     * Create a new chromosome.
      *
      * @param sequence
      *            the chromosome sequence (must equal the current length)
@@ -81,7 +81,7 @@ public interface Chromosome<T extends Comparable<T>>
     // Note: Default implementation of the getter/setter to store the double would require using Java 8.
 
     /**
-     * Set the fitness
+     * Set the fitness.
      *
      * @param fitness
      *            The fitness of the sequence
@@ -99,7 +99,7 @@ public interface Chromosome<T extends Comparable<T>>
     public T getFitness();
 
     /**
-     * Calculate the distance to another chromosome
+     * Calculate the distance to another chromosome.
      *
      * @param other
      *            the other chromosome
@@ -108,7 +108,7 @@ public interface Chromosome<T extends Comparable<T>>
     public double distance(Chromosome<T> other);
 
     /**
-     * Calculate if equal to another chromosome
+     * Calculate if equal to another chromosome.
      *
      * @param other
      *            the other chromosome

@@ -32,7 +32,7 @@ import ij.plugin.ZProjector;
 import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Produces a background intensity image and a mask from a sample image.
@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.core.ij.Utils;
  */
 public class ImageBackground implements PlugInFilter
 {
-    private final static String TITLE = "Image Background";
+    private static final String TITLE = "Image Background";
 
     private static float bias = 500;
     private static double sigma = 2;
@@ -109,14 +109,14 @@ public class ImageBackground implements PlugInFilter
         final ImageProcessor background = applyBlur(median);
         subtractBias(background);
 
-        Utils.display("Background", background);
+        ImageJUtils.display("Background", background);
 
         // Q. Is there a better way to do the thresholding for foreground pixels.
         // Ideally we want to outline cell shapes.
         final ImageProcessor mask = median.convertToByte(true);
         mask.autoThreshold();
 
-        Utils.display("Mask", mask);
+        ImageJUtils.display("Mask", mask);
     }
 
     private ImageProcessor getProjection()

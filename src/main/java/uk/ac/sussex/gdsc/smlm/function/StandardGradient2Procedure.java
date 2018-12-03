@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Class for evaluating a function
+ * Class for evaluating a function.
  */
 public class StandardGradient2Procedure implements Gradient2Procedure
 {

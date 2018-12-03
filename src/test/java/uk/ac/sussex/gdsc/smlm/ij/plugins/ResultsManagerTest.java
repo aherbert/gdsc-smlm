@@ -23,16 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
-import ij.Macro;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -46,11 +36,23 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.IntensityUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.LocationUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+
+import ij.Macro;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * Test the ResultsManager functionality to load results from file when the file has options.
@@ -62,35 +64,35 @@ public class ResultsManagerTest
     public void writeTSFMatchesRead(RandomSeed seed)
     {
         // This is redundant
-        ExtraAssumptions.assume(TestComplexity.LOW);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
         writeTSFMatchesRead(seed, 1, 1, 1, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithChannels(RandomSeed seed)
     {
-        //ExtraAssumptions.assume(TestComplexity.LOW);
+        //Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
         writeTSFMatchesRead(seed, 2, 1, 1, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithSlices(RandomSeed seed)
     {
-        //ExtraAssumptions.assume(TestComplexity.LOW);
+        //Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
         writeTSFMatchesRead(seed, 1, 2, 1, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithPositions(RandomSeed seed)
     {
-        //ExtraAssumptions.assume(TestComplexity.LOW);
+        //Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
         writeTSFMatchesRead(seed, 1, 1, 2, 1);
     }
 
     @SeededTest
     public void writeTSFMatchesReadWithTypes(RandomSeed seed)
     {
-        //ExtraAssumptions.assume(TestComplexity.LOW);
+        //Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
         writeTSFMatchesRead(seed, 1, 1, 1, 2);
     }
 
@@ -98,7 +100,7 @@ public class ResultsManagerTest
     public void writeTSFMatchesReadWithCombinations(RandomSeed seed)
     {
         // This takes longer
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         writeTSFMatchesRead(seed, 2, 2, 2, 2);
     }
 
@@ -134,7 +136,7 @@ public class ResultsManagerTest
         }
 
         // Generate random spots
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         final int size = 100;
         final Spot[] spots = new Spot[size];
         for (int i = 1; i <= size; i++)

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
- * Wraps a set of function values to implement the forEach procedure
+ * Wraps a set of function values to implement the forEach procedure.
  */
 public class PrecomputedGradient1Function extends PrecomputedValueFunction implements Gradient1Function
 {
@@ -50,7 +50,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
     {
         super(values);
         final int numberOfGradients = checkGradient(g1);
-        gradientIndices = SimpleArrayUtils.newArray(numberOfGradients, 0, 1);
+        gradientIndices = SimpleArrayUtils.natural(numberOfGradients);
         this.g1 = g1;
     }
 
@@ -79,7 +79,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
     }
 
     /**
-     * Gets a reference to the first order gradients
+     * Gets a reference to the first order gradients.
      *
      * @return the first order gradients
      */

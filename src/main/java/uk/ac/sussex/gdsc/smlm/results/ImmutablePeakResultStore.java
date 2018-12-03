@@ -172,7 +172,7 @@ public class ImmutablePeakResultStore implements PeakResultStore
     }
 
     /**
-     * Used to wrap the results to make them immutable
+     * Used to wrap the results to make them immutable.
      */
     private static class ImmutablePeakResultProcedure implements PeakResultProcedure
     {

@@ -37,7 +37,7 @@ import gnu.trove.list.array.TIntArrayList;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
-import uk.ac.sussex.gdsc.core.data.utils.RounderFactory;
+import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -192,7 +192,7 @@ public class PeakResultTableModel extends AbstractTableModel
     }
 
     /**
-     * Check if the settings are equal
+     * Check if the settings are equal.
      *
      * @param t1
      *            the t1
@@ -235,7 +235,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
         columnsComputed.set(true);
 
-        rounder = RounderFactory.create(tableSettings.getRoundingPrecision());
+        rounder = RounderUtils.create(tableSettings.getRoundingPrecision());
 
         // Create the converters
         final PeakResultConversionHelper helper = new PeakResultConversionHelper(calibration, psf);
@@ -310,7 +310,7 @@ public class PeakResultTableModel extends AbstractTableModel
             addName(valuesList, namesList);
         }
 
-        int[] outIndices = SimpleArrayUtils.newArray(converters.length, 0, 1);
+        int[] outIndices = SimpleArrayUtils.natural(converters.length);
         if (!showZ)
         {
             final TIntArrayList list = new TIntArrayList(outIndices);
@@ -517,7 +517,7 @@ public class PeakResultTableModel extends AbstractTableModel
     }
 
     /**
-     * Removes the result
+     * Removes the result.
      *
      * @param source
      *            the source
@@ -747,7 +747,7 @@ public class PeakResultTableModel extends AbstractTableModel
     }
 
     /**
-     * @return If true show the results deviations in the table
+     * @return If true show the results deviations in the table.
      */
     public boolean isShowDeviations()
     {
@@ -766,7 +766,7 @@ public class PeakResultTableModel extends AbstractTableModel
     }
 
     /**
-     * @return If true show the results end frame in the table
+     * @return If true show the results end frame in the table.
      */
     public boolean isShowEndFrame()
     {
@@ -785,7 +785,7 @@ public class PeakResultTableModel extends AbstractTableModel
     }
 
     /**
-     * @return If true show the results Id in the table
+     * @return If true show the results Id in the table.
      */
     public boolean isShowId()
     {
@@ -857,7 +857,7 @@ public class PeakResultTableModel extends AbstractTableModel
      */
     public void setRoundingPrecision(int roundingPrecision)
     {
-        rounder = RounderFactory.create(roundingPrecision);
+        rounder = RounderUtils.create(roundingPrecision);
         fireTableChanged(new TableModelEvent(this, 0, 0, 0, RENDERER));
     }
 

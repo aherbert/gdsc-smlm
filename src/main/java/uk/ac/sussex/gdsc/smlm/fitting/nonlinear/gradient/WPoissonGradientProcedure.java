@@ -47,7 +47,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
     protected final Gradient1Function func;
 
     /**
-     * The number of gradients
+     * The number of gradients.
      */
     public final int n;
 
@@ -56,7 +56,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
      */
     protected double[] data;
 
-    /** The y index counter */
+    /** The y index counter. */
     protected int yi;
 
     /**
@@ -88,7 +88,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
     }
 
     /**
-     * Compute the Fisher information matrix
+     * Compute the Fisher information matrix.
      *
      * <pre>
      * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
@@ -221,7 +221,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
     }
 
     /**
-     * @return True if the last calculation produced gradients with NaN values
+     * @return True if the last calculation produced gradients with NaN values.
      */
     public boolean isNaNGradients()
     {

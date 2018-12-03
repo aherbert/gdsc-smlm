@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.util.FastMath;
 
@@ -38,9 +39,12 @@ import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
-import uk.ac.sussex.gdsc.core.utils.MedianWindowDLLFloat;
-import uk.ac.sussex.gdsc.core.utils.MedianWindowFloat;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
+import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
+import uk.ac.sussex.gdsc.core.utils.FloatMedianWindow;
 import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
 
 /**
@@ -79,7 +83,7 @@ public class MedianFilter implements PlugInFilter
     @Override
     public void run(ImageProcessor ip)
     {
-        final long start = System.currentTimeMillis();
+        final long start = System.nanoTime();
 
         final ImageStack stack = imp.getImageStack();
 
@@ -99,7 +103,7 @@ public class MedianFilter implements PlugInFilter
             futures.add(threadPool.submit(new ImageNormaliser(stack, imageStack, mean, n)));
 
         // Finish processing data
-        Utils.waitForCompletion(futures);
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
         futures = new LinkedList<>();
 
@@ -109,9 +113,9 @@ public class MedianFilter implements PlugInFilter
             futures.add(threadPool.submit(new ImageGenerator(imageStack, mean, i, FastMath.min(i + blockSize, size))));
 
         // Finish processing data
-        Utils.waitForCompletion(futures);
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
-        if (Utils.isInterrupted())
+        if (ImageJUtils.isInterrupted())
             return;
 
         if (subtract)
@@ -122,7 +126,7 @@ public class MedianFilter implements PlugInFilter
                 futures.add(threadPool.submit(new ImageFilter(stack, imageStack, n)));
 
             // Finish processing data
-            Utils.waitForCompletion(futures);
+            ConcurrencyUtils.waitForCompletionUnchecked(futures);
         }
 
         // Update the image
@@ -133,10 +137,10 @@ public class MedianFilter implements PlugInFilter
         imp.setStack(outputStack);
         imp.updateAndDraw();
 
-        IJ.showTime(imp, start, "Completed");
-        final long milliseconds = System.currentTimeMillis() - start;
-        Utils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius, interval, blockSize,
-                Utils.timeToString(milliseconds), Utils.timeToString((double) milliseconds / imp.getStackSize()));
+        IJ.showTime(imp, TimeUnit.NANOSECONDS.toMillis(start), "Completed");
+        final long nanoseconds = System.nanoTime() - start;
+        ImageJUtils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius, interval, blockSize,
+                TextUtils.millisToString(nanoseconds), TextUtils.nanosToString(Math.round(nanoseconds / (double)imp.getStackSize())));
     }
 
     private int showDialog()
@@ -273,7 +277,7 @@ public class MedianFilter implements PlugInFilter
                         data[slice] = imageStack[slice][start];
 
                     // Initialise the window with the first n frames.
-                    final MedianWindowDLLFloat mw = new MedianWindowDLLFloat(data);
+                    final FloatLinkedMedianWindow mw = new FloatLinkedMedianWindow(data);
 
                     // Get the early medians.
                     int slice = 0;
@@ -298,7 +302,7 @@ public class MedianFilter implements PlugInFilter
                         data[slice] = imageStack[slice][start];
 
                     // Create median window filter
-                    final MedianWindowFloat mw = new MedianWindowFloat(data.clone(), radius);
+                    final FloatMedianWindow mw = FloatMedianWindow.wrap(data.clone(), radius);
 
                     // Produce the medians
                     for (int slice = 0; slice < nSlices; slice += interval)
@@ -341,9 +345,9 @@ public class MedianFilter implements PlugInFilter
                 }
 
                 // Initialise the window with the first n frames.
-                final MedianWindowDLLFloat[] mw = new MedianWindowDLLFloat[nPixels];
+                final FloatLinkedMedianWindow[] mw = new FloatLinkedMedianWindow[nPixels];
                 for (int pixel = 0; pixel < nPixels; pixel++)
-                    mw[pixel] = new MedianWindowDLLFloat(data[pixel]);
+                    mw[pixel] = new FloatLinkedMedianWindow(data[pixel]);
 
                 // Get the early medians.
                 int slice = 0;
@@ -375,9 +379,9 @@ public class MedianFilter implements PlugInFilter
                 }
 
                 // Create median window filter
-                final MedianWindowFloat[] mw = new MedianWindowFloat[nPixels];
+                final FloatMedianWindow[] mw = new FloatMedianWindow[nPixels];
                 for (int pixel = 0; pixel < nPixels; pixel++)
-                    mw[pixel] = new MedianWindowFloat(data[pixel].clone(), radius);
+                    mw[pixel] = FloatMedianWindow.wrap(data[pixel].clone(), radius);
 
                 // Produce the medians
                 for (int slice = 0; slice < nSlices; slice += interval)

@@ -1,28 +1,30 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.awt.Rectangle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import ij.plugin.filter.Convolver;
+import ij.process.FloatProcessor;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 
-import ij.plugin.filter.Convolver;
-import ij.process.FloatProcessor;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.awt.Rectangle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class KernelFilterTest
@@ -52,10 +54,10 @@ public class KernelFilterTest
         final int cy = kh / 2;
         for (int y = 0, i = 0; y < kh; y++)
         {
-            final int dy2 = Maths.pow2(cy - y);
+            final int dy2 = MathUtils.pow2(cy - y);
             for (int x = 0; x < kw; x++)
             {
-                final int dx2 = Maths.pow2(cx - x);
+                final int dx2 = MathUtils.pow2(cx - x);
                 k[i++] = (float) Math.sqrt(dx2 + dy2);
             }
         }
@@ -201,7 +203,7 @@ public class KernelFilterTest
     private void filter1IsSameAsFilter2(RandomSeed seed, FilterWrapper f1, FilterWrapper f2, boolean internal,
             double tolerance)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         final float[] data = createData(rand, size, size);
 
         final int testBorder = (internal) ? f1.kw / 2 : 0;
@@ -284,8 +286,8 @@ public class KernelFilterTest
 
     private void floatFilterIsFasterThanIJFilter(RandomSeed seed, int k)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final float[][] data = new float[10][];
         for (int i = 0; i < data.length; i++)
@@ -302,7 +304,7 @@ public class KernelFilterTest
             ts.repeat();
             if (logger.isLoggable(Level.INFO))
                 logger.info(ts.getReport(size));
-            logger.log(TestLog.getTimingRecord(ts.get(-3), ts.get(-1)));
+            logger.log(TestLogUtils.getTimingRecord(ts.get(-3), ts.get(-1)));
         }
     }
 
@@ -312,7 +314,7 @@ public class KernelFilterTest
         for (int i = data.length; i-- > 0;)
             data[i] = i;
 
-        Random.shuffle(data, rg);
+        RandomUtils.shuffle(data, rg);
 
         return data;
     }

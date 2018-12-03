@@ -234,7 +234,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * Set the change in error that defines a negligible amount
+     * Set the change in error that defines a negligible amount.
      *
      * @param delta
      *            the delta to set
@@ -245,7 +245,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return the delta
+     * @return the delta.
      */
     public double getDelta()
     {
@@ -263,7 +263,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return the minimum signal
+     * @return the minimum signal.
      */
     public double getMinimumSignal()
     {
@@ -281,7 +281,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return the minimum position for each dimension
+     * @return the minimum position for each dimension.
      */
     public double[] getMinimumPosition()
     {
@@ -299,7 +299,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return the maximum position for each dimension
+     * @return the maximum position for each dimension.
      */
     public double[] getMaximumPosition()
     {
@@ -317,7 +317,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return the minimum SD for each dimension
+     * @return the minimum SD for each dimension.
      */
     public double[] getMinimumSD()
     {
@@ -335,7 +335,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return the maximum SD for each dimension
+     * @return the maximum SD for each dimension.
      */
     public double[] getMaximumSD()
     {

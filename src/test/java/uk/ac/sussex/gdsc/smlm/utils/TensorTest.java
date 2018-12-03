@@ -1,8 +1,11 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -10,10 +13,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class TensorTest
@@ -93,9 +95,10 @@ public class TensorTest
     @SeededTest
     public void canComputeSameTensor(RandomSeed seed)
     {
-        final UniformRandomProvider random = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
         final int w = 3, h = 4;
         final float[] data = new float[w * h];
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-6, 0);
         for (int i = 0; i < 10; i++)
         {
             for (int j = data.length; j-- > 0;)
@@ -113,7 +116,7 @@ public class TensorTest
             for (int k = 0; k < 2; k++)
             {
                 Assertions.assertEquals(com2[k], com3[k]);
-                ExtraAssertions.assertEqualsRelative(v2[k], v3[k + 1], 1e-6);
+                TestAssertions.assertTest(v2[k], v3[k + 1], predicate);
                 for (int kk = 0; kk < 2; kk++)
                 {
                     // Swap vector direction
@@ -122,7 +125,7 @@ public class TensorTest
                         vv2[k][0] = -vv2[k][0];
                         vv2[k][1] = -vv2[k][1];
                     }
-                    ExtraAssertions.assertEqualsRelative(vv2[k][kk], vv3[k + 1][kk], 1e-6);
+                    TestAssertions.assertTest(vv2[k][kk], vv3[k + 1][kk], predicate);
                 }
             }
         }

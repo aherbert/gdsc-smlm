@@ -33,8 +33,8 @@ import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -48,7 +48,7 @@ import uk.ac.sussex.gdsc.smlm.function.Erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
- * Contains helper functions for working with Gaussian 2D peak results
+ * Contains helper functions for working with Gaussian 2D peak results.
  */
 public class Gaussian2DPeakResultHelper
 {
@@ -59,7 +59,7 @@ public class Gaussian2DPeakResultHelper
      * The Mahalanobis distance r for a 2D Gaussian that contains 50 percent of the integral.
      */
     public static final double R_2D_50 = inverseCumulative2D(0.5);
-    private static final double P05 = 0.5 / (Math.PI * Maths.pow2(R_2D_50));
+    private static final double P05 = 0.5 / (Math.PI * MathUtils.pow2(R_2D_50));
 
     /**
      * The default points to use for maximum likelihood precision computation, see
@@ -71,8 +71,8 @@ public class Gaussian2DPeakResultHelper
 
     private static class BaseGaussian2DPeakResultCalculator implements Gaussian2DPeakResultCalculator
     {
-        final static double twoPi = 2 * Math.PI;
-        final static double ONE_OVER_ROOT2 = 1.0 / ROOT2;
+        static final double TWO_PI = 2 * Math.PI;
+        static final double ONE_OVER_ROOT2 = 1.0 / ROOT2;
 
         final CalibrationReader calibration;
         final int isx, isy;
@@ -154,7 +154,7 @@ public class Gaussian2DPeakResultHelper
             }
 
             return (float) (params[PeakResult.INTENSITY] /
-                    (twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
+                    (TWO_PI * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
         }
 
         @Override
@@ -184,7 +184,7 @@ public class Gaussian2DPeakResultHelper
         }
 
         /**
-         * Compute the integral of the pixel using the error function
+         * Compute the integral of the pixel using the error function.
          *
          * @param x
          *            the x
@@ -364,7 +364,7 @@ public class Gaussian2DPeakResultHelper
         }
     }
 
-    private static abstract class BaseFastGaussian2DPeakResultCalculator extends BaseGaussian2DPeakResultCalculator
+    private abstract static class BaseFastGaussian2DPeakResultCalculator extends BaseGaussian2DPeakResultCalculator
     {
         public BaseFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper)
                 throws ConfigurationException, ConversionException
@@ -379,7 +379,7 @@ public class Gaussian2DPeakResultHelper
         public float getAmplitude(float[] params) throws ConfigurationException, ConversionException
         {
             return (float) (params[PeakResult.INTENSITY] /
-                    (twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
+                    (TWO_PI * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
         }
 
         @Override
@@ -450,7 +450,7 @@ public class Gaussian2DPeakResultHelper
     }
 
     /**
-     * Private class to allow caching the converters for two-axis Gaussian 2D
+     * Private class to allow caching the converters for two-axis Gaussian 2D.
      */
     private static class TwoAxisFastGaussian2DPeakResultCalculator extends BaseFastGaussian2DPeakResultCalculator
     {
@@ -474,7 +474,7 @@ public class Gaussian2DPeakResultHelper
     }
 
     /**
-     * Private class to allow caching the converters for one-axis Gaussian 2D
+     * Private class to allow caching the converters for one-axis Gaussian 2D.
      */
     private static class OneAxisFastGaussian2DPeakResultCalculator extends BaseFastGaussian2DPeakResultCalculator
     {
@@ -510,7 +510,7 @@ public class Gaussian2DPeakResultHelper
     /** Flag for the {@link Gaussian2DPeakResultCalculator#getPixelAmplitude(float[])} function. */
     public static final int PIXEL_AMPLITUDE = 0x00000020;
 
-    /** Dummy Gaussian 2D parameters */
+    /** Dummy Gaussian 2D parameters. */
     private static final float[] PARAMS = new float[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
     /** The index of the Sx parameter in the PeakResult parameters array. */
@@ -568,17 +568,17 @@ public class Gaussian2DPeakResultHelper
                 calibrationReader);
 
         // Try the desired methods
-        if (BitFlags.anySet(flags, AMPLITUDE))
+        if (BitFlagUtils.anySet(flags, AMPLITUDE))
             helper.getAmplitude(PARAMS);
-        if (BitFlags.anySet(flags, LSE_PRECISION))
+        if (BitFlagUtils.anySet(flags, LSE_PRECISION))
             helper.getLSEPrecision(PARAMS, 0);
-        if (BitFlags.anySet(flags, LSE_PRECISION_X))
+        if (BitFlagUtils.anySet(flags, LSE_PRECISION_X))
             helper.getLSEPrecision(PARAMS);
-        if (BitFlags.anySet(flags, MLE_PRECISION))
+        if (BitFlagUtils.anySet(flags, MLE_PRECISION))
             helper.getMLEPrecision(PARAMS, 0);
-        if (BitFlags.anySet(flags, MLE_PRECISION_X))
+        if (BitFlagUtils.anySet(flags, MLE_PRECISION_X))
             helper.getMLEPrecision(PARAMS);
-        if (BitFlags.anySet(flags, PIXEL_AMPLITUDE))
+        if (BitFlagUtils.anySet(flags, PIXEL_AMPLITUDE))
             helper.getPixelAmplitude(PARAMS);
 
         // Get a fast implementation

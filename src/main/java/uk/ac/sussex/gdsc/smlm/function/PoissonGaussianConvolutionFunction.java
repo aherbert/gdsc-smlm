@@ -25,7 +25,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is assumed to have mean of
@@ -50,7 +50,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
     private static final LogFactorial logFactorial = new LogFactorial();
 
     /**
-     * The on-chip gain multiplication factor
+     * The on-chip gain multiplication factor.
      */
     final double g;
 
@@ -204,7 +204,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
                         // Poisson
                         q * logu - u - logFactorial.getLogFUnsafe(q)
                         // Gaussian
-                                - (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+                                - (MathUtils.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
 
         // Determine normalisation
         // Note: This is needed when using this as a discrete probability distribution,
@@ -292,7 +292,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
                         // Poisson
                         q * logu - u - logFactorial.getLogFUnsafe(q)
                         // Gaussian
-                                - (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+                                - (MathUtils.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
         return Math.log(p);
     }
 

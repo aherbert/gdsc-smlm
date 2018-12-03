@@ -26,12 +26,12 @@ package uk.ac.sussex.gdsc.smlm.function;
 //import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Calculate the value of the Skew Normal distribution
  * <p>
- * 
+ *
  * @see <a href=
  *      "http://en.wikipedia.org/wiki/Skew_normal_distribution">http://en.wikipedia.org/wiki/Skew_normal_distribution</a>
  */
@@ -50,7 +50,7 @@ public class SkewNormalFunction
     protected double alpha;
 
     /**
-     * Create a function with the given parameters
+     * Create a function with the given parameters.
      *
      * @param parameters
      *            [amplitude, location, scale, alpha]
@@ -61,7 +61,7 @@ public class SkewNormalFunction
     }
 
     /**
-     * Set the parameters
+     * Set the parameters.
      *
      * @param parameters
      *            [amplitude, location, scale, alpha]
@@ -104,7 +104,7 @@ public class SkewNormalFunction
     {
         final double sigma = getSigma();
         return ((4.0 - Math.PI) / 2.0) *
-                (Maths.pow3((sigma * Math.sqrt(2.0 / Math.PI))) / Math.pow(1 - 2 * sigma * sigma / Math.PI, 1.5));
+                (MathUtils.pow3((sigma * Math.sqrt(2.0 / Math.PI))) / Math.pow(1 - 2 * sigma * sigma / Math.PI, 1.5));
     }
 
     /**

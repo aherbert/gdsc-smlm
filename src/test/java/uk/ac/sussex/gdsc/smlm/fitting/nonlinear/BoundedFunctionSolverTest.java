@@ -23,18 +23,19 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 
 /**
  * Test that a bounded fitter can return the same results with and without bounds.
@@ -96,7 +97,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
         final String name = getLVMName(applyBounds, clamping, false);
 
         final int LOOPS = 5;
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
         for (final double s : signal)
@@ -332,7 +333,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
     private void fitSingleGaussianBetterLVM(RandomSeed seed, boolean bounded2, int clamping2, boolean mle2,
             boolean bounded, int clamping, boolean mle)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         final NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
         final NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
         canFitSingleGaussianBetter(seed, solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),

@@ -121,7 +121,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
     }
 
     /**
-     * Removes the result
+     * Removes the result.
      *
      * @param source
      *            the source

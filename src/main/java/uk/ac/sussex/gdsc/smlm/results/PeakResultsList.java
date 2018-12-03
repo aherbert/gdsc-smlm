@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 
 /**
- * Wrapper class to output to multiple results destinations
+ * Wrapper class to output to multiple results destinations.
  */
 public class PeakResultsList extends AbstractPeakResults implements PeakResults
 {
@@ -61,7 +61,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
     }
 
     /**
-     * @return The number of outputs contained in the list
+     * @return The number of outputs contained in the list.
      */
     public int numberOfOutputs()
     {
@@ -81,7 +81,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
     }
 
     /**
-     * @return The outputs
+     * @return The outputs.
      */
     public PeakResults[] toArray()
     {

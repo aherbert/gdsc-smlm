@@ -47,23 +47,23 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
 public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, Gradient1Function, NamedFunction
 {
     /**
-     * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
+     * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM).
      */
     public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
 
     /**
-     * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM)
+     * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM).
      */
     public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
 
     private NoiseModel noiseModel = null;
 
-    /** Constant for 1/2*pi */
+    /** Constant for 1./2*pi */
     public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
 
-    /** Index of the background in the parameters array */
+    /** Index of the background in the parameters array. */
     public static final int BACKGROUND = 0;
-    /** Index of the signal intensity in the parameters array */
+    /** Index of the signal intensity in the parameters array. */
     public static final int SIGNAL = 1;
     /** Index of the x-position in the parameters array */
     public static final int X_POSITION = 2;
@@ -75,10 +75,10 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
     public static final int X_SD = 5;
     /** Index of the y-standard deviation in the parameters array */
     public static final int Y_SD = 6;
-    /** Index of the angle in the parameters array */
+    /** Index of the angle in the parameters array. */
     public static final int ANGLE = 7;
 
-    /** The number of parameters per Gaussian peak */
+    /** The number of parameters per Gaussian peak. */
     public static final int PARAMETERS_PER_PEAK = 7;
 
     /**
@@ -165,7 +165,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
     }
 
     /**
-     * @return the dimensions
+     * @return the dimensions.
      */
     public int[] getDimensions()
     {
@@ -173,7 +173,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
     }
 
     /**
-     * @return the maximum size in the first dimension
+     * @return the maximum size in the first dimension.
      */
     public int getMaxX()
     {
@@ -181,7 +181,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
     }
 
     /**
-     * @return the maximum size in the second dimension
+     * @return the maximum size in the second dimension.
      */
     public int getMaxY()
     {
@@ -196,27 +196,27 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
     abstract public Gaussian2DFunction copy();
 
     /**
-     * @return the number of peaks
+     * @return the number of peaks.
      */
     public abstract int getNPeaks();
 
     /**
-     * @return True if the function can evaluate the background gradient
+     * @return True if the function can evaluate the background gradient.
      */
     public abstract boolean evaluatesBackground();
 
     /**
-     * @return True if the function can evaluate the signal gradient
+     * @return True if the function can evaluate the signal gradient.
      */
     public abstract boolean evaluatesSignal();
 
     /**
-     * @return True if the function can evaluate the XY-position gradient
+     * @return True if the function can evaluate the XY-position gradient.
      */
     public abstract boolean evaluatesPosition();
 
     /**
-     * @return True if the function can evaluate the Z-position gradient
+     * @return True if the function can evaluate the Z-position gradient.
      */
     public boolean evaluatesZ()
     {
@@ -225,22 +225,22 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
     }
 
     /**
-     * @return True if the function can evaluate the standard deviation gradient for the 1st dimension
+     * @return True if the function can evaluate the standard deviation gradient for the 1st dimension.
      */
     public abstract boolean evaluatesSD0();
 
     /**
-     * @return True if the function can evaluate the standard deviation gradient for the 2nd dimension
+     * @return True if the function can evaluate the standard deviation gradient for the 2nd dimension.
      */
     public abstract boolean evaluatesSD1();
 
     /**
-     * @return True if the function can evaluate the angle gradient
+     * @return True if the function can evaluate the angle gradient.
      */
     public abstract boolean evaluatesAngle();
 
     /**
-     * @return The number of gradient parameters per peak
+     * @return The number of gradient parameters per peak.
      */
     public abstract int getGradientParametersPerPeak();
 
@@ -316,7 +316,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
     }
 
     /**
-     * @return the noise model
+     * @return the noise model.
      */
     public NoiseModel getNoiseModel()
     {

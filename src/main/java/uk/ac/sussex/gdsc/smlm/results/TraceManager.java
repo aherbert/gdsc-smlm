@@ -40,12 +40,12 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
- * Trace localisations through a time stack to identify single molecules
+ * Trace localisations through a time stack to identify single molecules.
  */
 public class TraceManager
 {
     /**
-     * Set the mode used to search backwards in time
+     * Set the mode used to search backwards in time.
      */
     public enum TraceMode
     {
@@ -1460,7 +1460,7 @@ public class TraceManager
     }
 
     /**
-     * @return the tracker
+     * @return the tracker.
      */
     public TrackProgress getTracker()
     {
@@ -1477,7 +1477,7 @@ public class TraceManager
     }
 
     /**
-     * @return the activationFrameInterval
+     * @return the activationFrameInterval.
      */
     public int getActivationFrameInterval()
     {
@@ -1497,7 +1497,7 @@ public class TraceManager
     }
 
     /**
-     * @return the activationFrameWindow
+     * @return the activationFrameWindow.
      */
     public int getActivationFrameWindow()
     {
@@ -1564,7 +1564,7 @@ public class TraceManager
     }
 
     /**
-     * @return the pulse interval
+     * @return the pulse interval.
      */
     public int getPulseInterval()
     {
@@ -1583,7 +1583,7 @@ public class TraceManager
     }
 
     /**
-     * @return the distanceExclusion
+     * @return the distanceExclusion.
      */
     public double getDistanceExclusion()
     {
@@ -1785,7 +1785,7 @@ public class TraceManager
 
         // Extract the traces
         final Trace[] traces = map.values(new Trace[map.size()]);
-        Arrays.sort(traces);
+        Arrays.sort(traces, (t1, t2) -> Integer.compare(t1.getId(), t2.getId()));
         return traces;
     }
 }

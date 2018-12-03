@@ -25,10 +25,10 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * Store a 2D image in a single array
+ * Store a 2D image in a single array.
  */
 public abstract class Image2D
 {
@@ -905,7 +905,7 @@ public abstract class Image2D
         if (x < 0)
         {
             x_1 = 0;
-            x_w_1 = Maths.clip(0, nc, x + w);
+            x_w_1 = MathUtils.clip(0, nc, x + w);
         }
         else
         {
@@ -918,7 +918,7 @@ public abstract class Image2D
         if (y < 0)
         {
             y_1 = 0;
-            y_h_1 = Maths.clip(0, nr, y + h);
+            y_h_1 = MathUtils.clip(0, nr, y + h);
         }
         else
         {

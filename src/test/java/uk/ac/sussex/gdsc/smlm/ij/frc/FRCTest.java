@@ -1,8 +1,21 @@
 package uk.ac.sussex.gdsc.smlm.ij.frc;
 
-import java.awt.Rectangle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.TimingResult;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
+
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -10,23 +23,12 @@ import org.apache.commons.rng.sampling.PermutationSampler;
 import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
+import java.awt.Rectangle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class FRCTest
@@ -67,8 +69,8 @@ public class FRCTest
         // Sample lines through an image to create a structure.
         final int size = 1024;
         final double[][] data = new double[size * 2][];
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 5);
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 5);
         for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--)
         {
             data[i++] = new double[] { x + gs.sample(), y + gs.sample() };
@@ -78,7 +80,7 @@ public class FRCTest
         final Rectangle bounds = new Rectangle(0, 0, size, size);
         IJImagePeakResults i1 = createImage(bounds);
         IJImagePeakResults i2 = createImage(bounds);
-        final int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
+        final int[] indices = SimpleArrayUtils.natural(data.length);
         PermutationSampler.shuffle(r, indices);
         for (final int i : indices)
         {
@@ -170,7 +172,7 @@ public class FRCTest
     @SeededTest
     public void computeSineIsFaster()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         final int steps = 100000;
         final double delta = 2 * Math.PI / steps;
@@ -229,13 +231,13 @@ public class FRCTest
     @SeededTest
     public void computeMirroredIsFaster(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         // Sample lines through an image to create a structure.
         final int N = 2048;
         final double[][] data = new double[N * 2][];
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 5);
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 5);
         for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--)
         {
             data[i++] = new double[] { x + gs.sample(), y + gs.sample() };
@@ -245,7 +247,7 @@ public class FRCTest
         final Rectangle bounds = new Rectangle(0, 0, N, N);
         IJImagePeakResults i1 = createImage(bounds);
         IJImagePeakResults i2 = createImage(bounds);
-        final int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
+        final int[] indices = SimpleArrayUtils.natural(data.length);
         PermutationSampler.shuffle(r, indices);
         for (final int i : indices)
         {
@@ -311,8 +313,8 @@ public class FRCTest
         final TimingResult slow = ts.get(-3);
         final TimingResult fast = ts.get(-2);
         final TimingResult fastest = ts.get(-1);
-        logger.log(TestLog.getTimingRecord(slow, fastest));
-        logger.log(TestLog.getTimingRecord(fast, fastest));
+        logger.log(TestLogUtils.getTimingRecord(slow, fastest));
+        logger.log(TestLogUtils.getTimingRecord(fast, fastest));
         // It should be faster than the non mirrored version
         Assertions.assertTrue(ts.get(-1).getMean() <= ts.get(-3).getMean());
     }

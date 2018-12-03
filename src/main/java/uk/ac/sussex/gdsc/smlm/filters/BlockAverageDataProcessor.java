@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter.
@@ -39,7 +39,7 @@ public class BlockAverageDataProcessor extends DataProcessor
     private BlockMeanFilter filter = new BlockMeanFilter();
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param border
      *            The border to ignore for maxima
@@ -143,7 +143,7 @@ public class BlockAverageDataProcessor extends DataProcessor
     public List<String> getParameters()
     {
         final List<String> list = super.getParameters();
-        list.add("smooth = " + Utils.rounded(smooth));
+        list.add("smooth = " + MathUtils.rounded(smooth));
         return list;
     }
 

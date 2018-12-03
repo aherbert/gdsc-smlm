@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a precision threshold
+ * Filter results using a precision threshold.
  */
 public class PrecisionFilter extends DirectFilter implements IMultiFilter
 {

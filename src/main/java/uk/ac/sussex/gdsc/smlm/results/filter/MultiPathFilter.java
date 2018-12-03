@@ -32,10 +32,10 @@ import java.util.List;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.RankedScoreCalculator;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.results.count.ConsecutiveFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.FailCounter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
@@ -276,7 +276,7 @@ public class MultiPathFilter implements Cloneable
     public interface FractionScoreStore
     {
         /**
-         * Add the unique Id of a result that was selected
+         * Add the unique Id of a result that was selected.
          *
          * @param uniqueId
          *            the unique id
@@ -285,7 +285,7 @@ public class MultiPathFilter implements Cloneable
     }
 
     /**
-     * Used to return default behaviour
+     * Used to return default behaviour.
      */
     private static class NullFractionScoreStore implements FractionScoreStore
     {
@@ -319,7 +319,7 @@ public class MultiPathFilter implements Cloneable
 
     private class FilterSetupState
     {
-        /** Store the initial state of the filter flags */
+        /** Store the initial state of the filter flags. */
         int setupFlags;
 
         FilterSetupState(int flags)
@@ -335,7 +335,7 @@ public class MultiPathFilter implements Cloneable
 
     private class FilterSetupDataState extends FilterSetupState
     {
-        /** Store the initial state of the filter setup data */
+        /** Store the initial state of the filter setup data. */
         FilterSetupData[] setupData;
 
         FilterSetupDataState(int flags, FilterSetupData[] setupData)
@@ -628,7 +628,7 @@ public class MultiPathFilter implements Cloneable
      *            True if this is a subset with pre-computed validation results
      * @return The new peak results that are accepted (and any valid candidates if found); or null
      */
-    final private PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates,
+    private final PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates,
             SelectedResultStore store, boolean precomputed)
     {
         final int candidateId = multiPathResult.candidateId;
@@ -734,9 +734,9 @@ public class MultiPathFilter implements Cloneable
     }
 
     /**
-     * Allows results to be ranked
+     * Allows results to be ranked.
      */
-    private class ResultRank implements Comparable<ResultRank>
+    private static class ResultRank implements Comparable<ResultRank>
     {
         /** The results. */
         final PreprocessedPeakResult[] results;
@@ -794,7 +794,7 @@ public class MultiPathFilter implements Cloneable
      *            the doublet results
      * @return the preprocessed peak result[]
      */
-    private PreprocessedPeakResult[] rank(PreprocessedPeakResult[] multiResults,
+    private static PreprocessedPeakResult[] rank(PreprocessedPeakResult[] multiResults,
             PreprocessedPeakResult[] multiDoubletResults, PreprocessedPeakResult[] singleResults,
             PreprocessedPeakResult[] singleDoubletResults)
     {
@@ -1611,7 +1611,7 @@ public class MultiPathFilter implements Cloneable
     }
 
     /**
-     * Check if the results contain a new result
+     * Check if the results contain a new result.
      *
      * @param results
      *            the results
@@ -2498,7 +2498,7 @@ public class MultiPathFilter implements Cloneable
         if (assignments.isEmpty())
             return null;
         final FractionalAssignment[] tmp = assignments.toArray(new FractionalAssignment[assignments.size()]);
-        final RankedScoreCalculator calc = new RankedScoreCalculator(tmp, nActual, nPredicted);
+        final RankedScoreCalculator calc = RankedScoreCalculator.create(tmp, nActual, nPredicted);
         final double[] result = calc.score(nPredicted, false, save);
         score[0] += result[0];
         score[1] += result[1];

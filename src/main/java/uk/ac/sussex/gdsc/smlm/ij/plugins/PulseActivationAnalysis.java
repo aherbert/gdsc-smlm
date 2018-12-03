@@ -63,15 +63,15 @@ import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import uk.ac.sussex.gdsc.core.clustering.DensityCounter;
 import uk.ac.sussex.gdsc.core.clustering.DensityCounter.Molecule;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -395,7 +395,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
         /** {@inheritDoc} */
         @Override
-        public int getID()
+        public int getId()
         {
             // Allow the ID to be updated from the original channel by using a current channel field
             // Note: the ID must be zero or above
@@ -612,7 +612,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         }
 
         // Store specific activations
-        final int sum = (int) Maths.sum(count);
+        final int sum = (int) MathUtils.sum(count);
         specificActivations = new Activation[sum];
         final int nonSpecificActivationsSize = list.size() - sum;
         nonSpecificActivations = new Activation[nonSpecificActivationsSize];
@@ -659,8 +659,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
     private static void printRate(String title, int count, int numberOfFrames)
     {
-        Utils.log("Activation rate : %s = %d/%d = %s per frame", title, count, numberOfFrames,
-                Utils.rounded((double) count / numberOfFrames));
+        ImageJUtils.log("Activation rate : %s = %d/%d = %s per frame", title, count, numberOfFrames,
+                MathUtils.rounded((double) count / numberOfFrames));
     }
 
     private static int getChannel(PeakResult p)
@@ -732,7 +732,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         }
 
         // Show fraction activations histogram. So we have to set the sum to 1
-        final double sum = Maths.sum(crosstalk);
+        final double sum = MathUtils.sum(crosstalk);
         for (int i = 0; i < crosstalk.length; i++)
             crosstalk[i] /= sum;
 
@@ -743,11 +743,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         plot.setLimits(0, channels + 1, 0, 1);
         plot.setXMinorTicks(false);
         plot.addPoints(x, y, Plot2.BAR);
-        String label = String.format("Crosstalk %s = %s", ctNames[index1], Maths.round(ct[index1]));
+        String label = String.format("Crosstalk %s = %s", ctNames[index1], MathUtils.round(ct[index1]));
         if (index2 > -1)
-            label += String.format(", %s = %s", ctNames[index2], Maths.round(ct[index2]));
+            label += String.format(", %s = %s", ctNames[index2], MathUtils.round(ct[index2]));
         plot.addLabel(0, 0, label);
-        Utils.display(TITLE, plot);
+        ImageJUtils.display(TITLE, plot);
     }
 
     /**
@@ -886,7 +886,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
         final double det_recip = 1.0 / det;
 
-        if (!Maths.isFinite(det_recip))
+        if (!Double.isFinite(det_recip))
             // Failed so reset to the observed densities
             return new double[] { D1, D2, D3 };
 
@@ -943,9 +943,9 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         //		final double[] x = B.getData();
 
         // Due to floating-point error in the decomposition we check the bounds
-        x[0] = Maths.clip(0, D1, x[0]);
-        x[1] = Maths.clip(0, D2, x[1]);
-        x[2] = Maths.clip(0, D3, x[2]);
+        x[0] = MathUtils.clip(0, D1, x[0]);
+        x[1] = MathUtils.clip(0, D2, x[1]);
+        x[2] = MathUtils.clip(0, D3, x[2]);
 
         return x;
     }
@@ -1183,7 +1183,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         // The event is null when the NonBlockingExtendedGenericDialog is first shown
         if (e == null)
             // Do not ignore this if a macro
-            if (Utils.isMacro())
+            if (ImageJUtils.isMacro())
                 return true;
 
         // Check arguments
@@ -1604,7 +1604,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
     private void createDensityCounter(float densityRadius)
     {
-        if (dc == null || dc.radius != densityRadius)
+        if (dc == null || dc.getRadius() != densityRadius)
         {
             dc = new DensityCounter(specificActivations, densityRadius, false);
             // Clear cache of density
@@ -1692,7 +1692,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
     }
 
     /**
-     * For processing the unmixing of specific channel activations
+     * For processing the unmixing of specific channel activations.
      */
     private class SpecificUnmixWorker extends UnmixWorker implements Runnable
     {
@@ -1779,7 +1779,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
     }
 
     /**
-     * For processing the unmixing of specific channel activations
+     * For processing the unmixing of specific channel activations.
      */
     private class NonSpecificUnmixWorker extends UnmixWorker implements Runnable
     {
@@ -1894,7 +1894,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
     private int isSimulation()
     {
-        if (Utils.isExtraOptions())
+        if (ImageJUtils.isExtraOptions())
         {
             final GenericDialog gd = new GenericDialog(TITLE);
             gd.addMessage("Perform a crosstalk simulation?");
@@ -1919,7 +1919,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         final RandomDataGenerator rdg = getRandomDataGenerator();
 
         // Draw the molecule positions
-        Utils.showStatus("Simulating molecules ...");
+        ImageJUtils.showStatus("Simulating molecules ...");
         final float[][][] molecules = new float[3][][];
         final MemoryPeakResults[] results = new MemoryPeakResults[3];
         final Calibration calibration = CalibrationHelper.create(sim_nmPerPixel, 1, 100);
@@ -1937,12 +1937,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         }
 
         // Simulate activation
-        Utils.showStatus("Simulating activations ...");
+        ImageJUtils.showStatus("Simulating activations ...");
         for (int c = 0; c < 3; c++)
             simulateActivations(rdg, molecules, c, results);
 
         // Combine
-        Utils.showStatus("Producing simulation output ...");
+        ImageJUtils.showStatus("Producing simulation output ...");
         final MemoryPeakResults r = new MemoryPeakResults();
         r.setCalibration(calibration);
         r.setBounds((Rectangle) bounds.clone());
@@ -1977,7 +1977,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         // Show an image of what it looks like with no unmixing, i.e. colours allocated
         // from the frame
 
-        Utils.showStatus("Simulation complete: " + Utils.timeToString(System.currentTimeMillis() - start));
+        ImageJUtils.showStatus("Simulation complete: " + TextUtils.millisToString(System.currentTimeMillis() - start));
     }
 
     private float[][] simulateMolecules(RandomDataGenerator rdg, int c)
@@ -2146,8 +2146,8 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
         // Report simulated cross talk
         final double[] crosstalk = computeCrosstalk(count, c);
-        Utils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", ctNames[index1], Utils.rounded(ct[index1]),
-                Utils.rounded(crosstalk[c1]), ctNames[index2], Utils.rounded(ct[index2]), Utils.rounded(crosstalk[c2]));
+        ImageJUtils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", ctNames[index1], MathUtils.rounded(ct[index1]),
+                MathUtils.rounded(crosstalk[c1]), ctNames[index2], MathUtils.rounded(ct[index2]), MathUtils.rounded(crosstalk[c2]));
     }
 
     private static BinomialDistribution createBinomialDistribution(RandomGenerator rand, int n, double p)
@@ -2166,7 +2166,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         int k = bd.sample();
         // Sample
         final RandomGenerator rand = rdg.getRandomGenerator();
-        final int[] sample = Random.sample(k, n, rand);
+        final int[] sample = RandomUtils.sample(k, n, rand);
         while (k-- > 0)
         {
             final float[] xy = molecules[sample[k]];
@@ -2202,7 +2202,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
         final String[] distribution = SettingsManager.getNames((Object[]) distributionValues);
 
         // Random crosstalk if not set
-        if (Maths.max(ct) == 0)
+        if (MathUtils.max(ct) == 0)
         {
             final RandomDataGenerator rdg = getRandomDataGenerator();
             for (int i = 0; i < ct.length; i++)

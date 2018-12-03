@@ -1,11 +1,19 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
+import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
+import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
+import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -16,18 +24,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
-import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
-import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
-import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
-import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
@@ -64,8 +66,8 @@ public class JumpDistanceAnalysisTest
     // Test MLE fitting and histogram fitting separately.
     // Is MLE fitting worth doing. Can it be made better?
 
-    double deltaD = 0.1;
-    double deltaF = 0.2;
+    final DoubleDoubleBiPredicate deltaD = TestHelper.doublesAreClose(0.1, 0);
+    final DoubleDoubleBiPredicate deltaF = TestHelper.doublesAreClose(0.2, 0);
     // Used for testing single populations
     // Used for testing dual populations:
     // 15-fold, 5-fold, 3-fold difference between pairs
@@ -85,6 +87,7 @@ public class JumpDistanceAnalysisTest
         jd.setMinFraction(0);
         final SimpsonIntegrator si = new SimpsonIntegrator(1e-3, 1e-8, 2,
                 SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-2, 0);
         for (final double d : D)
         {
             final double[] params = new double[] { d };
@@ -106,7 +109,7 @@ public class JumpDistanceAnalysisTest
                 final double o = si.integrate(10000, func, 0, x);
                 //logger.info(FunctionUtils.getSupplier("Integrate d=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d", d, x, e, o, si.getIterations(),
                 //		si.getEvaluations());
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-2, FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
+                TestAssertions.assertTest(e, o, equality, FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
             }
         }
     }
@@ -120,6 +123,7 @@ public class JumpDistanceAnalysisTest
         jd.setMinFraction(0);
         final SimpsonIntegrator si = new SimpsonIntegrator(1e-3, 1e-8, 2,
                 SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-2, 0);
         for (final double d : D)
             for (final double f : new double[] { 0, 0.1, 0.2, 0.4, 0.7, 0.9, 1 })
             {
@@ -142,7 +146,7 @@ public class JumpDistanceAnalysisTest
                     final double o = si.integrate(10000, func, 0, x);
                     //logger.info(FunctionUtils.getSupplier("Integrate d=%.1f, f=%.1f : x=%.1f, e=%f, o=%f, iter=%d, eval=%d", d, f, x, e, o,
                     //		si.getIterations(), si.getEvaluations());
-                    ExtraAssertions.assertEqualsRelative(e, o, 1e-2, FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
+                    TestAssertions.assertTest(e, o, equality, FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
                 }
             }
     }
@@ -156,7 +160,7 @@ public class JumpDistanceAnalysisTest
 
     private void fitSinglePopulation(RandomSeed seed, boolean mle)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final String title = String.format("%s Single  ", (mle) ? "MLE" : "LSQ");
         AssertionError error = null;
         NEXT_D: for (final double d : D)
@@ -218,8 +222,8 @@ public class JumpDistanceAnalysisTest
 
     private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction)
     {
-        ExtraAssumptions.assume(TestComplexity.MAXIMUM);
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
         AssertionError error = null;
@@ -246,14 +250,14 @@ public class JumpDistanceAnalysisTest
     private OutputStreamWriter out = null;
 
     /**
-     * This is not actually a test but runs the fitting algorithm many times to collect benchmark data to file
+     * This is not actually a test but runs the fitting algorithm many times to collect benchmark data to file.
      */
     @SeededTest
     public void canDoBenchmark(RandomSeed seed)
     {
         // Skip this as it is slow
         Assumptions.assumeTrue(false);
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         out = null;
         try
@@ -345,9 +349,7 @@ public class JumpDistanceAnalysisTest
 
         JumpDistanceAnalysis.sort(d, f);
         final double[] jumpDistances = createData(rg, samples, d, f);
-        final uk.ac.sussex.gdsc.core.logging.Logger gdscLogger = null;
-        //gdscLogger = new uk.ac.sussex.gdsc.core.logging.ConsoleLogger();
-        final JumpDistanceAnalysis jd = new JumpDistanceAnalysis(gdscLogger);
+        final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
         jd.setFitRestarts(3);
         double[][] fit;
         if (n == 0)
@@ -376,8 +378,8 @@ public class JumpDistanceAnalysisTest
         try
         {
             Assertions.assertEquals(d.length, fitD.length, "Failed to fit n");
-            ExtraAssertions.assertArrayEqualsRelative(d, fitD, deltaD, "Failed to fit d");
-            ExtraAssertions.assertArrayEqualsRelative(f, fitF, deltaF, "Failed to fit f");
+            TestAssertions.assertArrayTest(d, fitD, deltaD, "Failed to fit d");
+            TestAssertions.assertArrayTest(f, fitF, deltaF, "Failed to fit f");
         }
         catch (final AssertionError e)
         {
@@ -585,7 +587,7 @@ public class JumpDistanceAnalysisTest
         {
             if (size > getSize())
             {
-                final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(random, 0, 1);
+                final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(random, 0, 1);
                 final int extra = size - getSize();
 
                 // Get cumulative fraction
@@ -661,7 +663,7 @@ public class JumpDistanceAnalysisTest
     }
 
     /**
-     * Create random jump distances
+     * Create random jump distances.
      *
      * @param n
      *            Number of jump distances
@@ -696,7 +698,7 @@ public class JumpDistanceAnalysisTest
 
         // Debug
         //uk.ac.sussex.gdsc.core.utils.StoredDataStatistics stats = new uk.ac.sussex.gdsc.core.utils.StoredDataStatistics(data);
-        //uk.ac.sussex.gdsc.core.ij.Utils.showHistogram(
+        //uk.ac.sussex.gdsc.core.ij.new HistogramPlotBuilder(
         //		"MSD",
         //		stats,
         //		"MSD",

@@ -45,7 +45,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
     protected final Gradient1Function func;
 
     /**
-     * The number of gradients
+     * The number of gradients.
      */
     public final int n;
     /**
@@ -54,7 +54,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
      */
     public final double[] beta;
     /**
-     * The value for the fit
+     * The value for the fit.
      */
     public double value;
 
@@ -213,7 +213,7 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
     }
 
     /**
-     * @return True if the last calculation produced gradients with NaN values
+     * @return True if the last calculation produced gradients with NaN values.
      */
     public boolean isNaNGradients()
     {

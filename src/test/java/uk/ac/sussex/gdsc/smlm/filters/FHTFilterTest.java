@@ -23,23 +23,26 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.core.utils.ImageWindow;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestCounter;
+import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FHT;
 import ij.process.FloatProcessor;
-import uk.ac.sussex.gdsc.core.utils.ImageWindow;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.TestCounter;
-import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class FHTFilterTest
@@ -67,7 +70,7 @@ public class FHTFilterTest
         final int size = 16;
         final int ex = 5, ey = 7;
         final int ox = 1, oy = 2;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
         // This is offset from the centre
         final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);
@@ -134,10 +137,11 @@ public class FHTFilterTest
 
         // There may be differences due to the use of the JTransforms library
         final double error = (operation == Operation.DECONVOLUTION) ? 5e-2 : 1e-4;
+        final FloatFloatBiPredicate predicate = TestHelper.floatsAreClose(error, 0);
 
         // This tests everything and can fail easily depending on the random generator
         // due to edge artifacts.
-        //ExtraAssertions.assertArrayEqualsRelative(e, input1, error);
+        //TestAssertions.assertArrayTest(e, input1, TestHelper.almostEqualFloats(error, 0));
 
         // This tests the centre to ignore edge differences
         final int min = size / 4;
@@ -160,7 +164,7 @@ public class FHTFilterTest
                 final int xx = x;
                 final int i = y * size + x;
                 failCounter.run(() -> {
-                    ExtraAssertions.assertEqualsRelative(e[i], input1[i], error, msg.set(0, xx));
+                    TestAssertions.assertTest(e[i], input1[i], predicate, msg.set(0, xx));
                 });
             }
         }

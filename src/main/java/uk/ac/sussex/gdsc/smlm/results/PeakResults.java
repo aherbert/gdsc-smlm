@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 
 /**
- * Specifies the interface for saving peak fitting results
+ * Specifies the interface for saving peak fitting results.
  */
 public interface PeakResults
 {
@@ -65,7 +65,7 @@ public interface PeakResults
             float[] params, float[] paramsStdDev);
 
     /**
-     * Add a fitted peak result
+     * Add a fitted peak result.
      *
      * @param result
      *            the result
@@ -97,7 +97,7 @@ public interface PeakResults
     public void addAll(PeakResultStore results);
 
     /**
-     * @return The number of results added since begin()
+     * @return The number of results added since begin().
      */
     public int size();
 
@@ -107,7 +107,7 @@ public interface PeakResults
     public void end();
 
     /**
-     * @return True if still accepting results using the add methods
+     * @return True if still accepting results using the add methods.
      */
     public boolean isActive();
 
@@ -118,7 +118,7 @@ public interface PeakResults
     public void setSource(ImageSource source);
 
     /**
-     * @return The source used to create the results
+     * @return The source used to create the results.
      */
     public ImageSource getSource();
 
@@ -151,7 +151,7 @@ public interface PeakResults
     public void setCalibration(Calibration calibration);
 
     /**
-     * @return The calibration used to obtain the results
+     * @return The calibration used to obtain the results.
      */
     public Calibration getCalibration();
 
@@ -177,12 +177,12 @@ public interface PeakResults
     public void setConfiguration(String configuration);
 
     /**
-     * @return The configuration used to create the results
+     * @return The configuration used to create the results.
      */
     public String getConfiguration();
 
     /**
-     * @return The name of the results set
+     * @return The name of the results set.
      */
     public String getName();
 

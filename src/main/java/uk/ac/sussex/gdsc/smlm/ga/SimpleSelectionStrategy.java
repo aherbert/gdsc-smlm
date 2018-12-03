@@ -40,7 +40,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 {
     /** The fraction of the individuals to select (set between 0 and 1). */
     final double fraction;
-    /** The maximum number of individuals to select */
+    /** The maximum number of individuals to select. */
     final int max;
 
     private List<? extends Chromosome<T>> individuals = null;
@@ -103,7 +103,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
     }
 
     /**
-     * Calculate the new size of the population after selection
+     * Calculate the new size of the population after selection.
      *
      * @param size
      *            The current size of the population before selection
@@ -132,7 +132,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
     }
 
     /**
-     * Select pairs randomly from the population
+     * Select pairs randomly from the population.
      *
      * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#next()
      */

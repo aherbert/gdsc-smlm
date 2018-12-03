@@ -31,7 +31,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Solves (one) linear equation, A x = b.
@@ -76,7 +76,7 @@ public class EJMLLinearSolver
 
                 // Check for NaN or Infinity
                 for (int i = A.data.length; i-- > 0;)
-                    if (!Maths.isFinite(A.data[i]))
+                    if (!Double.isFinite(A.data[i]))
                         return false;
 
                 this.A = A;
@@ -215,22 +215,6 @@ public class EJMLLinearSolver
     public EJMLLinearSolver(double maxRelativeError, double maxAbsoluteError, double inversionTolerance)
     {
         this(new DoubleEquality(maxRelativeError, maxAbsoluteError), inversionTolerance);
-    }
-
-    /**
-     * Instantiates a new EJML linear solver with tolerance for the linear solution.
-     *
-     * @param significantDigits
-     *            the significant digits for equality
-     * @param maxAbsoluteError
-     *            the max absolute error for equality
-     * @deprecated The significant digits are used to set the max relative error as 1e<sup>-(n-1)</sup>, e.g. 3sd =&gt;
-     *             1e<sup>-2</sup>.
-     */
-    @Deprecated
-    public EJMLLinearSolver(int significantDigits, double maxAbsoluteError)
-    {
-        this(new DoubleEquality(significantDigits, maxAbsoluteError));
     }
 
     /**
@@ -568,7 +552,7 @@ public class EJMLLinearSolver
         // Check for NaN or Infinity
         final double[] a_inv = A_inv.data;
         for (int i = a_inv.length; i-- > 0;)
-            if (!Maths.isFinite(a_inv[i]))
+            if (!Double.isFinite(a_inv[i]))
                 return false;
 
         // Q. Should we check the product is the identity matrix?
@@ -870,7 +854,7 @@ public class EJMLLinearSolver
         // Check for NaN or Infinity
         final double[] a_inv = A_inv.data;
         for (int i = a_inv.length; i-- > 0;)
-            if (!Maths.isFinite(a_inv[i]))
+            if (!Double.isFinite(a_inv[i]))
                 return false;
 
         if (isInversionTolerance() && invalidInversion(A, pseudoInverse))
@@ -902,7 +886,7 @@ public class EJMLLinearSolver
         // Check for NaN or Infinity
         final double[] a_inv = A_inv.data;
         for (int i = a_inv.length; i-- > 0;)
-            if (!Maths.isFinite(a_inv[i]))
+            if (!Double.isFinite(a_inv[i]))
             {
                 System.out.printf("Not finite\n");
                 return false;
@@ -1256,7 +1240,7 @@ public class EJMLLinearSolver
         // Check for NaN or Infinity
         final double[] a_inv = A_inv.data;
         for (int i = a_inv.length; i-- > 0;)
-            if (!Maths.isFinite(a_inv[i]))
+            if (!Double.isFinite(a_inv[i]))
                 return false;
 
         // Q. Should we check the product is the identity matrix?
@@ -1514,7 +1498,7 @@ public class EJMLLinearSolver
         // Check for NaN or Infinity
         final double[] a_inv = A_inv.data;
         for (int i = a_inv.length; i-- > 0;)
-            if (!Maths.isFinite(a_inv[i]))
+            if (!Double.isFinite(a_inv[i]))
                 return false;
 
         // Q. Should we check the product is the identity matrix?

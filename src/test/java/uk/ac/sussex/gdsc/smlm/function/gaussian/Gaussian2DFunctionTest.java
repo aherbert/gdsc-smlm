@@ -1,8 +1,9 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.AfterAll;
@@ -11,10 +12,9 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.ij.Utils;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class Gaussian2DFunctionTest {
@@ -134,7 +134,7 @@ public abstract class Gaussian2DFunctionTest {
 
         final int[] gradientIndices = gf.gradientIndices();
         if (logger.isLoggable(Level.INFO))
-            logger.log(TestLog.getRecord(Level.INFO, "Function%d %s %s", npeaks, gf.getClass().getName(),
+            logger.log(TestLogUtils.getRecord(Level.INFO, "Function%d %s %s", npeaks, gf.getClass().getName(),
                     Arrays.toString(gradientIndices)));
 
         Assertions.assertEquals(gf.getNPeaks(), npeaks, "Incorrect number of peaks");
@@ -200,7 +200,7 @@ public abstract class Gaussian2DFunctionTest {
                                     f.initialise(a);
                                     if (record) {
                                         record = false;
-                                        logger.log(TestLog.getRecord(Level.INFO, "%s %d frozen to %s",
+                                        logger.log(TestLogUtils.getRecord(Level.INFO, "%s %d frozen to %s",
                                                 f1.getClass().getSimpleName(), 1, f.getClass().getSimpleName()));
                                     }
 
@@ -329,7 +329,7 @@ public abstract class Gaussian2DFunctionTest {
         logger.info(() -> {
             return String.format("functionComputesTargetGradient %s %s (error %s +/- %s)",
                     f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
-                    Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+                    MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 
@@ -379,7 +379,7 @@ public abstract class Gaussian2DFunctionTest {
                                                             f.initialise(a);
                                                             if (record) {
                                                                 record = false;
-                                                                logger.log(TestLog.getRecord(Level.INFO,
+                                                                logger.log(TestLogUtils.getRecord(Level.INFO,
                                                                         "%s %d frozen to %s",
                                                                         f2.getClass().getSimpleName(), 2,
                                                                         f.getClass().getSimpleName()));
@@ -543,8 +543,8 @@ public abstract class Gaussian2DFunctionTest {
         logger.info(() -> {
             return String.format("functionComputesTargetGradientWith2Peaks %s [%d] %s (error %s +/- %s)",
                     f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
-                    Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-                    Utils.rounded(s.getStandardDeviation()));
+                    Gaussian2DFunction.getName(targetParameter), MathUtils.rounded(s.getMean()),
+                    MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 

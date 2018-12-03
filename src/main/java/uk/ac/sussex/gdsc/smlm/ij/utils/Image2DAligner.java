@@ -27,11 +27,11 @@ import java.util.Arrays;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.math.interpolation.CachedBicubicInterpolator;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Perform 2D image alignment using normalised cross-correlation.
@@ -179,8 +179,8 @@ public class Image2DAligner implements Cloneable
         check2D(image);
         if (w < 2 || h < 2)
             throw new IllegalArgumentException("Require a 2D target image");
-        nc = Maths.nextPow2(Math.max(w, image.getWidth()));
-        nr = Maths.nextPow2(Math.max(h, image.getHeight()));
+        nc = MathUtils.nextPow2(Math.max(w, image.getWidth()));
+        nr = MathUtils.nextPow2(Math.max(h, image.getHeight()));
         nr_by_nc = nr * nc;
         // Window and pad the reference
         setReference(createDHT(image, reference));
@@ -362,7 +362,7 @@ public class Image2DAligner implements Cloneable
         // the code to report when the correlation value is incorrect.
 
         final double[] data = dht.getData();
-        final double[] limits = Maths.limits(data);
+        final double[] limits = MathUtils.limits(data);
         final double min = limits[0];
         final double max = limits[1];
 
@@ -478,8 +478,8 @@ public class Image2DAligner implements Cloneable
         check2D(image);
         if (w < 2 || h < 2)
             throw new IllegalArgumentException("Require a 2D target image");
-        nc = Maths.nextPow2(Math.max(w, image.getWidth()));
-        nr = Maths.nextPow2(Math.max(h, image.getHeight()));
+        nc = MathUtils.nextPow2(Math.max(w, image.getWidth()));
+        nr = MathUtils.nextPow2(Math.max(h, image.getHeight()));
         nr_by_nc = nr * nc;
         // Window and pad the reference
         setReference(createDHT(image, reference));
@@ -805,8 +805,8 @@ public class Image2DAligner implements Cloneable
                     int d1 = 0, d2 = 0;
                     for (int k = 0; k < 3; k++)
                     {
-                        d1 += Maths.pow2(xyz1[k] - centre[k]);
-                        d2 += Maths.pow2(xyz2[k] - centre[k]);
+                        d1 += MathUtils.pow2(xyz1[k] - centre[k]);
+                        d2 += MathUtils.pow2(xyz2[k] - centre[k]);
                     }
                     if (d2 < d1)
                     {
@@ -835,8 +835,8 @@ public class Image2DAligner implements Cloneable
             // Perform sub-pixel alignment.
             // Create a cubic spline using a small region of pixels around the maximum.
             // Avoid out-of-bounds errors. Only use the range that was normalised.
-            final int x = Maths.clip(ix, ixw - 5, xy[0] - 2);
-            final int y = Maths.clip(iy, iyh - 5, xy[1] - 2);
+            final int x = MathUtils.clip(ix, ixw - 5, xy[0] - 2);
+            final int y = MathUtils.clip(iy, iyh - 5, xy[1] - 2);
             final DoubleImage2D crop = correlation.crop(x, y, 5, 5, region);
 
             // Find the maximum starting at the current origin
@@ -913,7 +913,7 @@ public class Image2DAligner implements Cloneable
         frequencyDomainCorrelationError = DoubleEquality.relativeError(o, e);
         if (frequencyDomainCorrelationError > 0.05)
             System.err.printf("2D Correlation Error = %s : Spatial = %s, Freq = %s\n",
-                    Utils.rounded(frequencyDomainCorrelationError), Double.toString(e), Double.toString(o));
+                    MathUtils.rounded(frequencyDomainCorrelationError), Double.toString(e), Double.toString(o));
     }
 
     /**
@@ -1253,7 +1253,7 @@ public class Image2DAligner implements Cloneable
      */
     public void setEdgeWindow(double edgeWindow)
     {
-        this.edgeWindow = Maths.clip(0, 1, edgeWindow);
+        this.edgeWindow = MathUtils.clip(0, 1, edgeWindow);
     }
 
     /**
@@ -1320,7 +1320,7 @@ public class Image2DAligner implements Cloneable
      */
     public void setMinimumOverlap(double minimumOverlap)
     {
-        this.minimumOverlap = Maths.clip(0, 1, minimumOverlap);
+        this.minimumOverlap = MathUtils.clip(0, 1, minimumOverlap);
     }
 
     /**
@@ -1341,7 +1341,7 @@ public class Image2DAligner implements Cloneable
      */
     public void setMinimumDimensionOverlap(double minimumDimensionOverlap)
     {
-        this.minimumDimensionOverlap = Maths.clip(0, 1, minimumDimensionOverlap);
+        this.minimumDimensionOverlap = MathUtils.clip(0, 1, minimumDimensionOverlap);
     }
 
     /**

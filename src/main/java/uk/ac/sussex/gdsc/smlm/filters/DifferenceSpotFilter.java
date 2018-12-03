@@ -35,7 +35,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
     private DataProcessor processor2;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param search
      *            The search width for non-maximum suppression

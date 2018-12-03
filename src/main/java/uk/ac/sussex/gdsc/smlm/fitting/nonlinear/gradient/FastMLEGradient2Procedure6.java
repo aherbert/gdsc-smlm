@@ -85,7 +85,7 @@ public class FastMLEGradient2Procedure6 extends FastMLEGradient2Procedure
     }
 
     /**
-     * Reset the first derivative vector
+     * Reset the first derivative vector.
      */
     @Override
     protected void reset1()

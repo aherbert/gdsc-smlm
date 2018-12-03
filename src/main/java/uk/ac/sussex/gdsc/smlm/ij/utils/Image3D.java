@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * Store a 3D image in a single array
+ * Store a 3D image in a single array.
  */
 public abstract class Image3D
 {
@@ -40,7 +40,7 @@ public abstract class Image3D
     public static final int MAX_SIZE_OF_32_BIT_ARRAY = 1073741824;
 
     /**
-     * Check the size can fit in a 1D array
+     * Check the size can fit in a 1D array.
      *
      * @param nc
      *            the number of columns
@@ -79,7 +79,7 @@ public abstract class Image3D
     /** The number of columns (max x). */
     public final int nc;
 
-    /** The number of rows multiplied by the number of columns */
+    /** The number of rows multiplied by the number of columns. */
     public final int nr_by_nc;
 
     /**
@@ -257,7 +257,7 @@ public abstract class Image3D
     }
 
     /**
-     * Gets the size (the number of slices)
+     * Gets the size (the number of slices).
      *
      * @return the size
      */
@@ -335,7 +335,7 @@ public abstract class Image3D
     }
 
     /**
-     * Gets the index using the xyz components
+     * Gets the index using the xyz components.
      *
      * @param x
      *            the x
@@ -355,7 +355,7 @@ public abstract class Image3D
     }
 
     /**
-     * Gets the index using the xyz components
+     * Gets the index using the xyz components.
      *
      * @param x
      *            the x
@@ -1190,7 +1190,7 @@ public abstract class Image3D
         if (x < 0)
         {
             x_1 = 0;
-            x_w_1 = Maths.clip(0, nc, x + w);
+            x_w_1 = MathUtils.clip(0, nc, x + w);
         }
         else
         {
@@ -1203,7 +1203,7 @@ public abstract class Image3D
         if (y < 0)
         {
             y_1 = 0;
-            y_h_1 = Maths.clip(0, nr, y + h);
+            y_h_1 = MathUtils.clip(0, nr, y + h);
         }
         else
         {
@@ -1216,7 +1216,7 @@ public abstract class Image3D
         if (z < 0)
         {
             z_1 = 0;
-            z_d_1 = Maths.clip(0, ns, z + d);
+            z_d_1 = MathUtils.clip(0, ns, z + d);
         }
         else
         {

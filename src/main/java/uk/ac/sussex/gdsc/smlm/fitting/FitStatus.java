@@ -24,58 +24,58 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
- * Define the status of a fit result
+ * Define the status of a fit result.
  */
 public enum FitStatus
 {
     //@formatter:off
-    /** OK */
+    /** OK. */
     OK{ @Override public String getName() { return "OK"; }},
     /** Singular non-linear model */
     SINGULAR_NON_LINEAR_MODEL{ @Override public String getName() { return "Singular non-linear model"; }},
     /** Singular non-linear solution */
     SINGULAR_NON_LINEAR_SOLUTION{ @Override public String getName() { return "Singular non-linear solution"; }},
-    /** Invalid gradients */
+    /** Invalid gradients. */
     INVALID_GRADIENTS{ @Override public String getName() { return "Invalid gradients"; }},
-    /** Failed to converge */
+    /** Failed to converge. */
     FAILED_TO_CONVERGE{ @Override public String getName() { return "Failed to converge"; }},
-    /** Too many iterations */
+    /** Too many iterations. */
     TOO_MANY_ITERATIONS{ @Override public String getName() { return "Too many iterations"; }},
-    /** Too many evaluations */
+    /** Too many evaluations. */
     TOO_MANY_EVALUATIONS{ @Override public String getName() { return "Too many evaluations"; }},
-    /** Invalid likelihood */
+    /** Invalid likelihood. */
     INVALID_LIKELIHOOD{ @Override public String getName() { return "Invalid likelihood"; }},
-    /** Bad parameters */
+    /** Bad parameters. */
     BAD_PARAMETERS{ @Override public String getName() { return "Bad parameters"; }},
-    /** Failed to estimate width */
+    /** Failed to estimate width. */
     FAILED_TO_ESTIMATE_WIDTH{ @Override public String getName() { return "Failed to estimate width"; }},
-    /** Coordinates moved */
+    /** Coordinates moved. */
     COORDINATES_MOVED{ @Override public String getName() { return "Coordinates moved"; }},
-    /** Outside fit region */
+    /** Outside fit region. */
     OUTSIDE_FIT_REGION{ @Override public String getName() { return "Outside fit region"; }},
-    /** Insufficient signal */
+    /** Insufficient signal. */
     INSUFFICIENT_SIGNAL{ @Override public String getName() { return "Insufficient signal"; }},
     /** Insufficient Signal-to-Noise Ratio (SNR) */
     INSUFFICIENT_SNR{ @Override public String getName() { return "Insufficient SNR"; }},
-    /** Width diverged */
+    /** Width diverged. */
     WIDTH_DIVERGED{ @Override public String getName() { return "Width diverged"; }},
     /** Z-coordinate moved */
     Z_MOVED{ @Override public String getName() { return "Z-coordinate moved"; }},
-    /** Insufficient precision */
+    /** Insufficient precision. */
     INSUFFICIENT_PRECISION{ @Override public String getName() { return "Insufficient precision"; }},
-    /** Neighbour overlap */
+    /** Neighbour overlap. */
     NEIGHBOUR_OVERLAP{ @Override public String getName() { return "Neighbour overlap"; }},
-    /** Failed smart filter */
+    /** Failed smart filter. */
     FAILED_SMART_FILTER{ @Override public String getName() { return "Failed smart filter"; }},
-    /** Drift to another result */
+    /** Drift to another result. */
     DRIFT_TO_ANOTHER_RESULT{ @Override public String getName() { return "Drift to another result"; }},
-    /** Failed validation */
+    /** Failed validation. */
     FAILED_VALIDATION{ @Override public String getName() { return "Failed validation"; }},
-    /** No model improvement */
+    /** No model improvement. */
     NO_MODEL_IMPROVEMENT{ @Override public String getName() { return "No model improvement"; }},
-    /** Line search error */
+    /** Line search error. */
     LINE_SEARCH_ERROR{ @Override public String getName() { return "Line search error"; }},
-    /** Unknown */
+    /** Unknown. */
     UNKNOWN{ @Override public String getName() { return "Unknown"; }};
 	//@formatter:on
 

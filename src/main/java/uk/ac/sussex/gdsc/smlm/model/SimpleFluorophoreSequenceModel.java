@@ -24,12 +24,12 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
- * Contains a single-time model for a non-blinking fluorophore
+ * Contains a single-time model for a non-blinking fluorophore.
  */
 public class SimpleFluorophoreSequenceModel extends FluorophoreSequenceModel
 {
     /**
-     * Construct a new flourophore
+     * Construct a new flourophore.
      *
      * @param id
      *            The identifier

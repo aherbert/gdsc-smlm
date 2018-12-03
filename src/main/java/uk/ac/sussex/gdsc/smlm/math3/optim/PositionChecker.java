@@ -29,7 +29,7 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimplePointChecker;
 
 /**
- * Check if the position has converged
+ * Check if the position has converged.
  */
 public class PositionChecker extends SimplePointChecker<PointValuePair> implements OptimizationData
 {

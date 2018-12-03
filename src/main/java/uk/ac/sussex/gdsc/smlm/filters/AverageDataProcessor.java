@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 import java.util.List;
 
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter. When the box
@@ -50,7 +50,7 @@ public class AverageDataProcessor extends DataProcessor
     private AreaAverageFilter areaAverageFilter = null;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param border
      *            The border to ignore for maxima
@@ -63,7 +63,7 @@ public class AverageDataProcessor extends DataProcessor
     }
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param border
      *            The border to ignore for maxima
@@ -211,7 +211,7 @@ public class AverageDataProcessor extends DataProcessor
     public List<String> getParameters()
     {
         final List<String> list = super.getParameters();
-        list.add("smooth = " + Utils.rounded(smooth));
+        list.add("smooth = " + MathUtils.rounded(smooth));
         return list;
     }
 

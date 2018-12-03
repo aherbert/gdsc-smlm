@@ -32,7 +32,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 public interface IMultiPathFitResults
 {
     /**
-     * @return The frame containing the results
+     * @return The frame containing the results.
      */
     public int getFrame();
 

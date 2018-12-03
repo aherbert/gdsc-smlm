@@ -23,18 +23,18 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import java.util.Arrays;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianPSFModelTest
@@ -89,7 +89,7 @@ public class GaussianPSFModelTest
                     Arrays.fill(e, 0);
                     psf.create3D(e, maxx, maxy, 1, x0, x1, x2, false);
                     psf.getValue(maxx, maxy, x0, x1, x2, o);
-                    Assertions.assertEquals(1, Maths.sum(o), 1e-3);
+                    Assertions.assertEquals(1, MathUtils.sum(o), 1e-3);
                     psf.getValueAndGradient(maxx, maxy, x0, x1, x2, o2, g);
                     for (int ii = 0; ii < e.length; ii++)
                         if (e[ii] == 0)

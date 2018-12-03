@@ -43,7 +43,7 @@ public interface Gaussian2DFitConfiguration
     public void initialise(int npeaks, int maxx, int maxy, double[] params);
 
     /**
-     * True if the fit residuals should be computed
+     * True if the fit residuals should be computed.
      *
      * @return true if the fit residuals should be computed
      */
@@ -57,7 +57,7 @@ public interface Gaussian2DFitConfiguration
     public FunctionSolver getFunctionSolver();
 
     /**
-     * True if the fit parameter deviations should be computed
+     * True if the fit parameter deviations should be computed.
      *
      * @return true if the fit parameter deviations should be computed
      */

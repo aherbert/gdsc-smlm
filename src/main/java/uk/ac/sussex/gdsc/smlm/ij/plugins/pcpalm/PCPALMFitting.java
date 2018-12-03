@@ -69,8 +69,8 @@ import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
@@ -87,7 +87,7 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimize
  */
 public class PCPALMFitting implements PlugIn
 {
-    /** The title */
+    /** The title. */
     static String TITLE = "PC-PALM Fitting";
 
     private static String INPUT_FROM_FILE = "Load from file";
@@ -447,7 +447,7 @@ public class PCPALMFitting implements PlugIn
                     (filter && (r.nmPerPixel != nmPerPixel || r.spatialDomain != spatialDomain)))
                 continue;
             titles.add(String.format("%d%s: %s (%s nm/px)", r.id, (r.spatialDomain) ? "" : "*", r.source.getName(),
-                    Utils.rounded(r.nmPerPixel, 3)));
+                    MathUtils.rounded(r.nmPerPixel, 3)));
         }
         return titles;
     }
@@ -512,8 +512,8 @@ public class PCPALMFitting implements PlugIn
         // Model fitting for g(r) correlation curves
         // -------------
         log("Fitting g(r) correlation curve from the frequency domain");
-        log("Average peak density = %s um^-2. Blinking estimate = %s", Utils.rounded(peakDensity, 4),
-                Utils.rounded(blinkingRate, 4));
+        log("Average peak density = %s um^-2. Blinking estimate = %s", MathUtils.rounded(peakDensity, 4),
+                MathUtils.rounded(blinkingRate, 4));
 
         createResultsTable();
 
@@ -533,12 +533,12 @@ public class PCPALMFitting implements PlugIn
         if (parameters != null)
         {
             log("  Plot %s: Over-counting estimate = %s", randomModel.getName(),
-                    Utils.rounded(peakDensity / parameters[1], 4));
+                    MathUtils.rounded(peakDensity / parameters[1], 4));
             log("  Plot %s == %s", randomModel.getName(), resultColour.toString());
             plot.setColor(color);
             plot.addPoints(randomModel.getX(), randomModel.value(parameters), Plot.LINE);
             addNonFittedPoints(plot, gr, randomModel, parameters);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
             if (saveCorrelationCurve)
                 curves.add(extractCurve(gr, randomModel, parameters));
         }
@@ -554,12 +554,12 @@ public class PCPALMFitting implements PlugIn
             if (parameters != null)
             {
                 log("  Plot %s: Over-counting estimate = %s", clusteredModel.getName(),
-                        Utils.rounded(peakDensity / parameters[1], 4));
+                        MathUtils.rounded(peakDensity / parameters[1], 4));
                 log("  Plot %s == %s, ", clusteredModel.getName(), resultColour.toString());
                 plot.setColor(color);
                 plot.addPoints(clusteredModel.getX(), clusteredModel.value(parameters), Plot.LINE);
                 addNonFittedPoints(plot, gr, clusteredModel, parameters);
-                Utils.display(title, plot);
+                ImageJUtils.display(title, plot);
                 if (saveCorrelationCurve)
                     curves.add(extractCurve(gr, clusteredModel, parameters));
             }
@@ -572,12 +572,12 @@ public class PCPALMFitting implements PlugIn
             if (parameters != null)
             {
                 log("  Plot %s: Over-counting estimate = %s", emulsionModel.getName(),
-                        Utils.rounded(peakDensity / parameters[1], 4));
+                        MathUtils.rounded(peakDensity / parameters[1], 4));
                 log("  Plot %s == %s", emulsionModel.getName(), resultColour.toString());
                 plot.setColor(color);
                 plot.addPoints(emulsionModel.getX(), emulsionModel.value(parameters), Plot.LINE);
                 addNonFittedPoints(plot, gr, emulsionModel, parameters);
-                Utils.display(title, plot);
+                ImageJUtils.display(title, plot);
                 if (saveCorrelationCurve)
                     curves.add(extractCurve(gr, emulsionModel, parameters));
             }
@@ -643,10 +643,10 @@ public class PCPALMFitting implements PlugIn
     {
         if (!saveCorrelationCurve)
             return;
-        outputFilename = Utils.getFilename("Output_Correlation_File", outputFilename);
+        outputFilename = ImageJUtils.getFilename("Output_Correlation_File", outputFilename);
         if (outputFilename != null)
         {
-            outputFilename = Utils.replaceExtension(outputFilename, "xls");
+            outputFilename = ImageJUtils.replaceExtension(outputFilename, "xls");
 
             try (BufferedWriter output = new BufferedWriter(new FileWriter(outputFilename)))
             {
@@ -691,7 +691,7 @@ public class PCPALMFitting implements PlugIn
      */
     private boolean loadCorrelationCurve()
     {
-        inputFilename = Utils.getFilename("Input_Correlation_File", inputFilename);
+        inputFilename = ImageJUtils.getFilename("Input_Correlation_File", inputFilename);
         if (inputFilename == null)
             return false;
 
@@ -902,7 +902,7 @@ public class PCPALMFitting implements PlugIn
         parameters[0] = Math.abs(parameters[0]);
 
         final double ss = optimum.getResiduals().dotProduct(optimum.getResiduals());
-        ic1 = Maths.getAkaikeInformationCriterionFromResiduals(ss, randomModel.size(), parameters.length);
+        ic1 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, randomModel.size(), parameters.length);
 
         final double fitSigmaS = parameters[0];
         final double fitProteinDensity = parameters[1];
@@ -913,16 +913,16 @@ public class PCPALMFitting implements PlugIn
 
         log("  %s fit: SS = %f. cAIC = %f. %d evaluations", randomModel.getName(), ss, ic1, optimum.getEvaluations());
         log("  %s parameters:", randomModel.getName());
-        log("    Average precision = %s nm (%s%%)", Utils.rounded(fitSigmaS, 4), Utils.rounded(e1, 4));
-        log("    Average protein density = %s um^-2 (%s%%)", Utils.rounded(fitProteinDensity * 1e6, 4),
-                Utils.rounded(e2, 4));
+        log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4), MathUtils.rounded(e1, 4));
+        log("    Average protein density = %s um^-2 (%s%%)", MathUtils.rounded(fitProteinDensity * 1e6, 4),
+                MathUtils.rounded(e2, 4));
 
         valid1 = true;
         if (fittingTolerance > 0 && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance))
         {
             log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%), average protein density = %g um^-2 (%s%%)",
-                    randomModel.getName(), Utils.rounded(fittingTolerance, 4), fitSigmaS, Utils.rounded(e1, 4),
-                    fitProteinDensity * 1e6, Utils.rounded(e2, 4));
+                    randomModel.getName(), MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+                    fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
             valid1 = false;
         }
 
@@ -957,8 +957,8 @@ public class PCPALMFitting implements PlugIn
                 {
                     // Failed fit
                     log("  Failed to fit %s: g(r)protein %s > %s @ r=%s", randomModel.getName(),
-                            Utils.rounded(gr_protein_i, 4), Utils.rounded(gr_protein_threshold, 4),
-                            Utils.rounded(gr_[i], 4));
+                            MathUtils.rounded(gr_protein_i, 4), MathUtils.rounded(gr_protein_threshold, 4),
+                            MathUtils.rounded(gr_[i], 4));
                     valid1 = false;
                 }
                 //stats.addValue(gr_i);
@@ -1019,11 +1019,11 @@ public class PCPALMFitting implements PlugIn
         final double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
         final double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0 };
         // The amplitude and range should not extend beyond the limits of the g(r) curve.
-        final double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
-                Maths.max(gr[1]) };
+        final double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, MathUtils.max(x),
+                MathUtils.max(gr[1]) };
         log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", clusteredModel.getName(),
-                Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
-                Utils.rounded(uB[1] * 1e6, 4));
+                MathUtils.rounded(lB[0], 4), MathUtils.rounded(uB[0], 4), MathUtils.rounded(lB[1] * 1e6, 4),
+                MathUtils.rounded(uB[1] * 1e6, 4));
 
         final PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, clusteredModelMulti);
 
@@ -1064,7 +1064,7 @@ public class PCPALMFitting implements PlugIn
                 if (ss < constrainedSolution.getValue())
                 {
                     log("Re-fitting %s improved the SS from %s to %s (-%s%%)", clusteredModel.getName(),
-                            Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(
+                            MathUtils.rounded(constrainedSolution.getValue(), 4), MathUtils.rounded(ss, 4), MathUtils.rounded(
                                     100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
                     parameters = lvmSolution.getPoint().toArray();
                 }
@@ -1090,7 +1090,7 @@ public class PCPALMFitting implements PlugIn
         final double[] exp = clusteredModel.value(parameters);
         for (int i = 0; i < obs.length; i++)
             ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-        ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, clusteredModel.size(), parameters.length);
+        ic2 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, clusteredModel.size(), parameters.length);
 
         final double fitSigmaS = parameters[0];
         final double fitProteinDensity = parameters[1];
@@ -1106,20 +1106,20 @@ public class PCPALMFitting implements PlugIn
 
         log("  %s fit: SS = %f. cAIC = %f. %d evaluations", clusteredModel.getName(), ss, ic2, evaluations);
         log("  %s parameters:", clusteredModel.getName());
-        log("    Average precision = %s nm (%s%%)", Utils.rounded(fitSigmaS, 4), Utils.rounded(e1, 4));
-        log("    Average protein density = %s um^-2 (%s%%)", Utils.rounded(fitProteinDensity * 1e6, 4),
-                Utils.rounded(e2, 4));
-        log("    Domain radius = %s nm", Utils.rounded(domainRadius, 4));
-        log("    Domain density = %s", Utils.rounded(domainDensity, 4));
-        log("    nCluster = %s", Utils.rounded(nCluster, 4));
+        log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4), MathUtils.rounded(e1, 4));
+        log("    Average protein density = %s um^-2 (%s%%)", MathUtils.rounded(fitProteinDensity * 1e6, 4),
+                MathUtils.rounded(e2, 4));
+        log("    Domain radius = %s nm", MathUtils.rounded(domainRadius, 4));
+        log("    Domain density = %s", MathUtils.rounded(domainDensity, 4));
+        log("    nCluster = %s", MathUtils.rounded(nCluster, 4));
 
         // Check the fitted parameters are within tolerance of the initial estimates
         valid2 = true;
         if (fittingTolerance > 0 && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance))
         {
             log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%), average protein density = %g um^-2 (%s%%)",
-                    clusteredModel.getName(), Utils.rounded(fittingTolerance, 4), fitSigmaS, Utils.rounded(e1, 4),
-                    fitProteinDensity * 1e6, Utils.rounded(e2, 4));
+                    clusteredModel.getName(), MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+                    fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
             valid2 = false;
         }
 
@@ -1127,20 +1127,20 @@ public class PCPALMFitting implements PlugIn
         if (domainRadius < fitSigmaS)
         {
             log("  Failed to fit %s: Domain radius is smaller than the average precision (%s < %s)",
-                    clusteredModel.getName(), Utils.rounded(domainRadius, 4), Utils.rounded(fitSigmaS, 4));
+                    clusteredModel.getName(), MathUtils.rounded(domainRadius, 4), MathUtils.rounded(fitSigmaS, 4));
             valid2 = false;
         }
         if (domainDensity < 0)
         {
             log("  Failed to fit %s: Domain density is negative (%s)", clusteredModel.getName(),
-                    Utils.rounded(domainDensity, 4));
+                    MathUtils.rounded(domainDensity, 4));
             valid2 = false;
         }
 
         if (ic2 > ic1)
         {
             log("  Failed to fit %s - Information Criterion has increased %s%%", clusteredModel.getName(),
-                    Utils.rounded((100 * (ic2 - ic1) / ic1), 4));
+                    MathUtils.rounded((100 * (ic2 - ic1) / ic1), 4));
             valid2 = false;
         }
 
@@ -1328,11 +1328,11 @@ public class PCPALMFitting implements PlugIn
         final double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0, 0 };
         // The amplitude and range should not extend beyond the limits of the g(r) curve.
         // TODO - Find out the expected range for the alpha parameter.
-        final double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
-                Maths.max(gr[1]), Maths.max(x) * 2 };
+        final double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, MathUtils.max(x),
+                MathUtils.max(gr[1]), MathUtils.max(x) * 2 };
         log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", emulsionModel.getName(),
-                Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
-                Utils.rounded(uB[1] * 1e6, 4));
+                MathUtils.rounded(lB[0], 4), MathUtils.rounded(uB[0], 4), MathUtils.rounded(lB[1] * 1e6, 4),
+                MathUtils.rounded(uB[1] * 1e6, 4));
 
         final PointValuePair constrainedSolution = runBoundedOptimiser(initialSolution, lB, uB, emulsionModelMulti);
 
@@ -1373,7 +1373,7 @@ public class PCPALMFitting implements PlugIn
                 if (ss < constrainedSolution.getValue())
                 {
                     log("Re-fitting %s improved the SS from %s to %s (-%s%%)", emulsionModel.getName(),
-                            Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(
+                            MathUtils.rounded(constrainedSolution.getValue(), 4), MathUtils.rounded(ss, 4), MathUtils.rounded(
                                     100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
                     parameters = lvmSolution.getPoint().toArray();
                 }
@@ -1399,7 +1399,7 @@ public class PCPALMFitting implements PlugIn
         final double[] exp = emulsionModel.value(parameters);
         for (int i = 0; i < obs.length; i++)
             ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-        ic3 = Maths.getAkaikeInformationCriterionFromResiduals(ss, emulsionModel.size(), parameters.length);
+        ic3 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, emulsionModel.size(), parameters.length);
 
         final double fitSigmaS = parameters[0];
         final double fitProteinDensity = parameters[1];
@@ -1415,21 +1415,21 @@ public class PCPALMFitting implements PlugIn
 
         log("  %s fit: SS = %f. cAIC = %f. %d evaluations", emulsionModel.getName(), ss, ic3, evaluations);
         log("  %s parameters:", emulsionModel.getName());
-        log("    Average precision = %s nm (%s%%)", Utils.rounded(fitSigmaS, 4), Utils.rounded(e1, 4));
-        log("    Average protein density = %s um^-2 (%s%%)", Utils.rounded(fitProteinDensity * 1e6, 4),
-                Utils.rounded(e2, 4));
-        log("    Domain radius = %s nm", Utils.rounded(domainRadius, 4));
-        log("    Domain density = %s", Utils.rounded(domainDensity, 4));
-        log("    Domain coherence = %s", Utils.rounded(coherence, 4));
-        log("    nCluster = %s", Utils.rounded(nCluster, 4));
+        log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4), MathUtils.rounded(e1, 4));
+        log("    Average protein density = %s um^-2 (%s%%)", MathUtils.rounded(fitProteinDensity * 1e6, 4),
+                MathUtils.rounded(e2, 4));
+        log("    Domain radius = %s nm", MathUtils.rounded(domainRadius, 4));
+        log("    Domain density = %s", MathUtils.rounded(domainDensity, 4));
+        log("    Domain coherence = %s", MathUtils.rounded(coherence, 4));
+        log("    nCluster = %s", MathUtils.rounded(nCluster, 4));
 
         // Check the fitted parameters are within tolerance of the initial estimates
         valid2 = true;
         if (fittingTolerance > 0 && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance))
         {
             log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%), average protein density = %g um^-2 (%s%%)",
-                    emulsionModel.getName(), Utils.rounded(fittingTolerance, 4), fitSigmaS, Utils.rounded(e1, 4),
-                    fitProteinDensity * 1e6, Utils.rounded(e2, 4));
+                    emulsionModel.getName(), MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+                    fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
             valid2 = false;
         }
 
@@ -1437,20 +1437,20 @@ public class PCPALMFitting implements PlugIn
         if (domainRadius < fitSigmaS)
         {
             log("  Failed to fit %s: Domain radius is smaller than the average precision (%s < %s)",
-                    emulsionModel.getName(), Utils.rounded(domainRadius, 4), Utils.rounded(fitSigmaS, 4));
+                    emulsionModel.getName(), MathUtils.rounded(domainRadius, 4), MathUtils.rounded(fitSigmaS, 4));
             valid2 = false;
         }
         if (domainDensity < 0)
         {
             log("  Failed to fit %s: Domain density is negative (%s)", emulsionModel.getName(),
-                    Utils.rounded(domainDensity, 4));
+                    MathUtils.rounded(domainDensity, 4));
             valid2 = false;
         }
 
         if (ic3 > ic1)
         {
             log("  Failed to fit %s - Information Criterion has increased %s%%", emulsionModel.getName(),
-                    Utils.rounded((100 * (ic3 - ic1) / ic1), 4));
+                    MathUtils.rounded((100 * (ic3 - ic1) / ic1), 4));
             valid2 = false;
         }
 
@@ -1619,7 +1619,7 @@ public class PCPALMFitting implements PlugIn
         }
 
         /**
-         * Evaluate the correlation function
+         * Evaluate the correlation function.
          *
          * @param r
          *            The correlation radius
@@ -1780,7 +1780,7 @@ public class PCPALMFitting implements PlugIn
         }
 
         /**
-         * Evaluate the correlation function
+         * Evaluate the correlation function.
          *
          * @param r
          *            The correlation radius
@@ -1804,7 +1804,7 @@ public class PCPALMFitting implements PlugIn
         }
 
         /**
-         * Evaluate the correlation function
+         * Evaluate the correlation function.
          *
          * @param r
          *            The correlation radius
@@ -1820,7 +1820,7 @@ public class PCPALMFitting implements PlugIn
     }
 
     /**
-     * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
+     * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
      */
     private class ClusteredModelFunctionGradient extends ClusteredModelFunction implements MultivariateVectorFunction
     {
@@ -2117,7 +2117,7 @@ public class PCPALMFitting implements PlugIn
         }
 
         /**
-         * Evaluate the correlation function
+         * Evaluate the correlation function.
          *
          * @param r
          *            The correlation radius
@@ -2143,7 +2143,7 @@ public class PCPALMFitting implements PlugIn
         }
 
         /**
-         * Evaluate the correlation function
+         * Evaluate the correlation function.
          *
          * @param r
          *            The correlation radius
@@ -2159,7 +2159,7 @@ public class PCPALMFitting implements PlugIn
     }
 
     /**
-     * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
+     * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
      */
     private class EmulsionModelFunctionGradient extends EmulsionModelFunction implements MultivariateVectorFunction
     {
@@ -2202,18 +2202,18 @@ public class PCPALMFitting implements PlugIn
         sb.append(model).append('\t');
         sb.append(resultColour.toString()).append('\t');
         sb.append(valid).append('\t');
-        sb.append(Utils.rounded(precision, 4)).append('\t');
-        sb.append(Utils.rounded(density * 1e6, 4)).append('\t');
+        sb.append(MathUtils.rounded(precision, 4)).append('\t');
+        sb.append(MathUtils.rounded(density * 1e6, 4)).append('\t');
         sb.append(getString(domainRadius)).append('\t');
         sb.append(getString(domainDensity)).append('\t');
         sb.append(getString(nCluster)).append('\t');
         sb.append(getString(coherence)).append('\t');
-        sb.append(Utils.rounded(ic, 4)).append('\t');
+        sb.append(MathUtils.rounded(ic, 4)).append('\t');
         resultsTable.append(sb.toString());
     }
 
     private static String getString(double value)
     {
-        return (value == 0) ? "-" : Utils.rounded(value, 4);
+        return (value == 0) ? "-" : MathUtils.rounded(value, 4);
     }
 }

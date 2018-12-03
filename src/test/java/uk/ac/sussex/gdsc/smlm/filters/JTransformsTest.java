@@ -1,7 +1,23 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
+import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.TimingResult;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
+
+import ij.plugin.filter.EDM;
+import ij.process.ByteProcessor;
+import ij.process.FHT;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.jtransforms.dht.FloatDHT_2D;
@@ -9,26 +25,12 @@ import org.jtransforms.fft.FloatFFT_2D;
 import org.jtransforms.utils.CommonUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ij.plugin.filter.EDM;
-import ij.process.ByteProcessor;
-import ij.process.FHT;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.process.FHT2;
-import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class JTransformsTest
@@ -118,7 +120,7 @@ public class JTransformsTest
         final float[] o = new float[e.length];
         for (int i = 0, j = 0; i < o.length; i++, j += 2)
             o[i] = data1[j];
-        FHT2.swapQuadrants(new FloatProcessor(size, size, o));
+        Fht.swapQuadrants(new FloatProcessor(size, size, o));
 
         Assertions.assertArrayEquals(e, o, 1e-3f);
     }
@@ -138,8 +140,8 @@ public class JTransformsTest
         final float[] input1 = (float[]) fp1.getPixels();
         final float[] input2 = (float[]) fp2.getPixels();
 
-        final FHT2 fht1 = new FHT2(input1.clone(), size, false);
-        final FHT2 fht2 = new FHT2(input2.clone(), size, false);
+        final Fht fht1 = new Fht(input1.clone(), size, false);
+        final Fht fht2 = new Fht(input2.clone(), size, false);
 
         fht1.transform();
         fht2.transform();
@@ -240,13 +242,13 @@ public class JTransformsTest
 
     private class IJFHT2SpeedTask extends DHTSpeedTask
     {
-        FHT2 fht2;
+        Fht fht2;
 
         public IJFHT2SpeedTask(int maxN, float[][] data)
         {
-            super(FHT2.class.getSimpleName(), maxN, data);
+            super(Fht.class.getSimpleName(), maxN, data);
             // Create one so we have the pre-computed tables
-            fht2 = new FHT2(data[0].clone(), maxN, false);
+            fht2 = new Fht(data[0].clone(), maxN, false);
             fht2.transform();
         }
 
@@ -256,11 +258,11 @@ public class JTransformsTest
             for (int i = 0; i < data.length; i += 2)
             {
                 // Forward
-                FHT2 fht = new FHT2(data[i], maxN, false);
+                Fht fht = new Fht(data[i], maxN, false);
                 fht.copyTables(fht2);
                 fht.transform();
                 // Reverse
-                fht = new FHT2(data[i + 1], maxN, true);
+                fht = new Fht(data[i + 1], maxN, true);
                 fht.copyTables(fht2);
                 fht.transform();
             }
@@ -296,17 +298,17 @@ public class JTransformsTest
     @SeededTest
     public void jTransforms2DDHTIsFasterThanFHT2(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         // Test the forward DHT of data. and reverse transform or the pre-computed correlation.
 
         final int size = 256;
         final int w = size / 4;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
 
         // Blob in the centre
         FloatProcessor fp = createProcessor(size, size / 2 - w / 2, size / 2 - w / 2, w, w, null);
-        final FHT2 fht2 = new FHT2((float[]) fp.getPixels(), size, false);
+        final Fht fht2 = new Fht((float[]) fp.getPixels(), size, false);
         fht2.transform();
         fht2.initialiseFastMultiply();
 
@@ -323,7 +325,7 @@ public class JTransformsTest
             fp = createProcessor(size, x, y, w, w, r);
             final float[] pixels = (float[]) fp.getPixels();
             data[j++] = pixels.clone();
-            final FHT2 fht1 = new FHT2(pixels, size, false);
+            final Fht fht1 = new Fht(pixels, size, false);
             fht1.copyTables(fht2);
             fht2.transform();
             final float[] pixels2 = new float[pixels.length];
@@ -346,6 +348,6 @@ public class JTransformsTest
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
         TimingResult slow = ts.get(-2);
         TimingResult fast = ts.get(-1);
-        logger.log(TestLog.getTimingRecord(slow, fast));
+        logger.log(TestLogUtils.getTimingRecord(slow, fast));
     }
 }

@@ -23,14 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings({ "javadoc" })
 public class OffsetFunctionTest
@@ -39,7 +39,7 @@ public class OffsetFunctionTest
     public void offsetValueFunctionWrapsPrecomputedValues(RandomSeed seed)
     {
         final int n = 3;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final ValueFunction f0 = new FakeGradientFunction(3, n);
         final int size = f0.size();
         final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
@@ -83,7 +83,7 @@ public class OffsetFunctionTest
     public void offsetGradient1FunctionWrapsPrecomputedValues(RandomSeed seed)
     {
         final int n = 3;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final Gradient1Function f0 = new FakeGradientFunction(3, n);
         final int size = f0.size();
         final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
@@ -134,7 +134,7 @@ public class OffsetFunctionTest
     public void offsetGradient2FunctionWrapsPrecomputedValues(RandomSeed seed)
     {
         final int n = 3;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final Gradient2Function f0 = new FakeGradientFunction(3, n);
         final int size = f0.size();
         final double[] b1 = new PseudoRandomGenerator(size, r).getSequence();

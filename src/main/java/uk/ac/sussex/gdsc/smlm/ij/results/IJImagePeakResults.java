@@ -38,16 +38,16 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
 import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.process.InfinityMappedFloatProcessor;
 import uk.ac.sussex.gdsc.core.ij.process.MappedFloatProcessor;
-import uk.ac.sussex.gdsc.core.utils.SimpleLock;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Saves the fit results to an ImageJ image
+ * Saves the fit results to an ImageJ image.
  */
 public class IJImagePeakResults extends IJAbstractPeakResults
 {
@@ -90,7 +90,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
      */
     public static final int DISPLAY_MAX = 0x40;
     /**
-     * Use this to support negative values
+     * Use this to support negative values.
      */
     public static final int DISPLAY_NEGATIVES = 0x80;
     /**
@@ -172,7 +172,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     private int nextRepaintSize = 0;
     private long nextPaintTime = 0;
     private Object pixels;
-    private final SimpleLock imageLock = new SimpleLock();
+    private final SoftLock imageLock = new SoftLock();
     private double repaintInterval = 0.1;
     private long repaintDelay = 1000;
     private int currentFrame;
@@ -265,7 +265,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
         else
         {
             if (IJ.getInstance() != null)
-                Utils.log("ERROR: Unable to create image results '%s' due to invalid dimensions: width=%d, height=%d",
+                ImageJUtils.log("ERROR: Unable to create image results '%s' due to invalid dimensions: width=%d, height=%d",
                         title, imageWidth, imageHeight);
             w = h = 1;
         }
@@ -819,7 +819,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a value
+     * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a value.
      *
      * @param peak
      *            The peak frame
@@ -855,7 +855,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a value
+     * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a value.
      *
      * @param x
      *            The X coordinate
@@ -887,7 +887,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a value
+     * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a value.
      *
      * @param allpeak
      *            The peak frames
@@ -966,7 +966,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a value
+     * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a value.
      *
      * @param allx
      *            The X coordinates
@@ -1315,7 +1315,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * @return the repaintInterval
+     * @return the repaintInterval.
      */
     public double getRepaintInterval()
     {
@@ -1355,7 +1355,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * @return the displayFlags
+     * @return the displayFlags.
      */
     public int getDisplayFlags()
     {
@@ -1370,7 +1370,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * @return the rollingWindowSize
+     * @return the rollingWindowSize.
      */
     public int getRollingWindowSize()
     {
@@ -1403,7 +1403,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * @return True if the image should be displayed
+     * @return True if the image should be displayed.
      */
     public boolean isDisplayImage()
     {
@@ -1422,7 +1422,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * @return The IJ image
+     * @return The IJ image.
      */
     public ImagePlus getImagePlus()
     {
@@ -1430,7 +1430,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
     }
 
     /**
-     * @return the lutName
+     * @return the lutName.
      */
     public String getLutName()
     {

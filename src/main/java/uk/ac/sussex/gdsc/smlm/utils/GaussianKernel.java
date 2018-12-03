@@ -28,10 +28,10 @@ import java.util.Arrays;
 import org.apache.commons.math3.util.FastMath;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * Store a Gaussian kernel for use in convolution
+ * Store a Gaussian kernel for use in convolution.
  */
 public class GaussianKernel implements Cloneable
 {
@@ -43,7 +43,7 @@ public class GaussianKernel implements Cloneable
     /** The standard deviation. */
     final public double s;
 
-    final private double var2;
+    private final double var2;
 
     private int currentScale;
 
@@ -130,7 +130,7 @@ public class GaussianKernel implements Cloneable
      */
     public double[] getGaussianKernel(int scale, double range, boolean edgeCorrection) throws IllegalArgumentException
     {
-        if (!Maths.isPow2(scale))
+        if (!MathUtils.isPow2(scale))
             throw new IllegalArgumentException("Scale must be a power of 2: " + scale);
 
         // Limit range for the Gaussian
@@ -162,7 +162,7 @@ public class GaussianKernel implements Cloneable
                     kernel[i] = halfKernel.getQuick(j);
                 else
                 {
-                    kernel[i] = FastMath.exp(Maths.pow2(i * step) / var2);
+                    kernel[i] = FastMath.exp(MathUtils.pow2(i * step) / var2);
                     // Check if zero
                     if (kernel[i] == 0)
                         break;
@@ -237,7 +237,7 @@ public class GaussianKernel implements Cloneable
                 kernel[i] = halfKernel.getQuick(j);
             else
             {
-                kernel[i] = FastMath.exp(Maths.pow2(i * step) / var2);
+                kernel[i] = FastMath.exp(MathUtils.pow2(i * step) / var2);
                 // Check if zero
                 if (kernel[i] == 0)
                     break;
@@ -280,7 +280,7 @@ public class GaussianKernel implements Cloneable
             for (int i = 1, j = 0; i < kRadius; i++, j += upsample)
             {
                 for (int k = 1; k < upsample; k++)
-                    halfKernel.add(FastMath.exp(Maths.pow2((j + k) * step) / var2));
+                    halfKernel.add(FastMath.exp(MathUtils.pow2((j + k) * step) / var2));
                 halfKernel.add(g[i]);
             }
         }
@@ -293,7 +293,7 @@ public class GaussianKernel implements Cloneable
             final double step = 1.0 / currentScale;
             for (int i = halfKernel.size(); i < kRadius; i++)
             {
-                final double v = FastMath.exp(Maths.pow2(i * step) / var2);
+                final double v = FastMath.exp(MathUtils.pow2(i * step) / var2);
                 if (v == 0)
                     break;
                 halfKernel.add(v);
@@ -316,7 +316,7 @@ public class GaussianKernel implements Cloneable
             final double step = 1.0 / currentScale;
             for (int i = halfKernel.size(); i < kRadius; i++)
             {
-                final double v = FastMath.exp(Maths.pow2(i * step) / var2);
+                final double v = FastMath.exp(MathUtils.pow2(i * step) / var2);
                 if (v == 0)
                     break;
                 halfKernel.add(v);

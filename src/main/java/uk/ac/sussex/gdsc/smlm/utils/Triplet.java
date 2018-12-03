@@ -36,11 +36,11 @@ package uk.ac.sussex.gdsc.smlm.utils;
  */
 public class Triplet<A, B, C>
 {
-    /** First item of the triplet */
+    /** First item of the triplet. */
     public final A a;
-    /** Second item of the triplet */
+    /** Second item of the triplet. */
     public final B b;
-    /** Third item of the triplet */
+    /** Third item of the triplet. */
     public final C c;
 
     /**

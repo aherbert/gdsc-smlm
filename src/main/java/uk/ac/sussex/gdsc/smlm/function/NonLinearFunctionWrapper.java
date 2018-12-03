@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 /**
- * Wrap the NonLinearFunction to remove the parameters that are fixed from the evaluation methods
+ * Wrap the NonLinearFunction to remove the parameters that are fixed from the evaluation methods.
  */
 public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 {

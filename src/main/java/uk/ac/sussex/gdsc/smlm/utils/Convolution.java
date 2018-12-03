@@ -30,7 +30,7 @@ import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.utils.CommonUtils;
 
 /**
- * Simple class to perform convolution
+ * Simple class to perform convolution.
  */
 public class Convolution
 {
@@ -38,7 +38,7 @@ public class Convolution
     public static final int MAX = 1 << 30;
 
     /**
-     * Interface to handle a convolution value
+     * Interface to handle a convolution value.
      */
     public interface ConvolutionValueProcedure
     {
@@ -53,7 +53,7 @@ public class Convolution
     }
 
     /**
-     * Interface to handle two convolution valuess
+     * Interface to handle two convolution valuess.
      */
     public interface DoubleConvolutionValueProcedure
     {

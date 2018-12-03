@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Filter results using SNR
+ * Filter results using SNR.
  */
 public class MultiFilterSNRComponent extends MultiFilterComponent
 {

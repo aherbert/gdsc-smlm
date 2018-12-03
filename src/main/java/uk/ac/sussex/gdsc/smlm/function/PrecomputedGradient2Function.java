@@ -24,11 +24,11 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Wraps a set of function values to implement the forEach procedure
+ * Wraps a set of function values to implement the forEach procedure.
  */
 public class PrecomputedGradient2Function extends PrecomputedGradient1Function implements Gradient2Function
 {
-    /** The second order gradient */
+    /** The second order gradient. */
     protected final double[][] g2;
 
     /**
@@ -51,7 +51,7 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function i
     }
 
     /**
-     * Gets a reference to the first order gradients
+     * Gets a reference to the first order gradients.
      *
      * @return the first order gradients
      */

@@ -23,19 +23,20 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.util.Arrays;
-
-import org.jtransforms.fft.FloatFFT_2D;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import ij.process.FloatProcessor;
-import uk.ac.sussex.gdsc.core.ij.process.FHT2;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+
+import ij.process.FloatProcessor;
+
+import org.jtransforms.fft.FloatFFT_2D;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 @SuppressWarnings({ "javadoc" })
 public class FloatDHT2DTest
@@ -243,8 +244,8 @@ public class FloatDHT2DTest
         final float[] pixels = dht.getData().clone();
         final float[] pixels2 = dht2.getData().clone();
 
-        final FHT2 fht = new FHT2(pixels, size, false);
-        final FHT2 fht2 = new FHT2(pixels2, size, false);
+        final Fht fht = new Fht(pixels, size, false);
+        final Fht fht2 = new Fht(pixels2, size, false);
 
         dht.transform();
         dht2.transform();
@@ -259,7 +260,7 @@ public class FloatDHT2DTest
         check("divide", dht.divide(dht2), fht.divide(fht2), 1e-3f, 1e-3f);
     }
 
-    private static void check(String operation, FloatDHT2D dht, FHT2 fht, float rel, float abs)
+    private static void check(String operation, FloatDHT2D dht, Fht fht, float rel, float abs)
     {
         final float[] e = fht.getData();
         final float[] o = dht.getData();

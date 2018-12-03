@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
- * Contains calculator functions for working with peak results
+ * Contains calculator functions for working with peak results.
  */
 public interface Gaussian2DPeakResultCalculator
 {

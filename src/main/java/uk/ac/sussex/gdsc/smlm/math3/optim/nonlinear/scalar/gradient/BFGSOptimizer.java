@@ -62,33 +62,33 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
     /** Maximum step length used in line search. */
     private double[] maximumStepLength = null;
 
-    /** Convergence tolerance on gradient */
+    /** Convergence tolerance on gradient. */
     private double gradientTolerance;
 
-    /** Maximum number of restarts on the convergence point */
+    /** Maximum number of restarts on the convergence point. */
     private int restarts = 0;
 
-    /** Maximum number of restarts in the event of roundoff error */
+    /** Maximum number of restarts in the event of roundoff error. */
     private int roundoffRestarts = 3;
 
-    /** Convergence tolerance on position */
+    /** Convergence tolerance on position. */
     private PositionChecker positionChecker = null;
 
-    /** Flags to indicate if bounds are present */
+    /** Flags to indicate if bounds are present. */
     private boolean isLower, isUpper;
     private double[] lower, upper;
 
     private double sign = 0;
 
     /**
-     * Specify the maximum step length in each dimension
+     * Specify the maximum step length in each dimension.
      */
     public static class StepLength implements OptimizationData
     {
         private final double[] step;
 
         /**
-         * Build an instance
+         * Build an instance.
          *
          * @param step
          *            The maximum step size in each dimension
@@ -110,14 +110,14 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
     }
 
     /**
-     * Specify the tolerance on the gradient convergence with zero
+     * Specify the tolerance on the gradient convergence with zero.
      */
     public static class GradientTolerance implements OptimizationData
     {
         private final double tolerance;
 
         /**
-         * Build an instance
+         * Build an instance.
          *
          * @param tolerance
          *            The tolerance on the gradient
@@ -147,7 +147,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
         private final int restarts;
 
         /**
-         * Build an instance
+         * Build an instance.
          *
          * @param restarts
          *            The restarts on the gradient
@@ -174,7 +174,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
     public static class MaximumRoundoffRestarts extends MaximumRestarts
     {
         /**
-         * Build an instance
+         * Build an instance.
          *
          * @param restarts
          *            The restarts on the gradient
@@ -186,7 +186,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
     }
 
     /**
-     * Constructor
+     * Constructor.
      */
     public BFGSOptimizer()
     {
@@ -537,7 +537,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
     }
 
     /**
-     * The minimum value between two doubles
+     * The minimum value between two doubles.
      */
     private static double epsilon = calculateMachineEpsilonDouble();
 
@@ -611,7 +611,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
         @SuppressWarnings("unused")
         boolean check;
         /**
-         * The function value at the new point
+         * The function value at the new point.
          */
         double f;
 

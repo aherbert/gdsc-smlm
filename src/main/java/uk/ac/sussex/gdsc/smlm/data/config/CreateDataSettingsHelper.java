@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CreateDataSettingsOrBuilder;
 import uk.ac.sussex.gdsc.smlm.model.DiffusionType;
 
 /**
- * Contain the helper functionality for the CreateDataSettings
+ * Contain the helper functionality for the CreateDataSettings.
  */
 public class CreateDataSettingsHelper
 {

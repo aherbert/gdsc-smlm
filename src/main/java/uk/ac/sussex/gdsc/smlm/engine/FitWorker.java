@@ -31,10 +31,14 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.filters.AreaSum;
-import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.filters.FloatAreaSum;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -53,6 +57,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitParameters.FitTask;
 import uk.ac.sussex.gdsc.smlm.filters.BlockAverageDataProcessor;
 import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
+import uk.ac.sussex.gdsc.smlm.filters.SpotScoreComparator;
 import uk.ac.sussex.gdsc.smlm.fitting.FastGaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -112,13 +117,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
      */
     public static final int ITERATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
-    /** The number of additional evaluations to use for multiple peaks */
+    /** The number of additional evaluations to use for multiple peaks. */
     public static final int EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS = 1; // 0 for no effect
 
-    /** The number of additional evaluations to use for doublets */
+    /** The number of additional evaluations to use for doublets. */
     public static final int EVALUATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
-    private Logger logger = null, logger2 = null;
+    private Logger logger = null;
+    private Logger debugLogger = null;
     private FitTypeCounter counter = null;
     private long time = 0;
 
@@ -582,9 +588,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         //System.out.printf("Slice %d : Noise = %g\n", slice, noise);
         if (logger != null)
-            logger.info("Slice %d: Noise = %f", slice, noise);
+            LoggerUtils.log(logger, Level.INFO, "Slice %d: Noise = %f", slice, noise);
 
-        final ImageExtractor ie = new ImageExtractor(data, width, height);
+        final ImageExtractor ie = ImageExtractor.wrap(data, width, height);
         double[] region = null;
 
         final float offsetx = cc.dataBounds.x;
@@ -634,7 +640,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
             // Smooth the data to provide initial background estimates
             final float[] smoothedData = backgroundSmoothing.process(data, width, height);
-            final ImageExtractor ie2 = new ImageExtractor(smoothedData, width, height);
+            final ImageExtractor ie2 = ImageExtractor.wrap(smoothedData, width, height);
 
             // Perform the Gaussian fit
 
@@ -700,7 +706,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
                 SettingsManager.toJSON(config.getFitEngineSettings(),
                         new File(String.format("/tmp/config.%d.txt", slice)), SettingsManager.FLAG_JSON_WHITESPACE);
-                TextUtils.write(String.format("/tmp/filter.%d.xml", slice), filter.toXML());
+                FileUtils.save(String.format("/tmp/filter.%d.xml", slice), filter.toXML());
                 //filter.setDebugFile(String.format("/tmp/fitWorker.%b.txt", benchmarking));
                 final StringBuilder sb = new StringBuilder();
                 sb.append((benchmarking) ? ((uk.ac.sussex.gdsc.smlm.results.filter.Filter) filter.getFilter()).toXML()
@@ -717,7 +723,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                 for (int i = 0, len = candidates.getLength(); i < len; i++)
                     sb.append(String.format("Fit %d [%d,%d = %.1f]\n", i, candidates.get(i).x, candidates.get(i).y,
                             candidates.get(i).intensity));
-                TextUtils.write(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
+                FileUtils.save(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
             }
 
             FailCounter failCounter = config.getFailCounter();
@@ -746,7 +752,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                     sliceResults.addf(createResult(offsetx, offsety, fitted.get(i)));
 
             if (logger != null)
-                logger.info("Slice %d: %d / %d = %s", slice, success, candidates.getSize(),
+                LoggerUtils.log(logger, Level.INFO, "Slice %d: %d / %d = %s", slice, success, candidates.getSize(),
                         TextUtils.pleural(fitted.getSize(), "result"));
         }
 
@@ -800,7 +806,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                     spots[n] = new Spot(x, y, intensity);
                 }
                 // Sort the maxima
-                Arrays.sort(spots);
+                Arrays.sort(spots, SpotScoreComparator.getInstance());
             }
         }
 
@@ -820,7 +826,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         }
 
         if (logger != null)
-            logger.info("%d: Slice %d: %d candidates", workerId, slice, maxCandidate);
+            LoggerUtils.log(logger, Level.INFO, "%d: Slice %d: %d candidates", workerId, slice, maxCandidate);
 
         sliceResults = new TurboList<>(maxCandidate);
         if (requireIndices)
@@ -994,7 +1000,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         if (inside)
             fittedBackground.add(peakParams[Gaussian2DFunction.BACKGROUND]);
         else if (logger != null)
-            logger.info("[%d] Ignoring peak within image border @ %.2f,%.2f", slice,
+            LoggerUtils.log(logger, Level.INFO, "[%d] Ignoring peak within image border @ %.2f,%.2f", slice,
                     peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION]);
         return true;
     }
@@ -1081,7 +1087,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * Provide the ability to convert raw fitted results into PreprocessedPeakResult for validation
+     * Provide the ability to convert raw fitted results into PreprocessedPeakResult for validation.
      */
     private abstract class ResultFactory
     {
@@ -1218,7 +1224,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         final int width;
         final int height;
         final int parametersPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
-        final AreaSum area;
+        final FloatAreaSum area;
 
         int neighbours;
         double singleBackground = Double.NaN, multiBackground = Double.NaN;
@@ -1250,7 +1256,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         QuadrantAnalysis qaSingle = null;
 
         public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
-                double[] var_g2, Rectangle regionBounds, int candidateId, AreaSum area)
+                double[] var_g2, Rectangle regionBounds, int candidateId, FloatAreaSum area)
         {
             this.gf = gf;
             this.resultFactory = resultFactory;
@@ -1452,7 +1458,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
             // Multiple-fit ...
             if (logger != null)
-                logger.info("Slice %d: Multiple-fit (%d peaks : neighbours [%d + %d - %d])", slice, npeaks,
+                LoggerUtils.log(logger, Level.INFO, "Slice %d: Multiple-fit (%d peaks : neighbours [%d + %d - %d])", slice, npeaks,
                         candidateNeighbourCount, fittedNeighbourCount, precomputedFittedNeighbourCount);
 
             final double[] params = new double[1 + npeaks * parametersPerPeak];
@@ -1791,7 +1797,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                     if (otherId != candidateId)
                     {
                         if (logger != null)
-                            logger.info(
+                            LoggerUtils.log(logger, Level.INFO, 
                                     "Bad peak: Fitted coordinates moved closer to another result (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
                                     candidates.get(candidateId).x, candidates.get(candidateId).y, fcx2, fcy2,
                                     peakNeighbours.get(ii).params[Gaussian2DFunction.X_POSITION],
@@ -1836,7 +1842,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                         if (otherId != candidateId)
                         {
                             if (logger != null)
-                                logger.info(
+                                LoggerUtils.log(logger, Level.INFO, 
                                         "Bad peak: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
                                         candidates.get(candidateId).x, candidates.get(candidateId).y, fcx2 + 0.5f,
                                         fcy2 + 0.5f, candidates.get(otherId).x, candidates.get(otherId).y);
@@ -1966,7 +1972,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         }
 
         /**
-         * Gets the background contribution from the precomputed function
+         * Gets the background contribution from the precomputed function.
          *
          * @param precomputedFunction
          *            the precomputed function
@@ -2075,7 +2081,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             spotParams[Gaussian2DFunction.X_POSITION] += nx - x;
             spotParams[Gaussian2DFunction.Y_POSITION] += ny - y;
             final Gaussian2DFunction f = fitConfig.createGaussianFunction(1, r2.width, r2.height);
-            result[0] = (stats[AreaSum.SUM] - f.integral(spotParams)) / stats[AreaSum.N];
+            result[0] = (stats[FloatAreaSum.INDEX_SUM] - f.integral(spotParams)) / stats[FloatAreaSum.INDEX_COUNT];
             if (result[0] < 0)
                 result[0] = params[Gaussian2DFunction.BACKGROUND];
 
@@ -2653,7 +2659,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                         sum += region[i];
                     // Subtract any fitted peaks
                     if (precomputedFittedNeighboursSingle != null)
-                        sum -= Maths.sum(precomputedFittedNeighboursSingle);
+                        sum -= MathUtils.sum(precomputedFittedNeighboursSingle);
                     signal = (float) (sum - oldBackground * size);
                 }
                 if (signal > 0)
@@ -2816,7 +2822,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                     if (otherId != candidateId)
                     {
                         if (logger != null)
-                            logger.info(
+                            LoggerUtils.log(logger, Level.INFO, 
                                     "Bad peak: Fitted coordinates moved closer to another result (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
                                     candidates.get(candidateId).x, candidates.get(candidateId).y, fcx2, fcy2,
                                     peakNeighbours.get(ii).params[Gaussian2DFunction.X_POSITION],
@@ -2861,7 +2867,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                         if (otherId != candidateId)
                         {
                             if (logger != null)
-                                logger.info(
+                                LoggerUtils.log(logger, Level.INFO, 
                                         "Bad peak: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
                                         candidates.get(candidateId).x, candidates.get(candidateId).y, fcx2 + 0.5f,
                                         fcy2 + 0.5f, candidates.get(otherId).x, candidates.get(otherId).y);
@@ -3112,7 +3118,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             qa.quadrantAnalysis(residuals, width, height, cx, cy);
 
             if (logger != null)
-                logger.info("Residue analysis = %f (%d,%d)", qa.score, qa.vector[0], qa.vector[1]);
+                LoggerUtils.log(logger, Level.INFO, "Residue analysis = %f (%d,%d)", qa.score, qa.vector[0], qa.vector[1]);
 
             return qa;
         }
@@ -3150,7 +3156,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             final int cy = (int) Math.round(params[Gaussian2DFunction.Y_POSITION]);
 
             if (logger != null)
-                logger.info("Computing 2-kernel model");
+                LoggerUtils.log(logger, Level.INFO, "Computing 2-kernel model");
 
             if (!qa.computeDoubletCentres(width, height, cx, cy, params[Gaussian2DFunction.X_SD],
                     params[Gaussian2DFunction.Y_SD]))
@@ -3260,27 +3266,27 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                     // The MLE is only good if we are modelling the camera noise.
                     // The MLE put out by the Poisson model is not better than using the IC from the fit residuals.
                     // ------------
-                    ic1 = Maths.getBayesianInformationCriterion(singleValue, length,
+                    ic1 = MathUtils.getBayesianInformationCriterion(singleValue, length,
                             fitResult.getNumberOfFittedParameters());
-                    ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
+                    ic2 = MathUtils.getBayesianInformationCriterion(doubleValue, length,
                             newFitResult.getNumberOfFittedParameters());
                     // IC should be lower
                     improvement = ic2 < ic1;
                     if (logger != null)
-                        logger.info("Model improvement - Log likelihood (IC) : %f (%f) => %f (%f) : %f", singleValue,
+                        LoggerUtils.log(logger, Level.INFO, "Model improvement - Log likelihood (IC) : %f (%f) => %f (%f) : %f", singleValue,
                                 ic1, doubleValue, ic2, ic1 - ic2);
                 }
                 else if (solverType == FunctionSolverType.WLSE)
                 {
                     // If using the weighted least squares estimator then we can get the log likelihood from an approximation
-                    ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleValue, length,
+                    ic1 = MathUtils.getBayesianInformationCriterionFromResiduals(singleValue, length,
                             fitResult.getNumberOfFittedParameters());
-                    ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleValue, length,
+                    ic2 = MathUtils.getBayesianInformationCriterionFromResiduals(doubleValue, length,
                             newFitResult.getNumberOfFittedParameters());
                     // IC should be lower
                     improvement = ic2 < ic1;
                     if (logger != null)
-                        logger.info("Model improvement - Chi-squared (IC) : %f (%f) => %f (%f) : %f", singleValue, ic1,
+                        LoggerUtils.log(logger, Level.INFO, "Model improvement - Chi-squared (IC) : %f (%f) => %f (%f) : %f", singleValue, ic1,
                                 doubleValue, ic2, ic1 - ic2);
                 }
                 else if (solverType == FunctionSolverType.LSE)
@@ -3288,12 +3294,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                     // Adjusted r^2 should be higher
                     improvement = doubleValue > singleValue;
                     if (logger != null)
-                        logger.info("Model improvement - Adjusted R^2 : %f => %f", singleValue, doubleValue);
+                        LoggerUtils.log(logger, Level.INFO, "Model improvement - Adjusted R^2 : %f => %f", singleValue, doubleValue);
                 }
                 else
                     throw new IllegalStateException("Unable to calculate solution improvement");
 
-                if (logger2 != null)
+                if (debugLogger != null)
                 {
                     double[] peakParams = newFitResult.getParameters();
                     if (peakParams != null)
@@ -3308,11 +3314,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                                     Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
                         }
                     }
-                    final String msg = String.format("Doublet %d [%d,%d] %s (%s) %s [%f -> %f] IC [%f -> %f] = %s\n",
+                    LoggerUtils.log(debugLogger, Level.INFO, "Doublet %d [%d,%d] %s (%s) %s [%f -> %f] IC [%f -> %f] = %s\n",
                             slice, cc.fromRegionToGlobalX(cx), cc.fromRegionToGlobalY(cy), newFitResult.getStatus(),
                             newFitResult.getStatusData(), getFitValueName(), singleValue, doubleValue, ic1, ic2,
                             Arrays.toString(peakParams));
-                    logger2.debug(msg);
                 }
 
                 // Check if the predictive power of the model is better with two peaks:
@@ -3360,7 +3365,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                     if (xpos < 0 || xpos > width || ypos < 0 || ypos > height)
                     {
                         if (logger != null)
-                            logger.info("Fitted coordinates too far outside the fitted region (x %g || y %g) in %dx%d",
+                            LoggerUtils.log(logger, Level.INFO, "Fitted coordinates too far outside the fitted region (x %g || y %g) in %dx%d",
                                     xpos, ypos, width, height);
                         continue;
                     }
@@ -3382,7 +3387,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                         if (a > 0.785398 && a < 2.356194)
                         {
                             if (logger != null)
-                                logger.info(
+                                LoggerUtils.log(logger, Level.INFO, 
                                         "Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
                                         xShift, yShift, a * 57.29578);
                             continue;
@@ -3415,7 +3420,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                                     peakNeighbours.get(i).params[Gaussian2DFunction.Y_POSITION]))
                             {
                                 if (logger != null)
-                                    logger.info(
+                                    LoggerUtils.log(logger, Level.INFO, 
                                             "Bad peak %d: Fitted coordinates moved closer to another result (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
                                             n, candidates.get(candidateId).x, candidates.get(candidateId).y, fcx2, fcy2,
                                             peakNeighbours.get(i).params[Gaussian2DFunction.X_POSITION],
@@ -3459,7 +3464,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                         if (otherId != candidateId)
                         {
                             if (logger != null)
-                                logger.info(
+                                LoggerUtils.log(logger, Level.INFO, 
                                         "Bad peak %d: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
                                         n, candidates.get(candidateId).x, candidates.get(candidateId).y, fcx2 + 0.5f,
                                         fcy2 + 0.5f, candidates.get(otherId).x, candidates.get(otherId).y);
@@ -3503,9 +3508,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                 return createResult(newFitResult, results);
             }
             if (logger != null)
-                logger.info("Unable to fit 2-kernel model : %s", newFitResult.getStatus());
+                LoggerUtils.log(logger, Level.INFO, "Unable to fit 2-kernel model : %s", newFitResult.getStatus());
 
-            if (logger2 != null)
+            if (debugLogger != null)
             {
                 double[] peakParams = newFitResult.getParameters();
                 if (peakParams != null)
@@ -3520,10 +3525,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                                 regionBounds.y;
                     }
                 }
-                final String msg = String.format("Doublet %d [%d,%d] %s (%s) = %s\n", slice, cc.fromRegionToGlobalX(cx),
+                LoggerUtils.log(debugLogger, Level.INFO, "Doublet %d [%d,%d] %s (%s) = %s\n", slice, cc.fromRegionToGlobalX(cx),
                         cc.fromRegionToGlobalY(cy), newFitResult.getStatus(), newFitResult.getStatusData(),
                         Arrays.toString(peakParams));
-                logger2.debug(msg);
             }
 
             return createResult(newFitResult, null);
@@ -3671,7 +3675,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * @return The background estimate when fitting a single peak
+     * @return The background estimate when fitting a single peak.
      */
     @SuppressWarnings("unused")
     private float getSingleFittingBackground()
@@ -3927,7 +3931,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
                 sum += result.getBackground();
             final float av = (float) sum / peakResults.size();
             if (logger != null)
-                logger.info("Average background %f", av);
+                LoggerUtils.log(logger, Level.INFO, "Average background %f", av);
             return av;
         }
         // Compute average of the entire image
@@ -3936,7 +3940,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             sum += data[i];
         final float av = (float) sum / (width * height);
         if (logger != null)
-            logger.info("Image background %f", av);
+            LoggerUtils.log(logger, Level.INFO, "Image background %f", av);
         return av;
     }
 
@@ -4049,7 +4053,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * @return the total time used for fitting
+     * @return the total time used for fitting.
      */
     public long getTime()
     {
@@ -4057,7 +4061,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * Signal that the worker should end
+     * Signal that the worker should end.
      */
     public void finish()
     {
@@ -4065,7 +4069,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * @return True if the worker has finished
+     * @return True if the worker has finished.
      */
     public boolean isFinished()
     {
@@ -4073,7 +4077,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * @return Use the average fitted background as the background estimate for new fits
+     * @return Use the average fitted background as the background estimate for new fits.
      */
     public boolean isUseFittedBackground()
     {
@@ -4093,14 +4097,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * Sets the 2nd logger instance. This can be used for capturing debugging information.
+     * Sets the debug logger instance. This can be used for capturing debugging information.
      *
      * @param logger
      *            the new logger
      */
-    public void setLogger2(Logger logger)
+    public void setDebugLogger(Logger logger)
     {
-        this.logger2 = logger;
+        this.debugLogger = logger;
     }
 
     /**
@@ -4140,11 +4144,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * Provide the multi-path fit results dynamically
+     * Provide the multi-path fit results dynamically.
      */
     private class DynamicMultiPathFitResult extends MultiPathFitResult
     {
-        /** The constant for no Quadrant Analysis score */
+        /** The constant for no Quadrant Analysis score. */
         private static final double NO_QA_SCORE = -1;
 
         final ImageExtractor ie, ie2;
@@ -4156,14 +4160,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         boolean isValid;
         @SuppressWarnings("unused")
         int extra = 0;
-        final AreaSum area;
+        final FloatAreaSum area;
 
         public DynamicMultiPathFitResult(ImageExtractor ie, ImageExtractor ie2, boolean dynamic)
         {
             this.frame = FitWorker.this.slice;
             this.width = cc.dataBounds.width;
             this.height = cc.dataBounds.height;
-            area = new AreaSum(data, width, height);
+            area = FloatAreaSum.wrap(data, width, height);
             this.ie = ie;
             this.ie2 = ie2;
             this.dynamic = dynamic;
@@ -4394,7 +4398,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * Count the number of successful fits
+     * Count the number of successful fits.
      */
     private int success = 0;
 
@@ -4418,7 +4422,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             {
                 final int candidateId = dynamicMultiPathFitResult.candidateId;
                 //@formatter:off
-				logger.info("Not fit %d (%d,%d) %s", candidateId,
+				LoggerUtils.log(logger, Level.INFO, "Not fit %d (%d,%d) %s", candidateId,
 						cc.fromDataToGlobalX(candidates.get(candidateId).x),
 						cc.fromDataToGlobalY(candidates.get(candidateId).y),
 						(selectedResult.fitResult!=null && selectedResult.fitResult.data!=null) ?
@@ -4475,7 +4479,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
                 if (logger != null)
                     // Show the shift, signal and width spread
-                    logger.info("Fit OK %d (%.1f,%.1f) [%d]: Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f",
+                    LoggerUtils.log(logger, Level.INFO, "Fit OK %d (%.1f,%.1f) [%d]: Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f",
                             peak.getCandidateId(), peak.getX(), peak.getY(), peak.getId(),
                             Math.sqrt(peak.getXRelativeShift2()), Math.sqrt(peak.getYRelativeShift2()), peak.getSNR(),
                             peak.getXSDFactor(), peak.getYSDFactor());
@@ -4517,16 +4521,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
                 case BAD_PARAMETERS:
                 case FAILED_TO_ESTIMATE_WIDTH:
-                    logger.info("Bad parameters: %s", Arrays.toString(fitResult.getInitialParameters()));
+                    logger.log(Level.INFO, () -> "Bad parameters: "+ Arrays.toString(fitResult.getInitialParameters()));
                     break;
 
                 default:
-                    logger.info(fitResult.getStatus().toString());
+                    logger.log(Level.INFO, "{0}", fitResult.getStatus());
                     break;
             }
 
         // Debugging
-        if (logger2 != null)
+        if (debugLogger != null)
         {
             double[] peakParams = fitResult.getParameters();
             if (peakParams != null)
@@ -4547,7 +4551,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             }
             final int x = candidates.get(candidateId).x;
             final int y = candidates.get(candidateId).y;
-            logger2.debug("%d:%d [%d,%d] %s (%s) = %s\n", slice, candidateId, cc.fromDataToGlobalX(x),
+            LoggerUtils.log(debugLogger, Level.INFO, "%d:%d [%d,%d] %s (%s) = %s", slice, candidateId, cc.fromDataToGlobalX(x),
                     cc.fromDataToGlobalY(y), fitResult.getStatus(), fitResult.getStatusData(),
                     Arrays.toString(peakParams));
         }

@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Wraps a set of function values to implement the forEach procedure
+ * Wraps a set of function values to implement the forEach procedure.
  */
 public class PrecomputedValueFunction implements ValueFunction
 {
@@ -47,7 +47,7 @@ public class PrecomputedValueFunction implements ValueFunction
     }
 
     /**
-     * Gets a reference to the first order gradients
+     * Gets a reference to the first order gradients.
      *
      * @return the values
      */

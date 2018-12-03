@@ -114,7 +114,7 @@ public abstract class XStreamWrapper
     }
 
     /**
-     * Create an XML representation of this object
+     * Create an XML representation of this object.
      *
      * @param object
      *            the object

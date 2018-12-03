@@ -24,12 +24,12 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Interface for functions to produce a value
+ * Interface for functions to produce a value.
  */
 public interface ValueProcedure
 {
     /**
-     * Executes this procedure
+     * Executes this procedure.
      *
      * @param value
      *            the value of the function

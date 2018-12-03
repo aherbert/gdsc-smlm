@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Defines a function that can compute gradients
+ * Defines a function that can compute gradients.
  */
 public interface GradientFunction
 {

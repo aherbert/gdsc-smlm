@@ -45,10 +45,10 @@ public class PeakResultsDigest
     /** The digest. */
     private final PeakResultDigest digest = new PeakResultDigest();
 
-    /** The digest of 1 result */
+    /** The digest of 1 result. */
     private String value1;
 
-    /** The digest of all results */
+    /** The digest of all results. */
     private String value;
 
     /**

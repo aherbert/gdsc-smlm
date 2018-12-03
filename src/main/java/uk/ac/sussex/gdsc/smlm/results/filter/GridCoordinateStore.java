@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows checking for duplicates.
@@ -34,7 +34,7 @@ public class GridCoordinateStore implements CoordinateStore
      * The minimum size for the block. This prevents excess use of memory when the resolution is smaller than this
      * value.
      */
-    public final static double MINIMUM_BLOCK_SIZE = 0.5;
+    public static final double MINIMUM_BLOCK_SIZE = 0.5;
 
     private class CoordinateList
     {
@@ -203,7 +203,7 @@ public class GridCoordinateStore implements CoordinateStore
     }
 
     /**
-     * Create a new instance with the same settings
+     * Create a new instance with the same settings.
      *
      * @return the grid coordinate store
      * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#newInstance()
@@ -215,7 +215,7 @@ public class GridCoordinateStore implements CoordinateStore
     }
 
     /**
-     * Create a new instance with the given dimensions and the same resolution
+     * Create a new instance with the given dimensions and the same resolution.
      *
      * @param minx
      *            the min x coordinate value
@@ -443,7 +443,7 @@ public class GridCoordinateStore implements CoordinateStore
     }
 
     /**
-     * Get the squared distance
+     * Get the squared distance.
      *
      * @param x
      *            the x coordinate
@@ -514,7 +514,7 @@ public class GridCoordinateStore implements CoordinateStore
                             if (dd > zResolution)
                                 continue;
                             // Get a combined Euclidean squared distance
-                            d += Maths.pow2(dd);
+                            d += MathUtils.pow2(dd);
                         }
 
                         if (d < min)

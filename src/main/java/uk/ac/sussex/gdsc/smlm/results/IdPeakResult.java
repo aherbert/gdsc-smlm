@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
- * Specifies a peak fitting result with an Id
+ * Specifies a peak fitting result with an Id.
  */
 public class IdPeakResult extends PeakResult
 {

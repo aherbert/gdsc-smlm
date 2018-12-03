@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Defines function that can produce first order gradients
+ * Defines function that can produce first order gradients.
  */
 public interface Gradient1Function extends ValueFunction, GradientFunction
 {

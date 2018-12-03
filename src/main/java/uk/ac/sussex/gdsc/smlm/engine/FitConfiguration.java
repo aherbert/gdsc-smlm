@@ -23,12 +23,15 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
-import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -94,7 +97,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
 
 /**
- * Specifies the fitting configuration
+ * Specifies the fitting configuration.
  */
 public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFitConfiguration
 {
@@ -112,7 +115,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     private int flags;
     private AstigmatismZModel astigmatismZModel = null;
     private double coordinateShift = 1;
-    private int fitRegionWidth = 0, fitRegionHeight = 0;
+    private int fitRegionWidth = 0;
+    private int fitRegionHeight = 0;
     private double coordinateOffset = 0.5;
     private double minSignal = 0;
     private double precisionThreshold = 0;
@@ -777,7 +781,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the log
+     * @return the log.
      */
     public Logger getLog()
     {
@@ -797,7 +801,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the initialAngle
+     * @return the initialAngle.
      */
     @Override
     public double getInitialAngle()
@@ -989,7 +993,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the fit solver used to fit the point spread function (PSF)
+     * @return the fit solver used to fit the point spread function (PSF).
      */
     public FitSolver getFitSolver()
     {
@@ -997,7 +1001,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the fit solver used to fit the point spread function (PSF)
+     * @return the fit solver used to fit the point spread function (PSF).
      */
     public int getFitSolverValue()
     {
@@ -1039,7 +1043,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the fixedIterations flag
+     * @return the fixedIterations flag.
      */
     public boolean isFixedIterations()
     {
@@ -1057,7 +1061,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the maxIterations
+     * @return the maxIterations.
      */
     public int getMaxIterations()
     {
@@ -1075,7 +1079,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return True if fitting the background
+     * @return True if fitting the background.
      */
     @Override
     public boolean isBackgroundFitting()
@@ -1105,7 +1109,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return True if fitting an elliptical peak (with an angle parameter)
+     * @return True if fitting an elliptical peak (with an angle parameter).
      */
     @Override
     public boolean isAngleFitting()
@@ -1114,7 +1118,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return True if fitting the z-position
+     * @return True if fitting the z-position.
      */
     @Override
     public boolean isZFitting()
@@ -1123,7 +1127,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return True if fitting the peak width in dimension 0
+     * @return True if fitting the peak width in dimension 0.
      */
     @Override
     public boolean isXSDFitting()
@@ -1132,7 +1136,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return True if fitting the peak width in dimension 1
+     * @return True if fitting the peak width in dimension 1.
      */
     @Override
     public boolean isYSDFitting()
@@ -1182,7 +1186,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The maximum absolute coordinate shift for a good fit
+     * @return The maximum absolute coordinate shift for a good fit.
      */
     public double getCoordinateShift()
     {
@@ -1248,7 +1252,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the coordinateShift relative the the largest peak width
+     * @return the coordinateShift relative the the largest peak width.
      */
     public double getCoordinateShiftFactor()
     {
@@ -1277,7 +1281,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the width of the fit region used for validation
+     * @return the width of the fit region used for validation.
      */
     public int getFitRegionWidth()
     {
@@ -1290,7 +1294,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the height of the fit region used for validation
+     * @return the height of the fit region used for validation.
      */
     public int getFitRegionHeight()
     {
@@ -1298,7 +1302,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the coordinate offset when validating the coordinates are within the fit window
+     * @return the coordinate offset when validating the coordinates are within the fit window.
      */
     public double getCoordinateOffset()
     {
@@ -1317,7 +1321,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the signal strength
+     * @return the signal strength.
      */
     public double getSignalStrength()
     {
@@ -1325,7 +1329,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The minimum number of photons
+     * @return The minimum number of photons.
      */
     public double getMinPhotons()
     {
@@ -1389,10 +1393,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
                 if (nmPerPixel > 0 && gain > 0 &&
                         //calibration.isCCDCamera()
                         (calibration.isCCDCamera() || calibration.isSCMOS()))
-                    this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
+                    this.precisionThreshold = MathUtils.pow2(getPrecisionThreshold());
                 break;
             case PrecisionMethod.POISSON_CRLB_VALUE:
-                this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
+                this.precisionThreshold = MathUtils.pow2(getPrecisionThreshold());
                 break;
             default:
                 break;
@@ -1401,7 +1405,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return True if calculating the precision using the fitted background
+     * @return True if calculating the precision using the fitted background.
      */
     public boolean isPrecisionUsingBackground()
     {
@@ -1583,7 +1587,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the image noise
+     * @return the image noise.
      */
     public double getNoise()
     {
@@ -1610,7 +1614,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the widthFactor (or zero if not configured)
+     * @return the widthFactor (or zero if not configured).
      */
     @Override
     public double getMaxWidthFactor()
@@ -1639,7 +1643,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the minWidthFactor
+     * @return the minWidthFactor.
      */
     @Override
     public double getMinWidthFactor()
@@ -1991,7 +1995,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator.
      *
      * @return the gradientLineMinimisation True if using the gradient for line minimisation
      */
@@ -2001,7 +2005,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator.
      *
      * @param gradientLineMinimisation
      *            Set to true to use the gradient for line minimisation
@@ -2166,7 +2170,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Call this when a property changes that will change the stopping criteria
+     * Call this when a property changes that will change the stopping criteria.
      */
     private void invalidateToleranceChecker()
     {
@@ -2175,7 +2179,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the gaussianFunction
+     * @return the gaussianFunction.
      */
     public Gaussian2DFunction getGaussianFunction()
     {
@@ -2183,7 +2187,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Call this when a property changes that will change the Gaussian function
+     * Call this when a property changes that will change the Gaussian function.
      */
     private void invalidateGaussianFunction()
     {
@@ -2230,7 +2234,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     private PeakResultValidationData peakResultValidationData = null;
 
     /**
-     * @return the result
+     * @return the result.
      */
     public FitStatus getValidationResult()
     {
@@ -2238,7 +2242,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return Data associated with the validation result
+     * @return Data associated with the validation result.
      */
     @Override
     public Object getValidationData()
@@ -2333,8 +2337,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
             if (directFilter.accept(peak))
                 return setValidationResult(FitStatus.OK, null);
             if (log != null)
-                log.info("Bad peak %d: %s", peak.getId(),
-                        DirectFilter.getStatusMessage(peak, directFilter.getResult()));
+                log.info(() -> String.format("Bad peak %d: %s", peak.getId(),
+                        DirectFilter.getStatusMessage(peak, directFilter.getResult())));
             if (DirectFilter.anySet(directFilter.getResult(), V_X_SD_FACTOR | V_Y_SD_FACTOR))
                 return setValidationResult(FitStatus.WIDTH_DIVERGED, null);
             // At the moment we do not get any other validation data
@@ -2352,8 +2356,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
             if (x <= 0 || x >= fitRegionWidth || y <= 0 || y >= fitRegionHeight)
             {
                 if (log != null)
-                    log.info("Bad peak %d: Coordinates outside fit region (x=%g,y=%g) <> %d,%d", n, x, y,
-                            fitRegionWidth, fitRegionHeight);
+                    log.info(() -> String.format("Bad peak %d: Coordinates outside fit region (x=%g,y=%g) <> %d,%d", n, x, y,
+                            fitRegionWidth, fitRegionHeight));
                 return setValidationResult(FitStatus.OUTSIDE_FIT_REGION,
                         new double[] { x, y, fitRegionWidth, fitRegionHeight });
             }
@@ -2372,7 +2376,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         if (Math.abs(xShift) > maxShift || Math.abs(yShift) > maxShift)
         {
             if (log != null)
-                log.info("Bad peak %d: Fitted coordinates moved (x=%g,y=%g) > %g", n, xShift, yShift, maxShift);
+                log.info(() -> String.format("Bad peak %d: Fitted coordinates moved (x=%g,y=%g) > %g", n, xShift, yShift, maxShift));
             return setValidationResult(FitStatus.COORDINATES_MOVED, new double[] { xShift, yShift });
         }
 
@@ -2390,7 +2394,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         if (signal < minSignal)
         {
             if (log != null)
-                log.info("Bad peak %d: Insufficient signal %g\n", n, signal);
+                log.info(() -> String.format("Bad peak %d: Insufficient signal %g\n", n, signal));
             //if (params.length == 7) // Single peak
             //	System.out.printf("Bad peak %d: Insufficient signal (%g)\n", n, signal);
             return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
@@ -2413,7 +2417,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
             if (s2 > widthFactor || s2 < minWidthFactor)
             {
                 if (log != null)
-                    log.info("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n, xFactor, yFactor);
+                    log.info(() -> String.format("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n, xFactor, yFactor));
                 return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] { xFactor, yFactor });
             }
         }
@@ -2437,7 +2441,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         if (snr < getSignalStrength())
         {
             if (log != null)
-                log.info("Bad peak %d: Insufficient SNR %g\n", n, snr);
+                log.info(() -> String.format("Bad peak %d: Insufficient SNR %g\n", n, snr));
             //if (params.length == 7) // Single peak
             //	System.out.printf("Bad peak %d: Insufficient SNR (%g)\n", n, snr);
             return setValidationResult(FitStatus.INSUFFICIENT_SNR, snr);
@@ -2447,7 +2451,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         if (isXSDFitting())
         {
             boolean badWidth = false;
-            double xFactor = 0, yFactor = 0;
+            double xFactor = 0;
+            double yFactor = 0;
 
             xFactor = xsd / initialParams[Gaussian2DFunction.X_SD + offset];
             if (isTwoAxisGaussian2D)
@@ -2464,8 +2469,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
             if (badWidth)
             {
-                if (log != null)
-                    log.info("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n, xFactor, yFactor);
+                if (log != null) {
+                    final double localXFactor = xFactor;
+                    final double localYFactor = yFactor;
+                    log.info(() -> String.format("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n, localXFactor, localYFactor));
+                }
                 return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] { xFactor, yFactor });
             }
         }
@@ -2500,7 +2508,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
                 if (log != null)
                 {
                     final double precision = Math.sqrt(variance);
-                    log.info("Bad peak %d: Insufficient precision (%gx)\n", n, precision);
+                    log.info(() -> String.format("Bad peak %d: Insufficient precision (%gx)\n", n, precision));
                 }
                 return setValidationResult(FitStatus.INSUFFICIENT_PRECISION, variance);
             }
@@ -2612,7 +2620,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * An object that can return the results in a formatted state for the multi-path filter
+     * An object that can return the results in a formatted state for the multi-path filter.
      */
     private class DynamicPeakResult implements PreprocessedPeakResult
     {
@@ -3229,7 +3237,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The function solver for the current configuration
+     * @return The function solver for the current configuration.
      */
     @Override
     public FunctionSolver getFunctionSolver()
@@ -3296,7 +3304,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Call this when a property changes that will change the function solver
+     * Call this when a property changes that will change the function solver.
      */
     private void invalidateFunctionSolver()
     {
@@ -3465,7 +3473,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Checks if simple filtering is disabled
+     * Checks if simple filtering is disabled.
      *
      * @return True if simple filtering is disabled
      */
@@ -3475,7 +3483,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets to true to disable simple filtering during validation
+     * Sets to true to disable simple filtering during validation.
      *
      * @param disableSimpleFilter
      *            Set to true to disable simple filtering during validation
@@ -3486,7 +3494,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Checks if filtering should use the configured smart filter
+     * Checks if filtering should use the configured smart filter.
      *
      * @return True if filtering should use the configured smart filter
      */
@@ -3496,7 +3504,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets if filtering should use the configured smart filter
+     * Sets if filtering should use the configured smart filter.
      *
      * @param smartFilter
      *            True if filtering should use the configured smart filter
@@ -3517,7 +3525,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the smart filter string
+     * @return the smart filter string.
      */
     public String getSmartFilterString()
     {
@@ -3589,7 +3597,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Gets the smart filter name, if a smart filter exists
+     * Gets the smart filter name, if a smart filter exists.
      *
      * @return the smart filter name
      */
@@ -3691,7 +3699,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
     /** {@inheritDoc} */
     @Override
-    public int getFilterSetupFlags() throws IllegalStateException
+    public int getFilterSetupFlags()
     {
         // Cached for speed
         return filterSetupFlags;
@@ -3699,7 +3707,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
     /** {@inheritDoc} */
     @Override
-    public FilterSetupData[] getFilterSetupData() throws IllegalStateException
+    public FilterSetupData[] getFilterSetupData()
     {
         // Cached for speed
         return filterSetupData;
@@ -3716,14 +3724,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     @Override
     public int validate(PreprocessedPeakResult peak)
     {
-        final int flags = doValidate(peak);
-        if (log == null)
-            return flags;
-        // Log the error
-        if (flags != 0)
-            log.info("Bad peak %d (%.1f,%.1f) [%d]: %s", peak.getCandidateId(), peak.getX(), peak.getY(), peak.getId(),
-                    DirectFilter.getStatusMessage(peak, flags));
-        return flags;
+        final int result = doValidate(peak);
+        if (log != null && result != 0) {
+          LoggerUtils.log(log, Level.INFO, "Bad peak %d (%.1f,%.1f) [%d]: %s", peak.getCandidateId(), peak.getX(), peak.getY(), peak.getId(),
+                    DirectFilter.getStatusMessage(peak, result));
+        }
+        return result;
     }
 
     /** {@inheritDoc} */
@@ -3856,7 +3862,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return Set to true to clamp the parameter update to a maximum value
+     * @return Set to true to clamp the parameter update to a maximum value.
      */
     public boolean isUseClamping()
     {
@@ -3864,7 +3870,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Set to true to clamp the parameter update to a maximum value
+     * Set to true to clamp the parameter update to a maximum value.
      *
      * @param useClamping
      *            Set to true to clamp the parameter update to a maximum value
@@ -3876,7 +3882,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return Set to true to update the clamp values when the parameter update direction changes
+     * @return Set to true to update the clamp values when the parameter update direction changes.
      */
     public boolean isUseDynamicClamping()
     {
@@ -3884,7 +3890,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Set to true to update the clamp values when the parameter update direction changes
+     * Set to true to update the clamp values when the parameter update direction changes.
      *
      * @param useDynamicClamping
      *            Set to true to update the clamp values when the parameter update direction changes
@@ -3896,7 +3902,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return the clampValues
+     * @return the clampValues.
      */
     private double[] getClampValues()
     {
@@ -3922,7 +3928,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the background
+     * @return The clamp value for the background.
      */
     public double getClampBackground()
     {
@@ -3930,7 +3936,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the background
+     * Sets the clamp value for the background.
      *
      * @param value
      *            the new clamp value
@@ -3941,7 +3947,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the signal
+     * @return The clamp value for the signal.
      */
     public double getClampSignal()
     {
@@ -3949,7 +3955,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the signal
+     * Sets the clamp value for the signal.
      *
      * @param value
      *            the new clamp value
@@ -3960,7 +3966,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the x position
+     * @return The clamp value for the x position.
      */
     public double getClampX()
     {
@@ -3968,7 +3974,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the x position
+     * Sets the clamp value for the x position.
      *
      * @param value
      *            the new clamp value
@@ -3979,7 +3985,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the y position
+     * @return The clamp value for the y position.
      */
     public double getClampY()
     {
@@ -3987,7 +3993,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the y position
+     * Sets the clamp value for the y position.
      *
      * @param value
      *            the new clamp value
@@ -3998,7 +4004,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the z position
+     * @return The clamp value for the z position.
      */
     public double getClampZ()
     {
@@ -4006,7 +4012,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the z position
+     * Sets the clamp value for the z position.
      *
      * @param value
      *            the new clamp value
@@ -4017,7 +4023,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the x sd
+     * @return The clamp value for the x sd.
      */
     public double getClampXSD()
     {
@@ -4025,7 +4031,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the x sd
+     * Sets the clamp value for the x sd.
      *
      * @param value
      *            the new clamp value
@@ -4036,7 +4042,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the y sd
+     * @return The clamp value for the y sd.
      */
     public double getClampYSD()
     {
@@ -4044,7 +4050,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the y sd
+     * Sets the clamp value for the y sd.
      *
      * @param value
      *            the new clamp value
@@ -4055,7 +4061,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * @return The clamp value for the angle
+     * @return The clamp value for the angle.
      */
     public double getClampAngle()
     {
@@ -4063,7 +4069,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Sets the clamp value for the angle
+     * Sets the clamp value for the angle.
      *
      * @param value
      *            the new clamp value
@@ -4153,7 +4159,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     /**
-     * Return true if the camera type requires a per-pixel camera model
+     * Return true if the camera type requires a per-pixel camera model.
      *
      * @return true, if successful
      */
@@ -4195,7 +4201,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
                 case CameraType.EMCCD_VALUE:
                     final double bias = calibration.getBias();
                     final double gain = calibration.getCountPerPhoton();
-                    final double variance = Maths.pow2(calibration.getReadNoise());
+                    final double variance = MathUtils.pow2(calibration.getReadNoise());
                     // This will throw an exception if the calibration is invalid.
                     cameraModel = (value == CameraType.EMCCD_VALUE) ? new EMCCDCameraModel(bias, gain, variance)
                             : new CCDCameraModel(bias, gain, variance);

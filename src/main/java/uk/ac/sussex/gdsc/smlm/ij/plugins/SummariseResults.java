@@ -35,10 +35,11 @@ import ij.plugin.PlugIn;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
@@ -97,7 +98,7 @@ public class SummariseResults implements PlugIn, MouseListener
     }
 
     /**
-     * Remove all entries in the summary table if it showing
+     * Remove all entries in the summary table if it showing.
      */
     public static void clearSummaryTable()
     {
@@ -201,7 +202,7 @@ public class SummariseResults implements PlugIn, MouseListener
             sb.append('\t').append(maxT);
         }
         if (calibration != null && calibration.hasExposureTime())
-            sb.append('\t').append(Utils.timeToString(maxT * calibration.getExposureTime()));
+            sb.append('\t').append(TextUtils.millisToString((long)Math.ceil(maxT * calibration.getExposureTime())));
         else
             sb.append("\t-");
         if (size > 0)
@@ -219,8 +220,8 @@ public class SummariseResults implements PlugIn, MouseListener
         if (calibration != null)
         {
             //@formatter:off
-			sb.append('\t').append(calibration.hasNmPerPixel() ? Utils.rounded(calibration.getNmPerPixel()) : '-');
-			sb.append('\t').append(calibration.hasExposureTime() ? Utils.rounded(calibration.getExposureTime()) : '-');
+			sb.append('\t').append(calibration.hasNmPerPixel() ? MathUtils.rounded(calibration.getNmPerPixel()) : '-');
+			sb.append('\t').append(calibration.hasExposureTime() ? MathUtils.rounded(calibration.getExposureTime()) : '-');
 
 			if (calibration.hasCameraType())
 			{
@@ -380,7 +381,7 @@ public class SummariseResults implements PlugIn, MouseListener
                 String name = FitProtosHelper.getName(precisionMethod);
                 if (stored)
                     name += " (Stored)";
-                plot(wo, "Precision: " + name, new StoredDataStatistics(p.precision));
+                plot(wo, "Precision: " + name, StoredDataStatistics.create(p.precision));
             }
             catch (final DataException e)
             {
@@ -406,14 +407,13 @@ public class SummariseResults implements PlugIn, MouseListener
 
     private void plot(WindowOrganiser wo, String title, float[] data)
     {
-        plot(wo, title, new StoredDataStatistics(data));
+        plot(wo, title, StoredDataStatistics.create(data));
     }
 
     private void plot(WindowOrganiser wo, String title, StoredDataStatistics data)
     {
-        final int id = Utils.showHistogram(TITLE, data, title, 0, removeOutliers, histgramBins);
-        if (Utils.isNewWindow())
-            wo.add(id);
+        new HistogramPlotBuilder(TITLE, data, title)
+                .setRemoveOutliersOption(removeOutliers).setNumberOfBins(histgramBins).show(wo);
     }
 
     @Override

@@ -54,11 +54,12 @@ import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
-import uk.ac.sussex.gdsc.core.ij.IJLogger;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
@@ -113,7 +114,7 @@ public class PCPALMClusters implements PlugIn
         }
     }
 
-    /** The title */
+    /** The title. */
     static String TITLE = "PC-PALM Clusters";
 
     private static int runMode = 0;
@@ -154,7 +155,7 @@ public class PCPALMClusters implements PlugIn
             return;
 
         PCPALMMolecules.logSpacer();
-        Utils.log(TITLE);
+        ImageJUtils.log(TITLE);
         PCPALMMolecules.logSpacer();
         final long start = System.currentTimeMillis();
 
@@ -174,18 +175,18 @@ public class PCPALMClusters implements PlugIn
         final String yTitle = "Frequency";
 
         // Create the data required for fitting and plotting
-        float[] xValues = Utils.createHistogramAxis(hist[0]);
-        float[] yValues = Utils.createHistogramValues(hist[1]);
+        float[] xValues = HistogramPlot.createHistogramAxis(hist[0]);
+        float[] yValues = HistogramPlot.createHistogramValues(hist[1]);
 
         // Plot the histogram
-        float yMax = Maths.max(yValues);
+        float yMax = MathUtils.max(yValues);
         Plot2 plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
         if (xValues.length > 0)
         {
             final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
             plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, yMax * 1.05);
         }
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
 
         final HistogramData noiseData = loadNoiseHistogram(histogramData);
         if (noiseData != null)
@@ -193,23 +194,23 @@ public class PCPALMClusters implements PlugIn
             {
                 // Update the histogram
                 title += " (noise subtracted)";
-                xValues = Utils.createHistogramAxis(hist[0]);
-                yValues = Utils.createHistogramValues(hist[1]);
-                yMax = Maths.max(yValues);
+                xValues = HistogramPlot.createHistogramAxis(hist[0]);
+                yValues = HistogramPlot.createHistogramValues(hist[1]);
+                yMax = MathUtils.max(yValues);
                 plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
                 if (xValues.length > 0)
                 {
                     final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
                     plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, yMax * 1.05);
                 }
-                Utils.display(title, plot);
+                ImageJUtils.display(title, plot);
 
                 // Automatically save
                 if (autoSave)
                 {
-                    final String newFilename = Utils.replaceExtension(histogramData.filename, ".noise.tsv");
+                    final String newFilename = ImageJUtils.replaceExtension(histogramData.filename, ".noise.tsv");
                     if (saveHistogram(histogramData, newFilename))
-                        Utils.log("Saved noise-subtracted histogram to " + newFilename);
+                        ImageJUtils.log("Saved noise-subtracted histogram to " + newFilename);
                 }
             }
 
@@ -221,7 +222,7 @@ public class PCPALMClusters implements PlugIn
             final int n = (int) fitParameters[0];
             final double p = fitParameters[1];
 
-            Utils.log("Optimal fit : N=%d, p=%s", n, Utils.rounded(p));
+            ImageJUtils.log("Optimal fit : N=%d, p=%s", n, MathUtils.rounded(p));
 
             final BinomialDistribution dist = new BinomialDistribution(n, p);
 
@@ -234,8 +235,8 @@ public class PCPALMClusters implements PlugIn
                 // Calculate the estimated number of clusters from the observed molecules:
                 // Actual = (Observed / p-value) / N
                 final double actual = (nMolecules / p) / n;
-                Utils.log("Estimated number of clusters : (%d / %s) / %d = %s", nMolecules, Utils.rounded(p), n,
-                        Utils.rounded(actual));
+                ImageJUtils.log("Estimated number of clusters : (%d / %s) / %d = %s", nMolecules, MathUtils.rounded(p), n,
+                        MathUtils.rounded(actual));
             }
 
             final double[] x = new double[n + 2];
@@ -255,18 +256,18 @@ public class PCPALMClusters implements PlugIn
             plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
             final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
             plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
-                    Maths.maxDefault(yMax, y) * 1.05);
+                    MathUtils.maxDefault(yMax, y) * 1.05);
             plot.setColor(Color.magenta);
             plot.addPoints(x, y, Plot.LINE);
             plot.addPoints(x, y, Plot.CIRCLE);
             plot.setColor(Color.black);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
 
         final double seconds = (System.currentTimeMillis() - start) / 1000.0;
         final String msg = TITLE + " complete : " + seconds + "s";
         IJ.showStatus(msg);
-        Utils.log(msg);
+        ImageJUtils.log(msg);
         return;
     }
 
@@ -288,26 +289,26 @@ public class PCPALMClusters implements PlugIn
             return null;
         }
 
-        Utils.log("Using %d molecules (Density = %s um^-2) @ %s nm", molecules.size(),
-                Utils.rounded(molecules.size() / analysis.croppedArea), Utils.rounded(distance));
+        ImageJUtils.log("Using %d molecules (Density = %s um^-2) @ %s nm", molecules.size(),
+                MathUtils.rounded(molecules.size() / analysis.croppedArea), MathUtils.rounded(distance));
 
         final long s1 = System.nanoTime();
-        final ClusteringEngine engine = new ClusteringEngine(1, clusteringAlgorithm, new IJTrackProgress());
+        final ClusteringEngine engine = new ClusteringEngine(1, clusteringAlgorithm, new ImageJTrackProgress());
         if (multiThread)
             engine.setThreadCount(Prefs.getThreads());
-        engine.setTracker(new IJTrackProgress());
+        engine.setTracker(new ImageJTrackProgress());
         IJ.showStatus("Clustering ...");
-        final ArrayList<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
+        final List<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
         IJ.showStatus("");
 
         if (clusters == null)
         {
-            Utils.log("Aborted");
+            ImageJUtils.log("Aborted");
             return null;
         }
         nMolecules = molecules.size();
-        Utils.log("Finished : %d total clusters (%s ms)", clusters.size(),
-                Utils.rounded((System.nanoTime() - s1) / 1e6));
+        ImageJUtils.log("Finished : %d total clusters (%s ms)", clusters.size(),
+                MathUtils.rounded((System.nanoTime() - s1) / 1e6));
 
         // Save cluster centroids to a results set in memory. Then they can be plotted.
         final MemoryPeakResults results = new MemoryPeakResults(clusters.size());
@@ -317,16 +318,16 @@ public class PCPALMClusters implements PlugIn
         results.setCalibration(CalibrationHelper.create(100, 1, PCPALMMolecules.seconds * 1000));
         int id = 0;
         for (final Cluster c : clusters)
-            results.add(new ExtendedPeakResult((float) c.x, (float) c.y, c.n, ++id));
+            results.add(new ExtendedPeakResult((float) c.getX(), (float) c.getY(), c.getSize(), ++id));
         MemoryPeakResults.addResults(results);
 
         // Get the data for fitting
         final float[] values = new float[clusters.size()];
         for (int i = 0; i < values.length; i++)
-            values[i] = clusters.get(i).n;
-        final float yMax = (int) Math.ceil(Maths.max(values));
+            values[i] = clusters.get(i).getSize();
+        final float yMax = (int) Math.ceil(MathUtils.max(values));
         final int nBins = (int) (yMax + 1);
-        final float[][] hist = Utils.calcHistogram(values, 0, yMax, nBins);
+        final float[][] hist = HistogramPlot.calcHistogram(values, 0, yMax, nBins);
 
         final HistogramData histogramData = (calibrateHistogram) ? new HistogramData(hist, frames, area, units)
                 : new HistogramData(hist);
@@ -363,7 +364,7 @@ public class PCPALMClusters implements PlugIn
     {
         if (!saveHistogram)
             return false;
-        histogramFile = Utils.getFilename("Histogram_file", histogramFile);
+        histogramFile = ImageJUtils.getFilename("Histogram_file", histogramFile);
         return saveHistogram(histogramData, histogramFile);
     }
 
@@ -383,7 +384,7 @@ public class PCPALMClusters implements PlugIn
 
         final float[][] hist = histogramData.histogram;
 
-        filename = Utils.replaceExtension(filename, "tsv");
+        filename = ImageJUtils.replaceExtension(filename, "tsv");
         try (BufferedWriter output = new BufferedWriter(new FileWriter(filename)))
         {
             if (histogramData.isCalibrated())
@@ -399,7 +400,7 @@ public class PCPALMClusters implements PlugIn
             output.newLine();
             for (int i = 0; i < hist[0].length; i++)
             {
-                output.write(String.format("%d\t%s", (int) hist[0][i], Utils.rounded(hist[1][i])));
+                output.write(String.format("%d\t%s", (int) hist[0][i], MathUtils.rounded(hist[1][i])));
                 output.newLine();
             }
 
@@ -568,7 +569,7 @@ public class PCPALMClusters implements PlugIn
             // Ensure that the 'Yes' result is recorded for macros to detect
             Recorder.recordOption(macroOption);
 
-        noiseFile = Utils.getFilename("Noise_file", noiseFile);
+        noiseFile = ImageJUtils.getFilename("Noise_file", noiseFile);
         if (noiseFile != null)
         {
             final HistogramData data = loadHistogram(noiseFile);
@@ -583,7 +584,7 @@ public class PCPALMClusters implements PlugIn
     {
         if (PCPALMMolecules.molecules == null || PCPALMMolecules.molecules.size() < 2)
         {
-            Utils.log(TITLE + " defaulting to File mode");
+            ImageJUtils.log(TITLE + " defaulting to File mode");
             fileInput = true;
             // Ensure this gets recorded
             Recorder.recordOption("Method", "File");
@@ -604,7 +605,7 @@ public class PCPALMClusters implements PlugIn
         }
 
         if (fileInput)
-            if ((histogramFile = Utils.getFilename("Histogram_file", histogramFile)) == null)
+            if ((histogramFile = ImageJUtils.getFilename("Histogram_file", histogramFile)) == null)
                 return false;
 
         final GenericDialog gd = new GenericDialog(TITLE);
@@ -689,7 +690,7 @@ public class PCPALMClusters implements PlugIn
     }
 
     /**
-     * @return True if all the molecules have weights (allowing weighted clustering)
+     * @return True if all the molecules have weights (allowing weighted clustering).
      */
     private static boolean checkForWeights()
     {
@@ -701,7 +702,7 @@ public class PCPALMClusters implements PlugIn
 
     private static void error(String message)
     {
-        Utils.log("ERROR : " + message);
+        ImageJUtils.log("ERROR : " + message);
         IJ.error(TITLE, message);
     }
 
@@ -762,8 +763,8 @@ public class PCPALMClusters implements PlugIn
         mean = sum / count;
 
         final String name = "Zero-truncated Binomial distribution";
-        Utils.log("Mean cluster size = %s", Utils.rounded(mean));
-        Utils.log("Fitting cumulative " + name);
+        ImageJUtils.log("Mean cluster size = %s", MathUtils.rounded(mean));
+        ImageJUtils.log("Fitting cumulative " + name);
 
         // Convert to a normalised double array for the binomial fitter
         final double[] histogram = new double[histogramData.histogram[1].length];
@@ -788,7 +789,7 @@ public class PCPALMClusters implements PlugIn
             plot = new Plot2(title, "N", "Cumulative Probability", values, cumulativeHistogram);
             plot.setLimits(0, histogram.length - 1, 0, 1.05);
             plot.addPoints(values, cumulativeHistogram, Plot.CIRCLE);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
 
         // Do fitting for different N
@@ -803,12 +804,12 @@ public class PCPALMClusters implements PlugIn
         if (maxN > 0 && N > maxN)
             N = maxN;
 
-        Utils.log("Fitting N from %d to %d%s", min, N, (customRange) ? " (custom-range)" : "");
+        ImageJUtils.log("Fitting N from %d to %d%s", min, N, (customRange) ? " (custom-range)" : "");
 
         // Since varying the N should be done in integer steps do this
         // for n=1,2,3,... until the SS peaks then falls off (is worse then the best
         // score several times in succession)
-        final BinomialFitter bf = new BinomialFitter(new IJLogger());
+        final BinomialFitter bf = new BinomialFitter(ImageJPluginLoggerHelper.getLogger(getClass()));
         bf.setMaximumLikelihood(maximumLikelihood);
         for (int n = min; n <= N; n++)
         {
@@ -818,7 +819,7 @@ public class PCPALMClusters implements PlugIn
 
             final double p = solution.getPointRef()[0];
 
-            Utils.log("Fitted %s : N=%d, p=%s. SS=%g", name, n, Utils.rounded(p), solution.getValue());
+            ImageJUtils.log("Fitted %s : N=%d, p=%s. SS=%g", name, n, MathUtils.rounded(p), solution.getValue());
 
             if (bestSS > solution.getValue())
             {
@@ -866,6 +867,6 @@ public class PCPALMClusters implements PlugIn
         plot.setColor(color);
         plot.addPoints(x, y, Plot.LINE);
         //plot.addPoints(x, y, Plot2.CIRCLE);
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
     }
 }

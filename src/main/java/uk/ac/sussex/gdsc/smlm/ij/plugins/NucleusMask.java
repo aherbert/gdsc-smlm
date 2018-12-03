@@ -39,15 +39,15 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.Blitter;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 /**
- * This plugin creates a mask image stack using an XY and XZ mask image
+ * This plugin creates a mask image stack using an XY and XZ mask image.
  */
 public class NucleusMask implements PlugIn, MouseListener, DialogListener
 {
@@ -211,7 +211,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
         }
 
         // The final image will have a scale added to it.
-        imp = Utils.display(TITLE, stack);
+        imp = ImageJUtils.display(TITLE, stack);
         calibrate(imp);
 
         imp.setSlice(maxz / 2);
@@ -276,7 +276,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
         final ImageStack stack = new ImageStack(maxx, maxy, maxz);
         final byte on = (byte) 255;
         // Squared distances are relative to the radius of the depth
-        final double r2 = Maths.pow2(depthX * 0.5);
+        final double r2 = MathUtils.pow2(depthX * 0.5);
         for (int iz = 0; iz < maxz; iz++)
         {
             final byte[] mask = new byte[maxx * maxy];
@@ -313,7 +313,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
         final double[] s = new double[n];
         final double scale = reference / size;
         for (int i = 0; i < n; i++)
-            s[i] = Maths.pow2((centre - (i + 0.5)) * scale);
+            s[i] = MathUtils.pow2((centre - (i + 0.5)) * scale);
         return s;
     }
 

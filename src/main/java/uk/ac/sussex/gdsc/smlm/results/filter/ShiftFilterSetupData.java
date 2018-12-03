@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Used to pass a new shift value to a filter
+ * Used to pass a new shift value to a filter.
  */
 public class ShiftFilterSetupData implements FilterSetupData
 {

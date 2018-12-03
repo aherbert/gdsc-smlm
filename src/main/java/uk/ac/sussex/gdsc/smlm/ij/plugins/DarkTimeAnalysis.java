@@ -25,6 +25,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
@@ -34,8 +35,8 @@ import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -111,7 +112,7 @@ public class DarkTimeAnalysis implements PlugIn
             IJ.error(TITLE, "ms/frame must be strictly positive: " + msPerFrame);
             return;
         }
-        Utils.log("%s: %d localisations", TITLE, results.size());
+        ImageJUtils.log("%s: %d localisations", TITLE, results.size());
 
         analyse(results);
     }
@@ -170,10 +171,10 @@ public class DarkTimeAnalysis implements PlugIn
         if (maxDarkTime > 0)
             range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
 
-        final IJTrackProgress tracker = new IJTrackProgress();
+        final ImageJTrackProgress tracker = new ImageJTrackProgress();
         tracker.status("Analysing ...");
-        tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...", Utils.rounded(searchDistance),
-                Utils.rounded(d), Utils.rounded(range * msPerFrame / 1000.0), range);
+        tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...", MathUtils.rounded(searchDistance),
+                MathUtils.rounded(d), MathUtils.rounded(range * msPerFrame / 1000.0), range);
 
         Trace[] traces;
         if (method == 0)
@@ -186,7 +187,7 @@ public class DarkTimeAnalysis implements PlugIn
         else
         {
             final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
-            final ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(results), d,
+            final List<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(results), d,
                     range);
             traces = TraceMolecules.convertToTraces(results, clusters);
         }
@@ -233,14 +234,14 @@ public class DarkTimeAnalysis implements PlugIn
 
         final String title = "Cumulative Dark-time";
         final Plot2 plot = new Plot2(title, "Time (ms)", "Percentile", x, y);
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
 
         // Report percentile
         for (int i = 0; i < y.length; i++)
             if (y[i] >= percentile)
             {
-                Utils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, Utils.rounded(x[i]),
-                        Utils.rounded(x[i] / 1000));
+                ImageJUtils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, MathUtils.rounded(x[i]),
+                        MathUtils.rounded(x[i] / 1000));
                 break;
             }
 
@@ -257,7 +258,8 @@ public class DarkTimeAnalysis implements PlugIn
                 xValues[i] *= msPerFrame;
 
             // Ensure the bin width is never less than 1
-            Utils.showHistogram("Dark-time", new StoredDataStatistics(xValues), "Time (ms)", 1, 0, nBins);
+            new HistogramPlotBuilder("Dark-time", StoredDataStatistics.create(xValues), "Time (ms)")
+              .setIntegerBins(true).setNumberOfBins(nBins).show();
         }
     }
 }

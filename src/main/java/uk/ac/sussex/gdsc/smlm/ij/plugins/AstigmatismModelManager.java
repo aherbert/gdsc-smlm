@@ -61,17 +61,17 @@ import ij.process.FloatProcessor;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
-import uk.ac.sussex.gdsc.core.data.utils.RounderFactory;
-import uk.ac.sussex.gdsc.core.ij.IJLogger;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.SimpleLock;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -111,7 +111,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
  */
 public class AstigmatismModelManager implements PlugIn
 {
-    private final static String TITLE = "Astigmatism Model Manager";
+    private static final String TITLE = "Astigmatism Model Manager";
 
     private static AstigmatismModelSettings.Builder settings = null;
     private static TextWindow resultsWindow = null;
@@ -221,7 +221,7 @@ public class AstigmatismModelManager implements PlugIn
         {
             final AstigmatismModel resource = entry.getValue();
             if (withNmPerPixel)
-                list.add(String.format("%s [%s nm]", entry.getKey(), Utils.rounded(resource.getNmPerPixel())));
+                list.add(String.format("%s [%s nm]", entry.getKey(), MathUtils.rounded(resource.getNmPerPixel())));
             else
                 list.add(entry.getKey());
         }
@@ -229,7 +229,7 @@ public class AstigmatismModelManager implements PlugIn
     }
 
     /**
-     * Remove the extra information added to a name for use in dialogs
+     * Remove the extra information added to a name for use in dialogs.
      *
      * @param name
      *            the formatted name
@@ -398,7 +398,7 @@ public class AstigmatismModelManager implements PlugIn
     {
         final TurboList<String> newImageList = new TurboList<>();
 
-        for (final int id : Utils.getIDList())
+        for (final int id : ImageJUtils.getIdList())
         {
             final ImagePlus imp = WindowManager.getImage(id);
             if (imp == null)
@@ -638,7 +638,7 @@ public class AstigmatismModelManager implements PlugIn
         //IJ.log(config.getFitEngineSettings().toString());
 
         if (pluginSettings.getLogFitProgress())
-            fitConfig.setLog(new IJLogger());
+            fitConfig.setLog(ImageJPluginLoggerHelper.getLogger(getClass()));
 
         // Create a fit engine
         results = new MemoryPeakResults();
@@ -660,7 +660,7 @@ public class AstigmatismModelManager implements PlugIn
         final int y = cy - regionBounds.y;
         final int[] maxIndices = new int[] { y * regionBounds.width + x };
 
-        final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), source.getFrames(), threadCount > 1);
+        final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), source.getFrames(), threadCount > 1);
         IJ.showStatus("Fitting ...");
 
         boolean shutdown = false;
@@ -689,7 +689,7 @@ public class AstigmatismModelManager implements PlugIn
         IJ.showProgress(1);
 
         if (!shutdown)
-            Utils.log("Fit %d/%s", results.size(), TextUtils.pleural(source.getFrames(), "spot"));
+            ImageJUtils.log("Fit %d/%s", results.size(), TextUtils.pleural(source.getFrames(), "spot"));
 
         return !shutdown;
     }
@@ -746,9 +746,9 @@ public class AstigmatismModelManager implements PlugIn
     {
         final String title = TITLE + " " + yTitle;
         final Plot plot = new Plot(title, "Z (μm)", yTitle);
-        double[] limits = Maths.limits(y1);
+        double[] limits = MathUtils.limits(y1);
         if (y2 != null)
-            limits = Maths.limits(limits, y2);
+            limits = MathUtils.limits(limits, y2);
         final double rangex = (z[z.length - 1] - z[0]) * 0.05;
         final double rangey = (limits[1] - limits[0]) * 0.05;
         plot.setLimits(z[0] - rangex, z[z.length - 1] + rangex, limits[0] - rangey, limits[1] + rangey);
@@ -761,7 +761,7 @@ public class AstigmatismModelManager implements PlugIn
             plot.setColor(Color.BLACK);
             plot.addLegend(y1Title + "\n" + y2Title);
         }
-        return Utils.display(title, plot, 0, wo);
+        return ImageJUtils.display(title, plot, 0, wo);
     }
 
     private boolean fitData()
@@ -815,7 +815,7 @@ public class AstigmatismModelManager implements PlugIn
 
     private class ZDialogListener implements DialogListener
     {
-        boolean showRoi = Utils.isShowGenericDialog();
+        boolean showRoi = ImageJUtils.isShowGenericDialog();
 
         public ZDialogListener()
         {
@@ -1044,7 +1044,7 @@ public class AstigmatismModelManager implements PlugIn
         @Override
         public double[] value(double[] p) throws IllegalArgumentException
         {
-            final double one_d2 = 1.0 / Maths.pow2(p[P_D]);
+            final double one_d2 = 1.0 / MathUtils.pow2(p[P_D]);
 
             final double[] value = new double[fitZ.length * 2];
             double z, z2, z3, z4;
@@ -1087,9 +1087,9 @@ public class AstigmatismModelManager implements PlugIn
                 pl[i] -= delta;
             }
 
-            final double one_d2 = 1.0 / Maths.pow2(p[P_D]);
-            pu[P_D] = 1.0 / Maths.pow2(pu[P_D]);
-            pl[P_D] = 1.0 / Maths.pow2(pl[P_D]);
+            final double one_d2 = 1.0 / MathUtils.pow2(p[P_D]);
+            pu[P_D] = 1.0 / MathUtils.pow2(pu[P_D]);
+            pl[P_D] = 1.0 / MathUtils.pow2(pl[P_D]);
 
             final double[][] value = new double[fitZ.length * 2][p.length];
             double z, z2, z3, z4, v1, v2;
@@ -1183,7 +1183,7 @@ public class AstigmatismModelManager implements PlugIn
     private static void record(String name, double[] parameters)
     {
         final StringBuilder sb = new StringBuilder(name);
-        final Rounder rounder = RounderFactory.create(4);
+        final Rounder rounder = RounderUtils.create(4);
         sb.append(": ").append("gamma=").append(rounder.round(parameters[P_GAMMA]));
         sb.append("; ").append("d=").append(rounder.round(parameters[P_D]));
         sb.append("; ").append("s0x=").append(rounder.round(parameters[P_S0X]));
@@ -1211,7 +1211,7 @@ public class AstigmatismModelManager implements PlugIn
         final double z0 = parameters[P_Z0];
 
         // Draw across the entire data range
-        final double one_d2 = 1.0 / Maths.pow2(d);
+        final double one_d2 = 1.0 / MathUtils.pow2(d);
 
         // Update plot
         final double[] sx1 = new double[z.length];
@@ -1244,10 +1244,10 @@ public class AstigmatismModelManager implements PlugIn
     {
         createResultWindow();
         final StringBuilder sb = new StringBuilder();
-        final Rounder rounder = RounderFactory.create(4);
+        final Rounder rounder = RounderUtils.create(4);
         sb.append(fitZ.length * 2);
         sb.append('\t').append(pluginSettings.getWeightedFit());
-        sb.append('\t').append(Utils.rounded(optimum.getRMS(), 6));
+        sb.append('\t').append(MathUtils.rounded(optimum.getRMS(), 6));
         sb.append('\t').append(optimum.getIterations());
         sb.append('\t').append(optimum.getEvaluations());
         sb.append('\t').append(rounder.round(parameters[P_GAMMA]));
@@ -1406,7 +1406,7 @@ public class AstigmatismModelManager implements PlugIn
             return;
         }
 
-        Utils.log("Exported astigmatism model: %s to %s", name, pluginSettings.getFilename());
+        ImageJUtils.log("Exported astigmatism model: %s to %s", name, pluginSettings.getFilename());
     }
 
     private void viewModel()
@@ -1444,10 +1444,10 @@ public class AstigmatismModelManager implements PlugIn
         }
         catch (final ConversionException e)
         {
-            Utils.log("Bad conversion (%s), defaulting to native model units", e.getMessage());
+            ImageJUtils.log("Bad conversion (%s), defaulting to native model units", e.getMessage());
         }
 
-        Utils.log("Astigmatism model: %s\n%s", name, model);
+        ImageJUtils.log("Astigmatism model: %s\n%s", name, model);
 
         // Plot the curve. Do this so we encompass twice the depth-of-field.
         final double gamma = model.getGamma();
@@ -1478,8 +1478,8 @@ public class AstigmatismModelManager implements PlugIn
         final String title = TITLE + " Width Curve";
         final Plot plot = new Plot(title, "Z (" + UnitHelper.getShortName(model.getZDistanceUnit()) + ")",
                 "Width (" + UnitHelper.getShortName(model.getSDistanceUnit()) + ")");
-        double[] limits = Maths.limits(sx);
-        limits = Maths.limits(limits, sy);
+        double[] limits = MathUtils.limits(sx);
+        limits = MathUtils.limits(limits, sy);
         final double rangex = (z[z.length - 1] - z[0]) * 0.05;
         final double rangey = (limits[1] - limits[0]) * 0.05;
         final double miny = limits[0] - rangey;
@@ -1514,8 +1514,8 @@ public class AstigmatismModelManager implements PlugIn
 
         plot.setColor(Color.BLACK);
         plot.addLegend(legend);
-        plot.addLabel(0, 0, String.format("Model = %s (%s nm/pixel)", name, Utils.rounded(model.getNmPerPixel())));
-        Utils.display(title, plot);
+        plot.addLabel(0, 0, String.format("Model = %s (%s nm/pixel)", name, MathUtils.rounded(model.getNmPerPixel())));
+        ImageJUtils.display(title, plot);
 
         if (!pluginSettings.getShowPsf())
             return;
@@ -1556,7 +1556,7 @@ public class AstigmatismModelManager implements PlugIn
             final TextField tfz = gd.getLastTextField();
             gd.addCheckbox("Calibrated_image", pluginSettings.getCalibratedImage());
             gd.addDialogListener(this);
-            if (Utils.isShowGenericDialog())
+            if (ImageJUtils.isShowGenericDialog())
             {
                 gd.hideCancelButton();
                 gd.setOKLabel(" Close ");
@@ -1597,7 +1597,7 @@ public class AstigmatismModelManager implements PlugIn
             final int calibratedImage = getCalibratedImage();
             final float[] data = new float[width * width];
             psf.create3D(data, width, width, 1, cx, cx, _z, false);
-            final ImagePlus imp = Utils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
+            final ImagePlus imp = ImageJUtils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
             if (_calibratedImage != calibratedImage)
             {
                 if (calibratedImage == 1)
@@ -1621,7 +1621,7 @@ public class AstigmatismModelManager implements PlugIn
             plot.getImagePlus().setRoi(new Line(x, y1, x, y2));
         }
 
-        SimpleLock lock = new SimpleLock();
+        SoftLock lock = new SoftLock();
 
         private void update()
         {
@@ -1697,7 +1697,7 @@ public class AstigmatismModelManager implements PlugIn
 		settings.removeAstigmatismModelResources(name);
 		SettingsManager.writeSettings(settings.build());
 
-		Utils.log("Deleted astigmatism model: %s", name);
+		ImageJUtils.log("Deleted astigmatism model: %s", name);
 	}
 
 	private void invertModel()
@@ -1739,6 +1739,6 @@ public class AstigmatismModelManager implements PlugIn
         settings.putAstigmatismModelResources(name, builder.build());
         SettingsManager.writeSettings(settings.build());
 
-        Utils.log("Inverted astigmatism model: %s", name);
+        ImageJUtils.log("Inverted astigmatism model: %s", name);
     }
 }

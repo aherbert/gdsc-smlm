@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class MultiCubicSplineFunction extends CubicSplineFunction
 {
-    /** The number of splines to draw */
+    /** The number of splines to draw. */
     private int n = 1;
 
     /** The gradient indices, This can be cached for the same n. */
@@ -139,7 +139,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
     public int[] gradientIndices()
     {
         if (gradientIndices == null)
-            gradientIndices = SimpleArrayUtils.newArray(getNumberOfGradients(), 0, 1);
+            gradientIndices = SimpleArrayUtils.natural(getNumberOfGradients());
         return gradientIndices;
     }
 

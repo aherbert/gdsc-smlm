@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
- * Defines normalisation of an area around a point
+ * Defines normalisation of an area around a point.
  */
 public interface Normaliser
 {

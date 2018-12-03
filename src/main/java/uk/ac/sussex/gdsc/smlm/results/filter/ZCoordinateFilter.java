@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a z-coordinate range
+ * Filter results using a z-coordinate range.
  */
 public class ZCoordinateFilter extends DirectFilter
 {

@@ -1,17 +1,5 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.math3.util.Precision;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
@@ -26,18 +14,33 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestCounter;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+
+import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -100,11 +103,12 @@ public class FastMLEGradient2ProcedureTest
     @SeededTest
     public void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(RandomSeed seed)
     {
-        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 4);
-        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 5);
-        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 6);
-        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 11);
-        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 21);
+        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
+        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 4, equality);
+        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 5, equality);
+        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 6, equality);
+        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 11, equality);
+        gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 21, equality);
     }
 
     @SpeedTag
@@ -121,14 +125,14 @@ public class FastMLEGradient2ProcedureTest
         gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21);
     }
 
-    private void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(RandomSeed seed, int nparams)
+    private void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(RandomSeed seed, int nparams, DoubleDoubleBiPredicate equality)
     {
         final int iter = 10;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
         final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams,
@@ -141,7 +145,7 @@ public class FastMLEGradient2ProcedureTest
             final double s = p.computeLogLikelihood(paramsList.get(i));
             final double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
             // Virtually the same ...
-            ExtraAssertions.assertEqualsRelative(s, s2, 1e-5, msg.set(0, i));
+            TestAssertions.assertTest(s, s2, equality, msg.set(0, i));
         }
     }
 
@@ -149,7 +153,7 @@ public class FastMLEGradient2ProcedureTest
     public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed)
     {
         final int iter = 10;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
 
         final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
                 GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -290,14 +294,14 @@ public class FastMLEGradient2ProcedureTest
 
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 1000;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
         final MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams,
@@ -348,7 +352,7 @@ public class FastMLEGradient2ProcedureTest
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getTimingRecord("GradientCalculator " + nparams, time1, "FastMLEGradient2Procedure", time2));
+        logger.log(TestLogUtils.getTimingRecord("GradientCalculator " + nparams, time1, "FastMLEGradient2Procedure", time2));
     }
 
     @SeededTest
@@ -366,7 +370,7 @@ public class FastMLEGradient2ProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
         // Create messages
@@ -376,7 +380,7 @@ public class FastMLEGradient2ProcedureTest
         final IntArrayFormatSupplier msg2Dv = getMessage(nparams, "[%d] second derivative: Not same value @ %d");
         final IntArrayFormatSupplier msg2Dd1 = getMessage(nparams, "[%d] second derivative: Not same d1 @ %d");
         final IntArrayFormatSupplier msg2Dd2 = getMessage(nparams, "[%d] second derivative: Not same d2 @ %d");
-        
+
         FastMLEGradient2Procedure p1, p2;
         for (int i = 0; i < paramsList.size(); i++)
         {
@@ -404,7 +408,7 @@ public class FastMLEGradient2ProcedureTest
             Assertions.assertArrayEquals(p1.d2, p2.d2, msg2Dd2.set(1, i));
         }
     }
-    
+
     private static IntArrayFormatSupplier getMessage(int nparams, String format) {
         final IntArrayFormatSupplier msg = new IntArrayFormatSupplier(format, 2);
         msg.set(0, nparams);
@@ -422,14 +426,14 @@ public class FastMLEGradient2ProcedureTest
 
     private void gradientProcedureLinearIsFasterThanGradientProcedure(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 100;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
+        createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
 
         // Remove the timing of the function call by creating a dummy function
         final Gradient2Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -485,7 +489,7 @@ public class FastMLEGradient2ProcedureTest
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getRecord(Level.INFO, "Standard = %d : Unrolled %d = %d : %fx", time1, nparams, time2,
+        logger.log(TestLogUtils.getRecord(Level.INFO, "Standard = %d : Unrolled %d = %d : %fx", time1, nparams, time2,
                 (1.0 * time1) / time2));
         Assertions.assertTrue(time2 < time1 * 1.5);
     }
@@ -520,7 +524,7 @@ public class FastMLEGradient2ProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+        createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
 
         // for the gradients
         final double delta = 1e-4;

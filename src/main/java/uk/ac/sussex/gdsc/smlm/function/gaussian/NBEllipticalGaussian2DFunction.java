@@ -35,7 +35,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction
 {
     /**
-     * Constructor
+     * Constructor.
      *
      * @param npeaks
      *            The number of peaks

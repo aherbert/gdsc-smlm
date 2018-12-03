@@ -26,11 +26,11 @@ package uk.ac.sussex.gdsc.smlm.model.camera;
 import java.awt.Rectangle;
 import java.util.Arrays;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
- * Base class for the camera model
+ * Base class for the camera model.
  *
  * @author Alex Herbert
  */
@@ -44,7 +44,7 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable
      */
     public void checkBias(float bias)
     {
-        if (!Maths.isFinite(bias))
+        if (!Double.isFinite(bias))
             throw new IllegalArgumentException("Bias must be a finite number");
     }
 

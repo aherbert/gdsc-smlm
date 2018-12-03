@@ -57,7 +57,7 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -76,7 +76,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
 import uk.ac.sussex.gdsc.smlm.results.sort.FramePeakResultComparator;
 
 /**
- * A frame that shows a PeakResultsTableModel
+ * A frame that shows a PeakResultsTableModel.
  *
  * @author Alex Herbert
  */
@@ -487,7 +487,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
             imp.setOverlay(o);
             final PeakResult p = list[0];
             imp.setSlice(p.getFrame());
-            Utils.adjustSourceRect(imp, 0, (int) converter.convert(p.getXPosition()),
+            ImageJUtils.adjustSourceRect(imp, 0, (int) converter.convert(p.getXPosition()),
                     (int) converter.convert(p.getYPosition()));
             imp.getWindow().toFront();
         }

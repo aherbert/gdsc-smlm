@@ -29,7 +29,7 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * <p>
- * <strong>Note:</strong> This class has been adapted from 
+ * <strong>Note:</strong> This class has been adapted from
  * {@code org.apache.commons.math3.distribution} for use in the {@link CustomSimpsonIntegrator}.
  * <p>
  * Implements the <a href="http://mathworld.wolfram.com/TrapezoidalRule.html">
@@ -122,7 +122,7 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
 	{
 		return super.computeObjectiveValue(point);
 	}
-	
+
     /**
      * Compute the n-th stage integral of trapezoid rule. This function
      * should only be called by API <code>integrate()</code> in the package.
@@ -149,7 +149,7 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
                        integrator.computeObjectiveValue(max));
             return s;
         }
-        
+
 		final long np = 1L << (n-1);           // number of new points in this stage
 		double sum = 0;
 		final double max = integrator.getMax();
@@ -192,7 +192,7 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
                        integrator.computeObjectiveValue(max));
             return s;
         }
-        
+
 		final long np = 1L << (n-1);           // number of new points in this stage
 		double sum = 0;
 		final double max = integrator.getMax();
@@ -208,7 +208,7 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
 		s = 0.5 * (s + sum * spacing);
 		return s;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     protected double doIntegrate()

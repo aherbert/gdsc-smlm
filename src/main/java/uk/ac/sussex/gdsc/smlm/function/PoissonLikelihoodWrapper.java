@@ -28,11 +28,11 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson distribution:
- * 
+ *
  * <pre>
  * f(x) = l(x) - k * ln(l(x)) + log(k!)
  * </pre>
- * 
+ *
  * Where:
  * <ul>
  * <li>l(x) is the function (expected) value
@@ -49,7 +49,7 @@ import org.apache.commons.math3.util.FastMath;
  * <pre>
  * PMF(l, k) = C * e ^ -l * l ^ x / gamma(k + 1)
  * </pre>
- * 
+ *
  * with:
  * <ul>
  * <li>l = the function (expected) value

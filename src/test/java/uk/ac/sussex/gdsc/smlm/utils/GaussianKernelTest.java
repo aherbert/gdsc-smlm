@@ -23,12 +23,14 @@
  */
 package uk.ac.sussex.gdsc.smlm.utils;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+
 import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianKernelTest
@@ -36,6 +38,7 @@ public class GaussianKernelTest
     @Test
     public void canGetConversionFactor()
     {
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < 5; i++)
         {
             final double s = 0.33 * (1 << i);
@@ -49,7 +52,7 @@ public class GaussianKernelTest
             for (int u = o.length / 2, x = u; x >= 0; x--)
             {
                 final double e = norm * FastMath.exp(-(x - u) * (x - u) / var2);
-                ExtraAssertions.assertEqualsRelative(e, f * o[x], 1e-10);
+                TestAssertions.assertTest(e, f * o[x], predicate);
             }
         }
     }
@@ -141,6 +144,7 @@ public class GaussianKernelTest
     @Test
     public void canComputeDownscaleGaussianKernelIncScaleIncRange()
     {
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < 5; i++)
         {
             final double s = 0.33 * (1 << i);
@@ -154,10 +158,10 @@ public class GaussianKernelTest
                         final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
                         final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-                        if (Maths.isPow2(scale))
+                        if (MathUtils.isPow2(scale))
                             Assertions.assertArrayEquals(e, o);
                         else
-                            ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-10);
+                            TestAssertions.assertArrayTest(e, o, predicate);
                     }
         }
     }
@@ -165,6 +169,7 @@ public class GaussianKernelTest
     @Test
     public void canComputeDownscaleGaussianKernelDecScaleIncRange()
     {
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < 5; i++)
         {
             final double s = 0.33 * (1 << i);
@@ -178,10 +183,10 @@ public class GaussianKernelTest
                         final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
                         final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-                        if (Maths.isPow2(scale))
+                        if (MathUtils.isPow2(scale))
                             Assertions.assertArrayEquals(e, o);
                         else
-                            ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-10);
+                            TestAssertions.assertArrayTest(e, o, predicate);
                     }
         }
     }
@@ -189,6 +194,7 @@ public class GaussianKernelTest
     @Test
     public void canComputeDownscaleGaussianKernelIncRangeIncScale()
     {
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < 5; i++)
         {
             final double s = 0.33 * (1 << i);
@@ -202,10 +208,10 @@ public class GaussianKernelTest
                         final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
                         final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-                        if (Maths.isPow2(scale))
+                        if (MathUtils.isPow2(scale))
                             Assertions.assertArrayEquals(e, o);
                         else
-                            ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-10);
+                            TestAssertions.assertArrayTest(e, o, predicate);
                     }
         }
     }
@@ -213,6 +219,7 @@ public class GaussianKernelTest
     @Test
     public void canComputeDownscaleGaussianKernelIncRangeDecScale()
     {
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < 5; i++)
         {
             final double s = 0.33 * (1 << i);
@@ -226,10 +233,10 @@ public class GaussianKernelTest
                         final double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
                         final double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-                        if (Maths.isPow2(scale))
+                        if (MathUtils.isPow2(scale))
                             Assertions.assertArrayEquals(e, o);
                         else
-                            ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-10);
+                            TestAssertions.assertArrayTest(e, o, predicate);
                     }
         }
     }

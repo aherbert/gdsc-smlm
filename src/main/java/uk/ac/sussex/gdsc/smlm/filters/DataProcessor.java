@@ -73,7 +73,7 @@ public abstract class DataProcessor implements Cloneable
     public abstract boolean hasWeights();
 
     /**
-     * Process the data
+     * Process the data.
      *
      * @param data
      *            The data
@@ -86,7 +86,7 @@ public abstract class DataProcessor implements Cloneable
     public abstract float[] process(final float[] data, final int width, final int height);
 
     /**
-     * @return the border
+     * @return the border.
      */
     public int getBorder()
     {
@@ -108,7 +108,7 @@ public abstract class DataProcessor implements Cloneable
     }
 
     /**
-     * @return A description of the processor and parameters
+     * @return A description of the processor and parameters.
      */
     public String getDescription()
     {
@@ -116,12 +116,12 @@ public abstract class DataProcessor implements Cloneable
     }
 
     /**
-     * @return The name of the filter
+     * @return The name of the filter.
      */
     public abstract String getName();
 
     /**
-     * @return The parameters of the filter
+     * @return The parameters of the filter.
      */
     public List<String> getParameters()
     {
@@ -133,7 +133,7 @@ public abstract class DataProcessor implements Cloneable
     }
 
     /**
-     * Get the width spread of data used to process each position
+     * Get the width spread of data used to process each position.
      *
      * @return The spread
      */

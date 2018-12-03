@@ -30,8 +30,9 @@ import ij.WindowManager;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.text.TextPanel;
-import uk.ac.sussex.gdsc.core.ij.Utils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 /**
@@ -94,7 +95,7 @@ public class ImageROIPainter extends TextPanelMouseListener
 
         addRoi(imp, slice, new PointRoi(x, y));
 
-        Utils.adjustSourceRect(imp, 0, (int) x, (int) y);
+        ImageJUtils.adjustSourceRect(imp, 0, (int) x, (int) y);
     }
 
     /**
@@ -139,16 +140,15 @@ public class ImageROIPainter extends TextPanelMouseListener
         if (points == 0)
             return;
 
-        // Simple code to add the ROI onto a single slice: addRoi(imp, slice[0], new PointRoi(x, y, points));
+        // Simple code to add the ROI onto a single slice:
+        // addRoi(imp, slice[0], new PointRoi(x, y, points))
 
         // Add the ROI to each relevant slice
 
         // Sort the slices
-        final int[] indices = new int[points];
-        for (int i = 0; i < points; i++)
-            indices[i] = i;
+        final int[] indices = SimpleArrayUtils.natural(points);
 
-        Sort.sort(indices, slice);
+        SortUtils.sortIndices(indices, slice, true);
 
         final Overlay o = new Overlay();
 
@@ -237,7 +237,7 @@ public class ImageROIPainter extends TextPanelMouseListener
     }
 
     /**
-     * @return the title of the image
+     * @return the title of the image.
      */
     public String getTitle()
     {
@@ -254,7 +254,7 @@ public class ImageROIPainter extends TextPanelMouseListener
     }
 
     /**
-     * @return the coordProvider
+     * @return the coordProvider.
      */
     public CoordinateProvider getCoordProvider()
     {

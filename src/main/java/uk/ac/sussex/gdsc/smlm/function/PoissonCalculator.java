@@ -27,11 +27,11 @@ import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Computes likelihood values for a Poisson function
+ * Computes likelihood values for a Poisson function.
  */
 public class PoissonCalculator
 {
-    /** Avoid repeated computation of log of 2 PI */
+    /** Avoid repeated computation of log of 2 PI. */
     private static final double HALF_LOG_2_PI = 0.5 * Math.log(2.0 * FastMath.PI);
 
     /** The value of x where the instance method computes x! using an approximation. */
@@ -139,7 +139,7 @@ public class PoissonCalculator
     }
 
     /**
-     * Raise the value to the power 3
+     * Raise the value to the power 3.
      *
      * @param value
      *            the value
@@ -266,7 +266,7 @@ public class PoissonCalculator
     }
 
     /**
-     * Gets the values x
+     * Gets the values x.
      *
      * @return the values x
      */

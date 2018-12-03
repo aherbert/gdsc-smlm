@@ -23,14 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.util.Arrays;
-
-import org.jtransforms.fft.FloatFFT_3D;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import ij.ImageStack;
-import ij.process.FloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
@@ -38,14 +30,23 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 
+import ij.ImageStack;
+import ij.process.FloatProcessor;
+
+import org.jtransforms.fft.FloatFFT_3D;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
 @SuppressWarnings({ "javadoc" })
 public class FloatDHT3DTest
 {
     static int size = 16;
     static double centre = (size - 1) / 2.0;
 
-    final static double gamma = 2;
-    final static int zDepth = 5;
+    static final double gamma = 2;
+    static final int zDepth = 5;
     static QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
     private static FloatDHT3D createData(double cx, double cy, double cz)

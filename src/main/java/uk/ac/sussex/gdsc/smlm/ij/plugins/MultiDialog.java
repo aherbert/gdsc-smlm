@@ -59,7 +59,7 @@ import ij.plugin.frame.Recorder;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 /**
- * Shows a list of all the results sets held in memory, allowing multiple results to be selected
+ * Shows a list of all the results sets held in memory, allowing multiple results to be selected.
  */
 public class MultiDialog extends Dialog
         implements ActionListener, KeyListener, WindowListener, MouseListener, ItemListener
@@ -76,7 +76,7 @@ public class MultiDialog extends Dialog
     private final boolean macro;
 
     /**
-     * Interface to allow a list of any type to be shown in the MultiDialog
+     * Interface to allow a list of any type to be shown in the MultiDialog.
      *
      * @author Alex Herbert
      */
@@ -110,11 +110,11 @@ public class MultiDialog extends Dialog
     }
 
     /**
-     * Base class for default implementation of the Items interface
+     * Base class for default implementation of the Items interface.
      *
      * @author Alex Herbert
      */
-    public static abstract class BaseItems implements Items
+    public abstract static class BaseItems implements Items
     {
         /**
          * Returns the same formatted name.
@@ -131,7 +131,7 @@ public class MultiDialog extends Dialog
     }
 
     /**
-     * Interface to allow resulst to populate the items in the multi dialog
+     * Interface to allow resulst to populate the items in the multi dialog.
      */
     public interface MemoryResultsFilter
     {
@@ -155,7 +155,7 @@ public class MultiDialog extends Dialog
     }
 
     /**
-     * Class that allows the current results held in memory to be shown in the dialog
+     * Class that allows the current results held in memory to be shown in the dialog.
      *
      * @author Alex Herbert
      */
@@ -282,7 +282,7 @@ public class MultiDialog extends Dialog
     }
 
     /**
-     * Builds the main panel for the dialog
+     * Builds the main panel for the dialog.
      *
      * @return the panel
      */

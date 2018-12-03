@@ -44,27 +44,27 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGauss
 public class GaussianFunctionFactory
 {
     /**
-     * Compute gradients for background
+     * Compute gradients for background.
      */
     public static final int FIT_BACKGROUND = 0x00000001;
     /**
-     * Compute gradients for rotation angle
+     * Compute gradients for rotation angle.
      */
     public static final int FIT_ANGLE = 0x00000002;
     /**
-     * Compute gradients for x width
+     * Compute gradients for x width.
      */
     public static final int FIT_X_WIDTH = 0x00000004;
     /**
-     * Compute gradients for y width
+     * Compute gradients for y width.
      */
     public static final int FIT_Y_WIDTH = 0x00000008;
     /**
-     * Compute gradients for signal
+     * Compute gradients for signal.
      */
     public static final int FIT_SIGNAL = 0x00000010;
     /**
-     * Compute gradients for z position
+     * Compute gradients for z position.
      */
     public static final int FIT_Z = 0x00000020;
 

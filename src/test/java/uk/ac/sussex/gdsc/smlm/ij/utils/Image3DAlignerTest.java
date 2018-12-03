@@ -1,18 +1,18 @@
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class Image3DAlignerTest
@@ -33,8 +33,8 @@ public class Image3DAlignerTest
 
     // TODO - Make this test the StackAligner with sub-pixel accuracy and non power of 2 images
 
-    final static double gamma = 2.5;
-    final static int zDepth = 5;
+    static final double gamma = 2.5;
+    static final int zDepth = 5;
     protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
     private FloatImage3D createData(int x, int y, int z, double cx, double cy, double cz)

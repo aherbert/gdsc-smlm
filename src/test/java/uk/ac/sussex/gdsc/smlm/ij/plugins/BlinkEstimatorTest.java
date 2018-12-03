@@ -23,20 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -57,12 +43,27 @@ import uk.ac.sussex.gdsc.smlm.model.UniformDistribution;
 import uk.ac.sussex.gdsc.smlm.model.UniformIllumination;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class BlinkEstimatorTest
@@ -114,7 +115,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM],
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM],
                 particles, fixedFraction, false, true);
     }
 
@@ -123,7 +124,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[MEDIUM], tOn[MEDIUM], tOff[MEDIUM],
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[MEDIUM], tOn[MEDIUM], tOff[MEDIUM],
                 particles, fixedFraction, false, true);
     }
 
@@ -132,7 +133,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[HIGH], tOn[MEDIUM], tOff[MEDIUM],
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[HIGH], tOn[MEDIUM], tOff[MEDIUM],
                 particles, fixedFraction, false, true);
     }
 
@@ -141,7 +142,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[LOW], tOn[HIGH], tOff[HIGH],
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[LOW], tOn[HIGH], tOff[HIGH],
                 particles, fixedFraction, false, true);
     }
 
@@ -150,7 +151,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH],
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH],
                 particles, fixedFraction, false, true);
     }
 
@@ -159,7 +160,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[HIGH], tOn[HIGH], tOff[HIGH],
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[HIGH], tOn[HIGH], tOff[HIGH],
                 particles, fixedFraction, false, true);
     }
 
@@ -168,7 +169,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[LOW], tOn[LOW], tOff[LOW], particles,
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[LOW], tOn[LOW], tOff[LOW], particles,
                 fixedFraction, false, true);
     }
 
@@ -177,7 +178,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[MEDIUM], tOn[LOW], tOff[LOW],
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[MEDIUM], tOn[LOW], tOff[LOW],
                 particles, fixedFraction, false, true);
     }
 
@@ -186,7 +187,7 @@ public class BlinkEstimatorTest
     {
         final int particles = 1000;
         final double fixedFraction = 1;
-        estimateBlinking(RNGFactory.create(seed.getSeed()), nBlinks[HIGH], tOn[LOW], tOff[LOW], particles,
+        estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[HIGH], tOn[LOW], tOff[LOW], particles,
                 fixedFraction, false, true);
     }
 
@@ -195,7 +196,7 @@ public class BlinkEstimatorTest
     {
         // Skip this as it is slow
         Assumptions.assumeTrue(false);
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final int particles = 1000;
         final double fixedFraction = 1;
@@ -237,7 +238,7 @@ public class BlinkEstimatorTest
     private TIntHashSet estimateBlinking(UniformRandomProvider rg, double nBlinks, double tOn, double tOff,
             int particles, double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
     {
-        ExtraAssumptions.assume(TestComplexity.MAXIMUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
 
         final SpatialIllumination activationIllumination = new UniformIllumination(100);
         int totalSteps = 100;

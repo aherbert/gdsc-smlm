@@ -48,7 +48,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
  */
 public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 {
-    private final static String TITLE = "Smooth Image";
+    private static final String TITLE = "Smooth Image";
     private static final String[] filterNames;
     private static final DataFilterMethod[] filters;
     static

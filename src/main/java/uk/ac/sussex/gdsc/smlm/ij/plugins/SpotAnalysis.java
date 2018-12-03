@@ -89,11 +89,16 @@ import ij.plugin.filter.GaussianBlur;
 import ij.plugin.frame.PlugInFrame;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
@@ -182,14 +187,16 @@ public class SpotAnalysis extends PlugInFrame
      */
     private class BlurWorker implements Runnable
     {
+        Ticker ticker;
         ImageStack inputStack, outputStack;
         int slice, slices;
         Rectangle bounds;
         double blur;
 
-        public BlurWorker(ImageStack inputStack, int slice, int slices, Rectangle bounds, double blur,
+        public BlurWorker(Ticker ticker, ImageStack inputStack, int slice, int slices, Rectangle bounds, double blur,
                 ImageStack outputStack)
         {
+            this.ticker = ticker;
             this.inputStack = inputStack;
             this.slice = slice;
             this.slices = slices;
@@ -212,6 +219,7 @@ public class SpotAnalysis extends PlugInFrame
                 ip.snapshot();
                 gb.blurGaussian(ip, blur, blur, 0.002);
                 outputStack.setPixels(ip.getPixels(), slice);
+                ticker.tick();
             }
         }
     }
@@ -668,17 +676,17 @@ public class SpotAnalysis extends PlugInFrame
             final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
             final List<Future<?>> futures = new LinkedList<>();
 
-            Utils.setShowProgress(false);
+            final Ticker ticker = Ticker.create(new ImageJTrackProgress(true), nSlices, true);
             blurCount = 0;
-            // TODO - See if this is faster if processing multiple slices in each worker
             final int slices = 5;
+            ImageJUtils.showSlowProgress(0, nSlices);
             for (int n = 1; n <= nSlices; n += slices)
-                futures.add(threadPool.submit(new BlurWorker(stack, n, slices, bounds, blur * psfWidth, newStack)));
+                futures.add(threadPool.submit(new BlurWorker(ticker, stack, n, slices, bounds, blur * psfWidth, newStack)));
 
             IJ.showStatus("Calculating blur ... Finishing");
-            Utils.waitForCompletion(futures);
+            ConcurrencyUtils.waitForCompletionUnchecked(futures);
             threadPool.shutdown();
-            Utils.setShowProgress(false);
+            ImageJUtils.clearSlowProgress();
             IJ.showStatus("Calculating blur ... Drawing");
 
             final ImageStack blurSpot = new ImageStack(bounds.width, bounds.height, nSlices);
@@ -733,7 +741,7 @@ public class SpotAnalysis extends PlugInFrame
             IJ.showProgress(n, nSlices);
             final float[] data = rawSource.next(bounds);
             rawSpot.setPixels(data, n + 1);
-            final Statistics stats = new Statistics(data);
+            final Statistics stats = Statistics.create(data);
             profile[0][n] = stats.getMean() / gain;
             profile[1][n] = stats.getStandardDeviation() / gain;
         }
@@ -743,8 +751,9 @@ public class SpotAnalysis extends PlugInFrame
 
     private static ImagePlus showSpot(String title, ImageStack spot)
     {
-        final ImagePlus imp = Utils.display(title, spot);
-        if (Utils.isNewWindow() || imp.getWindow().getCanvas().getMagnification() == 1)
+        final WindowOrganiser windowOrganiser = new WindowOrganiser();      
+        final ImagePlus imp = ImageJUtils.display(title, spot, windowOrganiser);
+        if (windowOrganiser.isNotEmpty() || imp.getWindow().getCanvas().getMagnification() == 1)
             for (int i = 9; i-- > 0;)
                 imp.getWindow().getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
         return imp;
@@ -843,7 +852,7 @@ public class SpotAnalysis extends PlugInFrame
     private void showProfile(String title, String yTitle, double[] xValues, double[] yValues, double[] yValues2)
     {
         final Plot2 plot = new Plot2(title, "Frame", yTitle, xValues, yValues);
-        final double[] limits = Maths.limits(yValues);
+        final double[] limits = MathUtils.limits(yValues);
         plot.setLimits(xValues[0], xValues[xValues.length - 1], limits[0], limits[1]);
         plot.draw();
 
@@ -889,7 +898,7 @@ public class SpotAnalysis extends PlugInFrame
         plot.addPoints(new double[] { rawImp.getCurrentSlice(), rawImp.getCurrentSlice() }, limits, Plot.LINE);
 
         plot.setColor(Color.blue);
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
     }
 
     @SuppressWarnings("unchecked")
@@ -976,13 +985,13 @@ public class SpotAnalysis extends PlugInFrame
         if (trace == null)
             return;
 
-        final Statistics tOn = new Statistics(trace.getOnTimes());
-        final Statistics tOff = new Statistics(trace.getOffTimes());
+        final Statistics tOn = Statistics.create(trace.getOnTimes());
+        final Statistics tOff = Statistics.create(trace.getOffTimes());
         resultsWindow.append(
-                String.format("%d\t%.1f\t%.1f\t%s\t%s\t%s\t%d\t%s\t%s\t%s", id, cx, cy, Utils.rounded(signal, 4),
-                        Utils.rounded(tOn.getSum() * msPerFrame, 3), Utils.rounded(tOff.getSum() * msPerFrame, 3),
-                        trace.getNBlinks() - 1, Utils.rounded(tOn.getMean() * msPerFrame, 3),
-                        Utils.rounded(tOff.getMean() * msPerFrame, 3), imp.getTitle()));
+                String.format("%d\t%.1f\t%.1f\t%s\t%s\t%s\t%d\t%s\t%s\t%s", id, cx, cy, MathUtils.rounded(signal, 4),
+                        MathUtils.rounded(tOn.getSum() * msPerFrame, 3), MathUtils.rounded(tOff.getSum() * msPerFrame, 3),
+                        trace.getNBlinks() - 1, MathUtils.rounded(tOn.getMean() * msPerFrame, 3),
+                        MathUtils.rounded(tOff.getMean() * msPerFrame, 3), imp.getTitle()));
 
         // Save the individual on/off times for use in creating a histogram
         traces.put(id, trace);
@@ -1085,7 +1094,7 @@ public class SpotAnalysis extends PlugInFrame
         try
         {
             files[0] = openBufferedWriter(resultsDirectory + "traces.txt", String.format(
-                    "#ms/frame = %s\n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...", Utils.rounded(msPerFrame, 3)));
+                    "#ms/frame = %s\n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...", MathUtils.rounded(msPerFrame, 3)));
             files[1] = openBufferedWriter(resultsDirectory + "tOn.txt", "");
             files[2] = openBufferedWriter(resultsDirectory + "tOff.txt", "");
             files[3] = openBufferedWriter(resultsDirectory + "blinks.txt", "");
@@ -1333,8 +1342,8 @@ public class SpotAnalysis extends PlugInFrame
             currentSlice = slice;
             final double signal = getSignal(slice);
             final double noise = smoothSd[slice - 1];
-            currentLabel.setText(String.format("Frame %d: Signal = %s, SNR = %s", slice, Utils.rounded(signal, 4),
-                    Utils.rounded(signal / noise, 3)));
+            currentLabel.setText(String.format("Frame %d: Signal = %s, SNR = %s", slice, MathUtils.rounded(signal, 4),
+                    MathUtils.rounded(signal / noise, 3)));
 
             drawProfiles();
 
@@ -1362,8 +1371,8 @@ public class SpotAnalysis extends PlugInFrame
             {
                 params = fitResult.getParameters();
                 final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
-                rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
-                        Utils.rounded(spotSignal / noise, 3)));
+                rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s", MathUtils.rounded(spotSignal, 4),
+                        MathUtils.rounded(spotSignal / noise, 3)));
                 ImageROIPainter.addRoi(rawImp, slice,
                         new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]));
             }
@@ -1391,8 +1400,8 @@ public class SpotAnalysis extends PlugInFrame
             {
                 params = fitResult.getParameters();
                 final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
-                blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
-                        Utils.rounded(spotSignal / noise, 3)));
+                blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s", MathUtils.rounded(spotSignal, 4),
+                        MathUtils.rounded(spotSignal / noise, 3)));
                 ImageROIPainter.addRoi(blurImp, slice,
                         new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]));
             }

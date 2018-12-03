@@ -75,12 +75,13 @@ import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -120,7 +121,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
  */
 public class PCPALMMolecules implements PlugIn
 {
-    /** The title */
+    /** The title. */
     static String TITLE = "PC-PALM Molecules";
     private static String inputOption = "";
     private static boolean chooseRoi = false;
@@ -284,18 +285,18 @@ public class PCPALMMolecules implements PlugIn
             // Annibale, et al (2011), Quantitative photo activated localization microscopy: unraveling the
             // effects of photoblinking. PLoS One, 6(7): e22678 (http://dx.doi.org/10.1371%2Fjournal.pone.0022678)
             densityProtein = densityPeaks / blinkingRate;
-            log("Peak Density = %s (um^-2). Protein Density = %s (um^-2)", Utils.rounded(densityPeaks * 1e6),
-                    Utils.rounded(densityProtein * 1e6));
+            log("Peak Density = %s (um^-2). Protein Density = %s (um^-2)", MathUtils.rounded(densityPeaks * 1e6),
+                    MathUtils.rounded(densityProtein * 1e6));
         }
         else
         {
             // No blinking rate for non PC-PALM methods. This can be configured in later plugins if required.
             blinkingRate = 1;
             densityProtein = densityPeaks;
-            log("Molecule Density = %s (um^-2)", Utils.rounded(densityPeaks * 1e6));
+            log("Molecule Density = %s (um^-2)", MathUtils.rounded(densityPeaks * 1e6));
         }
 
-        log("Results lifetime = %s s", Utils.rounded(seconds));
+        log("Results lifetime = %s s", MathUtils.rounded(seconds));
 
         // Use a second plugin filter that will work on a region drawn on the binary image
         // and compute the PALM analysis
@@ -313,7 +314,7 @@ public class PCPALMMolecules implements PlugIn
 
         // Build a list of all images with a region ROI
         final List<String> titles = new LinkedList<>();
-        for (final int imageID : Utils.getIDList())
+        for (final int imageID : ImageJUtils.getIdList())
         {
             final ImagePlus imp = WindowManager.getImage(imageID);
             if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
@@ -653,7 +654,7 @@ public class PCPALMMolecules implements PlugIn
             if (Double.isNaN(lower) || Double.isNaN(upper))
             {
                 if (logFitParameters)
-                    Utils.log("Error computing IQR: %f - %f", lower, upper);
+                    ImageJUtils.log("Error computing IQR: %f - %f", lower, upper);
             }
             else
             {
@@ -663,7 +664,7 @@ public class PCPALMMolecules implements PlugIn
                 yMax = FastMath.min(upper + iqr, stats.getMax());
 
                 if (logFitParameters)
-                    Utils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
+                    ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
                             yMax);
             }
         }
@@ -674,10 +675,10 @@ public class PCPALMMolecules implements PlugIn
             yMax = stats.getMax();
 
             if (logFitParameters)
-                Utils.log("  Data range: %f - %f", yMin, yMax);
+                ImageJUtils.log("  Data range: %f - %f", yMin, yMax);
         }
 
-        final float[][] hist = Utils.calcHistogram(data, yMin, yMax, histogramBins);
+        final float[][] hist = HistogramPlot.calcHistogram(data, yMin, yMax, histogramBins);
 
         Plot2 plot = null;
         if (title != null)
@@ -689,10 +690,10 @@ public class PCPALMMolecules implements PlugIn
             {
                 final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
                 plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
-                        Maths.max(yValues) * 1.05);
+                        MathUtils.max(yValues) * 1.05);
             }
             plot.addPoints(xValues, yValues, Plot2.BAR);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
 
         // Extract non-zero data
@@ -711,7 +712,7 @@ public class PCPALMMolecules implements PlugIn
         y = Arrays.copyOf(y, count);
 
         // Sense check to fitted data. Get mean and SD of histogram
-        final double[] stats2 = Utils.getHistogramStatistics(x, y);
+        final double[] stats2 = HistogramPlot.getHistogramStatistics(x, y);
         double mean = stats2[0];
         if (logFitParameters)
             log("  Initial Statistics: %f +/- %f", stats2[0], stats2[1]);
@@ -779,7 +780,7 @@ public class PCPALMMolecules implements PlugIn
             addToPlot(plot, x, skewParameters, Plot.LINE);
 
             plot.setColor(Color.black);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
 
         // Return the average precision from the fitted curve
@@ -910,7 +911,7 @@ public class PCPALMMolecules implements PlugIn
     }
 
     /**
-     * Trace localisations
+     * Trace localisations.
      *
      * @param results
      *            The results
@@ -945,12 +946,12 @@ public class PCPALMMolecules implements PlugIn
         }
         log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
                 results.size(), molecules.size() + singles.size(), singles.size(), molecules.size(), distance, time,
-                Utils.rounded(time * results.getCalibrationReader().getExposureTime() / 1000.0));
+                MathUtils.rounded(time * results.getCalibrationReader().getExposureTime() / 1000.0));
         return molecules;
     }
 
     /**
-     * Calculate the density of peaks in the original data
+     * Calculate the density of peaks in the original data.
      *
      * @return The peak density
      */
@@ -1048,24 +1049,24 @@ public class PCPALMMolecules implements PlugIn
         if (blinkingDistribution == 3)
         {
             log("  - Clusters = %d", nMolecules);
-            log("  - Simulation size = %s um", Utils.rounded(simulationSize, 4));
-            log("  - Molecules/cluster = %s", Utils.rounded(blinkingRate, 4));
+            log("  - Simulation size = %s um", MathUtils.rounded(simulationSize, 4));
+            log("  - Molecules/cluster = %s", MathUtils.rounded(blinkingRate, 4));
             log("  - Blinking distribution = %s", BLINKING_DISTRIBUTION[blinkingDistribution]);
-            log("  - p-Value = %s", Utils.rounded(p, 4));
+            log("  - p-Value = %s", MathUtils.rounded(p, 4));
         }
         else
         {
             log("  - Molecules = %d", nMolecules);
-            log("  - Simulation size = %s um", Utils.rounded(simulationSize, 4));
-            log("  - Blinking rate = %s", Utils.rounded(blinkingRate, 4));
+            log("  - Simulation size = %s um", MathUtils.rounded(simulationSize, 4));
+            log("  - Blinking rate = %s", MathUtils.rounded(blinkingRate, 4));
             log("  - Blinking distribution = %s", BLINKING_DISTRIBUTION[blinkingDistribution]);
         }
-        log("  - Average precision = %s nm", Utils.rounded(sigmaS, 4));
+        log("  - Average precision = %s nm", MathUtils.rounded(sigmaS, 4));
         log("  - Clusters simulation = " + CLUSTER_SIMULATION[clusterSimulation]);
         if (clusterSimulation > 0)
         {
-            log("  - Cluster number = %s +/- %s", Utils.rounded(clusterNumber, 4), Utils.rounded(clusterNumberSD, 4));
-            log("  - Cluster radius = %s nm", Utils.rounded(clusterRadius, 4));
+            log("  - Cluster number = %s +/- %s", MathUtils.rounded(clusterNumber, 4), MathUtils.rounded(clusterNumberSD, 4));
+            log("  - Cluster radius = %s nm", MathUtils.rounded(clusterRadius, 4));
         }
 
         final double nmPerPixel = 100;
@@ -1146,7 +1147,7 @@ public class PCPALMMolecules implements PlugIn
                     // Generate a mask of circles then sample from that.
                     // If we want to fill the mask completely then adjust the total steps to be the number of
                     // circles that can fit inside the mask.
-                    totalSteps = (int) (maskSize * maskSize / (Math.PI * Maths.pow2(clusterRadius / maskScale)));
+                    totalSteps = (int) (maskSize * maskSize / (Math.PI * MathUtils.pow2(clusterRadius / maskScale)));
 
                 while ((centre = maskDistribution.next()) != null && clusterCentres.size() < totalSteps)
                 {
@@ -1281,7 +1282,7 @@ public class PCPALMMolecules implements PlugIn
                     for (int i = 0; i < mask.length; i++)
                         if (mask[i] != 0)
                             bp.set(i, 128);
-                    Utils.display(maskTitle, bp);
+                    ImageJUtils.display(maskTitle, bp);
                 }
             }
 
@@ -1449,20 +1450,20 @@ public class PCPALMMolecules implements PlugIn
         results.end();
 
         if (bp != null)
-            Utils.display(maskTitle, bp);
+            ImageJUtils.display(maskTitle, bp);
 
         // Used for debugging
         //System.out.printf("  * Molecules = %d (%d activated)\n", xyz.size(), count);
         //if (clusterSimulation > 0)
         //	System.out.printf("  * Cluster number = %s +/- %s. Radius = %s +/- %s\n",
-        //			Utils.rounded(statsSize.getMean(), 4), Utils.rounded(statsSize.getStandardDeviation(), 4),
-        //			Utils.rounded(statsRadius.getMean(), 4), Utils.rounded(statsRadius.getStandardDeviation(), 4));
+        //			MathUtils.rounded(statsSize.getMean(), 4), MathUtils.rounded(statsSize.getStandardDeviation(), 4),
+        //			MathUtils.rounded(statsRadius.getMean(), 4), MathUtils.rounded(statsRadius.getStandardDeviation(), 4));
 
         log("Simulation results");
         log("  * Molecules = %d (%d activated)", xyz.size(), count);
-        log("  * Blinking rate = %s", Utils.rounded((double) molecules.size() / xyz.size(), 4));
+        log("  * Blinking rate = %s", MathUtils.rounded((double) molecules.size() / xyz.size(), 4));
         log("  * Precision (Mean-displacement) = %s nm",
-                (statsSigma.getN() > 0) ? Utils.rounded(Math.sqrt(statsSigma.getMean()), 4) : "0");
+                (statsSigma.getN() > 0) ? MathUtils.rounded(Math.sqrt(statsSigma.getMean()), 4) : "0");
         if (intraDistances != null)
             if (intraDistances.getN() == 0)
             {
@@ -1485,42 +1486,41 @@ public class PCPALMMolecules implements PlugIn
                     p95--;
 
                 log("  * Mean Intra-Molecule particle linkage distance = %s nm (95%% = %s, 99%% = %s, 100%% = %s)",
-                        Utils.rounded(intraDistances.getMean(), 4), Utils.rounded(intraHist[0][p95], 4),
-                        Utils.rounded(intraHist[0][p99], 4), Utils.rounded(intraHist[0][intraHist[0].length - 1], 4));
+                        MathUtils.rounded(intraDistances.getMean(), 4), MathUtils.rounded(intraHist[0][p95], 4),
+                        MathUtils.rounded(intraHist[0][p99], 4), MathUtils.rounded(intraHist[0][intraHist[0].length - 1], 4));
 
                 if (distanceAnalysis)
                     performDistanceAnalysis(intraHist, p99);
             }
         if (clusterSimulation > 0)
         {
-            log("  * Cluster number = %s +/- %s", Utils.rounded(statsSize.getMean(), 4),
-                    Utils.rounded(statsSize.getStandardDeviation(), 4));
+            log("  * Cluster number = %s +/- %s", MathUtils.rounded(statsSize.getMean(), 4),
+                    MathUtils.rounded(statsSize.getStandardDeviation(), 4));
             log("  * Cluster radius = %s +/- %s nm (mean distance to centre-of-mass)",
-                    Utils.rounded(statsRadius.getMean(), 4), Utils.rounded(statsRadius.getStandardDeviation(), 4));
+                    MathUtils.rounded(statsRadius.getMean(), 4), MathUtils.rounded(statsRadius.getStandardDeviation(), 4));
         }
     }
 
     private static double[][] plot(DoubleData stats, String label, boolean integerBins)
     {
         final String title = TITLE + " " + label;
-        Plot2 plot;
-        double[][] hist = null;
-        if (integerBins)
+
+        if (integerBins) {
             // The histogram is not need for the return statement
-            Utils.showHistogram(title, stats, label, 1, 0, 0);
-        else
-        {
-            // Show a cumulative histogram so that the bin size is not relevant
-            hist = Maths.cumulativeHistogram(stats.values(), false);
-
-            // Create the axes
-            final double[] xValues = hist[0];
-            final double[] yValues = hist[1];
-
-            // Plot
-            plot = new Plot2(title, label, "Frequency", xValues, yValues);
-            Utils.display(title, plot);
+            new HistogramPlotBuilder(title, stats, label).setMinBinWidth(1).show();
+            return null;
         }
+
+        // Show a cumulative histogram so that the bin size is not relevant
+        double[][] hist = MathUtils.cumulativeHistogram(stats.values(), false);
+
+        // Create the axes
+        final double[] xValues = hist[0];
+        final double[] yValues = hist[1];
+
+        // Plot
+        Plot2 plot = new Plot2(title, label, "Frequency", xValues, yValues);
+        ImageJUtils.display(title, plot);
 
         return hist;
     }
@@ -1538,10 +1538,10 @@ public class PCPALMMolecules implements PlugIn
             // Precision was used to store the molecule ID
             points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
         final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
-                ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE, new IJTrackProgress());
+                ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE, new ImageJTrackProgress());
         IJ.showStatus("Clustering to check inter-molecule distances");
         engine.setTrackJoins(true);
-        final ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
+        final List<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
         IJ.showStatus("");
         if (clusters != null)
         {
@@ -1550,12 +1550,12 @@ public class PCPALMMolecules implements PlugIn
 
             final int all = interIdDistances.length + intraIdDistances.length;
 
-            log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%", Utils.rounded(intraHist[0][p99], 4),
-                    (all > 0) ? Utils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
+            log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%", MathUtils.rounded(intraHist[0][p99], 4),
+                    (all > 0) ? MathUtils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
 
             // Show a double cumulative histogram plot
-            final double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
-            final double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
+            final double[][] intraIdHist = MathUtils.cumulativeHistogram(intraIdDistances, false);
+            final double[][] interIdHist = MathUtils.cumulativeHistogram(interIdDistances, false);
 
             // Plot
             final String title = TITLE + " molecule linkage distance";
@@ -1567,7 +1567,7 @@ public class PCPALMMolecules implements PlugIn
             plot.setColor(Color.blue);
             plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
             plot.setColor(Color.black);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
         else
             log("Aborted clustering to check inter-molecule distances");
@@ -1994,7 +1994,7 @@ public class PCPALMMolecules implements PlugIn
         }
 
         final ShortProcessor ip = new ShortProcessor(width, height, data, null);
-        ip.setMinAndMax(0, Maths.max(data));
+        ip.setMinAndMax(0, MathUtils.max(data));
         return ip;
     }
 
@@ -2011,7 +2011,7 @@ public class PCPALMMolecules implements PlugIn
      */
     static ImagePlus displayImage(String title, ImageProcessor ip, double nmPerPixel)
     {
-        final ImagePlus imp = Utils.display(title, ip);
+        final ImagePlus imp = ImageJUtils.display(title, ip);
         final Calibration cal = new Calibration();
         cal.setUnit("um");
         cal.pixelWidth = cal.pixelHeight = nmPerPixel / 1000;
@@ -2050,7 +2050,7 @@ public class PCPALMMolecules implements PlugIn
     }
 
     /**
-     * Allow optimisation using Apache Commons Math 3 Optimiser
+     * Allow optimisation using Apache Commons Math 3 Optimiser.
      */
     private abstract class SkewNormalOptimiserFunction extends SkewNormalFunction
     {
@@ -2088,7 +2088,7 @@ public class PCPALMMolecules implements PlugIn
     }
 
     /**
-     * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
+     * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
      */
     private class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction
             implements MultivariateVectorFunction
@@ -2136,7 +2136,7 @@ public class PCPALMMolecules implements PlugIn
     }
 
     /**
-     * Allow optimisation using Apache Commons Math 3 Simplex
+     * Allow optimisation using Apache Commons Math 3 Simplex.
      */
     private class SkewNormalMultivariateFunction extends SkewNormalOptimiserFunction implements MultivariateFunction
     {
@@ -2170,11 +2170,11 @@ public class PCPALMMolecules implements PlugIn
      */
     private static void log(String format, Object... args)
     {
-        Utils.log(format, args);
+        ImageJUtils.log(format, args);
     }
 
     /**
-     * Output a spacer to the ImageJ log
+     * Output a spacer to the ImageJ log.
      */
     static void logSpacer()
     {

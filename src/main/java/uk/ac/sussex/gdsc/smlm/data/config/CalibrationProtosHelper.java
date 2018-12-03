@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
  */
 public class CalibrationProtosHelper
 {
-    /** The default Calibration */
+    /** The default Calibration. */
     public static final Calibration defaultCalibration;
     static
     {

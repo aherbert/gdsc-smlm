@@ -381,7 +381,7 @@ public class GradientCalculator7 extends GradientCalculator
     }
 
     /**
-     * Zero the working region of the input matrix alpha and vector beta
+     * Zero the working region of the input matrix alpha and vector beta.
      *
      * @param alpha
      *            the alpha
@@ -399,7 +399,7 @@ public class GradientCalculator7 extends GradientCalculator
     }
 
     /**
-     * Compute the matrix alpha and vector beta
+     * Compute the matrix alpha and vector beta.
      *
      * @param alpha
      *            the alpha
@@ -441,7 +441,7 @@ public class GradientCalculator7 extends GradientCalculator
     }
 
     /**
-     * Generate a symmetric matrix alpha
+     * Generate a symmetric matrix alpha.
      *
      * @param alpha
      *            the alpha

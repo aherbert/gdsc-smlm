@@ -27,7 +27,7 @@ import org.jtransforms.dht.FloatDHT_3D;
 
 import ij.ImageStack;
 import pl.edu.icm.jlargearrays.LargeArray;
-import uk.ac.sussex.gdsc.core.ij.process.FHT2;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
 
 /**
  * Wrapper to compute the discrete Hartley transform on 3D data. This uses the JTransforms library.
@@ -41,7 +41,7 @@ public class FloatDHT3D extends FloatImage3D
     private int[] jj;
 
     /**
-     * Instantiates a new 3D discrete Hartley transform
+     * Instantiates a new 3D discrete Hartley transform.
      *
      * @param stack
      *            the stack
@@ -604,7 +604,7 @@ public class FloatDHT3D extends FloatImage3D
     }
 
     /**
-     * Convert a discrete Fourier transform (DFT) to a DHT
+     * Convert a discrete Fourier transform (DFT) to a DHT.
      *
      * @param real
      *            the real component
@@ -845,13 +845,13 @@ public class FloatDHT3D extends FloatImage3D
             //@formatter:off
 			// We swap: 0 <=> nc_2, 0 <=> nc_2
 			// 1 <=> 7
-			FHT2.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
+			Fht.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
 			// 2 <=> 8
-			FHT2.swap(a, b, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
+			Fht.swap(a, b, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
 			// 3 <=> 5
-			FHT2.swap(a, b, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
+			Fht.swap(a, b, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
 			// 4 <=> 6
-			FHT2.swap(a, b, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
+			Fht.swap(a, b, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
 			//@formatter:on
         }
     }

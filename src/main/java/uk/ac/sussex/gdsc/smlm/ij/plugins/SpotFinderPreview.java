@@ -52,23 +52,23 @@ import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.ij.process.LUTHelper;
-import uk.ac.sussex.gdsc.core.ij.process.LUTHelper.LutColour;
-import uk.ac.sussex.gdsc.core.match.AUCCalculator;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.core.match.AucCalculator;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.RankedScoreCalculator;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -95,12 +95,12 @@ import uk.ac.sussex.gdsc.smlm.model.camera.FakePerPixelCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 /**
- * Runs the candidate maxima identification on the image and provides a preview using an overlay
+ * Runs the candidate maxima identification on the image and provides a preview using an overlay.
  */
 public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, ImageListener, ItemListener,
         FitConfigurationProvider, OptionCollectedListener
 {
-    private final static String TITLE = "Spot Finder Preview";
+    private static final String TITLE = "Spot Finder Preview";
 
     private static DataFilterMethod defaultDataFilterMethod;
     private static double defaultSmooth;
@@ -258,7 +258,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
             }
         }
 
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             // Listen for changes in the dialog options
             gd.addOptionCollectedListener(this);
@@ -434,7 +434,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
                 //Utils.log("ERROR: " + e.getMessage());
                 //return;
             }
-            Utils.log(filter.getDescription());
+            ImageJUtils.log(filter.getDescription());
         }
 
         lastCalibration = calibration;
@@ -450,7 +450,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
             if (modelBounds != null)
                 if (!modelBounds.contains(bounds))
                     //@formatter:off
-					Utils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
+					ImageJUtils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
 							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
 							bounds.x, bounds.y, bounds.width, bounds.height
 							);
@@ -461,7 +461,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
                 if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth() ||
                         modelBounds.height > ip.getHeight())
                     //@formatter:off
-					Utils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
+					ImageJUtils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
 							modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
 							ip.getWidth(),  ip.getHeight()
 							);
@@ -505,8 +505,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
             if (data.length < ip.getPixelCount())
             {
                 adjust = true;
-                bias = Maths.sum(cameraModel.getBias(bounds)) / data.length;
-                gain = Maths.sum(cameraModel.getGain(bounds)) / data.length;
+                bias = MathUtils.sum(cameraModel.getBias(bounds)) / data.length;
+                gain = MathUtils.sum(cameraModel.getGain(bounds)) / data.length;
             }
             cameraModel.removeBiasAndGain(bounds, data);
         }
@@ -588,7 +588,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
                     .toArray(new FractionalAssignment[fractionalAssignments.size()]);
 
             // Compute matches
-            final RankedScoreCalculator calc = new RankedScoreCalculator(assignments, nActual - 1, nPredicted - 1);
+            final RankedScoreCalculator calc = RankedScoreCalculator.create(assignments, nActual - 1, nPredicted - 1);
             final boolean save = showTP || showFP;
             final double[] calcScore = calc.score(nPredicted, multipleMatches, save);
             final ClassificationResult result = RankedScoreCalculator.toClassificationResult(calcScore, nActual);
@@ -598,11 +598,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
             final double[] precision = curve[0];
             final double[] recall = curve[1];
             final double[] jaccard = curve[2];
-            final double auc = AUCCalculator.auc(precision, recall);
+            final double auc = AucCalculator.auc(precision, recall);
 
             // Show scores
             final String label = String.format("Slice=%d, AUC=%s, R=%s, Max J=%s", imp.getCurrentSlice(),
-                    Utils.rounded(auc), Utils.rounded(result.getRecall()), Utils.rounded(Maths.maxDefault(0, jaccard)));
+                    MathUtils.rounded(auc), MathUtils.rounded(result.getRecall()), MathUtils.rounded(MathUtils.maxDefault(0, jaccard)));
             setLabel(label);
 
             // Plot
@@ -620,7 +620,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
             plot.addLabel(0, 0, label);
 
             final WindowOrganiser windowOrganiser = new WindowOrganiser();
-            Utils.display(title, plot, 0, windowOrganiser);
+            ImageJUtils.display(title, plot, 0, windowOrganiser);
 
             title = TITLE + " Precision-Recall";
             plot = new Plot2(title, "Recall", "Precision");
@@ -630,7 +630,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
             plot.drawLine(recall[recall.length - 1], precision[recall.length - 1], recall[recall.length - 1], 0);
             plot.setColor(Color.black);
             plot.addLabel(0, 0, label);
-            Utils.display(title, plot, 0, windowOrganiser);
+            ImageJUtils.display(title, plot, 0, windowOrganiser);
 
             windowOrganiser.tile();
 
@@ -694,14 +694,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
             final int[] count = spotFilterHelper.countNeighbours(spots, width, height, neighbourRadius);
 
             // Show as histogram the totals...
-            final int id = Utils.showHistogram(TITLE, new StoredData(count), "Neighbours", 1, 0, 0,
-                    "Radius = " + neighbourRadius);
-            if (Utils.isNewWindow())
-                wo.add(id);
+            new HistogramPlotBuilder(TITLE, StoredData.create(count), "Neighbours")
+                    .setIntegerBins(true).setPlotLabel("Radius = " + neighbourRadius).show(wo);
 
             // TODO - Draw n=0, n=1 on the image overlay
 
-            final LUT lut = LUTHelper.createLUT(LutColour.FIRE_LIGHT);
+            final LUT lut = LutHelper.createLut(LutColour.FIRE_LIGHT);
             // These are copied by the ROI
             final float[] x = new float[1];
             final float[] y = new float[1];
@@ -717,7 +715,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
                 {
                     x[0] = spots[i].x + bounds.x + 0.5f;
                     y[0] = spots[i].y + bounds.y + 0.5f;
-                    final Color c = LUTHelper.getColour(lut, size_1 - i, size);
+                    final Color c = LutHelper.getColour(lut, size_1 - i, size);
                     addRoi(0, o, x, y, 1, c, 2, 1);
                 }
             }
@@ -738,13 +736,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
                 plot.drawLine(select, 0, select, in);
                 x[0] = spots[select].x + bounds.x + 0.5f;
                 y[0] = spots[select].y + bounds.y + 0.5f;
-                final Color c = LUTHelper.getColour(lut, size_1 - select, size);
+                final Color c = LutHelper.getColour(lut, size_1 - select, size);
                 addRoi(0, o, x, y, 1, c, 3, 3);
                 plot.setColor(Color.black);
-                plot.addLabel(0, 0, "Selected spot intensity = " + Utils.rounded(in));
+                plot.addLabel(0, 0, "Selected spot intensity = " + MathUtils.rounded(in));
             }
 
-            Utils.display(title, plot, 0, wo);
+            ImageJUtils.display(title, plot, 0, wo);
 
             wo.tile();
         }

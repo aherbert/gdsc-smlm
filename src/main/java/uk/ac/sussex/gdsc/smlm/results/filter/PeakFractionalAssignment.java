@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 
 /**
- * Extends the fractional assignment to add a reference to the peak result
+ * Extends the fractional assignment to add a reference to the peak result.
  */
 public class PeakFractionalAssignment extends ImmutableFractionalAssignment
 {

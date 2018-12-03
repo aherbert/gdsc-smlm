@@ -23,8 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.StoppingCriteria;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Defines the stopping criteria for the {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
@@ -170,12 +174,22 @@ public class ErrorStoppingCriteria extends StoppingCriteria
             increment(a, true);
         }
 
-        if (log != null)
-            log.info("iter = %d, error = %f -> %f : %s : Continue = %b", getIteration(), oldError, newError,
-                    (result == 1) ? "worse"
-                            : "Delta = " + DoubleEquality.relativeError(oldError, newError) +
-                                    ((result == 0) ? " (negligible)" : ""),
+        if (log != null) {
+          LoggerUtils.log(log, Level.INFO, "iter = %d, error = %f -> %f : %s : Continue = %b", getIteration(), oldError, newError,
+                    getErrorDescription(oldError, newError, result),
                     notSatisfied);
+        }
+    }
+
+    private static String getErrorDescription(double oldError, double newError, int result) {
+      if (result == 1) {
+        return "worse";
+      }
+      String description = "Delta = " + DoubleEquality.relativeError(oldError, newError);
+      if (result == 0) {
+        description += " (negligible)";
+      }
+      return description;
     }
 
     /**
@@ -214,7 +228,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * Set the number of iterations that the fit has to improve by a negligible amount
+     * Set the number of iterations that the fit has to improve by a negligible amount.
      *
      * @param iterationLimit
      *            the iterationLimit to set
@@ -225,7 +239,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return the iterationLimit
+     * @return the iterationLimit.
      */
     public int getIterationLimit()
     {
@@ -239,11 +253,11 @@ public class ErrorStoppingCriteria extends StoppingCriteria
     public void setSignificantDigits(int significantDigits)
     {
         this.significantDigits = significantDigits;
-        maxRelativeError = DoubleEquality.getMaxRelativeError(significantDigits);
+        maxRelativeError = DoubleEquality.getRelativeErrorTerm(significantDigits);
     }
 
     /**
-     * @return the significantDigits
+     * @return the significantDigits.
      */
     public int getSignificantDigits()
     {
@@ -251,7 +265,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
     }
 
     /**
-     * @return true if avoiding plateaus
+     * @return true if avoiding plateaus.
      */
     public boolean isAvoidPlateau()
     {

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 /**
- * Defines the non-linear fitting function
+ * Defines the non-linear fitting function.
  */
 public interface ExtendedNonLinearFunction extends NonLinearFunction
 {

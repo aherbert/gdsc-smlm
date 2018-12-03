@@ -90,7 +90,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     /** Initial step used to bracket the optimum in line search. */
     private double initialStep = 1;
 
-    /** Flags to indicate if bounds are present */
+    /** Flags to indicate if bounds are present. */
     private boolean isLower, isUpper;
     private double[] lower, upper;
 
@@ -100,8 +100,6 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
     /**
      * Constructor with default {@link BrentSolver line search solver} and {@link IdentityPreconditioner preconditioner}
-     * .
-     *
      * @param updateFormula
      *            formula to use for updating the &beta; parameter,
      *            must be one of {@link Formula#FLETCHER_REEVES} or {@link Formula#POLAK_RIBIERE}.
@@ -767,7 +765,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     }
 
     /**
-     * @return the useGradientLineSearch
+     * @return the useGradientLineSearch.
      */
     public boolean isUseGradientLineSearch()
     {

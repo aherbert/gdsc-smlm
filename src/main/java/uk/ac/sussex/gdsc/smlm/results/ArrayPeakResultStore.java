@@ -200,7 +200,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
     }
 
     /**
-     * A version of rangeCheck with lower bounds check
+     * A version of rangeCheck with lower bounds check.
      */
     private void rangeCheckWithLowerBounds(int index)
     {

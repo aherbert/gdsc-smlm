@@ -33,7 +33,7 @@ public class FloatImage3D extends Image3D
 {
     /**
      * The data packed in zyx order: z * (nr * nc) + y * nc + x .
-     * 
+     *
      * @see #index(int, int, int)
      */
     protected float[] data;
@@ -56,7 +56,7 @@ public class FloatImage3D extends Image3D
     }
 
     /**
-     * Instantiates a new 3D image
+     * Instantiates a new 3D image.
      *
      * @param stack
      *            the stack

@@ -105,7 +105,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
     protected double ll = Double.NaN;
 
     /**
-     * Default constructor
+     * Default constructor.
      *
      * @param func
      *            The function to fit
@@ -116,7 +116,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
     }
 
     /**
-     * Default constructor
+     * Default constructor.
      *
      * @param func
      *            The function to fit
@@ -129,7 +129,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
     }
 
     /**
-     * Default constructor
+     * Default constructor.
      *
      * @param func
      *            The function to fit
@@ -535,7 +535,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
     }
 
     /**
-     * @return the initialLambda
+     * @return the initialLambda.
      */
     public double getInitialLambda()
     {
@@ -543,7 +543,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
     }
 
     /**
-     * @return the initialResidualSumOfSquares
+     * @return the initialResidualSumOfSquares.
      */
     public double getInitialResidualSumOfSquares()
     {

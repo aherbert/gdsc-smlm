@@ -33,9 +33,9 @@ import ij.WindowManager;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -115,7 +115,7 @@ public class FilterResults implements PlugIn
     }
 
     /**
-     * Analyse the results and determine the range for each filter
+     * Analyse the results and determine the range for each filter.
      */
     private boolean analyseResults()
     {
@@ -127,10 +127,10 @@ public class FilterResults implements PlugIn
         {
             wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
             wp.getW();
-            final float[] limits = Maths.limits(wp.wx);
+            final float[] limits = MathUtils.limits(wp.wx);
             maxWidth = limits[1];
             minWidth = limits[0];
-            averageWidth = Maths.sum(wp.wx) / wp.size();
+            averageWidth = MathUtils.sum(wp.wx) / wp.size();
         }
         catch (final DataException e)
         {
@@ -144,7 +144,7 @@ public class FilterResults implements PlugIn
             pp = new PrecisionResultProcedure(results);
             pp.getPrecision();
 
-            final double[] limits = Maths.limits(pp.precision);
+            final double[] limits = MathUtils.limits(pp.precision);
             maxPrecision = limits[1];
             minPrecision = limits[0];
         }
@@ -229,7 +229,7 @@ public class FilterResults implements PlugIn
     }
 
     /**
-     * Check that none of the filter values are outside the limits
+     * Check that none of the filter values are outside the limits.
      */
     private void checkLimits()
     {
@@ -260,7 +260,7 @@ public class FilterResults implements PlugIn
     }
 
     /**
-     * Apply the filters to the data
+     * Apply the filters to the data.
      */
     private void filterResults()
     {
@@ -386,7 +386,7 @@ public class FilterResults implements PlugIn
         final ArrayList<String> newImageList = new ArrayList<>();
         newImageList.add("[None]");
 
-        for (final int id : Utils.getIDList())
+        for (final int id : ImageJUtils.getIdList())
         {
             final ImagePlus imp = WindowManager.getImage(id);
             if (imp == null)

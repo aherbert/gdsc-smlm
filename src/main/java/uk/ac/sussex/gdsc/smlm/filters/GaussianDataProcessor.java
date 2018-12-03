@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 import java.util.List;
 
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with a Gaussian filter.
@@ -37,7 +37,7 @@ public class GaussianDataProcessor extends DataProcessor
     private GaussianFilter filter;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param border
      *            The border to ignore for maxima
@@ -105,7 +105,7 @@ public class GaussianDataProcessor extends DataProcessor
     }
 
     /**
-     * @return the Gaussian standard deviation
+     * @return the Gaussian standard deviation.
      */
     public double getSigma()
     {
@@ -134,8 +134,8 @@ public class GaussianDataProcessor extends DataProcessor
     public List<String> getParameters()
     {
         final List<String> list = super.getParameters();
-        list.add("sigma = " + Utils.rounded(sigma));
-        list.add("width = " + Utils.rounded(filter.getHalfWidth(sigma)));
+        list.add("sigma = " + MathUtils.rounded(sigma));
+        list.add("width = " + MathUtils.rounded(filter.getHalfWidth(sigma)));
         return list;
     }
 

@@ -48,7 +48,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class ImagePSFModel extends PSFModel
 {
-    /** The default noise fraction */
+    /** The default noise fraction. */
     public static final double DEFAULT_NOISE_FRACTION = 5e-2;
     private static final boolean COM_CHECK = false;
 
@@ -1089,7 +1089,7 @@ public class ImagePSFModel extends PSFModel
     }
 
     /**
-     * @return The half-width at half-maximum (HWHM) in dimension 0 for the last drawn image
+     * @return The half-width at half-maximum (HWHM) in dimension 0 for the last drawn image.
      */
     public double getHWHM0()
     {
@@ -1100,7 +1100,7 @@ public class ImagePSFModel extends PSFModel
     }
 
     /**
-     * @return The half-width at half-maximum (HWHM) in dimension 1 for the last drawn image
+     * @return The half-width at half-maximum (HWHM) in dimension 1 for the last drawn image.
      */
     public double getHWHM1()
     {
@@ -1111,7 +1111,7 @@ public class ImagePSFModel extends PSFModel
     }
 
     /**
-     * @return The HWHM table for dimension 0 for all the slices
+     * @return The HWHM table for dimension 0 for all the slices.
      */
     public double[] getAllHWHM0()
     {
@@ -1120,7 +1120,7 @@ public class ImagePSFModel extends PSFModel
     }
 
     /**
-     * @return The HWHM table for dimension 1 for all the slices
+     * @return The HWHM table for dimension 1 for all the slices.
      */
     public double[] getAllHWHM1()
     {
@@ -1129,7 +1129,7 @@ public class ImagePSFModel extends PSFModel
     }
 
     /**
-     * Initialise the HWHM look-up table
+     * Initialise the HWHM look-up table.
      */
     public void initialiseHWHM()
     {

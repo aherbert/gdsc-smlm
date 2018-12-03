@@ -41,11 +41,11 @@ import org.apache.commons.math3.special.Gamma;
 public class ChiSquaredDistributionTable
 {
     /**
-     * The p-value for computing the value using the cumulative probability
+     * The p-value for computing the value using the cumulative probability.
      */
     private final double p;
 
-    /** The chi squared critical value table */
+    /** The chi squared critical value table. */
     final double[] chiSquared;
 
     /**

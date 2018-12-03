@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.smlm.results.AbstractPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.ThreadSafePeakResults;
 
 /**
- * Wrap the fit results to provide convenience methods
+ * Wrap the fit results to provide convenience methods.
  */
 public abstract class IJAbstractPeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {

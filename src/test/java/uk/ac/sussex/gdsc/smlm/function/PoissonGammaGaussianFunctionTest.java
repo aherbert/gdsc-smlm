@@ -1,10 +1,18 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -12,21 +20,16 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianFunctionTest
@@ -137,6 +140,8 @@ public class PoissonGammaGaussianFunctionTest
                 return f.gaussianPDF(x);
             }
         };
+        DoubleDoubleBiPredicate integratePredicate = TestHelper.doublesAreClose(0.1, 0);
+        DoubleDoubleBiPredicate rangePredicate = TestHelper.doublesAreClose(1e-6, 0);
         for (int u = lower; u <= upper; u++)
         {
             final double ux = u + 0.5;
@@ -144,8 +149,8 @@ public class PoissonGammaGaussianFunctionTest
             final double e = in.integrate(20000, uf, lx, ux);
             final double o = f.gaussianCDF(ux) - f.gaussianCDF(lx);
             final double o2 = f.gaussianCDF(lx, ux);
-            ExtraAssertions.assertEqualsRelative(e, o, 0.1);
-            ExtraAssertions.assertEqualsRelative(o, o2, 1e-6);
+            TestAssertions.assertTest(e, o, integratePredicate);
+            TestAssertions.assertTest(o, o2, rangePredicate);
         }
     }
 
@@ -236,7 +241,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPDF()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -246,7 +251,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPMF()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -256,7 +261,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPMFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -266,7 +271,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPDFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -276,7 +281,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -286,7 +291,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPDFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -296,7 +301,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithApproximationAtGainAbove10AsPDFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -311,7 +316,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsNotOneWithApproximationAtGainAbove10AsPMFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         // This is the whole test. It could be separated into parameters that fail
         // and parameters that are OK.
@@ -330,7 +335,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPDFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -340,7 +345,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPMFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -350,7 +355,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPDFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -360,7 +365,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPMFAtLowNoise()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : photons)
             for (final double s : lowNoise)
                 for (final double g : totalGain)
@@ -370,7 +375,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPMFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -380,7 +385,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPDFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -390,7 +395,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -400,7 +405,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPDFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -410,7 +415,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithApproximationAsPDFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -420,7 +425,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithApproximationAsPMFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -434,7 +439,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPDFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -444,7 +449,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPMFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -454,7 +459,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPDFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -464,7 +469,7 @@ public class PoissonGammaGaussianFunctionTest
     @Test
     public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPMFAtHighPhotons()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         for (final double p : highPhotons)
             for (final double s : noise)
                 for (final double g : totalGain)
@@ -573,28 +578,28 @@ public class PoissonGammaGaussianFunctionTest
     public void discretePDFCloselyMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.34, ConvolutionMode.DISCRETE_PDF);
-        logger.log(TestLog.getRecord(Level.FINE, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
+        logger.log(TestLogUtils.getRecord(Level.FINE, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     @Test
     public void discretePMFCloselyMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.22, ConvolutionMode.DISCRETE_PMF);
-        logger.log(TestLog.getRecord(Level.FINE, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
+        logger.log(TestLogUtils.getRecord(Level.FINE, "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     @Test
     public void approximationCloselyMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.22, ConvolutionMode.APPROXIMATION);
-        logger.log(TestLog.getRecord(Level.FINE, "Approximation max error : rel = %g : abs = %g", e[0], e[1]));
+        logger.log(TestLogUtils.getRecord(Level.FINE, "Approximation max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     @Test
     public void legedreGaussPDFMatchesPMFIntegration()
     {
         final double[] e = closelyMatchesPMFIntegration(0.03, ConvolutionMode.LEGENDRE_GAUSS_PDF);
-        logger.log(TestLog.getRecord(Level.FINE, "Simpson integration max error : rel = %g : abs = %g", e[0], e[1]));
+        logger.log(TestLogUtils.getRecord(Level.FINE, "Simpson integration max error : rel = %g : abs = %g", e[0], e[1]));
     }
 
     // Speed order is roughly: Approx, Simpson, Discrete PDF, Legendre, Discrete PMF
@@ -632,7 +637,7 @@ public class PoissonGammaGaussianFunctionTest
             ConvolutionMode convolutionMode, boolean pmfMode)
     {
         final double p = cumulativeProbability(mu, s, g, convolutionMode, pmfMode);
-        logger.log(TestLog.getRecord(Level.INFO, "%s : mu=%f, s=%f, g=%f, p=%f", getName(convolutionMode), mu, s, g, p));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "%s : mu=%f, s=%f, g=%f, p=%f", getName(convolutionMode), mu, s, g, p));
 
         // Poisson-Gamma convolution approximation does not sum to 1 at lower gain
         // so account for this during the test.
@@ -712,7 +717,7 @@ public class PoissonGammaGaussianFunctionTest
                     return f.likelihood(x, mu);
                 }
             }, min, max);
-            logger.log(TestLog.getRecord(Level.FINE, "%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g", getName(convolutionMode), mu, s, g,
+            logger.log(TestLogUtils.getRecord(Level.FINE, "%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g", getName(convolutionMode), mu, s, g,
                     s, g, p, pp));
             p = pp;
         }
@@ -775,7 +780,7 @@ public class PoissonGammaGaussianFunctionTest
 
     private void fasterThan(RandomSeed seed, ConvolutionMode slow, ConvolutionMode fast)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         // Realistic EM-CCD parameters for speed test
         final double s = 7.16;
@@ -787,7 +792,7 @@ public class PoissonGammaGaussianFunctionTest
         final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1 / g, s);
         f2.setConvolutionMode(fast);
 
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         // Generate realistic data from the probability mass function
         final double[][] samples = new double[photons.length][];
@@ -838,7 +843,7 @@ public class PoissonGammaGaussianFunctionTest
         for (int i = 0; i < 5; i++)
             t2 += run(f2, samples, photons);
 
-        logger.log(TestLog.getTimingRecord(getName(f1), t1, getName(f2), t2));
+        logger.log(TestLogUtils.getTimingRecord(getName(f1), t1, getName(f2), t2));
     }
 
     private static long run(PoissonGammaGaussianFunction f, double[][] samples, double[] photons)

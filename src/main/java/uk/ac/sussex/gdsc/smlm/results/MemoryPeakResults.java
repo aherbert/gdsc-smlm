@@ -1144,11 +1144,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
         return false;
     }
 
-    /** The preferred distance unit */
+    /** The preferred distance unit. */
     public static final DistanceUnit PREFERRED_DISTANCE_UNIT = DistanceUnit.PIXEL;
-    /** The preferred intensity unit */
+    /** The preferred intensity unit. */
     public static final IntensityUnit PREFERRED_INTENSITY_UNIT = IntensityUnit.PHOTON;
-    /** The preferred angle unit */
+    /** The preferred angle unit. */
     public static final AngleUnit PREFERRED_ANGLE_UNIT = AngleUnit.RADIAN;
 
     /**

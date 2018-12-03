@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
- * Specifies the same illumination for any position
+ * Specifies the same illumination for any position.
  */
 public class UniformIllumination implements SpatialIllumination
 {

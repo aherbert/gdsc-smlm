@@ -38,7 +38,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 public class ICSIFastLog extends FastLog
 {
     /**
-     * Specify the data type that will be used in the call to the log functions
+     * Specify the data type that will be used in the call to the log functions.
      */
     public enum DataType
     {

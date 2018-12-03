@@ -32,7 +32,7 @@ import java.util.Comparator;
 class CandidateList
 {
     /**
-     * Simple interface for testing candidates
+     * Simple interface for testing candidates.
      */
     public interface Predicate
     {
@@ -57,7 +57,7 @@ class CandidateList
     }
 
     /** The candidate comparator. */
-    private final static CandidateComparator comp = new CandidateComparator();
+    private static final CandidateComparator comp = new CandidateComparator();
 
     private int size = 0;
     private Candidate[] list = null;
@@ -125,7 +125,7 @@ class CandidateList
     }
 
     /**
-     * Sort in ascending order of Id
+     * Sort in ascending order of Id.
      */
     public void sort()
     {
@@ -155,7 +155,7 @@ class CandidateList
     }
 
     /**
-     * Gets the candidate
+     * Gets the candidate.
      *
      * @param index
      *            the index

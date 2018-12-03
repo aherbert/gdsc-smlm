@@ -99,7 +99,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     }
 
     /**
-     * Gets the precision stored in the results
+     * Gets the precision stored in the results.
      */
     public void getStoredPrecision()
     {

@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
 
 /**
- * A frame that shows a PeakResultsListModel
+ * A frame that shows a PeakResultsListModel.
  *
  * @author Alex Herbert
  */

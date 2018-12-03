@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 public class LSQLVMGradientProcedureMatrixFactory extends BaseLSQLVMGradientProcedureFactory
 {
     /**
-     * Create a new gradient procedure
+     * Create a new gradient procedure.
      *
      * @param y
      *            Data to fit

@@ -43,7 +43,7 @@ public abstract class ItemGroup extends Group implements ItemShape
     /** The default colour. */
     protected final Color3f DEFAULT_COLOUR = new Color3f(0, 1, 0);
 
-    /** The list of points */
+    /** The list of points. */
     protected Point3f[] points;
 
     /**

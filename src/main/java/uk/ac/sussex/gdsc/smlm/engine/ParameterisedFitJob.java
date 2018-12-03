@@ -94,7 +94,7 @@ public class ParameterisedFitJob extends FitJob
     }
 
     /**
-     * @return The results
+     * @return The results.
      */
     public List<PeakResult> getResults()
     {
@@ -127,7 +127,7 @@ public class ParameterisedFitJob extends FitJob
     }
 
     /**
-     * @return The indices of the data that were fitted
+     * @return The indices of the data that were fitted.
      */
     public int[] getIndices()
     {

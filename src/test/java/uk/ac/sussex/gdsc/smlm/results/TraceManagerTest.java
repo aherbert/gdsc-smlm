@@ -23,18 +23,19 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import gnu.trove.list.array.TIntArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
-import gnu.trove.list.array.TIntArrayList;
-import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import java.util.Arrays;
+import java.util.Comparator;
 
 @SuppressWarnings({ "javadoc" })
 public class TraceManagerTest
@@ -42,7 +43,7 @@ public class TraceManagerTest
     @SeededTest
     public void canTraceSinglePulseWithFixedCoords(RandomSeed seed)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         final float[] params = createParams(rand);
         final Trace trace = new Trace();
         for (int i = 0; i < 5; i++)
@@ -54,7 +55,7 @@ public class TraceManagerTest
     @SeededTest
     public void canTraceSinglePulseWithMovingCoords(RandomSeed seed)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         final float distance = 0.5f;
 
         final float[] params = createParams(rand);
@@ -71,7 +72,7 @@ public class TraceManagerTest
     @SeededTest
     public void canTraceMultiplePulseWithFixedCoords(RandomSeed seed)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
 
         final float[] params = createParams(rand);
         final Trace trace = new Trace();
@@ -88,7 +89,7 @@ public class TraceManagerTest
     @SeededTest
     public void canTraceMultiplePulseWithMovingCoords(RandomSeed seed)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         final float distance = 0.5f;
 
         final float[] params = createParams(rand);
@@ -147,7 +148,7 @@ public class TraceManagerTest
     private static void simulate(RandomSeed seed, int molecules, int maxPulses, int maxOnTime, int maxOffTime,
             float distance)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         final Trace[] expected = new Trace[molecules];
         for (int j = 0; j < expected.length; j++)
         {
@@ -174,7 +175,7 @@ public class TraceManagerTest
 
     private static void simulateMoving(RandomSeed seed, int molecules, int maxPulses, int maxOnTime, int maxOffTime)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
 
         // When the molecules are moving their paths may intersect.
         // Thus each molecule is allocated a 2x2 square to move within
@@ -187,7 +188,7 @@ public class TraceManagerTest
             for (int x = 0; x < n && list.size() < molecules; x += 4)
                 list.add(y * n + x);
         final int[] positions = list.toArray();
-        Random.shuffle(positions, rand);
+        RandomUtils.shuffle(positions, rand);
 
         // Offsets for movement around the 2x2 region
         final int[][] offsets = new int[][] { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 }, };

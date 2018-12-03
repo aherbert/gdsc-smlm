@@ -34,15 +34,15 @@ import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 public class ResultAssignment implements Comparable<ResultAssignment>
 {
     /**
-     * The ID of the result that this assignment matches
+     * The ID of the result that this assignment matches.
      */
     public final int targetId;
     /**
-     * The distance to the target
+     * The distance to the target.
      */
     public final double distance;
     /**
-     * The score for matching the target
+     * The score for matching the target.
      */
     public final double score;
 

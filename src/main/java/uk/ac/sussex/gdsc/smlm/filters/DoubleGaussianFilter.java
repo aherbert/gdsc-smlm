@@ -118,7 +118,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
     }
 
     /**
-     * Get the border that will be ignored for the specified Gaussian standard deviation
+     * Get the border that will be ignored for the specified Gaussian standard deviation.
      *
      * @param sigma
      *            the Gaussian standard deviation
@@ -340,7 +340,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
      * @param newLength
      *            length of downscaled data
      */
-    final static private void downscaleLine(final double[] pixels, final double[] cache, final double[] kernel,
+    static private final void downscaleLine(final double[] pixels, final double[] cache, final double[] kernel,
             final int reduceBy, final int pixel0, final int unscaled0, final int length, final int pointInc,
             final int newLength)
     {
@@ -374,7 +374,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
      * Array index corresponding to the kernel center is
      * unitLength*3/2
      */
-    final static private double[] makeDownscaleKernel(final int unitLength)
+    static private final double[] makeDownscaleKernel(final int unitLength)
     {
         final int mid = unitLength * 3 / 2;
         final double[] kernel = new double[3 * unitLength];
@@ -399,7 +399,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
      * Scale a line up by factor <code>reduceBy</code> and write as a row
      * or column (or part thereof) to the pixels array of a FloatProcessor.
      */
-    final static private void upscaleLine(final double[] cache, final double[] pixels, final double[] kernel,
+    static private final void upscaleLine(final double[] cache, final double[] pixels, final double[] kernel,
             final int reduceBy, final int pixel0, final int unscaled0, final int writeFrom, final int writeTo,
             final int pointInc)
     {
@@ -422,7 +422,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
      * The kernel runs from [-2 to +2[, corresponding to array index
      * 0 ... 4*unitLength (whereby the last point is not in the array any more).
      */
-    final static private double[] makeUpscaleKernel(final int unitLength)
+    static private final double[] makeUpscaleKernel(final int unitLength)
     {
         final double[] kernel = new double[4 * unitLength];
         final int mid = 2 * unitLength;
@@ -475,7 +475,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
      *            Increment of the pixels array index to the next point (for an ImageProcessor,
      *            it should be <code>1</code> for a row, <code>width</code> for a column)
      */
-    final static private void convolveLine(final double[] input, final double[] pixels, final double[][] kernel,
+    static private final void convolveLine(final double[] input, final double[] pixels, final double[][] kernel,
             final int readFrom, final int readTo, final int writeFrom, final int writeTo, final int point0,
             final int pointInc)
     {

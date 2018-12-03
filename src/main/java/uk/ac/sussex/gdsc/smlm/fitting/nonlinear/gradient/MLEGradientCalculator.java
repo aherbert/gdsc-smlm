@@ -501,7 +501,7 @@ public class MLEGradientCalculator extends GradientCalculator
     }
 
     /**
-     * Zero the working region of the input matrix alpha and vector beta
+     * Zero the working region of the input matrix alpha and vector beta.
      *
      * @param alpha
      *            the alpha
@@ -625,7 +625,7 @@ public class MLEGradientCalculator extends GradientCalculator
     }
 
     /**
-     * Generate a symmetric matrix alpha
+     * Generate a symmetric matrix alpha.
      *
      * @param alpha
      *            the alpha

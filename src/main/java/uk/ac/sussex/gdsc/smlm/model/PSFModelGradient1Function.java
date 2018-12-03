@@ -30,11 +30,11 @@ import uk.ac.sussex.gdsc.smlm.function.NamedFunction;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 
 /**
- * A wrapper around a PSF Model for the Gradient1Function interface
+ * A wrapper around a PSF Model for the Gradient1Function interface.
  */
 public class PSFModelGradient1Function implements Gradient1Function, NamedFunction
 {
-    private static final int[] gradientIndices = SimpleArrayUtils.newArray(5, 0, 1);
+    private static final int[] gradientIndices = SimpleArrayUtils.natural(5);
     private final PSFModel psf;
     private final int width;
     private final int height;

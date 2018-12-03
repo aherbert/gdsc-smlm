@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 /**
- * Helper functions for the gradient procedures
+ * Helper functions for the gradient procedures.
  */
 class GradientProcedureHelper
 {

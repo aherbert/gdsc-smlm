@@ -1,11 +1,25 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+
+import gnu.trove.list.array.TDoubleArrayList;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -21,43 +35,32 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
-import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 {
     private static Logger logger;
-    private static DataCache<RandomSeed, Object> dataCache;
+    private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
 
     @BeforeAll
     public static void beforeAll()
     {
         logger = Logger.getLogger(SCMOSLikelihoodWrapperTest.class.getName());
-        dataCache = new DataCache<>();
+        ConcurrentHashMap = new ConcurrentHashMap<>();
     }
 
     @AfterAll
     public static void afterAll()
     {
-        dataCache.clear();
-        dataCache = null;
+        ConcurrentHashMap.clear();
+        ConcurrentHashMap = null;
         logger = null;
     }
 
@@ -120,9 +123,9 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         data.g = new float[n];
         data.o = new float[n];
         data.sd = new float[n];
-        final UniformRandomProvider rg = RNGFactory.create(source.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(source.getSeed());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), O);
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, G, G_SD);
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, G, G_SD);
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
         for (int i = 0; i < n; i++)
         {
@@ -249,15 +252,15 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final int n = maxx * maxx;
         int count = 0, total = 0;
 
-        final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
-                .getOrComputeIfAbsent(seed, this);
+        final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) ConcurrentHashMap
+                .computeIfAbsent(seed, this);
         final float[] var = testData.var;
         final float[] g = testData.g;
         final float[] o = testData.o;
         final float[] sd = testData.sd;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 1);
 
         for (final double background : testbackground)
             for (final double signal1 : testsignal1)
@@ -321,7 +324,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
                                         }
                                 }
         final double p = (100.0 * count) / total;
-        logger.log(TestLog.getRecord(Level.INFO, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(),
+        logger.log(TestLogUtils.getRecord(Level.INFO, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(),
                 NAME[targetParameter], count, total, p));
         Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
     }
@@ -450,15 +453,15 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final int n = maxx * maxx;
         int count = 0, total = 0;
 
-        final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
-                .getOrComputeIfAbsent(seed, this);
+        final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) ConcurrentHashMap
+                .computeIfAbsent(seed, this);
         final float[] var = testData.var;
         final float[] g = testData.g;
         final float[] o = testData.o;
         final float[] sd = testData.sd;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 1);
 
         for (final double background : testbackground)
             for (final double signal1 : testsignal1)
@@ -516,7 +519,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 
                                 }
         final double p = (100.0 * count) / total;
-        logger.log(TestLog.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(),
+        logger.log(TestLogUtils.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(),
                 NAME[targetParameter], count, total, p));
         Assertions.assertTrue(p > threshold, FunctionUtils.getSupplier("%s fraction too low: %s", NAME[targetParameter], p));
     }
@@ -671,19 +674,20 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         };
         SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
 
-        final IntArrayFormatSupplier msg1 = new IntArrayFormatSupplier("computeLikelihood @ %d", 1);        
-        final IntArrayFormatSupplier msg2 = new IntArrayFormatSupplier("computeLikelihood+gradient @ %d", 1);        
+        final IntArrayFormatSupplier msg1 = new IntArrayFormatSupplier("computeLikelihood @ %d", 1);
+        final IntArrayFormatSupplier msg2 = new IntArrayFormatSupplier("computeLikelihood+gradient @ %d", 1);
         double total = 0, p = 0;
         double maxp = 0;
         int maxi = 0;
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < n; i++)
         {
             final double nll = f.computeLikelihood(i);
             final double nll2 = f.computeLikelihood(gradient, i);
             final double nll3 = SCMOSLikelihoodWrapper.negativeLogLikelihood(mu, var[i], g[i], o[i], k[i]);
             total += nll;
-            ExtraAssertions.assertEqualsRelative(nll3, nll, 1e-10, msg1.set(0, i));
-            ExtraAssertions.assertEqualsRelative(nll3, nll2, 1e-10, msg2.set(0, i));
+            TestAssertions.assertTest(nll3, nll, predicate, msg1.set(0, i));
+            TestAssertions.assertTest(nll3, nll2, predicate, msg2.set(0, i));
             final double pp = FastMath.exp(-nll);
             if (maxp < pp)
             {
@@ -706,7 +710,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         final double mode2 = Math.ceil(lambda) - 1;
         final double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
         //TestLog.fine(logger,"mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
-        ExtraAssertions.assertEqualsRelative(kmax, k[maxi], 1e-3, "k-max");
+        TestAssertions.assertTest(kmax, k[maxi], TestHelper.doublesAreClose(1e-3, 0), "k-max");
 
         if (test)
             Assertions.assertEquals(P_LIMIT, p, 0.02, () -> "mu=" + mu);
@@ -715,15 +719,15 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         double sum, sum2;
         sum = f.computeLikelihood();
         sum2 = f.computeLikelihood(gradient);
-        ExtraAssertions.assertEqualsRelative(total, sum, 1e-10, "computeLikelihood");
-        ExtraAssertions.assertEqualsRelative(total, sum2, 1e-10, "computeLikelihood with gradient");
+        TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
+        TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");
 
         // Check the function can compute the same total after duplication
         f = f.build(nlf, a);
         sum = f.computeLikelihood();
         sum2 = f.computeLikelihood(gradient);
-        ExtraAssertions.assertEqualsRelative(total, sum, 1e-10, "computeLikelihood");
-        ExtraAssertions.assertEqualsRelative(total, sum2, 1e-10, "computeLikelihood with gradient");
+        TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
+        TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");
     }
 
     private static float[] newArray(int n, float val)
@@ -816,7 +820,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 
     private void canComputePValue(RandomSeed seed, BaseNonLinearFunction nlf)
     {
-        logger.log(TestLog.getRecord(Level.INFO, nlf.name));
+        logger.log(TestLogUtils.getRecord(Level.INFO, nlf.name));
 
         final int n = maxx * maxx;
 
@@ -825,15 +829,15 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
         // Simulate sCMOS camera
         nlf.initialise(a);
 
-        final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
-                .getOrComputeIfAbsent(seed, this);
+        final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) ConcurrentHashMap
+                .computeIfAbsent(seed, this);
         final float[] var = testData.var;
         final float[] g = testData.g;
         final float[] o = testData.o;
         final float[] sd = testData.sd;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(r, 0, 1);
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 1);
 
         final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
         for (int i = 0; i < n; i++)
@@ -857,8 +861,9 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
             op[j] = SCMOSLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
             oll2 -= Math.log(op[j]);
         }
-        logger.log(TestLog.getRecord(Level.INFO, "oll=%f, oll2=%f", oll, oll2));
-        ExtraAssertions.assertEqualsRelative(oll2, oll, 1e-10, "Observed Log-likelihood");
+        logger.log(TestLogUtils.getRecord(Level.INFO, "oll=%f, oll2=%f", oll, oll2));
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+        TestAssertions.assertTest(oll2, oll, predicate, "Observed Log-likelihood");
 
         final TDoubleArrayList list = new TDoubleArrayList();
         final int imin = 5, imax = 15;
@@ -879,13 +884,13 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
             }
             final double llr2 = -2 * Math.log(product.doubleValue());
             final double q = f.computeQValue(ll);
-            logger.log(TestLog.getRecord(Level.INFO, "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f", a[0], ll,
+            logger.log(TestLogUtils.getRecord(Level.INFO, "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f", a[0], ll,
                     ll2, llr, llr2, product.round(new MathContext(4)).toString(), q));
 
             // Only value if the product could be computed. Low ratios cause it to becomes
             // too small to store in a double.
             if (product.doubleValue() > 0)
-                ExtraAssertions.assertEqualsRelative(llr, llr2, 1e-10, "Log-likelihood");
+                TestAssertions.assertTest(llr, llr2, predicate, "Log-likelihood");
         }
 
         // Find min using quadratic fit
@@ -913,7 +918,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object>
 
         // Allow a tolerance as the random data may alter the p-value computation.
         // Should allow it to be less than 2 increment either side of the answer.
-        logger.log(TestLog.getRecord(Level.INFO, "min fit = %g => %g", mina, fita));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "min fit = %g => %g", mina, fita));
         Assertions.assertEquals(1, fita, 0.199, "min");
     }
 }

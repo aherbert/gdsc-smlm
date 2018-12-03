@@ -23,24 +23,15 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-
-import org.apache.commons.math3.util.FastMath;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
-import uk.ac.sussex.gdsc.core.ij.roi.RoiTest;
-import uk.ac.sussex.gdsc.core.ij.roi.RoiTestFactory;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
+import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
@@ -58,6 +49,16 @@ import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.MinMaxResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.plugin.PlugIn;
+
+import org.apache.commons.math3.util.FastMath;
+
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.
  */
@@ -65,7 +66,7 @@ public class CropResults implements PlugIn
 {
     private static final String TITLE = "Crop Results";
 
-    /** The text description of the options for the output cropped results name */
+    /** The text description of the options for the output cropped results name. */
     static final String[] NAME_OPTIONS = { "Name", "Suffix", "Sequence" };
 
     /** The option to specify the entire name for the output cropped results name. */
@@ -101,7 +102,7 @@ public class CropResults implements PlugIn
 
         // Build a list of all images with a region ROI
         titles = new TurboList<>(WindowManager.getWindowCount());
-        for (final int imageID : Utils.getIDList())
+        for (final int imageID : ImageJUtils.getIdList())
         {
             final ImagePlus imp = WindowManager.getImage(imageID);
             if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
@@ -266,18 +267,18 @@ public class CropResults implements PlugIn
                     final String name = (TextUtils.isNullOrEmpty(settings.getOutputName()))
                             ? (results.getName() + " Cropped")
                             : settings.getOutputName();
-                    egd.addStringField("Output_name", name, Maths.clip(60, 120, name.length()));
+                    egd.addStringField("Output_name", name, MathUtils.clip(60, 120, name.length()));
                 }
                 else if (settings.getNameOption() == NAME_OPTION_SUFFIX)
                 {
                     final String name = (TextUtils.isNullOrEmpty(settings.getNameSuffix())) ? " Cropped"
                             : settings.getNameSuffix();
-                    egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+                    egd.addStringField("Name_suffix", name, MathUtils.clip(20, 60, name.length()));
                 }
                 else if (settings.getNameOption() == NAME_OPTION_SEQUENCE)
                 {
                     final String name = settings.getNameSuffix();
-                    egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+                    egd.addStringField("Name_suffix", name, MathUtils.clip(20, 60, name.length()));
                     int c = settings.getNameCounter();
                     if (c < 1)
                         c = 1;
@@ -358,7 +359,7 @@ public class CropResults implements PlugIn
     }
 
     /**
-     * Apply the filters to the data
+     * Apply the filters to the data.
      */
     private void cropResults()
     {
@@ -497,7 +498,8 @@ public class CropResults implements PlugIn
             IJ.error(TITLE, "No ROI image: " + settings.getRoiImage());
             return;
         }
-        final RoiTest roiTest = RoiTestFactory.create(imp.getRoi());
+        final CoordinatePredicate roiTest = CoordinatePredicateUtils.createContainsPredicate(
+            imp.getRoi());
         if (roiTest == null)
         {
             IJ.error(TITLE, "Not an area ROI");
@@ -517,7 +519,7 @@ public class CropResults implements PlugIn
             @Override
             public void executeXYR(float x, float y, PeakResult result)
             {
-                if (roiTest.contains(x * xscale, y * yscale) && testZ.test(result))
+                if (roiTest.test(x * xscale, y * yscale) && testZ.test(result))
                     newResults.add(result);
             }
         });

@@ -34,9 +34,9 @@ package uk.ac.sussex.gdsc.smlm.utils;
  */
 public class Pair<A, B>
 {
-    /** First item of the pair */
+    /** First item of the pair. */
     public final A a;
-    /** Second item of the pair */
+    /** Second item of the pair. */
     public final B b;
 
     /**

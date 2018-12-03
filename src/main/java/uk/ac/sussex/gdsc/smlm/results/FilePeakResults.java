@@ -31,15 +31,15 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 
 /**
- * Saves the fit results to file
+ * Saves the fit results to file.
  */
 public abstract class FilePeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {
-    /** Only write to a single results file */
+    /** Only write to a single results file. */
     protected FileOutputStream fos = null;
 
     /** The filename. */
@@ -81,7 +81,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     }
 
     /**
-     * Open the required output from the open file output stream
+     * Open the required output from the open file output stream.
      */
     protected abstract void openOutput();
 
@@ -191,7 +191,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     }
 
     /**
-     * @return The first line added to the header
+     * @return The first line added to the header.
      */
     protected String getHeaderTitle()
     {
@@ -207,7 +207,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     }
 
     /**
-     * @return A line containing the file format version
+     * @return A line containing the file format version.
      */
     protected abstract String getVersion();
 
@@ -325,7 +325,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     }
 
     /**
-     * @return true if the records are stored as binary data
+     * @return true if the records are stored as binary data.
      */
     public boolean isBinary()
     {

@@ -52,11 +52,11 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.ij.process.FHT2;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
@@ -74,7 +74,7 @@ import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
  */
 public class PCPALMAnalysis implements PlugInFilter
 {
-    /** The title */
+    /** The title. */
     static String TITLE = "PC-PALM Analysis";
 
     private static String resultsDirectory = "";
@@ -111,7 +111,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
     private boolean spatialDomain;
 
-    /** Area of the region cropped from the PCPALM Molecules list */
+    /** Area of the region cropped from the PCPALM Molecules list. */
     double croppedArea = 0;
 
     /** {@inheritDoc} */
@@ -167,18 +167,18 @@ public class PCPALMAnalysis implements PlugInFilter
     }
 
     /**
-     * Show a directory selection dialog for the results directory
+     * Show a directory selection dialog for the results directory.
      *
      * @return True if a directory was selected
      */
     private static boolean getDirectory()
     {
-        resultsDirectory = Utils.getDirectory("Results_directory", resultsDirectory);
+        resultsDirectory = ImageJUtils.getDirectory("Results_directory", resultsDirectory);
         return resultsDirectory != null;
     }
 
     /**
-     * Save all the results to a directory
+     * Save all the results to a directory.
      *
      * @return {@link PlugInFilter#DONE }
      */
@@ -399,8 +399,8 @@ public class PCPALMAnalysis implements PlugInFilter
         final Roi roi = (imp == null) ? null : imp.getRoi();
         if (roi == null || !roi.isArea())
         {
-            log("Roi = %s nm x %s nm = %s um^2", Utils.rounded(pcw, 3), Utils.rounded(pch, 3),
-                    Utils.rounded(croppedArea, 3));
+            log("Roi = %s nm x %s nm = %s um^2", MathUtils.rounded(pcw, 3), MathUtils.rounded(pch, 3),
+                    MathUtils.rounded(croppedArea, 3));
             minx = PCPALMMolecules.minx;
             maxx = PCPALMMolecules.maxx;
             miny = PCPALMMolecules.miny;
@@ -436,8 +436,8 @@ public class PCPALMAnalysis implements PlugInFilter
             final double fraction = (double) dist.getSize() / (roi.getMask().getWidth() * roi.getMask().getHeight());
             log("Roi is a mask of %d pixels", dist.getSize());
             croppedArea = fraction * roix * roiy / 1e6;
-            log("Roi area %s x %s nm x %s nm = %s um^2", Utils.rounded(fraction), Utils.rounded(roix, 3),
-                    Utils.rounded(roiy, 3), Utils.rounded(croppedArea, 3));
+            log("Roi area %s x %s nm x %s nm = %s um^2", MathUtils.rounded(fraction), MathUtils.rounded(roix, 3),
+                    MathUtils.rounded(roiy, 3), MathUtils.rounded(croppedArea, 3));
 
             final double[] xyz = new double[3];
             // The mask is 0,0 in the centre so offset by this as well
@@ -454,8 +454,8 @@ public class PCPALMAnalysis implements PlugInFilter
         else
         {
             croppedArea = roix * roiy / 1e6;
-            log("Roi = %s nm x %s nm = %s um^2", Utils.rounded(roix, 3), Utils.rounded(roiy, 3),
-                    Utils.rounded(croppedArea, 3));
+            log("Roi = %s nm x %s nm = %s um^2", MathUtils.rounded(roix, 3), MathUtils.rounded(roiy, 3),
+                    MathUtils.rounded(croppedArea, 3));
 
             for (final Molecule m : PCPALMMolecules.molecules)
             {
@@ -562,8 +562,8 @@ public class PCPALMAnalysis implements PlugInFilter
             if (boundaryMaxx <= boundaryMinx || boundaryMaxy <= boundaryMiny)
             {
                 log("ERROR: 'Use border' option of %s nm is not possible: Width = %s nm, Height = %s nm",
-                        Utils.rounded(correlationDistance, 4), Utils.rounded(maxx - minx, 3),
-                        Utils.rounded(maxy - miny, 3));
+                        MathUtils.rounded(correlationDistance, 4), MathUtils.rounded(maxx - minx, 3),
+                        MathUtils.rounded(maxy - miny, 3));
                 return;
             }
 
@@ -714,14 +714,14 @@ public class PCPALMAnalysis implements PlugInFilter
         }
 
         log("%s domain analysis computed in %s ms", (spatialDomain) ? "Spatial" : "Frequency",
-                Utils.rounded((System.nanoTime() - start) * 1e-6, 4));
+                MathUtils.rounded((System.nanoTime() - start) * 1e-6, 4));
         log("---");
     }
 
     private static ImageProcessor applyWindow(ImageProcessor im, ImageWindow imageWindow)
     {
         float[] image = (float[]) im.toFloat(0, null).getPixels();
-        image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(), ImageWindow.WindowFunction.TUKEY);
+        image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(), ImageWindow.WindowMethod.TUKEY);
         return new FloatProcessor(im.getWidth(), im.getHeight(), image, null);
     }
 
@@ -751,10 +751,10 @@ public class PCPALMAnalysis implements PlugInFilter
         System.arraycopy(gr[1], offset, y, 0, y.length);
 
         final Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle);
-        plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
+        plot.setLimits(0, x[x.length - 1], MathUtils.min(y) * 0.95, MathUtils.max(y) * 1.05);
         plot.addPoints(x, y, (barChart) ? Plot2.BAR : Plot.LINE);
 
-        Utils.display(plotTitle, plot);
+        ImageJUtils.display(plotTitle, plot);
 
         if (showErrorBars && !barChart)
         {
@@ -764,7 +764,7 @@ public class PCPALMAnalysis implements PlugInFilter
                 final double sd = gr[2][i + offset];
                 plot.drawLine(x[i], y[i] - sd, x[i], y[i] + sd);
             }
-            Utils.display(plotTitle, plot);
+            ImageJUtils.display(plotTitle, plot);
         }
 
         return plot;
@@ -833,8 +833,8 @@ public class PCPALMAnalysis implements PlugInFilter
             double nmPerPixel, double density)
     {
         log("Creating Hartley transforms");
-        final FHT2 fht2Im = padToFHT2(im);
-        final FHT2 fht2W = padToFHT2(w);
+        final Fht fht2Im = padToFHT2(im);
+        final Fht fht2W = padToFHT2(w);
         if (fht2Im == null || fht2W == null)
         {
             error("Unable to perform Hartley transform");
@@ -942,7 +942,7 @@ public class PCPALMAnalysis implements PlugInFilter
     }
 
     /**
-     * Compute the radial average correlation function (gr)
+     * Compute the radial average correlation function (gr).
      *
      * @param maxRadius
      *            the maximum radius to process (in pixels)
@@ -1014,7 +1014,7 @@ public class PCPALMAnalysis implements PlugInFilter
         correlation.setRoi(crop);
         final ImageProcessor ip = correlation.crop();
         ip.resetMinAndMax();
-        Utils.display(title, ip);
+        ImageJUtils.display(title, ip);
     }
 
     /**
@@ -1024,9 +1024,9 @@ public class PCPALMAnalysis implements PlugInFilter
      *            in frequency domain
      * @return the auto correlation FHT.
      */
-    private static FloatProcessor computeAutoCorrelationFHT(FHT2 fftIm)
+    private static FloatProcessor computeAutoCorrelationFHT(Fht fftIm)
     {
-        final FHT2 FHT2 = fftIm.conjugateMultiply(fftIm);
+        final Fht FHT2 = fftIm.conjugateMultiply(fftIm);
         FHT2.inverseTransform();
         FHT2.swapQuadrants();
         return FHT2;
@@ -1054,12 +1054,12 @@ public class PCPALMAnalysis implements PlugInFilter
      *            the image
      * @return An FHT2 image in the frequency domain
      */
-    private static FHT2 padToFHT2(ImageProcessor ip)
+    private static Fht padToFHT2(ImageProcessor ip)
     {
         final FloatProcessor im2 = pad(ip);
         if (im2 == null)
             return null;
-        final FHT2 FHT2 = new FHT2(im2);
+        final Fht FHT2 = new Fht(im2);
         FHT2.transform();
         return FHT2;
     }
@@ -1089,7 +1089,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
     private static int nextPowerOfTwo(final int size)
     {
-        return Maths.nextPow2(size);
+        return MathUtils.nextPow2(size);
 
         //		int newSize = 0;
         //		for (int i = 4; i < 15; i++)
@@ -1178,7 +1178,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
         // Swap quadrants
         final FloatProcessor fp = new FloatProcessor(size, size, correlation, null);
-        FHT2.swapQuadrants(fp);
+        Fht.swapQuadrants(fp);
         return fp;
     }
 
@@ -1209,9 +1209,9 @@ public class PCPALMAnalysis implements PlugInFilter
         sb.append(IJ.d2s((maxx - minx) / pcw)).append('\t');
         sb.append(IJ.d2s(maxy - miny)).append('\t');
         sb.append(IJ.d2s((maxy - miny) / pch)).append('\t');
-        sb.append(Utils.rounded(uniquePoints, 4)).append('\t');
-        sb.append(Utils.rounded(peakDensity, 4)).append('\t');
-        sb.append(Utils.rounded(nmPerPixel, 4)).append('\t');
+        sb.append(MathUtils.rounded(uniquePoints, 4)).append('\t');
+        sb.append(MathUtils.rounded(peakDensity, 4)).append('\t');
+        sb.append(MathUtils.rounded(nmPerPixel, 4)).append('\t');
         sb.append(binaryImage).append('\t');
         resultsTable.append(sb.toString());
     }

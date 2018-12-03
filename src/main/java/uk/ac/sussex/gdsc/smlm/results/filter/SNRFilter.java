@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a signal-to-noise ratio (SNR) threshold
+ * Filter results using a signal-to-noise ratio (SNR) threshold.
  */
 public class SNRFilter extends DirectFilter implements IMultiFilter
 {

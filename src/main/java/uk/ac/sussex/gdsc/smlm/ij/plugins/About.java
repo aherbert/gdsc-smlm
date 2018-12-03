@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.Version;
 
 /**
- * Contains help dialogs for the GDSC ImageJ plugins
+ * Contains help dialogs for the GDSC ImageJ plugins.
  */
 public class About implements PlugIn, MacroExtension
 {
@@ -61,13 +61,13 @@ public class About implements PlugIn, MacroExtension
     enum ConfigureOption
     {
         //@formatter:off
-		/** Install */
+		/** Install. */
 		INSTALL{ @Override
 		public String getName() { return "Install"; }},
-		/** Remove */
+		/** Remove. */
 		REMOVE{ @Override
 		public String getName() { return "Remove"; }},
-		/** Edit */
+		/** Edit. */
 		EDIT{ @Override
 		public String getName() { return "Edit & Install"; }};
 		//@formatter:on
@@ -185,10 +185,10 @@ public class About implements PlugIn, MacroExtension
         // Build final message
         msg = new StringBuilder(msg.toString().trim());
         addVersion(msg, "GDSC", Version.getVersion(), Version.getBuildDate(), Version.getBuildNumber());
-        addVersion(msg, "GDSC-Core", 
-            uk.ac.sussex.gdsc.core.Version.getVersion(), 
-            uk.ac.sussex.gdsc.core.Version.getBuildDate(), 
-            uk.ac.sussex.gdsc.core.Version.getBuildNumber());
+        addVersion(msg, "GDSC-Core",
+            uk.ac.sussex.gdsc.core.VersionUtils.getVersion(),
+            uk.ac.sussex.gdsc.core.VersionUtils.getBuildDate(),
+            uk.ac.sussex.gdsc.core.VersionUtils.getBuildNumber());
 
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.addMessage(msg.toString());

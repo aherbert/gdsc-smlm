@@ -46,7 +46,7 @@ import ij.plugin.PlugIn;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
@@ -235,7 +235,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
                 if (hasId && tw != null)
                 {
                     final TextPanel tp = tw.getTextPanel();
-                    final int idColumn = Utils.getColumn(tp, "Id");
+                    final int idColumn = ImageJUtils.getColumn(tp, "Id");
                     final int start = tp.getSelectionStart();
                     if (start != -1 && idColumn != -1)
                     {
@@ -350,7 +350,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
         {
             if (!error[currentIndex])
             {
-                Utils.log("%s Error: %s for results '%s'", TITLE, msg, name);
+                ImageJUtils.log("%s Error: %s for results '%s'", TITLE, msg, name);
                 label.setText("Error: " + msg + ". Restart this plugin to refresh.");
             }
             error[currentIndex] = true;

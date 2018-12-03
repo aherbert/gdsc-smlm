@@ -28,28 +28,28 @@ package uk.ac.sussex.gdsc.smlm.engine;
  */
 public class FitType implements Cloneable
 {
-    /** Flag used for a single candidate fit with neighbours */
+    /** Flag used for a single candidate fit with neighbours. */
     public static final int MULTI = 1;
 
-    /** Flag used for a single candidate fit with neighbours was OK */
+    /** Flag used for a single candidate fit with neighbours was OK. */
     public static final int MULTI_OK = 2;
 
-    /** Flag used for a double candidate fit */
+    /** Flag used for a double candidate fit. */
     public static final int DOUBLET = 4;
 
-    /** Flag used for a double candidate fit was OK */
+    /** Flag used for a double candidate fit was OK. */
     public static final int DOUBLET_OK = 8;
 
-    /** Flag used for a double candidate fit with neighbours */
+    /** Flag used for a double candidate fit with neighbours. */
     public static final int MULTI_DOUBLET = 16;
 
-    /** Flag used for a double candidate fit with neighbours was OK */
+    /** Flag used for a double candidate fit with neighbours was OK. */
     public static final int MULTI_DOUBLET_OK = 32;
 
-    /** Flag used when a fit was OK */
+    /** Flag used when a fit was OK. */
     public static final int OK = 64;
 
-    /** The number of flags */
+    /** The number of flags. */
     public static final int NO_OF_FLAGS = 7;
 
     private int flags;

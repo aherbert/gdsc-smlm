@@ -34,7 +34,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
@@ -66,7 +66,7 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.ThetaUnits;
 public class TSFPeakResultsWriter extends AbstractPeakResults
 {
     /**
-     * Application ID assigned to GDSC SMLM ImageJ plugins
+     * Application ID assigned to GDSC SMLM ImageJ plugins.
      */
     public static final int APPLICATION_ID = 4;
 

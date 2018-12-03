@@ -47,19 +47,19 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
     protected PoissonCalculator poissonCalculator = null;
 
     /**
-     * The number of gradients
+     * The number of gradients.
      */
     public final int n;
     /**
-     * The first derivative of the Poisson log likelihood with respect to each parameter
+     * The first derivative of the Poisson log likelihood with respect to each parameter.
      */
     public final double[] d1;
     /**
-     * The second derivative of the Poisson log likelihood with respect to each parameter
+     * The second derivative of the Poisson log likelihood with respect to each parameter.
      */
     public final double[] d2;
 
-    /** Counter */
+    /** Counter. */
     protected int k;
 
     /**
@@ -99,7 +99,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
     }
 
     /**
-     * Reset the first and second derivative vectors
+     * Reset the first and second derivative vectors.
      */
     protected void reset2()
     {
@@ -155,7 +155,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
     }
 
     /**
-     * Reset the first derivative vector
+     * Reset the first derivative vector.
      */
     protected void reset1()
     {
@@ -317,7 +317,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
     }
 
     /**
-     * @return True if the last update calculation produced gradients with NaN values
+     * @return True if the last update calculation produced gradients with NaN values.
      */
     public boolean isNaNGradients()
     {

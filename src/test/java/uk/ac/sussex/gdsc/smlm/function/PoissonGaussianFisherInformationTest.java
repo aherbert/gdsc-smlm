@@ -1,15 +1,15 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFisherInformationTest
@@ -130,7 +130,7 @@ public class PoissonGaussianFisherInformationTest
             final double lower = f.getPoissonGaussianApproximationI(u);
             final double upper = PoissonFisherInformation.getPoissonI(u);
             final double alpha = I / upper;
-            logger.log(TestLog.getRecord(Level.INFO, "s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", f.s, u, I, I2, lower, upper, alpha));
+            logger.log(TestLogUtils.getRecord(Level.INFO, "s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", f.s, u, I, I2, lower, upper, alpha));
             Assertions.assertTrue(I > lower);
             Assertions.assertTrue(I < upper);
 

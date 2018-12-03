@@ -342,7 +342,7 @@ public class FitResult
         }
 
         /**
-         * Builds the fit result
+         * Builds the fit result.
          *
          * @return the fit result
          */

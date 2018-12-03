@@ -1,8 +1,15 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -11,17 +18,13 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonLikelihoodWrapperTest
@@ -86,7 +89,7 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitFixedComputesGradientPerDatum()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_FIXED);
     }
 
@@ -105,35 +108,35 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitEllipticalComputesGradientPerDatum()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_ELLIPTICAL);
     }
 
     @Test
     public void fitNBFixedComputesGradientPerDatum()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
     }
 
     @Test
     public void fitNBCircleComputesGradientPerDatum()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
     }
 
     @Test
     public void fitNBFreeCircleComputesGradientPerDatum()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
     }
 
     @Test
     public void fitNBEllipticalComputesGradientPerDatum()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
     }
 
@@ -260,7 +263,7 @@ public class PoissonLikelihoodWrapperTest
                                         }
                                 }
         final double p = (100.0 * count) / total;
-        logger.log(TestLog.getRecord(Level.INFO, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter],
+        logger.log(TestLogUtils.getRecord(Level.INFO, "Per Datum %s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter],
                 count, total, p));
         Assertions.assertTrue(p > 90, () -> NAME[targetParameter] + " fraction too low per datum: " + p);
     }
@@ -268,7 +271,7 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitFixedComputesGradient()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradient(GaussianFunctionFactory.FIT_FIXED);
     }
 
@@ -287,7 +290,7 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitEllipticalComputesGradient()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         // The elliptical function gradient evaluation is worse
         final DoubleEquality tmp = eq;
         eq = eqPerDatum;
@@ -298,28 +301,28 @@ public class PoissonLikelihoodWrapperTest
     @Test
     public void fitNBFixedComputesGradient()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
     }
 
     @Test
     public void fitNBCircleComputesGradient()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
     }
 
     @Test
     public void fitNBFreeCircleComputesGradient()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
     }
 
     @Test
     public void fitNBEllipticalComputesGradient()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         // The elliptical function gradient evaluation is worse
         final DoubleEquality tmp = eq;
         eq = eqPerDatum;
@@ -444,7 +447,7 @@ public class PoissonLikelihoodWrapperTest
 
                                 }
         final double p = (100.0 * count) / total;
-        logger.log(TestLog.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter], count,
+        logger.log(TestLogUtils.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)", f1.getClass().getSimpleName(), NAME[targetParameter], count,
                 total, p));
         Assertions.assertTrue(p > threshold, () -> NAME[targetParameter] + " fraction too low: " + p);
     }
@@ -511,7 +514,7 @@ public class PoissonLikelihoodWrapperTest
             if (pp / p < changeTolerance)
                 break;
         }
-        logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f, max=%d", mu, p, x));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f, max=%d", mu, p, x));
         Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
     }
 
@@ -539,7 +542,7 @@ public class PoissonLikelihoodWrapperTest
             }
         }, 0, max);
 
-        logger.log(TestLog.getRecord(Level.INFO, "mu=%f, p=%f", mu, p));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f", mu, p));
         Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
     }
 
@@ -635,15 +638,15 @@ public class PoissonLikelihoodWrapperTest
                 break;
         }
 
-        logger.log(TestLog.getRecord(Level.INFO, "mu=%f, limit=%d, p=%f", mu, limit, p));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, limit=%d, p=%f", mu, limit, p));
         Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
 
         // Check the function can compute the same total
         f = new PoissonLikelihoodWrapper(nlf, a, k, i, alpha);
         final double sum = f.computeLikelihood();
         final double sum2 = f.computeLikelihood(g);
-        final double delta = 1e-10;
-        ExtraAssertions.assertEqualsRelative(total, sum, delta, "computeLikelihood");
-        ExtraAssertions.assertEqualsRelative(total, sum2, delta, "computeLikelihood with gradient");
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+        TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
+        TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");
     }
 }

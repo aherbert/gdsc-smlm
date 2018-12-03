@@ -41,11 +41,11 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
     /** The pre-computed function factors for each Gaussian. */
     protected final double[][] peakFactors;
-    /** The Gaussian parameters (a) */
+    /** The Gaussian parameters (a). */
     protected double[] a;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param npeaks
      *            The number of peaks
@@ -67,9 +67,9 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
         return new NSFixedGaussian2DFunction(npeaks, maxx, maxy);
     }
 
-    /** The index for the The amplitude/height normalisation: 1/(2*pi*sx*sy). */
+    /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
     protected static final int N = 0;
-    /** The index for the The amplitude/height. */
+    /** The index for the The amplitude./height. */
     protected static final int HEIGHT = 1;
     /** The index for the x0 position pre-factor */
     protected static final int AA = 2;

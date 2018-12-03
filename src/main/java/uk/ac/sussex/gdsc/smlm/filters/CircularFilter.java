@@ -108,7 +108,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
     }
 
     /**
-     * Get the border that will be ignored for the specified radius
+     * Get the border that will be ignored for the specified radius.
      *
      * @param radius
      *            the radius
@@ -386,7 +386,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
     }
 
     /**
-     * Get the radii where different smoothing will be applied
+     * Get the radii where different smoothing will be applied.
      *
      * @param max
      *            The maximum radii to include

@@ -34,7 +34,7 @@ public abstract class AbstractResultProcedure
     /** The results. */
     final MemoryPeakResults results;
 
-    /** The counter for procedures */
+    /** The counter for procedures. */
     protected int i;
 
     /**

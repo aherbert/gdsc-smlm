@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a signal threshold
+ * Filter results using a signal threshold.
  */
 public class SignalFilter extends DirectFilter implements IMultiFilter
 {

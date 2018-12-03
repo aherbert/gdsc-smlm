@@ -60,7 +60,7 @@ public interface SelectionStrategy<T extends Comparable<T>>
     public ChromosomePair<T> next();
 
     /**
-     * Finish selection of pairs for breeding
+     * Finish selection of pairs for breeding.
      */
     public void finishBreeding();
 

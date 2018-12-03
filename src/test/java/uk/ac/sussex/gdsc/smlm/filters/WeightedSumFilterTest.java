@@ -23,18 +23,21 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import gnu.trove.list.array.TDoubleArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.Arrays;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class WeightedSumFilterTest extends WeightedFilterTest
@@ -44,13 +47,14 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
     {
         final DataFilter filter = createDataFilter();
 
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, 2, 0.2);
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
         final float[] offsets = getOffsets(filter);
         final int[] boxSizes = getBoxSizes(filter);
 
         final TDoubleArrayList l1 = new TDoubleArrayList();
+        final FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-6, 0);
 
         for (final int width : primes)
             for (final int height : primes)
@@ -84,17 +88,17 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
 
                             // Uniform weights
                             testfilterPerformsWeightedFiltering(filter, width, height, data, w1, boxSize, offset,
-                                    internal, ones);
+                                    internal, ones, equality);
 
                             // Random weights.
                             testfilterPerformsWeightedFiltering(filter, width, height, data, w2, boxSize, offset,
-                                    internal, ones);
+                                    internal, ones, equality);
                         }
             }
     }
 
     private static void testfilterPerformsWeightedFiltering(DataFilter filter, int width, int height, float[] data,
-            float[] w, int boxSize, float offset, boolean internal, float[] ones) throws AssertionError
+            float[] w, int boxSize, float offset, boolean internal, float[] ones, FloatFloatBiPredicate equality) throws AssertionError
     {
         // The filter f(x) should compute:
         //    sum(vi * wi) / mean(wi)
@@ -113,7 +117,7 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest
         filter.setWeights(w, width, height);
         final float[] o = filter(data, width, height, boxSize - offset, internal, filter);
 
-        ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-6, FunctionUtils.getSupplier("%s : [%dx%d] @ %.1f [internal=%b]",
+        TestAssertions.assertArrayTest(e, o, equality, FunctionUtils.getSupplier("%s : [%dx%d] @ %.1f [internal=%b]",
                 filter.name, width, height, boxSize - offset, internal));
     }
 }

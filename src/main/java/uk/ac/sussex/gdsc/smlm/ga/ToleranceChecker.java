@@ -37,9 +37,9 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
     final double relative;
     /** The absolute tolerance threshold. */
     final double absolute;
-    /** Set to true to check the fitness */
+    /** Set to true to check the fitness. */
     final boolean checkFitness;
-    /** Set to true to check the sequence */
+    /** Set to true to check the sequence. */
     final boolean checkSequence;
     /** The maximum iterations. */
     final int maxIterations;
@@ -108,7 +108,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
     }
 
     /**
-     * Check if the sequence has converged
+     * Check if the sequence has converged.
      *
      * @param p
      *            Previous
@@ -125,7 +125,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
     }
 
     /**
-     * Check if the value has converged
+     * Check if the value has converged.
      *
      * @param p
      *            Previous
@@ -167,7 +167,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
     protected abstract boolean converged(T previous, T current);
 
     /**
-     * @return the iterations
+     * @return the iterations.
      */
     public int getIterations()
     {

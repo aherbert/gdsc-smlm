@@ -35,7 +35,7 @@ import java.util.Vector;
 
 import ij.IJ;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
@@ -175,7 +175,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
         PeakFit.addPrecisionOptions(gd, this);
 
         // Add a mouse listener to the config file field
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             final Vector<TextField> numerics = gd.getNumericFields();
             final Vector<Checkbox> checkboxes = gd.getCheckboxes();
@@ -330,9 +330,9 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 
                 if (filename != null)
                 {
-                    templateFilename = Utils.replaceExtension(filename, ".txt");
+                    templateFilename = ImageJUtils.replaceExtension(filename, ".txt");
                     final File file = new File(templateFilename);
-                    final String name = Utils.removeExtension(file.getName());
+                    final String name = ImageJUtils.removeExtension(file.getName());
                     final TemplateSettings.Builder settings = TemplateSettings.newBuilder();
                     settings.addNotes(notes);
                     settings.setCalibration(fitConfig.getCalibration());

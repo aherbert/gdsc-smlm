@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Combine the result of two fail counters using an OR operator
+ * Combine the result of two fail counters using an OR operator.
  */
 public class CombinedOrFailCounter extends CombinedFailCounter
 {

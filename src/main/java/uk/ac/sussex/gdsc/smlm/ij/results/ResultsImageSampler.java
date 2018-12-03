@@ -37,8 +37,8 @@ import ij.ImageStack;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -165,7 +165,7 @@ public class ResultsImageSampler
     private final int xblocks, yblocks;
     private final int xy_blocks;
 
-    /** The size for samples */
+    /** The size for samples. */
     public final int size;
 
     /**
@@ -486,13 +486,13 @@ public class ResultsImageSampler
         list.clearf();
 
         // empty
-        for (final int i : Random.sample(nNo, no.length, r))
+        for (final int i : RandomUtils.sample(nNo, no.length, r))
             list.add(ResultsSample.createEmpty(no[i]));
         // low
-        for (final int i : Random.sample(nLow, lower, r))
+        for (final int i : RandomUtils.sample(nLow, lower, r))
             list.add(data[i]);
         // high
-        for (final int i : Random.sample(nHigh, upper, r))
+        for (final int i : RandomUtils.sample(nHigh, upper, r))
             list.add(data[i + lower]);
 
         if (list.isEmpty())
@@ -552,10 +552,10 @@ public class ResultsImageSampler
                     ox[i] = p.getXPosition() - xyz[0];
                     oy[i] = p.getYPosition() - xyz[1];
                     sb.append(position).append(' ');
-                    sb.append(Utils.rounded(ox[i] * nmPerPixel)).append(' ');
-                    sb.append(Utils.rounded(oy[i] * nmPerPixel)).append(' ');
-                    sb.append(Utils.rounded(p.getZPosition() * nmPerPixel)).append(' ');
-                    sb.append(Utils.rounded(p.getIntensity())).append('\n');
+                    sb.append(MathUtils.rounded(ox[i] * nmPerPixel)).append(' ');
+                    sb.append(MathUtils.rounded(oy[i] * nmPerPixel)).append(' ');
+                    sb.append(MathUtils.rounded(p.getZPosition() * nmPerPixel)).append(' ');
+                    sb.append(MathUtils.rounded(p.getIntensity())).append('\n');
                 }
                 final PointRoi roi = new PointRoi(ox, oy, size);
                 roi.setPosition(position);
@@ -584,7 +584,7 @@ public class ResultsImageSampler
     }
 
     /**
-     * Set the random generator for use during sampling
+     * Set the random generator for use during sampling.
      *
      * @param r
      *            the random generator to set (ignored if null)

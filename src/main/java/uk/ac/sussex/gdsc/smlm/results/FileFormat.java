@@ -24,30 +24,30 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
- * Specify the file format when reading results from file
+ * Specify the file format when reading results from file.
  */
 public enum FileFormat
 {
     //@formatter:off
-	/** SMLM Text */
+	/** SMLM Text. */
     SMLM_TEXT{
     	@Override public String getName() { return "SMLM Text"; }
         @Override public boolean isSMLM(){return true;}},
-    /** SMLM Binary */
+    /** SMLM Binary. */
     SMLM_BINARY{
         @Override public String getName() { return "SMLM Binary"; }
         @Override public boolean isSMLM(){return true;}},
-    /** RapidSTORM */
+    /** RapidSTORM. */
     RAPID_STORM{ @Override public String getName() { return "RapidSTORM"; }},
-    /** NSTORM */
+    /** NSTORM. */
     NSTORM{ @Override public String getName() { return "NSTORM"; }},
-    /** SMLM Table */
+    /** SMLM Table. */
     SMLM_TABLE{ @Override public String getName() { return "SMLM Table"; }},
-    /** MALK */
+    /** MALK. */
     MALK{ @Override public String getName() { return "MALK"; }},
-    /** TSF Binary */
+    /** TSF Binary. */
     TSF_BINARY{ @Override public String getName() { return "TSF Binary"; }},
-    /** Unknown */
+    /** Unknown. */
     UNKNOWN{ @Override public String getName() { return "Unknown"; }};
 	//@formatter:on
 

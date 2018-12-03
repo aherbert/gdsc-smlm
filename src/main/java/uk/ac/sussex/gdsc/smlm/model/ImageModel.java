@@ -34,7 +34,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
 /**
@@ -51,9 +51,9 @@ public abstract class ImageModel
     protected double tOff;
     /** Average off-state time for the second dark state */
     protected double tOff2;
-    /** Average number of blinks int the first dark state (used for each burst between second dark states) */
+    /** Average number of blinks int the first dark state (used for each burst between second dark states). */
     protected double nBlinks;
-    /** Average number of blinks into the second dark state */
+    /** Average number of blinks into the second dark state. */
     protected double nBlinks2;
 
     /**
@@ -74,7 +74,7 @@ public abstract class ImageModel
     private boolean rotation2D = false;
 
     /**
-     * Construct a new image model
+     * Construct a new image model.
      *
      * @param tOn
      *            Average on-state time
@@ -109,7 +109,7 @@ public abstract class ImageModel
     }
 
     /**
-     * Check the parameter is not less than zero
+     * Check the parameter is not less than zero.
      *
      * @param param
      *            the parameter name
@@ -123,7 +123,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the tOn
+     * @return the tOn.
      */
     public double gettOn()
     {
@@ -131,7 +131,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the tOff
+     * @return the tOff.
      */
     public double gettOff()
     {
@@ -139,7 +139,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the tOff2
+     * @return the tOff2.
      */
     public double gettOff2()
     {
@@ -147,7 +147,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the nBlinks
+     * @return the nBlinks.
      */
     public double getnBlinks()
     {
@@ -155,7 +155,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the nBlinks2
+     * @return the nBlinks2.
      */
     public double getnBlinks2()
     {
@@ -163,7 +163,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return The random data generator
+     * @return The random data generator.
      */
     protected RandomDataGenerator getRandom()
     {
@@ -658,7 +658,7 @@ public abstract class ImageModel
 
     private static double getTotalOnTime(FluorophoreSequenceModel f)
     {
-        return Maths.sum(f.getOnTimes());
+        return MathUtils.sum(f.getOnTimes());
     }
 
     /**
@@ -712,8 +712,8 @@ public abstract class ImageModel
         }
 
         // Get the maximum and minimum start and end times
-        final int sequenceStart = Maths.min(sequenceStartT);
-        int sequenceEnd = Maths.max(sequenceEndT);
+        final int sequenceStart = MathUtils.min(sequenceStartT);
+        int sequenceEnd = MathUtils.max(sequenceEndT);
 
         // Time-range check. Note that the final frames are 1-based
         if (sequenceStart > maxFrames - 1)
@@ -730,7 +730,7 @@ public abstract class ImageModel
         for (int i = 0; i < nFluorophores; i++)
         {
             generateOnTimes(maxFrames, frameInterval, bursts.get(i), sequenceStart, onTime[i], state[i]);
-            totalOnTime[i] = Maths.sum(onTime[i]);
+            totalOnTime[i] = MathUtils.sum(onTime[i]);
             photonBudget[i] = photons[i + photonIndex];
         }
 
@@ -908,7 +908,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the photon distribution used for the fluorophore
+     * @return the photon distribution used for the fluorophore.
      */
     public RealDistribution getPhotonDistribution()
     {
@@ -916,7 +916,7 @@ public abstract class ImageModel
     }
 
     /**
-     * Set the distribution used to generate the photon budget of a fluorophore
+     * Set the distribution used to generate the photon budget of a fluorophore.
      *
      * @param photonDistribution
      *            the photon distribution to set
@@ -927,7 +927,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the useGeometricDistribution
+     * @return the useGeometricDistribution.
      */
     public boolean isUseGeometricDistribution()
     {
@@ -944,7 +944,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return if true the image will be created using the photon budget per frame
+     * @return if true the image will be created using the photon budget per frame.
      */
     public boolean isPhotonBudgetPerFrame()
     {
@@ -974,7 +974,7 @@ public abstract class ImageModel
     }
 
     /**
-     * @return the confinementAttempts
+     * @return the confinementAttempts.
      */
     public int getConfinementAttempts()
     {
@@ -994,7 +994,7 @@ public abstract class ImageModel
     }
 
     /**
-     * Set to true if only diffusing in XY
+     * Set to true if only diffusing in XY.
      *
      * @return True if only diffusing in XY
      */
@@ -1004,7 +1004,7 @@ public abstract class ImageModel
     }
 
     /**
-     * Set to true to only diffuse in XY
+     * Set to true to only diffuse in XY.
      *
      * @param diffusion2d
      *            true to only diffuse in XY

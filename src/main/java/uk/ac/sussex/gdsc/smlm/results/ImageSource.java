@@ -101,7 +101,7 @@ public abstract class ImageSource
     private ReadHint readHint = ReadHint.SEQUENTIAL;
 
     /**
-     * Create the image source
+     * Create the image source.
      *
      * @param name
      *            The name of the image source
@@ -139,7 +139,7 @@ public abstract class ImageSource
     protected abstract boolean openSource();
 
     /**
-     * Closes the source
+     * Closes the source.
      */
     public void close()
     {
@@ -148,7 +148,7 @@ public abstract class ImageSource
     }
 
     /**
-     * Closes the source
+     * Closes the source.
      */
     protected abstract void closeSource();
 

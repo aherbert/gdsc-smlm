@@ -37,7 +37,7 @@ import org.apache.commons.math3.util.FastMath;
 import gnu.trove.function.TDoubleFunction;
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
@@ -52,7 +52,7 @@ import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
 public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInformation
 {
     /**
-     * Class to scale the lists
+     * Class to scale the lists.
      */
     private static class ScalingFunction implements TDoubleFunction
     {
@@ -155,10 +155,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     /** The last Gaussian kernel. */
     private double[] g;
 
-    /** The scale of the last Gaussian kernel */
+    /** The scale of the last Gaussian kernel. */
     private int lastScale;
 
-    /** The mean of the last Fisher information */
+    /** The mean of the last Fisher information. */
     private double lastT;
 
     /**
@@ -237,7 +237,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         final double scale = Math.ceil(s);
         if (scale > MAX_SCALE)
             return MAX_SCALE;
-        return Maths.nextPow2((int) scale);
+        return MathUtils.nextPow2((int) scale);
     }
 
     /**
@@ -267,7 +267,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         // This is not true when the gain is low.
         //final double lower = (t > 10) ? 0.5 * upper : 0;
         final double lower = 0;
-        return Maths.clip(lower, upper, I);
+        return MathUtils.clip(lower, upper, I);
     }
 
     @Override
@@ -588,7 +588,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
 
     /**
-     * Use an approximation as half the Poisson Fisher information when the mean is large
+     * Use an approximation as half the Poisson Fisher information when the mean is large.
      *
      * @param t
      *            the mean
@@ -734,7 +734,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         return G;
     }
 
-    private static abstract class IntegrationProcedure implements DoubleConvolutionValueProcedure
+    private abstract static class IntegrationProcedure implements DoubleConvolutionValueProcedure
     {
         int i = 0;
 
@@ -901,7 +901,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         //			System.out.printf("Sub-normal: P=%s A=%s\n", P, A);
         if (P == 0)
             return 0;
-        final double result = Maths.pow2(A) / P;
+        final double result = MathUtils.pow2(A) / P;
         //if (result > 1)
         //	System.out.printf("Strange: P=%s A=%s result=%s\n", P, A, result);
         return result;
@@ -992,7 +992,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         // Gaussian = Math.exp(-0.5 * x^2)
         // FastMath.exp(-746) == 0
         // => range for the Gaussian is sqrt(2*746) = 38.6
-        return Maths.clip(1, MAX_RANGE, range);
+        return MathUtils.clip(1, MAX_RANGE, range);
     }
 
     /**

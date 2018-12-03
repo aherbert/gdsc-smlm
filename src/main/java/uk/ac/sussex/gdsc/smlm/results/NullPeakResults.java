@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
- * Does nothing for any of the PeakResults methods
+ * Does nothing for any of the PeakResults methods.
  */
 public class NullPeakResults extends AbstractPeakResults implements ThreadSafePeakResults
 {

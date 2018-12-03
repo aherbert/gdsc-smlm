@@ -119,7 +119,7 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
     }
 
     /**
-     * Check if the position has converged
+     * Check if the position has converged.
      *
      * @param p
      *            Previous
@@ -136,7 +136,7 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
     }
 
     /**
-     * Check if the value has converged
+     * Check if the value has converged.
      *
      * @param p
      *            Previous
@@ -173,7 +173,7 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
     }
 
     /**
-     * @return the iterations
+     * @return the iterations.
      */
     public int getIterations()
     {

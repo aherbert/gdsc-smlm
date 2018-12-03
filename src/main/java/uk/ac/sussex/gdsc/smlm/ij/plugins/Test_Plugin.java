@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 
 /**
- * A simple class used to test plugin functionality
+ * A simple class used to test plugin functionality.
  */
 public class Test_Plugin implements PlugIn
 {

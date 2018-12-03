@@ -49,17 +49,20 @@ import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.SimpleLock;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.CubicSplineResource;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
@@ -75,12 +78,12 @@ import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * This plugin handle the save and load of per-pixel spline models
+ * This plugin handle the save and load of per-pixel spline models.
  */
 public class CubicSplineManager implements PlugIn
 {
     /**
-     * Contains the information used to represent a point spread function using a cubic spline
+     * Contains the information used to represent a point spread function using a cubic spline.
      */
     public static class CubicSplinePSF
     {
@@ -196,7 +199,7 @@ public class CubicSplineManager implements PlugIn
 
         final int size = maxi * maxj;
         final CustomTricubicFunction[][] splines = new CustomTricubicFunction[maxk][size];
-        final Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, true);
+        final Ticker ticker = Ticker.create(new ImageJTrackProgress(), (long) maxi * maxj * maxk, true);
         ticker.start();
         final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
         final TurboList<Future<?>> futures = new TurboList<>(maxk);
@@ -241,7 +244,7 @@ public class CubicSplineManager implements PlugIn
         }
         ticker.stop();
 
-        Utils.waitForCompletion(futures);
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
         threadPool.shutdownNow();
 
@@ -311,7 +314,7 @@ public class CubicSplineManager implements PlugIn
         // Try to save to file
         try (FileOutputStream os = new FileOutputStream(filename))
         {
-            final TrackProgress progress = new IJTrackProgress();
+            final TrackProgress progress = new ImageJTrackProgress();
 
             psfModel.imagePSF.writeDelimitedTo(os);
             psfModel.splineData.write(os, progress);
@@ -322,7 +325,7 @@ public class CubicSplineManager implements PlugIn
         }
         catch (final Exception e)
         {
-            Utils.log("Failed to save spline model to file: %s. %s", filename, e.getMessage());
+            ImageJUtils.log("Failed to save spline model to file: %s. %s", filename, e.getMessage());
         }
 
         return false;
@@ -331,7 +334,7 @@ public class CubicSplineManager implements PlugIn
     private static String getName(String filename)
     {
         final File file = new File(filename);
-        final String name = Utils.removeExtension(file.getName());
+        final String name = ImageJUtils.removeExtension(file.getName());
         return name;
     }
 
@@ -382,7 +385,7 @@ public class CubicSplineManager implements PlugIn
         try (InputStream is = new BufferedInputStream(new FileInputStream(filename)))
         {
             IJ.showStatus("Loading cubic spline: " + name);
-            final TrackProgress progress = new IJTrackProgress();
+            final TrackProgress progress = new ImageJTrackProgress();
 
             final ImagePSF imagePSF = ImagePSF.parseDelimitedFrom(is);
             final CubicSplineData function = CubicSplineData.read(is, progress);
@@ -391,7 +394,7 @@ public class CubicSplineManager implements PlugIn
         }
         catch (final Exception e)
         {
-            Utils.log("Failed to load spline model %s from file: %s. %s", name, filename, e.getMessage());
+            ImageJUtils.log("Failed to load spline model %s from file: %s. %s", name, filename, e.getMessage());
         }
         finally
         {
@@ -575,7 +578,7 @@ public class CubicSplineManager implements PlugIn
             gd.addSlider("z_shift (nm)", minZ, maxZ, pluginSettings.getZShift());
             final TextField tfzshift = gd.getLastTextField();
             gd.addDialogListener(this);
-            if (Utils.isShowGenericDialog())
+            if (ImageJUtils.isShowGenericDialog())
             {
                 gd.addAndGetButton("Reset", new ActionListener()
                 {
@@ -656,9 +659,10 @@ public class CubicSplineManager implements PlugIn
 
             final double[] values = p.getValues(f, a);
 
-            final ImagePlus imp = Utils.display(pluginSettings.getSelected() + " (slice)", values, f.getMaxX(),
-                    f.getMaxY(), Utils.NO_TO_FRONT);
-            if (Utils.isNewWindow())
+            final WindowOrganiser wo = new WindowOrganiser();
+            final ImagePlus imp = ImageJUtils.display(pluginSettings.getSelected() + " (slice)", values, f.getMaxX(),
+                    f.getMaxY(), ImageJUtils.NO_TO_FRONT, wo);
+            if (wo.size() != 0)
             {
                 updateCalibration = true;
                 imp.getWindow().toFront();
@@ -673,10 +677,10 @@ public class CubicSplineManager implements PlugIn
             }
 
             if (label != null)
-                label.setText("Intensity = " + Utils.rounded(Maths.sum(values)));
+                label.setText("Intensity = " + MathUtils.rounded(MathUtils.sum(values)));
         }
 
-        SimpleLock lock = new SimpleLock();
+        SoftLock lock = new SoftLock();
 
         private void update()
         {
@@ -730,7 +734,7 @@ public class CubicSplineManager implements PlugIn
 		settings.removeCubicSplineResources(name);
 		SettingsManager.writeSettings(settings.build());
 
-		Utils.log("Deleted spline model: %s\n%s", name, resource);
+		ImageJUtils.log("Deleted spline model: %s\n%s", name, resource);
 	}
 
 	private static void loadFromDirectory()
@@ -804,13 +808,13 @@ public class CubicSplineManager implements PlugIn
 
 		IJ.showStatus("Drawing cubic spline");
 		final FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
-		psfModel.splineData.sample(magnification, p, new IJTrackProgress());
+		psfModel.splineData.sample(magnification, p, new ImageJTrackProgress());
 
-		final ImageStack stack = new ImageStack(p.x.length, p.y.length);
-		for (final float[] pixels : p.value)
+		final ImageStack stack = new ImageStack(p.getXAxis().length, p.getYAxis().length);
+		for (final float[] pixels : p.getValue())
 			stack.addSlice(null, pixels);
 
-		final ImagePlus imp = Utils.display(name + " (upsampled)", stack);
+		final ImagePlus imp = ImageJUtils.display(name + " (upsampled)", stack);
 		final Calibration c = imp.getLocalCalibration();
 		c.setUnit("nm");
 		c.pixelWidth = c.pixelHeight = psfModel.imagePSF.getPixelSize() * magnification;

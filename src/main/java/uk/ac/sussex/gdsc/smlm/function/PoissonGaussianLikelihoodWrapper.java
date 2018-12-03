@@ -38,7 +38,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 {
     private final PoissonGaussianFunction2 p;
-    final private boolean usePicard = false;
+    private final boolean usePicard = false;
 
     /**
      * Initialise the function.

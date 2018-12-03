@@ -1,16 +1,8 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
-import java.util.logging.Level;
-
-import org.apache.commons.math3.util.Precision;
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-
-import uk.ac.sussex.gdsc.core.ij.Utils;
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
@@ -21,14 +13,24 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
+
+import org.apache.commons.math3.util.Precision;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+
+import java.util.logging.Level;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
@@ -46,7 +48,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     {
         Gaussian2DFunction f, f2;
 
-        final int flags2 = BitFlags.unset(flags, GaussianFunctionFactory.FIT_ERF);
+        final int flags2 = BitFlagUtils.unset(flags, GaussianFunctionFactory.FIT_ERF);
 
         if (this.f2 != null)
         {
@@ -184,7 +186,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         logger.info(() -> {
             return String.format("functionComputesSecondTargetGradient %s %s (error %s +/- %s)",
                     f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
-                    Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+                    MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 
@@ -356,8 +358,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         logger.info(() -> {
             return String.format("functionComputesSecondTargetGradient %s [%d] %s (error %s +/- %s)",
                     f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
-                    Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-                    Utils.rounded(s.getStandardDeviation()));
+                    Gaussian2DFunction.getName(targetParameter), MathUtils.rounded(s.getMean()),
+                    MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 
@@ -429,7 +431,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     @Test
     public void functionIsFasterThanEquivalentGaussian2DFunction()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
         final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
@@ -480,7 +482,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         {
             TimingResult slow = ts.get(-i - 3);
             TimingResult fast = ts.get(-i);
-            logger.log(TestLog.getTimingRecord(slow, fast));
+            logger.log(TestLogUtils.getTimingRecord(slow, fast));
         }
     }
 
@@ -665,7 +667,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
                                                             m.get(j, k));
                                                     if (!ok)
                                                     {
-                                                        logger.log(TestLog.getRecord(Level.INFO, "%d [%d,%d] %f ?= %f",
+                                                        logger.log(TestLogUtils.getRecord(Level.INFO, "%d [%d,%d] %f ?= %f",
                                                                 i, j, k, gradient, m.get(j, k)));
                                                         Assertions.fail(String.format("%d [%d,%d] %f != %f", i, j, k, gradient,
                                                                 m.get(j, k)));
@@ -1057,7 +1059,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     @Test
     public void functionIsFasterUsingForEach()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
@@ -1095,13 +1097,14 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         {
             TimingResult slow = ts.get(-i - 3);
             TimingResult fast = ts.get(-i);
-            logger.log(TestLog.getTimingRecord(slow, fast));
+            logger.log(TestLogUtils.getTimingRecord(slow, fast));
         }
     }
 
     @Test
     public void functionCanComputeIntegral()
     {
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
         double[] a;
         for (final double background : testbackground)
             // Peak 1
@@ -1115,14 +1118,14 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
                                     a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
                                     final double e = new IntegralValueProcedure().getIntegral(f1, a);
                                     final double o = f1.integral(a);
-                                    ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
+                                    TestAssertions.assertTest(e, o, predicate);
                                 }
     }
 
     @Test
     public void computeIntegralIsFaster()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final TurboList<double[]> p = new TurboList<>();
         for (final double background : testbackground)
@@ -1147,9 +1150,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         final long t3 = System.nanoTime();
         t1 = t2 - t1;
         t2 = t3 - t2;
-        logger.log(TestLog.getRecord(Level.INFO, "computeIntegralIsFaster %s %d vs %d (%gx)",
+        logger.log(TestLogUtils.getRecord(Level.INFO, "computeIntegralIsFaster %s %d vs %d (%gx)",
                 f1.getClass().getSimpleName(), t1, t2, (double) t1 / t2));
-        ExtraAssertions.assertEqualsRelative(s1, s2, 1e-3);
+        TestAssertions.assertTest(s1, s2, TestHelper.doublesAreClose(1e-3, 0));
         Assertions.assertTrue(t2 < t1);
     }
 
@@ -1158,6 +1161,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
     {
         Assumptions.assumeTrue(null != f2);
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
         double[] a;
         for (final double background : testbackground)
             // Peak 1
@@ -1181,14 +1185,14 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
                                                             final double e = new IntegralValueProcedure()
                                                                     .getIntegral(f2, a);
                                                             final double o = f2.integral(a);
-                                                            ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
+                                                            TestAssertions.assertTest(e, o, predicate);
                                                         }
     }
 
     @Test
     public void computeIntegralIsFasterWith2Peaks()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         Assumptions.assumeTrue(null != f2);
 
         final TurboList<double[]> p = new TurboList<>();
@@ -1223,9 +1227,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
         final long t3 = System.nanoTime();
         t1 = t2 - t1;
         t2 = t3 - t2;
-        logger.log(TestLog.getRecord(Level.INFO, "computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)",
+        logger.log(TestLogUtils.getRecord(Level.INFO, "computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)",
                 f1.getClass().getSimpleName(), t1, t2, (double) t1 / t2));
-        ExtraAssertions.assertEqualsRelative(s1, s2, 1e-3);
+        TestAssertions.assertTest(s1, s2, TestHelper.doublesAreClose(1e-3, 0));
         Assertions.assertTrue(t2 < t1);
     }
 }

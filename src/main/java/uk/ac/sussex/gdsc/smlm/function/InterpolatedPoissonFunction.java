@@ -45,17 +45,17 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
     private final CustomPoissonDistribution pd;
 
     /**
-     * The inverse of the on-chip gain multiplication factor
+     * The inverse of the on-chip gain multiplication factor.
      */
     final double alpha;
 
     /**
-     * The log of the inverse on-chip gain multiplication factor
+     * The log of the inverse on-chip gain multiplication factor.
      */
     final double logAlpha;
 
     /**
-     * Allow non-integer observed values
+     * Allow non-integer observed values.
      */
     final boolean nonInteger;
 
@@ -99,7 +99,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
     }
 
     /**
-     * Return the log of the factorial for the given real number, using the gamma function
+     * Return the log of the factorial for the given real number, using the gamma function.
      *
      * @param k
      *            the number
@@ -113,7 +113,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
     }
 
     /**
-     * Return the factorial for the given real number, using the gamma function
+     * Return the factorial for the given real number, using the gamma function.
      *
      * @param k
      *            the number

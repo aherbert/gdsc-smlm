@@ -1,24 +1,25 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import java.util.ArrayList;
-import java.util.function.Function;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.logging.Logger;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -28,20 +29,20 @@ import uk.ac.sussex.gdsc.test.utils.TestLog;
 public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
 {
     private static Logger logger;
-    private static DataCache<RandomSeed, Object> dataCache;
+    private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
 
     @BeforeAll
     public static void beforeAll()
     {
         logger = Logger.getLogger(Gaussian2DFunctionSpeedTest.class.getName());
-        dataCache = new DataCache<>();
+        ConcurrentHashMap = new ConcurrentHashMap<>();
     }
 
     @AfterAll
     public static void afterAll()
     {
-        dataCache.clear();
-        dataCache = null;
+        ConcurrentHashMap.clear();
+        ConcurrentHashMap = null;
         logger = null;
     }
 
@@ -72,7 +73,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
     @Override
     public Object apply(RandomSeed source)
     {
-        return new Gaussian2DFunctionSpeedTestData(RNGFactory.create(source.getSeed()));
+        return new Gaussian2DFunctionSpeedTestData(RngUtils.create(source.getSeed()));
     }
 
     //	private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();
@@ -90,8 +91,8 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
 
     private Gaussian2DFunctionSpeedTestData ensureDataSingle(RandomSeed seed, int size)
     {
-        final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache
-                .getOrComputeIfAbsent(seed, this);
+        final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) ConcurrentHashMap
+                .computeIfAbsent(seed, this);
         if (data.paramsListSinglePeak.size() < size)
             synchronized (data.paramsListSinglePeak)
             {
@@ -103,8 +104,8 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
 
     private Gaussian2DFunctionSpeedTestData ensureDataMulti(RandomSeed seed, int size)
     {
-        final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache
-                .getOrComputeIfAbsent(seed, this);
+        final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) ConcurrentHashMap
+                .computeIfAbsent(seed, this);
         if (data.paramsListMultiPeak.size() < size)
             synchronized (data.paramsListMultiPeak)
             {
@@ -315,7 +316,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
                 nparams++;
             }
         }
-        
+
         for (int i = 0; i < paramsList2.size(); i++)
         {
             f1.initialise(paramsList2.get(i));
@@ -340,7 +341,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
 
     void f1FasterThanf2(RandomSeed seed, int npeaks, int flags1, int flags2)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 10000;
         ArrayList<double[]> paramsList2;
@@ -387,7 +388,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
         }
         start2 = System.nanoTime() - start2;
 
-        logger.log(TestLog.getTimingRecord(f1.getClass().getName(), start1, f2.getClass().getName(), start2));
+        logger.log(TestLogUtils.getTimingRecord(f1.getClass().getName(), start1, f2.getClass().getName(), start2));
     }
 
     /**

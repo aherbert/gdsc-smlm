@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Defines function that can produce second order gradients
+ * Defines function that can produce second order gradients.
  */
 public interface ExtendedGradient2Function extends Gradient2Function
 {

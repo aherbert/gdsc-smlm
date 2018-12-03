@@ -31,7 +31,7 @@ public class GaussJordan
     private int max_row, max_col;
 
     /**
-     * @return True if OK
+     * @return True if OK.
      */
     private boolean find_pivot(float[][] a, int[] piv)
     {
@@ -178,7 +178,7 @@ public class GaussJordan
     }
 
     /**
-     * @return True if OK
+     * @return True if OK.
      */
     private boolean find_pivot(double[][] a, int[] piv)
     {

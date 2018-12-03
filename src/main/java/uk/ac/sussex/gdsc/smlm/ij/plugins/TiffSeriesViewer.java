@@ -50,7 +50,7 @@ import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
@@ -114,7 +114,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
                             dir = Macro.getValue(macroOptions, title, null);
                     }
                     else
-                        dir = Utils.getDirectory(title, inputDirectory);
+                        dir = ImageJUtils.getDirectory(title, inputDirectory);
                     if (TextUtils.isNullOrEmpty(dir))
                         return false;
                     inputDirectory = dir;
@@ -130,7 +130,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
                             file = Macro.getValue(macroOptions, title, null);
                     }
                     else
-                        file = Utils.getFilename(title, inputFile);
+                        file = ImageJUtils.getFilename(title, inputFile);
                     if (TextUtils.isNullOrEmpty(file))
                         return false;
                     inputFile = file;
@@ -141,7 +141,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
         });
         gd.addMessage("");
         label = gd.getLastLabel();
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             final Choice choice = gd.getLastChoice();
             choice.addItemListener(new ItemListener()
@@ -191,7 +191,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
         });
         gd.addMessage("");
         label2 = gd.getLastLabel();
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             final Choice choice = gd.getLastChoice();
             choice.addItemListener(new ItemListener()
@@ -247,14 +247,14 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
             IJ.error(TITLE, "Not a TIFF image");
             return;
         }
-        Utils.showStatus("Opening TIFF ...");
+        ImageJUtils.showStatus("Opening TIFF ...");
         source.setTrackProgress(this);
         if (!source.open())
         {
             IJ.error(TITLE, "Cannot open the image");
             return;
         }
-        Utils.showStatus("");
+        ImageJUtils.showStatus("");
 
         // Create a virtual stack
         final TiffSeriesVirtualStack stack = new TiffSeriesVirtualStack(source);
@@ -273,23 +273,13 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
             final String format = new File(outputDirectory, imp.getShortTitle() + "%0" + digits + "d.tif").getPath();
 
             IJ.showStatus("Saving image ...");
-            Utils.setShowStatus(false);
-            Utils.setShowProgress(false);
-            final ProgressBar progressBar = Utils.getProgressBar();
-            progressBar.show(0);
-            final int step = Utils.getProgressInterval(size);
-            int next = step;
             try
             {
                 for (int i = 1; i <= size; i += nImages)
                 {
-                    if (Utils.isInterrupted())
+                    if (ImageJUtils.isInterrupted())
                         break;
-                    if (i > next)
-                    {
-                        progressBar.show(i, size);
-                        next += step;
-                    }
+                    ImageJUtils.showSlowProgress(i, size);
                     final String path = String.format(format, i);
                     //System.out.println(path);
                     final ImageStack out = new ImageStack(source.getWidth(), source.getHeight());
@@ -309,9 +299,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
             }
             finally
             {
-                Utils.setShowStatus(true);
-                Utils.setShowProgress(true);
-                progressBar.show(1);
+                ImageJUtils.clearSlowProgress();
             }
             IJ.showStatus("Saved image");
         }
@@ -369,7 +357,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
             final Object pixels = source.getRaw(1);
             if (pixels == null)
                 throw new IllegalArgumentException("Source has no first frame");
-            setBitDepth(Utils.getBitDepth(pixels));
+            setBitDepth(ImageJUtils.getBitDepth(pixels));
         }
 
         /**
@@ -391,7 +379,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
          */
         public ImagePlus show()
         {
-            final ImagePlus imp = Utils.display(source.getName(), this);
+            final ImagePlus imp = ImageJUtils.display(source.getName(), this);
             addInfo(imp);
             return imp;
         }
@@ -408,8 +396,8 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
             if (fileInfo != null && fileInfo[0] != null)
             {
                 final ExtendedFileInfo efi = fileInfo[0];
-                if (efi.extendedMetaData != null)
-                    imp.setProperty("Info", efi.extendedMetaData);
+                if (efi.getExtendedMetaData() != null)
+                    imp.setProperty("Info", efi.getExtendedMetaData());
                 else if (efi.info != null)
                     imp.setProperty("Info", efi.info);
             }
@@ -422,7 +410,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
         }
 
         /**
-         * Does nothing
+         * Does nothing.
          *
          * @see ij.VirtualStack#addSlice(java.lang.String)
          */
@@ -433,7 +421,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
         }
 
         /**
-         * Does nothing
+         * Does nothing.
          *
          * @see ij.VirtualStack#deleteSlice(int)
          */
@@ -450,7 +438,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
             ImageProcessor ip = null;
             int depthThisImage = 0;
             if (pixels != null)
-                ip = Utils.createProcessor(getWidth(), getHeight(), pixels);
+                ip = ImageJUtils.createProcessor(getWidth(), getHeight(), pixels);
             else
             {
                 ip = new ByteProcessor(getWidth(), getHeight());
@@ -557,7 +545,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
     public void log(String format, Object... args)
     {
         if (logProgress)
-            Utils.log(format, args);
+            ImageJUtils.log(format, args);
     }
 
     @Override

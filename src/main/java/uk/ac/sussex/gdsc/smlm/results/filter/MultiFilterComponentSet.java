@@ -37,7 +37,7 @@ public abstract class MultiFilterComponentSet implements Cloneable
     abstract public int getValidationFlags();
 
     /**
-     * Validate the peak
+     * Validate the peak.
      *
      * @param peak
      *            the peak

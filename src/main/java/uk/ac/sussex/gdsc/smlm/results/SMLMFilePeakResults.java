@@ -24,19 +24,19 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
- * Saves the fit results to file
+ * Saves the fit results to file.
  */
 public abstract class SMLMFilePeakResults extends FilePeakResults
 {
     /** The flag for the end frame. Used in the file format version string. */
-    public final static int FLAG_END_FRAME = 0x0001;
+    public static final int FLAG_END_FRAME = 0x0001;
     /** The flag for the id. Used in the file format version string. */
-    public final static int FLAG_ID = 0x0002;
+    public static final int FLAG_ID = 0x0002;
     /** The flag for the precision. Used in the file format version string. */
-    public final static int FLAG_PRECISION = 0x0004;
+    public static final int FLAG_PRECISION = 0x0004;
 
     /**
-     * The version
+     * The version.
      *
      * <ul>
      * <li>V1 = Version 1 had signal and amplitude in the results. It did not have the version string.
@@ -45,7 +45,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
      * <li>V4 = Version 4 added mean intensity field to the standard data
      * </ul>
      */
-    public final static int VERSION = 4;
+    public static final int VERSION = 4;
 
     private final boolean showDeviations;
     private final boolean showEndFrame;

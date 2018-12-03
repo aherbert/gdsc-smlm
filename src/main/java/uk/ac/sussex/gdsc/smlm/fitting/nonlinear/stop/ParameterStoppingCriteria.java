@@ -49,7 +49,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
     public ParameterStoppingCriteria(Gaussian2DFunction func)
     {
         super(func);
-        eq = new DoubleEquality(DoubleEquality.getMaxRelativeError(significantDigits), 1e-16);
+        eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(significantDigits), 1e-16);
     }
 
     /** {@inheritDoc} */
@@ -147,7 +147,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
     }
 
     /**
-     * Set the change in parameters that defines a negligible amount
+     * Set the change in parameters that defines a negligible amount.
      *
      * @param significantDigits
      *            the significantDigits to set
@@ -155,12 +155,12 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
     public void setSignificantDigits(int significantDigits)
     {
         this.significantDigits = significantDigits;
-        eq.setMaxRelativeError(DoubleEquality.getMaxRelativeError(significantDigits));
+        eq.setMaxRelativeError(DoubleEquality.getRelativeErrorTerm(significantDigits));
         angleLimit = 1.0 / FastMath.pow(10, significantDigits - 1);
     }
 
     /**
-     * @return the significantDigits
+     * @return the significantDigits.
      */
     public int getSignificantDigits()
     {

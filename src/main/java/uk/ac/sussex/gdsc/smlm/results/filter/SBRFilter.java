@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 public class SBRFilter extends DirectFilter
 {
     /**
-     * The signal-to-background ratio (SBR)
+     * The signal-to-background ratio (SBR).
      */
     @XStreamAsAttribute
     final float sbr;

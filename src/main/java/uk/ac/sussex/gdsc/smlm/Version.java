@@ -73,7 +73,7 @@ public class Version {
   }
 
   /**
-   * Get the GDSC SMLM version
+   * Get the GDSC SMLM version.
    *
    * @return The uk.ac.sussex.gdsc.smlm package version
    */
@@ -82,7 +82,7 @@ public class Version {
   }
 
   /**
-   * Get the GDSC SMLM package build date
+   * Get the GDSC SMLM package build date.
    *
    * @return The uk.ac.sussex.gdsc.smlm package build date
    */
@@ -91,7 +91,7 @@ public class Version {
   }
 
   /**
-   * Get the GDSC SMLM package build number
+   * Get the GDSC SMLM package build number.
    *
    * @return The uk.ac.sussex.gdsc.smlm package build number
    */
@@ -100,7 +100,7 @@ public class Version {
   }
 
   /**
-   * Get the major version
+   * Get the major version.
    *
    * @return The major version (or 0 if unknown)
    */
@@ -113,7 +113,7 @@ public class Version {
   }
 
   /**
-   * Get the minor version
+   * Get the minor version.
    *
    * @return The minor version (or 0 if unknown)
    */
@@ -126,7 +126,7 @@ public class Version {
   }
 
   /**
-   * Get the patch version
+   * Get the patch version.
    *
    * @return The patch version (or 0 if unknown)
    */
@@ -139,7 +139,7 @@ public class Version {
   }
 
   /**
-   * Get a string with the major, minor and patch versions
+   * Get a string with the major, minor and patch versions.
    *
    * @return Major.Minor.Patch
    */

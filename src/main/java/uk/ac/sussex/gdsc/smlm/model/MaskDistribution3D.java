@@ -493,7 +493,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * @return The number of non-zero pixels in the mask
+     * @return The number of non-zero pixels in the mask.
      */
     public int getSize()
     {
@@ -501,7 +501,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * @return The width of the mask in pixels
+     * @return The width of the mask in pixels.
      */
     public int getWidth()
     {
@@ -509,7 +509,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * @return The height of the mask in pixels
+     * @return The height of the mask in pixels.
      */
     public int getHeight()
     {
@@ -517,7 +517,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * @return The depth of the mask in pixels
+     * @return The depth of the mask in pixels.
      */
     public int getDepth()
     {
@@ -525,7 +525,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * @return The X-scale
+     * @return The X-scale.
      */
     public double getScaleX()
     {
@@ -533,7 +533,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * @return The Y-scale
+     * @return The Y-scale.
      */
     public double getScaleY()
     {
@@ -541,7 +541,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * @return The mask (packed in ZYX order)
+     * @return The mask (packed in ZYX order).
      */
     protected int[] getMask()
     {
@@ -549,7 +549,7 @@ public class MaskDistribution3D implements SpatialDistribution
     }
 
     /**
-     * The UniformDistribution to pick the sub pixel x,y coordinates and slice z-depth
+     * The UniformDistribution to pick the sub pixel x,y coordinates and slice z-depth.
      *
      * @param uniformDistribution
      *            the uniformDistribution to set

@@ -41,7 +41,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
     private float[] data2 = null;
 
     /**
-     * Create the spot filter
+     * Create the spot filter.
      *
      * @param search
      *            The search width for non-maximum suppression
@@ -136,7 +136,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
     }
 
     /**
-     * @return the border at the edge to ignore for maxima
+     * @return the border at the edge to ignore for maxima.
      */
     public int getBorder()
     {
@@ -158,7 +158,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
     {
         final MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
         // Ensure the object is duplicated and not passed by reference.
-        f.nms = nms.clone();
+        f.nms = nms.copy();
         f.data2 = null;
         return f;
     }

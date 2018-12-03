@@ -52,9 +52,9 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
     /** The x1 position. */
     protected double x1pos;
 
-    /** The amplitude/height normalisation: 1/(2*pi*sx*sy). */
+    /** The amplitude./height normalisation: 1/(2*pi*sx*sy). */
     protected double n;
-    /** The amplitude/height. */
+    /** The amplitude./height. */
     protected double height;
     /** position pre-factor */
     protected double aa;
@@ -62,7 +62,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
     protected double aa2;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param maxx
      *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)

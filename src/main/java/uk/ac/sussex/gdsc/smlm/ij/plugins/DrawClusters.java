@@ -40,11 +40,11 @@ import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.LUT;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.process.LUTHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -161,10 +161,10 @@ public class DrawClusters implements PlugIn
                 final ImageStack stack = new ImageStack(w, h, maxFrame);
                 for (int i = 1; i <= maxFrame; i++)
                     stack.setPixels(bp.getPixels(), i); // Do not clone as the image is empty
-                imp = Utils.display(TITLE, stack);
+                imp = ImageJUtils.display(TITLE, stack);
             }
             else
-                imp = Utils.display(TITLE, bp);
+                imp = ImageJUtils.display(TITLE, bp);
 
             // Enlarge
             final ImageWindow iw = imp.getWindow();
@@ -181,7 +181,7 @@ public class DrawClusters implements PlugIn
         // Create ROIs and store data to sort them
         final Roi[] rois = new Roi[count];
         final int[][] frames = (isUseStackPosition) ? new int[count][] : null;
-        final int[] indices = SimpleArrayUtils.newArray(count, 0, 1);
+        final int[] indices = SimpleArrayUtils.natural(count);
         final double[] values = new double[count];
         for (int i = 0; i < count; i++)
         {
@@ -217,9 +217,6 @@ public class DrawClusters implements PlugIn
             rois[i] = roi;
             switch (sort)
             {
-                case 0:
-                default:
-                    break;
                 case 1: // Sort by ID
                     values[i] = traces[i].getId();
                     break;
@@ -238,15 +235,18 @@ public class DrawClusters implements PlugIn
                 case 6: // Mean / Frame
                     values[i] = -traces[i].getMeanPerFrame();
                     break;
+                case 0: // No sort
+                default:
+                    break;
             }
         }
 
         if (sort > 0)
-            Sort.sort(indices, values);
+            SortUtils.sortIndices(indices, values, true);
 
         // Draw the traces as ROIs on an overlay
         final Overlay o = new Overlay();
-        final LUT lut = LUTHelper.createLUT(DrawClusters.lut);
+        final LUT lut = LutHelper.createLut(DrawClusters.lut);
         final double scale = 256.0 / count;
         if (frames != null)
         {
@@ -255,7 +255,7 @@ public class DrawClusters implements PlugIn
             for (int i = 0; i < count; i++)
             {
                 final int index = indices[i];
-                final Color c = LUTHelper.getColour(lut, (int) (i * scale));
+                final Color c = LutHelper.getColour(lut, (int) (i * scale));
                 final PolygonRoi roi = (PolygonRoi) rois[index];
                 roi.setFillColor(c);
                 roi.setStrokeColor(c);
@@ -313,7 +313,7 @@ public class DrawClusters implements PlugIn
         gd.addChoice("Sort", sorts, sorts[sort]);
         gd.addCheckbox("Spline_fit (traces only)", splineFit);
         gd.addCheckbox("Use_stack_position", useStackPosition);
-        gd.addChoice("LUT", LUTHelper.luts, LUTHelper.luts[lut]);
+        gd.addChoice("LUT", LutHelper.getLutNames(), lut);
 
         gd.showDialog();
 

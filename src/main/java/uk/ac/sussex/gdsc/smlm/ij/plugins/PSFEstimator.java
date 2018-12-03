@@ -40,10 +40,10 @@ import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
@@ -119,7 +119,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
     {
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
         if (imp == null)
         {
             IJ.noImage();
@@ -436,7 +436,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
         addToResultTable(iteration++, 0, params, params_dev, p);
 
         if (!calculateStatistics(fitter, params, params_dev))
-            return (Utils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
+            return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
 
         if (!addToResultTable(iteration++, size(), params, params_dev, p))
             return BAD_ESTIMATE;
@@ -446,7 +446,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
         do
         {
             if (!calculateStatistics(fitter, params, params_dev))
-                return (Utils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
+                return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
 
             try
             {
@@ -631,7 +631,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
         final int[] slices = new int[stack.getSize()];
         for (int i = 0; i < slices.length; i++)
             slices[i] = i + 1;
-        Random.shuffle(slices, new Well19937c());
+        RandomUtils.shuffle(slices, new Well19937c());
 
         IJ.showStatus("Fitting ...");
 
@@ -648,11 +648,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
             final FitJob job = new FitJob(slice, IJImageConverter.getData(ip), roi);
             engine.run(job);
 
-            if (sampleSizeReached() || Utils.isInterrupted())
+            if (sampleSizeReached() || ImageJUtils.isInterrupted())
                 break;
         }
 
-        if (Utils.isInterrupted())
+        if (ImageJUtils.isInterrupted())
         {
             IJ.showProgress(1);
             engine.end(true);
@@ -688,21 +688,20 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
         if (settings.getShowHistograms())
         {
-            final int[] idList = new int[NAMES.length];
-            int count = 0;
-            boolean requireRetile = false;
+            final HistogramPlotBuilder builder = new HistogramPlotBuilder(TITLE)
+                .setNumberOfBins(settings.getHistogramBins());
+            final WindowOrganiser wo = new WindowOrganiser();
             for (int ii = 0; ii < 3; ii++)
             {
                 if (sampleNew[ii].getN() == 0)
                     continue;
-                final StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
-                idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.getHistogramBins(),
-                        "Mean = " + Utils.rounded(stats.getMean()) + ". Median = " +
-                                Utils.rounded(sampleNew[ii].getPercentile(50)));
-                requireRetile = requireRetile || Utils.isNewWindow();
+                final StoredDataStatistics stats = StoredDataStatistics.create(sampleNew[ii].getValues());
+                builder.setData(stats).setName(NAMES[ii])
+                  .setPlotLabel(
+                        "Mean = " + MathUtils.rounded(stats.getMean()) + ". Median = " +
+                                MathUtils.rounded(sampleNew[ii].getPercentile(50))).show(wo);
             }
-            if (requireRetile && count > 0)
-                WindowOrganiser.tileWindows(Arrays.copyOf(idList, count));
+            wo.tile();
         }
 
         if (size() < 2)
@@ -736,7 +735,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
     }
 
     /**
-     * Create the result window (if it is not available)
+     * Create the result window (if it is not available).
      */
     private static void createResultsWindow()
     {

@@ -32,7 +32,7 @@ public class FixedLifetimeImageModel extends ImageModel
     private double next = 0;
 
     /**
-     * Construct a new image model
+     * Construct a new image model.
      *
      * @param tOn
      *            Fixed on-state time

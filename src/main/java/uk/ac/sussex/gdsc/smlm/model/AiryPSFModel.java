@@ -36,7 +36,7 @@ import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Contains methods for generating models of a Point Spread Function using a Airy pattern.
@@ -62,12 +62,12 @@ public class AiryPSFModel extends PSFModel
     private static PolynomialSplineFunction spline;
 
     /**
-     * The zeros of J1(x) corresponding to the rings of the Airy pattern
+     * The zeros of J1(x) corresponding to the rings of the Airy pattern.
      */
     public static double[] RINGS = { 0, 3.8317, 7.0156, 10.1735, 13.3237, 16.4706 };
 
     /**
-     * The Airy power corresponding to the rings of the Airy pattern
+     * The Airy power corresponding to the rings of the Airy pattern.
      */
     public static double[] POWER;
     static
@@ -391,7 +391,7 @@ public class AiryPSFModel extends PSFModel
 
         // Pre-compute the Airy intensity used for interpolation.
         // Find the maximum distance from the centre to the edge of the image (normalised using the widths)
-        final double max = Maths.max(x0 / w0, x1 / w1, (x0range - x0) / w0, (x1range - x1) / w1);
+        final double max = MathUtils.max(x0 / w0, x1 / w1, (x0range - x0) / w0, (x1range - x1) / w1);
         // Find the maximum distance needed to evaluate the Airy pattern
         final double maxD = FastMath.min(RINGS[ring], Math.sqrt(2 * max * max));
         // Limit the total samples used for interpolation but always sample at least every pixel:
@@ -496,7 +496,7 @@ public class AiryPSFModel extends PSFModel
     }
 
     /**
-     * Calculate the intensity of the Airy pattern at the given distances by interpolation using the lookup table
+     * Calculate the intensity of the Airy pattern at the given distances by interpolation using the lookup table.
      *
      * @param d0
      *            squared distance in dimension 0
@@ -640,7 +640,7 @@ public class AiryPSFModel extends PSFModel
     }
 
     /**
-     * @return The width in dimension 0 for the last drawn Airy pattern
+     * @return The width in dimension 0 for the last drawn Airy pattern.
      */
     public double getW0()
     {
@@ -648,7 +648,7 @@ public class AiryPSFModel extends PSFModel
     }
 
     /**
-     * @return The width in dimension 1 for the last drawn Airy pattern
+     * @return The width in dimension 1 for the last drawn Airy pattern.
      */
     public double getW1()
     {
@@ -781,7 +781,7 @@ public class AiryPSFModel extends PSFModel
     }
 
     /**
-     * Sample from an Airy distribution
+     * Sample from an Airy distribution.
      *
      * @param n
      *            The number of samples

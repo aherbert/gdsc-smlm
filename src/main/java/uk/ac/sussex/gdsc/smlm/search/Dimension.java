@@ -24,26 +24,26 @@
 package uk.ac.sussex.gdsc.smlm.search;
 
 /**
- * Specify the dimensions for a search
+ * Specify the dimensions for a search.
  */
 public interface Dimension
 {
     /**
-     * Gets the current lower bound of the range
+     * Gets the current lower bound of the range.
      *
      * @return the current lower bound of the range
      */
     public double getLower();
 
     /**
-     * Gets the current upper bound of the range
+     * Gets the current upper bound of the range.
      *
      * @return the current upper bound of the range
      */
     public double getUpper();
 
     /**
-     * Gets the current centre of the range
+     * Gets the current centre of the range.
      *
      * @return the current centre of the range
      */

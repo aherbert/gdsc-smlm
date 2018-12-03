@@ -24,12 +24,12 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
 /**
- * Allow the position of executing code to be reported
+ * Allow the position of executing code to be reported.
  */
 public class CodeReporter
 {
     /**
-     * Print the classname, methodname and line number from the throwable
+     * Print the classname, methodname and line number from the throwable.
      *
      * @param t
      *            the throwable

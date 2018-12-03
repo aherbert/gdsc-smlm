@@ -24,11 +24,11 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
 /**
- * Provides utilities for working with JSON
+ * Provides utilities for working with JSON.
  */
 public class JSONUtils
 {
-    //** Allowed characters */
+    //** Allowed characters. */
     private static final char[] ALLOWED = { '-', '_' };
 
     /**

@@ -53,7 +53,7 @@ public class KernelFilter extends BaseWeightedFilter
     }
 
     /**
-     * Updates the weighted normaliser for the convolution
+     * Updates the weighted normaliser for the convolution.
      */
     private void updateWeightedNormaliser()
     {
@@ -361,7 +361,7 @@ public class KernelFilter extends BaseWeightedFilter
     }
 
     /**
-     * Pad an image processor to make the width and height an odd number
+     * Pad an image processor to make the width and height an odd number.
      *
      * @param fp
      *            the fp

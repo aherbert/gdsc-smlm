@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomAdaptor;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -34,7 +35,6 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.core.utils.TurboList.SimplePredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -236,7 +236,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     public boolean removeIf(final PeakResultPredicate filter)
     {
         // Delegate to the list implementation
-        return this.results.removeIf(new SimplePredicate<PeakResult>()
+        return this.results.removeIf(new Predicate<PeakResult>()
         {
             @Override
             public boolean test(PeakResult t)

@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.predicates.IdPeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 
 /**
- * Provides a cache of the view of the results
+ * Provides a cache of the view of the results.
  */
 public class CachedPeakResultView implements PeakResultView
 {
@@ -99,7 +99,7 @@ public class CachedPeakResultView implements PeakResultView
     }
 
     /**
-     * Clear the cache
+     * Clear the cache.
      */
     public void clear()
     {

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 
 /**
- * Create a Fast MLE gradient procedure
+ * Create a Fast MLE gradient procedure.
  */
 public class FastMLEGradient2ProcedureFactory
 {

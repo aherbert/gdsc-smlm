@@ -34,7 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import uk.ac.sussex.gdsc.core.data.procedures.TrivalueProcedure;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
@@ -336,7 +336,7 @@ public class CubicSplineData
      * @throws IllegalArgumentException
      *             If the number of sample is not positive
      */
-    public void sample(int n, TrivalueProcedure p, IJTrackProgress progress)
+    public void sample(int n, TrivalueProcedure p, ImageJTrackProgress progress)
     {
         sample(n, n, n, p, progress);
     }

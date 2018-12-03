@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Filter results using Precision with background from noise
+ * Filter results using Precision with background from noise.
  */
 public class MultiFilterVarianceComponent extends MultiFilterComponent
 {

@@ -30,7 +30,7 @@ import java.util.Set;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.ga.Chromosome;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
@@ -50,21 +50,21 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
  */
 public abstract class HysteresisFilter extends Filter
 {
-    /** The default absolute distance increment */
+    /** The default absolute distance increment. */
     public static final double DEFAULT_ABSOLUTE_DISTANCE_INCREMENT = 5;
-    /** The default relative distance increment */
+    /** The default relative distance increment. */
     public static final double DEFAULT_RELATIVE_DISTANCE_INCREMENT = 0.05;
-    /** The default time increment (in seconds) */
+    /** The default time increment (in seconds). */
     public static final double DEFAULT_SECONDS_TIME_INCREMENT = 0.05;
-    /** The default time increment (in frames) */
+    /** The default time increment (in frames). */
     public static final double DEFAULT_FRAMES_TIME_INCREMENT = 1;
-    /** The default range for absolute distance */
+    /** The default range for absolute distance. */
     public static final double DEFAULT_ABSOLUTE_DISTANCE_RANGE = 200;
-    /** The default range for relative distance */
+    /** The default range for relative distance. */
     public static final double DEFAULT_RELATIVE_DISTANCE_RANGE = 1;
-    /** The default range for time (in seconds) */
+    /** The default range for time (in seconds). */
     public static final double DEFAULT_SECONDS_TIME_RANGE = 5;
-    /** The default range for time (in frames) */
+    /** The default range for time (in frames). */
     public static final double DEFAULT_FRAMES_TIME_RANGE = 10;
 
     /** The search distance. */

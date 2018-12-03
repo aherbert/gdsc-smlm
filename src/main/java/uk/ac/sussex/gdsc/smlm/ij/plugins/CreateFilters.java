@@ -51,7 +51,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -223,7 +223,7 @@ public class CreateFilters implements PlugIn, ItemListener
     {
         // Save the output to file
         IJ.showStatus("Saving filters");
-        final String filename = Utils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
+        final String filename = ImageJUtils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
         if (filename != null)
         {
             filterSettings.setFilterSetFilename(filename);
@@ -259,7 +259,7 @@ public class CreateFilters implements PlugIn, ItemListener
         gd.addCheckbox("Enumerate_early attributes first", enumerateEarly);
         gd.addCheckbox("Show_demo_filters", false);
 
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             final Checkbox cb = (Checkbox) gd.getCheckboxes().get(1);
             cb.addItemListener(this);

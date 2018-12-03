@@ -1,23 +1,24 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.XmlUtils;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.TimingResult;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 
-import uk.ac.sussex.gdsc.core.utils.XmlUtils;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class FilterTest
@@ -39,7 +40,7 @@ public class FilterTest
     @SeededTest
     public void canCompareMultiFilter(RandomSeed seed)
     {
-        final UniformRandomProvider UniformRandomProvider = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
         final MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
         for (int i = 1000; i-- > 0;)
         {
@@ -54,7 +55,7 @@ public class FilterTest
     @SeededTest
     public void canCompareMultiFilter2(RandomSeed seed)
     {
-        final UniformRandomProvider UniformRandomProvider = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
         final MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
         for (int i = 1000; i-- > 0;)
         {
@@ -69,9 +70,9 @@ public class FilterTest
     @SeededTest
     public void directCompareMultiFilterIsFaster(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final UniformRandomProvider UniformRandomProvider = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
         final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
         final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -207,7 +208,7 @@ public class FilterTest
     public void canSerialiseMultiFilter(RandomSeed seed)
     {
         // Check the XStream serialisation supports inheritance
-        final UniformRandomProvider UniformRandomProvider = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
         testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
         testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
         testSerialisation(new MultiFilterCRLB(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
@@ -219,7 +220,7 @@ public class FilterTest
         {
             final MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
             final String xml = f1.toXML();
-            logger.log(TestLog.getRecord(Level.FINE, XmlUtils.prettyPrintXml(xml)));
+            logger.log(TestLogUtils.getRecord(Level.FINE, XmlUtils.prettyPrintXml(xml)));
             final MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
             Assertions.assertTrue(f1.getClass().equals(f2.getClass()));
             Assertions.assertEquals(f1, f2);

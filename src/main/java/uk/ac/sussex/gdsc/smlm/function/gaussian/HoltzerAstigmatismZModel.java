@@ -35,13 +35,13 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
  */
 public class HoltzerAstigmatismZModel implements AstigmatismZModel
 {
-    /** The width in the x focal plane */
+    /** The width in the x focal plane. */
     public final double s0x;
-    /** The width in the y focal plane */
+    /** The width in the y focal plane. */
     public final double s0y;
-    /** the gamma parameter (half the distance between the focal planes) */
+    /** the gamma parameter (half the distance between the focal planes). */
     public final double gamma;
-    /** one over the depth of focus squared (1/d^2) */
+    /** one over the depth of focus squared (1./d^2) */
     public final double one_d2;
     /** Empirical constant A for the x-astigmatism of the PSF */
     public final double Ax;

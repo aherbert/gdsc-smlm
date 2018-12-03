@@ -23,19 +23,19 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.Arrays;
-import java.util.logging.Logger;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class FunctionHelperTest
@@ -152,7 +152,7 @@ public class FunctionHelperTest
                 //Shape shape = new Ellipse2D.Double(cx - sx, cx - sy, 2 * sx, 2 * sy);
                 //imp.setRoi(new ShapeRoi(shape));
                 //IJ.save(imp, "/Users/ah403/1.tif");
-                final double scale = Maths.sum(values) / intensity;
+                final double scale = MathUtils.sum(values) / intensity;
                 for (int range = 1; range <= 3; range++)
                 {
                     final double e = Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, range);

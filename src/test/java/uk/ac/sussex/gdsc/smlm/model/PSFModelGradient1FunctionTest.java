@@ -23,8 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -32,7 +30,11 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction.ErfFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class PSFModelGradient1FunctionTest
@@ -62,6 +64,7 @@ public class PSFModelGradient1FunctionTest
         final ErfGaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
         f.setErfFunction(ErfFunction.COMMONS_MATH);
         final double[] a2 = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
+        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-8, 0);
 
         final double c = maxx * 0.5;
         for (int i = -1; i <= 1; i++)
@@ -111,8 +114,8 @@ public class PSFModelGradient1FunctionTest
 
                         for (int ii = 0; ii < ve.length; ii++)
                         {
-                            ExtraAssertions.assertEqualsRelative(ve[ii], vo[ii], 1e-8);
-                            ExtraAssertions.assertArrayEqualsRelative(ge[ii], go[ii], 1e-8);
+                            TestAssertions.assertTest(ve[ii], vo[ii], equality);
+                            TestAssertions.assertArrayTest(ge[ii], go[ii], equality);
                         }
                     }
                 }

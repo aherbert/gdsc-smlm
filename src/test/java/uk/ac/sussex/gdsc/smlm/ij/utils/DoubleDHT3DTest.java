@@ -23,13 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.util.Arrays;
-
-import org.jtransforms.fft.DoubleFFT_3D;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import ij.ImageStack;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
@@ -37,14 +30,22 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 
+import ij.ImageStack;
+
+import org.jtransforms.fft.DoubleFFT_3D;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
 @SuppressWarnings({ "javadoc" })
 public class DoubleDHT3DTest
 {
     static int size = 16;
     static double centre = (size - 1) / 2.0;
 
-    final static double gamma = 2;
-    final static int zDepth = 5;
+    static final double gamma = 2;
+    static final int zDepth = 5;
     private static QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
     private static DoubleDHT3D createData(double cx, double cy, double cz)

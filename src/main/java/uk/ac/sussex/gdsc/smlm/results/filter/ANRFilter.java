@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using an amplitude-to-noise ratio (ANR) threshold
+ * Filter results using an amplitude-to-noise ratio (ANR) threshold.
  */
 public class ANRFilter extends DirectFilter
 {

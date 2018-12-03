@@ -1,50 +1,53 @@
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestCounter;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestCounter;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class SolverSpeedTest implements Function<RandomSeed, Object>
 {
     private static Logger logger;
-    private static DataCache<RandomSeed, Object> dataCache;
+    private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
 
     @BeforeAll
     public static void beforeAll()
     {
         logger = Logger.getLogger(SolverSpeedTest.class.getName());
-        dataCache = new DataCache<>();
+        ConcurrentHashMap = new ConcurrentHashMap<>();
     }
 
     @AfterAll
     public static void afterAll()
     {
-        dataCache.clear();
-        dataCache = null;
+        ConcurrentHashMap.clear();
+        ConcurrentHashMap = null;
         logger = null;
     }
 
@@ -62,7 +65,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
 
     private SolverSpeedTestData ensureData(RandomSeed seed, int size)
     {
-        final SolverSpeedTestData data = (SolverSpeedTestData) dataCache.getOrComputeIfAbsent(seed, this);
+        final SolverSpeedTestData data = (SolverSpeedTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
         final ArrayList<float[][]> Adata = data.Adata;
         final ArrayList<float[]> Bdata = data.Bdata;
         if (Adata.size() < size)
@@ -85,7 +88,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
     @Override
     public Object apply(RandomSeed source)
     {
-        return new SolverSpeedTestData(RNGFactory.create(source.getSeed()));
+        return new SolverSpeedTestData(RngUtils.create(source.getSeed()));
     }
 
     @SeededTest
@@ -104,6 +107,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
         final int failureLimit = TestCounter.computeFailureLimit(ITER, 0.1);
         final TestCounter failCounter = new TestCounter(failureLimit, 2);
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-2, 0);
+
         int c = 0;
         for (int i = 0; i < A.size(); i++)
         {
@@ -118,10 +123,10 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             if (r1 && r2)
             {
                 failCounter.run(0, () -> {
-                    ExtraAssertions.assertArrayEqualsRelative(b, b2, 1e-2, "Different b result");
+                    TestAssertions.assertArrayTest(b, b2, predicate, "Different b result");
                 });
                 failCounter.run(0, () -> {
-                    ExtraAssertions.assertArrayEqualsRelative(a, a2, 1e-2, "Different a result");
+                    TestAssertions.assertArrayTest(a, a2, predicate, "Different a result");
                 });
             }
             else
@@ -147,6 +152,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
         final int failureLimit = TestCounter.computeFailureLimit(ITER, 0.1);
         final TestCounter failCounter = new TestCounter(failureLimit);
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-2, 0);
+
         int c = 0;
         for (int i = 0; i < ITER; i++)
         {
@@ -159,7 +166,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             //Assertions.assertTrue("Different solve result @ " + i, r1 == r2);
             if (r1 && r2)
                 failCounter.run(() -> {
-                    ExtraAssertions.assertArrayEqualsRelative(b, b2, 1e-2, "Different b result");
+                    TestAssertions.assertArrayTest(b, b2, predicate, "Different b result");
                 });
             else
                 c++;
@@ -183,6 +190,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
         final int failureLimit = TestCounter.computeFailureLimit(ITER, 0.1);
         final TestCounter failCounter = new TestCounter(failureLimit, 2);
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-2, 0);
+
         int c = 0;
         for (int i = 0; i < A.size(); i++)
         {
@@ -200,10 +209,10 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
                 for (int j = a1.length; j-- > 0;)
                     a1[j] = SimpleArrayUtils.toDouble(a[j]);
                 failCounter.run(0, () -> {
-                    ExtraAssertions.assertArrayEqualsRelative(b1, b2, 1e-2, "Different b result");
+                    TestAssertions.assertArrayTest(b1, b2, predicate, "Different b result");
                 });
                 failCounter.run(1, () -> {
-                    ExtraAssertions.assertArrayEqualsRelative(a1, a2, 1e-2, "Different a result");
+                    TestAssertions.assertArrayTest(a1, a2, predicate, "Different a result");
                 });
             }
             else
@@ -217,7 +226,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
     @SeededTest
     public void solveLinearWithInversionIsNotFasterThanGaussJordanFloat(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int ITER = 10000;
         final SolverSpeedTestData data = ensureData(seed, ITER);
@@ -243,14 +252,14 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             t2 = Math.min(t2, System.nanoTime() - start2);
         }
 
-        logger.log(TestLog.getTimingRecord("GaussJordanFloat", t1, "LinearSolver.solveLinearWithInversion", t2));
+        logger.log(TestLogUtils.getTimingRecord("GaussJordanFloat", t1, "LinearSolver.solveLinearWithInversion", t2));
     }
 
     @SpeedTag
     @SeededTest
     public void solveLinearIsFasterThanGaussJordanFloat(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int ITER = 10000;
         final SolverSpeedTestData data = ensureData(seed, ITER);
@@ -276,7 +285,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             t2 = Math.min(t2, System.nanoTime() - start2);
         }
 
-        logger.log(TestLog.getTimingRecord("GaussJordanFloat", t1, "LinearSolver.solveLinear", t2));
+        logger.log(TestLogUtils.getTimingRecord("GaussJordanFloat", t1, "LinearSolver.solveLinear", t2));
     }
 
     protected void runFloat(ArrayList<float[][]> A, ArrayList<float[]> B, int ITER, GaussJordan solver)
@@ -289,7 +298,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
     @SeededTest
     public void solveLinearWithInversionIsNotFasterThanGaussJordanDouble(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int ITER = 10000;
         final SolverSpeedTestData data = ensureData(seed, ITER);
@@ -315,14 +324,14 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             t2 = Math.min(t2, System.nanoTime() - start2);
         }
 
-        logger.log(TestLog.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveLinearWithInversion", t2));
+        logger.log(TestLogUtils.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveLinearWithInversion", t2));
     }
 
     @SpeedTag
     @SeededTest
     public void solveLinearIsFasterThanGaussJordanDouble(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int ITER = 10000;
         final SolverSpeedTestData data = ensureData(seed, ITER);
@@ -348,14 +357,14 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             t2 = Math.min(t2, System.nanoTime() - start2);
         }
 
-        logger.log(TestLog.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveLinear", t2));
+        logger.log(TestLogUtils.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveLinear", t2));
     }
 
     @SpeedTag
     @SeededTest
     public void solveCholeskyIsFasterThanGaussJordanDouble(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int ITER = 10000;
         final SolverSpeedTestData data = ensureData(seed, ITER);
@@ -381,14 +390,14 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             t2 = Math.min(t2, System.nanoTime() - start2);
         }
 
-        logger.log(TestLog.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveCholesky", t2));
+        logger.log(TestLogUtils.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveCholesky", t2));
     }
 
     @SpeedTag
     @SeededTest
     public void solveCholeskyLDLTIsFasterThanGaussJordanDouble(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int ITER = 10000;
         final SolverSpeedTestData data = ensureData(seed, ITER);
@@ -414,14 +423,14 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             t2 = Math.min(t2, System.nanoTime() - start2);
         }
 
-        logger.log(TestLog.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveCholeskyLDLT", t2));
+        logger.log(TestLogUtils.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solveCholeskyLDLT", t2));
     }
 
     @SpeedTag
     @SeededTest
     public void solveIsFasterThanGaussJordanDouble(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int ITER = 10000;
         final SolverSpeedTestData data = ensureData(seed, ITER);
@@ -447,7 +456,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object>
             t2 = Math.min(t2, System.nanoTime() - start2);
         }
 
-        logger.log(TestLog.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solve", t2));
+        logger.log(TestLogUtils.getTimingRecord("GaussJordanDouble", t1, "LinearSolver.solve", t2));
     }
 
     private static boolean createData(UniformRandomProvider rand, float[][] alpha, float[] beta,

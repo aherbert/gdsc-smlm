@@ -74,7 +74,7 @@ public abstract class SpotFilter implements Cloneable
     protected abstract Spot[] find(final float[] data, final int width, final int height);
 
     /**
-     * Get the pre-processed data produced by the find method
+     * Get the pre-processed data produced by the find method.
      *
      * @return The pre-processed data produced by the {@link #find(float[], int, int)} method
      */
@@ -98,8 +98,9 @@ public abstract class SpotFilter implements Cloneable
     }
 
     /**
-     * List and then rank the candidate spots in the data. The list will be in the order defined by sorting the
-     * candidates.
+     * List and then rank the candidate spots in the data.
+     * 
+     * <p>The list will be in the order defined by sorting the candidates using the score in descending order.
      *
      * @param data
      *            The data
@@ -114,7 +115,7 @@ public abstract class SpotFilter implements Cloneable
         final Spot[] spots = find(data, width, height);
         if (spots == null)
             return new Spot[0];
-        Arrays.sort(spots);
+        Arrays.sort(spots, SpotScoreComparator.getInstance());
         return spots;
     }
 
@@ -142,7 +143,7 @@ public abstract class SpotFilter implements Cloneable
     }
 
     /**
-     * @return A description of the filter and parameters
+     * @return A description of the filter and parameters.
      */
     public String getDescription()
     {
@@ -150,17 +151,17 @@ public abstract class SpotFilter implements Cloneable
     }
 
     /**
-     * @return The name of the filter
+     * @return The name of the filter.
      */
     public abstract String getName();
 
     /**
-     * @return The parameters of the filter
+     * @return The parameters of the filter.
      */
     public abstract List<String> getParameters();
 
     /**
-     * Get the width spread of data used to process each position
+     * Get the width spread of data used to process each position.
      *
      * @return The spread
      */

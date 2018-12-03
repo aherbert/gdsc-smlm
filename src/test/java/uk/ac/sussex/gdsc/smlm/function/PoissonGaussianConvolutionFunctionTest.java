@@ -1,8 +1,16 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -10,18 +18,13 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianConvolutionFunctionTest
@@ -165,7 +168,7 @@ public class PoissonGaussianConvolutionFunctionTest
         }
 
         if (p2 < 0.98 || p2 > 1.02)
-            logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
+            logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
 
         return p2;
     }
@@ -188,13 +191,14 @@ public class PoissonGaussianConvolutionFunctionTest
         // Note: The input mu parameter is pre-gain.
         final double e = mu;
         final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-3, 0);
         for (int x = min; x <= max; x++)
         {
             final double p = f.likelihood(x, e);
             if (p == 0)
                 continue;
             final double logP = f.logLikelihood(x, e);
-            ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-3, msg);
+            TestAssertions.assertTest(Math.log(p), logP, predicate, msg);
         }
     }
 
@@ -202,7 +206,7 @@ public class PoissonGaussianConvolutionFunctionTest
     @SeededTest
     public void pdfFasterThanPMF(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         // Realistic CCD parameters for speed test
         final double s = 7.16;
@@ -216,7 +220,7 @@ public class PoissonGaussianConvolutionFunctionTest
                 .createWithStandardDeviation(1 / g, s);
         f2.setComputePMF(false);
 
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         // Generate realistic data from the probability mass function
         final double[][] samples = new double[photons.length][];
@@ -267,7 +271,7 @@ public class PoissonGaussianConvolutionFunctionTest
         for (int i = 0; i < 5; i++)
             t2 += run(f2, samples, photons);
 
-        logger.log(TestLog.getTimingRecord("cdf", t1, "pdf", t2));
+        logger.log(TestLogUtils.getTimingRecord("cdf", t1, "pdf", t2));
     }
 
     private static long run(PoissonGaussianConvolutionFunction f, double[][] samples, double[] photons)

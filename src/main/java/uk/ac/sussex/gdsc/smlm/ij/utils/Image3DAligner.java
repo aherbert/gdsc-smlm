@@ -37,12 +37,12 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 
 import ij.ImageStack;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineCalculator;
 import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
@@ -120,7 +120,7 @@ public class Image3DAligner implements Cloneable
     public enum SearchMode
     {
         /**
-         * Perform a binary search by condensing the cube vertices around the highest value of a tricubic interpolation
+         * Perform a binary search by condensing the cube vertices around the highest value of a tricubic interpolation.
          */
         BINARY,
         /** Use the local gradient of a tricubic interpolation to find the maximum. */
@@ -216,9 +216,9 @@ public class Image3DAligner implements Cloneable
         check3D(image);
         if (w < 2 || h < 2 || d < 2)
             throw new IllegalArgumentException("Require a 3D target image");
-        nc = Maths.nextPow2(Math.max(w, image.getWidth()));
-        nr = Maths.nextPow2(Math.max(h, image.getHeight()));
-        ns = Maths.nextPow2(Math.max(d, image.getSize()));
+        nc = MathUtils.nextPow2(Math.max(w, image.getWidth()));
+        nr = MathUtils.nextPow2(Math.max(h, image.getHeight()));
+        ns = MathUtils.nextPow2(Math.max(d, image.getSize()));
         // Check the image will fit in an Image3D
         Image3D.checkSize(nc, nr, ns, true);
         nr_by_nc = nr * nc;
@@ -435,7 +435,7 @@ public class Image3DAligner implements Cloneable
         // the code to report when the correlation value is incorrect.
 
         final double[] data = dht.getData();
-        final double[] limits = Maths.limits(data);
+        final double[] limits = MathUtils.limits(data);
         final double min = limits[0];
         final double max = limits[1];
 
@@ -573,9 +573,9 @@ public class Image3DAligner implements Cloneable
         check3D(image);
         if (w < 2 || h < 2 || d < 2)
             throw new IllegalArgumentException("Require a 3D target image");
-        nc = Maths.nextPow2(Math.max(w, image.getWidth()));
-        nr = Maths.nextPow2(Math.max(h, image.getHeight()));
-        ns = Maths.nextPow2(Math.max(d, image.getSize()));
+        nc = MathUtils.nextPow2(Math.max(w, image.getWidth()));
+        nr = MathUtils.nextPow2(Math.max(h, image.getHeight()));
+        ns = MathUtils.nextPow2(Math.max(d, image.getSize()));
         nr_by_nc = nr * nc;
         // Window and pad the reference
         setReference(createDHT(image, reference));
@@ -1008,8 +1008,8 @@ public class Image3DAligner implements Cloneable
                         int d1 = 0, d2 = 0;
                         for (int k = 0; k < 3; k++)
                         {
-                            d1 += Maths.pow2(xyz1[k] - centre[k]);
-                            d2 += Maths.pow2(xyz2[k] - centre[k]);
+                            d1 += MathUtils.pow2(xyz1[k] - centre[k]);
+                            d2 += MathUtils.pow2(xyz2[k] - centre[k]);
                         }
                         if (d2 < d1)
                         {
@@ -1042,9 +1042,9 @@ public class Image3DAligner implements Cloneable
             if (calc == null)
                 calc = new CubicSplineCalculator();
             // Avoid out-of-bounds errors. Only use the range that was normalised
-            final int x = Maths.clip(ix, ixw - 4, xyz[0] - 1);
-            final int y = Maths.clip(iy, iyh - 4, xyz[1] - 1);
-            final int z = Maths.clip(iz, izd - 4, xyz[2] - 1);
+            final int x = MathUtils.clip(ix, ixw - 4, xyz[0] - 1);
+            final int y = MathUtils.clip(iy, iyh - 4, xyz[1] - 1);
+            final int z = MathUtils.clip(iz, izd - 4, xyz[2] - 1);
             final DoubleImage3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
             region = crop.getData();
             final CustomTricubicFunction f = CustomTricubicFunction.create(calc.compute(region));
@@ -1190,11 +1190,11 @@ public class Image3DAligner implements Cloneable
         frequencyDomainCorrelationError = DoubleEquality.relativeError(o, e);
         if (frequencyDomainCorrelationError > 0.05)
             System.err.printf("3D Correlation Error = %s : Spatial = %s, Freq = %s\n",
-                    Utils.rounded(frequencyDomainCorrelationError), Double.toString(e), Double.toString(o));
+                    MathUtils.rounded(frequencyDomainCorrelationError), Double.toString(e), Double.toString(o));
     }
 
     /**
-     * Compute the sum from the rolling sum tables
+     * Compute the sum from the rolling sum tables.
      *
      * @param x_1
      *            the x value -1
@@ -1426,7 +1426,7 @@ public class Image3DAligner implements Cloneable
      */
     public void setEdgeWindow(double edgeWindow)
     {
-        this.edgeWindow = Maths.clip(0, 1, edgeWindow);
+        this.edgeWindow = MathUtils.clip(0, 1, edgeWindow);
     }
 
     /**
@@ -1514,7 +1514,7 @@ public class Image3DAligner implements Cloneable
      */
     public void setMinimumOverlap(double minimumOverlap)
     {
-        this.minimumOverlap = Maths.clip(0, 1, minimumOverlap);
+        this.minimumOverlap = MathUtils.clip(0, 1, minimumOverlap);
     }
 
     /**
@@ -1535,7 +1535,7 @@ public class Image3DAligner implements Cloneable
      */
     public void setMinimumDimensionOverlap(double minimumDimensionOverlap)
     {
-        this.minimumDimensionOverlap = Maths.clip(0, 1, minimumDimensionOverlap);
+        this.minimumDimensionOverlap = MathUtils.clip(0, 1, minimumDimensionOverlap);
     }
 
     /**

@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
- * Specifies a peak fitting result that spans multiple frames
+ * Specifies a peak fitting result that spans multiple frames.
  */
 public class ExtendedPeakResult extends IdPeakResult
 {

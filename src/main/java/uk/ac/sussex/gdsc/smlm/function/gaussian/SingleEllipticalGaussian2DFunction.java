@@ -50,9 +50,9 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 
     /** Set to true if the Gaussian has no rotation angle. */
     protected boolean zeroAngle;
-    /** The amplitude/height normalisation: 1/(2*pi*sx*sy). */
+    /** The amplitude./height normalisation: 1/(2*pi*sx*sy). */
     protected double n;
-    /** The amplitude/height. */
+    /** The amplitude./height. */
     protected double height;
     /** x0 position pre-factor */
     protected double aa;
@@ -84,7 +84,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
     protected double cy;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param maxx
      *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)

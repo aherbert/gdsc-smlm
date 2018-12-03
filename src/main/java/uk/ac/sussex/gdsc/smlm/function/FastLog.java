@@ -24,20 +24,20 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Base class for an algorithm computing a fast approximation to the log function
+ * Base class for an algorithm computing a fast approximation to the log function.
  */
 public abstract class FastLog
 {
     /**
-     * Natural logarithm of 2
+     * Natural logarithm of 2.
      */
     public static final double LN2 = Math.log(2);
     /**
-     * Natural logarithm of 2
+     * Natural logarithm of 2.
      */
     public static final float LN2F = (float) LN2;
 
-    /** The default value for n (the number of bits to keep from the mantissa) */
+    /** The default value for n (the number of bits to keep from the mantissa). */
     public static final int N = 13;
 
     /**

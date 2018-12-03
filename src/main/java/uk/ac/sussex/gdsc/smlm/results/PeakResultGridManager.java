@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows listing neighbours of a given
@@ -106,7 +106,7 @@ public class PeakResultGridManager
      */
     public PeakResultGridManager(PeakResult[] results, double resolution)
     {
-        this.resolution = Maths.max(1, (int) Math.ceil(resolution));
+        this.resolution = MathUtils.max(1, (int) Math.ceil(resolution));
         double maxx = 0, maxy = 0;
         for (final PeakResult p : results)
         {

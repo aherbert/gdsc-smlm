@@ -46,7 +46,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     private int label;
 
     /**
-     * Identity matrix for no rotation
+     * Identity matrix for no rotation.
      */
     private static final double[] I = new double[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
 
@@ -61,11 +61,11 @@ public class CompoundMoleculeModel extends MoleculeModel
     private double fraction = 1;
 
     /**
-     * The diffusion rate for the molecule
+     * The diffusion rate for the molecule.
      */
     private double diffusionRate = 0;
     /**
-     * The diffusion type for the molecule
+     * The diffusion type for the molecule.
      */
     private DiffusionType diffusionType = DiffusionType.RANDOM_WALK;
 
@@ -358,7 +358,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     }
 
     /**
-     * Get the rotation matrix for a rotation around an axis
+     * Get the rotation matrix for a rotation around an axis.
      *
      * @param axis
      *            axis
@@ -419,7 +419,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     }
 
     /**
-     * @return The number of molecules in the compound molecule
+     * @return The number of molecules in the compound molecule.
      */
     public int getSize()
     {
@@ -480,7 +480,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     }
 
     /**
-     * @return The fraction of a population that this molecule represents
+     * @return The fraction of a population that this molecule represents.
      */
     public double getFraction()
     {
@@ -488,7 +488,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     }
 
     /**
-     * Set the fraction of a population that this molecule represents
+     * Set the fraction of a population that this molecule represents.
      *
      * @param fraction
      *            the fraction to set
@@ -528,7 +528,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     }
 
     /**
-     * @return the diffusionRate
+     * @return the diffusionRate.
      */
     public double getDiffusionRate()
     {
@@ -545,7 +545,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     }
 
     /**
-     * Get the diffusion type
+     * Get the diffusion type.
      *
      * @return The diffusion type
      */
@@ -555,7 +555,7 @@ public class CompoundMoleculeModel extends MoleculeModel
     }
 
     /**
-     * Set the diffusion type
+     * Set the diffusion type.
      *
      * @param diffusionType
      *            The diffusion type

@@ -37,7 +37,7 @@ public class MedianDataProcessor extends DataProcessor
     private MedianFilter filter = new MedianFilter();
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param border
      *            The border to ignore for maxima
@@ -125,7 +125,7 @@ public class MedianDataProcessor extends DataProcessor
     }
 
     /**
-     * @return the smoothing width
+     * @return the smoothing width.
      */
     public int getSmooth()
     {

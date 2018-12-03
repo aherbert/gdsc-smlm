@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Base class for fail counters
+ * Base class for fail counters.
  */
 public abstract class BaseFailCounter implements FailCounter
 {

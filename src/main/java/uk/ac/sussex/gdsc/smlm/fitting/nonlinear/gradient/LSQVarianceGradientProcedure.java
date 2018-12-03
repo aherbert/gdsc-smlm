@@ -41,18 +41,18 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
  */
 public class LSQVarianceGradientProcedure implements Gradient1Procedure
 {
-    /** Returned when computation was OK */
+    /** Returned when computation was OK. */
     public static final int STATUS_OK = 0;
-    /** Returned when computation failed due to NaN values in the gradients */
+    /** Returned when computation failed due to NaN values in the gradients. */
     public static final int STATUS_BAD_GRADIENTS = 1;
-    /** Returned when computation failed to invert the information matrix */
+    /** Returned when computation failed to invert the information matrix. */
     public static final int STATUS_FAILED_INVERSION = 2;
 
     /** The function. */
     protected final Gradient1Function func;
 
     /**
-     * The number of gradients
+     * The number of gradients.
      */
     public final int n;
     /**

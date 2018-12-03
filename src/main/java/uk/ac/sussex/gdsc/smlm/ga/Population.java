@@ -50,7 +50,7 @@ public class Population<T extends Comparable<T>>
     private TrackProgress tracker = null;
 
     /**
-     * Create a population of individuals
+     * Create a population of individuals.
      *
      * @param individuals
      *            The population of individuals
@@ -72,7 +72,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * @return the individuals
+     * @return the individuals.
      */
     public List<? extends Chromosome<T>> getIndividuals()
     {
@@ -229,7 +229,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * Check for duplicates in the current and new populations
+     * Check for duplicates in the current and new populations.
      *
      * @param newIndividuals
      *            The new population
@@ -250,7 +250,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * Check if a chromosome matches the sequence
+     * Check if a chromosome matches the sequence.
      *
      * @param c
      *            The chromosome
@@ -322,7 +322,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * Select a subset of the population
+     * Select a subset of the population.
      *
      * @param selection
      *            The selection strategy
@@ -337,7 +337,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * Get the population size limit to achieve when growing the population
+     * Get the population size limit to achieve when growing the population.
      *
      * @return the populationSize
      */
@@ -347,7 +347,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * Set the population size limit to achieve when growing the population
+     * Set the population size limit to achieve when growing the population.
      *
      * @param populationSize
      *            the population size to set
@@ -380,7 +380,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * @return the tracker
+     * @return the tracker.
      */
     public TrackProgress getTracker()
     {
@@ -388,7 +388,7 @@ public class Population<T extends Comparable<T>>
     }
 
     /**
-     * Set a tracker to allow the progress to be followed
+     * Set a tracker to allow the progress to be followed.
      *
      * @param tracker
      *            the tracker to set

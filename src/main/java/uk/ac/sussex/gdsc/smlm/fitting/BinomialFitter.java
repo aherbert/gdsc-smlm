@@ -53,12 +53,16 @@ import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.ij.Utils;
-import uk.ac.sussex.gdsc.core.logging.Logger;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * Fit a binomial distribution to a histogram
+ * Fit a binomial distribution to a histogram.
  */
 public class BinomialFitter
 {
@@ -144,7 +148,7 @@ public class BinomialFitter
      */
     private static double[] calculateHistogram(double[] data, boolean cumulative)
     {
-        final double[][] histogram = Maths.cumulativeHistogram(data, true);
+        final double[][] histogram = MathUtils.cumulativeHistogram(data, true);
         if (histogram[0].length == 0)
             return new double[] { 1 };
         // Pad to include all values
@@ -216,7 +220,7 @@ public class BinomialFitter
 
         final String name = (zeroTruncated) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
 
-        log("Mean cluster size = %s", Utils.rounded(mean));
+        log("Mean cluster size = %s", MathUtils.rounded(mean));
         log("Fitting cumulative " + name);
 
         // Since varying the N should be done in integer steps do this
@@ -230,7 +234,7 @@ public class BinomialFitter
 
             final double p = solution.getPointRef()[0];
 
-            log("Fitted %s : N=%d, p=%s. SS=%g", name, n, Utils.rounded(p), solution.getValue());
+            log("Fitted %s : N=%d, p=%s. SS=%g", name, n, MathUtils.rounded(p), solution.getValue());
 
             if (bestSS > solution.getValue())
             {
@@ -457,8 +461,8 @@ public class BinomialFitter
                         //	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
                         if (ss < solution.getValue())
                             //log("Re-fitting improved the SS from %s to %s (-%s%%)",
-                            //		Utils.rounded(solution.getValue(), 4), Utils.rounded(ss, 4),
-                            //		Utils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
+                            //		MathUtils.rounded(solution.getValue(), 4), MathUtils.rounded(ss, 4),
+                            //		MathUtils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
                             return new PointValuePair(lvmSolution.getPoint().toArray(), ss);
                     }
                 }
@@ -516,7 +520,7 @@ public class BinomialFitter
         int startIndex;
 
         /**
-         * Create a new Binomial model using the input p-values
+         * Create a new Binomial model using the input p-values.
          *
          * @param p
          *            The observed p-value
@@ -569,7 +573,7 @@ public class BinomialFitter
     }
 
     /**
-     * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
+     * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers.
      */
     public class BinomialModelFunction extends BinomialModel implements MultivariateFunction
     {
@@ -618,7 +622,7 @@ public class BinomialFitter
     }
 
     /**
-     * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
+     * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers.
      */
     private class BinomialModelFunctionGradient extends BinomialModel implements MultivariateVectorFunction
     {
@@ -753,12 +757,11 @@ public class BinomialFitter
 
     private void log(String format, Object... args)
     {
-        if (logger != null)
-            logger.info(format, args);
+        LoggerUtils.log(logger, Level.INFO, format, args);
     }
 
     /**
-     * @return True if use maximum likelihood fitting
+     * @return True if use maximum likelihood fitting.
      */
     public boolean isMaximumLikelihood()
     {
@@ -775,7 +778,7 @@ public class BinomialFitter
     }
 
     /**
-     * @return the number of restarts for fitting
+     * @return the number of restarts for fitting.
      */
     public int getFitRestarts()
     {

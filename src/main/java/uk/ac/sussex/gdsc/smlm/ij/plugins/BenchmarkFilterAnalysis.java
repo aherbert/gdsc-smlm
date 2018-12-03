@@ -82,7 +82,8 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -93,7 +94,7 @@ import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.Settings;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -228,10 +229,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     static double lowerSignalFactor;
     private static boolean depthRecallAnalysis = true;
     private static boolean scoreAnalysis = true;
-    private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
+    private static final String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
     private static int componentAnalysis = 3;
 
-    private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search",
+    private static final String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search",
             "Step Search" };
     private static int evolve = 0;
     private static boolean repeatEvolve = false;
@@ -244,7 +245,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     private static double enrichmentFraction = 0.2;
     private static double enrichmentPadding = 0.1;
 
-    private final static String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search", "Enumerate" };
+    private static final String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search", "Enumerate" };
     private static int searchParam = 3;
     private static boolean repeatSearch = false;
     private static int pRangeSearchWidth = 2;
@@ -388,7 +389,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Used to allow multi-threading of the scoring the fit results
+     * Used to allow multi-threading of the scoring the fit results.
      */
     private class FitResultsWorker implements Runnable
     {
@@ -472,7 +473,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         private void run(Job job)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
             {
                 finished = true;
                 return;
@@ -754,7 +755,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         if (invalidBenchmarkSpotFitResults(false))
             return;
 
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
         // For now do not provide an option, just debug
         debug = true; //extraOptions
 
@@ -888,7 +889,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         // Remove the previous iteration results
         iterBestFilter = null;
 
-        Utils.log(TITLE + " Iterating ...");
+        ImageJUtils.log(TITLE + " Iterating ...");
 
         final IterationConvergenceChecker checker = new IterationConvergenceChecker(current);
 
@@ -907,7 +908,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 double innerRangeReduction = 1;
                 if (iterationMinRangeReduction < 1)
                     // Linear interpolate down to the min range reduction
-                    innerRangeReduction = Maths.max(iterationMinRangeReduction, Maths.interpolateY(0, 1,
+                    innerRangeReduction = MathUtils.max(iterationMinRangeReduction, MathUtils.interpolateY(0, 1,
                             iterationMinRangeReductionIteration, iterationMinRangeReduction, innerIteration++));
                 // This would make the range too small...
                 //innerRangeReduction *= outerRangeReduction;
@@ -944,7 +945,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             // is centred around the current optimum.
             if (iterationMinRangeReduction < 1)
                 // Linear interpolate down to the min range reduction
-                outerRangeReduction = Maths.max(iterationMinRangeReduction, Maths.interpolateY(0, 1,
+                outerRangeReduction = MathUtils.max(iterationMinRangeReduction, MathUtils.interpolateY(0, 1,
                         iterationMinRangeReductionIteration, iterationMinRangeReduction, outerIteration++));
 
             // Optimise the filter again.
@@ -1130,7 +1131,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         GUIFilterSettings filterSettings = SettingsManager.readGUIFilterSettings(0);
 
-        final String filename = Utils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
+        final String filename = ImageJUtils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
         if (filename != null)
         {
             IJ.showStatus("Reading filters ...");
@@ -1323,7 +1324,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         IJ.showStatus("");
 
         filterList = filterList2;
-        Utils.log("Expanded input to %d filters in %s", countFilters(filterList),
+        ImageJUtils.log("Expanded input to %d filters in %s", countFilters(filterList),
                 TextUtils.pleural(filterList.size(), "set"));
     }
 
@@ -1621,10 +1622,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             distanceInPixels = distanceScore.upper;
             final double matchDistance = distanceInPixels * distanceInPixels;
 
-            resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
-                    Utils.rounded(distanceScore.upper * simulationParameters.a);
-            limitRange = ", d=" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
-                    Utils.rounded(distanceScore.upper * simulationParameters.a);
+            resultsPrefix3 = "\t" + MathUtils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
+                    MathUtils.rounded(distanceScore.upper * simulationParameters.a);
+            limitRange = ", d=" + MathUtils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
+                    MathUtils.rounded(distanceScore.upper * simulationParameters.a);
 
             // Signal factor must be greater than 1
             final RampedScore signalScore;
@@ -1634,8 +1635,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                         BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0);
                 lowerSignalFactor = signalScore.lower;
                 signalFactor = signalScore.upper;
-                resultsPrefix3 += "\t" + Utils.rounded(signalScore.lower) + "\t" + Utils.rounded(signalScore.upper);
-                limitRange += ", s=" + Utils.rounded(signalScore.lower) + "-" + Utils.rounded(signalScore.upper);
+                resultsPrefix3 += "\t" + MathUtils.rounded(signalScore.lower) + "\t" + MathUtils.rounded(signalScore.upper);
+                limitRange += ", s=" + MathUtils.rounded(signalScore.lower) + "-" + MathUtils.rounded(signalScore.upper);
             }
             else
             {
@@ -1666,7 +1667,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             }
 
             totalProgress = BenchmarkSpotFit.fitResults.size();
-            stepProgress = Utils.getProgressInterval(totalProgress);
+            stepProgress = ImageJUtils.getProgressInterval(totalProgress);
             progress = 0;
             BenchmarkSpotFit.fitResults.forEachEntry(new TIntObjectProcedure<FilterCandidates>()
             {
@@ -1835,8 +1836,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         gd.addNumericField("Criteria_limit", criteriaLimit, 4);
         gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
         gd.addMessage(String.format("Fitting match distance = %s nm; signal factor = %s",
-                Utils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.a),
-                Utils.rounded(BenchmarkSpotFit.signalFactor)));
+                MathUtils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.a),
+                MathUtils.rounded(BenchmarkSpotFit.signalFactor)));
         gd.addSlider("Upper_match_distance (%)", 0, 100, upperMatchDistance);
         gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
         gd.addSlider("Upper_signal_factor (%)", 0, 100, upperSignalFactor);
@@ -1887,7 +1888,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             signal *= 0.5;
         }
         final double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
-                Maths.pow2(simulationParameters.noise), simulationParameters.isEMCCD());
+                MathUtils.pow2(simulationParameters.noise), simulationParameters.isEMCCD());
         final double pLSE = Gaussian2DPeakResultHelper.getPrecision(simulationParameters.a, simulationParameters.s,
                 signal, simulationParameters.noise, simulationParameters.isEMCCD());
         final double pMLE = Gaussian2DPeakResultHelper.getMLPrecision(simulationParameters.a, simulationParameters.s,
@@ -1899,7 +1900,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         final FilterResult best = getBestResult();
         if (best != null)
-            msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
+            msg += String.format("\nCurrent Best=%s, FailCount=%d", MathUtils.rounded(best.score), best.failCount);
         gd.addMessage(msg);
     }
 
@@ -1946,18 +1947,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         if (BenchmarkSpotFit.computeDoublets)
         {
             // Round to the precision of the min/max
-            residualsThreshold = sResidualsThreshold = Maths.round(Math.abs(gd.getNextNumber()), 4);
+            residualsThreshold = sResidualsThreshold = MathUtils.round(Math.abs(gd.getNextNumber()), 4);
             if (showOptimiseParams)
             {
-                minResidualsThreshold = Maths.round(Math.abs(gd.getNextNumber()), 4);
-                maxResidualsThreshold = Maths.round(Math.abs(gd.getNextNumber()), 4);
+                minResidualsThreshold = MathUtils.round(Math.abs(gd.getNextNumber()), 4);
+                maxResidualsThreshold = MathUtils.round(Math.abs(gd.getNextNumber()), 4);
             }
         }
-        duplicateDistance = Maths.round(Math.abs(gd.getNextNumber()), 4);
+        duplicateDistance = MathUtils.round(Math.abs(gd.getNextNumber()), 4);
         if (showOptimiseParams)
         {
-            minDuplicateDistance = Maths.round(Math.abs(gd.getNextNumber()), 4);
-            maxDuplicateDistance = Maths.round(Math.abs(gd.getNextNumber()), 4);
+            minDuplicateDistance = MathUtils.round(Math.abs(gd.getNextNumber()), 4);
+            maxDuplicateDistance = MathUtils.round(Math.abs(gd.getNextNumber()), 4);
         }
         reset = gd.getNextBoolean();
         showResultsTable = gd.getNextBoolean();
@@ -2060,12 +2061,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         else
             limitFailCount = "";
         limitFailCount += "f=" + failCount;
-        limitFailCount += ", r=" + Utils.rounded(residualsThreshold);
+        limitFailCount += ", r=" + MathUtils.rounded(residualsThreshold);
     }
 
     private static String buildResultsPrefix2(int failCount, double residualsThreshold, double duplicateDistance)
     {
-        return "\t" + failCount + "\t" + Utils.rounded(residualsThreshold) + "\t" + Utils.rounded(duplicateDistance) +
+        return "\t" + failCount + "\t" + MathUtils.rounded(residualsThreshold) + "\t" + MathUtils.rounded(duplicateDistance) +
                 ((duplicateDistanceAbsolute) ? " (absolute)" : " (relative)");
     }
 
@@ -2216,7 +2217,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         gd.addCheckboxGroup(1, 3, labels, new boolean[] { showTP, showFP, showFN });
 
         // Dialog to have a reset checkbox. This reverts back to the default.
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             final Checkbox cb = (Checkbox) (gd.getCheckboxes().get(0));
             final Vector<TextField> v = gd.getNumericFields();
@@ -2385,7 +2386,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             scores.clear();
             runAnalysis(filterSets, optimum, rangeReduction);
 
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
                 return null;
         }
         else
@@ -2416,7 +2417,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
                 runAnalysis(filterSets);
 
-                if (Utils.isInterrupted())
+                if (ImageJUtils.isInterrupted())
                     return null;
             }
         }
@@ -2497,7 +2498,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         {
             optimum = runParameterAnalysis(iterative, optimum, rangeReduction);
 
-            if (optimum == null || Utils.isInterrupted())
+            if (optimum == null || ImageJUtils.isInterrupted())
                 return null;
         }
 
@@ -2577,11 +2578,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 final double slope = regression.getSlope();
 
                 sb.append('\t');
-                sb.append(Utils.rounded(tp / np)).append('\t');
-                sb.append(Utils.rounded(d / scored)).append('\t');
-                sb.append(Utils.rounded(sf / scored)).append('\t');
-                sb.append(Utils.rounded(Math.sqrt(rmsd / scored))).append('\t');
-                sb.append(Utils.rounded(slope)).append('\t');
+                sb.append(MathUtils.rounded(tp / np)).append('\t');
+                sb.append(MathUtils.rounded(d / scored)).append('\t');
+                sb.append(MathUtils.rounded(sf / scored)).append('\t');
+                sb.append(MathUtils.rounded(Math.sqrt(rmsd / scored))).append('\t');
+                sb.append(MathUtils.rounded(slope)).append('\t');
                 if (fs.atLimit() != null)
                     sb.append(fs.atLimit());
 
@@ -2754,7 +2755,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             plot.draw();
             plot.setColor(Color.BLUE);
             plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
-            final PlotWindow plotWindow = Utils.display(p.name, plot);
+            final PlotWindow plotWindow = ImageJUtils.display(p.name, plot);
             list[i++] = plotWindow.getImagePlus().getID();
         }
         WindowOrganiser.tileWindows(list);
@@ -2779,8 +2780,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 FractionClassificationResult s = scoreFilter(filter, minimalFilter, resultsList, coordinateStore);
                 s = getOriginalScore(s);
 
-                final String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
-                        Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
+                final String message = type + "\t\t\t" + MathUtils.rounded(s.getJaccard(), 4) + "\t\t" +
+                        MathUtils.rounded(s.getPrecision(), 4) + "\t\t" + MathUtils.rounded(s.getRecall(), 4);
 
                 if (isHeadless)
                     IJ.log(message);
@@ -2804,7 +2805,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
                     final StringBuilder sb = new StringBuilder();
                     sb.append('\t').append(filter.getParameterName(index)).append('\t');
-                    sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append('\t');
+                    sb.append(MathUtils.rounded(filter.getParameterValue(index), 4)).append('\t');
 
                     final double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
                     final double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
@@ -2860,8 +2861,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             sensitivity = dydx / count;
         }
 
-        sb.append(Utils.rounded(relativeSensitivity, 4)).append('\t');
-        sb.append(Utils.rounded(sensitivity, 4)).append('\t');
+        sb.append(MathUtils.rounded(relativeSensitivity, 4)).append('\t');
+        sb.append(MathUtils.rounded(sensitivity, 4)).append('\t');
     }
 
     private void createResultsWindow()
@@ -2956,7 +2957,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         if (index != -1)
         {
             sb.append('\t').append(names[index]);
-            sb.append('\t').append(Utils.rounded(filterScore.getFilter().getParameterValue(index)));
+            sb.append('\t').append(MathUtils.rounded(filterScore.getFilter().getParameterValue(index)));
             sb.append('\t');
             if (bestFilterScore.atLimit != null)
                 sb.append(bestFilterScore.atLimit(index));
@@ -2964,12 +2965,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         else
             // Broken
             sb.append("\t\t");
-        sb.append('\t').append(Utils.rounded(100.0 * result.criteria / bestFilterScore.criteria));
-        sb.append('\t').append(Utils.rounded(100.0 * result.score / bestFilterScore.score));
+        sb.append('\t').append(MathUtils.rounded(100.0 * result.criteria / bestFilterScore.criteria));
+        sb.append('\t').append(MathUtils.rounded(100.0 * result.score / bestFilterScore.score));
         sb.append('\t').append(filterScore.time);
-        sb.append('\t').append(Utils.rounded(filterScore.r2.getPrecision()));
-        sb.append('\t').append(Utils.rounded(filterScore.r2.getRecall()));
-        sb.append('\t').append(Utils.rounded(filterScore.r2.getJaccard()));
+        sb.append('\t').append(MathUtils.rounded(filterScore.r2.getPrecision()));
+        sb.append('\t').append(MathUtils.rounded(filterScore.r2.getRecall()));
+        sb.append('\t').append(MathUtils.rounded(filterScore.r2.getJaccard()));
         sb.append('\t');
         for (int i = 0; i < filterScore.combinations.length; i++)
         {
@@ -3076,7 +3077,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                     }
                     catch (final IllegalArgumentException e)
                     {
-                        Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+                        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
                                 ss_filter.getParameterName(i));
                         originalDimensions = null;
                         rangeInput = false;
@@ -3117,7 +3118,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                     }
                     catch (final IllegalArgumentException e)
                     {
-                        Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+                        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
                                 ss_filter.getParameterName(i));
                         originalDimensions = null;
                         rangeInput = false;
@@ -3177,7 +3178,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                     }
                     catch (final IllegalArgumentException e)
                     {
-                        Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+                        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
                                 ss_filter.getParameterName(i));
                         originalDimensions = null;
                         break;
@@ -3798,11 +3799,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 {
                     atLimit[j] = ComplexFilterScore.FLOOR;
                     sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[')
-                            .append(Utils.rounded(value));
+                            .append(MathUtils.rounded(value));
                     if (c1 == -1)
                     {
                         atLimit[j] = ComplexFilterScore.BELOW;
-                        sb.append("<").append(Utils.rounded(lowerLimit));
+                        sb.append("<").append(MathUtils.rounded(lowerLimit));
                     }
                     sb.append("]");
                 }
@@ -3813,11 +3814,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                     {
                         atLimit[j] = ComplexFilterScore.CEIL;
                         sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[')
-                                .append(Utils.rounded(value));
+                                .append(MathUtils.rounded(value));
                         if (c2 == 1)
                         {
                             atLimit[j] = ComplexFilterScore.ABOVE;
-                            sb.append(">").append(Utils.rounded(upperLimit));
+                            sb.append(">").append(MathUtils.rounded(upperLimit));
                         }
                         sb.append("]");
                     }
@@ -3826,13 +3827,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
             if (sb.length() > 0)
                 if (max.criteriaPassed)
-                    Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
-                            filter.getName(), Utils.rounded((invertScore) ? -max.score : max.score),
-                            Utils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount + limitRange,
+                    ImageJUtils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
+                            filter.getName(), MathUtils.rounded((invertScore) ? -max.score : max.score),
+                            MathUtils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount + limitRange,
                             sb.toString());
                 else
-                    Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
-                            filter.getName(), Utils.rounded((invertCriteria) ? -max.criteria : max.criteria),
+                    ImageJUtils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
+                            filter.getName(), MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria),
                             limitFailCount + limitRange, sb.toString());
         }
 
@@ -3842,8 +3843,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         final String type = max.r.filter.getType();
         if (!max.criteriaPassed)
         {
-            Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
-                    Utils.rounded((invertCriteria) ? -max.criteria : max.criteria), max.r.filter.getName());
+            ImageJUtils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
+                    MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria), max.r.filter.getName());
             return 0;
         }
 
@@ -3984,7 +3985,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Enumerate on the min interval to convert an off grid result to one on the grid
+     * Enumerate on the min interval to convert an off grid result to one on the grid.
      *
      * @param best
      *            The optimum
@@ -4009,8 +4010,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 try
                 {
                     final double value = ss_filter.getParameterValue(j);
-                    final double max = Maths.ceil(value, minIncrement);
-                    final double min = Maths.floor(value, minIncrement);
+                    final double max = MathUtils.ceil(value, minIncrement);
+                    final double min = MathUtils.floor(value, minIncrement);
                     dimensions2[i] = new SearchDimension(min, max, minIncrement, 1);
                     dimensions2[i].setCentre(value);
                     dimensions2[i].setIncrement(minIncrement);
@@ -4082,7 +4083,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             }
             catch (final IllegalArgumentException e)
             {
-                Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i, names[i]);
+                ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i, names[i]);
                 return null;
             }
         }
@@ -4097,7 +4098,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             }
         if (!active)
         {
-            Utils.log(TITLE + " : No search range");
+            ImageJUtils.log(TITLE + " : No search range");
             return currentOptimum;
         }
 
@@ -4453,9 +4454,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             if (c1 <= 0)
             {
                 sb.append(" : ").append(names[j]).append(' ').append(ComplexFilterScore.FLOOR).append('[')
-                        .append(Utils.rounded(value));
+                        .append(MathUtils.rounded(value));
                 if (c1 == -1)
-                    sb.append("<").append(Utils.rounded(lowerLimit));
+                    sb.append("<").append(MathUtils.rounded(lowerLimit));
                 sb.append("]");
             }
             else
@@ -4464,9 +4465,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 if (c2 >= 0)
                 {
                     sb.append(" : ").append(names[j]).append(' ').append(ComplexFilterScore.CEIL).append('[')
-                            .append(Utils.rounded(value));
+                            .append(MathUtils.rounded(value));
                     if (c2 == 1)
-                        sb.append(">").append(Utils.rounded(upperLimit));
+                        sb.append(">").append(MathUtils.rounded(upperLimit));
                     sb.append("]");
                 }
             }
@@ -4474,21 +4475,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         if (sb.length() > 0)
             if (max.criteriaPassed)
-                Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
-                        ss_filter.getName(), Utils.rounded((invertScore) ? -max.score : max.score),
-                        Utils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount + limitRange,
+                ImageJUtils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
+                        ss_filter.getName(), MathUtils.rounded((invertScore) ? -max.score : max.score),
+                        MathUtils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount + limitRange,
                         sb.toString());
             else
-                Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
-                        ss_filter.getName(), Utils.rounded((invertCriteria) ? -max.criteria : max.criteria),
+                ImageJUtils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
+                        ss_filter.getName(), MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria),
                         limitFailCount + limitRange, sb.toString());
 
         // We may have no filters that pass the criteria
         final String type = max.r.filter.getType();
         if (!max.criteriaPassed)
         {
-            Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
-                    Utils.rounded((invertCriteria) ? -max.criteria : max.criteria), max.r.filter.getName());
+            ImageJUtils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
+                    MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria), max.r.filter.getName());
             return null;
         }
 
@@ -4608,11 +4609,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         switch (index)
         {
             case 0:
-                return r.getPositives();
+                return r.getNumberOfPositives();
             case 1:
-                return r.getNegatives();
+                return r.getNumberOfNegatives();
             case 2:
-                return nActual - r.getPositives();
+                return (double)nActual - r.getNumberOfPositives();
             case 3:
                 return createIntegerResult(r).getPrecision();
             case 4:
@@ -4622,11 +4623,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             case 6:
                 return createIntegerResult(r).getJaccard();
             case 7:
-                return r.getTP();
+                return r.getTruePositives();
             case 8:
-                return r.getFP();
+                return r.getFalsePositives();
             case 9:
-                return r.getFN();
+                return r.getFalseNegatives();
             case 10:
                 return r.getPrecision();
             case 11:
@@ -4765,9 +4766,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         if (requireIntegerResults)
         {
             final ClassificationResult r2 = createIntegerResult(r);
-            add(sb, r2.getTP(), i++);
-            add(sb, r2.getFP(), i++);
-            add(sb, r2.getFN(), i++);
+            add(sb, r2.getTruePositives(), i++);
+            add(sb, r2.getFalsePositives(), i++);
+            add(sb, r2.getFalseNegatives(), i++);
             add(sb, r2.getPrecision(), i++);
             add(sb, r2.getRecall(), i++);
             add(sb, r2.getF1Score(), i++);
@@ -4776,9 +4777,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         else
             i += 7;
 
-        addCount(sb, r.getTP(), i++);
-        addCount(sb, r.getFP(), i++);
-        addCount(sb, r.getFN(), i++);
+        addCount(sb, r.getTruePositives(), i++);
+        addCount(sb, r.getFalsePositives(), i++);
+        addCount(sb, r.getFalseNegatives(), i++);
         add(sb, r.getPrecision(), i++);
         add(sb, r.getRecall(), i++);
         add(sb, r.getF1Score(), i++);
@@ -4789,7 +4790,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
     private static ClassificationResult createIntegerResult(FractionClassificationResult r)
     {
-        return new ClassificationResult(r.getPositives(), r.getNegatives(), 0, nActual - r.getPositives());
+        return new ClassificationResult(r.getNumberOfPositives(), r.getNumberOfNegatives(), 0, nActual - r.getNumberOfPositives());
     }
 
     /**
@@ -4809,9 +4810,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         //		// FN are the number of missed spots
         //		// Note: We cannot calculate TN since this is the number of fit candidates that are
         //		// filtered after fitting that do not match a spot or were not fitted.
-        //		final double fp = r.getPositives() - r.getTP();
-        //		final double fn = nActual - r.getTP();
-        //		return new FractionClassificationResult(r.getTP(), fp, 0, fn);
+        //		final double fp = r.getPositives() - r.getTruePositives();
+        //		final double fn = nActual - r.getTruePositives();
+        //		return new FractionClassificationResult(r.getTruePositives(), fp, 0, fn);
     }
 
     private static void add(StringBuilder sb, int value)
@@ -4840,13 +4841,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             if (value > 100)
                 sb.append('\t').append(IJ.d2s(value));
             else
-                add(sb, Utils.rounded(value));
+                add(sb, MathUtils.rounded(value));
     }
 
     private static void add(StringBuilder sb, double value, int i)
     {
         if (showColumns[i])
-            add(sb, Utils.rounded(value));
+            add(sb, MathUtils.rounded(value));
     }
 
     private static void saveFilter(DirectFilter filter)
@@ -4878,10 +4879,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
      */
     static String getFilename(String title, String filename)
     {
-        filename = Utils.getFilename(title, filename);
+        filename = ImageJUtils.getFilename(title, filename);
         // Use XML extension
         if (filename != null)
-            filename = Utils.replaceExtension(filename, ".xml");
+            filename = ImageJUtils.replaceExtension(filename, ".xml");
         return filename;
     }
 
@@ -4989,7 +4990,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             final String keyNo = "nNo";
             final String keyLow = "nLower";
             final String keyHigh = "nHigher";
-            if (Utils.isMacro())
+            if (ImageJUtils.isMacro())
             {
                 // Collect the options if running in a macro
                 final String options = Macro.getOptions();
@@ -5003,7 +5004,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             final ImagePlus[] out = new ImagePlus[1];
             out[0] = sampler.getSample(nNo, nLow, nHigh);
 
-            if (!Utils.isMacro())
+            if (!ImageJUtils.isMacro())
             {
                 // Show the template results
                 final ConfigurationTemplate configTemplate = new ConfigurationTemplate();
@@ -5013,8 +5014,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 final ImagePlus[] outImp = new ImagePlus[1];
                 if (out[0] != null)
                 {
-                    outImp[0] = display(out[0]);
-                    if (Utils.isNewWindow())
+                    final WindowOrganiser windowOrganiser = new WindowOrganiser();
+                    outImp[0] = display(out[0], windowOrganiser);
+                    if (windowOrganiser.isNotEmpty())
                     {
                         close[0] = true;
                         // Zoom a bit
@@ -5081,8 +5083,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                         out[0] = sampler.getSample(nNo, nLow, nHigh);
                         if (out[0] != null)
                         {
-                            outImp[0] = display(out[0]);
-                            if (Utils.isNewWindow())
+                            final WindowOrganiser windowOrganiser = new WindowOrganiser();
+                            outImp[0] = display(out[0], windowOrganiser);
+                            if (windowOrganiser.isNotEmpty())
                             {
                                 close[0] = true;
                                 // Zoom a bit
@@ -5124,19 +5127,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 return;
 
             final ImagePlus example = out[0];
-            filename = Utils.replaceExtension(filename, ".tif");
+            filename = ImageJUtils.replaceExtension(filename, ".tif");
             IJ.save(example, filename);
         }
     }
 
-    private static ImagePlus display(ImagePlus example)
+    private static ImagePlus display(ImagePlus example, WindowOrganiser windowOrganiser)
     {
         final String title = "Template Example";
         // Update the example image
         example.setTitle(title);
 
         // Display as a new image. This is so we can close it later.
-        return ConfigurationTemplate.displayTemplate(title, example);
+        return ConfigurationTemplate.displayTemplate(title, example, windowOrganiser);
     }
 
     private static void getNotes(TemplateSettings.Builder settings, String topFilterSummary)
@@ -5230,13 +5233,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         // Build a histogram of the number of spots at different depths
         final double[] depths = depthStats.getValues();
-        double[] limits = Maths.limits(depths);
+        double[] limits = MathUtils.limits(depths);
 
         //final int bins = Math.max(10, nActual / 100);
-        //final int bins = Utils.getBinsSturges(depths.length);
-        final int bins = Utils.getBinsSqrtRule(depths.length);
-        final double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
-        final double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
+        //final int bins = HistogramPlot.getBinsSturges(depths.length);
+        final int bins = HistogramPlot.getBinsSqrtRule(depths.length);
+        final double[][] h1 = HistogramPlot.calcHistogram(depths, limits[0], limits[1], bins);
+        final double[][] h2 = HistogramPlot.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
 
         // To get the number of TP at each depth will require that the filter is run
         // manually to get the results that pass.
@@ -5258,7 +5261,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         depths2 = Arrays.copyOf(depths2, count);
 
         // Build a histogram using the same limits
-        final double[][] h3 = Utils.calcHistogram(depths2, limits[0], limits[1], bins);
+        final double[][] h3 = HistogramPlot.calcHistogram(depths2, limits[0], limits[1], bins);
 
         // Convert pixel depth to nm
         for (int i = 0; i < h1[0].length; i++)
@@ -5269,7 +5272,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         // Produce a histogram of the number of spots at each depth
         final String title1 = TITLE + " Depth Histogram";
         final Plot2 plot1 = new Plot2(title1, "Depth (nm)", "Frequency");
-        plot1.setLimits(limits[0], limits[1], 0, Maths.max(h1[1]));
+        plot1.setLimits(limits[0], limits[1], 0, MathUtils.max(h1[1]));
         plot1.setColor(Color.black);
         plot1.addPoints(h1[0], h1[1], Plot2.BAR);
         plot1.addLabel(0, 0, "Black = Spots; Blue = Fitted; Red = Filtered");
@@ -5278,9 +5281,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         plot1.setColor(Color.red);
         plot1.addPoints(h1[0], h3[1], Plot2.BAR);
         plot1.setColor(Color.magenta);
-        final PlotWindow pw1 = Utils.display(title1, plot1);
-        if (Utils.isNewWindow())
-            wo.add(pw1);
+        ImageJUtils.display(title1, plot1, wo);
 
         // Interpolate
         final double halfBinWidth = (h1[0][1] - h1[0][0]) * 0.5;
@@ -5308,7 +5309,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         // Increase the number of points to show a smooth curve
         final double[] points = new double[bins * 5];
-        limits = Maths.limits(h1[0]);
+        limits = MathUtils.limits(h1[0]);
         final double interval = (limits[1] - limits[0]) / (points.length - 1);
         final double[] v = new double[points.length];
         final double[] v2 = new double[points.length];
@@ -5339,7 +5340,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         final String title2 = TITLE + " Depth Histogram (normalised)";
         final Plot2 plot2 = new Plot2(title2, "Depth (nm)", "Recall");
-        plot2.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0, Maths.min(1, Maths.max(v2)));
+        plot2.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0, MathUtils.min(1, MathUtils.max(v2)));
         plot2.setColor(Color.black);
         plot2.addLabel(0, 0, "Blue = Fitted; Red = Filtered");
         plot2.setColor(Color.blue);
@@ -5355,9 +5356,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             plot2.drawLine(halfSummaryDepth, 0, halfSummaryDepth,
                     getSplineValue(spline3, spline3b, halfSummaryDepth - halfBinWidth) /
                             getSplineValue(spline1, spline1b, halfSummaryDepth - halfBinWidth));
-        final PlotWindow pw2 = Utils.display(title2, plot2);
-        if (Utils.isNewWindow())
-            wo.add(pw2);
+        ImageJUtils.display(title2, plot2, wo);
 
         return allAssignments;
     }
@@ -5397,7 +5396,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         }
         else
         {
-            limits1 = Maths.limits(signal);
+            limits1 = MathUtils.limits(signal);
             // Prevent the auto-range being too big
             final double bound = 3;
             if (limits1[0] < -bound)
@@ -5414,13 +5413,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             limits2 = new double[] { 0, range };
         }
         else
-            limits2 = Maths.limits(distance);
+            limits2 = MathUtils.limits(distance);
 
         //final int bins = Math.max(10, nActual / 100);
-        //final int bins = Utils.getBinsSturges(signal.length);
-        final int bins = Utils.getBinsSqrtRule(signal.length);
-        final double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
-        final double[][] h2 = Utils.calcHistogram(distance, limits2[0], limits2[1], bins);
+        //final int bins = HistogramPlot.getBinsSturges(signal.length);
+        final int bins = HistogramPlot.getBinsSqrtRule(signal.length);
+        final double[][] h1 = HistogramPlot.calcHistogram(signal, limits1[0], limits1[1], bins);
+        final double[][] h2 = HistogramPlot.calcHistogram(distance, limits2[0], limits2[1], bins);
 
         // Run the filter manually to get the results that pass.
         if (allAssignments == null)
@@ -5446,8 +5445,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         distance2 = Arrays.copyOf(distance2, count);
 
         // Build a histogram using the same limits
-        final double[][] h1b = Utils.calcHistogram(signal2, limits1[0], limits1[1], bins);
-        final double[][] h2b = Utils.calcHistogram(distance2, limits2[0], limits2[1], bins);
+        final double[][] h1b = HistogramPlot.calcHistogram(signal2, limits1[0], limits1[1], bins);
+        final double[][] h2b = HistogramPlot.calcHistogram(distance2, limits2[0], limits2[1], bins);
 
         // Since the distance and signal factor are computed for all fits (single, multi, doublet)
         // there will be far more of them so we normalise and just plot the histogram profile.
@@ -5470,32 +5469,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         // Draw distance histogram first
         final String title2 = TITLE + " Distance Histogram";
         final Plot2 plot2 = new Plot2(title2, "Distance (nm)", "Frequency");
-        plot2.setLimits(limits2[0], limits2[1], 0, Maths.maxDefault(Maths.max(h2[1]), h2b[1]));
+        plot2.setLimits(limits2[0], limits2[1], 0, MathUtils.maxDefault(MathUtils.max(h2[1]), h2b[1]));
         plot2.setColor(Color.black);
         plot2.addLabel(0, 0, String.format("Blue = Fitted (%s); Red = Filtered (%s)",
-                Utils.rounded(distanceStats.getMean()), Utils.rounded(sumDistance / count)));
+                MathUtils.rounded(distanceStats.getMean()), MathUtils.rounded(sumDistance / count)));
         plot2.setColor(Color.blue);
         plot2.addPoints(h2[0], h2[1], Plot2.BAR);
         plot2.setColor(Color.red);
         plot2.addPoints(h2b[0], h2b[1], Plot2.BAR);
-        final PlotWindow pw2 = Utils.display(title2, plot2);
-        if (Utils.isNewWindow())
-            wo.add(pw2);
+        ImageJUtils.display(title2, plot2, wo);
 
         // Draw signal factor histogram
         final String title1 = TITLE + " Signal Factor Histogram";
         final Plot2 plot1 = new Plot2(title1, "Signal Factor", "Frequency");
-        plot1.setLimits(limits1[0], limits1[1], 0, Maths.maxDefault(Maths.max(h1[1]), h1b[1]));
+        plot1.setLimits(limits1[0], limits1[1], 0, MathUtils.maxDefault(MathUtils.max(h1[1]), h1b[1]));
         plot1.setColor(Color.black);
         plot1.addLabel(0, 0, String.format("Blue = Fitted (%s); Red = Filtered (%s)",
-                Utils.rounded(signalFactorStats.getMean()), Utils.rounded(sumSignal / count)));
+                MathUtils.rounded(signalFactorStats.getMean()), MathUtils.rounded(sumSignal / count)));
         plot1.setColor(Color.blue);
         plot1.addPoints(h1[0], h1[1], Plot2.BAR);
         plot1.setColor(Color.red);
         plot1.addPoints(h1b[0], h1b[1], Plot2.BAR);
-        final PlotWindow pw1 = Utils.display(title1, plot1);
-        if (Utils.isNewWindow())
-            wo.add(pw1);
+        ImageJUtils.display(title1, plot1, wo);
 
         return allAssignments;
     }
@@ -5793,11 +5788,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
     private class ComplexFilterScore extends SimpleFilterScore
     {
-        final static char WITHIN = '-';
-        final static char BELOW = '<';
-        final static char FLOOR = 'L';
-        final static char ABOVE = '>';
-        final static char CEIL = 'U';
+        static final char WITHIN = '-';
+        static final char BELOW = '<';
+        static final char FLOOR = 'L';
+        static final char ABOVE = '>';
+        static final char CEIL = 'U';
 
         int index;
         final ClassificationResult r2;
@@ -5888,7 +5883,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Allow the genetic algorithm to be stopped using the escape key
+     * Allow the genetic algorithm to be stopped using the escape key.
      */
     private class InterruptChecker extends ToleranceChecker<FilterScore>
     {
@@ -5913,7 +5908,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 return true;
             if (IJ.escapePressed())
             {
-                Utils.log("STOPPED " + ga_statusPrefix);
+                ImageJUtils.log("STOPPED " + ga_statusPrefix);
                 IJ.resetEscape(); // Allow the plugin to continue processing
                 return true;
             }
@@ -5939,7 +5934,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Allow the range search to be stopped using the escape key
+     * Allow the range search to be stopped using the escape key.
      */
     private class InterruptConvergenceChecker extends ConvergenceToleranceChecker<FilterScore>
     {
@@ -6023,7 +6018,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             // Stop if interrupted
             if (IJ.escapePressed())
             {
-                Utils.log("STOPPED " + ga_statusPrefix);
+                ImageJUtils.log("STOPPED " + ga_statusPrefix);
                 IJ.resetEscape(); // Allow the plugin to continue processing
                 return true;
             }
@@ -6032,7 +6027,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Configure the convergence for iterative optimisation
+     * Configure the convergence for iterative optimisation.
      */
     private class IterationConvergenceChecker
     {
@@ -6063,7 +6058,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             // Stop if interrupted
             if (IJ.escapePressed())
             {
-                Utils.log("STOPPED");
+                ImageJUtils.log("STOPPED");
                 // Do not reset escape
                 // IJ.resetEscape();
                 canContinue = false;
@@ -6124,7 +6119,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                 component = "iterations";
                 canContinue = false;
             }
-            Utils.log(prefix + " converged on " + component);
+            ImageJUtils.log(prefix + " converged on " + component);
         }
 
         public int getIterations()
@@ -6211,7 +6206,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Used to allow multi-threading of the scoring the filters
+     * Used to allow multi-threading of the scoring the filters.
      */
     private class ScoreWorker implements Runnable
     {
@@ -6261,7 +6256,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         private void run(ScoreJob job)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
             {
                 finished = true;
                 return;
@@ -6273,7 +6268,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Used to allow multi-threading of the scoring the filters
+     * Used to allow multi-threading of the scoring the filters.
      */
     private class ParameterScoreWorker implements Runnable
     {
@@ -6326,7 +6321,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         private void run(ParameterScoreJob job)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
             {
                 finished = true;
                 return;
@@ -6372,7 +6367,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     private synchronized void showProgress()
     {
         if (progress % stepProgress == 0)
-            if (Utils.showStatus("Scoring Filter: " + progress + " / " + totalProgress))
+            if (ImageJUtils.showStatus("Scoring Filter: " + progress + " / " + totalProgress))
                 IJ.showProgress(progress, totalProgress);
         progress++;
     }
@@ -6409,7 +6404,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
             int index = 0;
             totalProgress = scoreResults.length;
-            stepProgress = Utils.getProgressInterval(totalProgress);
+            stepProgress = ImageJUtils.getProgressInterval(totalProgress);
             progress = 0;
             for (final Filter filter : filterSet.getFilters())
             {
@@ -6435,7 +6430,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             IJ.showProgress(1);
 
             // In case the threads were interrupted
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
                 scoreResults = null;
         }
 
@@ -6506,7 +6501,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             }
 
             totalProgress = scoreResults.length;
-            stepProgress = Utils.getProgressInterval(totalProgress);
+            stepProgress = ImageJUtils.getProgressInterval(totalProgress);
             progress = 0;
             for (int i = 0; i < points.length; i++)
             {
@@ -6532,7 +6527,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             IJ.showProgress(1);
 
             // In case the threads were interrupted
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
                 scoreResults = null;
         }
 
@@ -6602,8 +6597,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             final StringBuilder sb = new StringBuilder("Scoring (");
             sb.append(filterSet.size()).append("):");
             for (int j = 0; j < lower.length; j++)
-                sb.append(' ').append(Utils.rounded(lower[j])).append('-').append(Utils.rounded(upper[j]));
-            Utils.log(sb.toString());
+                sb.append(' ').append(MathUtils.rounded(lower[j])).append('-').append(MathUtils.rounded(upper[j]));
+            ImageJUtils.log(sb.toString());
         }
 
         final Filter weakest = filterSet.createWeakestFilter();
@@ -6630,12 +6625,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         //		// DEBUG - Test if the two methods produce the same results
         //		FractionClassificationResult r2 = scoreFilter(filter, minFilter, BenchmarkFilterAnalysis.clonedResultsList);
-        //		if (!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
-        //				!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
+        //		if (!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTruePositives(), r2.getTruePositives(), 1e-6, 1e-10) ||
+        //				!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFalsePositives(), r2.getFalsePositives(), 1e-6, 1e-10) ||
         //				!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
         //		{
-        //			System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f : %s\n", r.getTP(), r2.getTP(), r.getFP(),
-        //					r2.getFP(), r.getFN(), r2.getFN(), filter.getName());
+        //			System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f : %s\n", r.getTruePositives(), r2.getTruePositives(), r.getFalsePositives(),
+        //					r2.getFalsePositives(), r.getFN(), r2.getFN(), filter.getName());
         //
         //			//					// Debug
         //			//					MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
@@ -6691,7 +6686,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Finish scoring and reset the subset
+     * Finish scoring and reset the subset.
      */
     private void finishScoring()
     {
@@ -7253,7 +7248,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
                 // Round this so that small differences are ignored.
                 // This should favour filters with lower fail count.
-                final double diff = Maths.round(score - max, 3);
+                final double diff = MathUtils.round(score - max, 3);
                 if (diff <= 0)
                     continue;
 
@@ -7271,7 +7266,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     /**
-     * Abstract class to allow the array storage to be reused
+     * Abstract class to allow the array storage to be reused.
      */
     private abstract class CustomTIntObjectProcedure implements TIntObjectProcedure<IdPeakResult[]>
     {

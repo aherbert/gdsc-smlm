@@ -81,7 +81,7 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellO
 public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 {
     /**
-     * Wrap the LikelihoodFunction with classes that implement the required interfaces
+     * Wrap the LikelihoodFunction with classes that implement the required interfaces.
      */
     private class Likelihood
     {
@@ -114,7 +114,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * Map the specified indices using the sqrt function for use with the Powell optimiser
+     * Map the specified indices using the sqrt function for use with the Powell optimiser.
      */
     private class MappedMultivariateLikelihood extends MultivariateLikelihood
     {
@@ -264,7 +264,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
         }
 
         /**
-         * @return True if the search method uses the gradient of the likelihood function
+         * @return True if the search method uses the gradient of the likelihood function.
          */
         public boolean usesGradients()
         {
@@ -273,20 +273,20 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * The likelihood function
+     * The likelihood function.
      */
     public enum LikelihoodFunction
     {
         /**
-         * Use a Poisson likelihood model
+         * Use a Poisson likelihood model.
          */
         POISSON("Poisson"),
         /**
-         * Use a Poisson likelihood model
+         * Use a Poisson likelihood model.
          */
         POISSON_GAUSSIAN("Poisson+Gaussian"),
         /**
-         * Use a Poisson likelihood model
+         * Use a Poisson likelihood model.
          */
         POISSON_GAMMA_GAUSSIAN("Poisson+Gamma+Gaussian");
 
@@ -318,7 +318,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     private MultivariateLikelihood powellFunction = null;
 
     /**
-     * Default constructor
+     * Default constructor.
      *
      * @param f
      *            The function
@@ -730,7 +730,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * @return the max iterations for the Powell search method
+     * @return the max iterations for the Powell search method.
      */
     public int getMaxIterations()
     {
@@ -747,7 +747,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * @return the search method
+     * @return the search method.
      */
     public SearchMethod getSearchMethod()
     {
@@ -764,7 +764,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * @return the likelihood function to model the count
+     * @return the likelihood function to model the count.
      */
     public LikelihoodFunction getLikelihoodFunction()
     {
@@ -781,7 +781,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * @return the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood function
+     * @return the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood function.
      */
     public double getAlpha()
     {
@@ -816,7 +816,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator.
      *
      * @return the gradientLineMinimisation True if using the gradient for line minimisation
      */
@@ -826,7 +826,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+     * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator.
      *
      * @param gradientLineMinimisation
      *            Set to true to use the gradient for line minimisation
@@ -837,7 +837,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * @return the relative threshold for convergence in the Maximum Likelihood Estimator
+     * @return the relative threshold for convergence in the Maximum Likelihood Estimator.
      */
     public double getRelativeThreshold()
     {
@@ -854,7 +854,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
     }
 
     /**
-     * @return the absolute threshold for convergence in the Maximum Likelihood Estimator
+     * @return the absolute threshold for convergence in the Maximum Likelihood Estimator.
      */
     public double getAbsoluteThreshold()
     {

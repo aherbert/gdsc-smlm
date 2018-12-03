@@ -1,19 +1,20 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
-
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.junit.jupiter.api.Assumptions;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @SuppressWarnings({ "javadoc" })
 public class BlockMeanFilterTest extends AbstractFilterTest
@@ -162,7 +163,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
     }
 
     /**
-     * Used to test the filter methods calculate the correct result
+     * Used to test the filter methods calculate the correct result.
      */
     private abstract class BlockMeanDataFilter extends DataFilter
     {
@@ -233,7 +234,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 
     private static void checkIsCorrect(RandomSeed seed, BlockMeanDataFilter filter)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, 57);
 
         for (final int width : primes)
@@ -353,7 +354,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 
     private void speedTest(RandomSeed seed, BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         ArrayList<float[]> dataSet = getSpeedData(seed, ITER3);
 
@@ -413,9 +414,9 @@ public class BlockMeanFilterTest extends AbstractFilterTest
                                 height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord(slow.name + " " + boxSize, boxSlowTotal, fast.name, boxFastTotal));
+            logger.log(TestLogUtils.getStageTimingRecord(slow.name + " " + boxSize, boxSlowTotal, fast.name, boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord(slow.name, slowTotal, fast.name, fastTotal));
+        logger.log(TestLogUtils.getTimingRecord(slow.name, slowTotal, fast.name, fastTotal));
     }
 
     private void speedTestInternal(RandomSeed seed, BlockMeanDataFilter fast, BlockMeanDataFilter slow)
@@ -426,7 +427,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest
     private void speedTestInternal(RandomSeed seed, BlockMeanDataFilter fast, BlockMeanDataFilter slow,
             int[] testBoxSizes)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
 
@@ -486,10 +487,10 @@ public class BlockMeanFilterTest extends AbstractFilterTest
                                 width, height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord("Internal " + slow.name + " " + boxSize, boxSlowTotal, fast.name,
+            logger.log(TestLogUtils.getStageTimingRecord("Internal " + slow.name + " " + boxSize, boxSlowTotal, fast.name,
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("Internal " + slow.name, slowTotal, fast.name, fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("Internal " + slow.name, slowTotal, fast.name, fastTotal));
     }
 
     @SpeedTag

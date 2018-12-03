@@ -185,7 +185,7 @@ public class TSFPeakResultsReader
     }
 
     /**
-     * Read the results from the TSF file into memory
+     * Read the results from the TSF file into memory.
      *
      * @return The results set (or null if an error occurred)
      */

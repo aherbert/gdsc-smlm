@@ -47,7 +47,7 @@ public class AggregatedImageSource extends ImageSource
     private float[] lastImage = null;
 
     /**
-     * Create a new aggregated image source using the given image source
+     * Create a new aggregated image source using the given image source.
      *
      * @param imageSource
      *            The image source to aggregate (must not be null)
@@ -145,7 +145,7 @@ public class AggregatedImageSource extends ImageSource
     }
 
     /**
-     * Overridden to allow the crop to be done before aggregation
+     * Overridden to allow the crop to be done before aggregation.
      *
      * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#next(java.awt.Rectangle)
      */
@@ -194,7 +194,7 @@ public class AggregatedImageSource extends ImageSource
     }
 
     /**
-     * Overridden to allow the crop to be done before aggregation
+     * Overridden to allow the crop to be done before aggregation.
      *
      * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#get(int, java.awt.Rectangle)
      */
@@ -329,7 +329,7 @@ public class AggregatedImageSource extends ImageSource
     }
 
     /**
-     * @return The number of frames to aggregate
+     * @return The number of frames to aggregate.
      */
     public int getAggregate()
     {

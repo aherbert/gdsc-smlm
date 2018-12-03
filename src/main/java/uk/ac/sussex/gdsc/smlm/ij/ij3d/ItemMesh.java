@@ -44,9 +44,10 @@ import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
 import customnode.CustomMesh;
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 
 /**
@@ -174,7 +175,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
         if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) != 0)
             flags |= GeometryArray.USE_COORD_INDEX_ONLY;
 
-        final int extra = BitFlags.unset(vertexFormat, flags);
+        final int extra = BitFlagUtils.unset(vertexFormat, flags);
         if (extra != 0)
             throw new IllegalArgumentException("Unsupported vertex format flags: " + extra);
 
@@ -485,7 +486,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
                     duplicate(objectIndices, 0, objectIndices.length, points.length, allIndices, 0);
                     iga.setNormalIndices(0, allIndices);
 
-                    final float[] normals = new float[(Maths.max(objectIndices) + 1) * 3];
+                    final float[] normals = new float[(MathUtils.max(objectIndices) + 1) * 3];
                     sourceIGA.getNormals(0, normals);
                     iga.setNormals(0, normals);
 
@@ -635,7 +636,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
      */
     protected void duplicateIndices(int[] objectIndices, int[] allIndices)
     {
-        final int nIndices = Maths.max(objectIndices) + 1;
+        final int nIndices = MathUtils.max(objectIndices) + 1;
         for (int i = 0, k = 0; i < points.length; i++)
         {
             final int offset = i * nIndices;

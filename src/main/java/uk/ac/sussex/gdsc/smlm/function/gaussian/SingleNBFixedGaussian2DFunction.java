@@ -43,7 +43,7 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
     }
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param maxx
      *            The maximum x value of the 2-dimensional data (used to unpack a linear index into coordinates)

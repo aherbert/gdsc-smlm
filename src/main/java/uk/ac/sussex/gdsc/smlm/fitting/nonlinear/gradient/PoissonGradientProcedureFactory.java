@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
- * Create a Poisson gradient procedure
+ * Create a Poisson gradient procedure.
  */
 public class PoissonGradientProcedureFactory
 {

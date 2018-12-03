@@ -23,8 +23,8 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolverType;
 import uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver;
@@ -226,7 +226,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
     @Override
     public double getAdjustedCoefficientOfDetermination()
     {
-        return Maths.getAdjustedCoefficientOfDetermination(value, getTotalSumOfSquares(), getNumberOfFittedPoints(),
+        return MathUtils.getAdjustedCoefficientOfDetermination(value, getTotalSumOfSquares(), getNumberOfFittedPoints(),
                 getNumberOfFittedParameters());
     }
 

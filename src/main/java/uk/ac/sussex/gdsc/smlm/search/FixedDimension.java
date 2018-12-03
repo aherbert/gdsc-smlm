@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.search;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Specify the dimensions for a search.
@@ -36,10 +36,10 @@ public class FixedDimension implements Cloneable, Dimension
     /** The maximum of the range. */
     public final double max;
 
-    /** The current lower bound of the range (will be clipped to min/max). */
+    /** The current lower bound of the range (will be clipped to min./max). */
     public final double lower;
 
-    /** The current upper bound of the range (will be clipped to min/max). */
+    /** The current upper bound of the range (will be clipped to min./max). */
     public final double upper;
 
     /** The min increment to use around the centre. */
@@ -186,7 +186,7 @@ public class FixedDimension implements Cloneable, Dimension
     public double round(double value)
     {
         if (canRound())
-            return Maths.round(value, minIncrement);
+            return MathUtils.round(value, minIncrement);
         return value;
     }
 

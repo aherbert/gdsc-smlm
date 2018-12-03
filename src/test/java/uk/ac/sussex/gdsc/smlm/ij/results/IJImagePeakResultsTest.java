@@ -1,18 +1,5 @@
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -25,9 +12,23 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Test the IJImagePeakResults functionality.
@@ -443,7 +444,7 @@ public class IJImagePeakResultsTest
 
     private void canAddUsingDifferentMethods(RandomSeed seed, int displayFlags)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         displayFlags |= IJImagePeakResults.DISPLAY_SIGNAL;
 
         final IJImagePeakResults[] r = new IJImagePeakResults[8];
@@ -484,7 +485,7 @@ public class IJImagePeakResultsTest
         {
             r[i].end();
             image[i] = getImage(r[i]);
-            logger.log(TestLog.getRecord(Level.FINE, "[%d] = %s", i, Arrays.toString(image[i])));
+            logger.log(TestLogUtils.getRecord(Level.FINE, "[%d] = %s", i, Arrays.toString(image[i])));
         }
 
         // Test single value adds

@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 /**
- * Helper class for converting peak results
+ * Helper class for converting peak results.
  */
 public class PeakResultConversionHelper
 {

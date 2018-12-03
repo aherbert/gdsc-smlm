@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 public interface PreprocessedPeakResult
 {
     /**
-     * Get the frame containing the result
+     * Get the frame containing the result.
      *
      * @return The frame
      */
@@ -90,21 +90,21 @@ public interface PreprocessedPeakResult
     }
 
     /**
-     * Get the background noise
+     * Get the background noise.
      *
      * @return The noise (in photons)
      */
     public float getNoise();
 
     /**
-     * The localisation variance using the noise estimate for the data to approximate the local noise
+     * The localisation variance using the noise estimate for the data to approximate the local noise.
      *
      * @return The location variance in nm
      */
     public double getLocationVariance();
 
     /**
-     * The localisation variance using the local background estimate for the local noise
+     * The localisation variance using the local background estimate for the local noise.
      *
      * @return The location variance in nm
      */
@@ -120,12 +120,12 @@ public interface PreprocessedPeakResult
     public double getLocationVarianceCRLB();
 
     /**
-     * @return The average peak standard deviation in the X and Y dimension
+     * @return The average peak standard deviation in the X and Y dimension.
      */
     public float getSD();
 
     /**
-     * @return The background
+     * @return The background.
      */
     public float getBackground();
 
@@ -137,22 +137,22 @@ public interface PreprocessedPeakResult
     public float getAmplitude();
 
     /**
-     * @return The angle (for an elliptical Gaussian peak)
+     * @return The angle (for an elliptical Gaussian peak).
      */
     public float getAngle();
 
     /**
-     * @return The x position
+     * @return The x position.
      */
     public float getX();
 
     /**
-     * @return The y position
+     * @return The y position.
      */
     public float getY();
 
     /**
-     * @return The z position
+     * @return The z position.
      */
     public float getZ();
 
@@ -173,12 +173,12 @@ public interface PreprocessedPeakResult
     public float getYRelativeShift2();
 
     /**
-     * @return The x-dimension standard deviation
+     * @return The x-dimension standard deviation.
      */
     public float getXSD();
 
     /**
-     * @return The y-dimension standard deviation
+     * @return The y-dimension standard deviation.
      */
     public float getYSD();
 
@@ -234,7 +234,7 @@ public interface PreprocessedPeakResult
     public boolean ignore();
 
     /**
-     * Convert this to the parameters for a Gaussian2DFunction
+     * Convert this to the parameters for a Gaussian2DFunction.
      *
      * @return the parameters
      */

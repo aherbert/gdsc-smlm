@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 public class GradientCalculatorFactory
 {
     /**
-     * Create a new gradient calculator
+     * Create a new gradient calculator.
      *
      * @param nparams
      *            the number of gradient parameters

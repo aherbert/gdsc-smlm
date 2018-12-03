@@ -45,7 +45,7 @@ import com.google.protobuf.util.JsonFormat.Printer;
 
 import ij.IJ;
 import ij.Prefs;
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings;
@@ -99,7 +99,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 
 /**
- * Manage the settings for ImageJ plugins
+ * Manage the settings for ImageJ plugins.
  */
 public class SettingsManager
 {
@@ -717,7 +717,7 @@ public class SettingsManager
     }
 
     /**
-     * @return The settings filename (from the ImageJ preferences or the default in the home directory)
+     * @return The settings filename (from the ImageJ preferences or the default in the home directory).
      */
     public static String getSettingsFilename()
     {
@@ -831,7 +831,7 @@ public class SettingsManager
      */
     public static class ConfigurationReader<T extends Message>
     {
-        /** the default instance of the message type */
+        /** the default instance of the message type. */
         private final T t;
 
         /**
@@ -866,7 +866,7 @@ public class SettingsManager
         public T read(int flags)
         {
             T c = (T) readMessage(t.getParserForType(), createSettingsFile(t.getClass()), flags);
-            if (c == null && BitFlags.anyNotSet(flags, FLAG_NO_DEFAULT))
+            if (c == null && BitFlagUtils.anyNotSet(flags, FLAG_NO_DEFAULT))
                 c = t;
             return c;
         }
@@ -1297,7 +1297,7 @@ public class SettingsManager
         catch (final IOException e)
         {
             //e.printStackTrace();
-            if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT))
                 IJ.log("Unable to write message: " + e.getMessage());
         }
         return false;
@@ -1325,7 +1325,7 @@ public class SettingsManager
         }
         catch (final IOException e)
         {
-            if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT))
                 IJ.log("Unable to write message: " + e.getMessage());
         }
         return false;
@@ -1374,7 +1374,7 @@ public class SettingsManager
             // Only print this if the file-not-found flag is present
             // and not silent. This prevents warnings when settings files
             // have yet to be created, i.e. for new users of a settings file.
-            if (BitFlags.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ) && !BitFlags.anySet(flags, FLAG_SILENT))
+            if (BitFlagUtils.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ) && !BitFlagUtils.anySet(flags, FLAG_SILENT))
                 IJ.log("Unable to read message: " + e.getMessage());
         }
         return null;
@@ -1402,7 +1402,7 @@ public class SettingsManager
         catch (final InvalidProtocolBufferException e)
         {
             //e.printStackTrace();
-            if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT))
                 IJ.log("Unable to read message: " + e.getMessage());
         }
         return null;
@@ -1478,7 +1478,7 @@ public class SettingsManager
         }
         catch (final FileNotFoundException e)
         {
-            if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT))
                 IJ.log("Unable to write message: " + e.getMessage());
         }
         return false;
@@ -1502,16 +1502,16 @@ public class SettingsManager
             if (printer == null)
                 printer = JsonFormat.printer();
             Printer p = printer;
-            if (BitFlags.anyNotSet(flags, FLAG_JSON_WHITESPACE))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_JSON_WHITESPACE))
                 p = p.omittingInsignificantWhitespace();
-            if (BitFlags.anySet(flags, FLAG_JSON_DEFAULT_VALUES))
+            if (BitFlagUtils.anySet(flags, FLAG_JSON_DEFAULT_VALUES))
                 p = p.includingDefaultValueFields();
             p.appendTo(message, output);
             return true;
         }
         catch (final IOException e)
         {
-            if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT))
                 IJ.log("Unable to write message: " + e.getMessage());
         }
         return false;
@@ -1568,7 +1568,7 @@ public class SettingsManager
         }
         catch (final IOException e)
         {
-            if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT))
                 IJ.log("Unable to read message: " + e.getMessage());
         }
         return false;
@@ -1596,7 +1596,7 @@ public class SettingsManager
         }
         catch (final IOException e)
         {
-            if (BitFlags.anyNotSet(flags, FLAG_SILENT))
+            if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT))
                 IJ.log("Unable to read message: " + e.getMessage());
         }
         return false;

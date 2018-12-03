@@ -1,30 +1,31 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.FloatEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.smlm.function.ICSIFastLog.DataType;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.FloatEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.function.ICSIFastLog.DataType;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class FastLogTest
@@ -220,7 +221,7 @@ public class FastLogTest
         final float e = (float) Math.log(v);
         final float o = f.log(v);
         final float error = FloatEquality.relativeError(e, o);
-        logger.log(uk.ac.sussex.gdsc.test.utils.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
+        logger.log(uk.ac.sussex.gdsc.test.utils.TestLogUtils.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
         if (test)
         {
             if (Double.isNaN(e) && Double.isNaN(o))
@@ -304,7 +305,7 @@ public class FastLogTest
         final double e = Math.log(v);
         final double o = f.log(v);
         final double error = DoubleEquality.relativeError(e, o);
-        logger.log(uk.ac.sussex.gdsc.test.utils.TestLog.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
+        logger.log(uk.ac.sussex.gdsc.test.utils.TestLogUtils.getRecord(Level.INFO, "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
         if (test)
         {
             if (Double.isNaN(e) && Double.isNaN(o))
@@ -322,8 +323,8 @@ public class FastLogTest
     @SeededTest
     public void canTestFloatError(RandomSeed seed)
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         // All float values is a lot so we do a representative set
         final float[] d = generateRandomFloats(seed, 1000000);
@@ -352,7 +353,7 @@ public class FastLogTest
 
     private static float[] generateRandomFloats(RandomSeed seed, int n)
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final float[] d = new float[n];
         for (int i = 0; i < d.length; i++)
             d[i] = nextUniformFloat(r);
@@ -363,7 +364,7 @@ public class FastLogTest
     {
         int u = r.nextInt();
         // Mask out sign and the last bit of the exponent (avoid infinity and NaN)
-        u = BitFlags.unset(u, 0x80000000 | 0x00800000);
+        u = BitFlagUtils.unset(u, 0x80000000 | 0x00800000);
         //assert ((u >> 23) & 0xff) < 255;
         return Float.intBitsToFloat(u);
     }
@@ -371,8 +372,8 @@ public class FastLogTest
     @Test
     public void canTestFloatErrorRange()
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         final TurboList<TestFastLog> test = new TurboList<>();
         final int n = 13;
@@ -415,8 +416,8 @@ public class FastLogTest
     {
         // Mantissa = 23-bit, Exponent = 8-bit
         final int mbits = 23;
-        mine = Maths.clip(0, 255, mine);
-        maxe = Maths.clip(0, 255, maxe);
+        mine = MathUtils.clip(0, 255, mine);
+        maxe = MathUtils.clip(0, 255, maxe);
         if (mine > maxe)
             throw new IllegalStateException();
         final int mn = (1 << mbits);
@@ -539,11 +540,11 @@ public class FastLogTest
     @SeededTest
     public void canTestDoubleError(RandomSeed seed)
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         // All float values is a lot so we do a representative set
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
         final double[] d = new double[10000000];
         final double[] logD = new double[d.length];
@@ -579,11 +580,11 @@ public class FastLogTest
     @SeededTest
     public void canTestDoubleErrorLog1P(RandomSeed seed)
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         // All float values is a lot so we do a representative set
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
         final double[] d = new double[100000];
         final double[] logD = new double[d.length];
@@ -610,10 +611,10 @@ public class FastLogTest
     @SeededTest
     public void canTestDoubleErrorRange(RandomSeed seed)
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
 
         final TurboList<TestFastLog> test = new TurboList<>();
         final int n = 13;
@@ -654,8 +655,8 @@ public class FastLogTest
     private static double[] generateDoubles(UniformRandomProvider r, int mine, int maxe, double[] d)
     {
         // Mantissa = 52-bit, Exponent = 11-bit
-        mine = Maths.clip(0, 2047, mine);
-        maxe = Maths.clip(0, 2047, maxe);
+        mine = MathUtils.clip(0, 2047, mine);
+        maxe = MathUtils.clip(0, 2047, maxe);
         if (mine > maxe)
             throw new IllegalStateException();
         int i = 0;
@@ -772,10 +773,10 @@ public class FastLogTest
     public void canTestFloatSpeed(RandomSeed seed)
     {
         // No assertions, this is just a report
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final float[] x = new float[1000000];
         for (int i = 0; i < x.length; i++)
             x[i] = nextUniformFloat(r);
@@ -861,10 +862,10 @@ public class FastLogTest
     public void canTestDoubleSpeed(RandomSeed seed)
     {
         // No assertions, this is just a report
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final double[] x = new double[1000000];
         for (int i = 0; i < x.length; i++)
             x[i] = nextUniformDouble(r);
@@ -912,10 +913,10 @@ public class FastLogTest
     public void canTestDoubleSpeedLog1P(RandomSeed seed)
     {
         // No assertions, this is just a report
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final double[] x = new double[1000000];
         for (int i = 0; i < x.length; i++)
             x[i] = nextUniformDouble(r);
@@ -942,10 +943,10 @@ public class FastLogTest
     public void canTestFloatVsDoubleSpeed(RandomSeed seed)
     {
         // No assertions, this is just a report
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final double[] x = new double[1000000];
         final float[] xf = new float[x.length];
         for (int i = 0; i < x.length; i++)

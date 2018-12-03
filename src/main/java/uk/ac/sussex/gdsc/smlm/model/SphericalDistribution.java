@@ -28,7 +28,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Samples uniformly from the specified spherical volume
+ * Samples uniformly from the specified spherical volume.
  */
 public class SphericalDistribution implements SpatialDistribution
 {

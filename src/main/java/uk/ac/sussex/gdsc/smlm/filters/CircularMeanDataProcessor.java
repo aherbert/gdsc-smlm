@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 import java.util.List;
 
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with a circular mean filter.
@@ -37,7 +37,7 @@ public class CircularMeanDataProcessor extends DataProcessor
     private CircularMeanFilter filter;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param border
      *            The border to ignore for maxima
@@ -135,7 +135,7 @@ public class CircularMeanDataProcessor extends DataProcessor
     public List<String> getParameters()
     {
         final List<String> list = super.getParameters();
-        list.add("radius = " + Utils.rounded(radius));
+        list.add("radius = " + MathUtils.rounded(radius));
         return list;
     }
 

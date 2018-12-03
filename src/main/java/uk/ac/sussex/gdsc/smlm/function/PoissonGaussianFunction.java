@@ -41,7 +41,7 @@ import org.apache.commons.math3.util.FastMath;
 public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
     /**
-     * The inverse of the on-chip gain multiplication factor
+     * The inverse of the on-chip gain multiplication factor.
      */
     final double alpha;
 
@@ -56,7 +56,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     static final double LOG_NORMALISATION = Math.log(NORMALISATION);
 
     /**
-     * Number of Picard iterations to use
+     * Number of Picard iterations to use.
      */
     private static final int NUM_PICARD = 3;
 
@@ -143,7 +143,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     }
 
     /**
-     * Get the probability of observation x
+     * Get the probability of observation x.
      *
      * @param x
      *            The observation value (after gain)
@@ -176,7 +176,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     }
 
     /**
-     * Get the log(p) of observation x
+     * Get the log(p) of observation x.
      *
      * @param x
      *            The observation value
@@ -209,7 +209,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     }
 
     /**
-     * Get the probability of observation x
+     * Get the probability of observation x.
      *
      * @param x
      *            The observation value
@@ -243,7 +243,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     }
 
     /**
-     * Get the probability of observation x
+     * Get the probability of observation x.
      *
      * @param x
      *            The observation value
@@ -265,7 +265,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     }
 
     /**
-     * Get the log(p) of observation x
+     * Get the log(p) of observation x.
      *
      * @param x
      *            The observation value
@@ -482,7 +482,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     }
 
     /**
-     * Return if using the Picard approximation for the initial saddle point
+     * Return if using the Picard approximation for the initial saddle point.
      *
      * @return True if using the Picard approximation
      */

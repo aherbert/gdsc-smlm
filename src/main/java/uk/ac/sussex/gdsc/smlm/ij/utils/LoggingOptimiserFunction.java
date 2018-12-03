@@ -62,7 +62,7 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction
     }
 
     /**
-     * Increment the evaluations count
+     * Increment the evaluations count.
      */
     public void increment()
     {
@@ -72,7 +72,7 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction
     }
 
     /**
-     * @return The function name
+     * @return The function name.
      */
     public String getName()
     {

@@ -43,10 +43,10 @@ import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextPanel;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -339,12 +339,12 @@ public class SpotInspector implements PlugIn, MouseListener
             }
             final int slice = rank.rank + 1;
             spots.setPixels(spotIp.getPixels(), slice);
-            spots.setSliceLabel(Utils.rounded(rank.originalScore), slice);
+            spots.setSliceLabel(MathUtils.rounded(rank.originalScore), slice);
         }
 
         source.close();
 
-        final ImagePlus imp = Utils.display(TITLE, spots);
+        final ImagePlus imp = ImageJUtils.display(TITLE, spots);
         imp.setRoi((PointRoi) null);
 
         // Make bigger
@@ -362,7 +362,7 @@ public class SpotInspector implements PlugIn, MouseListener
             return -1;
         final FitConfiguration fitConfig = new FitConfiguration();
         fitConfig.setPSF(psf);
-        return (float) Maths.max(1, fitConfig.getInitialXSD(), fitConfig.getInitialYSD());
+        return (float) MathUtils.max(1, fitConfig.getInitialXSD(), fitConfig.getInitialYSD());
     }
 
     private static void plotScore(float[] xValues, float[] yValues, double yMin, double yMax)
@@ -373,7 +373,7 @@ public class SpotInspector implements PlugIn, MouseListener
             final Plot2 plot = new Plot2(title, "Rank", SORT_ORDER[sortOrderIndex], xValues, yValues);
             plot.setLimits(1, xValues.length, yMin, yMax);
 
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
     }
 
@@ -382,8 +382,8 @@ public class SpotInspector implements PlugIn, MouseListener
         if (plotHistogram)
         {
             final String title = TITLE + " Histogram";
-            Utils.showHistogram(title, new StoredDataStatistics(data), SORT_ORDER[sortOrderIndex], 0,
-                    (removeOutliers) ? 1 : 0, histogramBins);
+            new HistogramPlotBuilder(title, StoredDataStatistics.create(data), SORT_ORDER[sortOrderIndex])
+              .setRemoveOutliersOption((removeOutliers) ? 1 : 0).setNumberOfBins(histogramBins).show();
         }
     }
 

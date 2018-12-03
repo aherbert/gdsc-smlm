@@ -25,7 +25,7 @@ package uk.ac.sussex.gdsc.smlm.engine;
 
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -182,7 +182,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets the size of the region to search for local maxima
+     * Gets the size of the region to search for local maxima.
      *
      * @return the size of the region to search for local maxima. The actual window is calculated dynamically
      *         in conjunction with the peak widths using {@link #getHWHMMax()}.
@@ -193,7 +193,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets the size of the region to search for local maxima
+     * Sets the size of the region to search for local maxima.
      *
      * @param search
      *            the size of the region to search for local maxima. The actual window is calculated dynamically
@@ -205,7 +205,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets the size of the region to search for local maxima
+     * Sets the size of the region to search for local maxima.
      *
      * @param search
      *            the size of the region to search for local maxima. The actual window is calculated dynamically
@@ -219,7 +219,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets if the Search parameter is absolute
+     * Gets if the Search parameter is absolute.
      *
      * @return True if the Search parameter is absolute
      */
@@ -229,7 +229,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets if the Search parameter is absolute
+     * Sets if the Search parameter is absolute.
      *
      * @param absolute
      *            True if the Search parameter is absolute
@@ -290,7 +290,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets if the Border parameter is absolute
+     * Gets if the Border parameter is absolute.
      *
      * @return True if the Border parameter is absolute
      */
@@ -300,7 +300,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets if the Border parameter is absolute
+     * Sets if the Border parameter is absolute.
      *
      * @param absolute
      *            True if the Border parameter is absolute
@@ -359,7 +359,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets if the Fitting parameter is absolute
+     * Gets if the Fitting parameter is absolute.
      *
      * @return True if the Fitting parameter is absolute
      */
@@ -369,7 +369,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets if the Fitting parameter is absolute
+     * Sets if the Fitting parameter is absolute.
      *
      * @param absolute
      *            True if the Fitting parameter is absolute
@@ -535,7 +535,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets the noise method used to estimate the image noise
+     * Gets the noise method used to estimate the image noise.
      *
      * @return the method used to estimate the image noise
      */
@@ -545,7 +545,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets the noise method used to estimate the image noise
+     * Sets the noise method used to estimate the image noise.
      *
      * @param noiseMethod
      *            Set the method used to estimate the image noise
@@ -556,7 +556,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets the noise method used to estimate the image noise
+     * Sets the noise method used to estimate the image noise.
      *
      * @param noiseMethod
      *            Set the method used to estimate the image noise
@@ -567,7 +567,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets the duplicate distance within which spots are considered duplicates
+     * Sets the duplicate distance within which spots are considered duplicates.
      *
      * @param duplicateDistance
      *            The distance within which spots are considered duplicates
@@ -578,7 +578,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets if the duplicate distance is absolute
+     * Sets if the duplicate distance is absolute.
      *
      * @param absolute
      *            True if the duplicate distance is absolute
@@ -609,7 +609,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets if the duplicate distance is absolute
+     * Gets if the duplicate distance is absolute.
      *
      * @return True if the duplicate distance is absolute
      */
@@ -647,7 +647,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets the type of filter to apply to the data before identifying local maxima
+     * Gets the type of filter to apply to the data before identifying local maxima.
      *
      * @return the type of filter to apply to the data before identifying local maxima
      */
@@ -657,7 +657,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets the type of filter to apply to the data before identifying local maxima
+     * Sets the type of filter to apply to the data before identifying local maxima.
      *
      * @param dataFilterType
      *            the type of filter to apply to the data before identifying local maxima
@@ -692,7 +692,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Sets the type of filter to apply to the data before identifying local maxima
+     * Sets the type of filter to apply to the data before identifying local maxima.
      *
      * @param dataFilterType
      *            the type of filter to apply to the data before identifying local maxima
@@ -771,7 +771,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets if the smoothing parameter is absolute
+     * Gets if the smoothing parameter is absolute.
      *
      * @param n
      *            The filter number
@@ -785,7 +785,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets if the smoothing parameter is absolute
+     * Gets if the smoothing parameter is absolute.
      *
      * @param n
      *            The filter number
@@ -815,7 +815,7 @@ public class FitEngineConfiguration implements Cloneable
     }
 
     /**
-     * Gets smoothing window size
+     * Gets smoothing window size.
      *
      * @param n
      *            The filter number
@@ -1138,7 +1138,7 @@ public class FitEngineConfiguration implements Cloneable
      */
     public static double round(double value, int decimalPlaces)
     {
-        return (decimalPlaces >= 0) ? Maths.roundUsingDecimalPlaces(value, decimalPlaces) : value;
+        return (decimalPlaces >= 0) ? MathUtils.roundUsingDecimalPlaces(value, decimalPlaces) : value;
     }
 
     /**

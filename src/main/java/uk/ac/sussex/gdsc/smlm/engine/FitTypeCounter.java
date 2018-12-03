@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Count the type of fit that was performed
+ * Count the type of fit that was performed.
  */
 public class FitTypeCounter
 {
@@ -45,7 +45,7 @@ public class FitTypeCounter
     }
 
     /**
-     * @return the total number of flags for the type of fit
+     * @return the total number of flags for the type of fit.
      */
     public int size()
     {
@@ -89,7 +89,7 @@ public class FitTypeCounter
     }
 
     /**
-     * Get the count of the given type
+     * Get the count of the given type.
      *
      * @param flags
      *            The flags that must be set
@@ -108,7 +108,7 @@ public class FitTypeCounter
     }
 
     /**
-     * Get the count of the given type
+     * Get the count of the given type.
      *
      * @param flags
      *            The flags that must be unset
@@ -129,7 +129,7 @@ public class FitTypeCounter
     }
 
     /**
-     * Get the count of the given type
+     * Get the count of the given type.
      *
      * @param setFlags
      *            The flags that must be set
@@ -153,7 +153,7 @@ public class FitTypeCounter
     }
 
     /**
-     * @return The total count
+     * @return The total count.
      */
     public int getTotal()
     {

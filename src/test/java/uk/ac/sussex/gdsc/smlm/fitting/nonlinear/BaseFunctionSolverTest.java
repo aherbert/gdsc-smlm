@@ -1,24 +1,11 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.math3.stat.inference.TTest;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
 import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerFactory;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
@@ -34,15 +21,30 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
+import org.apache.commons.math3.stat.inference.TTest;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
- * Base class for testing the function solvers
+ * Base class for testing the function solvers.
  */
 @SuppressWarnings({ "javadoc" })
 public abstract class BaseFunctionSolverTest implements Function<RandomSeed, double[][]>
@@ -148,7 +150,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
     private static double[][] weights = new double[NoiseModel.values().length][], noise = new double[weights.length][];
 
-    private static DataCache<RandomSeed, double[][]> dataCache = new DataCache<>();
+    private static ConcurrentHashMap<RandomSeed, double[][]> ConcurrentHashMap = new ConcurrentHashMap<>();
 
     private double[] getWeights(RandomSeed seed, NoiseModel noiseModel)
     {
@@ -158,7 +160,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
             if (noiseModel == NoiseModel.SCMOS)
             {
                 // Special case of per-pixel random weights
-                final double[][] data = dataCache.getOrComputeIfAbsent(seed, this);
+                final double[][] data = ConcurrentHashMap.computeIfAbsent(seed, this);
                 return data[0];
             }
             computeWeights(noiseModel, index);
@@ -174,7 +176,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
             if (noiseModel == NoiseModel.SCMOS)
             {
                 // Special case of per-pixel random noise
-                final double[][] data = dataCache.getOrComputeIfAbsent(seed, this);
+                final double[][] data = ConcurrentHashMap.computeIfAbsent(seed, this);
                 return data[1];
             }
             computeWeights(noiseModel, index);
@@ -217,9 +219,9 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     {
         // Per observation read noise.
         // This is generated once so create the randon generator here.
-        final UniformRandomProvider rg = RNGFactory.create(source.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(source.getSeed());
         final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, gain, gainSD);
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, gain, gainSD);
         final double[] w = new double[size * size];
         final double[] n = new double[size * size];
         for (int i = 0; i < w.length; i++)
@@ -258,7 +260,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         if (solver.isWeighted())
             solver.setWeights(getWeights(seed, noiseModel));
 
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         for (final double s : signal)
         {
@@ -333,7 +335,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
             solver.setWeights(getWeights(seed, noiseModel));
 
         final int LOOPS = 5;
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final StoredDataStatistics[] stats = new StoredDataStatistics[6];
         final String[] statName = { "Signal", "X", "Y" };
 
@@ -415,12 +417,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
                                 {
                                     betterPrecision[index]++;
                                     args[args.length - 1] = "P*";
-                                    logger.log(TestLog.getRecord(Level.FINE, msg, args));
+                                    logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
                                 }
                                 else
                                 {
                                     args[args.length - 1] = "P";
-                                    logger.log(TestLog.getRecord(Level.FINE, msg, args));
+                                    logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
                                 }
                                 totalPrecision[index]++;
                             }
@@ -434,12 +436,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
                             {
                                 betterAccuracy[index]++;
                                 args[args.length - 1] = "A*";
-                                logger.log(TestLog.getRecord(Level.FINE, msg, args));
+                                logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
                             }
                             else
                             {
                                 args[args.length - 1] = "A";
-                                logger.log(TestLog.getRecord(Level.FINE, msg, args));
+                                logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
                             }
                             totalAccuracy[index]++;
                         }
@@ -451,12 +453,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
                         {
                             betterPrecision[index]++;
                             args[args.length - 1] = "P*";
-                            logger.log(TestLog.getRecord(Level.FINE, msg, args));
+                            logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
                         }
                         else
                         {
                             args[args.length - 1] = "P";
-                            logger.log(TestLog.getRecord(Level.FINE, msg, args));
+                            logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
                         }
                         totalPrecision[index]++;
                     }
@@ -606,7 +608,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         }
 
         // Read-noise
-        final GaussianSampler gs = GaussianSamplerFactory.createGaussianSampler(rg, 0, 1);
+        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, 0, 1);
         if (noise != null)
             for (int i = 0; i < data.length; i++)
                 data[i] += gs.sample() * noise[i];
@@ -666,7 +668,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         }
 
         // Draw target data
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
         // fit with 2 peaks using the known params.
@@ -780,7 +782,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         }
 
         // Draw target data
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
         // fit with 2 peaks using the known params.
@@ -791,9 +793,11 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         solver1.fit(data, null, a, null);
         solver2.computeValue(data, null, a);
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+
         double v1 = solver1.getValue();
         double v2 = solver2.getValue();
-        ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10, "Fit 2 peaks and computeValue");
+        TestAssertions.assertTest(v1, v2, predicate, "Fit 2 peaks and computeValue");
 
         final double[] o1 = new double[f2.size()];
         final double[] o2 = new double[o1.length];
@@ -803,7 +807,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
         v1 = solver1.getValue();
         v2 = solver2.getValue();
-        ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10, "Fit 2 peaks and computeValue with yFit");
+        TestAssertions.assertTest(v1, v2, predicate, "Fit 2 peaks and computeValue with yFit");
 
         final StandardValueProcedure p = new StandardValueProcedure();
         double[] e = p.getValues(f2, a);
@@ -826,7 +830,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
             v1 = solver1.getValue();
             v2 = solver2.getValue();
-            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10, "Fit 1 peak + 1 precomputed and computeValue");
+            TestAssertions.assertTest(v1, v2, predicate, "Fit 1 peak + 1 precomputed and computeValue");
 
             Arrays.fill(o1, 0);
             Arrays.fill(o2, 0);
@@ -836,7 +840,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
             v1 = solver1.getValue();
             v2 = solver2.getValue();
-            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-10,
+            TestAssertions.assertTest(v1, v2, predicate,
                     "Fit 1 peak + 1 precomputed and computeValue with yFit");
 
             e = p.getValues(pf1, a);

@@ -114,7 +114,7 @@ public abstract class ResultFilter
     public abstract void finalise();
 
     /**
-     * @return The number of results that pass the filter
+     * @return The number of results that pass the filter.
      */
     public int getFilteredCount()
     {
@@ -122,7 +122,7 @@ public abstract class ResultFilter
     }
 
     /**
-     * @return The indices that were fitted that pass the filter
+     * @return The indices that were fitted that pass the filter.
      */
     public int[] getMaxIndices()
     {
@@ -140,7 +140,7 @@ public abstract class ResultFilter
     }
 
     /**
-     * @return The fitted peaks that pass the filter
+     * @return The fitted peaks that pass the filter.
      */
     public List<PeakResult> getResults()
     {

@@ -173,7 +173,7 @@ public class WeightedFailCounter extends BaseFailCounter
     }
 
     /**
-     * Gets the amount to decrement for a pass
+     * Gets the amount to decrement for a pass.
      *
      * @return the pass decrement
      */

@@ -172,7 +172,7 @@ public class Erf
         return erf(x2) - erf(x1);
     }
 
-    private final static double four_over_pi = 4.0 / Math.PI;
+    private static final double four_over_pi = 4.0 / Math.PI;
 
     /**
      * Returns the error function.

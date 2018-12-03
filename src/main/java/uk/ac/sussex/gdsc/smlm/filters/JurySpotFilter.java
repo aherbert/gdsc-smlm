@@ -35,7 +35,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
     private DataProcessor[] processors;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param search
      *            The search width for non-maximum suppression

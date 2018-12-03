@@ -59,7 +59,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
     // beta  = Gradient vector
     // We want to solve: A x = b to find the update x
 
-    /** Current best alpha (Scaled Hessian matrix) */
+    /** Current best alpha (Scaled Hessian matrix). */
     protected double[] alpha;
     /** Current best beta (Gradient vector). */
     protected double[] beta;
@@ -78,7 +78,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
     public static final double DEFAULT_MAX_ABSOLUTE_ERROR = 1e-4;
 
     /**
-     * Create a new stepping function solver
+     * Create a new stepping function solver.
      *
      * @param type
      *            the type
@@ -114,7 +114,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
     }
 
     /**
-     * Create a new stepping function solver
+     * Create a new stepping function solver.
      *
      * @param type
      *            the type
@@ -134,7 +134,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
     }
 
     /**
-     * Create a new stepping function solver
+     * Create a new stepping function solver.
      *
      * @param type
      *            the type
@@ -307,7 +307,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
     }
 
     /**
-     * @return the initialLambda
+     * @return the initialLambda.
      */
     public double getInitialLambda()
     {

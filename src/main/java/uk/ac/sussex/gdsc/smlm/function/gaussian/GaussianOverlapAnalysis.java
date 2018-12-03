@@ -25,7 +25,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
 
 /**
@@ -193,7 +193,7 @@ public class GaussianOverlapAnalysis
                     sum += data[k];
                     indices[k] = k;
                 }
-                Sort.sort(indices, data);
+                SortUtils.sortIndices(indices, data, true);
                 final double expected = sum * fraction;
                 double last = 0;
                 boolean useMask = false;

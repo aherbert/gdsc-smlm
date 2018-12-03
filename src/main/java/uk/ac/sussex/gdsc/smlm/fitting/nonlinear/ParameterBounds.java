@@ -264,7 +264,7 @@ public class ParameterBounds
     }
 
     /**
-     * Determine if the current solution (a) is at the the bounds
+     * Determine if the current solution (a) is at the the bounds.
      *
      * @param a
      *            the current parameters
@@ -387,7 +387,7 @@ public class ParameterBounds
     }
 
     /**
-     * Gets the lower limit of the bounds
+     * Gets the lower limit of the bounds.
      *
      * @return the lower limit (or null).
      */
@@ -397,7 +397,7 @@ public class ParameterBounds
     }
 
     /**
-     * Gets the upper limit of the bounds
+     * Gets the upper limit of the bounds.
      *
      * @return the upper limit (or null).
      */

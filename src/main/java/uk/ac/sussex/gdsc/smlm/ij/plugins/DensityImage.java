@@ -40,7 +40,7 @@ import ij.WindowManager;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
@@ -55,7 +55,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
 
 /**
- * Produces an image on localisation using their density
+ * Produces an image on localisation using their density.
  */
 public class DensityImage implements PlugIn
 {
@@ -493,7 +493,7 @@ public class DensityImage implements PlugIn
 
     private static String rounded(double d)
     {
-        return Utils.rounded(d, 3);
+        return MathUtils.rounded(d, 3);
     }
 
     /**
@@ -556,7 +556,7 @@ public class DensityImage implements PlugIn
 
         // Build a list of all images with a region ROI
         final List<String> titles = new LinkedList<>();
-        for (final int imageID : Utils.getIDList())
+        for (final int imageID : ImageJUtils.getIdList())
         {
             final ImagePlus imp = WindowManager.getImage(imageID);
             if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
@@ -740,7 +740,7 @@ public class DensityImage implements PlugIn
             plot.addPoints(values[0], lower, 1);
             plot.setColor(Color.BLACK);
         }
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
     }
 
     private static double min(double min, double[] data)

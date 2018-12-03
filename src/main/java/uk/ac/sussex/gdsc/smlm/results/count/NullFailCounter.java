@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  */
 public class NullFailCounter implements FailCounter
 {
-    /** An instance */
+    /** An instance. */
     public static final NullFailCounter INSTANCE = new NullFailCounter();
 
     @Override

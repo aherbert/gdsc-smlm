@@ -1,15 +1,15 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class HoltzerAstigmatismZModelTest
@@ -83,7 +83,7 @@ public class HoltzerAstigmatismZModelTest
             final double o2 = ds_dz2[1];
 
             if (record)
-                logger.log(TestLog.getRecord(Level.INFO, "z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)", z, s0, e1, o1,
+                logger.log(TestLogUtils.getRecord(Level.INFO, "z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)", z, s0, e1, o1,
                         DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2)));
 
             //double error = DoubleEquality.relativeError(o, e);

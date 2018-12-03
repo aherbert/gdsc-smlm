@@ -1,17 +1,5 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-
-import org.apache.commons.math3.util.Precision;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -23,16 +11,29 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestCounter;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TestLog.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
+
+import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -172,7 +173,7 @@ public class LSQLVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList,
+        final int[] x = createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList,
                 yList);
         final int n = x.length;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -185,7 +186,7 @@ public class LSQLVMGradientProcedureTest
         final IndexSupplier msgOB = new IndexSupplier(1, name + "Observations: Not same beta ", null);
         final IndexSupplier msgOAl = new IndexSupplier(1, name + "Observations: Not same alpha linear ", null);
         final IndexSupplier msgOAm = new IndexSupplier(1, name + "Observations: Not same alpha matrix ", null);
-        
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             final BaseLSQLVMGradientProcedure p = factory.createProcedure(yList.get(i), func);
@@ -248,7 +249,7 @@ public class LSQLVMGradientProcedureTest
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams,
             final BaseLSQLVMGradientProcedureFactory factory)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 1000;
         final double[][] alpha = new double[nparams][nparams];
@@ -257,7 +258,7 @@ public class LSQLVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList,
+        final int[] x = createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList,
                 yList);
         final int n = x.length;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -308,7 +309,7 @@ public class LSQLVMGradientProcedureTest
         final long time2 = t2.getTime();
 
         logger.log(
-                TestLog.getTimingRecord("GradientCalculator " + nparams, time1, factory.getClass().getSimpleName(), time2));
+                TestLogUtils.getTimingRecord("GradientCalculator " + nparams, time1, factory.getClass().getSimpleName(), time2));
     }
 
     @SeededTest
@@ -328,7 +329,7 @@ public class LSQLVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
         final String name = GradientCalculator.class.getSimpleName();
@@ -337,7 +338,7 @@ public class LSQLVMGradientProcedureTest
         final IndexSupplier msgOB = new IndexSupplier(1, name + "Observations: Not same beta ", null);
         final IndexSupplier msgOAl = new IndexSupplier(1, name + "Observations: Not same alpha linear ", null);
         final IndexSupplier msgOAm = new IndexSupplier(1, name + "Observations: Not same alpha matrix ", null);
-        
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             final BaseLSQLVMGradientProcedure p1 = LSQLVMGradientProcedureFactory.create(yList.get(i), func);
@@ -390,14 +391,14 @@ public class LSQLVMGradientProcedureTest
             final BaseLSQLVMGradientProcedureFactory factory1, final BaseLSQLVMGradientProcedureFactory factory2,
             boolean doAssert)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 100;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
+        createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
 
         // Remove the timing of the function call by creating a dummy function
         final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -454,7 +455,7 @@ public class LSQLVMGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        LogRecord record = TestLog.getTimingRecord(factory1.getClass().getSimpleName() + nparams, time1,
+        LogRecord record = TestLogUtils.getTimingRecord(factory1.getClass().getSimpleName() + nparams, time1,
                 factory2.getClass().getSimpleName(), time2);
         if (!doAssert && record.getLevel() == TestLevel.TEST_FAILURE)
             record.setLevel(TestLevel.TEST_WARNING);
@@ -477,7 +478,7 @@ public class LSQLVMGradientProcedureTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+        createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
 
         // for the gradients
         final double delta = 1e-4;
@@ -550,7 +551,7 @@ public class LSQLVMGradientProcedureTest
         try
         {
             background = 1e-2;
-            createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+            createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
 
             final EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
@@ -565,7 +566,7 @@ public class LSQLVMGradientProcedureTest
                 betaList.add(beta.clone());
                 for (int j = 0; j < nparams; j++)
                     if (Math.abs(beta[j]) < 1e-6)
-                        logger.log(TestLog.getRecord(Level.INFO, "[%d] Tiny beta %s %g", i,
+                        logger.log(TestLogUtils.getRecord(Level.INFO, "[%d] Tiny beta %s %g", i,
                                 func.getGradientParameterName(j), beta[j]));
                 // Solve
                 if (!solver.solve(p.getAlphaMatrix(), beta))
@@ -615,7 +616,7 @@ public class LSQLVMGradientProcedureTest
 
                 if (debug)
                     for (int i = 0; i < nparams; i++)
-                        logger.log(TestLog.getRecord(logLevel, "Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
+                        logger.log(TestLogUtils.getRecord(logLevel, "Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
                                 func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
                                 abs[i].getMean(), abs[i].getStandardDeviation()));
             }

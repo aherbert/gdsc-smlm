@@ -40,7 +40,7 @@ public class DoubleDHT3D extends DoubleImage3D
     private int[] jj;
 
     /**
-     * Instantiates a new 3D discrete Hartley transform
+     * Instantiates a new 3D discrete Hartley transform.
      *
      * @param stack
      *            the stack
@@ -599,7 +599,7 @@ public class DoubleDHT3D extends DoubleImage3D
     }
 
     /**
-     * Convert a discrete Fourier transform (DFT) to a DHT
+     * Convert a discrete Fourier transform (DFT) to a DHT.
      *
      * @param real
      *            the real component

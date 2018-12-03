@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Filter results using z-depth
+ * Filter results using z-depth.
  */
 public class MultiFilterZComponent extends MultiFilterComponent
 {

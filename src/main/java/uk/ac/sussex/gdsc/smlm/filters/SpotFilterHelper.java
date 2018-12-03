@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.Arrays;
 
 /**
- * Helper for the spot filter
+ * Helper for the spot filter.
  */
 public class SpotFilterHelper
 {

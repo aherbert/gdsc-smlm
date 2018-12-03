@@ -59,7 +59,7 @@ public interface CoordinateStore
     public void addToQueue(double x, double y, double z);
 
     /**
-     * Flush the queue to the store
+     * Flush the queue to the store.
      */
     public void flush();
 
@@ -131,14 +131,14 @@ public interface CoordinateStore
     public CoordinateStore resize(int minx, int miny, int width, int height);
 
     /**
-     * Gets the the min x coordinate value
+     * Gets the the min x coordinate value.
      *
      * @return the min X
      */
     public int getMinX();
 
     /**
-     * Gets the the min y coordinate value
+     * Gets the the min y coordinate value.
      *
      * @return the min Y
      */

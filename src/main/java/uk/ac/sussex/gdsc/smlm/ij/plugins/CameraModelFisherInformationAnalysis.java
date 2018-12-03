@@ -40,18 +40,19 @@ import ij.IJ;
 import ij.Prefs;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample;
 import uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache;
@@ -84,9 +85,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
     //@formatter:off
 	public enum CameraType implements NamedObject
 	{
-		/** A camera with pure Poisson shot noise */
+		/** A camera with pure Poisson shot noise. */
 		POISSON { @Override public String getName() { return "Poisson"; } },
-		/** CCD camera has Poisson shot noise and Gaussian read noise */
+		/** CCD camera has Poisson shot noise and Gaussian read noise. */
 		CCD { @Override	public String getName() { return "CCD"; }
 			  @Override	public boolean isFast() { return false; }
 			  @Override	public boolean isLowerFixedI() { return true; } },
@@ -147,7 +148,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
     private static String[] CAMERA_TYPES = SettingsManager.getNames((Object[]) cameraTypeValues);
 
     /**
-     * Class for hashing the Fisher information settings
+     * Class for hashing the Fisher information settings.
      */
     private static class FIKey
     {
@@ -483,7 +484,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
         }
         final double[] means = meanList.toArray();
         final double[] alphas = alphalist.toArray();
-        Sort.sortArrays(alphas, means, true);
+        SortUtils.sortData(alphas, means, true, false);
         final BasePoissonFisherInformation upperf = (type == CameraType.EM_CCD) ? new HalfPoissonFisherInformation()
                 : createPoissonGaussianApproximationFisherInformation(noise / gain);
         return new InterpolatedPoissonFisherInformation(means, alphas, type.isLowerFixedI(), upperf);
@@ -499,7 +500,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
     {
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        if (Utils.isExtraOptions() && !cache.isEmpty())
+        if (ImageJUtils.isExtraOptions() && !cache.isEmpty())
         {
             plotFromCache();
             return;
@@ -511,7 +512,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
         analyse();
     }
 
-    /** {@inheritDoc} */
     private boolean showDialog()
     {
         settings = SettingsManager.readCameraModelFisherInformationAnalysisSettings(0).toBuilder();
@@ -564,7 +564,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
     }
 
     // Set the debug flag
-    private final static boolean debug = System.getProperty("gdsc.smlm.debug") != null;
+    private static final boolean debug = System.getProperty("gdsc.smlm.debug") != null;
 
     private void analyse()
     {
@@ -622,16 +622,16 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
                     max = j;
             System.out.printf("PGG(p=%g) max=%g\n", t, data1[0][max]);
 
-            final String title = TITLE + " photons=" + Utils.rounded(t) + " alpha=" + Utils.rounded(alpha);
+            final String title = TITLE + " photons=" + MathUtils.rounded(t) + " alpha=" + MathUtils.rounded(alpha);
             final Plot plot = new Plot(title, "Count", "FI function");
-            double yMax = Maths.max(data1[1]);
-            yMax = Maths.maxDefault(yMax, data2[1]);
+            double yMax = MathUtils.max(data1[1]);
+            yMax = MathUtils.maxDefault(yMax, data2[1]);
             plot.setLimits(data2[0][0], data2[0][data2[0].length - 1], 0, yMax);
             plot.setColor(Color.red);
             plot.addPoints(data1[0], data1[1], Plot.LINE);
             plot.setColor(Color.blue);
             plot.addPoints(data2[0], data2[1], Plot.LINE);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
         // ==============
 
@@ -693,7 +693,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
             plot.addPoints(x, alpha2, pointShape);
             plot.setColor(Color.BLACK);
         }
-        Utils.display(title, plot, 0, wo);
+        ImageJUtils.display(title, plot, 0, wo);
 
         // The approximation should not produce an infinite computation
         double[] limits = new double[] { fi2[fi2.length - 1], fi2[fi2.length - 1] };
@@ -739,7 +739,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
         //	plot.addPoints(x, pggFI, pointShape);
         //	plot.setColor(Color.BLACK);
         //}
-        Utils.display(title, plot, 0, wo);
+        ImageJUtils.display(title, plot, 0, wo);
 
         wo.tile();
     }
@@ -878,7 +878,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
                 }
                 final double[] exp2 = meanList.toArray();
                 final double[] alphas = alphalist.toArray();
-                Sort.sortArrays(alphas, exp2, true);
+                SortUtils.sortData(alphas, exp2, true, false);
 
                 // Find any exponent not in the array
                 final TIntArrayList list = new TIntArrayList(exp.length);
@@ -895,7 +895,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
             }
             else
                 // Compute all
-                index = SimpleArrayUtils.newArray(alpha.length, 0, 1);
+                index = SimpleArrayUtils.natural(alpha.length);
 
             if (index.length > 0)
             {
@@ -903,7 +903,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
                 final int nThreads = Prefs.getThreads();
                 if (es == null)
                     es = Executors.newFixedThreadPool(nThreads);
-                final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), index.length, nThreads != 1);
+                final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), index.length, nThreads != 1);
                 final int nPerThread = (int) Math.ceil((double) index.length / nThreads);
                 final TurboList<Future<?>> futures = new TurboList<>(nThreads);
                 for (int i = 0; i < index.length; i += nPerThread)
@@ -925,7 +925,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
                         }
                     }));
                 }
-                Utils.waitForCompletion(futures);
+                ConcurrencyUtils.waitForCompletionUnchecked(futures);
                 ticker.stop();
                 IJ.showStatus("");
 
@@ -1101,6 +1101,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
             plot.addPoints(x, alpha, pointShape);
         plot.setColor(Color.BLACK);
         plot.addLabel(0, 0, cachePlot);
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
     }
 }

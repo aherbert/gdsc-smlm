@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
-
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
 
 /**
  * Test the ToleranceChecker can converge as expected.
@@ -161,9 +161,9 @@ public class ToleranceCheckerTest
             if (observed != 0)
             {
                 Assertions.assertEquals(expected, observed);
-                if (BitFlags.areSet(expected, ToleranceChecker.STATUS_TARGET_ITERATIONS))
+                if (BitFlagUtils.areSet(expected, ToleranceChecker.STATUS_TARGET_ITERATIONS))
                     Assertions.assertEquals(-maxIterations, tc.getIterations());
-                if (BitFlags.areSet(expected, ToleranceChecker.STATUS_MAX_ITERATIONS))
+                if (BitFlagUtils.areSet(expected, ToleranceChecker.STATUS_MAX_ITERATIONS))
                     Assertions.assertEquals(maxIterations, tc.getIterations());
                 return;
             }

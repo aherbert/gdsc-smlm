@@ -23,14 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.ArrayList;
-
-import org.apache.commons.math3.util.Precision;
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
@@ -38,12 +30,22 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestCounter;
+
+import org.apache.commons.math3.util.Precision;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -101,21 +103,22 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
     public void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed)
     {
         // Test the base functionality of computing the partial derivatives is the same
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 4);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 5);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 6);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 11);
-        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 21);
+        final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
+        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 4, equality);
+        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 5, equality);
+        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 6, equality);
+        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 11, equality);
+        gradientProcedureComputesSameAsBaseGradientProcedure(seed, 21, equality);
     }
 
-    private void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed, int nparams)
+    private void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed, int nparams, DoubleDoubleBiPredicate equality)
     {
         final int iter = 10;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
         for (int i = 0; i < paramsList.size(); i++)
@@ -125,8 +128,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
             p.computeSecondDerivative(paramsList.get(i));
             p2.computeSecondDerivative(paramsList.get(i));
             // Virtually the same ...
-            ExtraAssertions.assertArrayEqualsRelative(p.d1, p2.d1, 1e-5);
-            ExtraAssertions.assertArrayEqualsRelative(p.d2, p2.d2, 1e-5);
+            TestAssertions.assertArrayTest(p.d1, p2.d1, equality);
+            TestAssertions.assertArrayTest(p.d2, p2.d2, equality);
         }
     }
 
@@ -165,7 +168,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createData(RNGFactory.create(seed.getSeed()), nPeaks, iter, paramsList, yList, true);
+        createData(RngUtils.create(seed.getSeedAsLong()), nPeaks, iter, paramsList, yList, true);
 
         // for the gradients
         final double delta = 1e-4;

@@ -23,9 +23,9 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
@@ -190,7 +190,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
     private class LineStepSearch
     {
         /**
-         * The function value at the new point
+         * The function value at the new point.
          */
         double f;
 
@@ -269,10 +269,12 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
                         // Progressively ignore any search direction that is in the opposite direction to
                         // the first derivative gradient. Do this in order of the magnitude of the error
                         final double[] slopeComponents = new double[gradient.length];
-                        for (int i = 0; i < slopeComponents.length; i++)
+                        final int[] indices = new int[slopeComponents.length];
+                        for (int i = 0; i < slopeComponents.length; i++) {
                             slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
-                        final int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
-                        Sort.sortAscending(indices, slopeComponents);
+                            indices[i] = i;
+                        }
+                        SortUtils.sortIndices(indices, slopeComponents, false);
                         int j = 0;
                         while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0)
                         {
@@ -329,7 +331,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
                     return x;
 
                 // Check for bad function evaluation
-                if (!Maths.isFinite(f))
+                if (!Double.isFinite(f))
                 {
                     // Reset backtracking
                     backtracking = 0;

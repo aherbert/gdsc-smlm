@@ -30,13 +30,13 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Check if the coordinates have converged
+ * Check if the coordinates have converged.
  */
 public abstract class CoordinateChecker implements OptimizationData, ConvergenceChecker<PointValuePair>
 {
-    /** Relative tolerance threshold */
+    /** Relative tolerance threshold. */
     final double relative;
-    /** Absolute tolerance threshold */
+    /** Absolute tolerance threshold. */
     final double absolute;
 
     /**
@@ -77,7 +77,7 @@ public abstract class CoordinateChecker implements OptimizationData, Convergence
     }
 
     /**
-     * Check if the coordinates have converged
+     * Check if the coordinates have converged.
      *
      * @param p
      *            Previous

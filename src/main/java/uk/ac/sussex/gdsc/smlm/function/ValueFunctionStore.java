@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Wrap a function and store the values from the procedure
+ * Wrap a function and store the values from the procedure.
  */
 public class ValueFunctionStore implements ValueFunction, ValueProcedure
 {

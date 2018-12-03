@@ -39,7 +39,7 @@ import java.util.Scanner;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -187,12 +187,12 @@ public class MALKFilePeakResults extends FilePeakResults
         {
             final CalibrationReader cr = getCalibrationReader();
             if (cr.hasNmPerPixel())
-                comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(cr.getNmPerPixel()));
+                comments[count++] = String.format("Pixel pitch %s (nm)", MathUtils.rounded(cr.getNmPerPixel()));
             if (cr.hasCountPerPhoton())
-                comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(cr.getCountPerPhoton()));
+                comments[count++] = String.format("Gain %s (Count/photon)", MathUtils.rounded(cr.getCountPerPhoton()));
             if (cr.hasExposureTime())
                 comments[count++] = String.format("Exposure time %s (seconds)",
-                        Utils.rounded(cr.getExposureTime() * 1e-3));
+                        MathUtils.rounded(cr.getExposureTime() * 1e-3));
         }
         return Arrays.copyOf(comments, count);
     }

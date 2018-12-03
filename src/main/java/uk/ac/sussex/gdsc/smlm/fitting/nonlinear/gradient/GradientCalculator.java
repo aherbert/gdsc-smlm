@@ -248,7 +248,7 @@ public class GradientCalculator
     }
 
     /**
-     * Evaluate the function and compute the sum-of-squares
+     * Evaluate the function and compute the sum-of-squares.
      *
      * @param x
      *            n observations
@@ -521,7 +521,7 @@ public class GradientCalculator
     }
 
     /**
-     * Evaluate the function and compute the sum-of-squares
+     * Evaluate the function and compute the sum-of-squares.
      *
      * @param n
      *            The number of data points
@@ -691,7 +691,7 @@ public class GradientCalculator
     }
 
     /**
-     * @return True if the last calculation produced gradients with NaN values
+     * @return True if the last calculation produced gradients with NaN values.
      */
     public boolean isNaNGradients()
     {
@@ -849,7 +849,7 @@ public class GradientCalculator
     }
 
     /**
-     * Zero the working region of the input matrix alpha and vector beta
+     * Zero the working region of the input matrix alpha and vector beta.
      *
      * @param beta
      *            the beta

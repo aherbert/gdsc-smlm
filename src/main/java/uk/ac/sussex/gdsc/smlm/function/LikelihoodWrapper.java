@@ -26,11 +26,11 @@ package uk.ac.sussex.gdsc.smlm.function;
 import java.util.Arrays;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 
 /**
- * This is a wrapper for any function to compute the negative log-likelihood
+ * This is a wrapper for any function to compute the negative log-likelihood.
  */
 public abstract class LikelihoodWrapper
 {
@@ -40,10 +40,10 @@ public abstract class LikelihoodWrapper
     /** The parameters. */
     final protected double[] a;
 
-    /** The observed values */
+    /** The observed values. */
     final protected double[] data;
 
-    /** The number of observed values */
+    /** The number of observed values. */
     final protected int n;
 
     /** The number of variables. */
@@ -247,7 +247,7 @@ public abstract class LikelihoodWrapper
 
     /**
      * Specify if the likelihood function can compute gradients. If false then the calls to the likelihood functions to
-     * compute the gradient will throw a {@link uk.ac.sussex.gdsc.core.utils.NotImplementedException }
+     * compute the gradient will throw a {@link uk.ac.sussex.gdsc.core.data.NotImplementedException }
      *
      * @return True if the likelihood function can compute gradients
      */

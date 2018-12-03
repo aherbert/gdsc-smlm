@@ -37,8 +37,8 @@ import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
-import uk.ac.sussex.gdsc.core.data.utils.RounderFactory;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
@@ -77,7 +77,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
     private static TextWindow pairsWindow = null;
     private static ImageROIPainter pairPainter = null;
 
-    private final Rounder rounder = RounderFactory.create(4);
+    private final Rounder rounder = RounderUtils.create(4);
 
     /** {@inheritDoc} */
     @Override
@@ -118,7 +118,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
         compareCoordinates(results1, results2, dThreshold, increments, delta);
         final double seconds = (System.nanoTime() - start) / 1000000000.0;
 
-        IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
+        IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
     }
 
     private static boolean showDialog()
@@ -291,7 +291,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
         if (!java.awt.GraphicsEnvironment.isHeadless())
         {
             final String header = createResultsHeader(doIdAnalysis);
-            Utils.refreshHeadings(resultsWindow, header, true);
+            ImageJUtils.refreshHeadings(resultsWindow, header, true);
 
             if (showTable && (resultsWindow == null || !resultsWindow.isShowing()))
                 resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
@@ -317,7 +317,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
                 IJ.showProgress(0);
                 int c = 0;
                 final int total = pairs.size();
-                final int step = Utils.getProgressInterval(total);
+                final int step = ImageJUtils.getProgressInterval(total);
                 final ArrayList<String> list = new ArrayList<>(total);
                 boolean flush = true;
                 for (final PointPair pair : pairs)
@@ -426,7 +426,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
     {
         if (!saveClassifications)
             return null;
-        final String[] path = Utils.decodePath(classificationsFile);
+        final String[] path = ImageJUtils.decodePath(classificationsFile);
         final OpenDialog chooser = new OpenDialog("Classifications_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {
@@ -625,7 +625,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
         sb.append(result.getFalsePositives()).append('\t');
         sb.append(result.getFalseNegatives()).append('\t');
         sb.append(rounder.round(result.getJaccard())).append('\t');
-        sb.append(rounder.round(result.getRMSD())).append('\t');
+        sb.append(rounder.round(result.getRmsd())).append('\t');
         sb.append(rounder.round(result.getPrecision())).append('\t');
         sb.append(rounder.round(result.getRecall())).append('\t');
         sb.append(rounder.round(result.getFScore(0.5))).append('\t');
@@ -698,7 +698,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
         sb.append(t).append('\t');
         addPoint(sb, p1);
         addPoint(sb, p2);
-        final double d = pair.getXYDistance();
+        final double d = pair.getXyDistance();
         if (d >= 0)
             sb.append(rounder.round(d)).append('\t');
         else
@@ -745,12 +745,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
         final double[] d = new double[pairs.size()];
         int i = 0;
         for (final PointPair pair : pairs)
-            d[i++] = pair.getXYDistance2();
+            d[i++] = pair.getXyDistanceSquared();
         return d;
     }
 
     /**
-     * A point that holds a reference to a PeakResult
+     * A point that holds a reference to a PeakResult.
      */
     public static class PeakResultPoint extends BasePoint
     {

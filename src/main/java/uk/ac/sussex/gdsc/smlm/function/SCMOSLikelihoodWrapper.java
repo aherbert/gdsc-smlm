@@ -141,7 +141,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
     }
 
     /**
-     * Compute X (the mapped observed values from the sCMOS camera)
+     * Compute X (the mapped observed values from the sCMOS camera).
      *
      * @param k
      *            The observed values from the sCMOS camera
@@ -202,7 +202,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
     }
 
     /**
-     * Copy constructor
+     * Copy constructor.
      *
      * @param f
      *            The function to be used to calculated the expected values (Note that the expected value is the number

@@ -56,12 +56,12 @@ import ij.gui.Line;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -88,7 +88,7 @@ import uk.ac.sussex.gdsc.smlm.model.ImagePSFModel;
  */
 public class PSFDrift implements PlugIn
 {
-    private final static String TITLE = "PSF Drift";
+    private static final String TITLE = "PSF Drift";
 
     private static String title = "";
     private static boolean useOffset = false;
@@ -124,8 +124,7 @@ public class PSFDrift implements PlugIn
     private int total;
     private double[][] results;
 
-    private final int[] idList = new int[3];
-    private int idCount = 0;
+    private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
     private class Job
     {
@@ -154,7 +153,7 @@ public class PSFDrift implements PlugIn
     }
 
     /**
-     * Used to allow multi-threading of the fitting method
+     * Used to allow multi-threading of the fitting method.
      */
     private class Worker implements Runnable
     {
@@ -506,7 +505,7 @@ public class PSFDrift implements PlugIn
         // Check region size using the image PSF
         final double newPsfWidth = imp.getWidth() / scale;
         if (Math.ceil(newPsfWidth) > w)
-            Utils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
+            ImageJUtils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
 
         // Create robust PSF fitting settings
         final double a = psfSettings.getPixelSize() * scale;
@@ -557,8 +556,8 @@ public class PSFDrift implements PlugIn
         }
 
         // Fit
-        Utils.showStatus("Fitting ...");
-        final int step = Utils.getProgressInterval(total);
+        ImageJUtils.showStatus("Fitting ...");
+        final int step = ImageJUtils.getProgressInterval(total);
         outer: for (int z = minz, i = 0; z <= maxz; z++)
             for (int x = 0; x < grid.length; x++)
                 for (int y = 0; y < grid.length; y++, i++)
@@ -571,7 +570,7 @@ public class PSFDrift implements PlugIn
                 }
 
         // If escaped pressed then do not need to stop the workers, just return
-        if (Utils.isInterrupted())
+        if (ImageJUtils.isInterrupted())
         {
             IJ.showProgress(1);
             return;
@@ -663,7 +662,7 @@ public class PSFDrift implements PlugIn
         final double[][] smoothy = displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY, loess, start, end);
         displayPlot("Recall", "Recall", zPosition, recall, null, null, start, end);
 
-        WindowOrganiser.tileWindows(idList);
+        windowOrganiser.tile();
 
         // Ask the user if they would like to store them in the image
         final GenericDialog gd = new GenericDialog(TITLE);
@@ -672,7 +671,7 @@ public class PSFDrift implements PlugIn
         startSlice = psfSettings.getCentreImage() - (centre - start);
         endSlice = psfSettings.getCentreImage() + (end - centre);
         gd.addMessage(String.format("Save the drift to the PSF?\n \nSlices %d (%s nm) - %d (%s nm) above recall limit",
-                startSlice, Utils.rounded(zPosition[start]), endSlice, Utils.rounded(zPosition[end])));
+                startSlice, MathUtils.rounded(zPosition[start]), endSlice, MathUtils.rounded(zPosition[end])));
         gd.addMessage("Optionally average the end points to set drift outside the limits.\n(Select zero to ignore)");
         gd.addSlider("Number_of_points", 0, 10, positionsToAverage);
         gd.showDialog();
@@ -689,7 +688,7 @@ public class PSFDrift implements PlugIn
                 j = findCentre(zPosition[i], smoothx, j);
                 if (j == -1)
                 {
-                    Utils.log("Failed to find the offset for depth %.2f", zPosition[i]);
+                    ImageJUtils.log("Failed to find the offset for depth %.2f", zPosition[i]);
                     continue;
                 }
                 // The offset should store the difference to the centre in pixels so divide by the pixel pitch
@@ -797,7 +796,7 @@ public class PSFDrift implements PlugIn
 
         title = TITLE + " " + title;
         final Plot2 plot = new Plot2(title, "z (nm)", yLabel);
-        final double[] limitsx = Maths.limits(x);
+        final double[] limitsx = MathUtils.limits(x);
         double[] limitsy = new double[2];
         if (se != null)
         {
@@ -806,13 +805,13 @@ public class PSFDrift implements PlugIn
                 limitsy = new double[] { newY[0] - se[0], newY[0] + se[0] };
                 for (int i = 1; i < newY.length; i++)
                 {
-                    limitsy[0] = Maths.min(limitsy[0], newY[i] - se[i]);
-                    limitsy[1] = Maths.max(limitsy[1], newY[i] + se[i]);
+                    limitsy[0] = MathUtils.min(limitsy[0], newY[i] - se[i]);
+                    limitsy[1] = MathUtils.max(limitsy[1], newY[i] + se[i]);
                 }
             }
         }
         else if (c > 0)
-            limitsy = Maths.limits(newY);
+            limitsy = MathUtils.limits(newY);
         final double rangex = Math.max(0.05 * (limitsx[1] - limitsx[0]), 0.1);
         final double rangey = Math.max(0.05 * (limitsy[1] - limitsy[0]), 0.1);
         plot.setLimits(limitsx[0] - rangex, limitsx[1] + rangex, limitsy[0] - rangey, limitsy[1] + rangey);
@@ -843,9 +842,7 @@ public class PSFDrift implements PlugIn
             plot.setColor(Color.magenta);
             plot.drawLine(limitsx[0] - rangex, recallLimit, limitsx[1] + rangex, recallLimit);
         }
-        final PlotWindow pw = Utils.display(title, plot);
-        if (Utils.isNewWindow())
-            idList[idCount++] = pw.getImagePlus().getID();
+        ImageJUtils.display(title, plot, windowOrganiser);
 
         return new double[][] { newX, newY };
     }
@@ -934,7 +931,7 @@ public class PSFDrift implements PlugIn
     }
 
     /**
-     * Gets the starting points for the fitting
+     * Gets the starting points for the fitting.
      *
      * @return The starting points for the fitting
      */
@@ -991,22 +988,22 @@ public class PSFDrift implements PlugIn
                             {
                                 if (psfSettings.getCentreImage() <= 0)
                                 {
-                                    Utils.log(TITLE + ": Unknown PSF z-centre setting for image: " + imp.getTitle());
+                                    ImageJUtils.log(TITLE + ": Unknown PSF z-centre setting for image: " + imp.getTitle());
                                     continue;
                                 }
                                 if (psfSettings.getPixelSize() <= 0)
                                 {
-                                    Utils.log(TITLE + ": Unknown PSF nm/pixel setting for image: " + imp.getTitle());
+                                    ImageJUtils.log(TITLE + ": Unknown PSF nm/pixel setting for image: " + imp.getTitle());
                                     continue;
                                 }
                                 if (psfSettings.getPixelDepth() <= 0)
                                 {
-                                    Utils.log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
+                                    ImageJUtils.log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
                                     continue;
                                 }
                                 if (requireFwhm && psfSettings.getFwhm() <= 0)
                                 {
-                                    Utils.log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
+                                    ImageJUtils.log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
                                     continue;
                                 }
 
@@ -1089,12 +1086,12 @@ public class PSFDrift implements PlugIn
             int c0 = 0, c1 = 0;
             for (int i = 0; i < w0.length; i++)
             {
-                if (Maths.isFinite(w0[i]))
+                if (Double.isFinite(w0[i]))
                 {
                     s0.add(i + 1);
                     sw0[c0++] = w0[i];
                 }
-                if (Maths.isFinite(w1[i]))
+                if (Double.isFinite(w1[i]))
                 {
                     s1.add(i + 1);
                     sw1[c1++] = w1[i];
@@ -1126,14 +1123,14 @@ public class PSFDrift implements PlugIn
         for (int i = 0; i < w0.length; i++)
         {
             double w = 0;
-            if (Maths.isFinite(w0[i]))
+            if (Double.isFinite(w0[i]))
             {
-                if (Maths.isFinite(w1[i]))
+                if (Double.isFinite(w1[i]))
                     w = w0[i] * w1[i];
                 else
                     w = w0[i] * w0[i];
             }
-            else if (Maths.isFinite(w1[i]))
+            else if (Double.isFinite(w1[i]))
                 w = w1[i] * w1[i];
 
             if (w != 0)
@@ -1159,8 +1156,8 @@ public class PSFDrift implements PlugIn
         // Widths are in pixels
         final String title = TITLE + " HWHM";
         final Plot plot = new Plot(title, "Slice", "HWHM (px)");
-        double[] limits = Maths.limits(sw0);
-        limits = Maths.limits(limits, sw1);
+        double[] limits = MathUtils.limits(sw0);
+        limits = MathUtils.limits(limits, sw1);
         final double maxY = limits[1] * 1.05;
         plot.setLimits(1, size, 0, maxY);
         plot.setColor(Color.red);
@@ -1171,7 +1168,7 @@ public class PSFDrift implements PlugIn
         plot.addPoints(cx, cy, Plot.LINE);
         plot.setColor(Color.black);
         plot.addLabel(0, 0, "X=red; Y=blue, Combined=Magenta");
-        final PlotWindow pw = Utils.display(title, plot);
+        final PlotWindow pw = ImageJUtils.display(title, plot);
 
         // Show a non-blocking dialog to allow the centre to be updated ...
         // Add a label and dynamically update when the centre is moved.
@@ -1181,7 +1178,7 @@ public class PSFDrift implements PlugIn
 		gd2.addMessage(String.format(
 				"Update the PSF information?\n \n" +
 				"Current z-centre = %d, FHWM = %s px (%s nm)\n",
-				centre, Utils.rounded(fwhm), Utils.rounded(fwhm * scale)));
+				centre, MathUtils.rounded(fwhm), MathUtils.rounded(fwhm * scale)));
 		//@formatter:on
         gd2.addSlider("z-centre", cx[0], cx[cx.length - 1], newCentre);
         final TextField tf = gd2.getLastTextField();
@@ -1248,7 +1245,7 @@ public class PSFDrift implements PlugIn
             this.scale = scale;
             this.pw = pw;
             this.label = label;
-            drawing = Utils.isShowGenericDialog();
+            drawing = ImageJUtils.isShowGenericDialog();
             if (drawing)
                 update();
         }
@@ -1256,7 +1253,7 @@ public class PSFDrift implements PlugIn
         private void update()
         {
             final double fwhm = getFWHM();
-            label.setText(String.format("FWHM = %s px (%s nm)", Utils.rounded(fwhm), Utils.rounded(fwhm * scale)));
+            label.setText(String.format("FWHM = %s px (%s nm)", MathUtils.rounded(fwhm), MathUtils.rounded(fwhm * scale)));
 
             final Plot plot = pw.getPlot();
 

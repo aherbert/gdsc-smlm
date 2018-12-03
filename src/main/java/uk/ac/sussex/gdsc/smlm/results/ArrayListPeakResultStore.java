@@ -23,21 +23,21 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import org.apache.commons.math3.random.RandomAdaptor;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.core.utils.TurboList.SimplePredicate;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
-import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.function.Predicate;
 
 /**
  * Stores peak results using an ArrayList.
@@ -239,7 +239,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
         // Util we upgrade the Java version to 1.8 the ArrayList does not support
         // predicates so use a TurboList
         final TurboList<PeakResult> temp = new TurboList<>(this.results);
-        if (temp.removeIf(new SimplePredicate<PeakResult>()
+        if (temp.removeIf(new Predicate<PeakResult>()
         {
             @Override
             public boolean test(PeakResult t)

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 import gnu.trove.list.linked.TIntLinkedList;
 
 /**
- * Define a cluster of localisations from different frames that represent a single molecule trace
+ * Define a cluster of localisations from different frames that represent a single molecule trace.
  */
 public class Trace extends Cluster
 {
@@ -106,7 +106,7 @@ public class Trace extends Cluster
     }
 
     /**
-     * @return The number of times the molecule blinked
+     * @return The number of times the molecule blinked.
      */
     public int getNBlinks()
     {
@@ -115,7 +115,7 @@ public class Trace extends Cluster
     }
 
     /**
-     * @return The average on time for the molecule
+     * @return The average on time for the molecule.
      */
     public double getOnTime()
     {
@@ -124,7 +124,7 @@ public class Trace extends Cluster
     }
 
     /**
-     * @return The average off time for the molecule
+     * @return The average off time for the molecule.
      */
     public double getOffTime()
     {
@@ -145,7 +145,7 @@ public class Trace extends Cluster
     }
 
     /**
-     * @return the on-times
+     * @return the on-times.
      */
     public int[] getOnTimes()
     {
@@ -154,7 +154,7 @@ public class Trace extends Cluster
     }
 
     /**
-     * @return the off-times
+     * @return the off-times.
      */
     public int[] getOffTimes()
     {

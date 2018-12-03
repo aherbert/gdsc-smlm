@@ -28,11 +28,11 @@ import com.google.protobuf.Message;
 import ij.IJ;
 import ij.Prefs;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsReader;
-import uk.ac.sussex.gdsc.smlm.utils.XmlUtils;
+import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
 
 /**
  * This plugin allows the header to be displayed from a PeakFit results file.
@@ -102,12 +102,12 @@ public class ShowResultsHeader implements PlugIn
     {
         if (data == null)
             return false;
-        String text = (data instanceof String) ? (String) data : XmlUtils.toXML(data);
+        String text = (data instanceof String) ? (String) data : XStreamUtils.toXML(data);
         if (text.startsWith("{"))
             text = uk.ac.sussex.gdsc.smlm.utils.JSONUtils.simplify(text);
         else if (text.startsWith("<"))
             text = uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(text);
-        Utils.log("%s: %s", title, text);
+        ImageJUtils.log("%s: %s", title, text);
         return true;
     }
 
@@ -115,7 +115,7 @@ public class ShowResultsHeader implements PlugIn
     {
         if (data == null)
             return false;
-        Utils.log("%s:\n%s", title, data.toString());
+        ImageJUtils.log("%s:\n%s", title, data.toString());
         return true;
     }
 }

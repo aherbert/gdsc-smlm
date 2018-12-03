@@ -23,18 +23,18 @@
  */
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 @SuppressWarnings({ "javadoc" })
 public class PeakResultStoreTest
@@ -71,7 +71,7 @@ public class PeakResultStoreTest
         final boolean isList = store instanceof PeakResultStoreList;
         final PeakResultStoreList storeList = (isList) ? (PeakResultStoreList) store : null;
         PeakResult result;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
 
         PeakResult[] list = new PeakResult[20];
         int size = 0;
@@ -219,7 +219,7 @@ public class PeakResultStoreTest
                 store.add(result);
             }
 
-            final int[] indices = Random.sample(3, size, r);
+            final int[] indices = RandomUtils.sample(3, size, r);
             Arrays.sort(indices);
             final PeakResult[] list1 = new PeakResult[size - indices.length];
             final PeakResult[] toRemove = new PeakResult[indices.length];

@@ -38,7 +38,7 @@ import org.scijava.vecmath.Point3f;
 import customnode.CustomPointMesh;
 
 /**
- * Create an object to represent a set of points
+ * Create an object to represent a set of points.
  */
 public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShape
 {
@@ -167,7 +167,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
     }
 
     /**
-     * Check the indices contain a valid natural order of the specifed size
+     * Check the indices contain a valid natural order of the specifed size.
      *
      * @param indices
      *            the indices

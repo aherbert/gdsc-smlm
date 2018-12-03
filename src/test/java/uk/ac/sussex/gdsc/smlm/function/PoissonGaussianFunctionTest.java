@@ -1,23 +1,26 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunctionTest
@@ -109,7 +112,7 @@ public class PoissonGaussianFunctionTest
     @Test
     public void padeIsFaster()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final double[] noise2 = new double[noise.length];
         for (int i = 0; i < noise.length; i++)
@@ -127,7 +130,7 @@ public class PoissonGaussianFunctionTest
         final long t1 = getTime(noise2, N, x, true);
         final long t2 = getTime(noise2, N, x, false);
 
-        logger.log(TestLog.getRecord(Level.INFO, "Picard %d : Pade %d (%fx)", t1, t2, t1 / (double) t2));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "Picard %d : Pade %d (%fx)", t1, t2, t1 / (double) t2));
         Assertions.assertTrue(t2 < t1, () -> String.format("Picard %d < Pade %d", t1, t2));
     }
 
@@ -239,7 +242,7 @@ public class PoissonGaussianFunctionTest
         }, min, max);
 
         if (p2 < 0.98 || p2 > 1.02)
-            logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
+            logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
 
         return p2;
     }
@@ -271,13 +274,14 @@ public class PoissonGaussianFunctionTest
         final int min = range[0];
         final int max = range[1];
         final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-3, 0);
         for (int x = min; x <= max; x++)
         {
             final double p = f.probability(x);
             if (p == 0)
                 continue;
             final double logP = f.logProbability(x);
-            ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-3, msg);
+            TestAssertions.assertTest(Math.log(p), logP, predicate, msg);
         }
     }
 
@@ -296,7 +300,7 @@ public class PoissonGaussianFunctionTest
         final int min = range[0];
         final int max = range[1];
         final double logGain = Math.log(gain);
-        final double s2 = Maths.pow2(s);
+        final double s2 = MathUtils.pow2(s);
         final Supplier<String> msg1 = () -> String.format("probability g=%f, mu=%f, s=%f", gain, mu, s);
         final Supplier<String> msg2 = () -> String.format("logProbability g=%f, mu=%f, s=%f", gain, mu, s);
         for (int x = min; x <= max; x++)

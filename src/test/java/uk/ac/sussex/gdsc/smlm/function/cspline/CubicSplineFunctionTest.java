@@ -1,21 +1,10 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.math3.util.Precision;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.data.DoubleStackTrivalueProvider;
-import uk.ac.sussex.gdsc.core.ij.Utils;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -30,12 +19,23 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
+
+import org.apache.commons.math3.util.Precision;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class CubicSplineFunctionTest
@@ -88,13 +88,13 @@ public abstract class CubicSplineFunctionTest
     protected CubicSplineFunction f2f = null;
 
     // Test Astigmatic Gaussian
-    final static double gamma = 2;
-    final static int zDepth = 5;
+    static final double gamma = 2;
+    static final int zDepth = 5;
     protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-    final static CubicSplineData splineData, splineDataFloat;
-    final static double cx, cy, cz;
-    final static int scale;
+    static final CubicSplineData splineData, splineDataFloat;
+    static final double cx, cy, cz;
+    static final int scale;
     static
     {
         // Create a Guassian PSF twice the size of the test Gaussian for interpolation
@@ -185,7 +185,7 @@ public abstract class CubicSplineFunctionTest
             return;
 
         final int[] gradientIndices = cf.gradientIndices();
-        logger.log(TestLog.getRecord(Level.INFO, "Function%d %s %s", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices)));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "Function%d %s %s", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices)));
 
         Assertions.assertEquals(cf.getN(), npeaks, "Incorrect number of peaks");
 
@@ -344,7 +344,7 @@ public abstract class CubicSplineFunctionTest
         logger.info(() -> {
             return String.format("functionComputesTargetGradient1 %s %s (error %s +/- %s)",
                     f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-                    Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+                    MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 
@@ -447,7 +447,7 @@ public abstract class CubicSplineFunctionTest
                                     if (test)
                                     {
                                         s.add(error);
-                                        Assertions.assertTrue((gradient * d2yda2) >= 0, 
+                                        Assertions.assertTrue((gradient * d2yda2) >= 0,
                                                 () -> String.format("%s sign != %s", gradient,
                                                 d2yda2));
                                         //logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y, gradient, gradientIndex, d2yda2, error);
@@ -459,7 +459,7 @@ public abstract class CubicSplineFunctionTest
         logger.info(() -> {
             return String.format("functionComputesTargetGradient2 %s %s (error %s +/- %s)",
                     f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-                    Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+                    MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 
@@ -603,7 +603,7 @@ public abstract class CubicSplineFunctionTest
                                                     final double error = DoubleEquality.relativeError(gradient, dyda);
                                                     s.add(error);
 
-                                                    Assertions.assertTrue((gradient * dyda) >= 0, 
+                                                    Assertions.assertTrue((gradient * dyda) >= 0,
                                                             () -> String.format("%s sign != %s",
                                                             gradient, dyda));
                                                     //logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y, gradient, gradientIndex, dyda, error);
@@ -615,7 +615,7 @@ public abstract class CubicSplineFunctionTest
         logger.info(() -> {
             return String.format("functionComputesTargetGradient1With2Peaks %s %s (error %s +/- %s)",
                     f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-                    Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+                    MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 
@@ -742,7 +742,7 @@ public abstract class CubicSplineFunctionTest
         logger.info(() -> {
             return String.format("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)",
                     f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
-                    Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+                    MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
         });
     }
 
@@ -862,8 +862,8 @@ public abstract class CubicSplineFunctionTest
     private void speedTest(int n, int order)
     {
         // No assertions, this is just a report
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final CubicSplineFunction cf = (n == 2) ? f2 : f1;
         Assumptions.assumeTrue(null != cf);

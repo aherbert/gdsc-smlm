@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Implement a fixed value non-linear fitting function
+ * Implement a fixed value non-linear fitting function.
  */
 public class FixedNonLinearFunction implements NonLinearFunction
 {

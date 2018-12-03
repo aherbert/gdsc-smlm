@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.settings;
 
 /**
- * Contain the settings for a parameter for the batch fitting plugin
+ * Contain the settings for a parameter for the batch fitting plugin.
  */
 public class ParameterSettings
 {

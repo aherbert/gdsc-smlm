@@ -26,11 +26,11 @@ package uk.ac.sussex.gdsc.smlm.results;
 import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /**
- * Define a cluster of localisations
+ * Define a cluster of localisations.
  */
 public class Cluster implements Comparable<Cluster>
 {
@@ -176,7 +176,7 @@ public class Cluster implements Comparable<Cluster>
     }
 
     /**
-     * Remove the calculated centroid from memory (forces a refresh of the centroid)
+     * Remove the calculated centroid from memory (forces a refresh of the centroid).
      */
     public void resetCentroid()
     {
@@ -184,7 +184,7 @@ public class Cluster implements Comparable<Cluster>
     }
 
     /**
-     * Gets the standard deviation of the distances from the centroid
+     * Gets the standard deviation of the distances from the centroid.
      *
      * @return The standard deviation of the distances from the centroid
      */
@@ -271,7 +271,7 @@ public class Cluster implements Comparable<Cluster>
 
             sumXi2Ni += dx * dx * Ni;
             sumYi2Ni += dy * dy * Ni;
-            sumS2 += Maths.pow2(checkPrecision(result.getPrecision())) * Ni;
+            sumS2 += MathUtils.pow2(checkPrecision(result.getPrecision())) * Ni;
         }
 
         final double sumNin = sumNi * n;
@@ -291,7 +291,7 @@ public class Cluster implements Comparable<Cluster>
     }
 
     /**
-     * Gets the first PeakResult in the cluster (or null)
+     * Gets the first PeakResult in the cluster (or null).
      *
      * @return The first PeakResult in the cluster (or null)
      */
@@ -303,7 +303,7 @@ public class Cluster implements Comparable<Cluster>
     }
 
     /**
-     * Gets the last PeakResult in the cluster (or null)
+     * Gets the last PeakResult in the cluster (or null).
      *
      * @return The last PeakResult in the cluster (or null)
      */
@@ -343,7 +343,7 @@ public class Cluster implements Comparable<Cluster>
     }
 
     /**
-     * Sort in time order
+     * Sort in time order.
      */
     public void sort()
     {
@@ -439,7 +439,7 @@ public class Cluster implements Comparable<Cluster>
     }
 
     /**
-     * @return The mean-squared displacement between adjacent localisations
+     * @return The mean-squared displacement between adjacent localisations.
      */
     public double getMSD()
     {
@@ -458,7 +458,7 @@ public class Cluster implements Comparable<Cluster>
     }
 
     /**
-     * @return The mean displacement between adjacent localisations
+     * @return The mean displacement between adjacent localisations.
      */
     public double getMeanPerFrame()
     {

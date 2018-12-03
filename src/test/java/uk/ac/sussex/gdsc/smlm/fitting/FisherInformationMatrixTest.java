@@ -1,8 +1,16 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
@@ -11,17 +19,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.opentest4j.AssertionFailedError;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class FisherInformationMatrixTest
@@ -46,7 +46,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLB(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         for (int n = 1; n < 10; n++)
             canComputeCRLB(rg, n, 0, true);
     }
@@ -54,7 +54,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLBWithZeros(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         for (int n = 2; n < 10; n++)
         {
             canComputeCRLB(rg, n, 1, true);
@@ -65,7 +65,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLBWithReciprocal(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         for (int n = 1; n < 10; n++)
             canComputeCRLB(rg, n, 0, false);
     }
@@ -73,7 +73,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void canComputeCRLBWithReciprocalWithZeros(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         for (int n = 2; n < 10; n++)
         {
             canComputeCRLB(rg, n, 1, false);
@@ -84,7 +84,7 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void inversionDoesNotMatchReciprocal(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         for (int n = 1; n < 10; n++)
         {
             final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, 0);
@@ -96,7 +96,7 @@ public class FisherInformationMatrixTest
             if (n > 1)
                 // Just do a sum so we have a test
                 Assertions.assertThrows(AssertionFailedError.class, () -> {
-                    Assertions.assertEquals(Maths.sum(crlb), Maths.sum(crlb2));
+                    Assertions.assertEquals(MathUtils.sum(crlb), MathUtils.sum(crlb2));
                 });
         }
     }
@@ -156,7 +156,7 @@ public class FisherInformationMatrixTest
         // Zero selected columns
         if (k > 0)
         {
-            final int[] zero = Random.sample(k, n, rg); // new RandomDataGenerator(UniformRandomProvider).nextPermutation(n, k);
+            final int[] zero = RandomUtils.sample(k, n, rg); // new RandomDataGenerator(UniformRandomProvider).nextPermutation(n, k);
             for (final int i : zero)
                 for (int j = 0; j < n; j++)
                     I[i][j] = I[j][i] = 0;
@@ -188,7 +188,7 @@ public class FisherInformationMatrixTest
         final int k = 5;
         final int n = 10;
 
-        final UniformRandomProvider UniformRandomProvider = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
         final FisherInformationMatrix m = createRandomMatrix(UniformRandomProvider, n);
         final DenseMatrix64F e = m.getMatrix();
         if (logger.isLoggable(level))
@@ -196,7 +196,7 @@ public class FisherInformationMatrixTest
 
         for (int run = 1; run < 10; run++)
         {
-            final int[] indices = Random.sample(k, n, UniformRandomProvider);
+            final int[] indices = RandomUtils.sample(k, n, UniformRandomProvider);
             Arrays.sort(indices);
             final DenseMatrix64F o = m.subset(indices).getMatrix();
             if (logger.isLoggable(level))
@@ -221,13 +221,13 @@ public class FisherInformationMatrixTest
     @SeededTest
     public void computeWithSubsetReducesTheCRLB(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final Gaussian2DFunction f = createFunction(10, 1);
         final int perPeak = f.getGradientParametersPerPeak();
         // Create a matrix with 2 peaks + background
         final FisherInformationMatrix m = createFisherInformationMatrix(rg, 1 + 2 * perPeak, 0);
         // Subset each peak
-        final int[] indices = SimpleArrayUtils.newArray(1 + perPeak, 0, 1);
+        final int[] indices = SimpleArrayUtils.natural(1 + perPeak);
         final FisherInformationMatrix m1 = m.subset(indices);
         for (int i = 1; i < indices.length; i++)
             indices[i] += perPeak;

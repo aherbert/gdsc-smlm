@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -285,10 +285,12 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
                             // Progressively ignore any search direction that is in the opposite direction to
                             // the first derivative gradient. Do this in order of the magnitude of the error
                             final double[] slopeComponents = new double[gradient.length];
-                            for (int i = 0; i < slopeComponents.length; i++)
+                            final int[] indices = new int[slopeComponents.length];
+                            for (int i = 0; i < slopeComponents.length; i++) {
                                 slopeComponents[i] = gradient[i] * searchDirection[gradientIndices[i]];
-                            final int[] indices = SimpleArrayUtils.newArray(slopeComponents.length, 0, 1);
-                            Sort.sortAscending(indices, slopeComponents);
+                                indices[i] = i;
+                            }
+                            SortUtils.sortIndices(indices, slopeComponents, false);
                             int j = 0;
                             while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0)
                             {

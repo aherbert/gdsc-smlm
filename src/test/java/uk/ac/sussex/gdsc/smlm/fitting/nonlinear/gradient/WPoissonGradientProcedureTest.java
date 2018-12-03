@@ -1,47 +1,48 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.ArrayList;
-import java.util.function.Function;
-import java.util.logging.Logger;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class WPoissonGradientProcedureTest implements Function<RandomSeed, double[]>
 {
     private static Logger logger;
-    private static DataCache<RandomSeed, double[]> dataCache;
+    private static ConcurrentHashMap<RandomSeed, double[]> ConcurrentHashMap;
 
     @BeforeAll
     public static void beforeAll()
     {
         logger = Logger.getLogger(WPoissonGradientProcedureTest.class.getName());
-        dataCache = new DataCache<>();
+        ConcurrentHashMap = new ConcurrentHashMap<>();
     }
 
     @AfterAll
     public static void afterAll()
     {
-        dataCache.clear();
-        dataCache = null;
+        ConcurrentHashMap.clear();
+        ConcurrentHashMap = null;
         logger = null;
     }
 
@@ -62,7 +63,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     {
         int n = blockWidth * blockWidth;
         final double[] var = new double[n];
-        final UniformRandomProvider r = RNGFactory.create(source.getSeed());
+        final UniformRandomProvider r = RngUtils.create(source.getSeed());
         while (n-- > 0)
             // Range 0.9 to 1.1
             var[n] = 0.9 + 0.2 * r.nextDouble();
@@ -72,7 +73,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     @SeededTest
     public void gradientProcedureFactoryCreatesOptimisedProcedures(RandomSeed seed)
     {
-        final double[] var = dataCache.getOrComputeIfAbsent(seed, this);
+        final double[] var = ConcurrentHashMap.computeIfAbsent(seed, this);
         final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
         Assertions.assertEquals(
                 WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
@@ -97,13 +98,13 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
     private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed, int nparams)
     {
-        final double[] var = dataCache.getOrComputeIfAbsent(seed, this);
+        final double[] var = ConcurrentHashMap.computeIfAbsent(seed, this);
 
         final int iter = 10;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         createFakeParams(r, nparams, iter, paramsList);
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -195,11 +196,11 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         createFakeParams(r, nparams, iter, paramsList);
         final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
-        final double[] v = (precomputed) ? dataCache.getOrComputeIfAbsent(seed, this) : null;
+        final double[] v = (precomputed) ? ConcurrentHashMap.computeIfAbsent(seed, this) : null;
 
         final IntArrayFormatSupplier msg = getMessage(nparams, "[%d] Observations: Not same linear @ %d");
         for (int i = 0; i < paramsList.size(); i++)
@@ -237,18 +238,18 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
             final boolean precomputed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 100;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
 
         // Remove the timing of the function call by creating a dummy function
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
-        final double[] v = (precomputed) ? dataCache.getOrComputeIfAbsent(seed, this) : null;
+        final double[] v = (precomputed) ? ConcurrentHashMap.computeIfAbsent(seed, this) : null;
         final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("M [%d]", 1);
 
         for (int i = 0; i < paramsList.size(); i++)
@@ -298,7 +299,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
+        logger.log(TestLogUtils.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
     }
 
     @SpeedTag
@@ -313,15 +314,15 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
     private void gradientProcedureIsFasterThanWLSEGradientProcedure(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 100;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final double[] var = dataCache.getOrComputeIfAbsent(seed, this);
-        createFakeData(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        final double[] var = ConcurrentHashMap.computeIfAbsent(seed, this);
+        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
 
         // Remove the timing of the function call by creating a dummy function
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -374,7 +375,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getTimingRecord("WLSQLVMGradientProcedure " + nparams, time1, "WPoissonGradientProcedure", time2));
+        logger.log(TestLogUtils.getTimingRecord("WLSQLVMGradientProcedure " + nparams, time1, "WPoissonGradientProcedure", time2));
     }
 
     protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter, ArrayList<double[]> paramsList,

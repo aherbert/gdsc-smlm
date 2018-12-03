@@ -44,7 +44,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -90,7 +90,7 @@ public class SpotFit implements PlugIn
 
         private final double[] lower, upper;
 
-        final static Pattern pattern = Pattern.compile("\t");
+        static final Pattern pattern = Pattern.compile("\t");
 
         private SpotFitPluginTool()
         {
@@ -174,7 +174,7 @@ public class SpotFit implements PlugIn
             {
                 // Always warn if the channel is incorrect for the image
                 //if (logging)
-                Utils.log(TITLE + ": Image %s does not contain channel %d", imp.getTitle(), settings.getChannel());
+                ImageJUtils.log(TITLE + ": Image %s does not contain channel %d", imp.getTitle(), settings.getChannel());
                 return;
             }
 
@@ -191,7 +191,7 @@ public class SpotFit implements PlugIn
                 int y = ic.offScreenY(e.getY());
 
                 if (logging)
-                    Utils.log("Clicked %d,%d", x, y);
+                    ImageJUtils.log("Clicked %d,%d", x, y);
 
                 // Get the data
                 final int channel = settings.getChannel();
@@ -200,7 +200,7 @@ public class SpotFit implements PlugIn
 
                 final int stackIndex = imp.getStackIndex(channel, slice, frame);
 
-                final ImageExtractor ie = new ImageExtractor(null, imp.getWidth(), imp.getHeight());
+                final ImageExtractor ie = ImageExtractor.wrap(null, imp.getWidth(), imp.getHeight());
 
                 if (isRemoveEvent(e))
                 {
@@ -218,21 +218,21 @@ public class SpotFit implements PlugIn
                 x = index % ip.getWidth();
                 y = index / ip.getWidth();
                 if (logging)
-                    Utils.log("Fitting %d,%d", x, y);
+                    ImageJUtils.log("Fitting %d,%d", x, y);
                 final Rectangle bounds = ie.getBoxRegionBounds(x, y, settings.getFitRadius());
                 if (settings.getShowFitRoi())
                     imp.setRoi(bounds);
                 final FitResult fitResult = fitMaxima(ip, bounds, x, y);
 
                 if (logging)
-                    Utils.log("Fit estimate = %s", Arrays.toString(fitResult.getInitialParameters()));
+                    ImageJUtils.log("Fit estimate = %s", Arrays.toString(fitResult.getInitialParameters()));
                 if (logging)
                 {
                     String msg = "Fit status = " + fitResult.getStatus();
                     final Object data = fitResult.getStatusData();
                     if (data != null)
                         msg += " : " + SimpleArrayUtils.toString(data);
-                    Utils.log(msg);
+                    ImageJUtils.log(msg);
                 }
 
                 if (fitResult.getStatus() != FitStatus.OK)
@@ -351,7 +351,7 @@ public class SpotFit implements PlugIn
         }
 
         /**
-         * Create the result window (if it is not available)
+         * Create the result window (if it is not available).
          */
         private static void createResultsWindow()
         {
@@ -391,17 +391,17 @@ public class SpotFit implements PlugIn
             sb.append(bounds.width).append('x');
             sb.append(bounds.height);
             final double[] params = fitResult.getParameters();
-            sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.BACKGROUND]));
+            sb.append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.BACKGROUND]));
             final double signal = params[Gaussian2DFunction.SIGNAL];
-            sb.append('\t').append(Utils.rounded(signal));
-            sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.X_POSITION]));
-            sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.Y_POSITION]));
+            sb.append('\t').append(MathUtils.rounded(signal));
+            sb.append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.X_POSITION]));
+            sb.append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.Y_POSITION]));
             final double xsd = params[Gaussian2DFunction.X_SD];
-            sb.append('\t').append(Utils.rounded(xsd));
+            sb.append('\t').append(MathUtils.rounded(xsd));
             final double noise = validationData.getNoise();
             final double snr = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, xsd) / noise;
-            sb.append('\t').append(Utils.rounded(noise));
-            sb.append('\t').append(Utils.rounded(snr));
+            sb.append('\t').append(MathUtils.rounded(noise));
+            sb.append('\t').append(MathUtils.rounded(snr));
             resultsWindow.append(sb.toString());
         }
 

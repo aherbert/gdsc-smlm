@@ -30,7 +30,7 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Specify a named set of filters
+ * Specify a named set of filters.
  */
 public class FilterSet
 {
@@ -71,7 +71,7 @@ public class FilterSet
     }
 
     /**
-     * Get the size of the set
+     * Get the size of the set.
      *
      * @return the size
      */
@@ -94,7 +94,7 @@ public class FilterSet
     }
 
     /**
-     * Return the name of the value that will be returned from the first Filter getNumericalValueName() method
+     * Return the name of the value that will be returned from the first Filter getNumericalValueName() method.
      *
      * @return the valueName
      */
@@ -106,7 +106,7 @@ public class FilterSet
     }
 
     /**
-     * @return the filters
+     * @return the filters.
      */
     public List<Filter> getFilters()
     {
@@ -114,7 +114,7 @@ public class FilterSet
     }
 
     /**
-     * @return An XML representation of this object
+     * @return An XML representation of this object.
      */
     public String toXML()
     {
@@ -142,7 +142,7 @@ public class FilterSet
     }
 
     /**
-     * Sort the filters
+     * Sort the filters.
      */
     public void sort()
     {
@@ -182,7 +182,7 @@ public class FilterSet
     }
 
     /**
-     * @return True if all the filters are the same type
+     * @return True if all the filters are the same type.
      */
     public boolean allSameType()
     {
@@ -192,7 +192,7 @@ public class FilterSet
     }
 
     /**
-     * @return 1 if all the filters are the same type, -1 otherwise
+     * @return 1 if all the filters are the same type, -1 otherwise.
      */
     private int checkAllSameType()
     {

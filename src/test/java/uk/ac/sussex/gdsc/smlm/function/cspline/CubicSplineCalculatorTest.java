@@ -23,16 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class CubicSplineCalculatorTest
@@ -124,10 +124,10 @@ public class CubicSplineCalculatorTest
         {
             final double s2 = 2 * s * s;
             for (int xx = 0; xx < x; xx++)
-                otherx[xx] = Maths.pow2(xx - cx) / s2;
+                otherx[xx] = MathUtils.pow2(xx - cx) / s2;
             for (int yy = 0; yy < y; yy++)
             {
-                final double othery = Maths.pow2(yy - cy) / s2;
+                final double othery = MathUtils.pow2(yy - cy) / s2;
                 for (int xx = 0; xx < x; xx++)
                     fval[xx][yy][zz] = Math.exp(otherx[xx] + othery);
             }

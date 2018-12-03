@@ -80,7 +80,7 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
     }
 
     /**
-     * Reset the computation vectors to zero
+     * Reset the computation vectors to zero.
      */
     protected void resetExtended2()
     {

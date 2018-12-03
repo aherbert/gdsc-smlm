@@ -50,11 +50,11 @@ import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.util.Java2;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
@@ -171,7 +171,7 @@ public class ResultsManager implements PlugIn
     @Override
     public void run(String arg)
     {
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
         if ("load".equals(arg))
@@ -248,7 +248,7 @@ public class ResultsManager implements PlugIn
                     MemoryPeakResults.removeResults(results.getName());
 
             SummariseResults.clearSummaryTable();
-            Utils.log("Cleared %s (%s, %s)", count, sets, memory);
+            ImageJUtils.log("Cleared %s (%s, %s)", count, sets, memory);
             return;
         }
 
@@ -463,7 +463,7 @@ public class ResultsManager implements PlugIn
                     resultsSettings.getImageType(), resultsSettings.getWeighted(), resultsSettings.getEqualised(),
                     resultsList.getName(), bounds, resultsList.getNmPerPixel(), resultsList.getGain(),
                     resultsSettings.getScale(), resultsSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
-            if (BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS))
+            if (BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS))
                 image.setRollingWindowSize(resultsSettings.getRollingWindowSize());
             image.setRepaintDelay(2000);
             resultsList.addOutput(image);
@@ -477,7 +477,7 @@ public class ResultsManager implements PlugIn
         if (!TextUtils.isNullOrEmpty(resultsSettings.getResultsFilename()))
         {
             // Remove extension
-            final String resultsFilename = Utils.replaceExtension(resultsSettings.getResultsFilename(),
+            final String resultsFilename = ImageJUtils.replaceExtension(resultsSettings.getResultsFilename(),
                     ResultsProtosHelper.getExtension(resultsSettings.getFileFormat()));
 
             if (fileInput && inputFilename.equals(resultsFilename))
@@ -585,7 +585,7 @@ public class ResultsManager implements PlugIn
         final Checkbox saveCheckbox = gd.getLastCheckbox();
 
         // Hide the in-memory settings if the input is not a file
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             final Label saveLabel = gd.getLastLabel();
             final ItemListener listener = new ItemListener()
@@ -686,10 +686,10 @@ public class ResultsManager implements PlugIn
     public static void addTableResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
             final int flags)
     {
-        if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+        if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
             gd.addMessage("--- Table output ---");
         final ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
-        if (BitFlags.anySet(flags, FLAG_TABLE_FORMAT))
+        if (BitFlagUtils.anySet(flags, FLAG_TABLE_FORMAT))
             gd.addChoice("Table", SettingsManager.getResultsTableFormatNames(),
                     tableSettings.getResultsTableFormatValue(), new OptionListener<Integer>()
                     {
@@ -802,7 +802,7 @@ public class ResultsManager implements PlugIn
     public static void addImageResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
             final int flags)
     {
-        if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+        if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
             gd.addMessage("--- Image output ---");
         final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
         final EnumSet<ResultsImageType> requirePrecision = EnumSet.of(
@@ -832,7 +832,7 @@ public class ResultsManager implements PlugIn
                         final ResultsImageType resultsImage = imageSettings.getImageType();
                         if (resultsImage.getNumber() <= 0)
                             return false;
-                        final boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
+                        final boolean extraOptions = BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS);
                         final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
                         if (requireWeighted.contains(resultsImage))
                             egd.addCheckbox("Weighted", imageSettings.getWeighted());
@@ -872,7 +872,7 @@ public class ResultsManager implements PlugIn
     public static void addFileResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
             final int flags)
     {
-        if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+        if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
             gd.addMessage("--- File output ---");
         final ResultsFileSettings.Builder fileSettings = resultsSettings.getResultsFileSettingsBuilder();
         gd.addChoice("Results_format", SettingsManager.getResultsFileFormatNames(), fileSettings.getFileFormatValue(),
@@ -921,9 +921,9 @@ public class ResultsManager implements PlugIn
                         return true;
                     }
                 });
-        if (BitFlags.anySet(flags, FLAG_RESULTS_DIRECTORY))
+        if (BitFlagUtils.anySet(flags, FLAG_RESULTS_DIRECTORY))
             gd.addDirectoryField("Results_directory", fileSettings.getResultsDirectory());
-        else if (BitFlags.anySet(flags, FLAG_RESULTS_FILE))
+        else if (BitFlagUtils.anySet(flags, FLAG_RESULTS_FILE))
             gd.addFilenameField("Results_file", fileSettings.getResultsFilename());
         else
         {
@@ -965,7 +965,7 @@ public class ResultsManager implements PlugIn
     public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
             int flags)
     {
-        if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+        if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
             gd.addMessage("--- Memory output ---");
         final ResultsInMemorySettings.Builder memorySettings = resultsSettings.getResultsInMemorySettingsBuilder();
         gd.addCheckbox("Save_to_memory", memorySettings.getInMemory());
@@ -1066,7 +1066,7 @@ public class ResultsManager implements PlugIn
             // Currently we hide the filename field and pack the dialog.
             // We may wish to just disable the fields and leave them there.
             // This could be a user configured option in a global GDSC settings class.
-            if (Utils.isShowGenericDialog())
+            if (ImageJUtils.isShowGenericDialog())
             {
                 final Label l = gd.getLastLabel();
                 final Panel p = gd.getLastPanel();
@@ -1379,7 +1379,7 @@ public class ResultsManager implements PlugIn
             final ResultOption[] options = reader.getOptions();
             if (options != null)
                 collectOptions(reader, options);
-            reader.setTracker(new IJTrackProgress());
+            reader.setTracker(new ImageJTrackProgress());
             results = reader.getResults();
             reader.getTracker().progress(1.0);
 
@@ -1406,12 +1406,12 @@ public class ResultsManager implements PlugIn
                     return null;
             if (distanceUnit != null && results.getDistanceUnit() != distanceUnit)
             {
-                Utils.log("Incorrect distance unit: " + results.getDistanceUnit());
+                ImageJUtils.log("Incorrect distance unit: " + results.getDistanceUnit());
                 return null;
             }
             if (intensityUnit != null && results.getIntensityUnit() != intensityUnit)
             {
-                Utils.log("Incorrect intensity unit: " + results.getDistanceUnit());
+                ImageJUtils.log("Incorrect intensity unit: " + results.getDistanceUnit());
                 return null;
             }
         }
@@ -1511,7 +1511,7 @@ public class ResultsManager implements PlugIn
     }
 
     /**
-     * Check the calibration of the results exists, if not then prompt for it with a dialog
+     * Check the calibration of the results exists, if not then prompt for it with a dialog.
      *
      * @param results
      *            The results
@@ -1567,9 +1567,9 @@ public class ResultsManager implements PlugIn
 
             final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
             gd.addMessage(
-                    String.format("Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg, Utils.rounded(dataBounds.x),
-                            Utils.rounded(dataBounds.y), Utils.rounded(dataBounds.y + dataBounds.getWidth()),
-                            Utils.rounded(dataBounds.x + dataBounds.getHeight())));
+                    String.format("Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg, MathUtils.rounded(dataBounds.x),
+                            MathUtils.rounded(dataBounds.y), MathUtils.rounded(dataBounds.y + dataBounds.getWidth()),
+                            MathUtils.rounded(dataBounds.x + dataBounds.getHeight())));
             gd.addChoice("Calibration_distance_unit", SettingsManager.getDistanceUnitNames(),
                     calibration.getDistanceUnitValue());
             gd.addChoice("Calibration_intensity_unit", SettingsManager.getIntensityUnitNames(),
@@ -1833,7 +1833,7 @@ public class ResultsManager implements PlugIn
         r.begin();
         r.addAll(source.toArray());
         r.end();
-        Utils.log("Saved %s to %s", source.getName(), resultsFilename);
+        ImageJUtils.log("Saved %s to %s", source.getName(), resultsFilename);
         return true;
     }
 }

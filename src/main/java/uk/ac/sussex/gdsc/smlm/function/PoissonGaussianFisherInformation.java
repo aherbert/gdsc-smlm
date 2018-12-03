@@ -32,7 +32,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
@@ -274,7 +274,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
         final double scale = Math.ceil(s);
         if (scale > MAX_SCALE)
             return MAX_SCALE;
-        return Maths.nextPow2((int) scale);
+        return MathUtils.nextPow2((int) scale);
     }
 
     /**
@@ -301,7 +301,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
         // carried about the parameter.
         final double lower = 1.0 / (t + s * s); // getPoissonGaussianApproximationI(t);
         final double upper = 1.0 / t; // PoissonFisherInformation.getPoissonI(t);;
-        return Maths.clip(lower, upper, I);
+        return MathUtils.clip(lower, upper, I);
     }
 
     @Override
@@ -515,7 +515,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
         return sum;
     }
 
-    private static abstract class IntegrationProcedure implements ConvolutionValueProcedure
+    private abstract static class IntegrationProcedure implements ConvolutionValueProcedure
     {
         final int scale;
         final double[] pz_1;
@@ -746,7 +746,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
         // Gaussian = Math.exp(-0.5 * x^2)
         // FastMath.exp(-746) == 0
         // => range for the Gaussian is sqrt(2*746) = 38.6
-        return Maths.clip(1, MAX_RANGE, range);
+        return MathUtils.clip(1, MAX_RANGE, range);
     }
 
     /**

@@ -1,25 +1,26 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class SphericalDistributionTest
@@ -41,7 +42,7 @@ public class SphericalDistributionTest
     @SeededTest
     public void canSampleUsingTransformationMethod(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final double radius = 10 + rg.nextDouble() * 10;
         final SphericalDistribution dist = new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
         dist.setUseRejectionMethod(false);
@@ -52,7 +53,7 @@ public class SphericalDistributionTest
     @SeededTest
     public void canSampleUsingRejectionMethod(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final double radius = 10 + rg.nextDouble() * 10;
         final SphericalDistribution dist = new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
         dist.setUseRejectionMethod(true);
@@ -63,9 +64,9 @@ public class SphericalDistributionTest
     @SeededTest
     public void rejectionMethodIsFasterThanTransformationMethod(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final double radius = 10 + rg.nextDouble() * 10;
         final SphericalDistribution dist = new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
         dist.setUseRejectionMethod(false);
@@ -80,7 +81,7 @@ public class SphericalDistributionTest
         dist.setUseRejectionMethod(true);
         final long time2 = getRunTime(dist);
         Assertions.assertTrue(time1 > time2, () -> String.format("Rejection = %d, Transformation = %d", time2, time1));
-        logger.log(TestLog.getRecord(Level.INFO, "Rejection = %d, Transformation = %d", time2, time1));
+        logger.log(TestLogUtils.getRecord(Level.INFO, "Rejection = %d, Transformation = %d", time2, time1));
     }
 
     private static long getRunTime(SphericalDistribution dist)
@@ -108,7 +109,7 @@ public class SphericalDistributionTest
 
     private static void drawImage(RandomSeed seed, boolean useRejctionMethod)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MemoryPeakResults results = new MemoryPeakResults();
         results.setSortAfterEnd(true);
         final int radius = 10;

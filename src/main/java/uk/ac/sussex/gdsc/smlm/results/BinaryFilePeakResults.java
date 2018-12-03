@@ -33,10 +33,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 
 /**
- * Saves the fit results to a binary file format
+ * Saves the fit results to a binary file format.
  */
 public class BinaryFilePeakResults extends SMLMFilePeakResults
 {
@@ -469,11 +469,11 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
         int size = 3 * BYTES_INT + BYTES_FLOAT + BYTES_DOUBLE + BYTES_FLOAT + BYTES_FLOAT + nFields * BYTES_FLOAT;
         if (deviations)
             size += nFields * BYTES_FLOAT;
-        if (BitFlags.areSet(flags, FLAG_END_FRAME))
+        if (BitFlagUtils.areSet(flags, FLAG_END_FRAME))
             size += BYTES_INT;
-        if (BitFlags.areSet(flags, FLAG_ID))
+        if (BitFlagUtils.areSet(flags, FLAG_ID))
             size += BYTES_INT;
-        if (BitFlags.areSet(flags, FLAG_PRECISION))
+        if (BitFlagUtils.areSet(flags, FLAG_PRECISION))
             size += BYTES_INT;
         return size;
     }

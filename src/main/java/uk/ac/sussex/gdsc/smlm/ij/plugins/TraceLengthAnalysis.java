@@ -38,14 +38,17 @@ import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.SimpleLock;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -59,7 +62,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 
 /**
- * Analyses the track lengths of traced data
+ * Analyses the track lengths of traced data.
  */
 public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultProcedure
 {
@@ -72,7 +75,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
     private TypeConverter<DistanceUnit> distanceConverter;
     private TypeConverter<TimeUnit> timeConverter;
-    private final SimpleLock lock = new SimpleLock();
+    private final SoftLock lock = new SoftLock();
     private double _msdThreshold = -1;
     private boolean _normalise = false;
     private int _index;
@@ -134,7 +137,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
         }
         catch (final Exception e)
         {
-            Utils.log(TITLE + " - Unable to compute precision: " + e.getMessage());
+            ImageJUtils.log(TITLE + " - Unable to compute precision: " + e.getMessage());
         }
 
         // Analyse the track lengths
@@ -147,7 +150,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
         d = dList.toArray();
         length = lengthList.toArray();
         id = idList.toArray();
-        final int[] limits = Maths.limits(length);
+        final int[] limits = MathUtils.limits(length);
         minX = limits[0] - 1;
         maxX = limits[1] + 1;
         h1 = new int[limits[1] + 1];
@@ -158,8 +161,8 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
         y2 = new float[x1.length];
 
         // Sort by MSD
-        final int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
-        Sort.sortAscending(indices, d, false);
+        final int[] indices = SimpleArrayUtils.natural(d.length);
+        SortUtils.sortIndices(indices, d, false);
         final double[] d2 = d.clone();
         final int[] length2 = length.clone();
         final int[] id2 = id.clone();
@@ -173,19 +176,21 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
         // Interactive analysis
         final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
         gd.addMessage(String.format("Split traces into fixed or moving using the track diffusion coefficient (D).\n" +
-                "Localistion error has been subtracted from jumps (%s nm).", Utils.rounded(precision)));
-        final Statistics s = new Statistics(d);
+                "Localistion error has been subtracted from jumps (%s nm).", MathUtils.rounded(precision)));
+        final Statistics s = Statistics.create(d);
         final double av = s.getMean();
-        final String msg = String.format("Average D per track = %s um^2/s", Utils.rounded(av));
+        final String msg = String.format("Average D per track = %s um^2/s", MathUtils.rounded(av));
         gd.addMessage(msg);
         // Histogram the diffusion coefficients
         final WindowOrganiser wo = new WindowOrganiser();
-        final int id = Utils.showHistogram("Trace diffusion coefficient", new StoredData(d), "D (um^2/s)", 0, 1, 0,
-                msg);
-        if (Utils.isNewWindow())
-            wo.add(id);
-        final double min = Utils.xValues[0];
-        final double max = Utils.xValues[Utils.xValues.length - 1];
+        HistogramPlot histogramPlot =
+            new HistogramPlotBuilder("Trace diffusion coefficient", new StoredData(d), "D (um^2/s)")
+                .setRemoveOutliersOption(1)
+                .setPlotLabel(msg).build();
+        histogramPlot.show(wo);
+        final double[] xvalues = histogramPlot.getPlotXValues();
+        final double min = xvalues[0];
+        final double max = xvalues[xvalues.length - 1];
         // see if we can build a nice slider range from the histogram limits
         if (max - min < 5)
             // Because sliders are used when the range is <5 and floating point
@@ -194,7 +199,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
             gd.addNumericField("D_threshold", dThreshold, 2, 6, "um^2/s");
         gd.addCheckbox("Normalise", normalise);
         gd.addDialogListener(this);
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             draw(wo);
             wo.tile();
@@ -273,8 +278,8 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
         // Histogram the distributions
         computeHistogram(0, index, length, h1);
         computeHistogram(index, length.length, length, h2);
-        final int sum1 = (int) Maths.sum(h1);
-        final int sum2 = (int) Maths.sum(h2);
+        final int sum1 = (int) MathUtils.sum(h1);
+        final int sum2 = (int) MathUtils.sum(h2);
 
         final float max1 = createHistogramValues(h1, (_normalise) ? sum1 : 1, y1);
         final float max2 = createHistogramValues(h2, (_normalise) ? sum2 : 2, y2);
@@ -288,16 +293,9 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
         plot.addPoints(x2, y2, Plot.LINE);
         plot.setColor(Color.black);
         final double p = 100.0 * sum1 / (sum1 + sum2);
-        plot.addLabel(0, 0, String.format("Fixed (red) = %d (%s%%), Moving (blue) = %d (%s%%)", sum1, Utils.rounded(p),
-                sum2, Utils.rounded(100 - p)));
-        final PlotWindow pw = Utils.display(title, plot, Utils.NO_TO_FRONT);
-        if (wo != null)
-        {
-            // First call with the window organiser put at the front
-            pw.toFront();
-            if (Utils.isNewWindow())
-                wo.add(pw);
-        }
+        plot.addLabel(0, 0, String.format("Fixed (red) = %d (%s%%), Moving (blue) = %d (%s%%)", sum1, MathUtils.rounded(p),
+                sum2, MathUtils.rounded(100 - p)));
+        ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT, wo);
     }
 
     private static void computeHistogram(int i, int end, int[] length, int[] h)
@@ -417,7 +415,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			// Compute the jump
 			final int jump = frame - lastFrame;
 			// Get the raw distance but subtract the expected localisation error
-			final double d2 = Math.max(0, Maths.distance2(lastx, lasty, x, y) - error);
+			final double d2 = Math.max(0, MathUtils.distance2(lastx, lasty, x, y) - error);
 			// We expect the Mean Squared Distance (MSD) to scale linearly
 			// with time so just weight each jump by the time gap.
 			// However we apply a correction factor for diffusion with frames.

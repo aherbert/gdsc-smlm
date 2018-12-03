@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.core.logging.Logger;
+import java.util.logging.Logger;
 
 /**
  * Defines the stopping criteria for the {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
@@ -59,7 +59,7 @@ public abstract class StoppingCriteria
     /** The logger. */
     protected Logger log = null;
     private int iteration;
-    /** Set to true if iteration should continue (no reason to stop) */
+    /** Set to true if iteration should continue (no reason to stop). */
     protected boolean notSatisfied;
     /** Set to true if the stopping criteria are achieved. */
     protected boolean areAchieved;
@@ -156,7 +156,7 @@ public abstract class StoppingCriteria
     }
 
     /**
-     * @return the iteration
+     * @return the iteration.
      */
     public int getIteration()
     {
@@ -173,7 +173,7 @@ public abstract class StoppingCriteria
     }
 
     /**
-     * @return the maximumIterations
+     * @return the maximumIterations.
      */
     public int getMaximumIterations()
     {
@@ -194,7 +194,7 @@ public abstract class StoppingCriteria
     }
 
     /**
-     * @return the minimumIterations
+     * @return the minimumIterations.
      */
     public int getMinimumIterations()
     {
@@ -211,7 +211,7 @@ public abstract class StoppingCriteria
     }
 
     /**
-     * @return the log
+     * @return the log.
      */
     public Logger getLog()
     {

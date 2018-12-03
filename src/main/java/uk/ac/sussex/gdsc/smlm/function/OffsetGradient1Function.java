@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
+ * Wraps a value function to add a pre-computed offset to the value during the forEach procedure.
  */
 public class OffsetGradient1Function extends OffsetValueFunction
         implements Gradient1Function, Gradient1Procedure, NonLinearFunction
@@ -36,7 +36,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
     protected Gradient1Procedure procedure;
 
     /**
-     * Class for evaluating a function and storing the values and gradients
+     * Class for evaluating a function and storing the values and gradients.
      */
     protected class FunctionStore implements Gradient1Procedure
     {
@@ -90,7 +90,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
         }
     }
 
-    /** Used to store all the values and gradients for the NonLinearFunction interface */
+    /** Used to store all the values and gradients for the NonLinearFunction interface. */
     protected FunctionStore store = null;
 
     /** All the values for the NonLinearFunction interface. */

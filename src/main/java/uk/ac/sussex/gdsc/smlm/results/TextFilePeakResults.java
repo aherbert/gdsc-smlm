@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
- * Saves the fit results to file
+ * Saves the fit results to file.
  */
 public class TextFilePeakResults extends SMLMFilePeakResults
 {
@@ -460,7 +460,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
     }
 
     /**
-     * Adds all the results from the cluster
+     * Adds all the results from the cluster.
      *
      * @param cluster
      *            the cluster

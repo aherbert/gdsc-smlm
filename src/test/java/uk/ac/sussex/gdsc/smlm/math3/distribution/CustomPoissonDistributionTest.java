@@ -1,7 +1,14 @@
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TimingResult;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -9,15 +16,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class CustomPoissonDistributionTest
@@ -67,7 +67,7 @@ public class CustomPoissonDistributionTest
         @Override
         public Object getData(int i)
         {
-            r = RNGFactory.create(seed.getSeed());
+            r = RngUtils.create(seed.getSeedAsLong());
             mean = min;
             return null;
         }
@@ -148,7 +148,7 @@ public class CustomPoissonDistributionTest
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
         TimingResult slow = ts.get(-2);
         TimingResult fast = ts.get(-1);
-        logger.log(TestLog.getTimingRecord(slow, fast));
+        logger.log(TestLogUtils.getTimingRecord(slow, fast));
     }
 
     @SpeedTag
@@ -167,7 +167,7 @@ public class CustomPoissonDistributionTest
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
         TimingResult slow = ts.get(-2);
         TimingResult fast = ts.get(-1);
-        logger.log(TestLog.getTimingRecord(slow, fast));
+        logger.log(TestLogUtils.getTimingRecord(slow, fast));
     }
 
     @SpeedTag
@@ -192,6 +192,6 @@ public class CustomPoissonDistributionTest
         //Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
         TimingResult slow = ts.get(-2);
         TimingResult fast = ts.get(-1);
-        logger.log(TestLog.getTimingRecord(slow, fast));
+        logger.log(TestLogUtils.getTimingRecord(slow, fast));
     }
 }

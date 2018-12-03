@@ -146,7 +146,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
     }
 
     /**
-     * Generate a status message using all the properties of the peak that failed validation
+     * Generate a status message using all the properties of the peak that failed validation.
      *
      * @param peak
      *            The peak
@@ -194,7 +194,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
     }
 
     /**
-     * Generate a message using all flags that are set
+     * Generate a message using all flags that are set.
      *
      * @param flags
      *            The validation flags

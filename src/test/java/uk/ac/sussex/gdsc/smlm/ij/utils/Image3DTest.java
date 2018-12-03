@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import ij.ImageStack;
 import ij.process.ImageProcessor;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public abstract class Image3DTest

@@ -24,11 +24,11 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
- * Defines no normalisation of an area around a point
+ * Defines no normalisation of an area around a point.
  */
 public class NonNormaliser implements Normaliser
 {
-    /** An instance for applying no normalisation */
+    /** An instance for applying no normalisation. */
     public static final NonNormaliser INSTANCE = new NonNormaliser();
 
     /**

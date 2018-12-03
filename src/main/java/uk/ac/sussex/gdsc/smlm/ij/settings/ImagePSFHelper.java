@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder;
 
 /**
- * Contain helper functions for the ImagePOSF class
+ * Contain helper functions for the ImagePOSF class.
  */
 public class ImagePSFHelper
 {

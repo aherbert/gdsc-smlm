@@ -50,7 +50,7 @@ public class MultiPathFitResult implements Cloneable
         public PreprocessedPeakResult[] results;
 
         /**
-         * Allows storing any data associated with the fit result
+         * Allows storing any data associated with the fit result.
          */
         final public Object data;
 
@@ -124,17 +124,17 @@ public class MultiPathFitResult implements Cloneable
     }
 
     /**
-     * The frame containing the result
+     * The frame containing the result.
      */
     public int frame;
 
     /**
-     * The width of the fit region
+     * The width of the fit region.
      */
     public int width;
 
     /**
-     * The height of the fit region
+     * The height of the fit region.
      */
     public int height;
 
@@ -233,7 +233,7 @@ public class MultiPathFitResult implements Cloneable
     }
 
     /**
-     * @return the multiFitResult
+     * @return the multiFitResult.
      */
     public FitResult getMultiFitResult()
     {
@@ -250,7 +250,7 @@ public class MultiPathFitResult implements Cloneable
     }
 
     /**
-     * @return the multiQAScore
+     * @return the multiQAScore.
      */
     public double getMultiQAScore()
     {
@@ -267,7 +267,7 @@ public class MultiPathFitResult implements Cloneable
     }
 
     /**
-     * @return the multiDoubletFitResult
+     * @return the multiDoubletFitResult.
      */
     public FitResult getMultiDoubletFitResult()
     {
@@ -284,7 +284,7 @@ public class MultiPathFitResult implements Cloneable
     }
 
     /**
-     * @return the singleFitResult
+     * @return the singleFitResult.
      */
     public FitResult getSingleFitResult()
     {
@@ -301,7 +301,7 @@ public class MultiPathFitResult implements Cloneable
     }
 
     /**
-     * @return the singleQAScore
+     * @return the singleQAScore.
      */
     public double getSingleQAScore()
     {
@@ -318,7 +318,7 @@ public class MultiPathFitResult implements Cloneable
     }
 
     /**
-     * @return the doubletFitResult
+     * @return the doubletFitResult.
      */
     public FitResult getDoubletFitResult()
     {

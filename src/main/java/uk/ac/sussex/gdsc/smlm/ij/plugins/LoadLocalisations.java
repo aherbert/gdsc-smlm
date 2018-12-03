@@ -34,10 +34,11 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
+
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -57,7 +58,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Loads generic localisation files into memory
+ * Loads generic localisation files into memory.
  */
 public class LoadLocalisations implements PlugIn
 {
@@ -230,7 +231,7 @@ public class LoadLocalisations implements PlugIn
 
         final LoadLocalisationsSettings.Builder settings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 
-        final String[] path = Utils.decodePath(settings.getLocalisationsFilename());
+        final String[] path = ImageJUtils.decodePath(settings.getLocalisationsFilename());
         final OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
         if (chooser.getFileName() == null)
             return;
@@ -259,7 +260,7 @@ public class LoadLocalisations implements PlugIn
 
         final String msg = "Loaded " + TextUtils.pleural(results.size(), "localisation");
         IJ.showStatus(msg);
-        Utils.log(msg);
+        ImageJUtils.log(msg);
     }
 
     /**
@@ -338,21 +339,21 @@ public class LoadLocalisations implements PlugIn
                 catch (final NumberFormatException e)
                 {
                     if (errors++ == 0)
-                        Utils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
+                        ImageJUtils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
                 }
                 catch (final IndexOutOfBoundsException e)
                 {
                     if (errors++ == 0)
-                        Utils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
+                        ImageJUtils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
                 }
             }
         }
         catch (final IOException e)
         {
-            Utils.log("%s IO error: %s", TITLE, e.getMessage());
+            ImageJUtils.log("%s IO error: %s", TITLE, e.getMessage());
         }
         if (errors != 0)
-            Utils.log("%s has %d / %d error lines", TITLE, errors, count);
+            ImageJUtils.log("%s has %d / %d error lines", TITLE, errors, count);
 
         return localisations;
     }

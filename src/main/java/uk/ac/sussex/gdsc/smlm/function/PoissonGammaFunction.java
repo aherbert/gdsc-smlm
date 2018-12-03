@@ -48,7 +48,7 @@ import org.apache.commons.math3.util.FastMath;
 public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFunction, GradientLikelihoodFunction
 {
     /**
-     * The on-chip gain multiplication factor
+     * The on-chip gain multiplication factor.
      */
     final double m;
 

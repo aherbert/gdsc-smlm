@@ -1,18 +1,22 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.api.function.DoublePredicate;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import gnu.trove.list.array.TDoubleArrayList;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "unused", "javadoc" })
 public class PoissonFunctionTest
@@ -41,8 +45,8 @@ public class PoissonFunctionTest
             for (int i = 0; i < photons.length; i++)
             {
                 final int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
-                logger.log(TestLog.getRecord(Level.FINE, "minRange[%d][%d] = %d;", j, i, result[0]));
-                logger.log(TestLog.getRecord(Level.FINE, "maxRange[%d][%d] = %d;", j, i, result[1]));
+                logger.log(TestLogUtils.getRecord(Level.FINE, "minRange[%d][%d] = %d;", j, i, result[0]));
+                logger.log(TestLogUtils.getRecord(Level.FINE, "maxRange[%d][%d] = %d;", j, i, result[1]));
             }
     }
 
@@ -133,7 +137,7 @@ public class PoissonFunctionTest
         minx += min;
         maxx += min;
 
-        logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, p, minx, maxp, maxc,
+        logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, p, minx, maxp, maxc,
                 maxx));
         return new int[] { minx, maxx };
     }
@@ -167,12 +171,17 @@ public class PoissonFunctionTest
         final int[] range = getRange(gain, mu);
         final int min = range[0];
         final int max = range[1];
+        // Allow a relative difference or an exact match (for the case of -Infinity)
+        DoublePredicate isNegativeInfinity = TestHelper.doubleEquals(Double.NEGATIVE_INFINITY);
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0).or(
+            TestHelper.and(isNegativeInfinity, isNegativeInfinity));
         for (int x = min; x <= max; x++)
         {
             final double v1 = Math.log(f.likelihood(x, o));
             final double v2 = f.logLikelihood(x, o);
+            //System.out.printf("x=%d, v1=%s, v2=%s%n", x, v1, v2);
 
-            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
+            TestAssertions.assertTest(v1, v2, predicate, FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
         }
     }
 
@@ -195,12 +204,13 @@ public class PoissonFunctionTest
         final int[] range = getRange(1, mu);
         final int min = range[0];
         final int max = range[1];
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
         for (int x = min; x <= max; x++)
         {
             final double v1 = f.likelihood(x, o);
             final double v2 = pd.probability(x);
 
-            ExtraAssertions.assertEqualsRelative(v1, v2, 1e-8, FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
+            TestAssertions.assertTest(v1, v2, predicate, FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
         }
     }
 }

@@ -1,18 +1,19 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.apache.commons.rng.UniformRandomProvider;
-
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assumptions;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class AverageFilterTest extends AbstractFilterTest
@@ -82,7 +83,7 @@ public class AverageFilterTest extends AbstractFilterTest
     }
 
     /**
-     * Used to test the filter methods calculate the correct result
+     * Used to test the filter methods calculate the correct result.
      */
     private abstract class DataFilter
     {
@@ -126,7 +127,7 @@ public class AverageFilterTest extends AbstractFilterTest
 
     private static void checkIsCorrect(RandomSeed seed, DataFilter filter)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         for (final int width : primes)
             for (final int height : primes)
                 for (final float boxSize : boxSizes)
@@ -209,7 +210,7 @@ public class AverageFilterTest extends AbstractFilterTest
     private void speedTest(RandomSeed seed, DataFilter fast, DataFilter slow, int[] testBoxSizes)
     {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         ArrayList<float[]> dataSet = getSpeedData(seed, ITER3);
 
@@ -269,9 +270,9 @@ public class AverageFilterTest extends AbstractFilterTest
                                 height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord(slow.name + " " + boxSize, boxSlowTotal, fast.name, boxFastTotal));
+            logger.log(TestLogUtils.getStageTimingRecord(slow.name + " " + boxSize, boxSlowTotal, fast.name, boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord(slow.name, slowTotal, fast.name, fastTotal));
+        logger.log(TestLogUtils.getTimingRecord(slow.name, slowTotal, fast.name, fastTotal));
     }
 
     private void speedTestInternal(RandomSeed seed, DataFilter fast, DataFilter slow)
@@ -282,7 +283,7 @@ public class AverageFilterTest extends AbstractFilterTest
     private void speedTestInternal(RandomSeed seed, DataFilter fast, DataFilter slow, int[] testBoxSizes)
     {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
 
@@ -342,10 +343,10 @@ public class AverageFilterTest extends AbstractFilterTest
                                 width, height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord("Internal " + slow.name + " " + boxSize, boxSlowTotal, fast.name,
+            logger.log(TestLogUtils.getStageTimingRecord("Internal " + slow.name + " " + boxSize, boxSlowTotal, fast.name,
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("Internal " + slow.name, slowTotal, fast.name, fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("Internal " + slow.name, slowTotal, fast.name, fastTotal));
     }
 
     @SpeedTag

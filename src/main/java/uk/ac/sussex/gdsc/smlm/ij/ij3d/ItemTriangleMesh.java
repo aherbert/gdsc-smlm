@@ -83,7 +83,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
      */
     public ItemTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color, float transp)
     {
-        this(objectVertices, points, sizes, color, transp, -1, NullTrackProgress.INSTANCE);
+        this(objectVertices, points, sizes, color, transp, -1, NullTrackProgress.getInstance());
     }
 
     /**

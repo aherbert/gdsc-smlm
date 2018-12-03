@@ -35,7 +35,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 public class NBFixedGaussian2DFunction extends FixedGaussian2DFunction
 {
     /**
-     * Constructor
+     * Constructor.
      *
      * @param npeaks
      *            The number of peaks

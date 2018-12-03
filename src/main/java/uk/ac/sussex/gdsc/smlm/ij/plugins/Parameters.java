@@ -26,21 +26,21 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import java.util.EnumSet;
 
 /**
- * Utility methods for checking parameters
+ * Utility methods for checking parameters.
  */
 public class Parameters
 {
     /**
-     * Define the requirements for the parameter
+     * Define the requirements for the parameter.
      */
     public enum Requirement
     {
     /**
-     * Value is greater than zero
+     * Value is greater than zero.
      */
     ABOVE_ZERO,
     /**
-     * Value is zero or above
+     * Value is zero or above.
      */
     POSITIVE
     }

@@ -1,22 +1,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.process.FloatProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -27,8 +11,25 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.process.FloatProcessor;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class ConfigurationTemplateTest
@@ -104,7 +105,7 @@ public class ConfigurationTemplateTest
         {
             if (set.contains(template.name))
             {
-                logger.log(TestLog.getRecord(Level.INFO, test + " loaded: " + template));
+                logger.log(TestLogUtils.getRecord(Level.INFO, test + " loaded: " + template));
                 continue;
             }
             Assertions.fail(test + " could not load: " + template);
@@ -137,7 +138,7 @@ public class ConfigurationTemplateTest
         // Create a dummy image
         final int size = 20;
         final float[] pixels = new float[size * size];
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         for (int i = pixels.length; i-- > 0;)
             pixels[i] = r.nextFloat();
         final ImagePlus imp = new ImagePlus("test", new FloatProcessor(size, size, pixels));
@@ -146,7 +147,7 @@ public class ConfigurationTemplateTest
         IJ.save(imp, tmpFile.getPath());
 
         final String name = "canLoadTemplateImageFromFile";
-        final File file = new File(Utils.replaceExtension(tmpFile.getPath(), ".xml"));
+        final File file = new File(ImageJUtils.replaceExtension(tmpFile.getPath(), ".xml"));
         ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), file);
 
         Assertions.assertEquals(1, ConfigurationTemplate.getTemplateNamesWithImage().length);

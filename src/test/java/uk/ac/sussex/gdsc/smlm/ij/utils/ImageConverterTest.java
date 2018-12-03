@@ -23,42 +23,43 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.awt.Rectangle;
-import java.util.function.Function;
+import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import ij.process.ByteProcessor;
+import ij.process.FloatProcessor;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
-import ij.process.ByteProcessor;
-import ij.process.FloatProcessor;
-import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
+import java.awt.Rectangle;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @SuppressWarnings({ "javadoc" })
 public class ImageConverterTest implements Function<RandomSeed, Object>
 {
-    private static DataCache<RandomSeed, Object> dataCache;
+    private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
 
     @BeforeAll
     public static void beforeAll()
     {
-        dataCache = new DataCache<>();
+        ConcurrentHashMap = new ConcurrentHashMap<>();
     }
 
     @AfterAll
     public static void afterAll()
     {
-        dataCache.clear();
-        dataCache = null;
+        ConcurrentHashMap.clear();
+        ConcurrentHashMap = null;
     }
 
-    final static int w = 200, h = 300;
+    static final int w = 200, h = 300;
 
     private class ImageConverterTestData
     {
@@ -70,7 +71,7 @@ public class ImageConverterTest implements Function<RandomSeed, Object>
     @Override
     public Object apply(RandomSeed seed)
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         final ByteProcessor bp = new ByteProcessor(w, h);
         final ImageConverterTestData data = new ImageConverterTestData();
         data.bdata = (byte[]) bp.getPixels();
@@ -88,7 +89,7 @@ public class ImageConverterTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetData(RandomSeed seed)
     {
-        final ImageConverterTestData data = (ImageConverterTestData) dataCache.getOrComputeIfAbsent(seed, this);
+        final ImageConverterTestData data = (ImageConverterTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
         final byte[] bdata = data.bdata;
         final short[] sdata = data.sdata;
         final float[] fdata = data.fdata;
@@ -107,7 +108,7 @@ public class ImageConverterTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetDataWithFullBounds(RandomSeed seed)
     {
-        final ImageConverterTestData data = (ImageConverterTestData) dataCache.getOrComputeIfAbsent(seed, this);
+        final ImageConverterTestData data = (ImageConverterTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
         final byte[] bdata = data.bdata;
         final short[] sdata = data.sdata;
         final float[] fdata = data.fdata;
@@ -126,12 +127,12 @@ public class ImageConverterTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetCropData(RandomSeed seed)
     {
-        final ImageConverterTestData data = (ImageConverterTestData) dataCache.getOrComputeIfAbsent(seed, this);
+        final ImageConverterTestData data = (ImageConverterTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
         final byte[] bdata = data.bdata;
         final short[] sdata = data.sdata;
         final float[] fdata = data.fdata;
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
-        final ImageExtractor ie = new ImageExtractor(fdata, w, h);
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+        final ImageExtractor ie = ImageExtractor.wrap(fdata, w, h);
         for (int i = 0; i < 10; i++)
         {
             final Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),

@@ -87,7 +87,7 @@ public class FrameCounter extends Counter
     }
 
     /**
-     * Get the current frame
+     * Get the current frame.
      *
      * @return the current frame
      */

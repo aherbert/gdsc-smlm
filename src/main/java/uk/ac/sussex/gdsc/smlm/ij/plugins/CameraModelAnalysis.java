@@ -49,7 +49,7 @@ import ij.gui.Plot;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
@@ -57,10 +57,10 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.math.Geometry;
+import uk.ac.sussex.gdsc.core.math.GeometryUtils;
 import uk.ac.sussex.gdsc.core.threshold.IntHistogram;
 import uk.ac.sussex.gdsc.core.utils.CachedRandomGenerator;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
@@ -192,7 +192,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	private static String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
 
-	private static abstract class Round
+	private abstract static class Round
 	{
 		abstract int round(double d);
 	}
@@ -234,7 +234,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
     public int setup(String arg, ImagePlus imp)
     {
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
         return NO_IMAGE_REQUIRED;
     }
 
@@ -362,7 +362,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
             catch (final Exception ex)
             {
                 // Catch as this is run within a AWT dispatch thread
-                Utils.log(TITLE + "Error: " + ex.getMessage());
+                ImageJUtils.log(TITLE + "Error: " + ex.getMessage());
             }
             finally
             {
@@ -387,7 +387,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * Execute the analysis
+     * Execute the analysis.
      */
     private boolean execute()
     {
@@ -396,12 +396,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
         final CameraModelAnalysisSettings settings = this.settings.build();
         if (!(getGain(settings) > 0))
         {
-            Utils.log(TITLE + "Error: No total gain");
+            ImageJUtils.log(TITLE + "Error: No total gain");
             return false;
         }
         if (!(settings.getPhotons() > 0))
         {
-            Utils.log(TITLE + "Error: No photons");
+            ImageJUtils.log(TITLE + "Error: No photons");
             return false;
         }
         // Avoid repeating the same analysis
@@ -443,7 +443,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
         // KolmogorovSmirnovTest
         // n is the number of samples used to build the probability distribution.
-        final int n = (int) Maths.sum(h.h);
+        final int n = (int) MathUtils.sum(h.histogramCounts);
 
         // From KolmogorovSmirnovTest.kolmogorovSmirnovTest(RealDistribution distribution, double[] data, boolean exact):
         // Returns the p-value associated with the null hypothesis that data is a sample from distribution.
@@ -462,7 +462,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
         final WindowOrganiser wo = new WindowOrganiser();
         String title = TITLE + " CDF";
         Plot2 plot = new Plot2(title, "Count", "CDF");
-        final double max = 1.05 * Maths.maxDefault(1, y2);
+        final double max = 1.05 * MathUtils.maxDefault(1, y2);
         plot.setLimits(x2[0], x2[x2.length - 1], 0, max);
         plot.setColor(Color.blue);
         //plot.addPoints(x2, y1b, Plot2.LINE);
@@ -474,9 +474,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
         plot.drawLine(value, 0, value, max);
         plot.setColor(Color.black);
         plot.addLegend("CDF\nModel");
-        plot.addLabel(0, 0, String.format("Distance=%s @ %.0f (Mean=%s) : p=%s", Utils.rounded(distance), value,
-                Utils.rounded(area), Utils.rounded(p)));
-        Utils.display(title, plot, Utils.NO_TO_FRONT, wo);
+        plot.addLabel(0, 0, String.format("Distance=%s @ %.0f (Mean=%s) : p=%s", MathUtils.rounded(distance), value,
+                MathUtils.rounded(area), MathUtils.rounded(p)));
+        ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT, wo);
 
         // Show the histogram
         title = TITLE + " Histogram";
@@ -484,22 +484,22 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
         // Update X1 so that the histogram bars are centred over the x value
         for (int i = x1.length; i-- > 0;)
             x1[i] -= 0.5;
-        plot.setLimits(x1[0] - 0.5, x1[x1.length - 1] + 1.5, 0, Maths.max(h.h) * 1.05);
+        plot.setLimits(x1[0] - 0.5, x1[x1.length - 1] + 1.5, 0, MathUtils.max(h.histogramCounts) * 1.05);
         plot.setColor(Color.blue);
         //plot.addPoints(x2, y1b, Plot2.LINE);
-        plot.addPoints(x1, SimpleArrayUtils.toDouble(h.h), Plot2.BAR);
+        plot.addPoints(x1, SimpleArrayUtils.toDouble(h.histogramCounts), Plot2.BAR);
 
         plot.setColor(Color.red);
         final double[] x = floatHistogram[0].clone();
         final double[] y = floatHistogram[1].clone();
-        final double scale = n / (Maths.sum(y) * (x[1] - x[0]));
+        final double scale = n / (MathUtils.sum(y) * (x[1] - x[0]));
         for (int i = 0; i < y.length; i++)
             y[i] *= scale;
         plot.addPoints(x, y, Plot.LINE);
 
         plot.setColor(Color.black);
         plot.addLegend("Sample\nExpected");
-        Utils.display(title, plot, Utils.NO_TO_FRONT, wo);
+        ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT, wo);
 
         wo.tile();
 
@@ -729,7 +729,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
     private static IntHistogram createHistogram(int[] sample, int count)
     {
-        final int[] limits = Maths.limits(sample);
+        final int[] limits = MathUtils.limits(sample);
         final int min = limits[0];
         final int max = limits[1];
 
@@ -953,7 +953,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
             final String title = name;
             final Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, step),
                     list.toArray());
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
 
         double zero = 0;
@@ -995,11 +995,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
                 String title = "Gaussian";
                 Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(kernel.length, -radius * step, step),
                         kernel);
-                Utils.display(title, plot);
+                ImageJUtils.display(title, plot);
 
                 title = name + "-Gaussian";
                 plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(g.length, zero, step), g);
-                Utils.display(title, plot);
+                ImageJUtils.display(title, plot);
             }
 
             zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1.0);
@@ -1255,7 +1255,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
     private static double[][] cumulativeHistogram(IntHistogram histogram)
     {
-        final int[] h = histogram.h;
+        final int[] h = histogram.histogramCounts;
         final double[] x = new double[h.length];
         final double[] y = new double[x.length];
         double sum = 0;
@@ -1322,7 +1322,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
             y[i] = fun.likelihood(x[i], e);
         // Add more until the probability change is marginal
         final double delta = 1e-6;
-        double sum = Maths.sum(y);
+        double sum = MathUtils.sum(y);
         final TDoubleArrayList list = new TDoubleArrayList(y);
         for (int o = (int) x[x.length - 1] + 1;; o++)
         {
@@ -1575,12 +1575,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
         if (!((y1 > y4 && y2 > y3) || (y1 < y4 && y2 < y3)))
         {
             final double[] intersection = new double[2];
-            if (Geometry.getIntersection(0, y1, 1, y2, 1, y3, 0, y4, intersection))
+            if (GeometryUtils.getIntersection(0, y1, 1, y2, 1, y3, 0, y4, intersection))
                 // Compute area as two triangles
-                return Geometry.getArea(0, y1, 0, y4, intersection[0], intersection[1]) +
-                        Geometry.getArea(1, y2, 1, y3, intersection[0], intersection[1]);
+                return GeometryUtils.getArea(0, y1, 0, y4, intersection[0], intersection[1]) +
+                        GeometryUtils.getArea(1, y2, 1, y3, intersection[0], intersection[1]);
         }
 
-        return Math.abs(Geometry.getArea(areaX, new double[] { y1, y2, y3, y4 }));
+        return Math.abs(GeometryUtils.getArea(areaX, new double[] { y1, y2, y3, y4 }));
     }
 }

@@ -29,10 +29,10 @@ import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * This plugin creates a mask image stack using an XY and XZ mask image
+ * This plugin creates a mask image stack using an XY and XZ mask image.
  */
 public class DepthMask implements PlugIn
 {
@@ -61,7 +61,7 @@ public class DepthMask implements PlugIn
 
         gd.addMessage("Create a mask stack using XY, XZ and YZ mask images");
 
-        final String[] maskList = Utils.getImageList(Utils.SINGLE);
+        final String[] maskList = ImageJUtils.getImageList(ImageJUtils.SINGLE);
         gd.addChoice("Mask_XY", maskList, titleXY);
         gd.addChoice("Mask_XZ", maskList, titleXZ);
         gd.addChoice("Mask_YZ", maskList, titleYZ);
@@ -149,7 +149,7 @@ public class DepthMask implements PlugIn
 
             stack.setPixels(mask, z + 1);
         }
-        Utils.display(TITLE, stack);
+        ImageJUtils.display(TITLE, stack);
     }
 
     private static byte[] getMask(ImagePlus impXY)

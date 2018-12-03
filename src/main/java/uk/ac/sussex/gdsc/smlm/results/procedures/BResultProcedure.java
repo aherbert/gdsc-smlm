@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 /**
- * Interface for accessing the results
+ * Interface for accessing the results.
  */
 public interface BResultProcedure
 {

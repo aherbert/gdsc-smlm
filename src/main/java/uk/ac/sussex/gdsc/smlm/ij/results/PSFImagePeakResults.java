@@ -27,8 +27,8 @@ import java.awt.Rectangle;
 
 import org.apache.commons.math3.util.FastMath;
 
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Draws the fit results using the Gaussian PSF to an ImageJ image
+ * Draws the fit results using the Gaussian PSF to an ImageJ image.
  */
 public class PSFImagePeakResults extends IJImagePeakResults
 {
@@ -355,7 +355,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
     }
 
     /**
-     * @return the width for a fixed-width Gaussian
+     * @return the width for a fixed-width Gaussian.
      */
     public float getWidth()
     {

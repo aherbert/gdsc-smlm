@@ -62,13 +62,13 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 /**
- * Tests for drawing a localisation results set using an ImageJ 3D image
+ * Tests for drawing a localisation results set using an ImageJ 3D image.
  *
  * @see <A href="https://imagej.net/3D_Viewer">https://imagej.net/3D_Viewer</a>
  */
 public class ImageJ3DResultsViewerTest implements PlugIn
 {
-    private final static String TITLE = "ImageJ 3D Results Viewer";
+    private static final String TITLE = "ImageJ 3D Results Viewer";
 
     // To debug this from Eclipse relies on being able to find the native
     // runtime libraries for Open GL. See the README in the eclipse project folder.

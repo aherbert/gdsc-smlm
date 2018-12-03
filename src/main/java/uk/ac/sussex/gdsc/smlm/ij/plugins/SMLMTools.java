@@ -122,7 +122,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
     }
 
     /**
-     * @return True if the instance of the SMLM Tools Frame is visible
+     * @return True if the instance of the SMLM Tools Frame is visible.
      */
     public static boolean isFrameVisible()
     {
@@ -130,7 +130,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
     }
 
     /**
-     * Close the instance of the SMLM Tools Frame
+     * Close the instance of the SMLM Tools Frame.
      */
     public static void closeFrame()
     {
@@ -259,7 +259,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
     }
 
     /**
-     * Selectively ignore certain plugins
+     * Selectively ignore certain plugins.
      *
      * @param tokens
      *            The tokens from the plugins.config file

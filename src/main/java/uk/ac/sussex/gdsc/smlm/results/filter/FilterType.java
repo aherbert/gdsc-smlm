@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Define the type of filter
+ * Define the type of filter.
  */
 public enum FilterType
 {

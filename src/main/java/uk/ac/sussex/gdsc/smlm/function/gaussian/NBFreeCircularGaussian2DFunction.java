@@ -35,7 +35,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 public class NBFreeCircularGaussian2DFunction extends FreeCircularGaussian2DFunction
 {
     /**
-     * Constructor
+     * Constructor.
      *
      * @param npeaks
      *            The number of peaks

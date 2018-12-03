@@ -23,9 +23,6 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
@@ -38,10 +35,15 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianApproximationFisherInforma
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings({ "javadoc" })
 public class UnivariateLikelihoodFisherInformationCalculatorTest
@@ -54,7 +56,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
     @SeededTest
     public void canComputePoissonFisherInformation(RandomSeed seed)
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         for (int n = 1; n < 10; n++)
             canComputePoissonFisherInformation(r, Model.POISSON);
     }
@@ -62,7 +64,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
     @SeededTest
     public void canComputeHalfPoissonFisherInformation(RandomSeed seed)
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         for (int n = 1; n < 10; n++)
             canComputePoissonFisherInformation(r, Model.HALF_POISSON);
     }
@@ -70,7 +72,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
     @SeededTest
     public void canComputePoissonGaussianApproximationFisherInformation(RandomSeed seed)
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         for (int n = 1; n < 10; n++)
             canComputePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
     }
@@ -127,6 +129,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
             SimpleArrayUtils.multiply(e, 0.5);
 
         Assertions.assertArrayEquals(e, o, 1e-6);
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(5e-2, 0);
 
         if (model == Model.POISSON || model == Model.HALF_POISSON)
         {
@@ -144,15 +147,15 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
             // Get the limits by inverting the Fisher information
             final double[] crlb = I.crlb();
 
-            ExtraAssertions.assertEqualsRelative(var, crlb[2], 5e-2);
-            ExtraAssertions.assertEqualsRelative(var, crlb[3], 5e-2);
+            TestAssertions.assertTest(var, crlb[2], predicate);
+            TestAssertions.assertTest(var, crlb[3], predicate);
         }
     }
 
     @SeededTest
     public void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomSeed seed)
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
         for (int n = 1; n < 10; n++)
             canComputePerPixelPoissonGaussianApproximationFisherInformation(r);
     }
@@ -195,7 +198,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
         final FisherInformationMatrix I = calc.compute(params);
         final double[] o = I.getMatrix().data;
 
-        ExtraAssertions.assertArrayEqualsRelative(e, o, 1e-6);
+        TestAssertions.assertArrayTest(e, o, TestHelper.doublesAreClose(1e-6, 0));
     }
 
     private static double nextUniform(UniformRandomProvider r, double min, double max)

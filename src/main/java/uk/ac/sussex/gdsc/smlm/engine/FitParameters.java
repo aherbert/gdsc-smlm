@@ -41,13 +41,13 @@ public class FitParameters
     public enum FitTask
     {
         //@formatter:off
-		/** PSF fitting */
+		/** PSF fitting. */
 		PSF_FITTING{ @Override
 		public String getName() { return "PSF Fitting"; }},
-		/** Maxima identification */
+		/** Maxima identification. */
 		MAXIMA_IDENITIFICATION{ @Override
 		public String getName() { return "Maxima Identification"; }},
-		/** Benchmarking */
+		/** Benchmarking. */
 		BENCHMARKING{ @Override
 		public String getName() { return "Benchmarking"; }};
 		//@formatter:on
@@ -67,11 +67,11 @@ public class FitParameters
     }
 
     /**
-     * The noise for the image data
+     * The noise for the image data.
      */
     public float noise = Float.NaN;
     /**
-     * The spots to fit within the data
+     * The spots to fit within the data.
      */
     public Spot[] spots = null;
     /**
@@ -80,7 +80,7 @@ public class FitParameters
      */
     public int maxCandidate;
     /**
-     * The maxima to fit within the data
+     * The maxima to fit within the data.
      */
     public int[] maxIndices = null;
     /**
@@ -104,7 +104,7 @@ public class FitParameters
     @Deprecated
     public float distanceThreshold = 1;
     /**
-     * The task to perform
+     * The task to perform.
      */
     public FitTask fitTask = FitTask.PSF_FITTING;
     /**
@@ -123,7 +123,7 @@ public class FitParameters
     public MultiPathFilter benchmarkFilter = null;
 
     /**
-     * The distance to an existing result to be declared a duplicate
+     * The distance to an existing result to be declared a duplicate.
      */
     public double duplicateDistance = 0;
 

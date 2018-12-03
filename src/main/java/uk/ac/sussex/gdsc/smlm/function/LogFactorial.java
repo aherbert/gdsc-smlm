@@ -178,7 +178,7 @@ public class LogFactorial
     }
 
     /**
-     * Gets the lower limit on N in order to keep the representable factorials
+     * Gets the lower limit on N in order to keep the representable factorials.
      *
      * @param n
      *            the n
@@ -202,9 +202,9 @@ public class LogFactorial
      */
     public static double logF(int n) throws ArrayIndexOutOfBoundsException
     {
-        // This is not synchronized. 
-        // We read a copy of the table from main memory. 
-        // If it is too small then just compute using the Gamma function.		
+        // This is not synchronized.
+        // We read a copy of the table from main memory.
+        // If it is too small then just compute using the Gamma function.
         final double[] logF = MASTER_TABLE;
         if (n < logF.length)
             return logF[n];

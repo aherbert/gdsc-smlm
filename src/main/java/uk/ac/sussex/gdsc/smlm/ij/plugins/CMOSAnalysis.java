@@ -30,6 +30,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,15 +53,21 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.gui.ProgressBar;
 import ij.io.FileSaver;
+import ij.io.Opener;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.IntegerType;
-import uk.ac.sussex.gdsc.core.data.SIPrefix;
-import uk.ac.sussex.gdsc.core.generics.CloseableBlockingQueue;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.data.SiPrefix;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.ArrayMoment;
 import uk.ac.sussex.gdsc.core.math.IntegerArrayMoment;
@@ -73,6 +80,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
@@ -87,13 +95,15 @@ public class CMOSAnalysis implements PlugIn
 {
     private class SimulationWorker implements Runnable
     {
+        final Ticker ticker;
         final RandomGenerator rg;
         final String out;
         final float[] pixelOffset, pixelVariance, pixelGain;
         final int from, to, blockSize, photons;
 
-        public SimulationWorker(long seed, String out, ImageStack stack, int from, int to, int blockSize, int photons)
+        public SimulationWorker(Ticker ticker, long seed, String out, ImageStack stack, int from, int to, int blockSize, int photons)
         {
+            this.ticker = ticker;
             rg = new Well19937c(seed);
             pixelOffset = (float[]) stack.getPixels(1);
             pixelVariance = (float[]) stack.getPixels(2);
@@ -137,8 +147,6 @@ public class CMOSAnalysis implements PlugIn
             int start = from;
             for (int i = from; i < to; i++)
             {
-                showProgress();
-
                 // Create image
                 final short[] pixels = new short[pixelOffset.length];
                 if (poisson == null)
@@ -172,15 +180,17 @@ public class CMOSAnalysis implements PlugIn
                     start = i + 1;
                     stack = new ImageStack(size, size);
                 }
+                
+                ticker.tick();
             }
             // This should not happen if we control the to-from range correctly
             if (stack.getSize() != 0)
                 save(stack, start);
         }
 
-        final static short MIN_SHORT = 0;
+        static final short MIN_SHORT = 0;
         // Require cast since this is out-of-range for a signed short
-        final static short MAX_SHORT = (short) 65335;
+        static final short MAX_SHORT = (short) 65335;
 
         /**
          * Clip to the range for a 16-bit image.
@@ -229,17 +239,19 @@ public class CMOSAnalysis implements PlugIn
     }
 
     /**
-     * Used to allow multi-threading of the scoring the filters
+     * Used to allow multi-threading of the scoring the filters.
      */
     private class ImageWorker implements Runnable
     {
+        final Ticker ticker;
         volatile boolean finished = false;
         final BlockingQueue<Object> jobs;
         final ArrayMoment moment;
         int bitDepth = 0;
 
-        public ImageWorker(BlockingQueue<Object> jobs, ArrayMoment moment)
+        public ImageWorker(Ticker ticker, BlockingQueue<Object> jobs, ArrayMoment moment)
         {
+            this.ticker = ticker;
             this.jobs = jobs;
             this.moment = moment.newInstance();
         }
@@ -278,14 +290,13 @@ public class CMOSAnalysis implements PlugIn
 
         private void run(Object pixels)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
             {
                 finished = true;
                 return;
             }
-            showProgress();
             if (bitDepth == 0)
-                bitDepth = Utils.getBitDepth(pixels);
+                bitDepth = ImageJUtils.getBitDepth(pixels);
             // Most likely first
             if (bitDepth == 16)
                 moment.addUnsigned((short[]) pixels);
@@ -295,6 +306,7 @@ public class CMOSAnalysis implements PlugIn
                 moment.addUnsigned((byte[]) pixels);
             else
                 throw new IllegalStateException("Unsupported bit depth");
+            ticker.tick();
         }
     }
 
@@ -389,7 +401,7 @@ public class CMOSAnalysis implements PlugIn
     {
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
         // Avoid the status bar talking to the current image
         WindowManager.setTempCurrentImage(null);
 
@@ -402,7 +414,7 @@ public class CMOSAnalysis implements PlugIn
 				80));
 		//@formatter:on
 
-        final String dir = Utils.getDirectory(TITLE, directory);
+        final String dir = ImageJUtils.getDirectory(TITLE, directory);
         if (TextUtils.isNullOrEmpty(dir))
             return;
         directory = dir;
@@ -434,27 +446,6 @@ public class CMOSAnalysis implements PlugIn
             computeError();
     }
 
-    private int progress, stepProgress, totalProgress;
-    private ProgressBar progressBar;
-
-    /**
-     * Show progress.
-     */
-    private synchronized void showProgress()
-    {
-        //Utils.log("%d/%d\n", progress, totalProgress);
-        if (progress % stepProgress == 0)
-        {
-            //IJ.showProgress(progress, totalProgress);
-
-            // Use the actual progress bar so we can show progress
-            // when all other IJ commands cannot
-            final double p = (progress + 1.0) / totalProgress;
-            progressBar.show(p, true);
-        }
-        progress++;
-    }
-
     private void simulate()
     {
         // Create the offset, variance and gain for each pixel
@@ -471,24 +462,16 @@ public class CMOSAnalysis implements PlugIn
                 PoissonDistribution.DEFAULT_MAX_ITERATIONS);
         final ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
                 ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-        totalProgress = n;
-        stepProgress = Utils.getProgressInterval(totalProgress);
+        Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), n, false);
         for (int i = 0; i < n; i++)
         {
-            if (i % n == 0)
-                IJ.showProgress(i, n);
             // Q. Should these be clipped to a sensible range?
             pixelOffset[i] = pd.sample();
             pixelVariance[i] = (float) ed.sample();
             pixelGain[i] = (float) (gain + rg.nextGaussian() * gainSD);
+            ticker.tick();
         }
         IJ.showProgress(1);
-
-        // Avoid all the file saves from updating the progress bar and status line
-        Utils.setShowStatus(false);
-        Utils.setShowProgress(false);
-        final JLabel statusLine = Utils.getStatusLine();
-        progressBar = Utils.getProgressBar();
 
         // Save to the directory as a stack
         final ImageStack simulationStack = new ImageStack(size, size);
@@ -497,8 +480,8 @@ public class CMOSAnalysis implements PlugIn
         simulationStack.addSlice("Gain", pixelGain);
         simulationImp = new ImagePlus("PerPixel", simulationStack);
         // Only the info property is saved to the TIFF file
-        simulationImp.setProperty("Info", String.format("Offset=%s; Variance=%s; Gain=%s +/- %s", Utils.rounded(offset),
-                Utils.rounded(variance), Utils.rounded(gain), Utils.rounded(gainSD)));
+        simulationImp.setProperty("Info", String.format("Offset=%s; Variance=%s; Gain=%s +/- %s", MathUtils.rounded(offset),
+                MathUtils.rounded(variance), MathUtils.rounded(gain), MathUtils.rounded(gainSD)));
         IJ.save(simulationImp, new File(directory, "perPixelSimulation.tif").getPath());
 
         // Create thread pool and workers
@@ -509,20 +492,16 @@ public class CMOSAnalysis implements PlugIn
         // Simulate 20 - 200 photon images.
         final int[] photons = new int[] { 0, 20, 50, 100, 200 };
 
-        totalProgress = photons.length * frames;
-        stepProgress = Utils.getProgressInterval(totalProgress);
-        progress = 0;
-        progressBar.show(0);
-
         final int blockSize = 10; // For saving stacks
         int nPerThread = (int) Math.ceil((double) frames / nThreads);
         // Convert to fit the block size
         nPerThread = (int) Math.ceil((double) nPerThread / blockSize) * blockSize;
         long seed = start;
 
+        ticker = Ticker.createStarted(new ImageJTrackProgress(), photons.length * frames, true);
         for (final int p : photons)
         {
-            statusLine.setText("Simulating " + TextUtils.pleural(p, "photon"));
+            ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));
 
             // Create the directory
             final File out = new File(directory, String.format("photon%03d", p));
@@ -533,7 +512,7 @@ public class CMOSAnalysis implements PlugIn
             {
                 final int to = Math.min(from + nPerThread, frames);
                 futures.add(executor
-                        .submit(new SimulationWorker(seed++, out.getPath(), simulationStack, from, to, blockSize, p)));
+                        .submit(new SimulationWorker(ticker, seed++, out.getPath(), simulationStack, from, to, blockSize, p)));
                 from = to;
             }
             // Wait for all to finish
@@ -551,13 +530,12 @@ public class CMOSAnalysis implements PlugIn
             futures.clear();
         }
 
-        Utils.setShowStatus(true);
-        Utils.setShowProgress(true);
+        IJ.showStatus("");
         IJ.showProgress(1);
 
         executor.shutdown();
 
-        Utils.log("Simulation time = " + Utils.timeToString(System.currentTimeMillis() - start));
+        ImageJUtils.log("Simulation time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
     }
 
     private boolean showSimulateDialog()
@@ -598,7 +576,7 @@ public class CMOSAnalysis implements PlugIn
         }
         catch (final IllegalArgumentException ex)
         {
-            Utils.log(TITLE + ": " + ex.getMessage());
+            ImageJUtils.log(TITLE + ": " + ex.getMessage());
             return false;
         }
 
@@ -654,7 +632,7 @@ public class CMOSAnalysis implements PlugIn
         }
 
         for (final SubDir sd : subDirs)
-            Utils.log("Sub-directory: %s. Exposure time = %d", sd.name, sd.exposureTime);
+            ImageJUtils.log("Sub-directory: %s. Exposure time = %d", sd.name, sd.exposureTime);
 
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.addHelp(About.HELP_URL);
@@ -689,68 +667,7 @@ public class CMOSAnalysis implements PlugIn
     {
         final long start = System.currentTimeMillis();
 
-        // Avoid all the file saves from updating the progress bar and status line
-        Utils.setShowProgress(false);
-        Utils.setShowStatus(false);
-        final JLabel statusLine = Utils.getStatusLine();
-        progressBar = Utils.getProgressBar();
-
-        final TrackProgress trackProgress = new TrackProgress()
-        {
-            @Override
-            public void progress(double fraction)
-            {
-                progressBar.show(fraction);
-            }
-
-            @Override
-            public void progress(long position, long total)
-            {
-                progressBar.show((double) position / total);
-            }
-
-            @Override
-            public void incrementProgress(double fraction)
-            {
-                // Ignore
-            }
-
-            @Override
-            public void log(String format, Object... args)
-            {
-                // Ignore
-            }
-
-            @Override
-            public void status(String format, Object... args)
-            {
-                // Ignore
-            }
-
-            @Override
-            public boolean isEnded()
-            {
-                return false;
-            }
-
-            @Override
-            public boolean isProgress()
-            {
-                return true;
-            }
-
-            @Override
-            public boolean isLog()
-            {
-                return false;
-            }
-
-            @Override
-            public boolean isStatus()
-            {
-                return false;
-            }
-        };
+        final TrackProgress trackProgress2 = new ImageJTrackProgress();
 
         // Create thread pool and workers. The system is likely to be IO limited
         // so reduce the computation threads to allow the reading thread in the
@@ -769,11 +686,15 @@ public class CMOSAnalysis implements PlugIn
         // For each sub-directory compute the mean and variance
         final int nSubDirs = subDirs.size();
         boolean error = false;
-        int width = 0, height = 0;
+        int width = 0;
+        int height = 0;
+        
         for (int n = 0; n < nSubDirs; n++)
         {
+            ImageJUtils.showSlowProgress(0, nSubDirs);
+
             final SubDir sd = subDirs.getf(n);
-            statusLine.setText("Analysing " + sd.name);
+            ImageJUtils.showStatus(() -> "Analysing " + sd.name);
             final StopWatch sw = StopWatch.createStarted();
 
             // Option to reuse data
@@ -781,7 +702,9 @@ public class CMOSAnalysis implements PlugIn
             boolean found = false;
             if (reuseProcessedData && file.exists())
             {
-                final ImagePlus imp = IJ.openImage(file.getPath());
+                final Opener opener = new Opener();
+                opener.setSilentMode(true);
+                ImagePlus imp = opener.openImage(file.getPath());
                 if (imp != null && imp.getStackSize() == 2 && imp.getBitDepth() == 32)
                 {
                     if (n == 0)
@@ -806,11 +729,9 @@ public class CMOSAnalysis implements PlugIn
                 }
             }
 
-            if (!found)
-            {
+            if (!found) {
                 // Open the series
                 final SeriesImageSource source = new SeriesImageSource(sd.name, sd.path.getPath());
-                source.setTrackProgress(trackProgress);
                 if (!source.open())
                 {
                     error = true;
@@ -831,15 +752,13 @@ public class CMOSAnalysis implements PlugIn
                     break;
                 }
 
-                totalProgress = source.getFrames() + 1; // So the bar remains at 99% when workers have finished
-                stepProgress = Utils.getProgressInterval(totalProgress);
-                progress = 0;
-                progressBar.show(0);
+                // So the bar remains at 99% when workers have finished use frames + 1
+                Ticker ticker = Ticker.createStarted(trackProgress2, source.getFrames() + 1, true);
 
                 // Open the first frame to get the bit depth.
                 // Assume the first pixels are not empty as the source is open.
                 Object pixels = source.nextRaw();
-                final int bitDepth = Utils.getBitDepth(pixels);
+                final int bitDepth = ImageJUtils.getBitDepth(pixels);
 
                 ArrayMoment moment;
                 if (rollingAlgorithm)
@@ -853,7 +772,7 @@ public class CMOSAnalysis implements PlugIn
                 final CloseableBlockingQueue<Object> jobs = new CloseableBlockingQueue<>(nThreads * 2);
                 for (int i = 0; i < nThreads; i++)
                 {
-                    final ImageWorker worker = new ImageWorker(jobs, moment);
+                    final ImageWorker worker = new ImageWorker(ticker, jobs, moment);
                     workers.add(worker);
                     futures.add(executor.submit(worker));
                 }
@@ -865,13 +784,13 @@ public class CMOSAnalysis implements PlugIn
                     final long time = System.currentTimeMillis();
                     if (time - lastTime > 150)
                     {
-                        if (Utils.isInterrupted())
+                        if (ImageJUtils.isInterrupted())
                         {
                             error = true;
                             break;
                         }
                         lastTime = time;
-                        statusLine.setText("Analysing " + sd.name + " Frame " + source.getStartFrameNumber());
+                        IJ.showStatus("Analysing " + sd.name + " Frame " + source.getStartFrameNumber());
                     }
                     put(jobs, pixels);
                     pixels = source.nextRaw();
@@ -920,14 +839,12 @@ public class CMOSAnalysis implements PlugIn
 
                 // Get the processing speed.
                 sw.stop();
-                // progress holds the number of calls to showProgress() for
-                // processing a frame (i.e. number of frames)
-                final double bits = (double) bitDepth * progress * source.getWidth() * source.getHeight();
-                final double seconds = sw.getNanoTime() / 1e9;
-                final double bps = bits / seconds;
-                final SIPrefix prefix = SIPrefix.getPrefix(bps);
-                Utils.log("Processed %d frames. Time = %s. Rate = %s %sbits/s", moment.getN(), sw.toString(),
-                        Utils.rounded(prefix.convert(bps)), prefix.getName());
+                // ticker holds the number of number of frames processed
+                final double bits = (double) bitDepth * ticker.getCurrent() * source.getWidth() * source.getHeight();
+                final double bps = bits / sw.getTime(TimeUnit.SECONDS);
+                final SiPrefix prefix = SiPrefix.getSiPrefix(bps);
+                ImageJUtils.log("Processed %d frames. Time = %s. Rate = %s %sbits/s", moment.getN(), sw.toString(),
+                        MathUtils.rounded(prefix.convert(bps)), prefix.getPrefix());
 
                 // Reset
                 futures.clear();
@@ -939,7 +856,7 @@ public class CMOSAnalysis implements PlugIn
                 IJ.save(new ImagePlus("PerPixel", stack), file.getPath());
             }
 
-            final Statistics s = new Statistics(data[2 * n]);
+            final Statistics s = Statistics.create(data[2 * n]);
 
             if (pixelOffset != null)
             {
@@ -948,9 +865,9 @@ public class CMOSAnalysis implements PlugIn
                 final double[] mean = data[2 * n];
                 for (int i = 0; i < pixelOffset.length; i++)
                     signal.add(mean[i] - pixelOffset[i]);
-                Utils.log("%s Mean = %s +/- %s. Signal = %s +/- %s ADU", sd.name, Utils.rounded(s.getMean()),
-                        Utils.rounded(s.getStandardDeviation()), Utils.rounded(signal.getMean()),
-                        Utils.rounded(signal.getStandardDeviation()));
+                ImageJUtils.log("%s Mean = %s +/- %s. Signal = %s +/- %s ADU", sd.name, MathUtils.rounded(s.getMean()),
+                        MathUtils.rounded(s.getStandardDeviation()), MathUtils.rounded(signal.getMean()),
+                        MathUtils.rounded(signal.getStandardDeviation()));
             }
             else
             {
@@ -958,24 +875,20 @@ public class CMOSAnalysis implements PlugIn
                 pixelOffset = data[0];
                 pixelVariance = data[1];
                 statsOffset = s;
-                statsVariance = new Statistics(pixelVariance);
-                Utils.log("%s Offset = %s +/- %s. Variance = %s +/- %s", sd.name, Utils.rounded(s.getMean()),
-                        Utils.rounded(s.getStandardDeviation()), Utils.rounded(statsVariance.getMean()),
-                        Utils.rounded(statsVariance.getStandardDeviation()));
+                statsVariance = Statistics.create(pixelVariance);
+                ImageJUtils.log("%s Offset = %s +/- %s. Variance = %s +/- %s", sd.name, MathUtils.rounded(s.getMean()),
+                        MathUtils.rounded(s.getStandardDeviation()), MathUtils.rounded(statsVariance.getMean()),
+                        MathUtils.rounded(statsVariance.getStandardDeviation()));
             }
 
-            progressBar.show(1);
+            IJ.showProgress(1);
         }
-        progressBar.show(1);
-
-        Utils.setShowStatus(true);
-        Utils.setShowProgress(true);
-        IJ.showProgress(1);
+        ImageJUtils.clearSlowProgress();
 
         if (error)
         {
             executor.shutdownNow();
-            statusLine.setText(TITLE + " cancelled");
+            IJ.showStatus(TITLE + " cancelled");
             return;
         }
 
@@ -983,12 +896,12 @@ public class CMOSAnalysis implements PlugIn
 
         if (pixelOffset == null || pixelVariance == null)
         {
-            statusLine.setText(TITLE + " error: no bias image");
+            IJ.showStatus(TITLE + " error: no bias image");
             return;
         }
 
         // Compute the gain
-        statusLine.setText("Computing gain");
+        ImageJUtils.showStatus("Computing gain");
 
         final double[] pixelGain = new double[pixelOffset.length];
         final double[] bibiT = new double[pixelGain.length];
@@ -1027,12 +940,12 @@ public class CMOSAnalysis implements PlugIn
         //	pixelGain[i] = biaiT / bibiT;
         //}
 
-        final Statistics statsGain = new Statistics(pixelGain);
-        Utils.log("Gain Mean = %s +/- %s", Utils.rounded(statsGain.getMean()),
-                Utils.rounded(statsGain.getStandardDeviation()));
+        final Statistics statsGain = Statistics.create(pixelGain);
+        ImageJUtils.log("Gain Mean = %s +/- %s", MathUtils.rounded(statsGain.getMean()),
+                MathUtils.rounded(statsGain.getStandardDeviation()));
 
         // Histogram of offset, variance and gain
-        final int bins = 2 * Utils.getBinsSturgesRule(pixelGain.length);
+        final int bins = 2 * HistogramPlot.getBinsSturgesRule(pixelGain.length);
         final WindowOrganiser wo = new WindowOrganiser();
         showHistogram("Offset (ADU)", pixelOffset, bins, statsOffset, wo);
         showHistogram("Variance (ADU^2)", pixelVariance, bins, statsVariance, wo);
@@ -1068,7 +981,7 @@ public class CMOSAnalysis implements PlugIn
         }
         IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
-        Utils.log("Analysis time = " + Utils.timeToString(System.currentTimeMillis() - start));
+        ImageJUtils.log("Analysis time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
     }
 
     private static void showHistogram(String name, double[] values, int bins, Statistics stats, WindowOrganiser wo)
@@ -1077,17 +990,22 @@ public class CMOSAnalysis implements PlugIn
         final double minWidth = 0;
         final int removeOutliers = 0;
         final int shape = Plot.CIRCLE; // Plot2.BAR; // A bar chart confuses the log plot since it plots lines to zero.
-        final String label = String.format("Mean = %s +/- %s", Utils.rounded(stats.getMean()),
-                Utils.rounded(stats.getStandardDeviation()));
-        final int id = Utils.showHistogram(TITLE, data, name, minWidth, removeOutliers, bins, shape, label);
-        if (Utils.isNewWindow())
-            wo.add(id);
+        final String label = String.format("Mean = %s +/- %s", MathUtils.rounded(stats.getMean()),
+                MathUtils.rounded(stats.getStandardDeviation()));
+
+        HistogramPlot histogramPlot =
+            new HistogramPlotBuilder(TITLE, data, name).setMinBinWidth(minWidth)
+                .setRemoveOutliersOption(removeOutliers)
+                .setNumberOfBins(bins).setPlotShape(shape)
+                .setPlotLabel(label).build();
+
+        histogramPlot.show(wo);
         // Redraw using a log scale. This requires a non-zero y-min
-        final Plot plot = Utils.plot;
+        final Plot plot = histogramPlot.getPlot();
         final double[] limits = plot.getLimits();
         plot.setLimits(limits[0], limits[1], 1, limits[3]);
         plot.setAxisYLog(true);
-        Utils.plot.updateImage();
+        plot.updateImage();
     }
 
     private static <T> void put(BlockingQueue<T> jobs, T job)
@@ -1105,7 +1023,7 @@ public class CMOSAnalysis implements PlugIn
     private void computeError()
     {
         // Assume the simulation stack and measured stack are not null.
-        Utils.log("Comparison to simulation: %s", simulationImp.getInfoProperty());
+        ImageJUtils.log("Comparison to simulation: %s", simulationImp.getInfoProperty());
         final ImageStack simulationStack = simulationImp.getImageStack();
         for (int slice = 1; slice <= 3; slice++)
             computeError(slice, simulationStack);
@@ -1123,32 +1041,32 @@ public class CMOSAnalysis implements PlugIn
             s.add(o[i] - e[i]);
 
         final StringBuilder result = new StringBuilder("Error ").append(label);
-        result.append(" = ").append(Utils.rounded(s.getMean()));
-        result.append(" +/- ").append(Utils.rounded(s.getStandardDeviation()));
+        result.append(" = ").append(MathUtils.rounded(s.getMean()));
+        result.append(" +/- ").append(MathUtils.rounded(s.getStandardDeviation()));
 
         // Do statistical tests
         final double[] x = SimpleArrayUtils.toDouble(e), y = SimpleArrayUtils.toDouble(o);
 
         final PearsonsCorrelation c = new PearsonsCorrelation();
-        result.append(" : R=").append(Utils.rounded(c.correlation(x, y)));
+        result.append(" : R=").append(MathUtils.rounded(c.correlation(x, y)));
 
         // Mann-Whitney U is valid for any distribution, e.g. variance
         final MannWhitneyUTest test = new MannWhitneyUTest();
         double p = test.mannWhitneyUTest(x, y);
-        result.append(" : Mann-Whitney U p=").append(Utils.rounded(p)).append(' ')
+        result.append(" : Mann-Whitney U p=").append(MathUtils.rounded(p)).append(' ')
                 .append(((p < 0.05) ? "reject" : "accept"));
 
         if (slice != 2)
         {
             // T-Test is valid for approximately Normal distributions, e.g. offset and gain
             p = TestUtils.tTest(x, y);
-            result.append(" : T-Test p=").append(Utils.rounded(p)).append(' ')
+            result.append(" : T-Test p=").append(MathUtils.rounded(p)).append(' ')
                     .append(((p < 0.05) ? "reject" : "accept"));
             p = TestUtils.pairedTTest(x, y);
-            result.append(" : Paired T-Test p=").append(Utils.rounded(p)).append(' ')
+            result.append(" : Paired T-Test p=").append(MathUtils.rounded(p)).append(' ')
                     .append(((p < 0.05) ? "reject" : "accept"));
         }
 
-        Utils.log(result.toString());
+        ImageJUtils.log(result.toString());
     }
 }

@@ -36,9 +36,9 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat
 {
     /** The index of the x width. */
-    final static int i = PeakResult.STANDARD_PARAMETERS;
+    static final int i = PeakResult.STANDARD_PARAMETERS;
     /** The index of the y width. */
-    final static int j = i + 1;
+    static final int j = i + 1;
 
     /** {@inheritDoc} */
     @Override

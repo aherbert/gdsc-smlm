@@ -34,7 +34,7 @@ public class ActivationTimeImageModel extends ImageModel
     private double tAct;
 
     /**
-     * Construct a new image model
+     * Construct a new image model.
      *
      * @param tAct
      *            Average time for activation
@@ -62,7 +62,7 @@ public class ActivationTimeImageModel extends ImageModel
     }
 
     /**
-     * @return the tAct
+     * @return the tAct.
      */
     public double gettAct()
     {

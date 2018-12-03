@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
- * Define the diffusion type
+ * Define the diffusion type.
  */
 public enum DiffusionType
 {

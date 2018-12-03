@@ -41,7 +41,7 @@ public class Spot implements Comparable<Spot>, Cloneable
     private float score;
 
     /**
-     * Constructor that sets the score (for sorting) equal to the intensity
+     * Constructor that sets the score (for sorting) equal to the intensity.
      *
      * @param x
      *            The x-coordinate
@@ -76,7 +76,7 @@ public class Spot implements Comparable<Spot>, Cloneable
     }
 
     /**
-     * Get the distance between the two spots
+     * Get the distance between the two spots.
      *
      * @param o
      *            the other spot
@@ -88,7 +88,7 @@ public class Spot implements Comparable<Spot>, Cloneable
     }
 
     /**
-     * Get the squared distance between the two spots
+     * Get the squared distance between the two spots.
      *
      * @param o
      *            the other spot
@@ -124,7 +124,7 @@ public class Spot implements Comparable<Spot>, Cloneable
     }
 
     /**
-     * @return the score used for sorting the spots
+     * @return the score used for sorting the spots.
      */
     public float getScore()
     {

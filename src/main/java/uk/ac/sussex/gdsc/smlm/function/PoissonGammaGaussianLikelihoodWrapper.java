@@ -48,7 +48,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
 {
-    final private PoissonGammaGaussianFunction p;
+    private final PoissonGammaGaussianFunction p;
 
     /**
      * Initialise the function.

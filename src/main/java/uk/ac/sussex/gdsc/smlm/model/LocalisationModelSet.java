@@ -55,7 +55,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * Adds the localisation
+     * Adds the localisation.
      *
      * @param l
      *            the localisation
@@ -86,7 +86,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * @return The Id
+     * @return The Id.
      */
     public int getId()
     {
@@ -94,7 +94,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * Allow the package to set the id
+     * Allow the package to set the id.
      *
      * @param id
      *            The Id
@@ -105,7 +105,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * @return The time
+     * @return The time.
      */
     public int getTime()
     {
@@ -120,7 +120,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * @return True if this localisation is on for the entire duration of the time interval
+     * @return True if this localisation is on for the entire duration of the time interval.
      */
     public boolean isContinuous()
     {
@@ -148,7 +148,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * @return the data
+     * @return the data.
      */
     public double[] getData()
     {
@@ -193,7 +193,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * @return The total intensity
+     * @return The total intensity.
      */
     public double getIntensity()
     {
@@ -204,7 +204,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * @return the previous
+     * @return the previous.
      */
     public LocalisationModelSet getPrevious()
     {
@@ -223,7 +223,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
     }
 
     /**
-     * @return the next
+     * @return the next.
      */
     public LocalisationModelSet getNext()
     {

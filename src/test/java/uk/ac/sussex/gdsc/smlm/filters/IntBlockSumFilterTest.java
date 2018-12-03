@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.rng.UniformRandomProvider;
-
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
 
 @SuppressWarnings({ "javadoc" })
 public class IntBlockSumFilterTest extends AbstractFilterTest
@@ -86,7 +86,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
     }
 
     /**
-     * Used to test the filter methods calculate the correct result
+     * Used to test the filter methods calculate the correct result.
      */
     private class BlockSumDataFilter extends IntDataFilter
     {
@@ -138,7 +138,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 
     private static void checkIsCorrect(RandomSeed seed, BlockSumDataFilter filter)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         for (final int width : primes)
             for (final int height : primes)

@@ -1,18 +1,21 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.ArrayList;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+
+import java.util.ArrayList;
 
 @SuppressWarnings({ "deprecation", "javadoc" })
 public class SumFilterTest extends AbstractFilterTest {
@@ -20,9 +23,10 @@ public class SumFilterTest extends AbstractFilterTest {
     private static int InternalITER = 50;
     private static int ITER3 = 200;
     private static int ITER = 20;
+    private static FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-4, 0);
 
     /**
-     * Check the float arrays are equal, else fail with a formatted message
+     * Check the float arrays are equal, else fail with a formatted message.
      *
      * @param data1   the data 1
      * @param data2   the data 2
@@ -31,11 +35,12 @@ public class SumFilterTest extends AbstractFilterTest {
      * @param args    the args
      */
     private static void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args) {
-        ExtraAssertions.assertArrayEqualsRelative(data1, data2, 1e-4, () -> String.format(format, args));
+        TestAssertions.assertArrayTest(data1, data2, equality,
+            () -> String.format(format, args));
     }
 
     /**
-     * Check the int arrays are equal, else fail with a formatted message
+     * Check the int arrays are equal, else fail with a formatted message.
      *
      * @param data1   the data 1
      * @param data2   the data 2
@@ -66,7 +71,7 @@ public class SumFilterTest extends AbstractFilterTest {
     // COPY CODE FROM HERE...
     @SeededTest
     public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -88,7 +93,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     @SeededTest
     public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -110,7 +115,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     @SeededTest
     public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -132,7 +137,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(
             RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -159,7 +164,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -215,10 +220,10 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float blockSumNxNInternal " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxNInternal " + boxSize, boxSlowTotal,
                     "rollingBlockSumNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float blockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal",
+        logger.log(TestLogUtils.getTimingRecord("float blockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal",
                 fastTotal));
     }
 
@@ -226,7 +231,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -282,10 +287,10 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float blockSumNxNInternal " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxNInternal " + boxSize, boxSlowTotal,
                     "stripedBlockSumNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float blockSumNxNInternal", slowTotal, "stripedBlockSumNxNInternal",
+        logger.log(TestLogUtils.getTimingRecord("float blockSumNxNInternal", slowTotal, "stripedBlockSumNxNInternal",
                 fastTotal));
     }
 
@@ -293,7 +298,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -349,16 +354,16 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float stripedBlockSumNxNInternal " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("float stripedBlockSumNxNInternal " + boxSize, boxSlowTotal,
                     "rollingBlockSumNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal",
+        logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal",
                 fastTotal));
     }
 
     @SeededTest
     public void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -380,7 +385,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -434,14 +439,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockSumNxNInternal", slowTotal, "blockSum3x3Internal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockSumNxNInternal", slowTotal, "blockSum3x3Internal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -495,7 +500,7 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("float blockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal",
                 fastTotal));
     }
 
@@ -503,7 +508,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -557,7 +562,7 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockSum3x3Internal", slowTotal, "stripedBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("float blockSum3x3Internal", slowTotal, "stripedBlockSum3x3Internal",
                 fastTotal));
     }
 
@@ -565,7 +570,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -619,13 +624,13 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float stripedBlockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("float stripedBlockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal",
                 fastTotal));
     }
 
     @SeededTest
     public void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -648,7 +653,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -702,7 +707,7 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float rollingBlockSumNxNInternal", slowTotal, "rollingBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxNInternal", slowTotal, "rollingBlockSum3x3Internal",
                 fastTotal));
     }
 
@@ -710,7 +715,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -764,7 +769,7 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal, "stripedBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal, "stripedBlockSum3x3Internal",
                 fastTotal));
     }
 
@@ -772,7 +777,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -839,13 +844,13 @@ public class SumFilterTest extends AbstractFilterTest {
             // boxSize, boxFastTotal, boxSlowTotal),
             // boxFastTotal < boxSlowTotal);
         }
-        logger.log(TestLog.getTimingRecord("float rollingBlockSumNxNInternalTransposed", slowTotal,
+        logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxNInternalTransposed", slowTotal,
                 "rollingBlockSumNxNInternal", fastTotal));
     }
 
     @SeededTest
     public void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -867,7 +872,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     @SeededTest
     public void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -891,7 +896,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -947,17 +952,17 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal, "blockSumNxNInternal",
+            logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal, "blockSumNxNInternal",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float blockSumNxN", slowTotal, "blockSumNxNInternal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "blockSumNxNInternal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1013,17 +1018,17 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal, "stripedBlockSumNxN",
+            logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal, "stripedBlockSumNxN",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float blockSumNxN", slowTotal, "stripedBlockSumNxN", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "stripedBlockSumNxN", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1079,10 +1084,10 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float stripedBlockSumNxN " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("float stripedBlockSumNxN " + boxSize, boxSlowTotal,
                     "stripedBlockSumNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float stripedBlockSumNxN", slowTotal, "stripedBlockSumNxNInternal",
+        logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxN", slowTotal, "stripedBlockSumNxNInternal",
                 fastTotal));
     }
 
@@ -1090,7 +1095,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1146,17 +1151,17 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal, "rollingBlockSumNxN",
+            logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal, "rollingBlockSumNxN",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float blockSumNxN", slowTotal, "rollingBlockSumNxN", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "rollingBlockSumNxN", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1212,16 +1217,16 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("float rollingBlockSumNxN " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("float rollingBlockSumNxN " + boxSize, boxSlowTotal,
                     "rollingBlockSumNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float rollingBlockSumNxN", slowTotal, "rollingBlockSumNxNInternal",
+        logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxN", slowTotal, "rollingBlockSumNxNInternal",
                 fastTotal));
     }
 
     @SeededTest
     public void floatBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1243,7 +1248,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatBlockSum3x3IsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1296,12 +1301,12 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
     }
 
     @SeededTest
     public void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1324,7 +1329,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1378,12 +1383,12 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // stripedBlockTime, time), stripedBlockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float stripedBlockSumNxN", slowTotal, "stripedBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxN", slowTotal, "stripedBlockSum3x3", fastTotal));
     }
 
     @SeededTest
     public void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1406,7 +1411,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1460,14 +1465,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // rollingBlockTime, time), rollingBlockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float rollingBlockSumNxN", slowTotal, "rollingBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxN", slowTotal, "rollingBlockSum3x3", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1520,14 +1525,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1580,14 +1585,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockSum3x3", slowTotal, "stripedBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockSum3x3", slowTotal, "stripedBlockSum3x3", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1641,12 +1646,12 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float stripedBlockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float stripedBlockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
     }
 
     @SeededTest
     public void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1668,7 +1673,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     @SeededTest
     public void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1690,7 +1695,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     @SeededTest
     public void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1711,7 +1716,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     @SeededTest
     public void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1738,7 +1743,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1794,18 +1799,18 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int blockSumNxNInternal " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxNInternal " + boxSize, boxSlowTotal,
                     "rollingBlockSumNxNInternal", boxFastTotal));
         }
         logger.log(
-                TestLog.getTimingRecord("int blockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal", fastTotal));
+                TestLogUtils.getTimingRecord("int blockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1861,18 +1866,18 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int blockSumNxNInternal " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxNInternal " + boxSize, boxSlowTotal,
                     "stripedBlockSumNxNInternal", boxFastTotal));
         }
         logger.log(
-                TestLog.getTimingRecord("int blockSumNxNInternal", slowTotal, "stripedBlockSumNxNInternal", fastTotal));
+                TestLogUtils.getTimingRecord("int blockSumNxNInternal", slowTotal, "stripedBlockSumNxNInternal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -1928,16 +1933,16 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int stripedBlockSumNxNInternal " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("int stripedBlockSumNxNInternal " + boxSize, boxSlowTotal,
                     "rollingBlockSumNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal",
+        logger.log(TestLogUtils.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal, "rollingBlockSumNxNInternal",
                 fastTotal));
     }
 
     @SeededTest
     public void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -1959,7 +1964,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2013,14 +2018,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int blockSumNxNInternal", slowTotal, "blockSum3x3Internal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int blockSumNxNInternal", slowTotal, "blockSum3x3Internal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2075,14 +2080,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // blockTime, time), blockTime < time);
             }
         logger.log(
-                TestLog.getTimingRecord("int blockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal", fastTotal));
+                TestLogUtils.getTimingRecord("int blockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2137,14 +2142,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // blockTime, time), blockTime < time);
             }
         logger.log(
-                TestLog.getTimingRecord("int blockSum3x3Internal", slowTotal, "stripedBlockSum3x3Internal", fastTotal));
+                TestLogUtils.getTimingRecord("int blockSum3x3Internal", slowTotal, "stripedBlockSum3x3Internal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2198,13 +2203,13 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int stripedBlockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("int stripedBlockSum3x3Internal", slowTotal, "rollingBlockSum3x3Internal",
                 fastTotal));
     }
 
     @SeededTest
     public void intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -2227,7 +2232,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2281,7 +2286,7 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int rollingBlockSumNxNInternal", slowTotal, "rollingBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("int rollingBlockSumNxNInternal", slowTotal, "rollingBlockSum3x3Internal",
                 fastTotal));
     }
 
@@ -2289,7 +2294,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2343,7 +2348,7 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal, "stripedBlockSum3x3Internal",
+        logger.log(TestLogUtils.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal, "stripedBlockSum3x3Internal",
                 fastTotal));
     }
 
@@ -2351,7 +2356,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2418,13 +2423,13 @@ public class SumFilterTest extends AbstractFilterTest {
             // boxSize, boxFastTotal, boxSlowTotal),
             // boxFastTotal < boxSlowTotal);
         }
-        logger.log(TestLog.getTimingRecord("int rollingBlockSumNxNInternalTransposed", slowTotal,
+        logger.log(TestLogUtils.getTimingRecord("int rollingBlockSumNxNInternalTransposed", slowTotal,
                 "rollingBlockSumNxNInternal", fastTotal));
     }
 
     @SeededTest
     public void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -2446,7 +2451,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     @SeededTest
     public void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -2470,7 +2475,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intBlockSumInternalNxNIsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2526,17 +2531,17 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal, "blockSumNxNInternal",
+            logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal, "blockSumNxNInternal",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("int blockSumNxN", slowTotal, "blockSumNxNInternal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "blockSumNxNInternal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intStripedBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2592,17 +2597,17 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal, "stripedBlockSumNxN",
+            logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal, "stripedBlockSumNxN",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("int blockSumNxN", slowTotal, "stripedBlockSumNxN", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "stripedBlockSumNxN", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2658,18 +2663,18 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int stripedBlockSumNxN " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("int stripedBlockSumNxN " + boxSize, boxSlowTotal,
                     "stripedBlockSumNxNInternal", boxFastTotal));
         }
         logger.log(
-                TestLog.getTimingRecord("int stripedBlockSumNxN", slowTotal, "stripedBlockSumNxNInternal", fastTotal));
+                TestLogUtils.getTimingRecord("int stripedBlockSumNxN", slowTotal, "stripedBlockSumNxNInternal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intRollingBlockSumNxNIsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2725,17 +2730,17 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal, "rollingBlockSumNxN",
+            logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal, "rollingBlockSumNxN",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("int blockSumNxN", slowTotal, "rollingBlockSumNxN", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "rollingBlockSumNxN", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2791,16 +2796,16 @@ public class SumFilterTest extends AbstractFilterTest {
                     // blockTime, time), blockTime < time);
                 }
             // if (debug)
-            logger.log(TestLog.getStageTimingRecord("int rollingBlockSumNxN " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("int rollingBlockSumNxN " + boxSize, boxSlowTotal,
                     "rollingBlockSumNxNInternal", boxFastTotal));
         }
         logger.log(
-                TestLog.getTimingRecord("int rollingBlockSumNxN", slowTotal, "rollingBlockSumNxNInternal", fastTotal));
+                TestLogUtils.getTimingRecord("int rollingBlockSumNxN", slowTotal, "rollingBlockSumNxNInternal", fastTotal));
     }
 
     @SeededTest
     public void intBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -2822,7 +2827,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intBlockSum3x3IsFasterThanBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2875,12 +2880,12 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
     }
 
     @SeededTest
     public void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -2903,7 +2908,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -2957,12 +2962,12 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // stripedBlockTime, time), stripedBlockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int stripedBlockSumNxN", slowTotal, "stripedBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int stripedBlockSumNxN", slowTotal, "stripedBlockSum3x3", fastTotal));
     }
 
     @SeededTest
     public void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final SumFilter filter = new SumFilter();
 
         for (final int width : primes)
@@ -2985,7 +2990,7 @@ public class SumFilterTest extends AbstractFilterTest {
     @SeededTest
     public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -3039,14 +3044,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // rollingBlockTime, time), rollingBlockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int rollingBlockSumNxN", slowTotal, "rollingBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int rollingBlockSumNxN", slowTotal, "rollingBlockSum3x3", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intRollingBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -3099,14 +3104,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int blockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int blockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intStripedBlockSum3x3IsFasterThanBlockSum3x3(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -3159,14 +3164,14 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int blockSum3x3", slowTotal, "stripedBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int blockSum3x3", slowTotal, "stripedBlockSum3x3", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3(RandomSeed seed) {
         // These test a deprecated filter
-        ExtraAssumptions.assume(TestComplexity.VERY_HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
         final SumFilter filter = new SumFilter();
 
@@ -3220,6 +3225,6 @@ public class SumFilterTest extends AbstractFilterTest {
                 // height,
                 // blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("int stripedBlockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("int stripedBlockSum3x3", slowTotal, "rollingBlockSum3x3", fastTotal));
     }
 }

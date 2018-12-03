@@ -1,16 +1,5 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.util.Precision;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -27,16 +16,31 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+
+import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -266,7 +270,7 @@ public class GradientCalculatorSpeedTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
+        final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
 
         final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length)
                 : new GradientCalculator(beta.length);
@@ -276,7 +280,7 @@ public class GradientCalculatorSpeedTest
         IntArrayFormatSupplier msgR = new IntArrayFormatSupplier("Result: Not same @ %d", 1);
         IntArrayFormatSupplier msgB = new IntArrayFormatSupplier("Observations: Not same beta @ %d", 1);
         IntArrayFormatSupplier msgA = new IntArrayFormatSupplier("Observations: Not same alpha @ %d", 1);
-        
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -292,7 +296,7 @@ public class GradientCalculatorSpeedTest
         msgR = new IntArrayFormatSupplier("N-Result: Not same @ %d", 1);
         msgB = new IntArrayFormatSupplier("N-Observations: Not same beta @ %d", 1);
         msgA = new IntArrayFormatSupplier("N-Observations: Not same alpha @ %d", 1);
-        
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             final double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -312,7 +316,7 @@ public class GradientCalculatorSpeedTest
             msgR = new IntArrayFormatSupplier("Result+Noise: Not same @ %d", 1);
             msgB = new IntArrayFormatSupplier("Observations+Noise: Not same beta @ %d", 1);
             msgA = new IntArrayFormatSupplier("Observations+Noise: Not same alpha @ %d", 1);
-            
+
             for (int i = 0; i < paramsList.size(); i++)
             {
                 final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -320,7 +324,7 @@ public class GradientCalculatorSpeedTest
                 Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
                 Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2),
                         msgB.set(0, i));
-                msgA.set(0, i);                
+                msgA.set(0, i);
                 for (int j = 0; j < beta.length; j++)
                     Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]),
                             msgA);
@@ -329,7 +333,7 @@ public class GradientCalculatorSpeedTest
             msgR = new IntArrayFormatSupplier("N-Result+Noise: Not same @ %d", 1);
             msgB = new IntArrayFormatSupplier("N-Observations+Noise: Not same beta @ %d", 1);
             msgA = new IntArrayFormatSupplier("N-Observations+Noise: Not same alpha @ %d", 1);
-            
+
             for (int i = 0; i < paramsList.size(); i++)
             {
                 final double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -348,7 +352,7 @@ public class GradientCalculatorSpeedTest
     private void gradientCalculatorNIsFasterThanGradientCalculator(RandomSeed seed, Gaussian2DFunction func,
             int nparams, boolean mle)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         // Check the function is the correct size
         Assertions.assertEquals(nparams, func.gradientIndices().length);
@@ -360,7 +364,7 @@ public class GradientCalculatorSpeedTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
+        final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
 
         final GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length)
                 : new GradientCalculator(beta.length);
@@ -382,21 +386,21 @@ public class GradientCalculatorSpeedTest
             calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
         start2 = System.nanoTime() - start2;
 
-        logger.log(TestLog.getTimingRecord(((mle) ? "MLE " : "") + "Linearised GradientCalculator " + nparams, start1,
+        logger.log(TestLogUtils.getTimingRecord(((mle) ? "MLE " : "") + "Linearised GradientCalculator " + nparams, start1,
                 "GradientCalculator", start2));
     }
 
     @SeededTest
     public void gradientCalculatorAssumedXIsFasterThanGradientCalculator(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 10000;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList);
+        final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
 
         final GradientCalculator calc = new GradientCalculator6();
         final GradientCalculator calc2 = new GradientCalculator6();
@@ -423,7 +427,7 @@ public class GradientCalculatorSpeedTest
             calc2.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
         start2 = System.nanoTime() - start2;
 
-        logger.log(TestLog.getTimingRecord("GradientCalculator", start1, "GradientCalculatorAssumed", start2));
+        logger.log(TestLogUtils.getTimingRecord("GradientCalculator", start1, "GradientCalculatorAssumed", start2));
     }
 
     @SeededTest
@@ -454,17 +458,17 @@ public class GradientCalculatorSpeedTest
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
         final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-        final int[] x = createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+        final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
 
         final double delta = 1e-3;
         final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 
         final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("[%d] Not same gradient @ %d", 2);
-        
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             msg.set(0, i);
-            
+
             final double[] y = yList.get(i);
             final double[] a = paramsList.get(i);
             final double[] a2 = a.clone();
@@ -517,7 +521,9 @@ public class GradientCalculatorSpeedTest
 		};
 		//@formatter:on
 
-        final int[] xx = SimpleArrayUtils.newArray(100, 0, 1);
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+
+        final int[] xx = SimpleArrayUtils.natural(100);
         final double[] xxx = SimpleArrayUtils.newArray(100, 0, 1.0);
         for (final double u : new double[] { 0.79, 2.5, 5.32 })
         {
@@ -527,11 +533,11 @@ public class GradientCalculatorSpeedTest
             {
                 double o = MLEGradientCalculator.likelihood(u, x);
                 double e = pd.probability(x);
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, "likelihood");
+                TestAssertions.assertTest(e, o, predicate, "likelihood");
 
                 o = MLEGradientCalculator.logLikelihood(u, x);
                 e = pd.logProbability(x);
-                ExtraAssertions.assertEqualsRelative(e, o, 1e-10, "log likelihood");
+                TestAssertions.assertTest(e, o, predicate, "log likelihood");
 
                 ll += e;
             }
@@ -539,7 +545,7 @@ public class GradientCalculatorSpeedTest
             final MLEGradientCalculator gc = new MLEGradientCalculator(1);
             final double o = gc.logLikelihood(xxx, new double[] { u }, func);
 
-            ExtraAssertions.assertEqualsRelative(ll, o, 1e-10, "sum log likelihood");
+            TestAssertions.assertTest(ll, o, predicate, "sum log likelihood");
         }
     }
 
@@ -567,7 +573,7 @@ public class GradientCalculatorSpeedTest
         try
         {
             background = 1e-2;
-            createData(RNGFactory.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+            createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
 
             final EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
 
@@ -601,6 +607,8 @@ public class GradientCalculatorSpeedTest
                 abs[i] = new Statistics();
             }
 
+            DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+
             //for (int b = 1; b < 1000; b *= 2)
             //for (double b : new double[] { -500, -100, -10, -1, -0.1, 0.1, 1, 10, 100, 500 })
             for (final double b : new double[] { -10, -1, -0.1, 0.1, 1, 10 })
@@ -622,8 +630,8 @@ public class GradientCalculatorSpeedTest
                     final double[] beta2 = betaList.get(i);
                     final double[] x2 = xList.get(i);
 
-                    Assertions.assertArrayEquals(beta2, beta, 1e-10, "Beta");
-                    ExtraAssertions.assertArrayEquals(alpha2, alpha, 1e-10, "Alpha");
+                    TestAssertions.assertArrayTest(beta2, beta, predicate, "Beta");
+                    TestAssertions.assertArrayTest(alpha2, alpha, predicate, "Alpha");
 
                     // Solve
                     solver.solve(alpha, beta);
@@ -664,8 +672,8 @@ public class GradientCalculatorSpeedTest
         final EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
         final int n = blockWidth * blockWidth;
         final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
-        final CustomPoissonDistribution pd = new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int run = 5; run-- > 0;)
         {
             a[Gaussian2DFunction.BACKGROUND] = random(r, background);
@@ -678,19 +686,17 @@ public class GradientCalculatorSpeedTest
 
             // Simulate Poisson process
             func.initialise(a);
-            final double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
-            final double[] u = new double[x.length];
+            final double[] u = new double[n];
+            final double[] x = new double[n];
             for (int i = 0; i < n; i++)
             {
-                // Add random Poisson noise
                 final double value = func.eval(i);
+                u[i] = value;
+                // Add random Poisson noise
                 if (value > 0)
                 {
-                    pd.setMeanUnsafe(value);
-                    u[i++] = pd.sample();
+                    x[i] = new PoissonSampler(r, value).sample();
                 }
-                else
-                    u[i++] = 0;
             }
 
             final int ng = func.getNumberOfGradients();
@@ -702,7 +708,7 @@ public class GradientCalculatorSpeedTest
             final double llr = PoissonCalculator.logLikelihoodRatio(u, x);
             final double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
             //logger.fine(FunctionUtils.getSupplier("llr=%f, llr2=%f", llr, llr2));
-            ExtraAssertions.assertEqualsRelative(llr, llr2, 1e-10, "Log-likelihood ratio");
+            TestAssertions.assertTest(llr, llr2, predicate, "Log-likelihood ratio");
         }
     }
 

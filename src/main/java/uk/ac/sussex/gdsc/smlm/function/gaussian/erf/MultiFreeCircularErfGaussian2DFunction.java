@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 //import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
@@ -394,7 +394,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
             // Compute G53(xk)
             final double G53 = one_sssssSqrt2pi *
-                    (Maths.pow3(x_u_m12) * exp_x_minus - Maths.pow3(x_u_p12) * exp_x_plus);
+                    (MathUtils.pow3(x_u_m12) * exp_x_minus - MathUtils.pow3(x_u_p12) * exp_x_plus);
             d2u_ds2[j] = tI * (G53 - 2 * G31);
 
             exp_x_minus = exp_x_plus;
@@ -527,7 +527,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
             // Compute G53(xk)
             final double G53 = one_sssssSqrt2pi *
-                    (Maths.pow3(x_u_m12) * exp_x_minus - Maths.pow3(x_u_p12) * exp_x_plus);
+                    (MathUtils.pow3(x_u_m12) * exp_x_minus - MathUtils.pow3(x_u_p12) * exp_x_plus);
             d2u_ds2[j] = tI * (G53 - 2 * G31);
 
             exp_x_minus = exp_x_plus;

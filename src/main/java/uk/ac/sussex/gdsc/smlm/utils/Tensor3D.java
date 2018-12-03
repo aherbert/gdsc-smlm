@@ -28,7 +28,7 @@ import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.EigenDecomposition;
 
 /**
- * Compute the inertia tensor for a 3D object
+ * Compute the inertia tensor for a 3D object.
  *
  * @author Alex Herbert
  */

@@ -43,12 +43,12 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import uk.ac.sussex.gdsc.core.filters.FilteredNonMaximumSuppression;
-import uk.ac.sussex.gdsc.core.ij.IJLogger;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
@@ -74,7 +74,7 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
  */
 public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 {
-    private final static String TITLE = "Gaussian Fit";
+    private static final String TITLE = "Gaussian Fit";
     private double smooth = Prefs.get(Constants.smooth, 0);
     private int boxSize = (int) Prefs.get(Constants.boxSize, 1);
     private float background = (float) Prefs.get(Constants.background, 0);
@@ -389,7 +389,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
         if (topN > 0 && maxIndices.length > topN)
         {
-            maxIndices = Sort.sort(maxIndices, data);
+            SortUtils.sortIndices(maxIndices, data, true);
             maxIndices = Arrays.copyOf(maxIndices, topN);
         }
 
@@ -470,7 +470,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
             else
                 filter.stripedBlockFilter(smoothData, width, height, (float) smooth);
         }
-        Sort.sort(maxIndices, smoothData);
+        SortUtils.sortIndices(maxIndices, smoothData, true);
 
         // Show the candidate peaks
         if (maxIndices.length > 0)
@@ -592,7 +592,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
                     // Insert into a full size image
                     final FloatProcessor fp2 = new FloatProcessor(ip.getWidth(), ip.getHeight());
                     fp2.insert(fp, bounds.x, bounds.y);
-                    Utils.display(TITLE, fp2);
+                    ImageJUtils.display(TITLE, fp2);
                 }
             }
             else
@@ -612,7 +612,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
             final float[] ypoints = new float[maxIndices.length];
 
             // Extract each peak and fit individually
-            final ImageExtractor ie = new ImageExtractor(data, width, height);
+            final ImageExtractor ie = ImageExtractor.wrap(data, width, height);
             float[] region = null;
             final Gaussian2DFitter gf = createGaussianFitter(filterResults);
 
@@ -914,7 +914,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
         setupPeakFiltering(config);
 
         if (isLogProgress())
-            config.setLog(new IJLogger());
+            config.setLog(ImageJPluginLoggerHelper.getLogger(getClass()));
 
         config.setBackgroundFitting(fitBackground);
 
@@ -936,7 +936,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
         config.setMinWidthFactor(0.5);
         config.setWidthFactor(3);
         if (logProgress)
-            config.setLog(new IJLogger());
+            config.setLog(ImageJPluginLoggerHelper.getLogger(getClass()));
     }
 
     /**
@@ -1053,7 +1053,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the smooth
+     * @return the smooth.
      */
     public double getSmooth()
     {
@@ -1070,7 +1070,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the boxSize
+     * @return the boxSize.
      */
     public int getBoxSize()
     {
@@ -1087,7 +1087,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the background
+     * @return the background.
      */
     public float getBackground()
     {
@@ -1104,7 +1104,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the peakHeight
+     * @return the peakHeight.
      */
     public float getPeakHeight()
     {
@@ -1121,7 +1121,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the fractionAboveBackground
+     * @return the fractionAboveBackground.
      */
     public float getFractionAboveBackground()
     {
@@ -1138,7 +1138,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the peakWidth
+     * @return the peakWidth.
      */
     public float getPeakWidth()
     {
@@ -1146,7 +1146,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the topN
+     * @return the topN.
      */
     public int getTopN()
     {
@@ -1172,7 +1172,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the blockFindAlgorithm
+     * @return the blockFindAlgorithm.
      */
     public boolean isBlockFindAlgorithm()
     {
@@ -1189,7 +1189,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the neighbourCheck
+     * @return the neighbourCheck.
      */
     public boolean isNeighbourCheck()
     {
@@ -1206,7 +1206,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the border
+     * @return the border.
      */
     public int getBorder()
     {
@@ -1223,7 +1223,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the fitFunction
+     * @return the fitFunction.
      */
     public int getFitFunction()
     {
@@ -1252,7 +1252,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the fitBackground
+     * @return the fitBackground.
      */
     public boolean isFitBackground()
     {
@@ -1269,7 +1269,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the logProgress
+     * @return the logProgress.
      */
     public boolean isLogProgress()
     {
@@ -1286,7 +1286,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the maxIterations
+     * @return the maxIterations.
      */
     public int getMaxIterations()
     {
@@ -1294,7 +1294,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return True if fitting an elliptical Gaussian
+     * @return True if fitting an elliptical Gaussian.
      */
     public boolean isEllipticalFitting()
     {
@@ -1311,7 +1311,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
     }
 
     /**
-     * @return the the initial peak standard deviation
+     * @return the the initial peak standard deviation.
      */
     public double getInitialPeakStdDev()
     {

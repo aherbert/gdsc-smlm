@@ -53,7 +53,7 @@ public class BlockMeanFilter extends BlockFilter
     }
 
     /**
-     * Get the value squared
+     * Get the value squared.
      *
      * @param f
      *            the value

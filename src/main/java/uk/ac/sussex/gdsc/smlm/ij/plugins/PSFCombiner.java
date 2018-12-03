@@ -38,7 +38,7 @@ import ij.plugin.frame.Recorder;
 import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
@@ -52,7 +52,7 @@ import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
  */
 public class PSFCombiner implements PlugIn
 {
-    private final static String TITLE = "PSF Combiner";
+    private static final String TITLE = "PSF Combiner";
 
     private static List<String> selected = null;
     private final List<PSF> input = new LinkedList<>();
@@ -192,7 +192,7 @@ public class PSFCombiner implements PlugIn
         if (minStart < maxStart || minEnd < maxEnd || minSize < maxSize)
         {
             boolean crop;
-            if (Utils.isMacro())
+            if (ImageJUtils.isMacro())
             {
                 final String options = Macro.getOptions();
                 crop = options.contains(" crop");
@@ -287,7 +287,7 @@ public class PSFCombiner implements PlugIn
         IJ.showProgress(1);
         IJ.showStatus("");
 
-        final ImagePlus imp = Utils.display("Combined PSF", stack);
+        final ImagePlus imp = ImageJUtils.display("Combined PSF", stack);
         imp.setSlice(1 + shift);
         imp.resetDisplayRange();
         imp.updateAndDraw();
@@ -296,8 +296,8 @@ public class PSFCombiner implements PlugIn
         imp.setProperty("Info", ImagePSFHelper
                 .toString(ImagePSFHelper.create(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
 
-        Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
-                imp.getSlice(), Utils.rounded(nmPerPixel), Utils.rounded(nmPerSlice), totalImages, Utils.rounded(fwhm));
+        ImageJUtils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
+                imp.getSlice(), MathUtils.rounded(nmPerPixel), MathUtils.rounded(nmPerSlice), totalImages, MathUtils.rounded(fwhm));
     }
 
     private double getNmPerPixel()

@@ -50,10 +50,12 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.logging.Logger;
-import uk.ac.sussex.gdsc.core.logging.NullLogger;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
@@ -70,7 +72,7 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellO
 public class JumpDistanceAnalysis
 {
     private static final boolean DEBUG_OPTIMISER = false;
-    private final static double THIRD = 1.0 / 3.0;
+    private static final double THIRD = 1.0 / 3.0;
     private double s2 = 0;
     private boolean msdCorrection = false;
     private int n = 0;
@@ -78,7 +80,7 @@ public class JumpDistanceAnalysis
     private boolean calibrated = false;
 
     /**
-     * Interface to logger to record a jump distance curve
+     * Interface to logger to record a jump distance curve.
      */
     public interface CurveLogger
     {
@@ -137,7 +139,7 @@ public class JumpDistanceAnalysis
      */
     public JumpDistanceAnalysis(Logger logger)
     {
-        this.logger = NullLogger.createIfNull(logger);
+        this.logger = LoggerUtils.createIfNull(logger);
         resetFitResult();
     }
 
@@ -166,7 +168,7 @@ public class JumpDistanceAnalysis
         resetFitResult();
         if (jumpDistances == null || jumpDistances.length == 0)
             return null;
-        final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+        final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
         if (meanJumpDistance == 0)
             return null;
         final double[][] jdHistogram = cumulativeHistogram(jumpDistances);
@@ -198,7 +200,7 @@ public class JumpDistanceAnalysis
         final double estimatedD = meanJumpDistance / 4;
         if (meanJumpDistance == 0)
             return null;
-        logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+        LoggerUtils.log(logger, Level.INFO, "Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
         // We use the adjusted R^2 to pick the best model.
 
@@ -260,7 +262,7 @@ public class JumpDistanceAnalysis
 
         if (best > -1)
         {
-            logger.info("Best fit achieved using %s: %s, %s = %s", TextUtils.pleural(best + 1, "population"),
+            LoggerUtils.log(logger, Level.INFO, "Best fit achieved using %s: %s, %s = %s", TextUtils.pleural(best + 1, "population"),
                     formatD(coefficients[best]), TextUtils.pleural(best + 1, "Fraction"), format(fractions[best]));
             lastFitValue = fitValue[best];
             return new double[][] { coefficients[best], fractions[best] };
@@ -284,7 +286,7 @@ public class JumpDistanceAnalysis
         resetFitResult();
         if (jumpDistances == null || jumpDistances.length == 0)
             return null;
-        final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+        final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
         if (meanJumpDistance == 0)
             return null;
         final double[][] jdHistogram = cumulativeHistogram(jumpDistances);
@@ -312,7 +314,7 @@ public class JumpDistanceAnalysis
         final double estimatedD = meanJumpDistance / 4;
         if (meanJumpDistance == 0)
             return null;
-        logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+        LoggerUtils.log(logger, Level.INFO, "Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
         final double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n);
         if (fit != null)
@@ -369,24 +371,24 @@ public class JumpDistanceAnalysis
                 // True for an unweighted fit
                 ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
                 //ss = calculateSumOfSquares(function.getY(), function.value(fitParams));
-                lastFitValue = fitValue = Maths.getAdjustedCoefficientOfDetermination(ss,
-                        Maths.getTotalSumOfSquares(function.getY()), function.x.length, 1);
+                lastFitValue = fitValue = MathUtils.getAdjustedCoefficientOfDetermination(ss,
+                        MathUtils.getTotalSumOfSquares(function.getY()), function.x.length, 1);
                 final double[] coefficients = fitParams;
                 final double[] fractions = new double[] { 1 };
 
-                logger.info("Fit Jump distance (N=1) : %s, SS = %s, Adjusted R^2 = %s (%d evaluations)",
-                        formatD(fitParams[0]), Maths.rounded(ss, 4), Maths.rounded(fitValue, 4),
+                LoggerUtils.log(logger, Level.INFO, "Fit Jump distance (N=1) : %s, SS = %s, Adjusted R^2 = %s (%d evaluations)",
+                        formatD(fitParams[0]), MathUtils.rounded(ss, 4), MathUtils.rounded(fitValue, 4),
                         lvmSolution.getEvaluations());
 
                 return new double[][] { coefficients, fractions };
             }
             catch (final TooManyIterationsException e)
             {
-                logger.info("LVM optimiser failed to fit (N=1) : Too many iterations : %s", e.getMessage());
+                LoggerUtils.log(logger, Level.INFO, "LVM optimiser failed to fit (N=1) : Too many iterations : %s", e.getMessage());
             }
             catch (final ConvergenceException e)
             {
-                logger.info("LVM optimiser failed to fit (N=1) : %s", e.getMessage());
+                LoggerUtils.log(logger, Level.INFO, "LVM optimiser failed to fit (N=1) : %s", e.getMessage());
             }
         }
 
@@ -413,27 +415,27 @@ public class JumpDistanceAnalysis
                     new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MINIMIZE);
 
             evaluations = powellOptimizer.getEvaluations();
-            logger.debug("Powell optimiser fit (N=%d) : SS = %f (%d evaluations)", n, constrainedSolution.getValue(),
+            LoggerUtils.log(logger, Level.FINE, "Powell optimiser fit (N=%d) : SS = %f (%d evaluations)", n, constrainedSolution.getValue(),
                     evaluations);
         }
         catch (final TooManyEvaluationsException e)
         {
-            logger.info("Powell optimiser failed to fit (N=%d) : Too many evaluations (%d)", n,
+            LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : Too many evaluations (%d)", n,
                     powellOptimizer.getEvaluations());
         }
         catch (final TooManyIterationsException e)
         {
-            logger.info("Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n,
+            LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n,
                     powellOptimizer.getIterations());
         }
         catch (final ConvergenceException e)
         {
-            logger.info("Powell optimiser failed to fit (N=%d) : %s", n, e.getMessage());
+            LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : %s", n, e.getMessage());
         }
 
         if (constrainedSolution == null)
         {
-            logger.info("Trying CMAES optimiser with restarts ...");
+            LoggerUtils.log(logger, Level.INFO, "Trying CMAES optimiser with restarts ...");
 
             final double[] uB = function.getUpperBounds();
             final SimpleBounds bounds = new SimpleBounds(lB, uB);
@@ -460,7 +462,7 @@ public class JumpDistanceAnalysis
                     {
                         evaluations = cmaesOptimizer.getEvaluations();
                         constrainedSolution = solution;
-                        logger.debug("CMAES optimiser [%da] fit (N=%d) : SS = %f (%d evaluations)", i, n,
+                        LoggerUtils.log(logger, Level.FINE, "CMAES optimiser [%da] fit (N=%d) : SS = %f (%d evaluations)", i, n,
                                 solution.getValue(), evaluations);
                     }
                 }
@@ -482,7 +484,7 @@ public class JumpDistanceAnalysis
                     {
                         evaluations = cmaesOptimizer.getEvaluations();
                         constrainedSolution = solution;
-                        logger.debug("CMAES optimiser [%db] fit (N=%d) : SS = %f (%d evaluations)", i, n,
+                        LoggerUtils.log(logger, Level.FINE, "CMAES optimiser [%db] fit (N=%d) : SS = %f (%d evaluations)", i, n,
                                 solution.getValue(), evaluations);
                     }
                 }
@@ -505,7 +507,7 @@ public class JumpDistanceAnalysis
                     {
                         evaluations = cmaesOptimizer.getEvaluations();
                         constrainedSolution = solution;
-                        logger.info("Powell optimiser re-fit (N=%d) : SS = %f (%d evaluations)", n,
+                        LoggerUtils.log(logger, Level.INFO, "Powell optimiser re-fit (N=%d) : SS = %f (%d evaluations)", n,
                                 constrainedSolution.getValue(), evaluations);
                     }
                 }
@@ -525,7 +527,7 @@ public class JumpDistanceAnalysis
 
         if (constrainedSolution == null)
         {
-            logger.info("Failed to fit N=%d", n);
+            LoggerUtils.log(logger, Level.INFO, "Failed to fit N=%d", n);
             return null;
         }
 
@@ -565,10 +567,10 @@ public class JumpDistanceAnalysis
             //double ss = calculateSumOfSquares(functionGradient.getY(), functionGradient.value(lvmSolution.getPoint().toArray()));
 
             // All fitted parameters must be above zero
-            if (ss < this.ss && Maths.min(lvmSolution.getPoint().toArray()) > 0)
+            if (ss < this.ss && MathUtils.min(lvmSolution.getPoint().toArray()) > 0)
             {
-                logger.info("  Re-fitting improved the SS from %s to %s (-%s%%)", Maths.rounded(this.ss, 4),
-                        Maths.rounded(ss, 4), Maths.rounded(100 * (this.ss - ss) / this.ss, 4));
+                LoggerUtils.log(logger, Level.INFO, "  Re-fitting improved the SS from %s to %s (-%s%%)", MathUtils.rounded(this.ss, 4),
+                        MathUtils.rounded(ss, 4), MathUtils.rounded(100 * (this.ss - ss) / this.ss, 4));
                 fitParams = lvmSolution.getPoint().toArray();
                 this.ss = ss;
                 evaluations += lvmSolution.getEvaluations();
@@ -576,15 +578,15 @@ public class JumpDistanceAnalysis
         }
         catch (final TooManyIterationsException e)
         {
-            logger.error("Failed to re-fit : Too many iterations : %s", e.getMessage());
+            LoggerUtils.log(logger, Level.WARNING, "Failed to re-fit : Too many iterations : %s", e.getMessage());
         }
         catch (final ConvergenceException e)
         {
-            logger.error("Failed to re-fit : %s", e.getMessage());
+            LoggerUtils.log(logger, Level.WARNING, "Failed to re-fit : %s", e.getMessage());
         }
 
         // Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-        fitValue = Maths.getAdjustedCoefficientOfDetermination(ss, Maths.getTotalSumOfSquares(function.getY()),
+        fitValue = MathUtils.getAdjustedCoefficientOfDetermination(ss, MathUtils.getTotalSumOfSquares(function.getY()),
                 function.x.length, fitParams.length - 1);
 
         final double[] d = new double[n];
@@ -603,8 +605,8 @@ public class JumpDistanceAnalysis
         final double[] coefficients = d;
         final double[] fractions = f;
 
-        logger.info("Fit Jump distance (N=%d) : %s (%s), SS = %s, Adjusted R^2 = %s (%d evaluations)", n, formatD(d),
-                format(f), Maths.rounded(ss, 4), Maths.rounded(fitValue, 4), evaluations);
+        LoggerUtils.log(logger, Level.INFO, "Fit Jump distance (N=%d) : %s (%s), SS = %s, Adjusted R^2 = %s (%d evaluations)", n, formatD(d),
+                format(f), MathUtils.rounded(ss, 4), MathUtils.rounded(fitValue, 4), evaluations);
 
         if (isValid(d, f))
         {
@@ -625,32 +627,32 @@ public class JumpDistanceAnalysis
             if (d[i] < minD)
                 if (++belowMinD > 1)
                 {
-                    logger.info("  Invalid: Multiple populations below minimum D (%s um^2)", Maths.rounded(minD));
+                    LoggerUtils.log(logger, Level.INFO, "  Invalid: Multiple populations below minimum D (%s um^2)", MathUtils.rounded(minD));
                     return false;
                 }
             // Check the fractions and coefficients exist
             if (f[i] <= 0)
             {
-                logger.info("  Invalid: Fraction is zero");
+                LoggerUtils.log(logger, Level.INFO, "  Invalid: Fraction is zero");
                 return false;
             }
             if (d[i] <= 0)
             {
-                logger.info("  Invalid: Coefficient is zero");
+                LoggerUtils.log(logger, Level.INFO, "  Invalid: Coefficient is zero");
                 return false;
             }
             // Check the fit has fractions above the minimum fraction
             if (f[i] < minFraction)
             {
-                logger.info("  Invalid: Fraction is less than the minimum fraction: %s < %s", Maths.rounded(f[i]),
-                        Maths.rounded(minFraction));
+                LoggerUtils.log(logger, Level.INFO, "  Invalid: Fraction is less than the minimum fraction: %s < %s", MathUtils.rounded(f[i]),
+                        MathUtils.rounded(minFraction));
                 return false;
             }
             // Check the coefficients are different
             if (i > 0 && d[i - 1] / d[i] < minDifference)
             {
-                logger.info("  Invalid: Coefficients are not different: %s / %s = %s < %s", Maths.rounded(d[i - 1]),
-                        Maths.rounded(d[i]), Maths.rounded(d[i - 1] / d[i]), Maths.rounded(minDifference));
+                LoggerUtils.log(logger, Level.INFO, "  Invalid: Coefficients are not different: %s / %s = %s < %s", MathUtils.rounded(d[i - 1]),
+                        MathUtils.rounded(d[i]), MathUtils.rounded(d[i - 1] / d[i]), MathUtils.rounded(minDifference));
                 return false;
             }
         }
@@ -698,13 +700,13 @@ public class JumpDistanceAnalysis
         resetFitResult();
         if (jumpDistances == null || jumpDistances.length == 0)
             return null;
-        final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+        final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
         if (meanJumpDistance == 0)
             return null;
 
         // Guess the D
         final double estimatedD = meanJumpDistance / 4;
-        logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+        LoggerUtils.log(logger, Level.INFO, "Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
         // Used for saving fitted the curve
         if (curveLogger != null && jdHistogram == null)
@@ -770,9 +772,9 @@ public class JumpDistanceAnalysis
             // i.e. 1 extra diffusion coefficient and population fraction
             final double q = ChiSquaredDistributionTable.computeQValue(llr, 2);
             final boolean reject = (q > significanceLevel);
-            logger.info("Fit Jump distance (N=%d -> %d) : MLE = %s -> %s, LLR = %s, q-value = %s (Reject=%b)", best + 1,
-                    n + 1, Maths.rounded(ll[best], 4), Maths.rounded(ll[n], 4), Maths.rounded(llr, 4),
-                    Maths.rounded(q, 4), reject);
+            LoggerUtils.log(logger, Level.INFO, "Fit Jump distance (N=%d -> %d) : MLE = %s -> %s, LLR = %s, q-value = %s (Reject=%b)", best + 1,
+                    n + 1, MathUtils.rounded(ll[best], 4), MathUtils.rounded(ll[n], 4), MathUtils.rounded(llr, 4),
+                    MathUtils.rounded(q, 4), reject);
             if (reject)
                 break;
 
@@ -785,7 +787,7 @@ public class JumpDistanceAnalysis
 
         if (best > -1)
         {
-            logger.info("Best fit achieved using %s: %s, %s = %s", TextUtils.pleural(best + 1, "population"),
+            LoggerUtils.log(logger, Level.INFO, "Best fit achieved using %s: %s, %s = %s", TextUtils.pleural(best + 1, "population"),
                     formatD(coefficients[best]), TextUtils.pleural(best + 1, "Fraction"), format(fractions[best]));
             lastFitValue = fitValue[best];
             return new double[][] { coefficients[best], fractions[best] };
@@ -829,13 +831,13 @@ public class JumpDistanceAnalysis
         resetFitResult();
         if (jumpDistances == null || jumpDistances.length == 0)
             return null;
-        final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+        final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
         if (meanJumpDistance == 0)
             return null;
 
         // Guess the D
         final double estimatedD = meanJumpDistance / 4;
-        logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
+        LoggerUtils.log(logger, Level.INFO, "Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
         // Used for saving fitted the curve
         if (curveLogger != null && jdHistogram == null)
@@ -881,29 +883,29 @@ public class JumpDistanceAnalysis
 
                 final double[] fitParams = solution.getPointRef();
                 ll = solution.getValue();
-                lastFitValue = fitValue = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
+                lastFitValue = fitValue = MathUtils.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
                 final double[] coefficients = fitParams;
                 final double[] fractions = new double[] { 1 };
 
-                logger.info("Fit Jump distance (N=1) : %s, MLE = %s, Akaike IC = %s (%d evaluations)",
-                        formatD(fitParams[0]), Maths.rounded(ll, 4), Maths.rounded(fitValue, 4),
+                LoggerUtils.log(logger, Level.INFO, "Fit Jump distance (N=1) : %s, MLE = %s, Akaike IC = %s (%d evaluations)",
+                        formatD(fitParams[0]), MathUtils.rounded(ll, 4), MathUtils.rounded(fitValue, 4),
                         powellOptimizer.getEvaluations());
 
                 return new double[][] { coefficients, fractions };
             }
             catch (final TooManyEvaluationsException e)
             {
-                logger.info("Powell optimiser failed to fit (N=1) : Too many evaluation (%d)",
+                LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=1) : Too many evaluation (%d)",
                         powellOptimizer.getEvaluations());
             }
             catch (final TooManyIterationsException e)
             {
-                logger.info("Powell optimiser failed to fit (N=1) : Too many iterations (%d)",
+                LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=1) : Too many iterations (%d)",
                         powellOptimizer.getIterations());
             }
             catch (final ConvergenceException e)
             {
-                logger.info("Powell optimiser failed to fit (N=1) : %s", e.getMessage());
+                LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=1) : %s", e.getMessage());
             }
 
             return null;
@@ -925,27 +927,27 @@ public class JumpDistanceAnalysis
                     new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
 
             evaluations = powellOptimizer.getEvaluations();
-            logger.debug("Powell optimiser fit (N=%d) : MLE = %f (%d evaluations)", n, constrainedSolution.getValue(),
+            LoggerUtils.log(logger, Level.FINE, "Powell optimiser fit (N=%d) : MLE = %f (%d evaluations)", n, constrainedSolution.getValue(),
                     powellOptimizer.getEvaluations());
         }
         catch (final TooManyEvaluationsException e)
         {
-            logger.info("Powell optimiser failed to fit (N=%d) : Too many evaluation (%d)", n,
+            LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : Too many evaluation (%d)", n,
                     powellOptimizer.getEvaluations());
         }
         catch (final TooManyIterationsException e)
         {
-            logger.info("Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n,
+            LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n,
                     powellOptimizer.getIterations());
         }
         catch (final ConvergenceException e)
         {
-            logger.info("Powell optimiser failed to fit (N=%d) : %s", n, e.getMessage());
+            LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=%d) : %s", n, e.getMessage());
         }
 
         if (constrainedSolution == null)
         {
-            logger.info("Trying CMAES optimiser with restarts ...");
+            LoggerUtils.log(logger, Level.INFO, "Trying CMAES optimiser with restarts ...");
 
             final double[] uB = function.getUpperBounds();
             final SimpleBounds bounds = new SimpleBounds(lB, uB);
@@ -976,7 +978,7 @@ public class JumpDistanceAnalysis
                     {
                         evaluations = cmaesOptimizer.getEvaluations();
                         constrainedSolution = solution;
-                        logger.debug("CMAES optimiser [%da] fit (N=%d) : MLE = %f (%d evaluations)", i, n,
+                        LoggerUtils.log(logger, Level.FINE, "CMAES optimiser [%da] fit (N=%d) : MLE = %f (%d evaluations)", i, n,
                                 solution.getValue(), evaluations);
                     }
                 }
@@ -998,7 +1000,7 @@ public class JumpDistanceAnalysis
                     {
                         evaluations = cmaesOptimizer.getEvaluations();
                         constrainedSolution = solution;
-                        logger.debug("CMAES optimiser [%db] fit (N=%d) : MLE = %f (%d evaluations)", i, n,
+                        LoggerUtils.log(logger, Level.FINE, "CMAES optimiser [%db] fit (N=%d) : MLE = %f (%d evaluations)", i, n,
                                 solution.getValue(), evaluations);
                     }
                 }
@@ -1021,7 +1023,7 @@ public class JumpDistanceAnalysis
                     {
                         evaluations = cmaesOptimizer.getEvaluations();
                         constrainedSolution = solution;
-                        logger.info("Powell optimiser re-fit (N=%d) : MLE = %f (%d evaluations)", n,
+                        LoggerUtils.log(logger, Level.INFO, "Powell optimiser re-fit (N=%d) : MLE = %f (%d evaluations)", n,
                                 constrainedSolution.getValue(), powellOptimizer.getEvaluations());
                     }
                 }
@@ -1041,7 +1043,7 @@ public class JumpDistanceAnalysis
 
         if (constrainedSolution == null)
         {
-            logger.info("Failed to fit N=%d", n);
+            LoggerUtils.log(logger, Level.INFO, "Failed to fit N=%d", n);
             return null;
         }
 
@@ -1049,7 +1051,7 @@ public class JumpDistanceAnalysis
         ll = constrainedSolution.getValue();
 
         // Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-        fitValue = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
+        fitValue = MathUtils.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
 
         final double[] d = new double[n];
         final double[] f = new double[n];
@@ -1067,8 +1069,8 @@ public class JumpDistanceAnalysis
         final double[] coefficients = d;
         final double[] fractions = f;
 
-        logger.info("Fit Jump distance (N=%d) : %s (%s), MLE = %s, Akaike IC = %s (%d evaluations)", n, formatD(d),
-                format(f), Maths.rounded(ll, 4), Maths.rounded(fitValue, 4), evaluations);
+        LoggerUtils.log(logger, Level.INFO, "Fit Jump distance (N=%d) : %s (%s), MLE = %s, Akaike IC = %s (%d evaluations)", n, formatD(d),
+                format(f), MathUtils.rounded(ll, 4), MathUtils.rounded(fitValue, 4), evaluations);
 
         if (isValid(d, f))
         {
@@ -1127,7 +1129,7 @@ public class JumpDistanceAnalysis
         {
             if (i != 0)
                 sb.append(", ");
-            sb.append(Maths.rounded(jumpD[i], 4));
+            sb.append(MathUtils.rounded(jumpD[i], 4));
         }
         sb.append(" um^2");
         if (calibrated)
@@ -1138,7 +1140,7 @@ public class JumpDistanceAnalysis
             {
                 if (i != 0)
                     sb.append(", ");
-                sb.append(Maths.rounded(jumpD[i], 4));
+                sb.append(MathUtils.rounded(jumpD[i], 4));
             }
             sb.append(" um^2/s");
         }
@@ -1154,13 +1156,13 @@ public class JumpDistanceAnalysis
         {
             if (i != 0)
                 sb.append(", ");
-            sb.append(Maths.rounded(data[i], 4));
+            sb.append(MathUtils.rounded(data[i], 4));
         }
         return sb.toString();
     }
 
     /**
-     * Sort the arrays by the size of the diffusion coefficient
+     * Sort the arrays by the size of the diffusion coefficient.
      *
      * @param d
      *            The diffusion coefficient array
@@ -1170,17 +1172,7 @@ public class JumpDistanceAnalysis
     public static void sort(double[] d, double[] f)
     {
         // Sort by coefficient size
-        final int[] indices = new int[f.length];
-        for (int i = 0; i < f.length; i++)
-            indices[i] = i;
-        Sort.sort(indices, d);
-        final double[] d2 = Arrays.copyOf(d, d.length);
-        final double[] f2 = Arrays.copyOf(f, f.length);
-        for (int i = 0; i < f.length; i++)
-        {
-            d[i] = d2[indices[i]];
-            f[i] = f2[indices[i]];
-        }
+        SortUtils.sortData(f, d, true, false);
     }
 
     private void saveFitCurve(double[][] fit, double[][] jdHistogram)
@@ -1243,7 +1235,7 @@ public class JumpDistanceAnalysis
     /**
      * Function used for least-squares fitting of cumulative histogram of jump distances.
      */
-    private static abstract class Function
+    private abstract static class Function
     {
         double[] x, y;
         double estimatedD;
@@ -1258,7 +1250,7 @@ public class JumpDistanceAnalysis
         }
 
         /**
-         * @return An estimate for the parameters
+         * @return An estimate for the parameters.
          */
         public double[] guess()
         {
@@ -1279,7 +1271,7 @@ public class JumpDistanceAnalysis
         }
 
         /**
-         * @return An estimate for the initial search step for the parameters
+         * @return An estimate for the initial search step for the parameters.
          */
         public double[] step()
         {
@@ -1945,7 +1937,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return The number restarts for fitting
+     * @return The number restarts for fitting.
      */
     public int getFitRestarts()
     {
@@ -1962,7 +1954,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return the min fraction for each population in a mixed population
+     * @return the min fraction for each population in a mixed population.
      */
     public double getMinFraction()
     {
@@ -1979,7 +1971,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return the min difference between diffusion coefficients in a mixed population
+     * @return the min difference between diffusion coefficients in a mixed population.
      */
     public double getMinDifference()
     {
@@ -1996,7 +1988,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return the minimum number of different molecules to fit in a mixed population model
+     * @return the minimum number of different molecules to fit in a mixed population model.
      */
     public int getMinN()
     {
@@ -2015,7 +2007,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return the maximum number of different molecules to fit in a mixed population model
+     * @return the maximum number of different molecules to fit in a mixed population model.
      */
     public int getMaxN()
     {
@@ -2045,7 +2037,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * Get the cumulative jump distance histogram given a set of jump distance values
+     * Get the cumulative jump distance histogram given a set of jump distance values.
      *
      * @param values
      *            The jump distances
@@ -2053,7 +2045,7 @@ public class JumpDistanceAnalysis
      */
     public static double[][] cumulativeHistogram(double[] values)
     {
-        return Maths.cumulativeHistogram(values, true);
+        return MathUtils.cumulativeHistogram(values, true);
     }
 
     /**
@@ -2081,7 +2073,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * Gets the minimum diffusion coefficient
+     * Gets the minimum diffusion coefficient.
      *
      * @return the minimum diffusion coefficient
      */
@@ -2265,7 +2257,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return The localisation error (s) of the start and end coordinates of the jump (in um)
+     * @return The localisation error (s) of the start and end coordinates of the jump (in um).
      */
     public double getError()
     {
@@ -2289,7 +2281,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return True if correcting MSD between frames
+     * @return True if correcting MSD between frames.
      */
     public boolean isMsdCorrection()
     {
@@ -2309,7 +2301,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return The number of frames between the start and end coordinates of the jump
+     * @return The number of frames between the start and end coordinates of the jump.
      */
     public int getN()
     {
@@ -2317,7 +2309,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * Set the number of frames between the start and end coordinates of the jump
+     * Set the number of frames between the start and end coordinates of the jump.
      *
      * @param n
      *            The number of frames (must be strictly positive)
@@ -2350,7 +2342,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return The time difference between each frame
+     * @return The time difference between each frame.
      */
     public double getDeltaT()
     {
@@ -2369,7 +2361,7 @@ public class JumpDistanceAnalysis
     }
 
     /**
-     * @return True if the number of frames and time delta have been set
+     * @return True if the number of frames and time delta have been set.
      */
     public boolean isCalibrated()
     {

@@ -37,7 +37,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
     private final int pulseInterval;
 
     /**
-     * Assume the default refractive index
+     * Assume the default refractive index.
      *
      * @param photons
      *            The photons in the focal plane
@@ -50,7 +50,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
     }
 
     /**
-     * Assume the default refractive index
+     * Assume the default refractive index.
      *
      * @param photons
      *            The photons in the focal plane

@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
  */
 public class FitProtosHelper
 {
-    /** The default FitSolverSettings */
+    /** The default FitSolverSettings. */
     public static final FitSolverSettings defaultFitSolverSettings;
     static
     {
@@ -89,7 +89,7 @@ public class FitProtosHelper
         defaultFitSolverSettings = builder.build();
     }
 
-    /** The default FilterSettings */
+    /** The default FilterSettings. */
     public static final FilterSettings defaultFilterSettings;
     static
     {
@@ -107,7 +107,7 @@ public class FitProtosHelper
         defaultFilterSettings = builder.build();
     }
 
-    /** The default FitSettings */
+    /** The default FitSettings. */
     public static final FitSettings defaultFitSettings;
     static
     {
@@ -117,7 +117,7 @@ public class FitProtosHelper
         defaultFitSettings = builder.build();
     }
 
-    /** The default FitEngineSettings */
+    /** The default FitEngineSettings. */
     public static final FitEngineSettings defaultFitEngineSettings;
     static
     {
@@ -162,10 +162,8 @@ public class FitProtosHelper
         rp.setAbsolute(true);
         builder.setDuplicateDistance(rp.build());
 
-        // This used to be: builder.setFailuresLimit(3);
         // The new pass rate parameter should be more adaptable to different image sizes.
         // XXX Revisit this when more is known about how to set the pass rate.
-        //builder.setFailuresLimit(-1);
         builder.setFailuresLimit(3);
         builder.setPassRate(0.5);
 

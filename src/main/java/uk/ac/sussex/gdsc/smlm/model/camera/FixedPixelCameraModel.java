@@ -41,7 +41,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
     /** The variance. */
     protected final float variance;
 
-    /** The variance divided by the squared gain (variance/gain^2). */
+    /** The variance divided by the squared gain (variance./gain^2). */
     protected final float var_g2;
 
     /**

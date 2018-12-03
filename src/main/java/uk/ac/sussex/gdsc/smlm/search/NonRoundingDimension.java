@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.search;
 
 /**
- * Null implementation of the Dimension interface that does not perform rounding
+ * Null implementation of the Dimension interface that does not perform rounding.
  */
 class NonRoundingDimension implements Dimension
 {
@@ -77,7 +77,7 @@ class NonRoundingDimension implements Dimension
     }
 
     /**
-     * Does not round the number
+     * Does not round the number.
      *
      * @see uk.ac.sussex.gdsc.smlm.search.Dimension#round(double)
      */

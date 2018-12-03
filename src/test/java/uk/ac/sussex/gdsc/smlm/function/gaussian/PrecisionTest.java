@@ -1,20 +1,23 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Contains tests for the Gaussian functions in single or double precision
@@ -412,7 +415,7 @@ public class PrecisionTest
     @Test
     public void circularFunctionPrecisionIsNot5sf()
     {
-        Assertions.assertThrows(AssertionFailedError.class, () -> {
+        Assertions.assertThrows(AssertionError.class, () -> {
             functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), 1e-5);
         });
     }
@@ -426,7 +429,7 @@ public class PrecisionTest
             maxx *= 2;
             while (maxx * maxx < Integer.MAX_VALUE)
             {
-                logger.log(TestLog.getRecord(Level.INFO, "maxx = %d", maxx));
+                logger.log(TestLogUtils.getRecord(Level.INFO, "maxx = %d", maxx));
                 functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
                         1e-3);
                 maxx *= 2;
@@ -434,7 +437,7 @@ public class PrecisionTest
         }
         catch (final AssertionError e)
         {
-            logger.log(TestLog.getRecord(Level.INFO, e.getMessage()));
+            logger.log(TestLogUtils.getRecord(Level.INFO, e.getMessage()));
             //e.printStackTrace();
             return;
         }
@@ -484,7 +487,7 @@ public class PrecisionTest
     @Test
     public void fixedFunctionPrecisionIsNot6sf()
     {
-        Assertions.assertThrows(AssertionFailedError.class, () -> {
+        Assertions.assertThrows(AssertionError.class, () -> {
             functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-6);
         });
     }
@@ -498,14 +501,14 @@ public class PrecisionTest
             maxx *= 2;
             while (maxx * maxx < Integer.MAX_VALUE)
             {
-                logger.log(TestLog.getRecord(Level.INFO, "maxx = %d", maxx));
+                logger.log(TestLogUtils.getRecord(Level.INFO, "maxx = %d", maxx));
                 functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
                 maxx *= 2;
             }
         }
         catch (final AssertionError e)
         {
-            logger.log(TestLog.getRecord(Level.INFO, e.getMessage()));
+            logger.log(TestLogUtils.getRecord(Level.INFO, e.getMessage()));
             //e.printStackTrace();
             return;
         }
@@ -559,13 +562,15 @@ public class PrecisionTest
         final double[] tg1 = new double[n];
         final double[] tg2 = new double[n];
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(precision, 0);
+
         for (int i = 0, limit = maxx * maxx; i < limit; i++)
         {
             final float v1 = f1.eval(i);
             t1 += v1;
             final double v2 = f2.eval(i);
             t2 += v2;
-            ExtraAssertions.assertEqualsRelative(v2, v1, precision, "Different values");
+            TestAssertions.assertTest(v2, v1, predicate, "Different values");
             final float vv1 = f1.eval(i, g1);
             final double vv2 = f2.eval(i, g2);
             Assertions.assertEquals(v1, vv1, "Different f1 values");
@@ -575,16 +580,16 @@ public class PrecisionTest
                 tg1[j] += g1[j];
                 tg2[j] += g2[j];
             }
-            ExtraAssertions.assertArrayEqualsRelative(g2, toDouble(g1), precision, "Different gradients");
+            TestAssertions.assertArrayTest(g2, toDouble(g1), predicate, "Different gradients");
         }
-        ExtraAssertions.assertArrayEqualsRelative(tg2, tg1, precision, "Different total gradients");
-        ExtraAssertions.assertEqualsRelative(t2, t1, precision, "Different totals");
+        TestAssertions.assertArrayTest(tg2, tg1, predicate, "Different total gradients");
+        TestAssertions.assertTest(t2, t1, predicate, "Different totals");
     }
 
     private void isFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
             boolean doubleFaster)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         f1.setMaxX(maxx);
         f2.setMaxX(maxx);
@@ -629,7 +634,7 @@ public class PrecisionTest
             c2 = f2.getClass();
         }
 
-        logger.log(TestLog.getTimingRecord(((noSum) ? "No sum " : "") + "Gradient " + c1.getSimpleName(), time1,
+        logger.log(TestLogUtils.getTimingRecord(((noSum) ? "No sum " : "") + "Gradient " + c1.getSimpleName(), time1,
                 c2.getSimpleName(), time2));
     }
 
@@ -733,7 +738,7 @@ public class PrecisionTest
 
     private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum, boolean doubleFaster)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         f1.setMaxX(maxx);
         f2.setMaxX(maxx);
@@ -778,7 +783,7 @@ public class PrecisionTest
         }
 
         logger.log(
-                TestLog.getTimingRecord(((noSum) ? "No sum " : "") + c1.getSimpleName(), time1, c2.getSimpleName(), time2));
+                TestLogUtils.getTimingRecord(((noSum) ? "No sum " : "") + c1.getSimpleName(), time1, c2.getSimpleName(), time2));
     }
 
     @SuppressWarnings("unused")

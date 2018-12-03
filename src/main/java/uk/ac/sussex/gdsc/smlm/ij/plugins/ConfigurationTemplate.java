@@ -52,7 +52,9 @@ import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import ij.util.StringSorter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
@@ -173,7 +175,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
                 this.tifPath = tifPath;
             else if (file != null)
             {
-                tifPath = Utils.replaceExtension(file.getPath(), ".tif");
+                tifPath = ImageJUtils.replaceExtension(file.getPath(), ".tif");
                 if (new File(tifPath).exists())
                     this.tifPath = tifPath;
             }
@@ -250,7 +252,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
             try (InputStream inputStream = resourceClass.getResourceAsStream(tifPath))
             {
                 if (inputStream != null)
-                    imp = opener.openTiff(inputStream, Utils.removeExtension(file.getName()));
+                    imp = opener.openTiff(inputStream, ImageJUtils.removeExtension(file.getName()));
             }
             catch (final IOException e)
             {
@@ -522,7 +524,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
                 }
 
                 // Create a simple name
-                final String name = Utils.removeExtension(line);
+                final String name = ImageJUtils.removeExtension(line);
 
                 // Check if an example TIF file exists for the template
                 String tifPath = templateDir + name + ".tif";
@@ -779,15 +781,15 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     //@formatter:off
 	public static enum TemplateOption implements NamedObject
 	{
-		/** Load standard templates */
+		/** Load standard templates. */
 		LOAD_STANDARD_TEMPLATES{ @Override public String getName() { return "Load standard templates"; }},
-		/** Load custom templates */
+		/** Load custom templates. */
 		LOAD_CUSTOM_TEMPLATES{ @Override public String getName() { return "Load custom templates"; }},
-		/** Remove loaded templates */
+		/** Remove loaded templates. */
 		REMOVE_LOADED_TEMPLATES{ @Override public String getName() { return "Remove loaded templates"; }},
-		/** View template */
+		/** View template. */
 		VIEW_TEMPLATE{ @Override public String getName() { return "View template"; }},
-		/** View image example for template */
+		/** View image example for template. */
 		VIEW_TEMPLATE_IMAGE{ @Override public String getName() { return "View image example for template"; }};
 
 		@Override
@@ -941,7 +943,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     private static void loadSelectedCustomTemplatesFromDirectory(ConfigurationTemplateSettings.Builder settings)
     {
         // Allow the user to specify a configuration directory
-        final String newDirectory = Utils.getDirectory("Template_directory", settings.getConfigurationDirectory());
+        final String newDirectory = ImageJUtils.getDirectory("Template_directory", settings.getConfigurationDirectory());
 
         if (newDirectory == null)
             return;
@@ -982,7 +984,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
             @Override
             public String getFormattedName(int i)
             {
-                final String[] path = Utils.decodePath(sortedList[i]);
+                final String[] path = ImageJUtils.decodePath(sortedList[i]);
                 return path[1];
             }
         });
@@ -1010,7 +1012,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
             if (SettingsManager.fromJSON(file, builder, 0))
             {
                 count++;
-                final String name = Utils.removeExtension(file.getName());
+                final String name = ImageJUtils.removeExtension(file.getName());
                 // Assume the Tif image will be detected automatically
                 addTemplate(name, builder.build(), TemplateType.CUSTOM, file, null);
             }
@@ -1197,8 +1199,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
             IJ.error(TITLE, "Failed to load example image for template: " + name);
         else
         {
-            this.imp = displayTemplate(TITLE, imp);
-            if (Utils.isNewWindow())
+            WindowOrganiser windowOrganiser = new WindowOrganiser();
+            this.imp = displayTemplate(TITLE, imp, null);
+            if (windowOrganiser.isNotEmpty())
             {
                 // Zoom a bit
                 final ImageWindow iw = this.imp.getWindow();
@@ -1212,18 +1215,18 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     }
 
     /**
-     * Display the template image in an image window with the specified title. If the window exists it will be reused
-     * and the appropriate properties updated.
+     * Display the template image in an image window with the specified title. If the window exists
+     * it will be reused and the appropriate properties updated.
      *
-     * @param title
-     *            the title
-     * @param templateImp
-     *            the template image
+     * @param title the title
+     * @param templateImp the template image
+     * @param windowOrganiser the window organiser (new windows will be added to this if not null)
      * @return the image plus
      */
-    public static ImagePlus displayTemplate(String title, ImagePlus templateImp)
+    public static ImagePlus displayTemplate(String title, ImagePlus templateImp, 
+        WindowOrganiser windowOrganiser)
     {
-        final ImagePlus imp = Utils.display(title, templateImp.getStack());
+        final ImagePlus imp = ImageJUtils.display(title, templateImp.getStack(), windowOrganiser);
         imp.setOverlay(templateImp.getOverlay());
         imp.setProperty("Info", templateImp.getProperty("Info"));
         imp.setCalibration(templateImp.getCalibration());

@@ -23,43 +23,44 @@
  */
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.function.Function;
+import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import ij.process.FloatProcessor;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
-import ij.process.FloatProcessor;
-import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.DataCache;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @SuppressWarnings({ "javadoc" })
 public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
 {
-    private static DataCache<RandomSeed, Object> dataCache;
+    private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
 
     @BeforeAll
     public static void beforeAll()
     {
-        dataCache = new DataCache<>();
+        ConcurrentHashMap = new ConcurrentHashMap<>();
     }
 
     @AfterAll
     public static void afterAll()
     {
-        dataCache.clear();
-        dataCache = null;
+        ConcurrentHashMap.clear();
+        ConcurrentHashMap = null;
     }
 
-    final static int w = 113, h = 29, size = w * h;
+    static final int w = 113, h = 29, size = w * h;
 
     private static class PerPixelCameraModelTestData
     {
@@ -69,7 +70,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @Override
     public Object apply(RandomSeed seed)
     {
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
 
         final PerPixelCameraModelTestData data = new PerPixelCameraModelTestData();
         data.bias = new float[size];
@@ -91,7 +92,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetDataWithFullBounds(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
         final Rectangle bounds = new Rectangle(0, 0, w, h);
@@ -114,11 +115,11 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
 
     private void canGetCropData(RandomSeed seed, boolean initialise)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = createModel(data, initialise);
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
-        final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+        final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
         for (int i = 0; i < 10; i++)
         {
             final Rectangle bounds = getBounds(rand, ie);
@@ -161,11 +162,11 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
 
     private void canCropAndGetData(RandomSeed seed, boolean initialise)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = createModel(data, initialise);
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
-        final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+        final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
         for (int i = 0; i < 10; i++)
         {
             final Rectangle bounds = getBounds(rand, ie);
@@ -181,7 +182,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canConvertDataWithFullBounds(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
         checkConversion(data, new Rectangle(0, 0, w, h), model);
@@ -219,11 +220,11 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canConvertDataWithCropBounds(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
-        final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+        final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
         for (int j = 0; j < 10; j++)
         {
             final Rectangle bounds = getBounds(rand, ie);
@@ -234,11 +235,11 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canCropAndConvertDataWithCropBounds(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
-        final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+        final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
         for (int j = 0; j < 10; j++)
         {
             final Rectangle bounds = getBounds(rand, ie);
@@ -249,7 +250,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetWeightsWithPositiveVariance(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final float[] var = data.variance.clone();
         for (int i = 0; i < var.length; i++)
@@ -266,7 +267,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetWeightsWithAllZeroVariance(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final float[] var = new float[data.variance.length];
         final PerPixelCameraModel model = new PerPixelCameraModel(w, h, data.bias, data.gain, var);
@@ -279,7 +280,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetWeightsWithZeroVariance(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final float[] var = data.variance.clone();
         var[0] = 0;
@@ -308,16 +309,16 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
 
     private void canGetMeanVariance(RandomSeed seed, boolean initialise, boolean normalised)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final PerPixelCameraModel model = createModel(data, initialise);
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
-        final ImageExtractor ie = new ImageExtractor(data.bias, w, h);
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+        final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
         for (int i = 0; i < 10; i++)
         {
             final Rectangle bounds = getBounds(rand, ie);
             final float[] v = (normalised) ? model.getNormalisedVariance(bounds) : model.getVariance(bounds);
-            final double e = Maths.sum(v) / v.length;
+            final double e = MathUtils.sum(v) / v.length;
             final double o = (normalised) ? model.getMeanNormalisedVariance(bounds) : model.getMeanVariance(bounds);
             Assertions.assertEquals(e, o);
         }
@@ -326,7 +327,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object>
     @SeededTest
     public void canGetCoordinateData(RandomSeed seed)
     {
-        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache.getOrComputeIfAbsent(seed,
+        final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) ConcurrentHashMap.computeIfAbsent(seed,
                 this);
         final int ox = 2;
         final int oy = 3;

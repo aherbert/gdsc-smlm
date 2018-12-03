@@ -43,7 +43,7 @@ import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -78,19 +78,19 @@ public class BlinkEstimator implements PlugIn
     private double r2;
     private double adjustedR2;
 
-    /** The milliseconds/frame */
+    /** The milliseconds./frame */
     public double msPerFrame;
-    /** The max dark time */
+    /** The max dark time. */
     public int maxDarkTime = s_maxDarkTime;
-    /** The relative distance */
+    /** The relative distance. */
     public boolean relativeDistance = s_relativeDistance;
-    /** The search distance */
+    /** The search distance. */
     public double searchDistance = s_searchDistance;
-    /** The number of fitted points */
+    /** The number of fitted points. */
     public int nFittedPoints = s_nFittedPoints;
-    /** The time at lower bound flag */
+    /** The time at lower bound flag. */
     public boolean timeAtLowerBound = s_timeAtLowerBound;
-    /** The show plots flag */
+    /** The show plots flag. */
     public boolean showPlots = false;
 
     private double[] parameters = null;
@@ -120,7 +120,7 @@ public class BlinkEstimator implements PlugIn
             return;
         }
         msPerFrame = results.getCalibrationReader().getExposureTime();
-        Utils.log("%s: %d localisations", TITLE, results.size());
+        ImageJUtils.log("%s: %d localisations", TITLE, results.size());
 
         showPlots = true;
         if (rangeFittedPoints > 0)
@@ -235,7 +235,7 @@ public class BlinkEstimator implements PlugIn
     {
         final String title = TITLE + " " + yAxisTitle;
         final Plot2 plot = new Plot2(title, xAxisTitle, yAxisTitle, x, y);
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
     }
 
     /**
@@ -257,7 +257,7 @@ public class BlinkEstimator implements PlugIn
         double[] td = calculateTd(Ntd);
 
         if (verbose)
-            Utils.log("  Estimate %.0f molecules at td = %.0f ms", Ntd[0], td[0]);
+            ImageJUtils.log("  Estimate %.0f molecules at td = %.0f ms", Ntd[0], td[0]);
 
         Ntd = shift(Ntd);
         td = shift(td);
@@ -272,7 +272,7 @@ public class BlinkEstimator implements PlugIn
         {
             final String title = TITLE + " Molecule Counts";
             final Plot2 plot = new Plot2(title, "td (ms)", "Count", td, Ntd);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
 
             plot.setColor(Color.red);
             plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), Plot.CIRCLE);
@@ -288,7 +288,7 @@ public class BlinkEstimator implements PlugIn
 
             plot.setColor(Color.blue);
             plot.addPoints(xOther, yOther, Plot.CROSS);
-            Utils.display(title, plot);
+            ImageJUtils.display(title, plot);
         }
 
         // Check if the fitted curve asymptotes above the real curve
@@ -296,10 +296,10 @@ public class BlinkEstimator implements PlugIn
         {
             if (verbose)
             {
-                Utils.log("  *** Warning ***");
-                Utils.log(
+                ImageJUtils.log("  *** Warning ***");
+                ImageJUtils.log(
                         "  Fitted curve does not asymptote above real curve. Increase the number of fitted points to sample more of the overcounting regime");
-                Utils.log("  ***************");
+                ImageJUtils.log("  ***************");
             }
             increaseNFittedPoints = true;
         }
@@ -307,7 +307,7 @@ public class BlinkEstimator implements PlugIn
         // Blinking rate is 1 + nBlinks
         final double blinkingRate = 1 + parameters[1];
         if (verbose)
-            Utils.log("  Blinking rate = %s", Utils.rounded(blinkingRate, 4));
+            ImageJUtils.log("  Blinking rate = %s", MathUtils.rounded(blinkingRate, 4));
         return blinkingRate;
     }
 
@@ -352,12 +352,12 @@ public class BlinkEstimator implements PlugIn
             final double averagePrecision = calculateAveragePrecision(results, verbose);
             distanceThreshold = averagePrecision * searchDistance / results.getNmPerPixel();
             if (verbose)
-                Utils.log("Average precision = %f, Distance threshold = %f px", averagePrecision, distanceThreshold);
+                ImageJUtils.log("Average precision = %f, Distance threshold = %f px", averagePrecision, distanceThreshold);
         }
         else
         {
             distanceThreshold = searchDistance;
-            Utils.log("Distance threshold = %f px", distanceThreshold);
+            ImageJUtils.log("Distance threshold = %f px", distanceThreshold);
         }
 
         final double[] Ntd = new double[maxDarkTime + 1];
@@ -515,11 +515,11 @@ public class BlinkEstimator implements PlugIn
 
             if (log)
             {
-                Utils.log("  Fit %d points. R^2 = %s. Adjusted R^2 = %s", obs.length, Utils.rounded(r2, 4),
-                        Utils.rounded(adjustedR2, 4));
-                Utils.log("  N=%s, nBlink=%s, tOff=%s (%s frames)", Utils.rounded(parameters[0], 4),
-                        Utils.rounded(parameters[1], 4), Utils.rounded(parameters[2], 4),
-                        Utils.rounded(parameters[2] / msPerFrame, 4));
+                ImageJUtils.log("  Fit %d points. R^2 = %s. Adjusted R^2 = %s", obs.length, MathUtils.rounded(r2, 4),
+                        MathUtils.rounded(adjustedR2, 4));
+                ImageJUtils.log("  N=%s, nBlink=%s, tOff=%s (%s frames)", MathUtils.rounded(parameters[0], 4),
+                        MathUtils.rounded(parameters[1], 4), MathUtils.rounded(parameters[2], 4),
+                        MathUtils.rounded(parameters[2] / msPerFrame, 4));
             }
 
             return parameters;
@@ -527,13 +527,13 @@ public class BlinkEstimator implements PlugIn
         catch (final TooManyIterationsException e)
         {
             if (log)
-                Utils.log("  Failed to fit %d points: Too many iterations: (%s)", blinkingModel.size(), e.getMessage());
+                ImageJUtils.log("  Failed to fit %d points: Too many iterations: (%s)", blinkingModel.size(), e.getMessage());
             return null;
         }
         catch (final ConvergenceException e)
         {
             if (log)
-                Utils.log("  Failed to fit %d points", blinkingModel.size());
+                ImageJUtils.log("  Failed to fit %d points", blinkingModel.size());
             return null;
         }
     }
@@ -596,7 +596,7 @@ public class BlinkEstimator implements PlugIn
     }
 
     /**
-     * @return the coefficient of determination of the previous fit
+     * @return the coefficient of determination of the previous fit.
      */
     public double getR2()
     {
@@ -604,7 +604,7 @@ public class BlinkEstimator implements PlugIn
     }
 
     /**
-     * @return the adjusted coefficient of determination of the previous fit
+     * @return the adjusted coefficient of determination of the previous fit.
      */
     public double getAdjustedR2()
     {
@@ -612,7 +612,7 @@ public class BlinkEstimator implements PlugIn
     }
 
     /**
-     * @return the increaseNFittedPoints
+     * @return the increaseNFittedPoints.
      */
     public boolean isIncreaseNFittedPoints()
     {

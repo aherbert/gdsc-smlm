@@ -75,7 +75,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
      *
      * @return the the gradient indices
      */
-    abstract protected int[] createGradientIndices();
+    protected abstract int[] createGradientIndices();
 
     /**
      * Replicate the gradient indices from multiple peaks for the configured number of peaks.

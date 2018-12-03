@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Class to encapsulate counting
+ * Class to encapsulate counting.
  */
 public class Counter
 {
@@ -50,7 +50,7 @@ public class Counter
     }
 
     /**
-     * Reset the count
+     * Reset the count.
      */
     public void reset()
     {

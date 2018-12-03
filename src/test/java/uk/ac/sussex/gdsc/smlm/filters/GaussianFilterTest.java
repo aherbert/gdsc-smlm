@@ -1,30 +1,32 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.awt.Rectangle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.TimingResult;
+import uk.ac.sussex.gdsc.test.utils.TimingService;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import ij.plugin.filter.GaussianBlur;
+import ij.process.FloatProcessor;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 
-import ij.plugin.filter.GaussianBlur;
-import ij.process.FloatProcessor;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import java.awt.Rectangle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class GaussianFilterTest
@@ -241,7 +243,7 @@ public class GaussianFilterTest
 
     private void filter1IsSameAsFilter2(RandomSeed seed, GFilter f1, GFilter f2, boolean weighted, double tolerance)
     {
-        final UniformRandomProvider rand = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
         final float[] data = createData(rand, size, size);
         float[] w = null;
         if (weighted)
@@ -316,9 +318,9 @@ public class GaussianFilterTest
     @SeededTest
     public void floatFilterIsFasterThanDoubleFilter(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final float[][] data = new float[10][];
         for (int i = 0; i < data.length; i++)
@@ -341,7 +343,7 @@ public class GaussianFilterTest
             {
                 TimingResult slow = ts.get(j + k);
                 TimingResult fast = ts.get(j);
-                logger.log(TestLog.getTimingRecord(slow, fast));
+                logger.log(TestLogUtils.getTimingRecord(slow, fast));
             }
     }
 
@@ -349,9 +351,9 @@ public class GaussianFilterTest
     @SeededTest
     public void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final float[][] data = new float[10][];
         for (int i = 0; i < data.length; i++)
@@ -374,7 +376,7 @@ public class GaussianFilterTest
             {
                 TimingResult slow = ts.get(j + k);
                 TimingResult fast = ts.get(j);
-                logger.log(TestLog.getTimingRecord(slow, fast));
+                logger.log(TestLogUtils.getTimingRecord(slow, fast));
             }
     }
 
@@ -384,7 +386,7 @@ public class GaussianFilterTest
         for (int i = data.length; i-- > 0;)
             data[i] = i;
 
-        Random.shuffle(data, rg);
+        RandomUtils.shuffle(data, rg);
 
         return data;
     }

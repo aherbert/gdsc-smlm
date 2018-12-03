@@ -37,7 +37,7 @@ import org.apache.commons.math3.random.RandomVectorGenerator;
 public class UniformDistribution implements SpatialDistribution
 {
     /**
-     * Wrap a standard random generator to create a vector generator for 3 dimensions
+     * Wrap a standard random generator to create a vector generator for 3 dimensions.
      */
     private class VectorGeneratorWrapper implements RandomVectorGenerator
     {
@@ -81,7 +81,7 @@ public class UniformDistribution implements SpatialDistribution
     }
 
     /**
-     * Create a new uniform distribution using a Halton sequence
+     * Create a new uniform distribution using a Halton sequence.
      *
      * @param min
      *            The minimum bounds for the distribution
@@ -94,7 +94,7 @@ public class UniformDistribution implements SpatialDistribution
     }
 
     /**
-     * Create a new uniform distribution using a Halton sequence
+     * Create a new uniform distribution using a Halton sequence.
      *
      * @param min
      *            The minimum bounds for the distribution
@@ -116,7 +116,7 @@ public class UniformDistribution implements SpatialDistribution
     }
 
     /**
-     * Create a new uniform distribution using the given vector generator
+     * Create a new uniform distribution using the given vector generator.
      *
      * @param min
      *            The minimum bounds for the distribution
@@ -131,7 +131,7 @@ public class UniformDistribution implements SpatialDistribution
     }
 
     /**
-     * Create a new uniform distribution using a new random number generator from the factory for each dimension
+     * Create a new uniform distribution using a new random number generator from the factory for each dimension.
      *
      * @param min
      *            The minimum bounds for the distribution
@@ -185,7 +185,7 @@ public class UniformDistribution implements SpatialDistribution
     }
 
     /**
-     * Return a vector with values in the unit domain ([0,1])
+     * Return a vector with values in the unit domain ([0,1]).
      *
      * @return the vector populated with values in the unit domain ([0,1])
      */

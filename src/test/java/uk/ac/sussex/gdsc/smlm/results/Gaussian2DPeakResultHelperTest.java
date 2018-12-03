@@ -1,17 +1,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
@@ -21,14 +11,26 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class Gaussian2DPeakResultHelperTest
@@ -74,8 +76,8 @@ public class Gaussian2DPeakResultHelperTest
     @Test
     public void lowerIntegrationPointsApproximateMaximumLikelihoodVariance()
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         final double[] sum = new double[maxPoints + 1];
         int count = 0;
@@ -104,8 +106,8 @@ public class Gaussian2DPeakResultHelperTest
     @Test
     public void runSpeedTest()
     {
-        ExtraAssumptions.assume(logger, Level.INFO);
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
         // Test with realistic parameters
 
@@ -228,20 +230,22 @@ public class Gaussian2DPeakResultHelperTest
         Assertions.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative2D(Double.POSITIVE_INFINITY));
         Assertions.assertEquals(0, Gaussian2DPeakResultHelper.inverseCumulative2D(0));
         Assertions.assertTrue(Double.POSITIVE_INFINITY == Gaussian2DPeakResultHelper.inverseCumulative2D(1));
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
         for (int i = 1; i <= 10; i++)
         {
             final double r = i / 10.0;
             final double p = Gaussian2DPeakResultHelper.cumulative2D(r);
             final double r2 = Gaussian2DPeakResultHelper.inverseCumulative2D(p);
-            ExtraAssertions.assertEqualsRelative(r, r2, 1e-8);
+            TestAssertions.assertTest(r, r2, predicate);
         }
     }
 
     @SeededTest
     public void canComputeMeanSignalUsingR(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < 10; i++)
         {
             final double intensity = rg.nextDouble() * 100;
@@ -249,26 +253,27 @@ public class Gaussian2DPeakResultHelperTest
             final double sy = rg.nextDouble() * 2;
             final double r = rg.nextDouble() * 5;
             assertEquals(intensity * Gaussian2DPeakResultHelper.cumulative2D(r) / (Math.PI * r * r * sx * sy),
-                    Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, r));
+                    Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, r), predicate);
 
             // Test fixed versions verse dynamic
             assertEquals(Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, 1),
-                    Gaussian2DPeakResultHelper.getMeanSignalUsingR1(intensity, sx, sy));
+                    Gaussian2DPeakResultHelper.getMeanSignalUsingR1(intensity, sx, sy), predicate);
             assertEquals(Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, 2),
-                    Gaussian2DPeakResultHelper.getMeanSignalUsingR2(intensity, sx, sy));
+                    Gaussian2DPeakResultHelper.getMeanSignalUsingR2(intensity, sx, sy), predicate);
         }
     }
 
-    private static void assertEquals(double e, double o)
+    private static void assertEquals(double e, double o, DoubleDoubleBiPredicate predicate)
     {
-        ExtraAssertions.assertEqualsRelative(e, o, 1e-10);
+        TestAssertions.assertTest(e, o, predicate);
     }
 
     @SeededTest
     public void canComputeMeanSignalUsingP(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
         for (int i = 0; i < 10; i++)
         {
             final double intensity = rg.nextDouble() * 100;
@@ -276,14 +281,14 @@ public class Gaussian2DPeakResultHelperTest
             final double sy = rg.nextDouble() * 2;
             final double p = rg.nextDouble();
             double e = intensity * p /
-                    (Math.PI * Maths.pow2(Gaussian2DPeakResultHelper.inverseCumulative2D(p)) * sx * sy);
+                    (Math.PI * MathUtils.pow2(Gaussian2DPeakResultHelper.inverseCumulative2D(p)) * sx * sy);
             double o = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, p);
-            assertEquals(e, o);
+            assertEquals(e, o, predicate);
 
             // Test fixed versions verse dynamic
             e = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, 0.5);
             o = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensity, sx, sy);
-            assertEquals(e, o);
+            assertEquals(e, o, predicate);
         }
     }
 }

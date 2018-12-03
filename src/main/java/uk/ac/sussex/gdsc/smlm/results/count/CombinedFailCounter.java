@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Combine the result of two fail counters
+ * Combine the result of two fail counters.
  */
 public abstract class CombinedFailCounter extends BaseFailCounter
 {

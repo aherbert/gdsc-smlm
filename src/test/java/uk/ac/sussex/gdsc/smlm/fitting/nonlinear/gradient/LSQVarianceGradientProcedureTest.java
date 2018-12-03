@@ -1,13 +1,5 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.ArrayList;
-import java.util.logging.Logger;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
@@ -18,15 +10,24 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class LSQVarianceGradientProcedureTest
@@ -101,7 +102,7 @@ public class LSQVarianceGradientProcedureTest
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
         final int n = blockWidth * blockWidth;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -162,13 +163,13 @@ public class LSQVarianceGradientProcedureTest
 
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 1000;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
         final int n = blockWidth * blockWidth;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -217,7 +218,7 @@ public class LSQVarianceGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getTimingRecord("GradientCalculator " + nparams, time1, "LSQVarianceGradientProcedure", time2));
+        logger.log(TestLogUtils.getTimingRecord("GradientCalculator " + nparams, time1, "LSQVarianceGradientProcedure", time2));
     }
 
     @SeededTest
@@ -243,7 +244,7 @@ public class LSQVarianceGradientProcedureTest
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
         Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
         if (precomputed)
@@ -252,7 +253,7 @@ public class LSQVarianceGradientProcedureTest
 
         final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("[%d] Observations: Not same variance @ %d", 2);
         msg.set(0, nparams);
-        
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             final LSQVarianceGradientProcedure p1 = new LSQVarianceGradientProcedure(func);
@@ -287,13 +288,13 @@ public class LSQVarianceGradientProcedureTest
     private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
             final boolean precomputed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 100;
 
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
 
         // Remove the timing of the function call by creating a dummy function
         final FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
@@ -350,14 +351,14 @@ public class LSQVarianceGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
+        logger.log(TestLogUtils.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
     }
 
     @SeededTest
     public void crlbIsHigherWithPrecomputed(RandomSeed seed)
     {
         final int iter = 10;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
 
         final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
                 GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);

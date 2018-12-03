@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
- * Defines normalisation of an area around a point using a per-pixel normalisation
+ * Defines normalisation of an area around a point using a per-pixel normalisation.
  */
 public class PerPixelNormaliser implements Normaliser
 {

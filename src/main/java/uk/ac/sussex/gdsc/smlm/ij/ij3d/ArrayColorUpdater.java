@@ -60,14 +60,14 @@ public abstract class ArrayColorUpdater
     }
 
     /**
-     * Gets the number of coordinates
+     * Gets the number of coordinates.
      *
      * @return the n
      */
     public abstract int getN();
 
     /**
-     * Set to true to use colours with alpha
+     * Set to true to use colours with alpha.
      *
      * @return true, if using colours with alpha
      */
@@ -119,7 +119,7 @@ public abstract class ArrayColorUpdater
     public abstract float[] getColors(float alpha);
 
     /**
-     * Class to update single colour coordinates with alpha
+     * Class to update single colour coordinates with alpha.
      */
     private static class SingleArrayColorUpdater4 extends ArrayColorUpdater
     {
@@ -184,7 +184,7 @@ public abstract class ArrayColorUpdater
     }
 
     /**
-     * Class to update multiple colour coordinates with alpha
+     * Class to update multiple colour coordinates with alpha.
      */
     private static class MultiArrayColorUpdater4 extends ArrayColorUpdater
     {
@@ -260,7 +260,7 @@ public abstract class ArrayColorUpdater
     }
 
     /**
-     * Class to update single colour coordinates with no alpha
+     * Class to update single colour coordinates with no alpha.
      */
     private static class SingleArrayColorUpdater3 extends ArrayColorUpdater
     {
@@ -325,7 +325,7 @@ public abstract class ArrayColorUpdater
     }
 
     /**
-     * Class to update multiple colour coordinates with no alpha
+     * Class to update multiple colour coordinates with no alpha.
      */
     private static class MultiArrayColorUpdater3 extends ArrayColorUpdater
     {

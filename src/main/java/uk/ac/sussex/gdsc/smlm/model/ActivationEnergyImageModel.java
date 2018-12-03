@@ -37,7 +37,7 @@ public class ActivationEnergyImageModel extends ImageModel
     private SpatialIllumination illumination;
 
     /**
-     * Construct a new image model
+     * Construct a new image model.
      *
      * @param eAct
      *            Average energy for activation
@@ -71,7 +71,7 @@ public class ActivationEnergyImageModel extends ImageModel
     }
 
     /**
-     * @return the average energy for activation
+     * @return the average energy for activation.
      */
     public double getActivationEnergy()
     {

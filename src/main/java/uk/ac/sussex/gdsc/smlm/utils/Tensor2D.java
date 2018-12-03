@@ -25,10 +25,10 @@ package uk.ac.sussex.gdsc.smlm.utils;
 
 import org.ejml.data.DenseMatrix64F;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * Compute the inertia tensor for a 3D object
+ * Compute the inertia tensor for a 3D object.
  *
  * @author Alex Herbert
  */
@@ -181,7 +181,7 @@ public class Tensor2D
     {
         for (int i = 0; i < 2; i++)
         {
-            final double l = Math.sqrt(Maths.pow2(eigenVectors[i][0]) + Maths.pow2(eigenVectors[i][1]));
+            final double l = Math.sqrt(MathUtils.pow2(eigenVectors[i][0]) + MathUtils.pow2(eigenVectors[i][1]));
             if (l > 0)
             {
                 eigenVectors[i][0] /= l;

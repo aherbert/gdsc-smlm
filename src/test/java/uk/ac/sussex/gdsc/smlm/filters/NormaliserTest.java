@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings({ "javadoc" })
 public class NormaliserTest extends AbstractFilterTest
@@ -36,7 +36,7 @@ public class NormaliserTest extends AbstractFilterTest
     @SeededTest
     public void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         for (final int width : primes)
             for (final int height : primes)

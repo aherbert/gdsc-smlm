@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.gui;
 import javax.swing.ListSelectionModel;
 
 /**
- * A helper class for the ListSelectionModel
+ * A helper class for the ListSelectionModel.
  */
 public class ListSelectionModelHelper
 {

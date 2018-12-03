@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.data;
 
 /**
- * Interface for any object that has a name
+ * Interface for any object that has a name.
  */
 public interface NamedObject
 {

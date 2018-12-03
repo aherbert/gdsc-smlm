@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolverType;
@@ -67,7 +67,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
     private double[] weights = null;
 
     /**
-     * Create a new stepping function solver
+     * Create a new stepping function solver.
      *
      * @param type
      *            the type
@@ -82,7 +82,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
     }
 
     /**
-     * Create a new stepping function solver
+     * Create a new stepping function solver.
      *
      * @param type
      *            the type
@@ -185,7 +185,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
             log("%s End [%s] = %s\n", name, tc.getIterations(), status);
 
-            if (BitFlags.anySet(status, ToleranceChecker.STATUS_CONVERGED))
+            if (BitFlagUtils.anySet(status, ToleranceChecker.STATUS_CONVERGED))
             {
                 log("%s Converged [%s]\n", name, tc.getIterations());
                 // A solver may compute both at the same time...
@@ -197,7 +197,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
             }
 
             // Check the iterations
-            if (BitFlags.areSet(status, ToleranceChecker.STATUS_MAX_ITERATIONS))
+            if (BitFlagUtils.areSet(status, ToleranceChecker.STATUS_MAX_ITERATIONS))
                 return FitStatus.TOO_MANY_ITERATIONS;
 
             // We should not reach here unless we missed something

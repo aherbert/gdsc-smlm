@@ -34,8 +34,8 @@ import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter;
@@ -69,7 +69,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
     private static boolean zero = false;
 
     // Ensure not null
-    private Ticker ticker = Ticker.INSTANCE;
+    private Ticker ticker = Ticker.getDefaultInstance();
 
     private int lastId = 0;
     private int lastMethod = -1;
@@ -123,7 +123,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
     public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
     {
         // Get available kernels
-        final String[] names = Utils.getImageList(Utils.GREY_SCALE | Utils.SINGLE);
+        final String[] names = ImageJUtils.getImageList(ImageJUtils.GREY_SCALE | ImageJUtils.SINGLE);
         if (names.length == 0)
         {
             IJ.error(TITLE, "No suitable kernel images");
@@ -202,7 +202,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
                         break;
                     case DECONVOLUTION:
                     default:
-                        Utils.log("Unsupported operation (%s), default to correlation", operation.getName());
+                        ImageJUtils.log("Unsupported operation (%s), default to correlation", operation.getName());
                         kf.setConvolution(false);
                         break;
                 }
@@ -225,7 +225,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
             lastZero = zero;
         }
 
-        ticker = Ticker.create(new IJTrackProgress(), nPasses, nPasses != 1);
+        ticker = Ticker.create(new ImageJTrackProgress(), nPasses, nPasses != 1);
         ticker.start();
     }
 }

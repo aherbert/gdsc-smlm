@@ -24,7 +24,7 @@ import org.apache.commons.math3.util.MathUtils;
 
 /**
  * <p>
- * <strong>Note:</strong> This class has been directly copied from 
+ * <strong>Note:</strong> This class has been directly copied from
  * {@code org.apache.commons.math3.distribution} for use in the {@link CustomPoissonDistribution}.
  * <p>
  * <p>
@@ -50,7 +50,7 @@ import org.apache.commons.math3.util.MathUtils;
  */
 final class SaddlePointExpansionCopy {
 
-    /** 1/2 * log(2 &#960;). */
+    /** 1./2 * log(2 &#960;). */
     private static final double HALF_LOG_2_PI = 0.5 * FastMath.log(MathUtils.TWO_PI);
 
     /** exact Stirling expansion error for certain values. */

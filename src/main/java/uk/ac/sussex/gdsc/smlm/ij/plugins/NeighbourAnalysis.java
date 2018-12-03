@@ -26,8 +26,8 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import ij.IJ;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -68,7 +68,7 @@ public class NeighbourAnalysis implements PlugIn
         final TraceManager manager = new TraceManager(results);
 
         // Run the tracing
-        manager.setTracker(new IJTrackProgress());
+        manager.setTracker(new ImageJTrackProgress());
         final Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
 
         saveTraces(traces);
@@ -76,7 +76,7 @@ public class NeighbourAnalysis implements PlugIn
 
     private void saveTraces(Trace[] traces)
     {
-        final String[] path = Utils.decodePath(filename);
+        final String[] path = ImageJUtils.decodePath(filename);
         final OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {

@@ -266,7 +266,7 @@ public class IJImageSource extends ImageSource
     }
 
     /**
-     * @return True is the image array or any part of it is null
+     * @return True is the image array or any part of it is null.
      */
     private boolean nullImageArray()
     {

@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgress;
  */
 public class SearchSpace
 {
-    /** Used to ignore rounding values */
+    /** Used to ignore rounding values. */
     private static NonRoundingDimension nonRoundingDimension = new NonRoundingDimension();
 
     private int iteration = 0;
@@ -61,7 +61,7 @@ public class SearchSpace
     public enum RefinementMode
     {
         /**
-         * No refinement before reducing the range
+         * No refinement before reducing the range.
          */
         NONE,
         /**
@@ -79,7 +79,7 @@ public class SearchSpace
     private RefinementMode searchMode = RefinementMode.SINGLE_DIMENSION;
 
     /**
-     * Clone the search dimensions
+     * Clone the search dimensions.
      *
      * @param dimensions
      *            the search dimensions
@@ -772,7 +772,7 @@ public class SearchSpace
     }
 
     /**
-     * @return the tracker
+     * @return the tracker.
      */
     public TrackProgress getTracker()
     {
@@ -780,7 +780,7 @@ public class SearchSpace
     }
 
     /**
-     * Set a tracker to allow the progress to be followed
+     * Set a tracker to allow the progress to be followed.
      *
      * @param tracker
      *            the tracker to set
@@ -802,7 +802,7 @@ public class SearchSpace
     }
 
     /**
-     * Send a start message to the tracker
+     * Send a start message to the tracker.
      *
      * @param stage
      *            The stage that has started
@@ -817,7 +817,7 @@ public class SearchSpace
     }
 
     /**
-     * Send an end signal to the tracker
+     * Send an end signal to the tracker.
      */
     private void end()
     {

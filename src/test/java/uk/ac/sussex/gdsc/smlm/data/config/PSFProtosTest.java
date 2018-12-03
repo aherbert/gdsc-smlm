@@ -1,10 +1,10 @@
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.utils.JSONUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.TextFormat;
@@ -12,11 +12,11 @@ import com.google.protobuf.TextFormat.ParseException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.utils.JSONUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PSFProtosTest
@@ -54,7 +54,7 @@ public class PSFProtosTest
         final String e = psfBuilder.toString();
         final PSFProtos.PSF psf = psfBuilder.build();
         final String o = psf.toString();
-        logger.log(TestLog.getRecord(logLevel, o));
+        logger.log(TestLogUtils.getRecord(logLevel, o));
         Assertions.assertEquals(e, o);
 
         psfBuilder.clear();
@@ -63,7 +63,7 @@ public class PSFProtosTest
 
         // Short string
         final String o2 = TextFormat.shortDebugString(psf);
-        logger.log(TestLog.getRecord(logLevel, o2));
+        logger.log(TestLogUtils.getRecord(logLevel, o2));
 
         psfBuilder.clear();
         TextFormat.merge(o2, psfBuilder);
@@ -72,9 +72,9 @@ public class PSFProtosTest
         // JSON
         final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
         String json = printer.print(psf);
-        logger.log(TestLog.getRecord(logLevel, json));
+        logger.log(TestLogUtils.getRecord(logLevel, json));
         json = JSONUtils.simplify(json);
-        logger.log(TestLog.getRecord(logLevel, json));
+        logger.log(TestLogUtils.getRecord(logLevel, json));
 
         psfBuilder.clear();
         JsonFormat.parser().merge(json, psfBuilder);

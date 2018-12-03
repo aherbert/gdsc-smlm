@@ -1,15 +1,5 @@
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -19,16 +9,27 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class EJMLLinearSolverTest
@@ -501,7 +502,7 @@ public class EJMLLinearSolverTest
 
     private void runSolverSpeedTest(RandomSeed seed, int flags)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
         final int n = f0.size();
@@ -516,7 +517,7 @@ public class EJMLLinearSolverTest
         final int np = f0.getNumberOfGradients();
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-                new RandomGeneratorAdapter(RNGFactory.create(seed.getSeed())), 1);
+                new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
         //double lambda = 10;
         for (final double background : testbackground)
             // Peak 1
@@ -574,7 +575,7 @@ public class EJMLLinearSolverTest
         // about the fastest of Cholesky/CholeskyLDLT/Direct.
         // Just check the PseudoInverse is slowest
         for (int i = 1; i < size; i++)
-            logger.log(TestLog.getTimingRecord(ts.get(-(size)), ts.get(-i)));
+            logger.log(TestLogUtils.getTimingRecord(ts.get(-(size)), ts.get(-i)));
 
         if (np > 2)
         {
@@ -582,7 +583,7 @@ public class EJMLLinearSolverTest
             int i = (np == 5) ? 2 : 1;
             final int size_1 = size - 1;
             for (; i < size_1; i++)
-                logger.log(TestLog.getTimingRecord(ts.get(-(size_1)), ts.get(-i)));
+                logger.log(TestLogUtils.getTimingRecord(ts.get(-(size_1)), ts.get(-i)));
         }
     }
 
@@ -812,7 +813,7 @@ public class EJMLLinearSolverTest
 
     private void runInversionSpeedTest(RandomSeed seed, int flags)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
         final int n = f0.size();
@@ -826,7 +827,7 @@ public class EJMLLinearSolverTest
         final int np = f0.getNumberOfGradients();
         final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
         final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-                new RandomGeneratorAdapter(RNGFactory.create(seed.getSeed())), 1);
+                new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
         //double lambda = 10;
         for (final double background : testbackground)
             // Peak 1
@@ -885,22 +886,22 @@ public class EJMLLinearSolverTest
         if (np <= 5)
         {
             for (int i = 2; i <= size; i++)
-                logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-1)));
+                logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-1)));
 
             if (np < 5)
                 // n < 5 Direct is fastest
                 for (int i = 3; i <= size; i++)
-                    logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-2)));
+                    logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-2)));
             else
                 // Cholesky should be fastest. It is marginal over CholeskyLDLT.
                 // and may not be faster than Direct at n=5 so that comparison is ignored.
                 for (int i = 4; i <= size; i++)
-                    logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-3)));
+                    logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-3)));
         }
         else
             // No Direct inversion possible.
             // Cholesky should be fastest.
             for (int i = 2; i <= size; i++)
-                logger.log(TestLog.getTimingRecord(ts.get(-i), ts.get(-1)));
+                logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-1)));
     }
 }

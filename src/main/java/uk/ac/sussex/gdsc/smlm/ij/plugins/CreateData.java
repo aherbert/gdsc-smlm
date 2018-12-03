@@ -64,6 +64,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 import com.google.protobuf.TextFormat;
+import com.thoughtworks.xstream.converters.reflection.SerializationMethodInvoker;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -86,19 +87,20 @@ import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -186,11 +188,11 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
 
 /**
- * Creates data using a simulated PSF
+ * Creates data using a simulated PSF.
  */
 public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
-    /** The title */
+    /** The title. */
     static final String TITLE = "Create Data";
     private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
@@ -319,37 +321,37 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     // Compute the CRLB for the PSF using the fisher information
     private BasePoissonFisherInformation[] fiFunction = null;
 
-    /** Store the parameters */
+    /** Store the parameters. */
     public static class BaseParameters
     {
         private static int nextId = 1;
 
         /**
-         * The parameter set identifier
+         * The parameter set identifier.
          */
         final int id;
         /**
-         * Gaussian standard deviation
+         * Gaussian standard deviation.
          */
         final double s;
         /**
-         * Pixel pitch in nm
+         * Pixel pitch in nm.
          */
         final double a;
         /**
-         * The min number of photons per frame
+         * The min number of photons per frame.
          */
         final double minSignal;
         /**
-         * The max number of photons per frame
+         * The max number of photons per frame.
          */
         final double maxSignal;
         /**
-         * The average signal per frame
+         * The average signal per frame.
          */
         double averageSignal;
         /**
-         * The camera bias
+         * The camera bias.
          */
         final double bias;
         /**
@@ -361,7 +363,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
          */
         final double qe;
         /**
-         * Read noise in ADUs
+         * Read noise in ADUs.
          */
         final double readNoise;
         /**
@@ -377,11 +379,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
          */
         Rectangle cameraBounds;
         /**
-         * Background
+         * Background.
          */
         double b;
         /**
-         * Background noise in photons per pixel (used in the precision calculations)
+         * Background noise in photons per pixel (used in the precision calculations).
          */
         final double noise;
 
@@ -455,11 +457,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         }
     }
 
-    /** Store the parameters for the last simulation for spot data */
+    /** Store the parameters for the last simulation for spot data. */
     public static class SimulationParameters extends BaseParameters
     {
         /**
-         * Number of molecules in the simulated image
+         * Number of molecules in the simulated image.
          */
         final int molecules;
         /**
@@ -468,11 +470,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
          */
         final boolean fullSimulation;
         /**
-         * The z-position depth
+         * The z-position depth.
          */
         final double depth;
         /**
-         * True if the depth is fixed
+         * True if the depth is fixed.
          */
         final boolean fixedDepth;
 
@@ -545,23 +547,23 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         }
     }
 
-    /** Store the parameters for the last benchmark */
+    /** Store the parameters for the last benchmark. */
     public static class BenchmarkParameters extends BaseParameters
     {
         /**
-         * Number of frames in the simulated image
+         * Number of frames in the simulated image.
          */
         final int frames;
         /**
-         * The x position of the localisation in each frame
+         * The x position of the localisation in each frame.
          */
         final double x;
         /**
-         * The y position of the localisation in each frame
+         * The y position of the localisation in each frame.
          */
         final double y;
         /**
-         * The z position of the localisation in each frame
+         * The z position of the localisation in each frame.
          */
         final double z;
         /**
@@ -581,7 +583,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         final double[] crlb;
 
         /**
-         * The number of frames with a simulated photon count
+         * The number of frames with a simulated photon count.
          */
         private int molecules;
 
@@ -682,19 +684,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                     background[i] = bg;
                 }
             });
-            final double av = Maths.sum(p) / molecules;
-            final double av2 = Maths.sum(background) / molecules;
-            Utils.log(
+            final double av = MathUtils.sum(p) / molecules;
+            final double av2 = MathUtils.sum(background) / molecules;
+            ImageJUtils.log(
                     "Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
-                    frames, molecules, Utils.rounded(averageSignal), Utils.rounded(av), Utils.rounded(b),
-                    Utils.rounded(av2));
+                    frames, molecules, MathUtils.rounded(averageSignal), MathUtils.rounded(av), MathUtils.rounded(b),
+                    MathUtils.rounded(av2));
             // Reset the average signal and background (in photons)
             averageSignal = av;
             b = av2;
         }
 
         /**
-         * @return The average number of photons per frame
+         * @return The average number of photons per frame.
          */
         public double getSignal()
         {
@@ -711,7 +713,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         }
 
         /**
-         * @return the average number of background photons per frame
+         * @return the average number of background photons per frame.
          */
         public double getBackground()
         {
@@ -738,7 +740,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     {
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
         simpleMode = (arg != null && arg.contains("simple"));
         benchmarkMode = (arg != null && arg.contains("benchmark"));
         spotMode = (arg != null && arg.contains("spot"));
@@ -805,7 +807,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                 // Ensure we have 50% of the frames with a spot.
                 nextN = new int[settings.getParticles() * 2];
                 Arrays.fill(nextN, 0, settings.getParticles(), 1);
-                Random.shuffle(nextN, new Well19937c());
+                RandomUtils.shuffle(nextN, new Well19937c());
 
                 // Only put spots in the central part of the image
                 final double border = settings.getSize() / 4.0;
@@ -831,7 +833,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                     if (mean < 0.5)
                     {
                         final GenericDialog gd = new GenericDialog(TITLE);
-                        gd.addMessage("The mean samples per frame is low: " + Utils.rounded(mean) + "\n \nContinue?");
+                        gd.addMessage("The mean samples per frame is low: " + MathUtils.rounded(mean) + "\n \nContinue?");
                         gd.enableYesNoCancel();
                         gd.hideCancelButton();
                         gd.showDialog();
@@ -1084,14 +1086,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     }
 
     /**
-     * Output the theoretical limits for fitting a Gaussian and store the benchmark settings
+     * Output the theoretical limits for fitting a Gaussian and store the benchmark settings.
      *
      * @param dist
      *            The distribution
      */
     private void reportAndSaveFittingLimits(SpatialDistribution dist)
     {
-        Utils.log(TITLE + " Benchmark");
+        ImageJUtils.log(TITLE + " Benchmark");
 
         final double a = settings.getPixelPitch();
         final double[] xyz = dist.next().clone();
@@ -1127,14 +1129,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
         final double sd = Gaussian2DPeakResultHelper.getStandardDeviation(sd0, sd1) * a;
 
-        Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * a), Utils.rounded(xyz[0], 6));
-        Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * a), Utils.rounded(xyz[1], 6));
-        Utils.log("Z = %s nm : %s px", Utils.rounded(xyz[2] * a), Utils.rounded(xyz[2], 6));
-        Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / a));
+        ImageJUtils.log("X = %s nm : %s px", MathUtils.rounded(xyz[0] * a), MathUtils.rounded(xyz[0], 6));
+        ImageJUtils.log("Y = %s nm : %s px", MathUtils.rounded(xyz[1] * a), MathUtils.rounded(xyz[1], 6));
+        ImageJUtils.log("Z = %s nm : %s px", MathUtils.rounded(xyz[2] * a), MathUtils.rounded(xyz[2], 6));
+        ImageJUtils.log("Width (s) = %s nm : %s px", MathUtils.rounded(sd), MathUtils.rounded(sd / a));
         final double sa = PSFCalculator.squarePixelAdjustment(sd, a);
-        Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa), Utils.rounded(sa / a));
-        Utils.log("Signal (N) = %s - %s photons", Utils.rounded(settings.getPhotonsPerSecond()),
-                Utils.rounded(settings.getPhotonsPerSecondMaximum()));
+        ImageJUtils.log("Adjusted Width (sa) = %s nm : %s px", MathUtils.rounded(sa), MathUtils.rounded(sa / a));
+        ImageJUtils.log("Signal (N) = %s - %s photons", MathUtils.rounded(settings.getPhotonsPerSecond()),
+                MathUtils.rounded(settings.getPhotonsPerSecondMaximum()));
 
         boolean emCCD;
         double totalGain;
@@ -1175,18 +1177,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         final double upperP = Gaussian2DPeakResultHelper.getPrecision(a, sd, min, noise, emCCD);
         final double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, max, noise, emCCD);
         final double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, min, noise, emCCD);
-        final double lowerN = getPrecisionN(a, sd, min, Maths.pow2(noise), emCCD);
-        final double upperN = getPrecisionN(a, sd, max, Maths.pow2(noise), emCCD);
+        final double lowerN = getPrecisionN(a, sd, min, MathUtils.pow2(noise), emCCD);
+        final double upperN = getPrecisionN(a, sd, max, MathUtils.pow2(noise), emCCD);
 
         if (settings.getCameraType() == CameraType.SCMOS)
-            Utils.log("sCMOS camera background estimate uses an average read noise");
-        Utils.log("Effective background noise = %s photo-electron [includes read noise and background photons]",
-                Utils.rounded(noise));
-        Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP), Utils.rounded(upperP),
-                Utils.rounded(lowerP / a), Utils.rounded(upperP / a));
-        Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
-                Utils.rounded(upperMLP), Utils.rounded(lowerMLP / a), Utils.rounded(upperMLP / a));
-        Utils.log("Signal precision: %s - %s photo-electrons", Utils.rounded(lowerN), Utils.rounded(upperN));
+            ImageJUtils.log("sCMOS camera background estimate uses an average read noise");
+        ImageJUtils.log("Effective background noise = %s photo-electron [includes read noise and background photons]",
+                MathUtils.rounded(noise));
+        ImageJUtils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", MathUtils.rounded(lowerP), MathUtils.rounded(upperP),
+                MathUtils.rounded(lowerP / a), MathUtils.rounded(upperP / a));
+        ImageJUtils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", MathUtils.rounded(lowerMLP),
+                MathUtils.rounded(upperMLP), MathUtils.rounded(lowerMLP / a), MathUtils.rounded(upperMLP / a));
+        ImageJUtils.log("Signal precision: %s - %s photo-electrons", MathUtils.rounded(lowerN), MathUtils.rounded(upperN));
 
         // Wrap to a function
         final PSFModelGradient1Function f = new PSFModelGradient1Function(psf, size, size);
@@ -1201,12 +1203,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         // Compute SNR using mean signal at 50%. Assume the region covers the entire PSF.
         final double[] v = new StandardValueProcedure().getValues(f, params);
         final double u = FunctionHelper.getMeanValue(v, 0.5);
-        final double u0 = Maths.max(v);
+        final double u0 = MathUtils.max(v);
 
         // Store the benchmark settings when not using variable photons
         if (min == max)
         {
-            Utils.log("50%% PSF SNR : %s : Peak SNR : %s", Utils.rounded(u / noise), Utils.rounded(u0 / noise));
+            ImageJUtils.log("50%% PSF SNR : %s : Peak SNR : %s", MathUtils.rounded(u / noise), MathUtils.rounded(u0 / noise));
 
             // Compute the true CRLB using the fisher information
             createLikelihoodFunction();
@@ -1224,11 +1226,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             //System.out.println(m);
             if (crlb != null)
             {
-                Utils.log("Localisation precision (CRLB): B=%s, I=%s photons", Utils.rounded(crlb[0]),
-                        Utils.rounded(crlb[1]));
-                Utils.log("Localisation precision (CRLB): X=%s, Y=%s, Z=%s nm : %s,%s,%s px",
-                        Utils.rounded(crlb[2] * a), Utils.rounded(crlb[3] * a), Utils.rounded(crlb[4] * a),
-                        Utils.rounded(crlb[2]), Utils.rounded(crlb[3]), Utils.rounded(crlb[4]));
+                ImageJUtils.log("Localisation precision (CRLB): B=%s, I=%s photons", MathUtils.rounded(crlb[0]),
+                        MathUtils.rounded(crlb[1]));
+                ImageJUtils.log("Localisation precision (CRLB): X=%s, Y=%s, Z=%s nm : %s,%s,%s px",
+                        MathUtils.rounded(crlb[2] * a), MathUtils.rounded(crlb[3] * a), MathUtils.rounded(crlb[4] * a),
+                        MathUtils.rounded(crlb[2]), MathUtils.rounded(crlb[3]), MathUtils.rounded(crlb[4]));
             }
 
             benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, a,
@@ -1240,12 +1242,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         {
             // SNR will just scale
             final double scale = max / min;
-            Utils.log("50%% PSF SNR : %s - %s : Peak SNR : %s - %s", Utils.rounded(u / noise),
-                    Utils.rounded(scale * u / noise), Utils.rounded(u0 / noise), Utils.rounded(scale * u0 / noise));
-            Utils.log(
+            ImageJUtils.log("50%% PSF SNR : %s - %s : Peak SNR : %s - %s", MathUtils.rounded(u / noise),
+                    MathUtils.rounded(scale * u / noise), MathUtils.rounded(u0 / noise), MathUtils.rounded(scale * u0 / noise));
+            ImageJUtils.log(
                     "Warning: Benchmark settings are only stored in memory when the number of photons is fixed. Min %s != Max %s",
-                    Utils.rounded(settings.getPhotonsPerSecond()),
-                    Utils.rounded(settings.getPhotonsPerSecondMaximum()));
+                    MathUtils.rounded(settings.getPhotonsPerSecond()),
+                    MathUtils.rounded(settings.getPhotonsPerSecondMaximum()));
         }
     }
 
@@ -1272,7 +1274,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
             // Get the expected value at each pixel in electrons. Assuming a Poisson distribution this
             // is equal to the total variance at the pixel.
-            return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
+            return Math.sqrt(backgroundVariance + MathUtils.pow2(readNoise));
         }
         else if (settings.getCameraType() == CameraType.SCMOS)
         {
@@ -1286,10 +1288,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             createPerPixelCameraModelData(cameraModel);
 
             // Get the average read noise in electrons
-            final double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length);
+            final double readNoise = (MathUtils.sum(this.readNoise) / this.readNoise.length);
 
             // Combine as above
-            return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
+            return Math.sqrt(backgroundVariance + MathUtils.pow2(readNoise));
         }
         throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
     }
@@ -1408,7 +1410,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                 final int totalFrames = (int) Math.ceil(settings.getSeconds() * 1000 / settings.getExposureTime());
                 gd.addMessage(String.format(
                         "Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
-                        newFrames - totalFrames, Utils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
+                        newFrames - totalFrames, MathUtils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
             }
             else
                 gd.addMessage(String.format("Require %d frames to draw all fluorophores.\nDo you want to proceed?",
@@ -1601,7 +1603,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     }
 
     /**
-     * Get the PSF half-width at half-maxima
+     * Get the PSF half-width at half-maxima.
      *
      * @return the PSF half-width at half-maxima
      */
@@ -1673,7 +1675,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     }
 
     /**
-     * Get the PSF standard deviation for a Gaussian using the PSF half-width at half-maxima
+     * Get the PSF standard deviation for a Gaussian using the PSF half-width at half-maxima.
      *
      * @return the PSF standard deviation for a Gaussian
      */
@@ -1683,7 +1685,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     }
 
     /**
-     * Get the PSF half-width at half-maxima from the Image PSF
+     * Get the PSF half-width at half-maxima from the Image PSF.
      *
      * @return the PSF half-width at half-maxima
      */
@@ -1878,7 +1880,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution()))
         {
             // Get the distribution file
-            final String filename = Utils.getFilename("Photon_distribution", settings.getPhotonDistributionFile());
+            final String filename = ImageJUtils.getFilename("Photon_distribution", settings.getPhotonDistributionFile());
             if (filename != null)
             {
                 settings.setPhotonDistributionFile(filename);
@@ -1932,7 +1934,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                     // Ignore
                 }
             }
-            Utils.log("Failed to load custom photon distribution from file: %s. Default to fixed.",
+            ImageJUtils.log("Failed to load custom photon distribution from file: %s. Default to fixed.",
                     settings.getPhotonDistributionFile());
         }
         else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.getPhotonDistribution()))
@@ -2295,7 +2297,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         int lastT = -1;
         for (final LocalisationModelSet l : localisationSets)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
                 break;
             if (l.getTime() != lastT)
             {
@@ -2307,9 +2309,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             i++;
         }
         // Finish processing data
-        Utils.waitForCompletion(futures);
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
         futures.clear();
-        if (Utils.isInterrupted())
+        if (ImageJUtils.isInterrupted())
         {
             IJ.showProgress(1);
             return null;
@@ -2319,21 +2321,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         float[] limits = null;
         for (int t = 1; t <= maxT; t++)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
                 break;
             final Object pixels = stack.getPixels(t);
             if (pixels == null)
                 futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, maxT, t, null,
                         syncResults, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
             else if (limits == null)
-                limits = Maths.limits((float[]) pixels);
+                limits = MathUtils.limits((float[]) pixels);
         }
 
         // Finish
-        Utils.waitForCompletion(futures);
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
         threadPool.shutdown();
         IJ.showProgress(1);
-        if (Utils.isInterrupted() || limits == null)
+        if (ImageJUtils.isInterrupted() || limits == null)
             return null;
         results.end();
 
@@ -2344,21 +2346,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         futures = null;
 
         if (photonsRemoved.get() > 0)
-            Utils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(),
+            ImageJUtils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(),
                     settings.getMinPhotons());
         if (t1Removed.get() > 0)
-            Utils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(),
+            ImageJUtils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(),
                     settings.getMinSnrT1());
         if (tNRemoved.get() > 0)
-            Utils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(),
+            ImageJUtils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(),
                     settings.getMinSnrTN());
         if (photonStats.getN() > 0)
-            Utils.log("Average photons rendered = %s +/- %s", Utils.rounded(photonStats.getMean()),
-                    Utils.rounded(photonStats.getStandardDeviation()));
+            ImageJUtils.log("Average photons rendered = %s +/- %s", MathUtils.rounded(photonStats.getMean()),
+                    MathUtils.rounded(photonStats.getStandardDeviation()));
 
         //System.out.printf("rawPhotons = %f\n", rawPhotons.getMean());
         //System.out.printf("drawPhotons = %f\n", drawPhotons.getMean());
-        //Utils.showHistogram("draw photons", drawPhotons, "photons", true, 0, 1000);
+        //new HistogramPlotBuilder("draw photons", drawPhotons, "photons", true, 0, 1000);
 
         // Update with all those localisation that have been drawn
         localisationSets.clear();
@@ -2373,9 +2375,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         {
             // Get the global limits and ensure all values can be represented
             final Object[] imageArray = stack.getImageArray();
-            limits = Maths.limits((float[]) imageArray[0]);
+            limits = MathUtils.limits((float[]) imageArray[0]);
             for (int j = 1; j < imageArray.length; j++)
-                limits = Maths.limits(limits, (float[]) imageArray[j]);
+                limits = MathUtils.limits(limits, (float[]) imageArray[j]);
             //float limits0 = limits[0];
             final float limits0 = 0; // Leave bias in place
             // Check if the image will fit in a 16-bit range
@@ -2416,7 +2418,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         }
 
         // Show image
-        final ImagePlus imp = Utils.display(CREATE_DATA_IMAGE_TITLE, newStack);
+        final ImagePlus imp = ImageJUtils.display(CREATE_DATA_IMAGE_TITLE, newStack);
 
         final ij.measure.Calibration cal = new ij.measure.Calibration();
         String unit = "nm";
@@ -2624,8 +2626,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                 {
                     final String message = String.format(
                             "Astigmatism model '%s' calibration (%s nm) does not match pixel pitch (%s nm)",
-                            settings.getAstigmatismModel(), Utils.rounded(astigmatismModel.getNmPerPixel()),
-                            Utils.rounded(settings.getPixelPitch()));
+                            settings.getAstigmatismModel(), MathUtils.rounded(astigmatismModel.getNmPerPixel()),
+                            MathUtils.rounded(settings.getPixelPitch()));
                     // Optionally convert
                     final GenericDialog gd = new GenericDialog(TITLE);
                     gd.addMessage(TextUtils.wrap(message + ". Created data is not suitable for fitting.", 80));
@@ -2781,7 +2783,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
         final float readNoise = (float) new CreateDataSettingsHelper(settings).getReadNoiseInCounts();
 
-        return new CCDCameraModel(bias, gain, (float) Maths.pow2(readNoise));
+        return new CCDCameraModel(bias, gain, (float) MathUtils.pow2(readNoise));
     }
 
     /**
@@ -2824,7 +2826,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         @Override
         public void run()
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
                 return;
 
             showProgress();
@@ -2872,7 +2874,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                 final float[] data = new float[settings.getSize() * settings.getSize()];
                 for (final LocalisationModelSet localisationSet : subset)
                 {
-                    if (Utils.isInterrupted())
+                    if (ImageJUtils.isInterrupted())
                         return;
 
                     if (localisationSet.size() == 0)
@@ -3318,7 +3320,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                 ip.setInterpolationMethod(ImageProcessor.BILINEAR);
                 ip = ip.resize(settings.getSize(), settings.getSize());
                 final float[] data = (float[]) ip.getPixels();
-                final double max = Maths.maxDefault(0, data);
+                final double max = MathUtils.maxDefault(0, data);
                 if (max != 0)
                 {
                     final double scale = settings.getBackground() / max;
@@ -3610,7 +3612,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             }
             catch (final DataException e)
             {
-                Utils.log("Unable to compute width: " + e.getMessage());
+                ImageJUtils.log("Unable to compute width: " + e.getMessage());
             }
 
             try
@@ -3629,7 +3631,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             }
             catch (final DataException e)
             {
-                Utils.log("Unable to compute LSE precision: " + e.getMessage());
+                ImageJUtils.log("Unable to compute LSE precision: " + e.getMessage());
             }
 
             // Compute density per frame. Multithread for speed
@@ -3662,7 +3664,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                 });
                 runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats, radius, bounds, allDensity,
                         counter.getCount());
-                Utils.waitForCompletion(futures);
+                ConcurrencyUtils.waitForCompletionUnchecked(futures);
                 threadPool.shutdownNow();
                 IJ.showProgress(1);
 
@@ -3718,13 +3720,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             sb.append(" model=").append(settings.getAstigmatismModel());
         else
         {
-            sb.append(" DoF=").append(Utils.rounded(settings.getDepthOfFocus()));
+            sb.append(" DoF=").append(MathUtils.rounded(settings.getDepthOfFocus()));
             if (settings.getEnterWidth())
-                sb.append(" SD=").append(Utils.rounded(settings.getPsfSd()));
+                sb.append(" SD=").append(MathUtils.rounded(settings.getPsfSd()));
             else
             {
-                sb.append(" λ=").append(Utils.rounded(settings.getWavelength()));
-                sb.append(" NA=").append(Utils.rounded(settings.getNumericalAperture()));
+                sb.append(" λ=").append(MathUtils.rounded(settings.getWavelength()));
+                sb.append(" NA=").append(MathUtils.rounded(settings.getNumericalAperture()));
             }
         }
         sb.append('\t');
@@ -3732,14 +3734,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append('\t');
         sb.append(localisations.size()).append('\t');
         sb.append(nFrames).append('\t');
-        sb.append(Utils.rounded(areaInUm)).append('\t');
-        sb.append(Utils.rounded(localisations.size() / (areaInUm * nFrames), 4)).append('\t');
-        sb.append(Utils.rounded(getHWHM(), 4)).append('\t');
+        sb.append(MathUtils.rounded(areaInUm)).append('\t');
+        sb.append(MathUtils.rounded(localisations.size() / (areaInUm * nFrames), 4)).append('\t');
+        sb.append(MathUtils.rounded(getHWHM(), 4)).append('\t');
         double s = getPsfSD();
-        sb.append(Utils.rounded(s, 4)).append('\t');
+        sb.append(MathUtils.rounded(s, 4)).append('\t');
         s *= settings.getPixelPitch();
         final double sa = PSFCalculator.squarePixelAdjustment(s, settings.getPixelPitch()) / settings.getPixelPitch();
-        sb.append(Utils.rounded(sa, 4)).append('\t');
+        sb.append(MathUtils.rounded(sa, 4)).append('\t');
         // Width not valid for the Image PSF.
         // Q. Is this true? We can approximate the FHWM for a spot-like image PSF.
         final int nStats = (psfModelType == PSF_MODEL_IMAGE) ? stats.length - 1 : stats.length;
@@ -3748,7 +3750,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             final double centre = (alwaysRemoveOutliers[i])
                     ? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
                     : stats[i].getMean();
-            sb.append(Utils.rounded(centre, 4)).append('\t');
+            sb.append(MathUtils.rounded(centre, 4)).append('\t');
         }
         if (java.awt.GraphicsEnvironment.isHeadless())
         {
@@ -3765,15 +3767,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
             final WindowOrganiser wo = new WindowOrganiser();
 
-            boolean requireRetile = false;
+            final HistogramPlotBuilder builder = new HistogramPlotBuilder(TITLE);
             for (int i = 0; i < NAMES.length; i++)
                 if (chosenHistograms[i])
                 {
-                    wo.add(Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
-                            (integerDisplay[i]) ? 1 : 0,
-                            (settings.getRemoveOutliers() || alwaysRemoveOutliers[i]) ? 2 : 0,
-                            settings.getHistogramBins() * ((integerDisplay[i]) ? 100 : 1)));
-                    requireRetile = requireRetile || Utils.isNewWindow();
+                    builder.setData((StoredDataStatistics) stats[i]).setName(NAMES[i])
+                      .setIntegerBins(integerDisplay[i])
+                      .setRemoveOutliersOption(
+                            (settings.getRemoveOutliers() || alwaysRemoveOutliers[i]) ? 2 : 0)
+                      .setNumberOfBins(settings.getHistogramBins()).show(wo);
                 }
 
             wo.tile();
@@ -3817,7 +3819,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         IJ.showProgress(currentIndex, finalIndex);
     }
 
-    private synchronized static void addDensity(Statistics stats, int[] density)
+    private static synchronized void addDensity(Statistics stats, int[] density)
     {
         stats.add(density);
     }
@@ -3957,12 +3959,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     {
         if (!settings.getSaveImage())
             return;
-        final String[] path = Utils.decodePath(settings.getImageFilename());
+        final String[] path = ImageJUtils.decodePath(settings.getImageFilename());
         final OpenDialog chooser = new OpenDialog("Image_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {
             settings.setImageFilename(chooser.getDirectory() + chooser.getFileName());
-            settings.setImageFilename(Utils.replaceExtension(settings.getImageFilename(), "tiff"));
+            settings.setImageFilename(ImageJUtils.replaceExtension(settings.getImageFilename(), "tiff"));
 
             final FileSaver fs = new FileSaver(imp);
             boolean ok;
@@ -3982,12 +3984,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     {
         if (!settings.getSaveImageResults())
             return;
-        final String[] path = Utils.decodePath(settings.getImageResultsFilename());
+        final String[] path = ImageJUtils.decodePath(settings.getImageResultsFilename());
         final OpenDialog chooser = new OpenDialog("Image_Results_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {
             settings.setImageResultsFilename(chooser.getDirectory() + chooser.getFileName());
-            settings.setImageResultsFilename(Utils.replaceExtension(settings.getImageResultsFilename(), "xls"));
+            settings.setImageResultsFilename(ImageJUtils.replaceExtension(settings.getImageResultsFilename(), "xls"));
 
             final TextFilePeakResults r = new TextFilePeakResults(settings.getImageResultsFilename(), false);
             r.copySettings(results);
@@ -4177,12 +4179,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         if (!settings.getSaveFluorophores() || fluorophores == null)
             return;
 
-        final String[] path = Utils.decodePath(settings.getFluorophoresFilename());
+        final String[] path = ImageJUtils.decodePath(settings.getFluorophoresFilename());
         final OpenDialog chooser = new OpenDialog("Fluorophores_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {
             settings.setFluorophoresFilename(chooser.getDirectory() + chooser.getFileName());
-            settings.setFluorophoresFilename(Utils.replaceExtension(settings.getFluorophoresFilename(), "xls"));
+            settings.setFluorophoresFilename(ImageJUtils.replaceExtension(settings.getFluorophoresFilename(), "xls"));
 
             try (BufferedWriter output = new BufferedWriter(new FileWriter(settings.getFluorophoresFilename())))
             {
@@ -4196,7 +4198,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                     sb.append(f.getId()).append('\t');
                     sb.append(f.getNumberOfBlinks()).append('\t');
                     for (final double[] burst : f.getBurstSequence())
-                        sb.append(Utils.rounded(burst[0], 3)).append('\t').append(Utils.rounded(burst[1], 3))
+                        sb.append(MathUtils.rounded(burst[0], 3)).append('\t').append(MathUtils.rounded(burst[1], 3))
                                 .append('\t');
                     output.write(sb.toString());
                     output.newLine();
@@ -4243,12 +4245,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
         final LoadLocalisationsSettings.Builder settings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 
-        final String[] path = Utils.decodePath(settings.getLocalisationsFilename());
+        final String[] path = ImageJUtils.decodePath(settings.getLocalisationsFilename());
         final OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {
             settings.setLocalisationsFilename(
-                    Utils.replaceExtension(chooser.getDirectory() + chooser.getFileName(), "xls"));
+                    ImageJUtils.replaceExtension(chooser.getDirectory() + chooser.getFileName(), "xls"));
             SettingsManager.writeSettings(settings.build());
 
             try (BufferedWriter output = new BufferedWriter(new FileWriter(settings.getLocalisationsFilename())))
@@ -4705,9 +4707,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                 final int upperx = modelBounds.x + modelBounds.width - size;
                 final int uppery = modelBounds.y + modelBounds.height - size;
                 gd.addSlider("Origin_x", modelBounds.x, upperx,
-                        Maths.clip(modelBounds.x, upperx, settings.getOriginX()));
+                        MathUtils.clip(modelBounds.x, upperx, settings.getOriginX()));
                 gd.addSlider("Origin_y", modelBounds.y, uppery,
-                        Maths.clip(modelBounds.y, uppery, settings.getOriginY()));
+                        MathUtils.clip(modelBounds.y, uppery, settings.getOriginY()));
                 gd.showDialog();
                 if (gd.wasCanceled())
                     throw new IllegalArgumentException("Unknown camera model crop");
@@ -4952,7 +4954,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     }
 
     /**
-     * Show a dialog allowing the parameters for a simulation to be performed
+     * Show a dialog allowing the parameters for a simulation to be performed.
      *
      * @return True if the parameters were collected
      */
@@ -4977,7 +4979,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         if (!trackMode)
             gd.addNumericField("Seconds", settings.getSeconds(), 1);
         gd.addNumericField("Exposure_time (ms)", settings.getExposureTime(), 1);
-        gd.addSlider("Steps_per_second", 1, Maths.clip(15, 1000, settings.getStepsPerSecond()),
+        gd.addSlider("Steps_per_second", 1, MathUtils.clip(15, 1000, settings.getStepsPerSecond()),
                 settings.getStepsPerSecond());
         if (!trackMode)
         {
@@ -5273,7 +5275,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
             gd.addCheckbox("Enable_2D_rotation", settings.getRotate2D());
             gd.addCheckbox("Show_example_compounds", false);
 
-            if (Utils.isShowGenericDialog())
+            if (ImageJUtils.isShowGenericDialog())
             {
                 @SuppressWarnings("rawtypes")
                 final Vector v = gd.getCheckboxes();
@@ -5530,8 +5532,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                     cm.setDiffusionRate(m.getDiffusionRate() * diffusionFactor);
                     cm.setDiffusionType(DiffusionType.fromString(m.getDiffusionType()));
                     compounds.add(cm);
-                    compoundNames.add(String.format("Fraction=%s, D=%s um^2/s", Utils.rounded(cm.getFraction()),
-                            Utils.rounded(m.getDiffusionRate())));
+                    compoundNames.add(String.format("Fraction=%s, D=%s um^2/s", MathUtils.rounded(cm.getFraction()),
+                            MathUtils.rounded(m.getDiffusionRate())));
                 }
 
                 // Convert coordinates from nm to pixels
@@ -5613,7 +5615,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>The generators used in the simulation can be adjusted by changing this method.
      *
      * @see uk.ac.sussex.gdsc.smlm.model.RandomGeneratorFactory#createRandomGenerator()
@@ -5772,7 +5774,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
                     NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
         }
 
-        //Statistics stats = new Statistics(Arrays.copyOfRange(noise, 1, noise.length));
+        //Statistics stats = Statistics.create(Arrays.copyOfRange(noise, 1, noise.length));
         //System.out.printf("Noise = %.3f +/- %.3f (%d)\n", stats.getMean(), stats.getStandardDeviation(), stats.getN());
 
         // Convert noise units from counts to the result format
@@ -5843,13 +5845,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         final RawResultProcedure sp = new RawResultProcedure(results);
         sp.getBIXYZ();
         final float[] signal = sp.intensity;
-        float[] limits = Maths.limits(signal);
+        float[] limits = MathUtils.limits(signal);
         double minSignal = limits[0];
         double maxSignal = limits[1];
-        double signalPerFrame = Maths.sum(signal) / molecules;
+        double signalPerFrame = MathUtils.sum(signal) / molecules;
 
         final float[] depths = sp.z;
-        limits = Maths.limits(depths);
+        limits = MathUtils.limits(depths);
         float depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
         final boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
 
@@ -5889,11 +5891,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
         final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
         final StringBuilder sb = new StringBuilder();
         sb.append("Results contain ").append(TextUtils.pleural(molecules, "molecule")).append('\n');
-        sb.append("Min signal = ").append(Utils.rounded(minSignal)).append(iUnits).append('\n');
-        sb.append("Max signal = ").append(Utils.rounded(maxSignal)).append(iUnits).append('\n');
-        sb.append("Av signal = ").append(Utils.rounded(signalPerFrame)).append(iUnits).append('\n');
+        sb.append("Min signal = ").append(MathUtils.rounded(minSignal)).append(iUnits).append('\n');
+        sb.append("Max signal = ").append(MathUtils.rounded(maxSignal)).append(iUnits).append('\n');
+        sb.append("Av signal = ").append(MathUtils.rounded(signalPerFrame)).append(iUnits).append('\n');
         if (fixedDepth)
-            sb.append("Fixed depth = ").append(Utils.rounded(depth)).append(zUnits).append('\n');
+            sb.append("Fixed depth = ").append(MathUtils.rounded(depth)).append(zUnits).append('\n');
         gd.addMessage(sb.toString());
 
         gd.addCheckbox("Flourophore_simulation", fullSimulation);
@@ -6089,13 +6091,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
     }
 
     /**
-     * Show a dialog allowing the parameters for a benchmark simulation to be loaded
+     * Show a dialog allowing the parameters for a benchmark simulation to be loaded.
      *
      * @return True if the parameters were collected
      */
     private static boolean showLoadDialog()
     {
-        final String[] images = Utils.getImageList(Utils.GREY_SCALE);
+        final String[] images = ImageJUtils.getImageList(ImageJUtils.GREY_SCALE);
         if (images.length == 0)
         {
             IJ.error(TITLE, "No greyscale benchmark images");

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results.procedures;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Interface for accessing the results
+ * Interface for accessing the results.
  */
 public interface IXYRResultProcedure
 {

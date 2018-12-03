@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.util.function.Supplier;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Supplier;
 
 @SuppressWarnings({ "javadoc" })
 public class CoordinateStoreTest

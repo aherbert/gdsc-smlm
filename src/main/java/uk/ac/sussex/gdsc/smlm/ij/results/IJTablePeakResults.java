@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
-import uk.ac.sussex.gdsc.core.data.utils.RounderFactory;
+import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -165,7 +165,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
         toPixelConverter = new IdentityTypeConverter<>(null);
         calculator = null;
         canComputePrecision = false;
-        rounder = RounderFactory.create(roundingPrecision);
+        rounder = RounderUtils.create(roundingPrecision);
 
         // We must correctly convert all the PSF parameter types
         helper = new PeakResultConversionHelper(getCalibration(), getPSF());
@@ -206,7 +206,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
         }
 
         ic = converters[PeakResult.INTENSITY];
-        outIndices = SimpleArrayUtils.newArray(converters.length, 0, 1);
+        outIndices = SimpleArrayUtils.natural(converters.length);
         if (!showZ)
         {
             final TIntArrayList list = new TIntArrayList(outIndices);
@@ -241,7 +241,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * Create the result window (if it is not available)
+     * Create the result window (if it is not available).
      */
     private void createResultsWindow()
     {
@@ -587,7 +587,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return the name of the frame column
+     * @return the name of the frame column.
      */
     public String getFrameColumnName()
     {
@@ -611,7 +611,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return the table title
+     * @return the table title.
      */
     public String getTableTitle()
     {
@@ -632,7 +632,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return True if the deviations of the parameters should be shown
+     * @return True if the deviations of the parameters should be shown.
      */
     public boolean isShowDeviations()
     {
@@ -666,7 +666,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return the addCounter
+     * @return the addCounter.
      */
     public boolean isAddCounter()
     {
@@ -704,7 +704,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return the resultsWindow
+     * @return the resultsWindow.
      */
     public TextWindow getResultsWindow()
     {
@@ -742,7 +742,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return If true show the results end frame in the table
+     * @return If true show the results end frame in the table.
      */
     public boolean isShowEndFrame()
     {
@@ -759,7 +759,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return If true show the results Id in the table
+     * @return If true show the results Id in the table.
      */
     public boolean isShowId()
     {
@@ -776,7 +776,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return If true then show the fitting data (original pixel data and fit error) in the table
+     * @return If true then show the fitting data (original pixel data and fit error) in the table.
      */
     public boolean isShowFittingData()
     {
@@ -793,7 +793,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return If true then show the noise and SNR in the table
+     * @return If true then show the noise and SNR in the table.
      */
     public boolean isShowNoiseData()
     {
@@ -847,7 +847,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     /**
-     * @return the repaintInterval
+     * @return the repaintInterval.
      */
     public double getRepaintInterval()
     {

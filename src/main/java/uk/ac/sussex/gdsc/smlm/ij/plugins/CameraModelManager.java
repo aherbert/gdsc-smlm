@@ -42,10 +42,10 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.ExtendedStatistics;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
@@ -58,7 +58,7 @@ import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
 /**
- * This plugin handle the save and load of per-pixel camera models
+ * This plugin handle the save and load of per-pixel camera models.
  */
 public class CameraModelManager implements PlugIn
 {
@@ -124,7 +124,7 @@ public class CameraModelManager implements PlugIn
     private static String getName(String filename)
     {
         final File file = new File(filename);
-        final String name = Utils.removeExtension(file.getName());
+        final String name = ImageJUtils.removeExtension(file.getName());
         return name;
     }
 
@@ -179,14 +179,14 @@ public class CameraModelManager implements PlugIn
 
         if (imp == null)
         {
-            Utils.log("Failed to load camera model %s data from file: ", name, filename);
+            ImageJUtils.log("Failed to load camera model %s data from file: ", name, filename);
             return null;
         }
         // Check stack size
         final ImageStack stack = imp.getImageStack();
         if (stack.getSize() != 3)
         {
-            Utils.log("Camera model %s requires 3 image stack from file: %s", name, filename);
+            ImageJUtils.log("Camera model %s requires 3 image stack from file: %s", name, filename);
             return null;
         }
         // Get the origin
@@ -203,7 +203,7 @@ public class CameraModelManager implements PlugIn
         }
         catch (final Exception e)
         {
-            Utils.log("Failed to load camera model %s from file: %s. %s", name, filename, e.getMessage());
+            ImageJUtils.log("Failed to load camera model %s from file: %s. %s", name, filename, e.getMessage());
         }
         return null;
     }
@@ -315,7 +315,7 @@ public class CameraModelManager implements PlugIn
     {
         // Select an image
         GenericDialog gd = new GenericDialog(TITLE);
-        final String[] list = Utils.getImageList(Utils.GREY_SCALE);
+        final String[] list = ImageJUtils.getImageList(ImageJUtils.GREY_SCALE);
         gd.addChoice("Image", list, pluginSettings.getImage());
         gd.showDialog();
         if (gd.wasCanceled())
@@ -410,7 +410,7 @@ public class CameraModelManager implements PlugIn
         settings.removeCameraModelResources(name);
         SettingsManager.writeSettings(settings.build());
 
-        Utils.log("Deleted camera model: %s\n%s", name, resource);
+        ImageJUtils.log("Deleted camera model: %s\n%s", name, resource);
     }
 
     private static void loadFromDirectory()
@@ -495,7 +495,7 @@ public class CameraModelManager implements PlugIn
                     ".\nExpecting stack of size 3 but it was " + stack.getSize());
             return;
         }
-        Utils.log("Camera model: %s\n%s", name, resource);
+        ImageJUtils.log("Camera model: %s\n%s", name, resource);
         for (int n = 1; n <= stack.getSize(); n++)
             logStats(stack.getSliceLabel(n), stack.getProcessor(n));
 
@@ -510,7 +510,7 @@ public class CameraModelManager implements PlugIn
             final ExtendedStatistics stats2 = new ExtendedStatistics();
             for (int i = 0; i < gain.length; i++)
             {
-                final double v1 = variance[i] / Maths.pow2(gain[i]);
+                final double v1 = variance[i] / MathUtils.pow2(gain[i]);
                 var_g2[i] = (float) v1;
                 stats1.add(Math.sqrt(v1));
                 stats2.add(v1);
@@ -520,7 +520,7 @@ public class CameraModelManager implements PlugIn
         }
         catch (final Exception e)
         {
-            Utils.log("Failed to load camera model %s from file: %s. %s", name, resource.getFilename(), e.getMessage());
+            ImageJUtils.log("Failed to load camera model %s from file: %s. %s", name, resource.getFilename(), e.getMessage());
         }
         stack.addSlice("var/g^2", var_g2);
 
@@ -533,7 +533,7 @@ public class CameraModelManager implements PlugIn
         for (int n = 1; n <= 4; n++)
         {
             cimp.setSliceWithoutUpdate(n);
-            Utils.autoAdjust(cimp, true);
+            ImageJUtils.autoAdjust(cimp, true);
         }
         cimp.setSliceWithoutUpdate(1);
 
@@ -557,9 +557,9 @@ public class CameraModelManager implements PlugIn
 
     private static void logStats(String name, ExtendedStatistics stats)
     {
-        Utils.log("%s : %s += %s : [%s to %s]", name, Utils.rounded(stats.getMean()),
-                Utils.rounded(stats.getStandardDeviation()), Utils.rounded(stats.getMin()),
-                Utils.rounded(stats.getMax()));
+        ImageJUtils.log("%s : %s += %s : [%s to %s]", name, MathUtils.rounded(stats.getMean()),
+                MathUtils.rounded(stats.getStandardDeviation()), MathUtils.rounded(stats.getMin()),
+                MathUtils.rounded(stats.getMax()));
     }
 
     private static void printCameraModels()

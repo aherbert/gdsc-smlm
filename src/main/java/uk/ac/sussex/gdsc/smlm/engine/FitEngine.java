@@ -23,16 +23,22 @@
  */
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import uk.ac.sussex.gdsc.core.logging.FileLogger;
-import uk.ac.sussex.gdsc.core.logging.Logger;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.logging.PlainMessageFormatter;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
 import uk.ac.sussex.gdsc.smlm.results.PeakResults;
@@ -54,13 +60,11 @@ public class FitEngine
     private final PeakResults results;
     private boolean isAlive = true;
 
-    private final FitJob sum = null;
-
     // Used by the FitWorkers
     private final int fitting;
     private final MaximaSpotFilter spotFilter;
     private Logger logger = null;
-    private final FileLogger fileLogger = null;
+    private Logger debugLogger = null;
     private FitTypeCounter counter = null;
 
     /**
@@ -75,7 +79,7 @@ public class FitEngine
     }
 
     /**
-     * @return The filter used for identifying candidate local maxima
+     * @return The filter used for identifying candidate local maxima.
      */
     public MaximaSpotFilter getSpotFilter()
     {
@@ -83,7 +87,7 @@ public class FitEngine
     }
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param config
      *            The fit configuration
@@ -100,7 +104,7 @@ public class FitEngine
     }
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param config
      *            The fit configuration
@@ -126,13 +130,13 @@ public class FitEngine
         this.queueType = queueType;
         switch (queueType)
         {
-            case BLOCKING:
-            default:
-                this.jobs = new ArrayBlockingQueue<>(queueSize);
-                break;
             case NON_BLOCKING:
             case IGNORE:
                 this.jobs = new LinkedBlockingQueue<>();
+                break;
+            case BLOCKING:
+            default:
+                this.jobs = new ArrayBlockingQueue<>(queueSize);
                 break;
         }
         this.results = results;
@@ -142,14 +146,18 @@ public class FitEngine
 
         logger = config.getFitConfiguration().getLog();
         //// Allow debugging the fit process
-        //try
-        //{
-        //	fileLogger = new FileLogger(
-        //			String.format("/tmp/%s%s.log", config.getFitConfiguration().getFitSolver().getShortName(),
-        //					(config.getFitConfiguration().isModelCamera()) ? "C" : ""));
-        //}
-        //catch (java.io.FileNotFoundException e)
-        //{
+        //try {
+        //    String pattern = new File(System.getProperty("java.io.tmpdir"),
+        //        String.format("%s%s.log",
+        //        FitProtosHelper.getName(config.getFitConfiguration().getFitSolver()),
+        //        (config.getFitConfiguration().isModelCamera()) ? "C" : "")
+        //        ).getPath();
+        //    FileHandler handler = new FileHandler(pattern);
+        //    handler.setFormatter(new PlainMessageFormatter());
+        //    debugLogger = LoggerUtils.getUnconfiguredLogger();
+        //    debugLogger.addHandler(handler);
+        //} catch (IOException ex) {
+        //  // Ignore
         //}
 
         // Allow logging the type of fit
@@ -176,7 +184,7 @@ public class FitEngine
                     copy, results, jobs);
             // Note - Clone the spot filter for each worker.
             worker.setSearchParameters(getSpotFilter(), fitting);
-            worker.setLogger2(fileLogger);
+            worker.setDebugLogger(debugLogger);
             worker.setCounter(counter);
             final Thread t = new Thread(worker);
 
@@ -243,9 +251,6 @@ public class FitEngine
         if (threads.isEmpty())
             return;
 
-        if (sum != null)
-            put(sum); // Final frame
-
         time = 0;
 
         if (now)
@@ -278,8 +283,8 @@ public class FitEngine
                 e.printStackTrace();
             }
 
-        if (fileLogger != null)
-            fileLogger.close();
+        if (debugLogger != null)
+            debugLogger.getHandlers()[0].close();
 
         // Output this to the log
         if (counter != null)
@@ -317,12 +322,11 @@ public class FitEngine
 
     private void report(String name, int count, int total)
     {
-        logger.info("%s %d / %d = %.2f", name, count, total, (100.00 * count) / total);
-        //System.out.printf("%s %d / %d = %.2f\n", name, count, total, (100.00 * count) / total);
+        LoggerUtils.log(logger, Level.INFO, "%s %d / %d = %.2f", name, count, total, (100.00 * count) / total);
     }
 
     /**
-     * @return the total fitting time
+     * @return the total fitting time.
      */
     public long getTime()
     {
@@ -340,7 +344,7 @@ public class FitEngine
     }
 
     /**
-     * @return True if there are no jobs queued
+     * @return True if there are no jobs queued.
      */
     public boolean isQueueEmpty()
     {

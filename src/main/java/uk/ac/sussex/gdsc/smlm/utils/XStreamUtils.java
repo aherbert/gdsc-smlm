@@ -28,9 +28,9 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 /**
- * Extend the XML Utilities using XStream
+ * Provide XML utilities using XStream.
  */
-public class XmlUtils extends uk.ac.sussex.gdsc.core.utils.XmlUtils
+public class XStreamUtils
 {
     private static XStream xs = null;
 

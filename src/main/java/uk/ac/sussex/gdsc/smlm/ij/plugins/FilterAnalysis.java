@@ -43,7 +43,7 @@ import ij.gui.PlotWindow;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
@@ -197,7 +197,7 @@ public class FilterAnalysis implements PlugIn
     {
         final GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-        final String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
+        final String[] path = ImageJUtils.decodePath(filterSettings.getFilterSetFilename());
         final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {
@@ -231,7 +231,7 @@ public class FilterAnalysis implements PlugIn
     {
         final GUIFilterSettings.Builder filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 
-        final String[] path = Utils.decodePath(filterSettings.getFilterSetFilename());
+        final String[] path = ImageJUtils.decodePath(filterSettings.getFilterSetFilename());
         final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
         if (chooser.getFileName() != null)
         {
@@ -587,7 +587,7 @@ public class FilterAnalysis implements PlugIn
             plot.draw();
             plot.setColor(Color.BLUE);
             plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
-            final PlotWindow plotWindow = Utils.display(p.name, plot);
+            final PlotWindow plotWindow = ImageJUtils.display(p.name, plot);
             list[i++] = plotWindow.getImagePlus().getID();
         }
         WindowOrganiser.tileWindows(list);
@@ -611,8 +611,8 @@ public class FilterAnalysis implements PlugIn
 
                 final ClassificationResult s = filter.score(resultsList);
 
-                final String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
-                        Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
+                final String message = type + "\t\t\t" + MathUtils.rounded(s.getJaccard(), 4) + "\t\t" +
+                        MathUtils.rounded(s.getPrecision(), 4) + "\t\t" + MathUtils.rounded(s.getRecall(), 4);
 
                 if (isHeadless)
                     IJ.log(message);
@@ -632,7 +632,7 @@ public class FilterAnalysis implements PlugIn
 
                     final StringBuilder sb = new StringBuilder();
                     sb.append('\t').append(filter.getParameterName(index)).append('\t');
-                    sb.append(Utils.rounded(filter.getParameterValue(index), 4)).append('\t');
+                    sb.append(MathUtils.rounded(filter.getParameterValue(index), 4)).append('\t');
 
                     final double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
                     final double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
@@ -669,8 +669,8 @@ public class FilterAnalysis implements PlugIn
         final double relativeSensitivity = (abs1 + abs2) * 0.5;
         final double sensitivity = (dydx1 + dydx2) * 0.5;
 
-        sb.append(Utils.rounded(relativeSensitivity, 4)).append('\t');
-        sb.append(Utils.rounded(sensitivity, 4)).append('\t');
+        sb.append(MathUtils.rounded(relativeSensitivity, 4)).append('\t');
+        sb.append(MathUtils.rounded(sensitivity, 4)).append('\t');
     }
 
     private void createResultsWindow()
@@ -867,11 +867,11 @@ public class FilterAnalysis implements PlugIn
         {
             final StringBuilder sb = new StringBuilder();
             sb.append(filter.getName()).append('\t');
-            sb.append(s.getTP() + s.getFP()).append('\t');
-            sb.append(s.getTP()).append('\t');
-            sb.append(s.getFP()).append('\t');
-            sb.append(s.getTN()).append('\t');
-            sb.append(s.getFN()).append('\t');
+            sb.append(s.getTruePositives() + s.getFalsePositives()).append('\t');
+            sb.append(s.getTruePositives()).append('\t');
+            sb.append(s.getFalsePositives()).append('\t');
+            sb.append(s.getTrueNegatives()).append('\t');
+            sb.append(s.getFalseNegatives()).append('\t');
             sb.append(s.getJaccard()).append('\t');
             sb.append(s.getPrecision()).append('\t');
             sb.append(s.getRecall()).append('\t');

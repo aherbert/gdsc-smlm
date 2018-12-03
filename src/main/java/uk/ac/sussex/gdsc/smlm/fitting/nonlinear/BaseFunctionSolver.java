@@ -362,7 +362,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
     }
 
     /**
-     * @return the maxEvaluations
+     * @return the maxEvaluations.
      */
     public int getMaxEvaluations()
     {
@@ -467,7 +467,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
     }
 
     /**
-     * @return The function
+     * @return The function.
      */
     public GradientFunction getGradientFunction()
     {

@@ -24,21 +24,21 @@
 package uk.ac.sussex.gdsc.smlm.engine;
 
 /**
- * Performs quadrant analysis on fit residuals to look for asymmetry
+ * Performs quadrant analysis on fit residuals to look for asymmetry.
  */
 public class QuadrantAnalysis
 {
     // Make these public for simplicity
 
-    /** The sum of the 4 quadrants using the X dividing lines (two diagonals through the centre) */
+    /** The sum of the 4 quadrants using the X dividing lines (two diagonals through the centre). */
     public double ABCD;
-    /** The sum of the A quadrant using the X dividing lines (two diagonals through the centre) */
+    /** The sum of the A quadrant using the X dividing lines (two diagonals through the centre). */
     public double A;
-    /** The sum of the B quadrant using the X dividing lines (two diagonals through the centre) */
+    /** The sum of the B quadrant using the X dividing lines (two diagonals through the centre). */
     public double B;
-    /** The sum of the C quadrant using the X dividing lines (two diagonals through the centre) */
+    /** The sum of the C quadrant using the X dividing lines (two diagonals through the centre). */
     public double C;
-    /** The sum of the D quadrant using the X dividing lines (two diagonals through the centre) */
+    /** The sum of the D quadrant using the X dividing lines (two diagonals through the centre). */
     public double D;
     /** The sum of the 4 quadrants using the + dividing lines (horizontal and vertical through the centre) */
     public double ABCD2;
@@ -71,7 +71,7 @@ public class QuadrantAnalysis
      */
     public double score2;
 
-    /** The vector direction defined by the assymetry in the quadrants */
+    /** The vector direction defined by the assymetry in the quadrants. */
     public int[] vector;
     /**
      * The maximum asymmetry score for quadrant analysis.
@@ -358,7 +358,7 @@ public class QuadrantAnalysis
     }
 
     /**
-     * Gets the angle between two vectors
+     * Gets the angle between two vectors.
      *
      * @param a
      *            the a
@@ -388,7 +388,7 @@ public class QuadrantAnalysis
     }
 
     /**
-     * Gets the angle between two vectors
+     * Gets the angle between two vectors.
      *
      * @param a
      *            the a

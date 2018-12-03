@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ga;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 /**
- * Base class for data generation using randomness
+ * Base class for data generation using randomness.
  */
 public abstract class Randomiser
 {

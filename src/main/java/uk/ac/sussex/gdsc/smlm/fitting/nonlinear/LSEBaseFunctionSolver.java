@@ -23,7 +23,7 @@
  */
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolverType;
 import uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -136,7 +136,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
     @Override
     public double getAdjustedCoefficientOfDetermination()
     {
-        return Maths.getAdjustedCoefficientOfDetermination(getResidualSumOfSquares(), getTotalSumOfSquares(),
+        return MathUtils.getAdjustedCoefficientOfDetermination(getResidualSumOfSquares(), getTotalSumOfSquares(),
                 getNumberOfFittedPoints(), getNumberOfFittedParameters());
     }
 

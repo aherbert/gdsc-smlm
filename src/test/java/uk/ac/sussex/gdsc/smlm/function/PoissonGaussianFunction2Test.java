@@ -1,8 +1,9 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -12,8 +13,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunction2Test
@@ -171,7 +173,7 @@ public class PoissonGaussianFunction2Test
         }, min, max);
 
         if (p2 < 0.98 || p2 > 1.02)
-            logger.log(TestLog.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
+            logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
 
         return p2;
     }
@@ -193,13 +195,14 @@ public class PoissonGaussianFunction2Test
         // Note: The input mu parameter is pre-gain.
         final double e = mu;
         final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-3, 0);
         for (int x = min; x <= max; x++)
         {
             final double p = f.likelihood(x, e);
             if (p == 0)
                 continue;
             final double logP = f.logLikelihood(x, e);
-            ExtraAssertions.assertEqualsRelative(Math.log(p), logP, 1e-3, msg);
+            TestAssertions.assertTest(Math.log(p), logP, predicate, msg);
         }
     }
 }

@@ -42,8 +42,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.utils.BitFlags;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
@@ -58,15 +58,15 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
-import uk.ac.sussex.gdsc.smlm.utils.XmlUtils;
+import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
 
 /**
- * Reads the fit results from file
+ * Reads the fit results from file.
  */
 public class PeakResultsReader
 {
     // Set up to read two-axis (and theta) Gaussian 2D data into the current format
-    private final static int isx, isy, ia, nTwoAxis, nTwoAxisAndTheta;
+    private static final int isx, isy, ia, nTwoAxis, nTwoAxisAndTheta;
     static
     {
         final PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
@@ -78,11 +78,11 @@ public class PeakResultsReader
         nTwoAxisAndTheta = PeakResult.STANDARD_PARAMETERS + 3;
     }
 
-    /** Index of the background in the parameters array in the legacy GDSC file format */
+    /** Index of the background in the parameters array in the legacy GDSC file format. */
     static final int LEGACY_FORMAT_BACKGROUND = 0;
-    /** Index of the signal intensity in the parameters array in the legacy GDSC file format */
+    /** Index of the signal intensity in the parameters array in the legacy GDSC file format. */
     static final int LEGACY_FORMAT_SIGNAL = 1;
-    /** Index of the angle in the parameters array in the legacy GDSC file format */
+    /** Index of the angle in the parameters array in the legacy GDSC file format. */
     static final int LEGACY_FORMAT_ANGLE = 2;
     /** Index of the x-position in the parameters array in the legacy GDSC file format */
     static final int LEGACY_FORMAT_X_POSITION = 3;
@@ -100,11 +100,11 @@ public class PeakResultsReader
      */
     private static String IMAGEJ_TABLE_RESULTS_HEADER_V1_V2 = "origX\torigY\torigValue\tError\tNoise";
 
-    /** The space pattern */
+    /** The space pattern. */
     private static Pattern spacePattern = Pattern.compile(" ");
-    /** The tab pattern */
+    /** The tab pattern. */
     private static Pattern tabPattern = Pattern.compile("\t");
-    /** Simple whitespace pattern for tabs of spaces */
+    /** Simple whitespace pattern for tabs of spaces. */
     private static Pattern whitespacePattern = Pattern.compile("[\t ]");
 
     private boolean useScanner = false;
@@ -229,9 +229,9 @@ public class PeakResultsReader
                         try
                         {
                             final int flags = Integer.parseInt(version.substring(startIndex, endIndex));
-                            readEndFrame = BitFlags.areSet(flags, SMLMFilePeakResults.FLAG_END_FRAME);
-                            readId = BitFlags.areSet(flags, SMLMFilePeakResults.FLAG_ID);
-                            readPrecision = BitFlags.areSet(flags, SMLMFilePeakResults.FLAG_PRECISION);
+                            readEndFrame = BitFlagUtils.areSet(flags, SMLMFilePeakResults.FLAG_END_FRAME);
+                            readId = BitFlagUtils.areSet(flags, SMLMFilePeakResults.FLAG_ID);
+                            readPrecision = BitFlagUtils.areSet(flags, SMLMFilePeakResults.FLAG_PRECISION);
                         }
                         catch (final NumberFormatException e)
                         {
@@ -292,7 +292,7 @@ public class PeakResultsReader
     }
 
     /**
-     * @return True if the results file is binary
+     * @return True if the results file is binary.
      */
     public boolean isBinary()
     {
@@ -301,7 +301,7 @@ public class PeakResultsReader
     }
 
     /**
-     * @return The file format
+     * @return The file format.
      */
     public FileFormat getFormat()
     {
@@ -311,7 +311,7 @@ public class PeakResultsReader
     }
 
     /**
-     * @return The bounds specified in the results header
+     * @return The bounds specified in the results header.
      */
     public Rectangle getBounds()
     {
@@ -336,7 +336,7 @@ public class PeakResultsReader
     }
 
     /**
-     * @return The name specified in the results header
+     * @return The name specified in the results header.
      */
     public String getName()
     {
@@ -349,7 +349,7 @@ public class PeakResultsReader
     }
 
     /**
-     * @return The source specified in the results header
+     * @return The source specified in the results header.
      */
     public ImageSource getSource()
     {
@@ -368,7 +368,7 @@ public class PeakResultsReader
     }
 
     /**
-     * @return The calibration specified in the results header
+     * @return The calibration specified in the results header.
      */
     @SuppressWarnings("deprecation")
     public Calibration getCalibration()
@@ -388,7 +388,7 @@ public class PeakResultsReader
                         try
                         {
                             final float resolution = Float.parseFloat(match.group(1));
-                            if (Maths.isFinite(resolution) && resolution > 0)
+                            if (Double.isFinite(resolution) && resolution > 0)
                             {
                                 final double nmPerPixel = (float) (1e9 / resolution);
                                 calibration = new CalibrationWriter();
@@ -411,7 +411,7 @@ public class PeakResultsReader
                             // Convert the XML back
                             try
                             {
-                                final uk.ac.sussex.gdsc.smlm.results.Calibration cal = (uk.ac.sussex.gdsc.smlm.results.Calibration) XmlUtils
+                                final uk.ac.sussex.gdsc.smlm.results.Calibration cal = (uk.ac.sussex.gdsc.smlm.results.Calibration) XStreamUtils
                                         .fromXML(calibrationString);
                                 cal.validate();
 

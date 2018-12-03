@@ -40,14 +40,13 @@ import ij.ImagePlus;
 import ij.io.FileInfo;
 import ij.io.Opener;
 import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.generics.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.io.ByteArraySeekableStream;
 import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
 import uk.ac.sussex.gdsc.core.ij.io.FastImageReader;
 import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder;
-import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoderBE;
-import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoderLE;
+import uk.ac.sussex.gdsc.core.ij.io.BigEndianFastTiffDecoder;
+import uk.ac.sussex.gdsc.core.ij.io.LittleEndianFastTiffDecoder;
 import uk.ac.sussex.gdsc.core.ij.io.FileSeekableStream;
 import uk.ac.sussex.gdsc.core.ij.io.SeekableStream;
 import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder.IndexMap;
@@ -55,6 +54,7 @@ import uk.ac.sussex.gdsc.core.ij.io.FastTiffDecoder.NumberOfImages;
 import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
 /**
@@ -73,7 +73,7 @@ public class SeriesImageSource extends ImageSource
     private long sequentialReadBufferLimit = 52428800L;
 
     /**
-     * Store details for an image
+     * Store details for an image.
      */
     private abstract class Image
     {
@@ -130,7 +130,7 @@ public class SeriesImageSource extends ImageSource
         abstract Object getFrame(int i) throws Exception;
 
         /**
-         * Close the image
+         * Close the image.
          *
          * @param freeMemory
          *            Set to true to free any cached memory
@@ -142,7 +142,7 @@ public class SeriesImageSource extends ImageSource
     }
 
     /**
-     * Support all images ImageJ can read using a fixed image array
+     * Support all images ImageJ can read using a fixed image array.
      */
     @SuppressWarnings("unused")
     private class ArrayImage extends Image
@@ -189,11 +189,11 @@ public class SeriesImageSource extends ImageSource
         FastTiffDecoder td = null;
         boolean inMemory = false;
         /**
-         * Flag indicating that no errors reading the image have occurred
+         * Flag indicating that no errors reading the image have occurred.
          */
         boolean canRead = true;
         /**
-         * The number of frames that have been read from the input stream
+         * The number of frames that have been read from the input stream.
          */
         int frameCount = 0;
         /** Flag indicating that the Tiff info is complete. Relevant when opened using an index map */
@@ -670,7 +670,7 @@ public class SeriesImageSource extends ImageSource
         }
 
         @Override
-        synchronized public void close(boolean freeResources)
+        public synchronized void close(boolean freeResources)
         {
             frameCount = 0;
 
@@ -961,7 +961,7 @@ public class SeriesImageSource extends ImageSource
                         break;
 
                     @SuppressWarnings("resource")
-                    final ByteArraySeekableStream ss = new ByteArraySeekableStream(nextSource.buffer);
+                    final ByteArraySeekableStream ss = ByteArraySeekableStream.wrap(nextSource.buffer);
 
                     // Re-use the cache
                     TiffImage image = imageData[currentImage].tiffImage;
@@ -1190,7 +1190,7 @@ public class SeriesImageSource extends ImageSource
         {
             final byte[] buf = new byte[(int) size];
             if (fs.readBytes(buf) == size)
-                return new ByteArraySeekableStream(buf);
+                return ByteArraySeekableStream.wrap(buf);
         }
         catch (final IOException e)
         {
@@ -1297,7 +1297,7 @@ public class SeriesImageSource extends ImageSource
     public final boolean isTiffSeries;
 
     /**
-     * Hold image data
+     * Hold image data.
      */
     private class ImageData
     {
@@ -1318,7 +1318,7 @@ public class SeriesImageSource extends ImageSource
     private int[] imageSize;
 
     /**
-     * Used to cache data about the TIFF images
+     * Used to cache data about the TIFF images.
      */
     @XStreamOmitField
     private ImageData[] imageData;
@@ -1345,7 +1345,7 @@ public class SeriesImageSource extends ImageSource
     private int numberOfImages = 1;
 
     @XStreamOmitField
-    private TrackProgress trackProgress = NullTrackProgress.INSTANCE;
+    private TrackProgress trackProgress = NullTrackProgress.getInstance();
 
     // Used to process the files into images
     @XStreamOmitField
@@ -1360,7 +1360,7 @@ public class SeriesImageSource extends ImageSource
     @XStreamOmitField
     private CloseableBlockingQueue<NextSource> readQueue;
 
-    /** Used for sequential reading to queue the raw frames */
+    /** Used for sequential reading to queue the raw frames. */
     @XStreamOmitField
     private CloseableBlockingQueue<Object> rawFramesQueue = null;
 
@@ -1405,7 +1405,7 @@ public class SeriesImageSource extends ImageSource
      */
     public SeriesImageSource(String name, String directory)
     {
-        this(name, new SeriesOpener(directory, false, 1));
+        this(name, new SeriesOpener(directory));
     }
 
     /**
@@ -1503,32 +1503,32 @@ public class SeriesImageSource extends ImageSource
         final int b9 = buf[9] & 255;
         final int b10 = buf[10] & 255;
         final int b11 = buf[11] & 255;
-        final int indexMapOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b8, b9, b10, b11)
-                : FastTiffDecoderBE.toInt(b8, b9, b10, b11);
+        final int indexMapOffsetHeader = (littleEndian) ? LittleEndianFastTiffDecoder.toInt(b8, b9, b10, b11)
+                : BigEndianFastTiffDecoder.toInt(b8, b9, b10, b11);
         if (indexMapOffsetHeader != 54773648)
             return false;
         final int b16 = buf[16] & 255;
         final int b17 = buf[17] & 255;
         final int b18 = buf[18] & 255;
         final int b19 = buf[19] & 255;
-        final int displaySettingsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b16, b17, b18, b19)
-                : FastTiffDecoderBE.toInt(b16, b17, b18, b19);
+        final int displaySettingsOffsetHeader = (littleEndian) ? LittleEndianFastTiffDecoder.toInt(b16, b17, b18, b19)
+                : BigEndianFastTiffDecoder.toInt(b16, b17, b18, b19);
         if (displaySettingsOffsetHeader != 483765892)
             return false;
         final int b24 = buf[24] & 255;
         final int b25 = buf[25] & 255;
         final int b26 = buf[26] & 255;
         final int b27 = buf[27] & 255;
-        final int commentsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b24, b25, b26, b27)
-                : FastTiffDecoderBE.toInt(b24, b25, b26, b27);
+        final int commentsOffsetHeader = (littleEndian) ? LittleEndianFastTiffDecoder.toInt(b24, b25, b26, b27)
+                : BigEndianFastTiffDecoder.toInt(b24, b25, b26, b27);
         if (commentsOffsetHeader != 99384722)
             return false;
         final int b32 = buf[32] & 255;
         final int b33 = buf[33] & 255;
         final int b34 = buf[34] & 255;
         final int b35 = buf[35] & 255;
-        final int summaryMetadataHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b32, b33, b34, b35)
-                : FastTiffDecoderBE.toInt(b32, b33, b34, b35);
+        final int summaryMetadataHeader = (littleEndian) ? LittleEndianFastTiffDecoder.toInt(b32, b33, b34, b35)
+                : BigEndianFastTiffDecoder.toInt(b32, b33, b34, b35);
         if (summaryMetadataHeader != 2355492)
             return false;
         return true;
@@ -1576,19 +1576,19 @@ public class SeriesImageSource extends ImageSource
                     final FastTiffDecoder td = FastTiffDecoder.create(ss, path);
 
                     final NumberOfImages nImages = td.getNumberOfImages(estimate);
-                    if (nImages.exact)
-                        trackProgress.log("%s : images=%d (%d bytes)", path, nImages.numberOfImages, size);
+                    if (nImages.isExact())
+                        trackProgress.log("%s : images=%d (%d bytes)", path, nImages.getImageCount(), size);
                     else
-                        trackProgress.log("%s : images=%d (approx) (%d bytes)", path, nImages.numberOfImages, size);
+                        trackProgress.log("%s : images=%d (approx) (%d bytes)", path, nImages.getImageCount(), size);
                     if (estimate)
                         // Track if this is exact
-                        exact = exact && nImages.exact;
-                    else if (nImages.numberOfImages <= 0)
+                        exact = exact && nImages.isExact();
+                    else if (nImages.getImageCount() <= 0)
                         // No TIFF images. This will break the non-sequential support
                         // using the cumulative size array so remove the image.
                         continue;
 
-                    frames += nImages.numberOfImages;
+                    frames += nImages.getImageCount();
                     imageSize[ok] = frames;
                     imageData[ok] = new ImageData(size);
                     names[ok] = path;
@@ -1853,7 +1853,7 @@ public class SeriesImageSource extends ImageSource
     }
 
     /**
-     * Close the background thread
+     * Close the background thread.
      */
     private synchronized void closeQueue()
     {

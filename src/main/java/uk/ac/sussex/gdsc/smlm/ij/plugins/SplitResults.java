@@ -30,7 +30,7 @@ import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -63,7 +63,7 @@ public class SplitResults implements PlugIn
             IJ.error(TITLE, "There are no fitting results in memory");
             return;
         }
-        final String[] items = Utils.getImageList(Utils.GREY_8_16);
+        final String[] items = ImageJUtils.getImageList(ImageJUtils.GREY_8_16);
         if (items.length == 0)
         {
             IJ.error(TITLE, "There are no suitable mask images");
@@ -135,7 +135,7 @@ public class SplitResults implements PlugIn
                     : new ShortProcessor(maxx, maxy);
             for (int i = 0; i < mask.length; i++)
                 objectIp.set(i, mask[i]);
-            final ImagePlus imp = Utils.display(objectMask + " Objects", objectIp);
+            final ImagePlus imp = ImageJUtils.display(objectMask + " Objects", objectIp);
             imp.setDisplayRange(0, maxObject);
             imp.updateAndDraw();
         }
@@ -143,7 +143,7 @@ public class SplitResults implements PlugIn
         // Process the results mapping them to their objects
         final Counter i = new Counter();
         final int size = results.size();
-        final int step = Utils.getProgressInterval(size);
+        final int step = ImageJUtils.getProgressInterval(size);
         results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
         {
             @Override

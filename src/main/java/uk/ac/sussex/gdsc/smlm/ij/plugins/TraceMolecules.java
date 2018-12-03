@@ -56,8 +56,8 @@ import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -214,7 +214,7 @@ public class TraceMolecules implements PlugIn
             IJ.error(TITLE, "No localisations in memory");
             return;
         }
-        altKeyDown = Utils.isExtraOptions();
+        altKeyDown = ImageJUtils.isExtraOptions();
 
         Trace[] traces = null;
         int totalFiltered = 0;
@@ -229,7 +229,7 @@ public class TraceMolecules implements PlugIn
                 return;
 
             final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
-                    getClusteringAlgorithm(settings.getClusteringAlgorithm()), new IJTrackProgress());
+                    getClusteringAlgorithm(settings.getClusteringAlgorithm()), new ImageJTrackProgress());
 
             if (settings.getSplitPulses())
             {
@@ -237,12 +237,12 @@ public class TraceMolecules implements PlugIn
                 limitTimeThreshold(settings.getPulseInterval());
             }
 
-            final ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
+            final List<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
                     getDistance(settings.getDistanceThreshold(), results.getCalibration()), timeThresholdInFrames());
 
             if (clusters == null)
             {
-                Utils.log("Aborted");
+                ImageJUtils.log("Aborted");
                 return;
             }
 
@@ -274,7 +274,7 @@ public class TraceMolecules implements PlugIn
                 limitTimeThreshold(settings.getPulseInterval());
             }
 
-            manager.setTracker(new IJTrackProgress());
+            manager.setTracker(new ImageJTrackProgress());
             manager.traceMolecules(getDistance(settings.getDistanceThreshold(), results.getCalibration()),
                     timeThresholdInFrames());
             traces = manager.getTraces();
@@ -377,7 +377,7 @@ public class TraceMolecules implements PlugIn
         return points;
     }
 
-    private Trace[] convertToTraces(ArrayList<Cluster> clusters)
+    private Trace[] convertToTraces(List<Cluster> clusters)
     {
         return convertToTraces(results, clusters);
     }
@@ -391,7 +391,7 @@ public class TraceMolecules implements PlugIn
      *            the clusters
      * @return the traces
      */
-    public static Trace[] convertToTraces(MemoryPeakResults results, ArrayList<Cluster> clusters)
+    public static Trace[] convertToTraces(MemoryPeakResults results, List<Cluster> clusters)
     {
         final Trace[] traces = new Trace[clusters.size()];
         int i = 0;
@@ -399,9 +399,9 @@ public class TraceMolecules implements PlugIn
         {
             final Trace trace = new Trace();
             trace.setId(i + 1);
-            for (ClusterPoint point = cluster.head; point != null; point = point.next)
+            for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null; point = point.getNext())
                 // The point Id was the position in the original results array
-                trace.add(results.get(point.id));
+                trace.add(results.get(point.getId()));
             traces[i++] = trace;
         }
         return traces;
@@ -506,12 +506,12 @@ public class TraceMolecules implements PlugIn
             if (filename.matches(regex))
                 filename.replaceAll(regex, "." + (id) + ".");
             else
-                Utils.replaceExtension(filename, id + ".xls");
+                ImageJUtils.replaceExtension(filename, id + ".xls");
         }
-        filename = Utils.getFilename(title, filename);
+        filename = ImageJUtils.getFilename(title, filename);
         if (filename != null)
         {
-            filename = Utils.replaceExtension(filename, "xls");
+            filename = ImageJUtils.replaceExtension(filename, "xls");
 
             final boolean showDeviations = sourceResults.hasDeviations();
             // Assume that are results are from a single frame but store the trace ID
@@ -585,9 +585,9 @@ public class TraceMolecules implements PlugIn
         sb.append(results.getName()).append('\t');
         sb.append(outputName.equals("Cluster") ? getClusteringAlgorithm(settings.getClusteringAlgorithm())
                 : getTraceMode(settings.getTraceMode())).append('\t');
-        sb.append(Utils.rounded(exposureTime * 1000, 3)).append('\t');
-        sb.append(Utils.rounded(dThreshold, 3)).append('\t');
-        sb.append(Utils.rounded(tThreshold, 3));
+        sb.append(MathUtils.rounded(exposureTime * 1000, 3)).append('\t');
+        sb.append(MathUtils.rounded(dThreshold, 3)).append('\t');
+        sb.append(MathUtils.rounded(tThreshold, 3));
         if (settings.getSplitPulses())
             sb.append(" *");
         sb.append('\t');
@@ -597,7 +597,7 @@ public class TraceMolecules implements PlugIn
         sb.append(singles).append('\t');
         sb.append(traces.length - singles).append('\t');
         for (int i = 0; i < stats.length; i++)
-            sb.append(Utils.rounded(stats[i].getMean(), 3)).append('\t');
+            sb.append(MathUtils.rounded(stats[i].getMean(), 3)).append('\t');
         if (java.awt.GraphicsEnvironment.isHeadless())
         {
             IJ.log(sb.toString());
@@ -609,25 +609,20 @@ public class TraceMolecules implements PlugIn
         {
             IJ.showStatus("Calculating histograms ...");
 
-            int[] idList = new int[NAMES.length];
-            int count = 0;
-
-            boolean requireRetile = false;
+            final WindowOrganiser windowOrganiser = new WindowOrganiser();
+            final HistogramPlotBuilder builder = new HistogramPlotBuilder(TITLE)
+                .setNumberOfBins(settings.getHistogramBins());
             for (int i = 0; i < NAMES.length; i++)
                 if (displayHistograms[i])
                 {
-                    idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
-                            (integerDisplay[i]) ? 1 : 0,
-                            (settings.getRemoveOutliers() || alwaysRemoveOutliers[i]) ? 2 : 0,
-                            settings.getHistogramBins());
-                    requireRetile = requireRetile || Utils.isNewWindow();
+                    builder.setData((StoredDataStatistics) stats[i])
+                      .setName(NAMES[i])
+                      .setIntegerBins(integerDisplay[i])
+                      .setRemoveOutliersOption((settings.getRemoveOutliers() || alwaysRemoveOutliers[i]) ? 2 : 0)
+                      .show(windowOrganiser);
                 }
 
-            if (count > 0 && requireRetile)
-            {
-                idList = Arrays.copyOf(idList, count);
-                WindowOrganiser.tileWindows(idList);
-            }
+            windowOrganiser.tile();
         }
 
         if (settings.getSaveTraceData())
@@ -666,7 +661,7 @@ public class TraceMolecules implements PlugIn
     {
         // Get the directory
         IJ.showStatus("Saving trace data");
-        final String directory = Utils.getDirectory("Trace_data_directory", settings.getTraceDataDirectory());
+        final String directory = ImageJUtils.getDirectory("Trace_data_directory", settings.getTraceDataDirectory());
         if (directory != null)
         {
             settings.setTraceDataDirectory(directory);
@@ -687,7 +682,7 @@ public class TraceMolecules implements PlugIn
 
             for (final double d : s.getValues())
             {
-                file.append(Utils.rounded(d, 4));
+                file.append(MathUtils.rounded(d, 4));
                 file.newLine();
             }
         }
@@ -1465,7 +1460,7 @@ public class TraceMolecules implements PlugIn
     }
 
     /**
-     * Shows the plot
+     * Shows the plot.
      */
     private void showPlot()
     {

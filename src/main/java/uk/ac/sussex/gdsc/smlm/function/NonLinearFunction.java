@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Defines the non-linear fitting function
+ * Defines the non-linear fitting function.
  */
 public interface NonLinearFunction extends GradientFunction
 {

@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Defines function that can produce values
+ * Defines function that can produce values.
  */
 public interface ValueFunction
 {

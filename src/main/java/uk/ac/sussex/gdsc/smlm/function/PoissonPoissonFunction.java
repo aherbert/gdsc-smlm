@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Implements the probability density function for a combined Poisson distribution used to model a Poisson-Gaussian
@@ -66,12 +66,12 @@ import uk.ac.sussex.gdsc.core.utils.Maths;
 public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
     /**
-     * The inverse of the on-chip gain multiplication factor
+     * The inverse of the on-chip gain multiplication factor.
      */
     final double alpha;
 
     /**
-     * The log of the inverse on-chip gain multiplication factor
+     * The log of the inverse on-chip gain multiplication factor.
      */
     final double logAlpha;
 
@@ -92,7 +92,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
             throw new IllegalArgumentException("Gaussian variance must be strictly positive");
         this.alpha = Math.abs(alpha);
         logAlpha = Math.log(this.alpha);
-        var_g2 = variance * Maths.pow2(this.alpha);
+        var_g2 = variance * MathUtils.pow2(this.alpha);
     }
 
     /**
@@ -171,7 +171,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     }
 
     /**
-     * Return the factorial for the given real number, using the gamma function
+     * Return the factorial for the given real number, using the gamma function.
      *
      * @param k
      *            the number

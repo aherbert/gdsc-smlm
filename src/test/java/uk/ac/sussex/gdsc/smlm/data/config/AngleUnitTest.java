@@ -23,11 +23,11 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unchecked", "javadoc" })
 public class AngleUnitTest

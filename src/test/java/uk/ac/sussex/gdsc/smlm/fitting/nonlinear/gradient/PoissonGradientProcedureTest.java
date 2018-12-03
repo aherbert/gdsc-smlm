@@ -1,14 +1,5 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import java.util.ArrayList;
-import java.util.logging.Logger;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
@@ -20,15 +11,27 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class PoissonGradientProcedureTest
@@ -103,7 +106,7 @@ public class PoissonGradientProcedureTest
         final int iter = 10;
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
         final int n = blockWidth * blockWidth;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -112,7 +115,9 @@ public class PoissonGradientProcedureTest
         // Create messages
         final IntArrayFormatSupplier msgOAl = getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
         final IntArrayFormatSupplier msgOAm = getMessage(nparams, "[%d] Observations: Not same alpha matrix @ %d");
-        
+
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+
         for (int i = 0; i < paramsList.size(); i++)
         {
             final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(func);
@@ -120,10 +125,11 @@ public class PoissonGradientProcedureTest
             final double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
             // Not exactly the same ...
             final double[] al = p.getLinear();
-            ExtraAssertions.assertArrayEqualsRelative(al, new DenseMatrix64F(m).data, 1e-10, msgOAl.set(1, i));
+            TestAssertions.assertArrayTest(al, new DenseMatrix64F(m).data, predicate,
+                msgOAl.set(1, i));
 
             final double[][] am = p.getMatrix();
-            ExtraAssertions.assertArrayEqualsRelative(am, m, 1e-10, msgOAm.set(1, i));
+            TestAssertions.assertArrayTest(am, m, predicate, msgOAm.set(1, i));
         }
     }
 
@@ -132,7 +138,7 @@ public class PoissonGradientProcedureTest
         msg.set(0, nparams);
         return msg;
     }
-    
+
     private abstract class Timer
     {
         private int loops;
@@ -176,12 +182,12 @@ public class PoissonGradientProcedureTest
 
     private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, final int nparams)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 1000;
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
         final int n = blockWidth * blockWidth;
         final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -230,7 +236,7 @@ public class PoissonGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getTimingRecord("GradientCalculator " + nparams, time1, "PoissonGradientProcedure", time2));
+        logger.log(TestLogUtils.getTimingRecord("GradientCalculator " + nparams, time1, "PoissonGradientProcedure", time2));
     }
 
     @SeededTest
@@ -255,7 +261,7 @@ public class PoissonGradientProcedureTest
         final int iter = 10;
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
         Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
         if (precomputed)
@@ -304,12 +310,12 @@ public class PoissonGradientProcedureTest
     private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, final int nparams,
             final boolean precomputed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final int iter = 100;
         final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-        createFakeParams(RNGFactory.create(seed.getSeed()), nparams, iter, paramsList);
+        createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
 
         // Remove the timing of the function call by creating a dummy function
         final FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
@@ -366,7 +372,7 @@ public class PoissonGradientProcedureTest
         };
         final long time2 = t2.getTime();
 
-        logger.log(TestLog.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
+        logger.log(TestLogUtils.getTimingRecord("precomputed=" + precomputed + " Standard " + nparams, time1, "Unrolled", time2));
         //Assertions.assertTrue(time2 < time1);
     }
 
@@ -374,7 +380,7 @@ public class PoissonGradientProcedureTest
     public void crlbIsHigherWithPrecomputed(RandomSeed seed)
     {
         final int iter = 10;
-        final UniformRandomProvider r = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
 
         final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
                 GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);

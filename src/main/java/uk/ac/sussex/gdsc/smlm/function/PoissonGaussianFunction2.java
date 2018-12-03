@@ -44,7 +44,7 @@ import org.apache.commons.math3.util.FastMath;
 public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikelihoodFunction
 {
     /**
-     * The inverse of the on-chip gain multiplication factor
+     * The inverse of the on-chip gain multiplication factor.
      */
     final double alpha;
 
@@ -117,7 +117,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
     }
 
     /**
-     * Return if using the Picard approximation for the initial saddle point
+     * Return if using the Picard approximation for the initial saddle point.
      *
      * @return True if using the Picard approximation
      */

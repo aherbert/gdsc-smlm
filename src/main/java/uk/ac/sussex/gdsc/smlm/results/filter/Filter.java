@@ -194,10 +194,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         return newResults;
     }
 
-    private final static int FP = 0;
-    private final static int FN = 1;
-    private final static int TP = 2;
-    private final static int TN = 3;
+    private static final int FP = 0;
+    private static final int FN = 1;
+    private static final int TP = 2;
+    private static final int TN = 3;
 
     /**
      * Filter the results
@@ -1610,7 +1610,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     public int[] getChromosomeParameters()
     {
         // Assume all the parameters are included in the Chromosome
-        return SimpleArrayUtils.newArray(getNumberOfParameters(), 0, 1);
+        return SimpleArrayUtils.natural(getNumberOfParameters());
     }
 
     /**

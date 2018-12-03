@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -411,7 +411,7 @@ public class CalibrationReader
     public double getQuantumEfficiency()
     {
         final CalibrationOrBuilder c = getCalibrationOrBuilder();
-        return (c.hasCameraCalibration()) ? Maths.clip(0, 1, c.getCameraCalibration().getQuantumEfficiency()) : 0;
+        return (c.hasCameraCalibration()) ? MathUtils.clip(0, 1, c.getCameraCalibration().getQuantumEfficiency()) : 0;
     }
 
     /**

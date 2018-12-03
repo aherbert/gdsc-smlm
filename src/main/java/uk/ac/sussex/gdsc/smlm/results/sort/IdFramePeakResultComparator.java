@@ -28,11 +28,11 @@ import java.util.Comparator;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Compares the results by Id then by frame
+ * Compares the results by Id then by frame.
  */
 public class IdFramePeakResultComparator implements Comparator<PeakResult>
 {
-    /** An instance of the comparator */
+    /** An instance of the comparator. */
     public static final IdFramePeakResultComparator INSTANCE = new IdFramePeakResultComparator();
 
     /** {@inheritDoc} */

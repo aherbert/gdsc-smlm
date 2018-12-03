@@ -31,12 +31,12 @@ import org.jtransforms.fft.FloatFFT_2D;
 
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.process.FHT2;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.math.RadialStatistics;
+import uk.ac.sussex.gdsc.core.math.RadialStatisticsUtils;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
@@ -270,7 +270,7 @@ public class FRC
          */
         private void setCorrelation(double correlation)
         {
-            this.correlation = Maths.clip(-1, 1, correlation);
+            this.correlation = MathUtils.clip(-1, 1, correlation);
         }
 
         /**
@@ -673,8 +673,8 @@ public class FRC
                 re1[j] = data[i++];
                 im1[j] = data[i++];
             }
-            FHT2.swapQuadrants(new FloatProcessor(size, size, re1));
-            FHT2.swapQuadrants(new FloatProcessor(size, size, im1));
+            Fht.swapQuadrants(new FloatProcessor(size, size, re1));
+            Fht.swapQuadrants(new FloatProcessor(size, size, im1));
             progess.incrementProgress(THIRD);
 
             ip2 = getSquareTaperedImage(ip2);
@@ -694,8 +694,8 @@ public class FRC
                 re2[j] = data[i++];
                 im2[j] = data[i++];
             }
-            FHT2.swapQuadrants(new FloatProcessor(size, size, re2));
-            FHT2.swapQuadrants(new FloatProcessor(size, size, im2));
+            Fht.swapQuadrants(new FloatProcessor(size, size, re2));
+            Fht.swapQuadrants(new FloatProcessor(size, size, im2));
             progess.incrementProgress(THIRD);
         }
         else
@@ -716,7 +716,7 @@ public class FRC
             // Speed up by reusing the FHT object which performs pre-computation
 
             final float[] f1 = (float[]) ip1.getPixels();
-            final FHT2 fht1 = new FHT2(f1, ip1.getWidth(), false);
+            final Fht fht1 = new Fht(f1, ip1.getWidth(), false);
             fht1.transform();
             FloatProcessor[] fft = fht1.getComplexTransformProcessors();
             re1 = (float[]) fft[0].getPixels();
@@ -727,7 +727,7 @@ public class FRC
             mean2 = taperedImageMean;
 
             final float[] f2 = (float[]) ip2.getPixels();
-            final FHT2 fht2 = new FHT2(f2, ip2.getWidth(), false);
+            final Fht fht2 = new Fht(f2, ip2.getWidth(), false);
             fht2.copyTables(fht1);
             fft = fht2.getComplexTransformProcessors();
             re2 = (float[]) fft[0].getPixels();
@@ -811,7 +811,7 @@ public class FRC
         else
         {
             // Compute the radial sum as per the DIP image Matlab toolbox
-            final double[][] sum = RadialStatistics.radialSumAndCount(size, conjMult, absFFT1, absFFT2);
+            final double[][] sum = RadialStatisticsUtils.radialSumAndCount(size, conjMult, absFFT1, absFFT2);
             for (int radius = 0; radius < max; radius++)
                 results[radius] = new FRCCurveResult(radius, (int) sum[3][radius], sum[0][radius], sum[1][radius],
                         sum[2][radius]);
@@ -1090,7 +1090,7 @@ public class FRC
     {
         final FloatProcessor taperedDataImage = getSquareTaperedImage(ip);
 
-        final FHT2 fht = new FHT2(taperedDataImage);
+        final Fht fht = new Fht(taperedDataImage);
         fht.transform();
 
         return fht.getComplexTransformProcessors();
@@ -1415,7 +1415,7 @@ public class FRC
     }
 
     /** The constant 2 * Math.PI */
-    private final static double TWO_PI = 2.0 * Math.PI;
+    private static final double TWO_PI = 2.0 * Math.PI;
 
     /**
      * Calculate the curve representing the minimum correlation required to distinguish two images for each
@@ -1615,7 +1615,7 @@ public class FRC
                 // Q. Is this necessary given the intersection check above?
                 if (px >= x1 && px < x2)
                 {
-                    final double py = Maths.interpolateY(x1, y3, x2, y4, px);
+                    final double py = MathUtils.interpolateY(x1, y3, x2, y4, px);
                     intersections[count++] = new double[] { px, py };
                 }
             }

@@ -415,29 +415,29 @@ public class Shape3DHelper
         return (float) Math.sqrt(d);
     }
 
-    static final private float[][] triVertices = { { sqrt(8d / 9), 0, 0 }, { -sqrt(2d / 9), sqrt(2d / 3), 0 },
+    static private final float[][] triVertices = { { sqrt(8d / 9), 0, 0 }, { -sqrt(2d / 9), sqrt(2d / 3), 0 },
             { -sqrt(2d / 9), -sqrt(2d / 3), 0 } };
-    static final private int[][] triFaces = { { 0, 1, 2 } };
+    static private final int[][] triFaces = { { 0, 1, 2 } };
 
-    static final private float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
-    static final private int[][] squareFaces = { { 0, 1, 3 }, { 3, 1, 2 } };
+    static private final float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
+    static private final int[][] squareFaces = { { 0, 1, 3 }, { 3, 1, 2 } };
 
     // https://en.m.wikipedia.org/wiki/Tetrahedron
     // based on alternated cube
-    static final private float[][] tetraVertices = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
-    static final private int[][] tetraFaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
+    static private final float[][] tetraVertices = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
+    static private final int[][] tetraFaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
 
     // https://en.m.wikipedia.org/wiki/Octahedron
-    static final private float[][] octaVertices = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 },
+    static private final float[][] octaVertices = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 },
             { 0, 0, -1 }, };
-    static final private int[][] octaFaces = { { 0, 3, 4 }, { 3, 1, 4 }, { 1, 2, 4 }, { 2, 0, 4 }, { 3, 0, 5 },
+    static private final int[][] octaFaces = { { 0, 3, 4 }, { 3, 1, 4 }, { 1, 2, 4 }, { 2, 0, 4 }, { 3, 0, 5 },
             { 1, 3, 5 }, { 2, 1, 5 }, { 0, 2, 5 }, };
 
-    static final private float[][] cubeVertices = { { 1, 1, -1 }, { -1, 1, -1 }, { -1, -1, -1 }, { 1, -1, -1 },
+    static private final float[][] cubeVertices = { { 1, 1, -1 }, { -1, 1, -1 }, { -1, -1, -1 }, { 1, -1, -1 },
             { 1, 1, 1 }, { -1, 1, 1 }, { -1, -1, 1 }, { 1, -1, 1 }, };
-    static final private int[][] cubeFaces = { { 0, 1, 3 }, { 3, 1, 2 }, { 0, 4, 7 }, { 0, 7, 3 }, { 1, 5, 6 },
+    static private final int[][] cubeFaces = { { 0, 1, 3 }, { 3, 1, 2 }, { 0, 4, 7 }, { 0, 7, 3 }, { 1, 5, 6 },
             { 1, 6, 2 }, { 3, 7, 6 }, { 3, 6, 2 }, { 0, 4, 5 }, { 0, 5, 1 }, { 4, 5, 7 }, { 4, 6, 7 }, };
-    static final private int[][] cubeFaces4 = { { 0, 1, 5, 4 }, { 1, 2, 6, 5 }, { 2, 3, 7, 6 }, { 3, 0, 4, 7 },
+    static private final int[][] cubeFaces4 = { { 0, 1, 5, 4 }, { 1, 2, 6, 5 }, { 2, 3, 7, 6 }, { 3, 0, 4, 7 },
             { 7, 4, 5, 6 }, { 2, 1, 0, 3 }, };
 
     /**

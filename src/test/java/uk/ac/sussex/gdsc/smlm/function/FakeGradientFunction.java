@@ -23,10 +23,10 @@
  */
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.PseudoRandomSequence;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({ "javadoc" })
 public class FakeGradientFunction
@@ -51,7 +51,7 @@ public class FakeGradientFunction
         this.maxx = maxx;
         this.n = maxx * maxx;
         this.nparams = nparams;
-        this.r = new PseudoRandomSequence(randomSize, RNGFactory.create(randomSeed), scale);
+        this.r = new PseudoRandomSequence(randomSize, RngUtils.create(randomSeed), scale);
         this.dy_da = new double[nparams];
     }
 
@@ -98,7 +98,7 @@ public class FakeGradientFunction
     @Override
     public int[] gradientIndices()
     {
-        return SimpleArrayUtils.newArray(nparams, 0, 1);
+        return SimpleArrayUtils.natural(nparams);
     }
 
     @Override

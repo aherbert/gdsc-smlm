@@ -45,7 +45,7 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
@@ -55,6 +55,7 @@ import uk.ac.sussex.gdsc.core.threshold.FloatHistogram;
 import uk.ac.sussex.gdsc.core.threshold.Histogram;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
@@ -102,7 +103,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
         thresholdMethodOptions[AutoThreshold.Method.NONE.ordinal()] = true;
         for (i = 0; i < thresholdMethods.length; i++)
         {
-            thresholdMethodNames[i] = thresholdMethods[i].name;
+            thresholdMethodNames[i] = thresholdMethods[i].toString();
             thresholdMethodOptions[i] = true;
         }
         for (int j = 0; i < thresholdMethodNames.length; i++, j++)
@@ -200,7 +201,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
         final FractionClassificationResult f;
         final ClassificationResult c;
         /**
-         * Store details about the spots that were accepted
+         * Store details about the spots that were accepted.
          */
         final byte[] good;
         final long time;
@@ -232,7 +233,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
     }
 
     /**
-     * Used to allow multi-threading of the fitting method
+     * Used to allow multi-threading of the fitting method.
      */
     private class Worker implements Runnable
     {
@@ -291,7 +292,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
         @SuppressWarnings("null")
         private void run(int frame)
         {
-            if (Utils.isInterrupted())
+            if (ImageJUtils.isInterrupted())
             {
                 finished = true;
                 return;
@@ -322,7 +323,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
                         data);
                 final int maxx = stack.getWidth();
                 final int maxy = stack.getHeight();
-                final ImageExtractor ie = new ImageExtractor(data, maxx, maxy);
+                final ImageExtractor ie = ImageExtractor.wrap(data, maxx, maxy);
                 final float noise = FitWorker.estimateNoise(data, maxx, maxy, config.getNoiseMethod());
                 snr = new double[spots.length];
                 for (int i = 0; i < spots.length; i++)
@@ -518,7 +519,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
     {
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
 
         simulationParameters = CreateData.simulationParameters;
         if (simulationParameters == null)
@@ -564,7 +565,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
                 "Rank candidate spots in the benchmark image created by " + CreateData.TITLE +
                         " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE +
                         " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
-                Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
+                MathUtils.rounded(simulationParameters.s), MathUtils.rounded(getSa())));
 
         gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
         gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
@@ -673,7 +674,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
     private synchronized void showProgress()
     {
         if (progress % stepProgress == 0)
-            if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+            if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress))
                 IJ.showProgress(progress, totalProgress);
         progress++;
     }
@@ -724,7 +725,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
         // Process the frames
         totalProgress = filterCandidates.size();
-        stepProgress = Utils.getProgressInterval(totalProgress);
+        stepProgress = ImageJUtils.getProgressInterval(totalProgress);
         progress = 0;
         filterCandidates.forEachKey(new TIntProcedure()
         {
@@ -753,7 +754,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
         IJ.showProgress(1);
 
-        if (Utils.isInterrupted())
+        if (ImageJUtils.isInterrupted())
         {
             IJ.showStatus("Aborted");
             return;
@@ -796,10 +797,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn
             public boolean execute(int frame, FilterResult r)
             {
                 // Determine the number of positives to find. This score may be fractional.
-                fX[0] += r.result.getTP();
-                fX[1] += r.result.getFP();
+                fX[0] += r.result.getTruePositives();
+                fX[1] += r.result.getFalsePositives();
 
-                // Q. Is r.result.getTP() not the same as the total of r.spots[i].match?
+                // Q. Is r.result.getTruePositives() not the same as the total of r.spots[i].match?
                 // A. Not if we used fractional scoring.
                 int c = 0;
                 for (int i = r.spots.length; i-- > 0;)
@@ -809,14 +810,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn
                 nX[1] += (r.spots.length - c);
 
                 // Make the target use the fractional score
-                final double np2 = r.result.getTP() * f1;
+                final double np2 = r.result.getTruePositives() * f1;
                 double targetP = np2;
 
                 // Set the target using the closest
                 if (f1 < 1)
                 {
                     double np = 0;
-                    double min = r.result.getTP();
+                    double min = r.result.getTruePositives();
                     for (final ScoredSpot spot : r.spots)
                         if (spot.match)
                         {
@@ -869,7 +870,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
                 // Debug
                 //System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
-                //		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
+                //		r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(), p, n,
                 //		nAfter, (double) n / (n + p));
 
                 // TODO - This is different from BenchmarkSpotFit where all the candidates are
@@ -1071,12 +1072,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn
                 if (!Float.isInfinite(r.t))
                     s.add(r.t);
                 time += r.time;
-                tp += r.f.getTP();
-                fp += r.f.getFP();
-                tn += r.f.getTN();
-                itp += r.c.getTP();
-                ifp += r.c.getFP();
-                itn += r.c.getTN();
+                tp += r.f.getTruePositives();
+                fp += r.f.getFalsePositives();
+                tn += r.f.getTrueNegatives();
+                itp += r.c.getTruePositives();
+                ifp += r.c.getFalsePositives();
+                itn += r.c.getTrueNegatives();
             }
 
             sb.setLength(0);
@@ -1088,7 +1089,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
                 add(sb, compactBins);
             add(sb, s.getMean());
             add(sb, s.getStandardDeviation());
-            add(sb, Utils.timeToString(time / 1e6));
+            add(sb, TextUtils.nanosToString(time));
 
             // TP are all accepted candidates that can be matched to a spot
             // FP are all accepted candidates that cannot be matched to a spot
@@ -1198,7 +1199,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
     private static void add(StringBuilder sb, double value)
     {
-        add(sb, Utils.rounded(value));
+        add(sb, MathUtils.rounded(value));
     }
 
     private static void addCount(StringBuilder sb, double value)
@@ -1210,7 +1211,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
         if (value > 100)
             sb.append('\t').append(IJ.d2s(value));
         else
-            add(sb, Utils.rounded(value));
+            add(sb, MathUtils.rounded(value));
     }
 
     private static void createTable()
@@ -1272,17 +1273,17 @@ public class BenchmarkSmartSpotRanking implements PlugIn
     {
         final double[] scores = new double[SORT.length - 1];
         int i = 0;
-        scores[i++] = m.getTP();
-        scores[i++] = m.getFP();
-        scores[i++] = m.getTN();
-        scores[i++] = m.getFN();
+        scores[i++] = m.getTruePositives();
+        scores[i++] = m.getFalsePositives();
+        scores[i++] = m.getTrueNegatives();
+        scores[i++] = m.getFalseNegatives();
         scores[i++] = m.getPrecision();
         scores[i++] = m.getRecall();
         scores[i++] = m.getFScore(0.5);
         scores[i++] = m.getF1Score();
         scores[i++] = m.getFScore(2);
         scores[i++] = m.getJaccard();
-        scores[i++] = m.getMCC();
+        scores[i++] = m.getMatthewsCorrelationCoefficient();
         for (final double s : scores)
             add(sb, s);
         return (sortIndex != 0) ? scores[sortIndex - 1] : 0;

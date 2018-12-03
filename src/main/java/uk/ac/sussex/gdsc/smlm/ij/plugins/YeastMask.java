@@ -31,10 +31,10 @@ import ij.plugin.PlugIn;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
- * This plugin creates a mask image of a Yeast cell for use in diffusion simulations
+ * This plugin creates a mask image of a Yeast cell for use in diffusion simulations.
  */
 public class YeastMask implements PlugIn
 {
@@ -205,10 +205,10 @@ public class YeastMask implements PlugIn
         {
             // TODO - Remove this laziness since we should really just do a 2D image
             final int centre = stack.getSize() / 2;
-            imp = Utils.display(TITLE, stack.getProcessor(centre));
+            imp = ImageJUtils.display(TITLE, stack.getProcessor(centre));
         }
         else
-            imp = Utils.display(TITLE, stack);
+            imp = ImageJUtils.display(TITLE, stack);
 
         // Calibrate
         final Calibration cal = new Calibration();

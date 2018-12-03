@@ -23,15 +23,15 @@
  */
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.awt.Rectangle;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
-import uk.ac.sussex.gdsc.core.utils.Random;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import java.awt.Rectangle;
 
 @SuppressWarnings({ "javadoc" })
 public class SpotFilterHelperTest
@@ -45,7 +45,7 @@ public class SpotFilterHelperTest
         for (int i = n; i-- > 0;)
             data[i] = 1;
 
-        Random.shuffle(data, rg);
+        RandomUtils.shuffle(data, rg);
 
         final Spot[] spots = new Spot[n];
         for (int i = 0, j = 0; i < data.length; i++)
@@ -62,7 +62,7 @@ public class SpotFilterHelperTest
     @SeededTest
     public void canCountNeighbours(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
         final int width = 64, height = 64;
         final int size = width * height;

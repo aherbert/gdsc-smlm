@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Interface for functions to produce a value, first and second partial derivatives
+ * Interface for functions to produce a value, first and second partial derivatives.
  */
 public interface ExtendedGradient2Procedure
 {

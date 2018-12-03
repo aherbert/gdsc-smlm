@@ -1,17 +1,20 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import java.util.ArrayList;
-
-import org.apache.commons.rng.UniformRandomProvider;
-
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RNGFactory;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assumptions;
+
+import java.util.ArrayList;
 
 @SuppressWarnings({ "javadoc" })
 public class MedianFilterTest extends AbstractFilterTest
@@ -20,14 +23,15 @@ public class MedianFilterTest extends AbstractFilterTest
     private static int InternalITER = 20;
     private static int ITER3 = 100;
     private static int ITER = 10;
+    private static FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-3, 0);
 
     private static void floatArrayEquals(float[] data1, float[] data2, @SuppressWarnings("unused") int boxSize,
             String format, Object... args)
     {
         try
         {
-            //ExtraAssertions.assertArrayEqualsRelative(data1, data2, boxSize * boxSize * 1e-3);
-            ExtraAssertions.assertArrayEqualsRelative(data1, data2, 1e-3);
+            //TestAssertions.assertArrayTest(data1, data2, TestHelper.almostEqualFloats(boxSize, 0) * boxSize * 1e-3);
+            TestAssertions.assertArrayTest(data1, data2, equality);
         }
         catch (final AssertionError e)
         {
@@ -38,7 +42,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MedianFilter filter = new MedianFilter();
         for (final int width : primes)
             for (final int height : primes)
@@ -61,7 +65,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MedianFilter filter = new MedianFilter();
         for (final int width : primes)
             for (final int height : primes)
@@ -84,7 +88,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatBlockMedianNxNInternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -141,16 +145,16 @@ public class MedianFilterTest extends AbstractFilterTest
                     //		blockTime, time), blockTime < time);
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord("float rollingMedianNxNInternal " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("float rollingMedianNxNInternal " + boxSize, boxSlowTotal,
                     "blockMedianNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float rollingMedianNxNInternal", slowTotal, "blockMedianNxNInternal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxNInternal", slowTotal, "blockMedianNxNInternal", fastTotal));
     }
 
     @SeededTest
     public void floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MedianFilter filter = new MedianFilter();
         for (final int width : primes)
             for (final int height : primes)
@@ -173,7 +177,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatBlockMedian3x3InternalIsFasterThanBlockMedianNxNInternal(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -227,14 +231,14 @@ public class MedianFilterTest extends AbstractFilterTest
                 //if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
                 //		blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockMedianNxNInternal", slowTotal, "blockMedian3x3Internal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockMedianNxNInternal", slowTotal, "blockMedian3x3Internal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatBlockMedian3x3InternalIsFasterThanRollingMedian3x3Internal(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -288,13 +292,13 @@ public class MedianFilterTest extends AbstractFilterTest
                 //if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
                 //		blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float rollingMedian3x3Internal", slowTotal, "blockMedian3x3Internal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float rollingMedian3x3Internal", slowTotal, "blockMedian3x3Internal", fastTotal));
     }
 
     @SeededTest
     public void floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MedianFilter filter = new MedianFilter();
         for (final int width : primes)
             for (final int height : primes)
@@ -317,7 +321,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatRollingMedian3x3InternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -372,13 +376,13 @@ public class MedianFilterTest extends AbstractFilterTest
                 //		blockTime, time), blockTime < time);
             }
         logger.log(
-                TestLog.getTimingRecord("float rollingMedianNxNInternal", slowTotal, "rollingMedian3x3Internal", fastTotal));
+                TestLogUtils.getTimingRecord("float rollingMedianNxNInternal", slowTotal, "rollingMedian3x3Internal", fastTotal));
     }
 
     @SeededTest
     public void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MedianFilter filter = new MedianFilter();
         for (final int width : primes)
             for (final int height : primes)
@@ -402,7 +406,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatBlockMedianInternalNxNIsFasterThanBlockMedianNxN(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -459,17 +463,17 @@ public class MedianFilterTest extends AbstractFilterTest
                     //		blockTime, time), blockTime < time);
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord("float blockMedianNxN " + boxSize, boxSlowTotal, "blockMedianNxNInternal",
+            logger.log(TestLogUtils.getStageTimingRecord("float blockMedianNxN " + boxSize, boxSlowTotal, "blockMedianNxNInternal",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float blockMedianNxN", slowTotal, "blockMedianNxNInternal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockMedianNxN", slowTotal, "blockMedianNxNInternal", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatBlockMedianNxNIsFasterThanRollingMedianNxN(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -526,17 +530,17 @@ public class MedianFilterTest extends AbstractFilterTest
                     //		rollingTime, time), rollingTime < time);
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord("float rollingMedianNxN " + boxSize, boxSlowTotal, "blockMedianNxN",
+            logger.log(TestLogUtils.getStageTimingRecord("float rollingMedianNxN " + boxSize, boxSlowTotal, "blockMedianNxN",
                     boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float rollingMedianNxN", slowTotal, "blockMedianNxN", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxN", slowTotal, "blockMedianNxN", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatRollingMedianInternalNxNIsFasterThanRollingMedianNxN(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -593,16 +597,16 @@ public class MedianFilterTest extends AbstractFilterTest
                     //		blockTime, time), blockTime < time);
                 }
             //if (debug)
-            logger.log(TestLog.getStageTimingRecord("float rollingMedianNxN " + boxSize, boxSlowTotal,
+            logger.log(TestLogUtils.getStageTimingRecord("float rollingMedianNxN " + boxSize, boxSlowTotal,
                     "rollingMedianNxNInternal", boxFastTotal));
         }
-        logger.log(TestLog.getTimingRecord("float rollingMedianNxN", slowTotal, "rollingMedianNxNInternal", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxN", slowTotal, "rollingMedianNxNInternal", fastTotal));
     }
 
     @SeededTest
     public void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MedianFilter filter = new MedianFilter();
         for (final int width : primes)
             for (final int height : primes)
@@ -625,7 +629,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatBlockMedian3x3IsFasterThanBlockMedianNxN(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -678,13 +682,13 @@ public class MedianFilterTest extends AbstractFilterTest
                 //if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
                 //		blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockMedianNxN", slowTotal, "blockMedian3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockMedianNxN", slowTotal, "blockMedian3x3", fastTotal));
     }
 
     @SeededTest
     public void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult(RandomSeed seed)
     {
-        final UniformRandomProvider rg = RNGFactory.create(seed.getSeed());
+        final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
         final MedianFilter filter = new MedianFilter();
 
         for (final int width : primes)
@@ -708,7 +712,7 @@ public class MedianFilterTest extends AbstractFilterTest
     @SeededTest
     public void floatRollingMedian3x3IsFasterThanRollingMedianNxN(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -761,14 +765,14 @@ public class MedianFilterTest extends AbstractFilterTest
                 //if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
                 //		rollingBlockTime, time), rollingBlockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float rollingMedianNxN", slowTotal, "rollingMedian3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxN", slowTotal, "rollingMedian3x3", fastTotal));
     }
 
     @SpeedTag
     @SeededTest
     public void floatRollingMedian3x3IsFasterThanBlockMedian3x3(RandomSeed seed)
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
         final MedianFilter filter = new MedianFilter();
 
@@ -821,6 +825,6 @@ public class MedianFilterTest extends AbstractFilterTest
                 //if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
                 //		blockTime, time), blockTime < time);
             }
-        logger.log(TestLog.getTimingRecord("float blockMedian3x3", slowTotal, "rollingMedian3x3", fastTotal));
+        logger.log(TestLogUtils.getTimingRecord("float blockMedian3x3", slowTotal, "rollingMedian3x3", fastTotal));
     }
 }

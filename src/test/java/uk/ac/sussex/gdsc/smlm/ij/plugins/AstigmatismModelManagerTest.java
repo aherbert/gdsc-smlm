@@ -23,14 +23,16 @@
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import org.junit.jupiter.api.Test;
-
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssertions;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class AstigmatismModelManagerTest
@@ -84,12 +86,13 @@ public class AstigmatismModelManagerTest
         final TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, sDistanceUnit,
                 nmPerPixel);
 
+        DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
         for (double z = -0.5; z <= 0.5; z += 0.1)
         {
             final double e = sc.convert(m1.getSx(z));
             final double o = m2.getSx(zc.convert(z));
             //logger.fine(FunctionUtils.getSupplier("%f vs %f", e, o);
-            ExtraAssertions.assertEqualsRelative(e, o, 1e-8);
+            TestAssertions.assertTest(e, o, predicate);
         }
     }
 }

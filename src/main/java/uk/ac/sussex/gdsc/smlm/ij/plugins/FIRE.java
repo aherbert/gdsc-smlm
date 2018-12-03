@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.ParametricUnivariateFunction;
@@ -85,19 +87,20 @@ import ij.process.ImageProcessor;
 import ij.process.LUT;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.ij.process.LUTHelper;
-import uk.ac.sussex.gdsc.core.ij.process.LUTHelper.LutColour;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.utils.Maths;
-import uk.ac.sussex.gdsc.core.utils.MedianWindow;
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.DoubleMedianWindow;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -267,7 +270,7 @@ public class FIRE implements PlugIn
     private double correctionQValue, correctionMean, correctionSigma;
 
     /**
-     * Store images for FIRE analysis
+     * Store images for FIRE analysis.
      */
     public class FireImages
     {
@@ -391,7 +394,7 @@ public class FIRE implements PlugIn
     @Override
     public void run(String arg)
     {
-        extraOptions = Utils.isExtraOptions();
+        extraOptions = ImageJUtils.isExtraOptions();
         SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
         // Require some fit results and selected regions
@@ -487,7 +490,7 @@ public class FIRE implements PlugIn
             else
             {
                 // Multi-thread this ...
-                final int nThreads = Maths.min(repeats, getThreads());
+                final int nThreads = MathUtils.min(repeats, getThreads());
                 final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
                 final TurboList<Future<?>> futures = new TurboList<>(repeats);
                 final TurboList<FIREWorker> workers = new TurboList<>(repeats);
@@ -519,10 +522,10 @@ public class FIRE implements PlugIn
                 executor.shutdown();
 
                 // Show a combined FRC curve plot of all the smoothed curves if we have multiples.
-                final LUT valuesLUT = LUTHelper.createLUT(LutColour.FIRE_GLOW);
+                final LUT valuesLUT = LutHelper.createLut(LutColour.FIRE_GLOW);
                 @SuppressWarnings("unused")
-                final LUT noSmoothLUT = LUTHelper.createLUT(LutColour.GRAYS).createInvertedLut(); // Black at max value
-                final LUTHelper.DefaultLUTMapper mapper = new LUTHelper.DefaultLUTMapper(0, repeats);
+                final LUT noSmoothLUT = LutHelper.createLut(LutColour.GRAYS).createInvertedLut(); // Black at max value
+                final LutHelper.DefaultLutMapper mapper = new LutHelper.DefaultLutMapper(0, repeats);
                 final FrcCurve curve = new FrcCurve();
 
                 final Statistics stats = new Statistics();
@@ -543,14 +546,14 @@ public class FIRE implements PlugIn
                     {
                         // Output each FRC curve using a suffix.
                         logResult(w.name, result);
-                        wo.add(Utils.display(w.plot.getTitle(), w.plot));
+                        wo.add(ImageJUtils.display(w.plot.getTitle(), w.plot));
                     }
                     if (showFRCCurve)
                     {
                         final int index = mapper.map(i + 1);
                         //@formatter:off
 						curve.add(name, result, thresholdMethod,
-								LUTHelper.getColour(valuesLUT, index),
+								LutHelper.getColour(valuesLUT, index),
 								Color.blue,
 								null //LUTHelper.getColour(noSmoothLUT, index)
 								);
@@ -567,7 +570,7 @@ public class FIRE implements PlugIn
                     {
                         curve.addResolution(mean);
                         final Plot2 plot = curve.getPlot();
-                        Utils.display(plot.getTitle(), plot);
+                        ImageJUtils.display(plot.getTitle(), plot);
                     }
                 }
 
@@ -590,24 +593,24 @@ public class FIRE implements PlugIn
                         imageSize);
         }
 
-        IJ.showStatus(TITLE + " complete : " + Utils.timeToString(System.currentTimeMillis() - start));
+        IJ.showStatus(TITLE + " complete : " + TextUtils.millisToString(System.currentTimeMillis() - start));
     }
 
     private void logResult(String name, FireResult result)
     {
-        IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name, Utils.rounded(result.fireNumber, 4),
-                units, Utils.rounded(nmPerUnit / result.getNmPerPixel(), 3)));
+        IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name, MathUtils.rounded(result.fireNumber, 4),
+                units, MathUtils.rounded(nmPerUnit / result.getNmPerPixel(), 3)));
         if (Double.isNaN(result.fireNumber))
-            Utils.log(
+            ImageJUtils.log(
                     "%s Warning: NaN result possible if the resolution is below the pixel size of the input Fourier image (%s %s).",
-                    TITLE, Utils.rounded(result.getNmPerPixel()), units);
+                    TITLE, MathUtils.rounded(result.getNmPerPixel()), units);
     }
 
     private void logResult(String name, FireResult result, double mean, Statistics stats)
     {
         IJ.log(String.format("%s : FIRE number = %s +/- %s %s [95%% CI, n=%d] (Fourier scale = %s)", name,
-                Utils.rounded(mean, 4), Utils.rounded(stats.getConfidenceInterval(0.95), 4), units, stats.getN(),
-                Utils.rounded(nmPerUnit / result.getNmPerPixel(), 3)));
+                MathUtils.rounded(mean, 4), MathUtils.rounded(stats.getConfidenceInterval(0.95), 4), units, stats.getN(),
+                MathUtils.rounded(nmPerUnit / result.getNmPerPixel(), 3)));
     }
 
     private MemoryPeakResults cropToRoi(MemoryPeakResults results)
@@ -654,7 +657,7 @@ public class FIRE implements PlugIn
 
         // Build a list of all images with a region ROI
         final List<String> titles = new LinkedList<>();
-        for (final int imageID : Utils.getIDList())
+        for (final int imageID : ImageJUtils.getIdList())
         {
             final ImagePlus imp = WindowManager.getImage(imageID);
             if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
@@ -1105,7 +1108,7 @@ public class FIRE implements PlugIn
             // Truncate last block
             blocks[block.getCount()] = Arrays.copyOf(blocks[block.getCount()], i.getCount());
 
-            final int[] indices = SimpleArrayUtils.newArray(block.getCount() + 1, 0, 1);
+            final int[] indices = SimpleArrayUtils.natural(block.getCount() + 1);
             if (randomSplit)
                 MathArrays.shuffle(indices);
 
@@ -1144,7 +1147,7 @@ public class FIRE implements PlugIn
     }
 
     /**
-     * Encapsulate plotting the FRC curve to allow multiple curves to be plotted together
+     * Encapsulate plotting the FRC curve to allow multiple curves to be plotted together.
      */
     private class FrcCurve
     {
@@ -1214,10 +1217,10 @@ public class FIRE implements PlugIn
             plot.drawLine(x, 0, x, correlation);
             plot.setColor(Color.BLACK);
             if (Double.isNaN(originalResolution))
-                plot.addLabel(0, 0, String.format("Resolution = %s %s", Utils.rounded(resolution), units));
+                plot.addLabel(0, 0, String.format("Resolution = %s %s", MathUtils.rounded(resolution), units));
             else
-                plot.addLabel(0, 0, String.format("Resolution = %s %s (Original = %s %s)", Utils.rounded(resolution),
-                        units, Utils.rounded(originalResolution), units));
+                plot.addLabel(0, 0, String.format("Resolution = %s %s (Original = %s %s)", MathUtils.rounded(resolution),
+                        units, MathUtils.rounded(originalResolution), units));
         }
 
         private void add(Color color, double[] y)
@@ -1234,13 +1237,8 @@ public class FIRE implements PlugIn
             // Q. For some reason the limits calculated are ignored,
             // so set them as the defaults.
             // The FRC should not go above 1 so limit Y.
-            // Use reflection method
-            final double[] limits = plot.getCurrentMinAndMax();
-            if (limits != null)
-                plot.setLimits(limits[0], limits[1], Math.min(0, limits[2]), 1.05);
-            else
-                // Auto-range:
-                plot.setLimits(Double.NaN, Double.NaN, Double.NaN, 1.05);
+            // Auto-range:
+            plot.setLimits(Double.NaN, Double.NaN, Double.NaN, 1.05);
             return plot;
         }
     }
@@ -1261,7 +1259,7 @@ public class FIRE implements PlugIn
     private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod, int flags)
     {
         final Plot2 plot = createFrcCurve(name, result, thresholdMethod);
-        return Utils.display(plot.getTitle(), plot, flags);
+        return ImageJUtils.display(plot.getTitle(), plot, flags);
     }
 
     private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod thresholdMethod,
@@ -1336,7 +1334,7 @@ public class FIRE implements PlugIn
         plot.setColor(Color.red);
         plot.addPoints(xValues, yValues, Plot.CONNECTED_CIRCLES);
 
-        Utils.display(title, plot);
+        ImageJUtils.display(title, plot);
     }
 
     /**
@@ -1363,14 +1361,14 @@ public class FIRE implements PlugIn
         return calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, images);
     }
 
-    private TrackProgress progress = new IJTrackProgress();
+    private TrackProgress progress = new ImageJTrackProgress();
 
     private void setProgress(int repeats)
     {
         if (repeats > 1)
             progress = new ParallelTrackProgress(repeats);
         else
-            progress = new IJTrackProgress();
+            progress = new ImageJTrackProgress();
     }
 
     /**
@@ -1450,9 +1448,9 @@ public class FIRE implements PlugIn
         // than 1/4 of R (the resolution).
         if (fireNumber > 0 && (images.nmPerPixel > fireNumber / 4))
             // Q. Should this be output somewhere else?
-            Utils.log(
+            ImageJUtils.log(
                     "%s Warning: The super-resolution pixel size (%s) should be smaller than 1/4 of R (the resolution %s)",
-                    TITLE, Utils.rounded(images.nmPerPixel), Utils.rounded(fireNumber));
+                    TITLE, MathUtils.rounded(images.nmPerPixel), MathUtils.rounded(fireNumber));
 
         return new FireResult(fireNumber, result.correlation, frcCurve, originalCorrelationCurve);
     }
@@ -1579,7 +1577,7 @@ public class FIRE implements PlugIn
         {
             // Random sample of precision values from the distribution is used to
             // construct the decay curve
-            final int[] sample = Random.sample(10000, precision.getN(), new Well19937c());
+            final int[] sample = RandomUtils.sample(10000, precision.getN(), new Well19937c());
 
             final double four_pi2 = 4 * Math.PI * Math.PI;
             final double[] pre = new double[q.length];
@@ -1646,7 +1644,7 @@ public class FIRE implements PlugIn
             for (int i = 0; i < norm.length; i++)
                 norm[i] = frcnum[i] / exp_decay[i];
             // Median window of 5 == radius of 2
-            final MedianWindow mw = new MedianWindow(norm, 2);
+            final DoubleMedianWindow mw = DoubleMedianWindow.wrap(norm, 2);
             smooth = new double[exp_decay.length];
             for (int i = 0; i < norm.length; i++)
             {
@@ -1688,7 +1686,7 @@ public class FIRE implements PlugIn
             plot.addPoints(qScaled, line, Plot.LINE);
             plot.setColor(Color.black);
             plot.addLabel(0, 0, label);
-            Utils.display(title, plot, Utils.NO_TO_FRONT);
+            ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
         }
 
         if (fitPrecision)
@@ -2048,7 +2046,7 @@ public class FIRE implements PlugIn
 
         // Build a list of all images with a region ROI
         final List<String> titles = new LinkedList<>();
-        for (final int imageID : Utils.getIDList())
+        for (final int imageID : ImageJUtils.getIdList())
         {
             final ImagePlus imp = WindowManager.getImage(imageID);
             if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
@@ -2120,8 +2118,8 @@ public class FIRE implements PlugIn
         sampleDecay = gd.getNextBoolean();
         loessSmoothing = gd.getNextBoolean();
         fitPrecision = gd.getNextBoolean();
-        minQ = Maths.clip(0, 0.5, gd.getNextNumber());
-        maxQ = Maths.clip(0, 0.5, gd.getNextNumber());
+        minQ = MathUtils.clip(0, 0.5, gd.getNextNumber());
+        maxQ = MathUtils.clip(0, 0.5, gd.getNextNumber());
 
         // Check arguments
         try
@@ -2171,7 +2169,7 @@ public class FIRE implements PlugIn
     }
 
     /**
-     * Represent the Q-plot data
+     * Represent the Q-plot data.
      */
     private class QPlot
     {
@@ -2240,7 +2238,8 @@ public class FIRE implements PlugIn
             return Math.sin(x) / x;
         }
 
-        PlotWindow[] plot(double mean, double sigma, double qValue)
+        void plot(double mean, double sigma, double qValue,
+            MyWindowOrganiser windowOrganiser)
         {
             this.mean = mean;
             this.sigma = sigma;
@@ -2274,7 +2273,7 @@ public class FIRE implements PlugIn
             plot.setColor(Color.red);
             final double[] vq = makeStrictlyPositive(this.vq, Double.POSITIVE_INFINITY);
             plot.addPoints(qScaled, vq, Plot.LINE);
-            final double min = Maths.min(vq);
+            final double min = MathUtils.min(vq);
             if (qValue > 0)
             {
                 label += String.format(". Cost = %.3f", plateauness);
@@ -2292,7 +2291,7 @@ public class FIRE implements PlugIn
             plot.addLabel(0, 0, label);
 
             plot.setAxisYLog(true);
-            final PlotWindow pw1 = Utils.display(title, plot, Utils.NO_TO_FRONT);
+            windowOrganiser.display(title, plot, ImageJUtils.NO_TO_FRONT);
             plot.setLimitsToFit(true); // For the log scale this seems to only work after drawing
 
             // Show how the resolution changes
@@ -2302,7 +2301,6 @@ public class FIRE implements PlugIn
 
             // Resolution in pixels
             final FIREResult result = FRC.calculateFire(smoothedFrcCurve, thresholdMethod);
-            PlotWindow pw2 = null;
             if (result != null)
             {
                 final double fireNumber = result.fireNumber;
@@ -2321,7 +2319,7 @@ public class FIRE implements PlugIn
                 curve.addResolution(fireNumber, orig, result.correlation);
                 plot = curve.getPlot();
 
-                pw2 = Utils.display(plot.getTitle(), plot, Utils.NO_TO_FRONT);
+                windowOrganiser.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT);
             }
 
             // Produce a ratio plot. Plateauness is designed to achieve a value of 1 for this ratio.
@@ -2339,9 +2337,9 @@ public class FIRE implements PlugIn
             plot.drawLine(qScaled[low], 0, qScaled[low], 2);
             plot.drawLine(qScaled[high], 0, qScaled[high], 2);
             plot.setLimits(0, xMax, 0, 2);
-            final PlotWindow pw3 = Utils.display(title2, plot, Utils.NO_TO_FRONT);
+            windowOrganiser.display(title2, plot, ImageJUtils.NO_TO_FRONT);
 
-            return new PlotWindow[] { pw1, pw2, pw3 };
+            windowOrganiser.tile();
         }
 
         private double computePlateauness(double qValue, double mu, double sd)
@@ -2380,21 +2378,21 @@ public class FIRE implements PlugIn
 
         /**
          * The mean of the localisation precision distribution (in nm). This value can be updated by the
-         * {@link #plot(double, double)} method.
+         * {@link #plot(double, double, MyWindowOrganiser)} method.
          */
         double mean;
 
         /**
          * The standard deviation of the localisation precision distribution (in nm). This value can be updated by the
-         * {@link #plot(double, double)} method.
+         * {@link #plot(double, double, MyWindowOrganiser)} method.
          */
         double sigma;
 
         PrecisionHistogram(float[][] hist, StoredDataStatistics precision, String title)
         {
             this.title = title;
-            x = Utils.createHistogramAxis(hist[0]);
-            y = Utils.createHistogramValues(hist[1]);
+            x = HistogramPlot.createHistogramAxis(hist[0]);
+            y = HistogramPlot.createHistogramValues(hist[1]);
             this.precision = precision;
 
             // Sum the area under the histogram to use for normalisation.
@@ -2430,14 +2428,14 @@ public class FIRE implements PlugIn
             standardAmplitude = 0;
         }
 
-        PlotWindow plot(double mean, double sigma)
+        void plot(double mean, double sigma, MyWindowOrganiser windowOrganiser)
         {
             this.mean = mean;
             this.sigma = sigma;
-            return plot();
+            plot(windowOrganiser);
         }
 
-        PlotWindow plot()
+        void plot(MyWindowOrganiser windowOrganiser)
         {
             final Plot2 plot = new Plot2(title, "Precision (nm)", "Frequency");
             if (x != null)
@@ -2457,8 +2455,8 @@ public class FIRE implements PlugIn
                 // Normalise
                 plot.setColor(Color.red);
                 plot.addPoints(x2, y2, Plot.LINE);
-                float max = Maths.max(y2);
-                max = Maths.maxDefault(max, y);
+                float max = MathUtils.max(y2);
+                max = MathUtils.maxDefault(max, y);
                 final double rangex = 0; //(x2[x2.length - 1] - x2[0]) * 0.025;
                 plot.setLimits(x2[0] - rangex, x2[x2.length - 1] + rangex, 0, max * 1.05);
             }
@@ -2485,7 +2483,8 @@ public class FIRE implements PlugIn
                 // Always put min = 0 otherwise the plot does not change.
                 plot.setLimits(0, max, 0, 1.05);
             }
-            return Utils.display(title, plot, Utils.NO_TO_FRONT);
+            windowOrganiser.display(title, plot, ImageJUtils.NO_TO_FRONT);
+            windowOrganiser.tile();
         }
     }
 
@@ -2568,7 +2567,7 @@ public class FIRE implements PlugIn
         if (Double.isNaN(lower) || Double.isNaN(upper))
         {
             if (logFitParameters)
-                Utils.log("Error computing IQR: %f - %f", lower, upper);
+                ImageJUtils.log("Error computing IQR: %f - %f", lower, upper);
         }
         else
         {
@@ -2578,7 +2577,7 @@ public class FIRE implements PlugIn
             yMax = FastMath.min(upper + iqr, stats.getMax());
 
             if (logFitParameters)
-                Utils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
+                ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
                         yMax);
         }
 
@@ -2589,7 +2588,7 @@ public class FIRE implements PlugIn
             yMax = Math.min(stats.getMax(), stats.getMean() + n * stats.getStandardDeviation());
 
             if (logFitParameters)
-                Utils.log("  Data range: %f - %f. Plotting mean +/- %dxSD: %f - %f", stats.getMin(), stats.getMax(), n,
+                ImageJUtils.log("  Data range: %f - %f. Plotting mean +/- %dxSD: %f - %f", stats.getMin(), stats.getMax(), n,
                         yMin, yMax);
         }
 
@@ -2603,8 +2602,8 @@ public class FIRE implements PlugIn
             precision.add(d);
         }
 
-        final int histogramBins = Utils.getBins(precision, Utils.BinMethod.SCOTT);
-        final float[][] hist = Utils.calcHistogram(precision.getFloatValues(), yMin, yMax, histogramBins);
+        final int histogramBins = HistogramPlot.getBins(precision, HistogramPlot.BinMethod.SCOTT);
+        final float[][] hist = HistogramPlot.calcHistogram(precision.getFloatValues(), yMin, yMax, histogramBins);
         final PrecisionHistogram histogram = new PrecisionHistogram(hist, precision, title);
 
         if (precisionMethod == PrecisionMethod.FIXED)
@@ -2632,9 +2631,9 @@ public class FIRE implements PlugIn
         y = Arrays.copyOf(y, count);
 
         // Sense check to fitted data. Get mean and SD of histogram
-        final double[] stats2 = Utils.getHistogramStatistics(x, y);
+        final double[] stats2 = HistogramPlot.getHistogramStatistics(x, y);
         if (logFitParameters)
-            Utils.log("  Initial Statistics: %f +/- %f", stats2[0], stats2[1]);
+            ImageJUtils.log("  Initial Statistics: %f +/- %f", stats2[0], stats2[1]);
         histogram.mean = stats2[0];
         histogram.sigma = stats2[1];
 
@@ -2642,24 +2641,24 @@ public class FIRE implements PlugIn
         final double[] parameters = fitGaussian(x, y);
         if (parameters == null)
         {
-            Utils.log("  Failed to fit initial Gaussian");
+            ImageJUtils.log("  Failed to fit initial Gaussian");
             return histogram;
         }
         final double newMean = parameters[1];
         final double error = Math.abs(stats2[0] - newMean) / stats2[1];
         if (error > 3)
         {
-            Utils.log("  Failed to fit Gaussian: %f standard deviations from histogram mean", error);
+            ImageJUtils.log("  Failed to fit Gaussian: %f standard deviations from histogram mean", error);
             return histogram;
         }
         if (newMean < yMin || newMean > yMax)
         {
-            Utils.log("  Failed to fit Gaussian: %f outside data range %f - %f", newMean, yMin, yMax);
+            ImageJUtils.log("  Failed to fit Gaussian: %f outside data range %f - %f", newMean, yMin, yMax);
             return histogram;
         }
 
         if (logFitParameters)
-            Utils.log("  Initial Gaussian: %f @ %f +/- %f", parameters[0], parameters[1], parameters[2]);
+            ImageJUtils.log("  Initial Gaussian: %f @ %f +/- %f", parameters[0], parameters[1], parameters[2]);
 
         histogram.mean = parameters[1];
         histogram.sigma = parameters[2];
@@ -2684,11 +2683,11 @@ public class FIRE implements PlugIn
         // Check they are different
         for (int i = 0; i < pp.size(); i++)
             // Check this is valid
-            if (Maths.isFinite(pp.precision[i]))
+            if (Double.isFinite(pp.precision[i]))
             {
                 final double p1 = pp.precision[i];
                 for (int j = i + 1; j < pp.size(); j++)
-                    if (Maths.isFinite(pp.precision[j]) && pp.precision[j] != p1)
+                    if (Double.isFinite(pp.precision[j]) && pp.precision[j] != p1)
                         return true;
                 // All the results are the same, this is not valid
                 break;
@@ -2726,43 +2725,62 @@ public class FIRE implements PlugIn
             initialGuess = guess.guess();
             return fitter.withStartPoint(initialGuess).fit(observations);
         }
-        catch (final TooManyEvaluationsException e)
-        {
-            // Use the initial estimate
-            return initialGuess;
-        }
         catch (final Exception e)
         {
+            // We are expecting TooManyEvaluationsException. 
             // Just in case there is another exception type, or the initial estimate failed
-            return null;
+            // we catch all exceptions.
         }
+        return initialGuess;
     }
 
     /**
-     * Used to tile the windows from the worker threads on the first plot
+     * Used to tile the windows from the worker threads on the first plot.
      */
-    private class MyWindowOrganiser
+    private static class MyWindowOrganiser
     {
-        final WindowOrganiser wo = new WindowOrganiser();
-        int expected;
-        int size = 0;
-        boolean ignore = false;
+        final WindowOrganiser windowOrganiser = new WindowOrganiser();
+        AtomicInteger size;
 
-        public void add(PlotWindow plot)
+        MyWindowOrganiser(int size)
         {
-            if (ignore)
-                return;
+          this.size = new AtomicInteger(size);
+        }
 
-            // This is not perfect since multiple threads may reset the same new-window flag
-            if (Utils.isNewWindow())
-                wo.add(plot);
-
-            // Layout the windows if we reached the expected size.
-            if (++size == expected)
-            {
-                wo.tile();
-                ignore = true; // No further need to track the windows
+        public void display(String title, Plot2 plot, int flags) {
+          if (isTiled()) {
+            ImageJUtils.display(title, plot, flags);
+          }
+          else
+          {
+            // The windows have not yet been tiled so track all new windows
+            WindowOrganiser localWindowOrganiser = new WindowOrganiser();
+            ImageJUtils.display(title, plot, flags, localWindowOrganiser);
+            if (localWindowOrganiser.isNotEmpty()) {
+              synchronized (windowOrganiser) {
+                windowOrganiser.add(localWindowOrganiser);
+              }
             }
+          }
+        }
+
+        public boolean isTiled()
+        {
+          return size.get() == 0;
+        }
+
+        public void tile() {
+          // Get the value and count down to zero
+          if (size.getAndUpdate(MyWindowOrganiser::decrementToZero) == 1) {
+            // When the value is 1 the next value is 0 so tile
+            synchronized (windowOrganiser) {
+              windowOrganiser.tile();
+            }
+          }
+        }
+
+        static int decrementToZero(int value) {
+          return Math.max(0, value - 1);
         }
     }
 
@@ -2838,7 +2856,7 @@ public class FIRE implements PlugIn
         public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work)
         {
             // Plot the histogram
-            wo.add(histogram.plot(work.a.mean, work.a.sigma));
+            histogram.plot(work.a.mean, work.a.sigma, wo);
             return work;
         }
     }
@@ -2866,8 +2884,7 @@ public class FIRE implements PlugIn
         {
             // Compute Q and then plot the scaled FRC numerator
             final WorkSettings settings = work.a;
-            for (final PlotWindow pw : qplot.plot(settings.mean, settings.sigma, settings.qValue))
-                wo.add(pw);
+            qplot.plot(settings.mean, settings.sigma, settings.qValue, wo);
             return work;
         }
     }
@@ -2876,7 +2893,7 @@ public class FIRE implements PlugIn
             final double nmPerPixel)
     {
         // This is used for the initial layout of windows
-        final MyWindowOrganiser wo = new MyWindowOrganiser();
+        final MyWindowOrganiser wo = new MyWindowOrganiser(2);
 
         // Use a simple workflow
         final Workflow<WorkSettings, Object> workflow = new Workflow<>();
@@ -2887,9 +2904,6 @@ public class FIRE implements PlugIn
         workflow.add(new QPlotWorker(wo, qplot), previous);
 
         workflow.start();
-
-        // The number of plots
-        wo.expected = 4;
 
         final String KEY_MEAN = "mean_estimate";
         final String KEY_SIGMA = "sigma_estimate";
@@ -2923,7 +2937,7 @@ public class FIRE implements PlugIn
 
             gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
                     String.format("Initial estimate:\nPrecision = %.3f +/- %.3f\n", histogram.mean, histogram.sigma) +
-                    String.format("Q = %s\nCost = %.3f", Utils.rounded(qplot.qValue), plateauness));
+                    String.format("Q = %s\nCost = %.3f", MathUtils.rounded(qplot.qValue), plateauness));
 
             final double mean10 = histogram.mean * 10;
             final double sd10 = histogram.sigma * 10;
@@ -2941,7 +2955,7 @@ public class FIRE implements PlugIn
             try
             {
                 final long timeout = System.currentTimeMillis() + 5000;
-                while (wo.size < wo.expected)
+                while (!wo.isTiled())
                 {
                     Thread.sleep(50);
                     if (System.currentTimeMillis() > timeout)
@@ -2981,7 +2995,7 @@ public class FIRE implements PlugIn
     private class FIREDialogListener implements DialogListener, MouseListener
     {
         /**
-         * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed
+         * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed.
          */
         @SuppressWarnings("unused")
         static final long DELAY = 500;
@@ -3005,7 +3019,7 @@ public class FIRE implements PlugIn
             this.defaultMean = histogram.mean;
             this.defaultSigma = histogram.sigma;
             this.defaultQValue = qplot.qValue;
-            isMacro = Utils.isMacro();
+            isMacro = ImageJUtils.isMacro();
             // For the reset
             tf1 = (TextField) gd.getNumericFields().get(0);
             tf2 = (TextField) gd.getNumericFields().get(1);

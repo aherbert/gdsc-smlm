@@ -34,9 +34,9 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
  */
 public abstract class CubicSplineFunction implements Gradient2Function
 {
-    /** Index of the background in the parameters array */
+    /** Index of the background in the parameters array. */
     public static final int BACKGROUND = 0;
-    /** Index of the signal intensity in the parameters array */
+    /** Index of the signal intensity in the parameters array. */
     public static final int SIGNAL = 1;
     /** Index of the x-position in the parameters array */
     public static final int X_POSITION = 2;
@@ -46,7 +46,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
     public static final int Z_POSITION = 4;
     /** Index of the x-standard deviation in the parameters array */
 
-    /** The number of parameters per spline */
+    /** The number of parameters per spline. */
     public static final int PARAMETERS_PER_PEAK = 4;
 
     /**
@@ -925,7 +925,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
     // The following properties may be overridden by optimised versions (e.g. no background computation)
 
     /**
-     * @return True if the function can evaluate the background gradient
+     * @return True if the function can evaluate the background gradient.
      */
     public boolean evaluatesBackground()
     {
@@ -933,7 +933,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
     }
 
     /**
-     * @return True if the function can evaluate the signal gradient
+     * @return True if the function can evaluate the signal gradient.
      */
     public boolean evaluatesSignal()
     {
@@ -941,7 +941,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
     }
 
     /**
-     * @return True if the function can evaluate the XY-position gradient
+     * @return True if the function can evaluate the XY-position gradient.
      */
     public boolean evaluatesPosition()
     {
@@ -949,7 +949,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
     }
 
     /**
-     * @return True if the function can evaluate the X-position gradient
+     * @return True if the function can evaluate the X-position gradient.
      */
     public boolean evaluatesX()
     {
@@ -957,7 +957,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
     }
 
     /**
-     * @return True if the function can evaluate the Y-position gradient
+     * @return True if the function can evaluate the Y-position gradient.
      */
     public boolean evaluatesY()
     {
@@ -965,7 +965,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
     }
 
     /**
-     * @return True if the function can evaluate the Z-position gradient
+     * @return True if the function can evaluate the Z-position gradient.
      */
     public boolean evaluatesZ()
     {
@@ -1015,7 +1015,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
      * @param order
      *            the order
      */
-    abstract protected void initialise(double[] a, int order);
+    protected abstract void initialise(double[] a, int order);
 
     /**
      * Checks if the gradient parameter is on a cubic spline node boundary. If true then the second order derivative

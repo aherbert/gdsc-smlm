@@ -32,119 +32,119 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 public interface IDirectFilter
 {
     /**
-     * Validation flag for the signal in photons
+     * Validation flag for the signal in photons.
      */
-    public final static int V_PHOTONS = 0x000000001;
+    public static final int V_PHOTONS = 0x000000001;
 
     /**
-     * Validation flag for the SNR
+     * Validation flag for the SNR.
      */
-    public final static int V_SNR = 0x000000002;
+    public static final int V_SNR = 0x000000002;
 
     /**
-     * Validation flag for the noise
+     * Validation flag for the noise.
      */
-    public final static int V_NOISE = 0x000000004;
+    public static final int V_NOISE = 0x000000004;
 
     /**
-     * Validation flag for the location variance
+     * Validation flag for the location variance.
      */
-    public final static int V_LOCATION_VARIANCE = 0x000000008;
+    public static final int V_LOCATION_VARIANCE = 0x000000008;
 
     /**
-     * Validation flag for the location variance using the local background
+     * Validation flag for the location variance using the local background.
      */
-    public final static int V_LOCATION_VARIANCE2 = 0x000000010;
+    public static final int V_LOCATION_VARIANCE2 = 0x000000010;
 
     /**
-     * Validation flag for the average peak standard deviation in the X and Y dimension
+     * Validation flag for the average peak standard deviation in the X and Y dimension.
      */
-    public final static int V_SD = 0x000000020;
+    public static final int V_SD = 0x000000020;
 
     /**
-     * Validation flag for the background
+     * Validation flag for the background.
      */
-    public final static int V_BACKGROUND = 0x000000040;
+    public static final int V_BACKGROUND = 0x000000040;
 
     /**
-     * Validation flag for the amplitude
+     * Validation flag for the amplitude.
      */
-    public final static int V_AMPLITUDE = 0x000000080;
+    public static final int V_AMPLITUDE = 0x000000080;
 
     /**
-     * Validation flag for the angle (for an elliptical Gaussian peak)
+     * Validation flag for the angle (for an elliptical Gaussian peak).
      */
-    public final static int V_ANGLE = 0x000000100;
+    public static final int V_ANGLE = 0x000000100;
 
     /**
-     * Validation flag for the x position
+     * Validation flag for the x position.
      */
-    public final static int V_X = 0x000000200;
+    public static final int V_X = 0x000000200;
 
     /**
-     * Validation flag for the y position
+     * Validation flag for the y position.
      */
-    public final static int V_Y = 0x000000400;
+    public static final int V_Y = 0x000000400;
 
     /**
-     * Validation flag for the relative x position shift squared
+     * Validation flag for the relative x position shift squared.
      */
-    public final static int V_X_RELATIVE_SHIFT = 0x000000800;
+    public static final int V_X_RELATIVE_SHIFT = 0x000000800;
 
     /**
-     * Validation flag for the relative y position shift squared
+     * Validation flag for the relative y position shift squared.
      */
-    public final static int V_Y_RELATIVE_SHIFT = 0x000001000;
+    public static final int V_Y_RELATIVE_SHIFT = 0x000001000;
 
     /**
-     * Validation flag for the x-dimension standard deviation
+     * Validation flag for the x-dimension standard deviation.
      */
-    public final static int V_X_SD = 0x000002000;
+    public static final int V_X_SD = 0x000002000;
 
     /**
-     * Validation flag for the y-dimension standard deviation
+     * Validation flag for the y-dimension standard deviation.
      */
-    public final static int V_Y_SD = 0x000004000;
+    public static final int V_Y_SD = 0x000004000;
 
     /**
-     * Validation flag for the x-dimension width factor
+     * Validation flag for the x-dimension width factor.
      */
-    public final static int V_X_SD_FACTOR = 0x000008000;
+    public static final int V_X_SD_FACTOR = 0x000008000;
 
     /**
-     * Validation flag for the y-dimension width factor
+     * Validation flag for the y-dimension width factor.
      */
-    public final static int V_Y_SD_FACTOR = 0x000010000;
+    public static final int V_Y_SD_FACTOR = 0x000010000;
 
     /**
      * Validation flag for the location variance using the fitted x/y parameter Cramér-Rao lower bound
      */
-    public final static int V_LOCATION_VARIANCE_CRLB = 0x000020000;
+    public static final int V_LOCATION_VARIANCE_CRLB = 0x000020000;
 
     /**
-     * Validation flag for the z position
+     * Validation flag for the z position.
      */
-    public final static int V_Z = 0x000040000;
+    public static final int V_Z = 0x000040000;
 
     /**
-     * Disable filtering using the width of the result
+     * Disable filtering using the width of the result.
      */
-    public final static int NO_WIDTH = 0x000000001;
+    public static final int NO_WIDTH = 0x000000001;
 
     /**
-     * Disable filtering using the shift of the result
+     * Disable filtering using the shift of the result.
      */
-    public final static int NO_SHIFT = 0x000000002;
+    public static final int NO_SHIFT = 0x000000002;
 
     /**
-     * Enable filtering both X and Y widths
+     * Enable filtering both X and Y widths.
      */
-    public final static int XY_WIDTH = 0x000000004;
+    public static final int XY_WIDTH = 0x000000004;
 
     /**
-     * Disable Z filtering (use when not fitting in 3D)
+     * Disable Z filtering (use when not fitting in 3D).
      */
-    public final static int NO_Z = 0x000000008;
+    public static final int NO_Z = 0x000000008;
 
     /**
      * Gets the flags indicating all the fields that are used during validation. These flags may be returned by the

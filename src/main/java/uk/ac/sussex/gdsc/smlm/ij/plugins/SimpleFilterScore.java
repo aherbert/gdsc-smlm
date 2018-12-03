@@ -27,7 +27,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterScore;
 
 /**
- * Store the filter score used in benchmarking
+ * Store the filter score used in benchmarking.
  */
 public class SimpleFilterScore extends FilterScore
 {

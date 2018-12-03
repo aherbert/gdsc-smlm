@@ -36,7 +36,7 @@ import ij.IJ;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
@@ -119,7 +119,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
         compareCoordinates(results1, results2, results3, dThreshold);
         final double seconds = (System.nanoTime() - start) / 1000000000.0;
 
-        IJ.showStatus(String.format("%s = %ss", TITLE, Utils.rounded(seconds, 4)));
+        IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
     }
 
     private static boolean showDialog()
@@ -346,7 +346,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
         sb.append(result.getFalsePositives()).append('\t');
         sb.append(result.getFalseNegatives()).append('\t');
         sb.append(IJ.d2s(result.getJaccard(), 4)).append('\t');
-        sb.append(IJ.d2s(result.getRMSD(), 4)).append('\t');
+        sb.append(IJ.d2s(result.getRmsd(), 4)).append('\t');
         sb.append(IJ.d2s(result.getPrecision(), 4)).append('\t');
         sb.append(IJ.d2s(result.getRecall(), 4)).append('\t');
         sb.append(IJ.d2s(result.getFScore(0.5), 4)).append('\t');
@@ -463,13 +463,13 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
     {
         addPoint(sb, p2);
         final PointPair pair = new PointPair(p1, p2);
-        final double d = pair.getXYDistance();
+        final double d = pair.getXyDistance();
         if (d >= 0)
-            sb.append(Utils.rounded(d, 4)).append('\t');
+            sb.append(MathUtils.rounded(d, 4)).append('\t');
         else
             sb.append("-\t");
         if (p1 != null && p2 != null)
-            sb.append(Utils.rounded(p1.score(p2, d * d, dThreshold), 4)).append('\t');
+            sb.append(MathUtils.rounded(p1.score(p2, d * d, dThreshold), 4)).append('\t');
         else
             sb.append("-\t");
     }

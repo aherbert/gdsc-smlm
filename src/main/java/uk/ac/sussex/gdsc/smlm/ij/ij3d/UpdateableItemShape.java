@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 /**
- * Interface allowing shape objects that represent a set of items to be updated
+ * Interface allowing shape objects that represent a set of items to be updated.
  */
 public interface UpdateableItemShape extends ItemShape
 {

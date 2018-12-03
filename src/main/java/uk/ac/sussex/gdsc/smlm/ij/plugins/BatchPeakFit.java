@@ -61,7 +61,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
@@ -92,7 +93,7 @@ public class BatchPeakFit implements PlugIn
     private TextField configFilenameText;
 
     /**
-     * Default constructor
+     * Default constructor.
      */
     public BatchPeakFit()
     {
@@ -334,7 +335,7 @@ public class BatchPeakFit implements PlugIn
                     peakFit.run(imp, false);
 
                     IJ.log(String.format("%s : %s : Size %d : Time = %s", imageFilename, settingsFilename,
-                            peakFit.getSize(), Utils.timeToString(peakFit.getTime())));
+                            peakFit.getSize(), TextUtils.millisToString(peakFit.getTime())));
                 }
                 catch (final Exception e)
                 {
@@ -386,7 +387,7 @@ public class BatchPeakFit implements PlugIn
     }
 
     /**
-     * Ask for parameters
+     * Ask for parameters.
      *
      * @return True if not cancelled
      */
@@ -396,7 +397,7 @@ public class BatchPeakFit implements PlugIn
         gd.addHelp(About.HELP_URL);
 
         gd.addFilenameField("Config_filename", configFilename);
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             configFilenameText = (TextField) gd.getStringFields().get(0);
 
@@ -415,7 +416,7 @@ public class BatchPeakFit implements PlugIn
                         // Look for nodes that are part of the fit configuration
                         final XPathFactory factory = XPathFactory.newInstance();
                         final XPath xpath = factory.newXPath();
-                        // TODO: Check this still works after the package was refactored 
+                        // TODO: Check this still works after the package was refactored
                         final XPathExpression expr = xpath
                                 .compile("//uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration//*");
 
@@ -435,12 +436,12 @@ public class BatchPeakFit implements PlugIn
                         }
 
                         // Save the settings file
-                        final String[] path = Utils.decodePath(configFilenameText.getText());
+                        final String[] path = ImageJUtils.decodePath(configFilenameText.getText());
                         final OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
                         if (chooser.getFileName() != null)
                         {
                             String newFilename = chooser.getDirectory() + chooser.getFileName();
-                            newFilename = Utils.replaceExtension(newFilename, ".xml");
+                            newFilename = ImageJUtils.replaceExtension(newFilename, ".xml");
                             try (FileOutputStream fs = new FileOutputStream(newFilename))
                             {
                                 xs.toXML(batchSettings, fs);
@@ -471,7 +472,7 @@ public class BatchPeakFit implements PlugIn
     {
         final XStream xs = new XStream(new DomDriver());
         XStream.setupDefaultSecurity(xs); // to be removed after 1.5
-        // TODO: Check this still works after the package was refactored 
+        // TODO: Check this still works after the package was refactored
         xs.allowTypesByWildcard(new String[] { "uk.ac.sussex.gdsc.smlm.**" });
         xs.alias("gdsc.fitting.batchSettings", BatchSettings.class);
         xs.alias("parameter", ParameterSettings.class);

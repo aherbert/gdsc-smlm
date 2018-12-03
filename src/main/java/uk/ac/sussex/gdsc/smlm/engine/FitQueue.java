@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.engine;
 
 /**
- * Define the type of queue used within the fit engine
+ * Define the type of queue used within the fit engine.
  */
 public enum FitQueue
 {

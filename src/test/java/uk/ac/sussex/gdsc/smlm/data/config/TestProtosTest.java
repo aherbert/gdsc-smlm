@@ -23,12 +23,12 @@
  */
 package uk.ac.sussex.gdsc.smlm.data.config;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "javadoc" })
 public class TestProtosTest

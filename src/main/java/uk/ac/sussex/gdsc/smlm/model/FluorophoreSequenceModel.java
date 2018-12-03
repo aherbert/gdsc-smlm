@@ -66,7 +66,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
     }
 
     /**
-     * The number of times the molecule went into the dark state
+     * The number of times the molecule went into the dark state.
      */
     private int blinks = 0;
     /**
@@ -229,7 +229,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
     }
 
     /**
-     * Convert the start time to an integer
+     * Convert the start time to an integer.
      *
      * @param t
      *            the time
@@ -241,7 +241,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
     }
 
     /**
-     * Convert the end time to an integer
+     * Convert the end time to an integer.
      *
      * @param t
      *            the time

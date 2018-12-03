@@ -24,7 +24,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Class for evaluating the integral (sum) of a function
+ * Class for evaluating the integral (sum) of a function.
  */
 public class IntegralValueProcedure implements ValueProcedure
 {

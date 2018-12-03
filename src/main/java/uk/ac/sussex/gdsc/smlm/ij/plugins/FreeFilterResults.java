@@ -29,7 +29,7 @@ import java.awt.event.ItemListener;
 
 import ij.IJ;
 import ij.plugin.PlugIn;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
@@ -143,7 +143,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
         gd.addTextAreas(text, null, 20, 80);
         gd.addCheckbox("Show_demo_filters", false);
 
-        if (Utils.isShowGenericDialog())
+        if (ImageJUtils.isShowGenericDialog())
         {
             final Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
             cb.addItemListener(this);

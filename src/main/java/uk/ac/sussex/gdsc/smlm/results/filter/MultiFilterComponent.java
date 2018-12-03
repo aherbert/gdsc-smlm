@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 public abstract class MultiFilterComponent
 {
     /**
-     * Validate the peak
+     * Validate the peak.
      *
      * @param peak
      *            the peak

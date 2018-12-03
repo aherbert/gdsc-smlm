@@ -1,20 +1,21 @@
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import uk.ac.sussex.gdsc.test.junit5.ExtraAssumptions;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLog;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings({ "javadoc" })
 public class RampedSelectionStrategyTest
@@ -101,7 +102,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest50()
     {
-        ExtraAssumptions.assume(TestComplexity.LOW);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
         speedTest(50, false, 10);
     }
 
@@ -109,7 +110,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest200()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         speedTest(200, true, 5);
     }
 
@@ -117,7 +118,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest1000()
     {
-        ExtraAssumptions.assume(TestComplexity.MEDIUM);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
         speedTest(1000, true, 2);
     }
 
@@ -126,7 +127,7 @@ public class RampedSelectionStrategyTest
     @Test
     public void speedTest5000()
     {
-        ExtraAssumptions.assume(TestComplexity.HIGH);
+        Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
         speedTest(5000, true, 1);
     }
 
@@ -189,6 +190,6 @@ public class RampedSelectionStrategyTest
 
         final TimingResult slow = ts.get((faster) ? ts.getSize() - 2 : ts.getSize() - 1);
         final TimingResult fast = ts.get((faster) ? ts.getSize() - 1 : ts.getSize() - 2);
-        logger.log(TestLog.getTimingRecord(slow, fast));
+        logger.log(TestLogUtils.getTimingRecord(slow, fast));
     }
 }

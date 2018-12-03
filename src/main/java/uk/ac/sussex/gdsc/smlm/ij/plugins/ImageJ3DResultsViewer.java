@@ -111,20 +111,20 @@ import ij3d.UniverseListener;
 import ij3d.UniverseSettings;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
-import uk.ac.sussex.gdsc.core.data.utils.RounderFactory;
+import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.IJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
-import uk.ac.sussex.gdsc.core.ij.process.LUTHelper;
-import uk.ac.sussex.gdsc.core.ij.process.LUTHelper.LutColour;
-import uk.ac.sussex.gdsc.core.ij.roi.RoiTest;
-import uk.ac.sussex.gdsc.core.ij.roi.RoiTestFactory;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
+import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.utils.Maths;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
@@ -171,13 +171,13 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
 import uk.ac.sussex.gdsc.smlm.utils.Triplet;
 
 /**
- * Draws a localisation results set using an ImageJ 3D image
+ * Draws a localisation results set using an ImageJ 3D image.
  *
  * @see <A href="https://imagej.net/3D_Viewer">https://imagej.net/3D_Viewer</a>
  */
 public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseListener
 {
-    private final static String TITLE = "ImageJ 3D Results Viewer";
+    private static final String TITLE = "ImageJ 3D Results Viewer";
 
     //@formatter:off
 	private enum SizeMode implements NamedObject
@@ -205,9 +205,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private final static String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
+	private static final String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
 
-	private final static String[] RENDERING = SettingsManager.getNames((Object[]) Rendering.values());
+	private static final String[] RENDERING = SettingsManager.getNames((Object[]) Rendering.values());
 
 	private enum DepthMode implements NamedObject
 	{
@@ -234,7 +234,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private final static String[] DEPTH_MODE = SettingsManager.getNames((Object[]) DepthMode.values());
+	private static final String[] DEPTH_MODE = SettingsManager.getNames((Object[]) DepthMode.values());
 
 	private enum TransparencyMode implements NamedObject
 	{
@@ -265,7 +265,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private final static String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());
+	private static final String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());
 
 	private enum SortMode implements NamedObject
 	{
@@ -309,7 +309,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private final static String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
+	private static final String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
 	//@formatter:on
 
     // To debug this from Eclipse relies on being able to find the native
@@ -365,7 +365,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         /** The rendering mode. */
         final Rendering rendering;
 
-        /** Used to test if this is the same results set */
+        /** Used to test if this is the same results set. */
         PeakResultsDigest digest;
 
         CustomContentInstant contentInstance;
@@ -711,9 +711,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     }
 
     /** The executor service for message digests. */
-    private final static ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-    private final static Transform3D IDENTITY = new Transform3D();
+    private static final Transform3D IDENTITY = new Transform3D();
 
     // No ned to store this in settings as when the plugin is first run there are no windows
     private static String lastWindow = "";
@@ -817,7 +817,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
                 return true;
             }
         });
-        gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
+        gd.addChoice("Colour", LutHelper.getLutNames(), settings.getLut());
         gd.addChoice("Rendering", RENDERING, settings.getRendering(), new OptionListener<Integer>()
         {
             @Override
@@ -1314,12 +1314,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         if (settings.getTransparencyMode() == 0)
             return null;
 
-        final double min = Maths.clip(0, 1, settings.getMinTransparency());
-        final double max = Maths.clip(0, 1, settings.getMaxTransparency());
+        final double min = MathUtils.clip(0, 1, settings.getMinTransparency());
+        final double max = MathUtils.clip(0, 1, settings.getMaxTransparency());
         if (min == max)
         {
             // No per item transparency
-            Utils.log("No per-item transparency as min == max");
+            ImageJUtils.log("No per-item transparency as min == max");
             return null;
         }
         // Convert to alpha
@@ -1353,12 +1353,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         p.getI();
 
         final float[] intensity = p.intensity;
-        final float[] limits = Maths.limits(intensity);
+        final float[] limits = MathUtils.limits(intensity);
         final float min = limits[0];
         final float max = limits[1];
         if (min == max)
         {
-            Utils.log("No per-item transparency as intensity is fixed");
+            ImageJUtils.log("No per-item transparency as intensity is fixed");
             return null;
         }
 
@@ -1376,7 +1376,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         final SizeMode sizeMode = SizeMode.forNumber(settings.getSizeMode());
         if (sizeMode == SizeMode.FIXED_SIZE)
         {
-            Utils.log("No per-item transparency as size is fixed");
+            ImageJUtils.log("No per-item transparency as size is fixed");
             return null;
         }
 
@@ -1415,12 +1415,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             // Use the average radius. This is the equivalent of the mean radius of an enclosing ellipsoid.
             //d[i] = Math.sqrt(d[i] / 3);
         }
-        final double[] limits = Maths.limits(d);
+        final double[] limits = MathUtils.limits(d);
         final double min = limits[0];
         final double max = limits[1];
         if (min == max)
         {
-            Utils.log("No per-item transparency as size is fixed");
+            ImageJUtils.log("No per-item transparency as size is fixed");
             return null;
         }
 
@@ -1434,7 +1434,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     private static float getTransparency(ImageJ3DResultsViewerSettingsOrBuilder settings)
     {
-        float transparency = Maths.clip(0, 1, (float) settings.getTransparency());
+        float transparency = MathUtils.clip(0, 1, (float) settings.getTransparency());
         // Do not allow fully transparent objects
         if (transparency == 1)
             transparency = 0;
@@ -1490,8 +1490,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
                         // Rank by intensity, highest first
                         final StandardResultProcedure p = new StandardResultProcedure(results);
                         p.getI();
-                        final int[] indices = SimpleArrayUtils.newArray(results.size(), 0, 1);
-                        Sort.sort(indices, p.intensity);
+                        final int[] indices = SimpleArrayUtils.natural(results.size());
+                        SortUtils.sortIndices(indices, p.intensity, true);
                         final double inc = range / indices.length;
                         for (int i = 0; i < indices.length; i++)
                             // The standard rendering has +z going away so put the highest rank at min
@@ -1538,8 +1538,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
         final double[] d = getDistance(data.points, direction, eye);
 
-        final int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
-        Sort.sort(indices, d);
+        final int[] indices = SimpleArrayUtils.natural(d.length);
+        SortUtils.sortIndices(indices, d, true);
 
         reorder(indices, data);
     }
@@ -1575,7 +1575,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         final Vector3d dir = new Vector3d(settings.getSortDirectionX(), settings.getSortDirectionY(),
                 settings.getSortDirectionZ());
         final double l1 = dir.lengthSquared();
-        if (!Maths.isFinite(l1))
+        if (!Double.isFinite(l1))
             return null;
         return dir;
     }
@@ -1641,8 +1641,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             d[i] = a * p.x + b * p.y + c * p.z;
         }
 
-        final int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
-        Sort.sort(indices, d);
+        final int[] indices = SimpleArrayUtils.natural(d.length);
+        SortUtils.sortIndices(indices, d, true);
 
         reorder(indices, data);
     }
@@ -1688,10 +1688,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         v.normalize();
 
         // Use the vector lengths in each dimension to set the order
-        int[] indices = SimpleArrayUtils.newArray(3, 0, 1);
+        int[] indices = SimpleArrayUtils.natural(3);
         final double[] values = new double[] { v.x, v.y, v.z };
         final double[] absValues = new double[] { Math.abs(v.x), Math.abs(v.y), Math.abs(v.z) };
-        Sort.sort(indices, absValues);
+        SortUtils.sortIndices(indices, absValues, true);
 
         final int ix = search(indices, 0);
         final int iy = search(indices, 1);
@@ -1821,7 +1821,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     private static Color3f[] createColour(MemoryPeakResults results, ImageJ3DResultsViewerSettingsOrBuilder settings)
     {
         // Colour by z
-        final LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
+        final LUT lut = LutHelper.createLut(LutColour.forNumber(settings.getLut()), false);
 
         StandardResultProcedure p = null;
         float range = 0;
@@ -1830,7 +1830,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         {
             p = new StandardResultProcedure(results);
             p.getZ();
-            limits = Maths.limits(p.z);
+            limits = MathUtils.limits(p.z);
             range = limits[1] - limits[0];
         }
 
@@ -1900,7 +1900,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     }
 
     /**
-     * Creates the image 3D universe with a unique name
+     * Creates the image 3D universe with a unique name.
      *
      * @param title
      *            the title
@@ -2474,7 +2474,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     private interface ContentAction
     {
         /**
-         * Run the action
+         * Run the action.
          *
          * @param c
          *            The content
@@ -2485,7 +2485,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         public void finish();
     }
 
-    private static abstract class BaseContentAction implements ContentAction
+    private abstract static class BaseContentAction implements ContentAction
     {
         @Override
         public void finish()
@@ -2515,8 +2515,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
                 settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
                 final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
                 // Transparency can be set interactively using: Edit > Change Transparency
-                //gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
-                gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
+                //gd.addSlider("Transparency", 0, 0.9, settings.getTransparency());
+                gd.addChoice("Colour", LutHelper.getLutNames(), settings.getLut());
                 gd.showDialog();
                 if (gd.wasCanceled())
                     return -1;
@@ -2896,8 +2896,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             // Print the eye coords and direction in the virtual world.
             // This can be used for a custom sort.
             //Utils.log("%s : Eye point = %s : Direction = %s", c.getName(), eye, direction);
-            final Rounder rounder = RounderFactory.create(4);
-            Utils.log("%s : Eye point = (%s,%s,%s) : Direction = (%s,%s,%s)", c.getName(), rounder.round(eye.x),
+            final Rounder rounder = RounderUtils.create(4);
+            ImageJUtils.log("%s : Eye point = (%s,%s,%s) : Direction = (%s,%s,%s)", c.getName(), rounder.round(eye.x),
                     rounder.round(eye.y), rounder.round(eye.z), rounder.round(direction.x), rounder.round(direction.y),
                     rounder.round(direction.z));
 
@@ -2968,8 +2968,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
             final double[] d = getDistance(data.points, direction, eye);
 
-            final int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
-            Sort.sort(indices, d);
+            final int[] indices = SimpleArrayUtils.natural(d.length);
+            SortUtils.sortIndices(indices, d, true);
 
             if (updateable != null)
                 // Switch to fast mode when not debugging
@@ -3003,7 +3003,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             if (imp == null)
             {
                 final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-                final String[] list = Utils.getImageList(Utils.SINGLE);
+                final String[] list = ImageJUtils.getImageList(ImageJUtils.SINGLE);
                 if (list.length == 0)
                     return -1;
                 gd.addChoice("Image", list, title);
@@ -3045,7 +3045,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     private class CropResultsAction extends BaseContentAction
     {
-        RoiTest shape = null;
+        CoordinatePredicate shape = null;
         private final Point2d p2d = new Point2d();
         ImageJ3DResultsViewerSettings.Builder settings = null;
 
@@ -3062,7 +3062,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
                 Roi roi = canvas3D.getRoi();
                 if (roi == null)
                     roi = new Roi(0, 0, canvas.getWidth(), canvas.getHeight());
-                shape = RoiTestFactory.create(roi);
+                shape = CoordinatePredicateUtils.createContainsPredicate(roi);
                 if (shape == null)
                     return -1;
                 settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
@@ -3097,7 +3097,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
                 final String name = (TextUtils.isNullOrEmpty(settings.getOutputName()))
                         ? (results.getName() + " Cropped")
                         : settings.getOutputName();
-                egd.addStringField("Output_name", name, Maths.clip(60, 120, name.length()));
+                egd.addStringField("Output_name", name, MathUtils.clip(60, 120, name.length()));
                 egd.showDialog();
                 if (egd.wasCanceled())
                     return -1;
@@ -3136,15 +3136,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             }
             newResults.setName(outputName);
             newResults.begin();
-            Utils.showStatus("Cropping " + results.getName());
-            final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), results.size(), false);
+            ImageJUtils.showStatus("Cropping " + results.getName());
+            final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), results.size(), false);
             final PeakResult[] allResults = results.toArray();
             for (int i = 0, size = results.size(); i < size; i++)
             {
                 final Point3d locInImagePlate = new Point3d(points.getf(i));
                 vWorldToIP.transform(locInImagePlate);
                 canvas.getPixelLocationFromImagePlate(locInImagePlate, p2d);
-                if (shape.contains(p2d.x, p2d.y))
+                if (shape.test(p2d.x, p2d.y))
                     newResults.add(allResults[i]);
                 ticker.tick();
             }
@@ -3313,12 +3313,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
                             {
                                 final String name = (TextUtils.isNullOrEmpty(settings.getNameSuffix())) ? " Cropped"
                                         : settings.getNameSuffix();
-                                egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+                                egd.addStringField("Name_suffix", name, MathUtils.clip(20, 60, name.length()));
                             }
                             else if (settings.getNameOption() == CropResults.NAME_OPTION_SEQUENCE)
                             {
                                 final String name = settings.getNameSuffix();
-                                egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+                                egd.addStringField("Name_suffix", name, MathUtils.clip(20, 60, name.length()));
                                 int c = settings.getNameCounter();
                                 if (c < 1)
                                     c = 1;
@@ -3705,7 +3705,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
         IJ.showStatus("Creating 3D mesh ...");
         final double creaseAngle = (r.isHighResolution()) ? 44 : 0;
-        final IJTrackProgress progress = null; // Used for debugging construction time
+        final ImageJTrackProgress progress = null; // Used for debugging construction time
         if (alpha != null)
         {
             final TransparentItemTriangleMesh mesh = new TransparentItemTriangleMesh(
