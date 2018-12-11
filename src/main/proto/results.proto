@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+// ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
+// Authors: Alex Herbert, 2017 
+// License: GPL V3
+package uk.ac.sussex.gdsc.smlm.data.config;
+
+option java_outer_classname = "ResultsProtos";
+import "unit.proto";
+
+// The type of results image
+enum ResultsImageType {
+// No results image
+	DRAW_NONE = 0;
+	// Draw each localisation using an intensity of 1
+	DRAW_LOCALISATIONS = 1;
+	// Draw each localisation using the signal intensity
+	DRAW_INTENSITY = 2;
+	// Draw each localisation using the frame number as the intensity
+	DRAW_FRAME_NUMBER = 3;
+	// Draw each localisation using the fitted PSF
+	DRAW_FITTED_PSF = 4;
+	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with 
+	// the width equal to the localisation precision 
+	DRAW_LOCALISATIONS_PRECISION = 5;
+	// Draw each localisation as a Gaussian 2D spot using the signal intensity with 
+	// the width equal to the localisation precision 
+	DRAW_INTENSITY_PRECISION = 6;
+	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with the 
+	// width equal to the specified average localisation precision 
+	DRAW_LOCALISATIONS_AVERAGE_PRECISION = 7;
+	// Draw each localisation as a Gaussian 2D spot using the signal intensity with 
+	// the width equal to the specified average localisation precision 
+	DRAW_INTENSITY_AVERAGE_PRECISION = 8;
+	// Draw each localisation using the fit error as the intensity
+	DRAW_FIT_ERROR = 9;
+	// Draw each localisation using the z-position as the intensity (providing crude 3D rendering)
+	DRAW_Z_POSITION = 10;
+}
+
+// The mode for the results image
+enum ResultsImageMode {
+// Add the value to the image
+	IMAGE_ADD = 0;
+	// Replace the current value
+	IMAGE_REPLACE = 1;
+	// Use the maximum value
+	IMAGE_MAX = 2;
+}
+
+// Define the results image settings
+message ResultsImageSettings {
+// Define the type of results image
+	ResultsImageType image_type = 1;
+	// Set to true to weight the result over nearest-neighbour pixels
+	bool weighted = 2;
+	// Set to true to equalise the results image histogram for contrast enhancement
+	bool equalised = 3;
+	// The average precision to use when drawing a Gaussian 2D PSF (in nm)
+	double average_precision = 4;
+	// The scale of the results image
+	double scale = 5;
+	// The rolling window size for the results image
+	int32 rolling_window_size = 6;
+}
+
+// The type of results file
+enum ResultsFileFormat {
+// None
+	FILE_NONE = 0;
+	// Text
+	TEXT = 1;
+	// Binary
+	BINARY = 2;
+	// Tagged Spot File
+	TSF = 3;
+	// Molecular Accuracy Localisation Keep
+	MALK = 4;
+}
+
+// The results file settings
+message ResultsFileSettings {
+// The results directory
+	string results_directory = 1;
+	// The results filename
+	string results_filename = 2;
+	// The file format
+	ResultsFileFormat file_format = 3;
+	// The distance unit
+	DistanceUnit distance_unit = 4;
+	// The intensity unit
+	IntensityUnit intensity_unit = 5;
+	// The angle unit
+	AngleUnit angle_unit = 6;
+	// Set to true to show precision in the results file
+	bool show_precision = 7;
+}
+
+// The type of results file
+enum ResultsTableFormat {
+// None
+	TABLE_NONE = 0;
+	// Use an ImageJ table
+	IMAGEJ = 1;
+	// Use an interactive table
+	INTERACTIVE = 2;
+}
+
+// Define the results table settings
+message ResultsTableSettings {
+// Set to true to show the results table
+	bool show_table = 1;
+	// The distance unit
+	DistanceUnit distance_unit = 2;
+	// The intensity unit
+	IntensityUnit intensity_unit = 3;
+	// The angle unit
+	AngleUnit angle_unit = 4;
+	// Set to true to show precision in the results table
+	bool show_precision = 5;
+	// Set to true to show the fitting data in the results table
+	bool show_fitting_data = 6;
+	// Set to true to show the noise data in the results table
+	bool show_noise_data = 7;
+	// Set the rounding precision for the results table
+	int32 rounding_precision = 8;
+	// Set to true to update the settings on existing tables
+	bool update_existing_tables = 9;
+	// The results table format
+	ResultsTableFormat results_table_format = 10;
+	// Set to true to show a row counter in the table
+	bool show_row_counter = 11;
+}
+
+// Define the in-memory results settings
+message ResultsInMemorySettings {
+// Set to true to save the results to memory
+	bool in_memory = 1;
+}
+
+// Define the results settings
+message ResultsSettings {
+// Set to true to log progress during fitting
+	bool log_progress = 1;
+	// Set to true to show the parameter deviations. This applies to table and file results output.
+	bool show_deviations = 2;
+
+	// The results image settings
+	ResultsImageSettings results_image_settings = 3;
+
+	// The results file settings
+	ResultsFileSettings results_file_settings = 4;
+
+	// The results table settings
+	ResultsTableSettings results_table_settings = 5;
+
+	// the results in-memory settings
+	ResultsInMemorySettings results_in_memory_settings = 6;
+}

@@ -107,9 +107,9 @@ Software for single molecule localisation microscopy (SMLM)
     <pmd.version>6.7.0</pmd.version>
     <xstream.version>1.4.10</xstream.version>
     <ejml.version>0.24</ejml.version>
-    <protobuf.version>3.3.0</protobuf.version>
+    <protobuf.version>3.6.1</protobuf.version>
     <JTransforms.version>3.1</JTransforms.version>
-    <!-- Maven -->
+    <!-- Maven plugins -->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -124,6 +124,8 @@ Software for single molecule localisation microscopy (SMLM)
     <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
     <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
+    <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+    <os-maven-plugin.version>1.6.0</os-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -256,6 +258,14 @@ Software for single molecule localisation microscopy (SMLM)
   </repositories>
 
   <build>
+    <extensions>
+      <extension>
+        <!-- Generate a classifier for the current OS and architecture. Required for protocArtifact. -->
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>${os-maven-plugin.version}</version>
+      </extension>
+    </extensions>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -331,6 +341,22 @@ Software for single molecule localisation microscopy (SMLM)
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>${protobuf-maven-plugin.version}</version>
+        <configuration>
+          <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+          <checkStaleness>true</checkStaleness>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
         <configuration>
@@ -607,6 +633,28 @@ Software for single molecule localisation microscopy (SMLM)
           <artifactId>junit-jupiter-engine</artifactId>
         </dependency>
       </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>add-source</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>${project.build.directory}/generated-sources/java/</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
     <profile>
       <id>coveralls</id>

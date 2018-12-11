@@ -1,0 +1,149 @@
+syntax = "proto3";
+
+// ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
+// Authors: Alex Herbert, 2017 
+// License: GPL V3
+package uk.ac.sussex.gdsc.smlm.data.config;
+
+option java_outer_classname = "PSFProtos";
+
+import "unit.proto";
+
+// enums that are used for optional units have [enum_name]_NA as the first entry as the 
+// proto definition will use this as the default
+
+// The type of Point Spread Function (PSF)
+enum PSFType {
+	PSF_TYPE_NA = 0; // Not available. Only the standard parameters are supported.
+	ONE_AXIS_GAUSSIAN_2D = 1; // A 2D Gaussian with the same standard deviation in X and Y dimensions
+	TWO_AXIS_GAUSSIAN_2D = 2; // A 2D Gaussian with standard deviations in X and Y dimensions
+	TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3; // A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
+	ASTIGMATIC_GAUSSIAN_2D = 4; // A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
+	CUSTOM = 5; // A custom point spread function (PSF) 
+}
+
+// Define the type of units supported in the Point Spread Function (PSF)
+enum PSFParameterUnit {
+	PSF_PARAMETER_UNIT_NA = 0; // Not available
+	DISTANCE = 1; // The parameter describes a distance
+	INTENSITY = 2; // The parameter describes an intensity
+	ANGLE = 3; // The parameter describes an angle
+}
+
+// Define the additional parameters of the Point Spread Function (PSF)
+message PSFParameter {
+	string name = 1;
+	PSFParameterUnit unit = 2;
+	double value = 3;
+}
+
+// Define the Gaussian 2D Astigmatism model. This maps a z-coordinate into a Gaussian width 
+// for the X and Y dimensions. 
+// Uses the model described by Smith, et al (2010) based on Holtzer, et al (2007).
+// Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically 
+// minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
+// Holtzer, L., Meckel, T. & Schmidt, T. Nanometric three-dimensional tracking of individual 
+// quantum dots in cells. Applied Physics Letters 90, 1–3 (2007).
+// For X/Y dimension: z' = (z-/+gamma); s = s0 * sqrt(1 + (z'^2 + A * z'^3 + B * z'^4) / d^2).
+message AstigmatismModel
+{ 
+	// The gamma parameter (half the distance between the focal planes). 
+	// Note that a positive gamma puts the focal plane for the X-dimension above the 
+	// z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+	// (negative Z). If gamma is negative then the orientation of the focal planes of X 
+	// and Y are reversed.	
+	double gamma = 1;
+	// Depth-of-focus. This is the z-distance where the width is enlarged by 
+	// a factor of sqrt(2) compared to the width in the focal plane.   
+	double d = 2; 
+	double ax = 3; // Empirical constant A for the x-astigmatism of the PSF
+	double bx = 4; // Empirical constant B for the x-astigmatism of the PSF
+	double ay = 5; // Empirical constant A for the y-astigmatism of the PSF
+	double by = 6; // Empirical constant B for the y-astigmatism of the PSF
+	double s0x = 7; // The width (standard deviation) in the x-focal plane
+	double s0y = 8; // The width (standard deviation) in the y-focal plane
+	DistanceUnit z_distance_unit = 9; // The input distance unit for z (μm, nm)
+	DistanceUnit s_distance_unit = 10; // The output distance unit for s (may be pixels)
+	// The pixel size used to create the model. A model is only valid when used 
+	// with the same light path (objective, magnification, camera sensor). The entire 
+	// light path is not recorded but the pixel size is stored. This can be used as 
+	// a quick validation of matching calibration, or to convert output width in pixels.
+	double nm_per_pixel = 11;
+	// The z-centre. This is assumed to be zero but can be used to store the results
+	// of curve fitting where the z-centre is a parameter.
+	double z0 = 12;
+}
+
+// Define the astigmatism model settings
+message AstigmatismModelSettings
+{
+	map<string, AstigmatismModel> astigmatism_model_resources = 1;
+}
+
+// Define the Point Spread Function (PSF)
+message PSF {
+	PSFType psf_type = 1; // The PSF type
+	
+	// The names of the PSF parameters. The results are stored using the standard parameters of 
+	// [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+	// parameters array. The names of the non-standard parameters, in order, can be defined here.
+	repeated PSFParameter parameters = 2;
+	
+	// The PSF model name. This should contain all the information required to
+	// load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+	string model_name = 3;
+}
+
+// Define the offset for slice alignment correction
+message Offset
+{
+	double cx = 2;
+	double cy = 3;
+}
+
+// Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
+message ImagePSF
+{
+	// The number of images in the PSF
+	int32 image_count = 1;
+    // The image containing the focal plane of the PSF. This is 1-indexed.
+	int32 centre_image = 2;
+	// The size of the PSF pixel in nanometers
+	double pixel_size = 3;
+	// The depth of the PSF pixel in nanometers
+	double pixel_depth = 4;
+	// The Full Width at Half Maxima (FWHM) in image pixels
+	double fwhm = 5;
+	// Notes about the PSF, added as Key-Value pairs.
+	map<string, string> notes = 6;
+	// The alignment correction for each slice in pixels. This is the shift required to 
+	// move the centre of the image to the centre of the PSF. The PSF centre may be 
+	// determined by PSF fitting.
+	// If missing then the alignment is assumed to be 0,0.
+	map<int32, Offset> offsets = 7;
+	// X-centre. This can be used instead of the offsets. This is the distance
+	// through the image width that is the x-centre. 
+	double x_centre = 8;
+	// Y-centre. This can be used instead of the offsets. This is the distance
+	// through the image width that is the y-centre. 
+	double y_centre = 9;
+	// Z-centre. This can be used instead of the centre_image. This is the distance
+	// through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+	// should use rounding to the nearest integer and then add 1. 
+	double z_centre = 10;
+}
+
+// Define a cubic spline resource that can be loaded
+message CubicSplineResource
+{
+	// The filename where the spline data is stored
+	string filename = 1;
+	// The size of the spline scale in nanometers
+	double spline_scale = 2;
+}
+
+// Define the cubic spline settings
+message CubicSplineSettings
+{
+	map<string, CubicSplineResource> cubic_spline_resources = 1;
+}
