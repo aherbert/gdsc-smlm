@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
@@ -28,21 +29,27 @@ import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Computes the block median for each point within the array. <p> block algorithm sweeps the entire
- * (2n+1)*(2n+1) region around each pixel. <p> Note: Due to lack of small dimension checking the
- * routines will fail if maxx or maxy are less than 2. All routines are OK for 3x3 images and
- * larger.
+ * Computes the block median for each point within the array.
+ *
+ * <p>block algorithm sweeps the entire (2n+1)*(2n+1) region around each pixel.
+ *
+ * <p>Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less
+ * than 2. All routines are OK for 3x3 images and larger.
  */
 public class MedianFilter extends BaseFilter {
   private float[] floatDataBuffer = null;
-  private int nAbove, nBelow, half;
+  private int nAbove;
+  private int nBelow;
+  private int half;
   private float guess;
-  private float[] aboveBuf = null, belowBuf = null;
+  private float[] aboveBuf = null;
+  private float[] belowBuf = null;
 
   /**
    * Compute the block median within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -59,8 +66,9 @@ public class MedianFilter extends BaseFilter {
 
   /**
    * Compute the block median within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -114,8 +122,9 @@ public class MedianFilter extends BaseFilter {
 
   /**
    * Compute the block median within a 3x3 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -221,8 +230,9 @@ public class MedianFilter extends BaseFilter {
   }
 
   /**
-   * Find the n-th lowest number in part of an array. <p> Copied from
-   * ij.plugins.filters.RankFilters.
+   * Find the n-th lowest number in part of an array.
+   *
+   * <p>Copied from ij.plugins.filters.RankFilters.
    *
    * @param buf The input array. Only values 0 ... bufLength are read. <code>buf</code> will be
    *        modified.
@@ -233,7 +243,8 @@ public class MedianFilter extends BaseFilter {
   private static final float findNthLowestNumber(float[] buf, int bufLength, int n) {
     // Hoare's find, algorithm, based on http://www.geocities.com/zabrodskyvlada/3alg.html
     // Contributed by Heinz Klar
-    int i, j;
+    int i;
+    int j;
     int l = 0;
     int m = bufLength - 1;
     float med = buf[n];
@@ -274,8 +285,9 @@ public class MedianFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block median within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block median within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -291,8 +303,9 @@ public class MedianFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block median within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block median within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -332,10 +345,10 @@ public class MedianFilter extends BaseFilter {
         add(data[index]);
 
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           for (final int offset_d : offset) {
             add(data[index + offset_d]);
           }
@@ -367,8 +380,9 @@ public class MedianFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block median within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block median within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -437,8 +451,9 @@ public class MedianFilter extends BaseFilter {
 
   /**
    * Compute the rolling median within a 2n+1 size rolling around each point. Only pixels with a
-   * full block are processed. Pixels within border regions are unchanged. <p> Note: the input data
-   * is destructively modified
+   * full block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -455,8 +470,9 @@ public class MedianFilter extends BaseFilter {
 
   /**
    * Compute the rolling median within a 2n+1 size rolling around each point. Only pixels with a
-   * full block are processed. Pixels within border regions are unchanged. <p> Note: the input data
-   * is destructively modified
+   * full block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -517,8 +533,9 @@ public class MedianFilter extends BaseFilter {
 
   /**
    * Compute the rolling median within a 3x3 size rolling around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -573,8 +590,9 @@ public class MedianFilter extends BaseFilter {
   }
 
   /**
-   * Compute the rolling median within a 2n+1 size rolling around each point. <p> Note: the input
-   * data is destructively modified
+   * Compute the rolling median within a 2n+1 size rolling around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -590,8 +608,9 @@ public class MedianFilter extends BaseFilter {
   }
 
   /**
-   * Compute the rolling median within a 2n+1 size rolling around each point. <p> Note: the input
-   * data is destructively modified
+   * Compute the rolling median within a 2n+1 size rolling around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -671,8 +690,9 @@ public class MedianFilter extends BaseFilter {
   }
 
   /**
-   * Compute the rolling median within a 3x3 size rolling around each point. <p> Note: the input
-   * data is destructively modified
+   * Compute the rolling median within a 3x3 size rolling around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data

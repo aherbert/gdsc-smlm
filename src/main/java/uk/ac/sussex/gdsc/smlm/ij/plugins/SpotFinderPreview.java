@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -106,6 +107,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
   private static DataFilterMethod defaultDataFilterMethod;
   private static double defaultSmooth;
+
   static {
     final FitEngineConfiguration c = new FitEngineConfiguration();
     defaultDataFilterMethod = c.getDataFilterMethod(0);
@@ -144,7 +146,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
   private TextField textBorder;
 
   // For adjusting the selction sliders
-  private Scrollbar topNScrollBar, selectScrollBar;
+  private Scrollbar topNScrollBar;
+  private Scrollbar selectScrollBar;
 
   private boolean refreshing = false;
   private NonBlockingExtendedGenericDialog gd;
@@ -304,7 +307,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     if (refreshing) {
       return false;
     }
@@ -808,7 +811,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
   /** {@inheritDoc} */
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Nothing to do
   }
 
@@ -832,10 +835,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
   }
 
   @Override
-  public void itemStateChanged(ItemEvent e) {
-    if (e.getSource() instanceof Choice) {
+  public void itemStateChanged(ItemEvent event) {
+    if (event.getSource() instanceof Choice) {
       // Update the settings from the template
-      final Choice choice = (Choice) e.getSource();
+      final Choice choice = (Choice) event.getSource();
       final String templateName = choice.getSelectedItem();
       // System.out.println("Update to " + templateName);
 
@@ -877,9 +880,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
   }
 
   /**
-   * Refresh settings. <p> If this is a custom template then use all the settings. If a default
-   * template then leave some existing spot settings untouched as the user may have updated them
-   * (e.g. PSF width).
+   * Refresh settings.
+   *
+   * <p>If this is a custom template then use all the settings. If a default template then leave
+   * some existing spot settings untouched as the user may have updated them (e.g. PSF width).
    *
    * @param fitEngineSettings the config
    * @param isCustomTemplate True if a custom template.
@@ -916,7 +920,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
   /** {@inheritDoc} */
   @Override
-  public void optionCollected(OptionCollectedEvent e) {
+  public void optionCollected(OptionCollectedEvent event) {
     // Just run on the current processor
     if (preview) {
       run(imp.getProcessor());

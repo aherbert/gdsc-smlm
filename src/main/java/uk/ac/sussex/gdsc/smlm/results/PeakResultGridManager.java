@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -47,10 +48,13 @@ public class PeakResultGridManager {
   }
 
   private PeakList[][] peakGrid;
-  private final int resolution, xBlocks, yBlocks;
+  private final int resolution;
+  private final int xBlocks;
+  private final int yBlocks;
 
   private PeakResult[] peakCache = null;
-  private int peakCacheX = -1, peakCacheY = -1;
+  private int peakCacheX = -1;
+  private int peakCacheY = -1;
 
   /**
    * Clear the cache. This should be called when more data has been added to the grid.
@@ -94,7 +98,8 @@ public class PeakResultGridManager {
    */
   public PeakResultGridManager(PeakResult[] results, double resolution) {
     this.resolution = MathUtils.max(1, (int) Math.ceil(resolution));
-    double maxx = 0, maxy = 0;
+    double maxx = 0;
+    double maxy = 0;
     for (final PeakResult p : results) {
       if (maxx < p.getXPosition()) {
         maxx = p.getXPosition();
@@ -127,8 +132,9 @@ public class PeakResultGridManager {
   }
 
   /**
-   * Add a peak to the grid. Assumes that the coordinates are within the size of the grid. <p> This
-   * method does not clear the cache and should be called only when initialising the grid.
+   * Add a peak to the grid. Assumes that the coordinates are within the size of the grid.
+   *
+   * <p>This method does not clear the cache and should be called only when initialising the grid.
    *
    * @param peak the peak
    */

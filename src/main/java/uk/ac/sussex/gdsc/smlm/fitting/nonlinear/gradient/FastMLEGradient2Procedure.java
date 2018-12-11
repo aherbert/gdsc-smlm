@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
@@ -33,9 +34,10 @@ import java.util.Arrays;
 
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second
- * partial derivatives. <p> Ref: Smith et al, (2010). Fast, single-molecule localisation that
- * achieves theoretically minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq.
- * 12.
+ * partial derivatives.
+ *
+ * <p>Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+ * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class FastMLEGradient2Procedure
     implements ValueProcedure, Gradient1Procedure, Gradient2Procedure {
@@ -220,10 +222,13 @@ public class FastMLEGradient2Procedure
   }
 
   /**
-   * Calculates the pseudo Poisson log likelihood using the last value of the function. <p> The
-   * pseudo log-likelihood is equivalent to the log-likelihood without subtracting the log(x!) term.
-   * It can be converted to the log-likelihood by subtracting {@link #computeLogXFactorialTerm()}.
-   * <p> This term is suitable for use in maximum likelihood routines.
+   * Calculates the pseudo Poisson log likelihood using the last value of the function.
+   *
+   * <p>The pseudo log-likelihood is equivalent to the log-likelihood without subtracting the
+   * log(x!) term. It can be converted to the log-likelihood by subtracting
+   * {@link #computeLogXFactorialTerm()}.
+   *
+   * <p>This term is suitable for use in maximum likelihood routines.
    *
    * <pre>
    * pseudo ll = x * log(u) - u

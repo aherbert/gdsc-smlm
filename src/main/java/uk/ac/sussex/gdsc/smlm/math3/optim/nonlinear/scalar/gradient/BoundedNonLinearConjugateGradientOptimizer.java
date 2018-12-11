@@ -86,8 +86,10 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   private double initialStep = 1;
 
   /** Flags to indicate if bounds are present. */
-  private boolean isLower, isUpper;
-  private double[] lower, upper;
+  private boolean isLower;
+  private boolean isUpper;
+  private double[] lower;
+  private double[] upper;
 
   private boolean useGradientLineSearch = true;
   private boolean noBracket = false;
@@ -96,7 +98,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   /**
    * Constructor with default {@link BrentSolver line search solver} and
    * {@link IdentityPreconditioner preconditioner}
-   * 
+   *
    * @param updateFormula formula to use for updating the &beta; parameter, must be one of
    *        {@link Formula#FLETCHER_REEVES} or {@link Formula#POLAK_RIBIERE}.
    * @param checker Convergence checker.
@@ -554,10 +556,12 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   }
 
   /**
-   * Internal class for line search. <p> The function represented by this class is the dot product
-   * of the objective function gradient and the search direction. Its value is zero when the
-   * gradient is orthogonal to the search direction, i.e. when the objective function value is a
-   * local extremum along the search direction. </p>
+   * Internal class for line search.
+   *
+   * <p>The function represented by this class is the dot product of the objective function gradient
+   * and the search direction. Its value is zero when the gradient is orthogonal to the search
+   * direction, i.e. when the objective function value is a local extremum along the search
+   * direction. </p>
    */
   private class LineSearchFunction implements UnivariateFunction {
     /** Current point. */
@@ -607,7 +611,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   }
 
   /**
-   * Checks if there are lower or upper bounds that are not -Infinity or +Infinity
+   * Checks if there are lower or upper bounds that are not -Infinity or +Infinity.
    *
    * @throws MathUnsupportedOperationException if invalid bounds were passed to the
    *         {@link #optimize(OptimizationData[]) optimize} method.

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -68,6 +69,7 @@ public class LoadLocalisations implements PlugIn {
   private static EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
   private static String[] tUnits;
   private static TimeUnit[] tUnitValues;
+
   static {
     set.remove(TimeUnit.FRAME);
     set.remove(TimeUnit.UNRECOGNIZED);
@@ -115,8 +117,10 @@ public class LoadLocalisations implements PlugIn {
     public final Calibration calibration;
 
     /**
-     * Instantiates a new localisation list. <p> The time unit for the calibration is expected to be
-     * the exposure time in a valid unit of time (e.g. seconds and not frames)
+     * Instantiates a new localisation list.
+     *
+     * <p>The time unit for the calibration is expected to be the exposure time in a valid unit of
+     * time (e.g. seconds and not frames)
      *
      * @param calibration the calibration
      */

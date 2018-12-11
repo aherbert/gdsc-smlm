@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -159,10 +160,10 @@ public class FreeFilterResults implements PlugIn, ItemListener {
   }
 
   @Override
-  public void itemStateChanged(ItemEvent e) {
+  public void itemStateChanged(ItemEvent event) {
     // When the checkbox is clicked, output the list of available filters to the ImageJ log
 
-    final Checkbox cb = (Checkbox) e.getSource();
+    final Checkbox cb = (Checkbox) event.getSource();
     if (cb.getState()) {
       cb.setState(false);
 

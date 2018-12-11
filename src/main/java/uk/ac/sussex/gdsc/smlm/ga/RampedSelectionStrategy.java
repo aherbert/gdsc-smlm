@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -255,7 +256,8 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
     if (sorted == null) {
       return super.next();
     }
-    int first, second;
+    int first;
+    int second;
     if (sorted.size() == 2) {
       first = 0;
       second = 1;

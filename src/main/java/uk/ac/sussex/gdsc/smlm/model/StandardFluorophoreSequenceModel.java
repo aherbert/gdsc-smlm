@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -29,9 +30,10 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 /**
  * Contains a continuous-time model for a blinking fluorophore. Assumes a constant activation laser
- * and a simple exponential model for the average activation time. <p> Based on the work of Coltharp
- * et al (2012) Accurate Construction of photoactivated localization microscopy images for
- * quantitative measurements. PLOS One 7, Issue 12, pp 1-15
+ * and a simple exponential model for the average activation time.
+ *
+ * <p>Based on the work of Coltharp et al (2012) Accurate Construction of photoactivated
+ * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
 public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
   /**

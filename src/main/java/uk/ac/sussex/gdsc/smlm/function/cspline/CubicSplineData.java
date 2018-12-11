@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.data.procedures.TrivalueProcedure;
@@ -90,8 +91,9 @@ public class CubicSplineData {
   }
 
   /**
-   * Instantiates a new cubic spline data by copying the nodes from the function. <p> Warning: Any
-   * information about the scale of each axis is ignored.
+   * Instantiates a new cubic spline data by copying the nodes from the function.
+   *
+   * <p>Warning: Any information about the scale of each axis is ignored.
    *
    * @param function the function
    */
@@ -215,8 +217,9 @@ public class CubicSplineData {
   }
 
   /**
-   * Read a tricubic splines from the input stream. <p> Note: For best performance a buffered input
-   * stream should be used.
+   * Read a tricubic splines from the input stream.
+   *
+   * <p>Note: For best performance a buffered input stream should be used.
    *
    * @param inputStream the input stream
    * @return the custom tricubic interpolating function
@@ -227,8 +230,9 @@ public class CubicSplineData {
   }
 
   /**
-   * Read a tricubic splines from the input stream. <p> Note: For best performance a buffered input
-   * stream should be used.
+   * Read a tricubic splines from the input stream.
+   *
+   * <p>Note: For best performance a buffered input stream should be used.
    *
    * @param inputStream the input stream
    * @param progress the progress
@@ -290,10 +294,12 @@ public class CubicSplineData {
   }
 
   /**
-   * Sample the function. <p> n samples will be taken per node in each dimension. A final sample is
-   * taken at the end of the sample range thus the final range for each axis will be the current
-   * axis range. <p> The procedure setValue(int,int,int,double) method will be executed in ZYX
-   * order.
+   * Sample the function.
+   *
+   * <p>n samples will be taken per node in each dimension. A final sample is taken at the end of
+   * the sample range thus the final range for each axis will be the current axis range.
+   *
+   * <p>The procedure setValue(int,int,int,double) method will be executed in ZYX order.
    *
    * @param n the number of samples per spline node
    * @param p the procedure
@@ -305,10 +311,12 @@ public class CubicSplineData {
   }
 
   /**
-   * Sample the function. <p> n samples will be taken per node in each dimension. A final sample is
-   * taken at the end of the sample range thus the final range for each axis will be the current
-   * axis range. <p> The procedure setValue(int,int,int,double) method will be executed in ZYX
-   * order.
+   * Sample the function.
+   *
+   * <p>n samples will be taken per node in each dimension. A final sample is taken at the end of
+   * the sample range thus the final range for each axis will be the current axis range.
+   *
+   * <p>The procedure setValue(int,int,int,double) method will be executed in ZYX order.
    *
    * @param nx the number of samples per spline node in the x dimension
    * @param ny the number of samples per spline node in the y dimension

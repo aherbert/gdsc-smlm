@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -39,8 +40,9 @@ import java.awt.Color;
 /**
  * Attaches to a text panel and listens for mouse events. Upon double click it obtains the
  * coordinates from a provider and draws a point ROI on the named image. Supports drawing
- * multi-point ROI when multiple lines in the table are selected. <p> The provider should provide
- * [slice,x,y] coordinates for the image ROI.
+ * multi-point ROI when multiple lines in the table are selected.
+ *
+ * <p>The provider should provide [slice,x,y] coordinates for the image ROI.
  */
 public class ImageROIPainter extends TextPanelMouseListener {
   private final TextPanel textPanel;

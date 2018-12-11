@@ -37,8 +37,10 @@ import java.util.logging.Logger;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector for
- * use in the LVM algorithm. <p> Note: This class is a test-bed for implementation strategies. The
- * fastest strategy can then be used for other gradient procedures.
+ * use in the LVM algorithm.
+ *
+ * <p>Note: This class is a test-bed for implementation strategies. The fastest strategy can then be
+ * used for other gradient procedures.
  */
 @SuppressWarnings({"javadoc"})
 public class LSQLVMGradientProcedureTest {

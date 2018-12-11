@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.XStream;
@@ -94,8 +95,9 @@ public abstract class XStreamWrapper {
   }
 
   /**
-   * Add a class name alias to the global XStream object used for serialisation. <p> Should be
-   * called to produce neater XML output for new sub-class types prior to using
+   * Add a class name alias to the global XStream object used for serialisation.
+   *
+   * <p>Should be called to produce neater XML output for new sub-class types prior to using
    * {@link #toXML(Object)} or {@link #fromXML(String)}.
    *
    * @param type The class

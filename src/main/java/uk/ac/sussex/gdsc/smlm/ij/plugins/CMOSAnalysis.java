@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.IntegerType;
@@ -83,17 +84,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Analyse the per pixel offset, variance and gain from a sCMOS camera. <p> See Huang et al (2013)
- * Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms. Nature
- * Methods 10, 653-658 (Supplementary Information).
+ * Analyse the per pixel offset, variance and gain from a sCMOS camera.
+ *
+ * <p>See Huang et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule
+ * localization algorithms. Nature Methods 10, 653-658 (Supplementary Information).
  */
 public class CMOSAnalysis implements PlugIn {
   private class SimulationWorker implements Runnable {
     final Ticker ticker;
     final RandomGenerator rg;
     final String out;
-    final float[] pixelOffset, pixelVariance, pixelGain;
-    final int from, to, blockSize, photons;
+    final float[] pixelOffset;
+    final float[] pixelVariance;
+    final float[] pixelGain;
+    final int from;
+    final int to;
+    final int blockSize;
+    final int photons;
 
     public SimulationWorker(Ticker ticker, long seed, String out, ImageStack stack, int from,
         int to, int blockSize, int photons) {
@@ -646,8 +653,10 @@ public class CMOSAnalysis implements PlugIn {
     final TurboList<ImageWorker> workers = new TurboList<>(nThreads);
 
     final double[][] data = new double[subDirs.size() * 2][];
-    double[] pixelOffset = null, pixelVariance = null;
-    Statistics statsOffset = null, statsVariance = null;
+    double[] pixelOffset = null;
+    double[] pixelVariance = null;
+    Statistics statsOffset = null;
+    Statistics statsVariance = null;
 
     // For each sub-directory compute the mean and variance
     final int nSubDirs = subDirs.size();
@@ -990,7 +999,8 @@ public class CMOSAnalysis implements PlugIn {
     result.append(" +/- ").append(MathUtils.rounded(s.getStandardDeviation()));
 
     // Do statistical tests
-    final double[] x = SimpleArrayUtils.toDouble(e), y = SimpleArrayUtils.toDouble(o);
+    final double[] x = SimpleArrayUtils.toDouble(e);
+    final double[] y = SimpleArrayUtils.toDouble(o);
 
     final PearsonsCorrelation c = new PearsonsCorrelation();
     result.append(" : R=").append(MathUtils.rounded(c.correlation(x, y)));

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.search;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -281,8 +282,10 @@ public class SearchDimension implements Cloneable, Dimension {
   /**
    * Get the values of the dimension around the current centre using the configured increments.
    * Note: If the values are outside the min/max range then by default the number of values may be
-   * reduced. <p> If the pad setting is enabled then the number of values should remain constant as
-   * the values are padded in the opposite direction.
+   * reduced.
+   *
+   * <p>If the pad setting is enabled then the number of values should remain constant as the values
+   * are padded in the opposite direction.
    *
    * @return the values
    */
@@ -452,7 +455,8 @@ public class SearchDimension implements Cloneable, Dimension {
   }
 
   /**
-   * Set to true if padding the values in the opposite direction when the range overlaps the min/max
+   * Set to true if padding the values in the opposite direction when the range overlaps the
+   * min/max.
    *
    * @param pad true, if padding the values in the opposite direction when the range overlaps the
    *        min/max
@@ -464,9 +468,11 @@ public class SearchDimension implements Cloneable, Dimension {
 
   /**
    * Enumerate from the lower to the upper value using the configured nIncrement (n) to define the
-   * number of steps (2*n+1). <p> No range check is performed against the current min/max so the
-   * returned values can be outside the allowed range. The min increment setting is respected so the
-   * number of actual steps may be smaller.
+   * number of steps (2*n+1).
+   *
+   * <p>No range check is performed against the current min/max so the returned values can be
+   * outside the allowed range. The min increment setting is respected so the number of actual steps
+   * may be smaller.
    *
    * @param lower the lower
    * @param upper the upper
@@ -477,9 +483,11 @@ public class SearchDimension implements Cloneable, Dimension {
   }
 
   /**
-   * Enumerate from the lower to the upper value using the number of steps. <p> No range check is
-   * performed against the current min/max so the returned values can be outside the allowed range.
-   * The min increment setting is respected so the number of actual steps may be smaller.
+   * Enumerate from the lower to the upper value using the number of steps.
+   *
+   * <p>No range check is performed against the current min/max so the returned values can be
+   * outside the allowed range. The min increment setting is respected so the number of actual steps
+   * may be smaller.
    *
    * @param lower the lower
    * @param upper the upper

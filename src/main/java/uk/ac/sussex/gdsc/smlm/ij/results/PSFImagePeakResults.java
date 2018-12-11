@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -47,7 +48,9 @@ public class PSFImagePeakResults extends IJImagePeakResults {
 
   private Gaussian2DPeakResultCalculator calculator;
   private TypeConverter<DistanceUnit> dc;
-  private int isx, isy, ia;
+  private int isx;
+  private int isy;
+  private int ia;
 
   private boolean requirePSFParameters;
 
@@ -200,7 +203,9 @@ public class PSFImagePeakResults extends IJImagePeakResults {
       psfParams = fixedParams;
     } else {
       // Precalculate multiplication factors
-      final double t, sx, sy;
+      final double t;
+      final double sx;
+      final double sy;
       if (calculatedPrecision) {
         t = 0.0;
         final double precision = calculator.getLSEPrecision(params, noise);
@@ -267,8 +272,11 @@ public class PSFImagePeakResults extends IJImagePeakResults {
    * @return the parameters
    */
   private static double[] getPSFParameters(double t, double sx, double sy) {
-    double a, b, c;
-    double height, width;
+    double a;
+    double b;
+    double c;
+    double height;
+    double width;
 
     if (t == 0) {
       // sin(0) == 0

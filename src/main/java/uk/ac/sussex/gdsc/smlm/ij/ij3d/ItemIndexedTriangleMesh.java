@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import org.scijava.java3d.Geometry;
@@ -54,9 +55,10 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
   private boolean dirty = false;
 
   /**
-   * Instantiates a new item indexed triangle mesh. <p> This will repeat the object for each input
-   * point. The object is assumed to be centred on the origin. It will be scaled and translated for
-   * each input point.
+   * Instantiates a new item indexed triangle mesh.
+   *
+   * <p>This will repeat the object for each input point. The object is assumed to be centred on the
+   * origin. It will be scaled and translated for each input point.
    *
    * @param objectVertices the vertices of the object for a single point
    * @param objectFaces the faces of the object for a single point
@@ -231,7 +233,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
   public static int checkFacets(Point3f[] vertices, int[] faces) {
     int count = 0;
     final int nFaces = faces.length;
-    final Vector3f v1 = new Vector3f(), v2 = new Vector3f();
+    final Vector3f v1 = new Vector3f();
+    final Vector3f v2 = new Vector3f();
     for (int i = 0; i < nFaces; i += 3) {
       final int f1 = faces[i];
       final int f2 = faces[i + 1];
@@ -304,7 +307,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
     // normals[faces[i]].add(n[i]);
     // }
 
-    final Vector3f v1 = new Vector3f(), v2 = new Vector3f();
+    final Vector3f v1 = new Vector3f();
+    final Vector3f v2 = new Vector3f();
     for (int i = 0; i < nFaces; i += 3) {
       final int f1 = faces[i];
       final int f2 = faces[i + 1];

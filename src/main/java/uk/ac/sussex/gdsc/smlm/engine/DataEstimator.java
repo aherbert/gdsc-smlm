@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
@@ -47,7 +48,8 @@ public class DataEstimator {
 
   private final float[] data;
   private Histogram h;
-  private final int width, height;
+  private final int width;
+  private final int height;
   private float fraction = 0.25f;
   private int histogramSize = 2048;
   private AutoThreshold.Method thresholdMethod = Method.DEFAULT;

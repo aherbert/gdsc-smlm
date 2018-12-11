@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
@@ -377,9 +378,10 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
 
   /**
    * Read all lines from the input stream that begin with '#' and collates them into a header. Stops
-   * reading if a line contains {@value #END_HEADER}. <p> Lines are defined by the '\n' character.
-   * The input stream will read the first non-header line unless the header is terminated by the
-   * {@value #END_HEADER} tag.
+   * reading if a line contains {@value #END_HEADER}.
+   *
+   * <p>Lines are defined by the '\n' character. The input stream will read the first non-header
+   * line unless the header is terminated by the {@value #END_HEADER} tag.
    *
    * @param input the input
    * @return The header

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
@@ -49,7 +50,9 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import java.util.Arrays;
 
 /**
- * Perform 3D image alignment using normalised cross-correlation. <p> Uses the following formula:
+ * Perform 3D image alignment using normalised cross-correlation.
+ *
+ * <p>Uses the following formula:
  *
  * <pre>
  *  ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
@@ -77,9 +80,14 @@ public class Image3DAligner implements Cloneable {
     double[] s_;
     double[] ss;
     // Original dimensions and 3D size
-    int w, h, d, size;
+    int w;
+    int h;
+    int d;
+    int size;
     // Insert position
-    int ix, iy, iz;
+    int ix;
+    int iy;
+    int iz;
 
     DHTData(DoubleDHT3D dht, int w, int h, int d) {
       setDHT(dht, w, h, d);
@@ -143,7 +151,8 @@ public class Image3DAligner implements Cloneable {
 
   // Not thread safe as they are used for the target image
   private DHTData target;
-  private double[] buffer, region;
+  private double[] buffer;
+  private double[] region;
   private double frequencyDomainCorrelationError;
   private int[] crop;
 
@@ -171,9 +180,10 @@ public class Image3DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and assumes the target image will be the same size. <p> The dimension
-   * are converted to the next power of 2 for speed. The combined size must fit within the maximum
-   * size of a single array.
+   * Sets the reference image and assumes the target image will be the same size.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (destructively modified)
    * @throws IllegalArgumentException If any dimension is less than 2, or if the combined target
@@ -184,9 +194,10 @@ public class Image3DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and the size of the target image. <p> The dimension are converted to
-   * the next power of 2 for speed. The combined size must fit within the maximum size of a single
-   * array.
+   * Sets the reference image and the size of the target image.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (may be destructively modified)
    * @param w the width of the target image
@@ -240,7 +251,9 @@ public class Image3DAligner implements Cloneable {
     }
 
     // Shift mean to 0 with optional window
-    final int w = image.getWidth(), h = image.getHeight(), d = image.getSize();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+    final int d = image.getSize();
     final double[] wx = createXWindow(w);
     final double[] wy = createYWindow(h);
     final double[] wz = createZWindow(d);
@@ -379,10 +392,14 @@ public class Image3DAligner implements Cloneable {
   }
 
   /**
-   * Prepare the DHT. <p> Converts the data to quantised data. Any zero value (from padding or
-   * weighting) remains zero. <p> This may reduce the precision slightly but allows the computation
-   * of a rolling sum table have minimal errors. The rolling sum and sum-of-squares table is
-   * computed and the DHT is transformed to the frequency domain.
+   * Prepare the DHT.
+   *
+   * <p>Converts the data to quantised data. Any zero value (from padding or weighting) remains
+   * zero.
+   *
+   * <p>This may reduce the precision slightly but allows the computation of a rolling sum table
+   * have minimal errors. The rolling sum and sum-of-squares table is computed and the DHT is
+   * transformed to the frequency domain.
    *
    * @param dhtData the dht data
    * @return the DHT data
@@ -421,7 +438,8 @@ public class Image3DAligner implements Cloneable {
 
     // First build a table for each XY slice
     for (int s = 0; s < ns; s++) {
-      double sum_ = 0, sum2 = 0;
+      double sum_ = 0;
+      double sum2 = 0;
       int i = s * nr_by_nc;
       // Initialise first row sum
       // sum = rolling sum of (0 - colomn)
@@ -473,9 +491,12 @@ public class Image3DAligner implements Cloneable {
   }
 
   /**
-   * The limit for the range of the data as an integer. <p> When this it too high the sumXY from the
-   * DHT conjugate multiplication does not match the sum from correlation in the spatial domain. <p>
-   * In theory the largest sumXY should be 2^bits * 2^bits * max integer (the size of the largest
+   * The limit for the range of the data as an integer.
+   *
+   * <p>When this it too high the sumXy from the DHT conjugate multiplication does not match the sum
+   * from correlation in the spatial domain.
+   *
+   * <p>In theory the largest sumXy should be 2^bits * 2^bits * max integer (the size of the largest
    * array). 10-bit integer: 2^10 * 2^10 * 2^31 = 2^51. This is smaller than the mantissa of a
    * double (2^52) so should be represented correctly.
    */
@@ -493,9 +514,10 @@ public class Image3DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and assumes the target image will be the same size. <p> The dimension
-   * are converted to the next power of 2 for speed. The combined size must fit within the maximum
-   * size of a single array.
+   * Sets the reference image and assumes the target image will be the same size.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (destructively modified)
    * @throws IllegalArgumentException If any dimension is less than 2, or if the combined target
@@ -506,9 +528,10 @@ public class Image3DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and the size of the target image. <p> The dimension are converted to
-   * the next power of 2 for speed. The combined size must fit within the maximum size of a single
-   * array.
+   * Sets the reference image and the size of the target image.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (may be destructively modified)
    * @param w the width of the target image
@@ -545,7 +568,9 @@ public class Image3DAligner implements Cloneable {
 
   private DHTData createDHT(Image3D image, DHTData dhtData) {
     // Shift mean to 0 with optional window
-    final int w = image.getWidth(), h = image.getHeight(), d = image.getSize();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+    final int d = image.getSize();
     final double[] wx = createXWindow(w);
     final double[] wy = createYWindow(h);
     final double[] wz = createZWindow(d);
@@ -622,8 +647,9 @@ public class Image3DAligner implements Cloneable {
 
   /**
    * Align the image with the reference with sub-pixel accuracy. Compute the translation required to
-   * move the target image onto the reference image for maximum correlation. <p> Refinement uses a
-   * default sub-pixel accuracy of 1e-2;
+   * move the target image onto the reference image for maximum correlation.
+   *
+   * <p>Refinement uses a default sub-pixel accuracy of 1e-2;
    *
    * @param image the image
    * @param refinements the refinements for sub-pixel accuracy
@@ -633,7 +659,9 @@ public class Image3DAligner implements Cloneable {
    */
   public double[] align(ImageStack image, int refinements) {
     check3D(image);
-    final int w = image.getWidth(), h = image.getHeight(), d = image.getSize();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+    final int d = image.getSize();
     if (w > nc || h > nr || d > ns) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
@@ -656,7 +684,9 @@ public class Image3DAligner implements Cloneable {
    */
   public double[] align(ImageStack image, int refinements, double error) {
     check3D(image);
-    final int w = image.getWidth(), h = image.getHeight(), d = image.getSize();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+    final int d = image.getSize();
     if (w > nc || h > nr || d > ns) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
@@ -680,8 +710,9 @@ public class Image3DAligner implements Cloneable {
 
   /**
    * Align the image with the reference with sub-pixel accuracy. Compute the translation required to
-   * move the target image onto the reference image for maximum correlation. <p> Refinement uses a
-   * default sub-pixel accuracy of 1e-2;
+   * move the target image onto the reference image for maximum correlation.
+   *
+   * <p>Refinement uses a default sub-pixel accuracy of 1e-2;
    *
    * @param image the image
    * @param refinements the refinements for sub-pixel accuracy
@@ -691,7 +722,9 @@ public class Image3DAligner implements Cloneable {
    */
   public double[] align(Image3D image, int refinements) {
     check3D(image);
-    final int w = image.getWidth(), h = image.getHeight(), d = image.getSize();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+    final int d = image.getSize();
     if (w > nc || h > nr || d > ns) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
@@ -714,7 +747,9 @@ public class Image3DAligner implements Cloneable {
    */
   public double[] align(Image3D image, int refinements, double error) {
     check3D(image);
-    final int w = image.getWidth(), h = image.getHeight(), d = image.getSize();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+    final int d = image.getSize();
     if (w > nc || h > nr || d > ns) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
@@ -745,7 +780,7 @@ public class Image3DAligner implements Cloneable {
     // Normalise:
     // ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
     //
-    // (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
+    // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )
 
     // Only do this over the range where at least half the original images overlap,
     // i.e. the insert point of one will be the middle of the other when shifted.
@@ -776,7 +811,7 @@ public class Image3DAligner implements Cloneable {
     // to restrict the bounds for finding the maximum of the normalised correlation
     // which should be close to this.
     int maxi = correlation.findMaxIndex(ix, iy, iz, crop[3], crop[4], crop[5]);
-    int[] xyz = correlation.getXYZ(maxi);
+    int[] xyz = correlation.getXyz(maxi);
 
     // Check in the spatial domain
     checkCorrelation(target, correlation, maxi);
@@ -877,7 +912,7 @@ public class Image3DAligner implements Cloneable {
         final int base = s * nr_by_nc + r * nc;
         final int hd = h[j] * d;
         for (int c = ix, i = 0; c < ixw; c++, i++) {
-          final double sumXY = buffer[base + c];
+          final double sumXy = buffer[base + c];
 
           compute(rx_1[i], ry_1[j], rz_1, rx_w_1[i], ry_h_1[j], rz_d_1, w[i], h[j], d, rs_, rss,
               rsum);
@@ -885,17 +920,17 @@ public class Image3DAligner implements Cloneable {
               tsum);
 
           // Compute the correlation
-          // (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
+          // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )
 
           final int n = w[i] * hd;
-          final double numerator = sumXY - (rsum[X] * tsum[Y] / n);
+          final double numerator = sumXy - (rsum[X] * tsum[Y] / n);
           final double denominator1 = rsum[XX] - (rsum[X] * rsum[X] / n);
           final double denominator2 = tsum[YY] - (tsum[Y] * tsum[Y] / n);
 
           double R;
           if (denominator1 == 0 || denominator2 == 0) {
             // If there is data and all the variances are the same then correlation is perfect
-            if (rsum[XX] == tsum[YY] && rsum[XX] == sumXY && rsum[XX] > 0) {
+            if (rsum[XX] == tsum[YY] && rsum[XX] == sumXy && rsum[XX] > 0) {
               R = 1;
             } else {
               R = 0;
@@ -929,9 +964,10 @@ public class Image3DAligner implements Cloneable {
             maxj = base + c;
           } else if (R == max) {
             // Get shift from centre
-            final int[] xyz1 = correlation.getXYZ(maxj);
-            final int[] xyz2 = correlation.getXYZ(base + c);
-            int d1 = 0, d2 = 0;
+            final int[] xyz1 = correlation.getXyz(maxj);
+            final int[] xyz2 = correlation.getXyz(base + c);
+            int d1 = 0;
+            int d2 = 0;
             for (int k = 0; k < 3; k++) {
               d1 += MathUtils.pow2(xyz1[k] - centre[k]);
               d2 += MathUtils.pow2(xyz2[k] - centre[k]);
@@ -947,7 +983,7 @@ public class Image3DAligner implements Cloneable {
 
     // The maximum correlation with normalisation
     maxi = maxj; // correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
-    xyz = correlation.getXYZ(maxi);
+    xyz = correlation.getXyz(maxi);
 
     // Report the shift required to move from the centre of the target image to the reference
     // @formatter:off
@@ -1068,7 +1104,7 @@ public double[] value(double[] point) throws IllegalArgumentException
     }
 
     // The maximum correlation without normalisation
-    final int[] xyz = correlation.getXYZ(maxi);
+    final int[] xyz = correlation.getXyz(maxi);
 
     // Find the range for the target and reference
     final int nc_2 = nc / 2;
@@ -1196,7 +1232,7 @@ public double[] value(double[] point) throws IllegalArgumentException
   /** Do not have a maximum evaluations as we will converge using the refinements parameter. */
   private static final MaxEval maxEvaluations = new MaxEval(Integer.MAX_VALUE);
 
-  /** The bounds of the spline are always 0-1 */
+  /** The bounds of the spline are always 0-1. */
   private static final SimpleBounds bounds =
       new SimpleBounds(new double[3], SimpleArrayUtils.newDoubleArray(3, 1));
 

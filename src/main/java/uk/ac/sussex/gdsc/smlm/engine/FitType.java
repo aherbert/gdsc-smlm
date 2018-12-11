@@ -21,12 +21,15 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
+
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 
 /**
  * Define the type of fit that was performed.
  */
-public class FitType implements Cloneable {
+public class FitType {
   /** Flag used for a single candidate fit with neighbours. */
   public static final int MULTI = 1;
 
@@ -51,6 +54,7 @@ public class FitType implements Cloneable {
   /** The number of flags. */
   public static final int NO_OF_FLAGS = 7;
 
+  /** The flags. */
   private int flags;
 
   /**
@@ -65,6 +69,15 @@ public class FitType implements Cloneable {
    */
   public FitType(int flags) {
     this.flags = flags;
+  }
+
+  /**
+   * Instantiates a new fit type.
+   *
+   * @param source the source
+   */
+  private FitType(FitType source) {
+    this.flags = source.flags;
   }
 
   /**
@@ -86,8 +99,7 @@ public class FitType implements Cloneable {
     if (enabled) {
       flags |= flag;
     } else {
-      // TODO - check this
-      flags &= flag;
+      flags = BitFlagUtils.unset(flags, flag);
     }
   }
 
@@ -115,7 +127,7 @@ public class FitType implements Cloneable {
    *
    * @param enabled Set to true to enable
    */
-  public void setMultiOK(boolean enabled) {
+  public void setMultiOk(boolean enabled) {
     setFlag(MULTI_OK, enabled);
   }
 
@@ -133,7 +145,7 @@ public class FitType implements Cloneable {
    *
    * @param enabled Set to true to enable
    */
-  public void setMultiDoubletOK(boolean enabled) {
+  public void setMultiDoubletOk(boolean enabled) {
     setFlag(MULTI_DOUBLET_OK, enabled);
   }
 
@@ -151,7 +163,7 @@ public class FitType implements Cloneable {
    *
    * @param enabled Set to true to enable
    */
-  public void setDoubletOK(boolean enabled) {
+  public void setDoubletOk(boolean enabled) {
     setFlag(DOUBLET_OK, enabled);
   }
 
@@ -160,7 +172,7 @@ public class FitType implements Cloneable {
    *
    * @param enabled Set to true to enable
    */
-  public void setOK(boolean enabled) {
+  public void setOk(boolean enabled) {
     setFlag(OK, enabled);
   }
 
@@ -178,7 +190,7 @@ public class FitType implements Cloneable {
    *
    * @return Set to true if enabled
    */
-  public boolean getMultiOK() {
+  public boolean getMultiOk() {
     return getFlag(MULTI_OK);
   }
 
@@ -196,7 +208,7 @@ public class FitType implements Cloneable {
    *
    * @return Set to true if enabled
    */
-  public boolean getMultiDoubletOK() {
+  public boolean getMultiDoubletOk() {
     return getFlag(MULTI_DOUBLET_OK);
   }
 
@@ -214,7 +226,7 @@ public class FitType implements Cloneable {
    *
    * @return Set to true if enabled
    */
-  public boolean getDoubletOK() {
+  public boolean getDoubletOk() {
     return getFlag(DOUBLET_OK);
   }
 
@@ -223,7 +235,7 @@ public class FitType implements Cloneable {
    *
    * @return Set to true if enabled
    */
-  public boolean getOK() {
+  public boolean getOk() {
     return getFlag(OK);
   }
 
@@ -234,12 +246,12 @@ public class FitType implements Cloneable {
     }
     final StringBuilder sb = new StringBuilder();
     append(sb, getMulti(), "Multi");
-    append(sb, getMultiOK(), "MultiOK");
+    append(sb, getMultiOk(), "MultiOK");
     append(sb, getMultiDoublet(), "MultiDoublet");
-    append(sb, getMultiDoubletOK(), "MultiDoubletOK");
+    append(sb, getMultiDoubletOk(), "MultiDoubletOK");
     append(sb, getDoublet(), "Doublet");
-    append(sb, getDoubletOK(), "DoubletOK");
-    append(sb, getOK(), "OK");
+    append(sb, getDoubletOk(), "DoubletOK");
+    append(sb, getOk(), "OK");
 
     if (sb.length() == 0) {
       return "None";
@@ -256,13 +268,12 @@ public class FitType implements Cloneable {
     }
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public FitType clone() {
-    try {
-      return (FitType) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
+  /**
+   * Create a copy.
+   *
+   * @return the fit type
+   */
+  public FitType copy() {
+    return new FitType(this);
   }
 }

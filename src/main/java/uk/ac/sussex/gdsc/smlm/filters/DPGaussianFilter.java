@@ -21,13 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
 /**
  * Computes a Gaussian convolution in the spatial domain for each point within the array. Uses a
- * double precision gaussian kernel. <p> Adapted from ij.plugin.filter.GaussianBlur
+ * double precision gaussian kernel.
+ *
+ * <p>Adapted from ij.plugin.filter.GaussianBlur
  */
 public class DPGaussianFilter extends BaseWeightedFilter {
   private final double accuracy;
@@ -40,7 +43,8 @@ public class DPGaussianFilter extends BaseWeightedFilter {
   private int lastUnitLength;
 
   private Normaliser normaliser = null;
-  private double sx, sy;
+  private double sx;
+  private double sy;
 
   /** {@inheritDoc} */
   @Override
@@ -83,7 +87,9 @@ public class DPGaussianFilter extends BaseWeightedFilter {
 
   /**
    * Compute the Gaussian convolution. Pixels within border regions (defined by 3 sigma) are
-   * unchanged. <p> Note: the input data is destructively modified
+   * unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -111,7 +117,9 @@ public class DPGaussianFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the Gaussian convolution. <p> Note: the input data is destructively modified
+   * Compute the Gaussian convolution.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -124,7 +132,9 @@ public class DPGaussianFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the Gaussian convolution. <p> Note: the input data is destructively modified
+   * Compute the Gaussian convolution.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -309,7 +319,9 @@ public class DPGaussianFilter extends BaseWeightedFilter {
     int p = pixel0 + pointInc * (unscaled0 - reduceBy * 3 / 2); // pointer in pixels array
     final int pLast = pixel0 + pointInc * (length - 1);
     for (int xout = -1; xout <= newLength; xout++) {
-      double sum0 = 0, sum1 = 0, sum2 = 0;
+      double sum0 = 0;
+      double sum1 = 0;
+      double sum2 = 0;
       for (int x = 0; x < reduceBy; x++, p += pointInc) {
         final double v = pixels[p < pixel0 ? pixel0 : (p > pLast ? pLast : p)];
         sum0 += v * kernel[x + 2 * reduceBy];

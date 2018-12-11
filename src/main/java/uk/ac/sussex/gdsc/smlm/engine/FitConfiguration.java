@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -154,7 +155,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   private int filterSetupFlags;
   private FilterSetupData[] filterSetupData;
 
-  private double[] precomputedFunctionValues = null, observationWeights = null;
+  private double[] precomputedFunctionValues = null;
+  private double[] observationWeights = null;
   private CameraModel cameraModel = null;
 
   private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
@@ -782,9 +784,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * Sets the PSF type. <p> If the type is astigmatism and the astigmatism model cannot be
-   * constructed from the current PSF parameters then the result filtering state may be incorrect.
-   * It is safer to call
+   * Sets the PSF type.
+   *
+   * <p>If the type is astigmatism and the astigmatism model cannot be constructed from the current
+   * PSF parameters then the result filtering state may be incorrect. It is safer to call
    * {@link #setAstigmatismModel(uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel)}
    * which also updates the PSF type to astigmatism.
    *
@@ -796,6 +799,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
+   * Sets the initial peak standard deviation.
+   *
    * @param initialPeakStdDev An estimate for the peak standard deviation used to initialise the fit
    *        for all dimensions
    */
@@ -809,8 +814,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * Set an estimate for the peak standard deviation used to initialise the fit for dimension 0 <p>
-   * Setting this will update the value in {@link #getCoordinateShift()}
+   * Set an estimate for the peak standard deviation used to initialise the fit for dimension 0.
+   *
+   * <p>Setting this will update the value in {@link #getCoordinateShift()}.
    *
    * @param initialPeakStdDev0 An estimate for the peak standard deviation used to initialise the
    *        fit for dimension 0
@@ -822,13 +828,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * Gets the initial peak std dev.
+   * Gets the initial peak standard deviation.
    *
    * @return An estimate for the combined peak standard deviation
    * @throws ConfigurationException if the PSF type is astigmatism and the model cannot be
    *         constructed
    */
-  public double getInitialPeakStdDev() throws ConfigurationException {
+  public double getInitialPeakStdDev() {
     if (isTwoAxisGaussian2D) {
       return Gaussian2DPeakResultHelper.getStandardDeviation(getInitialXSD(), getInitialYSD());
     }
@@ -843,7 +849,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *         constructed
    */
   @Override
-  public double getInitialXSD() throws ConfigurationException {
+  public double getInitialXSD() {
     if (getAstigmatismZModel() != null) {
       return astigmatismZModel.getSx(0);
     }
@@ -851,8 +857,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * Set an estimate for the peak standard deviation used to initialise the fit for dimension 1 <p>
-   * Setting this will update the value in {@link #getCoordinateShift()}
+   * Set an estimate for the peak standard deviation used to initialise the fit for dimension 1.
+   *
+   * <p>Setting this will update the value in {@link #getCoordinateShift()}.
    *
    * @param initialPeakStdDev1 An estimate for the peak standard deviation used to initialise the
    *        fit for dimension 1
@@ -874,7 +881,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *         constructed
    */
   @Override
-  public double getInitialYSD() throws ConfigurationException {
+  public double getInitialYSD() {
     if (getAstigmatismZModel() != null) {
       return astigmatismZModel.getSy(0);
     }
@@ -894,8 +901,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * {@inheritDoc} <p> Note: This is also true if validation is active and the precision method
-   * requires computation of the deviations (see {@link #isFilterRequiresDeviations()}).
+   * {@inheritDoc}
+   *
+   * <p>Note: This is also true if validation is active and the precision method requires
+   * computation of the deviations (see {@link #isFilterRequiresDeviations()}).
    *
    * @see uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitConfiguration#isComputeDeviations()
    */
@@ -1110,7 +1119,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Set the maximum absolute coordinate shift for a good fit, relative to the largest peak width.
-   * Set to zero to disable. <p> Setting this will update the value in {@link #getCoordinateShift()}
+   * Set to zero to disable.
+   *
+   * <p>Setting this will update the value in {@link #getCoordinateShift()}
    *
    * @param shiftFactor The maximum absolute coordinate shift for a good fit, relative to the
    *        largest peak width
@@ -1150,7 +1161,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @throws ConfigurationException if the PSF type is astigmatism and the model cannot be
    *         constructed
    */
-  public double getWidthMax() throws ConfigurationException {
+  public double getWidthMax() {
     double widthMax = getInitialXSD();
     if (isTwoAxisGaussian2D) {
       widthMax = Math.max(widthMax, getInitialYSD());
@@ -1167,9 +1178,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Set the size of the fit region. Any coordinate outside the region will fail fit validation (see
-   * {@link #validatePeak(int, double[], double[], double[])}). Set to zero to disable. <p> Note: it
-   * is assumed that the coordinates of the peak are relative to the fit region of size NxN.
-   * Coordinates are offset by the amount defined by the coordinate offset, e.g. 0.5 pixels.
+   * {@link #validatePeak(int, double[], double[], double[])}). Set to zero to disable.
+   *
+   * <p>Note: it is assumed that the coordinates of the peak are relative to the fit region of size
+   * NxN. Coordinates are offset by the amount defined by the coordinate offset, e.g. 0.5 pixels.
    *
    * @param fitRegionWidth the fit region width
    * @param fitRegionHeight the fit region height
@@ -1232,8 +1244,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Set the minimum photons used to determine the signal strength for a good fit (signalThreshold =
-   * max(minSignal, noise x signalStrength). <p> Note that minSignal is created appropriately from
-   * minPhotons using the type of fitter, see {@link #isFitCameraCounts()}.
+   * max(minSignal, noise x signalStrength).
+   *
+   * <p>Note that minSignal is created appropriately from minPhotons using the type of fitter, see
+   * {@link #isFitCameraCounts()}.
    *
    * @param minPhotons The minimum number of photons
    */
@@ -1372,10 +1386,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * Gets the precision method that will be used to produce the precision value for filtering. <p>
-   * This checks first the direct filter and then the current value for the precision method. <p>
-   * The value is written into the current calibration to allow the calibration to be used in saved
-   * results.
+   * Gets the precision method that will be used to produce the precision value for filtering.
+   *
+   * <p>This checks first the direct filter and then the current value for the precision method.
+   *
+   * <p>The value is written into the current calibration to allow the calibration to be used in
+   * saved results.
    *
    * @return the filter precision method
    */
@@ -1594,7 +1610,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * Sets the nm per pixel scale to use when evaluating a fitted peak's localisation precision
+   * Sets the nm per pixel scale to use when evaluating a fitted peak's localisation precision.
    *
    * @param nmPerPixel the nm per pixel scale to use when evaluating a fitted peak's localisation
    *        precision
@@ -1627,8 +1643,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   }
 
   /**
-   * Specify the camera type used. <p> Specifying a CCD camera is relevant when validating results
-   * using the localisation precision.
+   * Specify the camera type used.
+   *
+   * <p>Specifying a CCD camera is relevant when validating results using the localisation
+   * precision.
    *
    * @param cameraType the new camera type
    */
@@ -1996,12 +2014,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     /**
      * Sets the result.
      *
-     * @param n The peak number
+     * @param peakNumber The peak number
      * @param initialParams The initial peak parameters
      * @param params The fitted peak parameters
      * @param paramDevs the fitted peak parameter variances (can be null)
      */
-    public void setResult(int n, double[] initialParams, double[] params, double[] paramDevs);
+    public void setResult(int peakNumber, double[] initialParams, double[] params,
+        double[] paramDevs);
 
     /**
      * Gets the local background.
@@ -2045,8 +2064,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Sets the peak result validation data. This is used to obtain extra information about each peak
-   * during calls to {@link #validatePeak(int, double[], double[], double[])}. <p> The object is
-   * discarded after a call to {@link #validateFit(int, double[], double[], double[])} or
+   * during calls to {@link #validatePeak(int, double[], double[], double[])}.
+   *
+   * <p>The object is discarded after a call to
+   * {@link #validateFit(int, double[], double[], double[])} or
    * {@link #validateFit(double[], double[], double[])}.
    *
    * @param peakResultValidationData the new peak result validation data
@@ -2181,7 +2202,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
     }
 
-    double xsd, ysd;
+    double xsd;
+    double ysd;
     // Map the width parameters using the z-model if present
     if (getAstigmatismZModel() != null) {
       final double z = params[Gaussian2DFunction.Z_POSITION + offset];
@@ -2292,9 +2314,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Get the localisation variance for fitting a spot with the specified parameters given the
-   * configuration (fit solver, precision using background, gain, nm per pixel). <p> We can
-   * calculate the precision using the estimated noise for the image or using the expected number of
-   * background photons at the location.
+   * configuration (fit solver, precision using background, gain, nm per pixel).
+   *
+   * <p>We can calculate the precision using the estimated noise for the image or using the expected
+   * number of background photons at the location.
    *
    * @param localBackground The background (in photons)
    * @param signal The signal (in photons)
@@ -2361,11 +2384,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Update the estimated parameter variance. This method should be run on the deviations produced
-   * by fitting. <p> If not an EM-CCD then the method does nothing. <p> If an EM-CCD the method
-   * scales the variance for all parameters by a factor of 2. This allows the computation of the
-   * localisation variance using the parameter deviations to match the estimation formulas of
-   * Mortensen. See Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3 for assumptions and
-   * proof using MLE.
+   * by fitting.
+   *
+   * <p>If not an EM-CCD then the method does nothing.
+   *
+   * <p>If an EM-CCD the method scales the variance for all parameters by a factor of 2. This allows
+   * the computation of the localisation variance using the parameter deviations to match the
+   * estimation formulas of Mortensen. See Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3
+   * for assumptions and proof using MLE.
    *
    * @param paramsDev the params dev
    */
@@ -2382,18 +2408,22 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * An object that can return the results in a formatted state for the multi-path filter.
    */
   private class DynamicPeakResult implements PreprocessedPeakResult {
-    int id, candidateId;
+    int id;
+    int candidateId;
     int offset;
     double[] initialParams;
     double[] params;
     double[] paramsDev;
-    double xsd, ysd;
+    double xsd;
+    double ysd;
     PeakResultValidationData peakResultValidationData;
     boolean existingResult;
     boolean newResult;
     float offsetx;
     float offsety;
-    double var, var2, varCRLB;
+    double var;
+    double var2;
+    double varCRLB;
 
     DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params,
         double[] paramsDev, PeakResultValidationData peakResultValidationData,
@@ -2683,15 +2713,22 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Create a dynamic object that can return the results in a formatted state for the multi-path
-   * filter. <p> The result is dynamic in that it computes the values just-in-time using the input
-   * array data. <p> The result can be a recycled object that is associated with this fit
-   * configuration, or a new object. If using the recycled object then a second call to this method
-   * will replace the array data on all references to the object. If using a new object then this
-   * method can be called again with new data and the old reference is still valid. <p> Note: All
-   * returned objects will be linked with this fit configuration. Thus changing properties such as
-   * the gain, noise or settings for computing the variance will result in changes to the values
-   * returned by the PreprocessedPeakResult. <p> Note: XY position may be wrong if the input
-   * parameters have not been updated with an offset from fitting a sub-region.
+   * filter.
+   *
+   * <p>The result is dynamic in that it computes the values just-in-time using the input array
+   * data.
+   *
+   * <p>The result can be a recycled object that is associated with this fit configuration, or a new
+   * object. If using the recycled object then a second call to this method will replace the array
+   * data on all references to the object. If using a new object then this method can be called
+   * again with new data and the old reference is still valid.
+   *
+   * <p>Note: All returned objects will be linked with this fit configuration. Thus changing
+   * properties such as the gain, noise or settings for computing the variance will result in
+   * changes to the values returned by the PreprocessedPeakResult.
+   *
+   * <p>Note: XY position may be wrong if the input parameters have not been updated with an offset
+   * from fitting a sub-region.
    *
    * @param candidateId the candidate id
    * @param n The peak number
@@ -2714,15 +2751,22 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Create a dynamic object that can return the results in a formatted state for the multi-path
-   * filter. <p> The result is dynamic in that it computes the values just-in-time using the input
-   * array data. <p> The result can be a recycled object that is associated with this fit
-   * configuration, or a new object. If using the recycled object then a second call to this method
-   * will replace the array data on all references to the object. If using a new object then this
-   * method can be called again with new data and the old reference is still valid. <p> Note: All
-   * returned objects will be linked with this fit configuration. Thus changing properties such as
-   * the gain, noise or settings for computing the variance will result in changes to the values
-   * returned by the PreprocessedPeakResult. <p> Note: XY position may be wrong if the input
-   * parameters have not been updated with an offset from fitting a sub-region.
+   * filter.
+   *
+   * <p>The result is dynamic in that it computes the values just-in-time using the input array
+   * data.
+   *
+   * <p>The result can be a recycled object that is associated with this fit configuration, or a new
+   * object. If using the recycled object then a second call to this method will replace the array
+   * data on all references to the object. If using a new object then this method can be called
+   * again with new data and the old reference is still valid.
+   *
+   * <p>Note: All returned objects will be linked with this fit configuration. Thus changing
+   * properties such as the gain, noise or settings for computing the variance will result in
+   * changes to the values returned by the PreprocessedPeakResult.
+   *
+   * <p>Note: XY position may be wrong if the input parameters have not been updated with an offset
+   * from fitting a sub-region.
    *
    * @param candidateId the candidate id
    * @param n The peak number
@@ -2753,13 +2797,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Create an object that can return the results in a formatted state for the multi-path filter.
-   * <p> The result is fixed in that it computes the values on construction using the input array
-   * data. <p> If a local background is provided then it is used instead of the fitted background.
-   * The local background can be computed if a multi-peak fit has been performed since the
-   * background will be the global background, The local background for a peak will be the global
-   * background plus the contribution of all the other peaks in the local region around the peak of
-   * interest. <p> The local background will be used to estimate the noise in the local region (as
-   * photon shot noise) if it is above the bias.
+   *
+   * <p>The result is fixed in that it computes the values on construction using the input array
+   * data.
+   *
+   * <p>If a local background is provided then it is used instead of the fitted background. The
+   * local background can be computed if a multi-peak fit has been performed since the background
+   * will be the global background, The local background for a peak will be the global background
+   * plus the contribution of all the other peaks in the local region around the peak of interest.
+   *
+   * <p>The local background will be used to estimate the noise in the local region (as photon shot
+   * noise) if it is above the bias.
    *
    * @param frame the frame
    * @param candidateId the candidate id
@@ -2788,7 +2836,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     final double z = parameters[offset + Gaussian2DFunction.Z_POSITION];
     final double x0 = initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
     final double y0 = initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
-    double xsd, ysd;
+    double xsd;
+    double ysd;
     // Map the width parameters using the z-model
     if (getAstigmatismZModel() != null) {
       xsd = astigmatismZModel.getSx(z);
@@ -2810,28 +2859,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     return new BasePreprocessedPeakResult(frame, n, candidateId, signal, u, noise, b, angle, x, y,
         z, x0, y0, xsd, ysd, xsd0, ysd0, variance, variance2, varianceCRLB, resultType);
   }
-
-  // The model now entirely defines the width so no unmapping is necessary
-  // /**
-  // * Unmap the width parameters using the Z model. This assumes the parameters are for a single
-  // peak.
-  // * <p>
-  // * Note that this is unnecessary if the original widths are known (i.e. at z=0) since they
-  // should be identical to
-  // * the current widths unmapped using the current z.
-  // *
-  // * @param params
-  // * the params
-  // */
-  // public void unmapZModel(double[] params)
-  // {
-  // if (getAstigmatismZModel() != null)
-  // {
-  // final double z = params[Gaussian2DFunction.Z_POSITION];
-  // params[Gaussian2DFunction.X_SD] /= astigmatismZModel.getSx(z);
-  // params[Gaussian2DFunction.Y_SD] /= astigmatismZModel.getSy(z);
-  // }
-  // }
 
   /**
    * @return Set to true if fitting requires the camera counts, i.e. amplification is explicitly
@@ -3863,9 +3890,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Sets the camera model name. This should contain all the information required to load the camera
-   * model, e.g. in the case of a per-pixel camera model for sCMOS cameras. <p> This settings is
-   * saved to the underlying configuration. If a camera model is used (e.g. for sCMOS camera) then
-   * {@link #setCameraModel(CameraModel)} should be called after setting the new camera model name.
+   * model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+   *
+   * <p>This settings is saved to the underlying configuration. If a camera model is used (e.g. for
+   * sCMOS camera) then {@link #setCameraModel(CameraModel)} should be called after setting the new
+   * camera model name.
    *
    * @param cameraModelName the new camera model name
    */
@@ -3887,8 +3916,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   /**
    * Sets the PSF model name. This should contain all the information required to load the PSF
-   * model, e.g. in the case of an astigmatic Gaussian 2D PSF. <p> This settings is saved to the
-   * underlying configuration. If a PSF model is used (e.g. for an astigmatic Gaussian 2D PSF) then
+   * model, e.g. in the case of an astigmatic Gaussian 2D PSF.
+   *
+   * <p>This settings is saved to the underlying configuration. If a PSF model is used (e.g. for an
+   * astigmatic Gaussian 2D PSF) then
    * {@link #setAstigmatismModel(uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel)}
    * should be called after setting the new PSF model name.
    *
@@ -3945,7 +3976,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @return the astigmatism Z model (or null)
    * @throws ConfigurationException if the model cannot be created from the parameters
    */
-  public AstigmatismZModel getAstigmatismZModel() throws ConfigurationException {
+  public AstigmatismZModel getAstigmatismZModel() {
     if (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
       if (astigmatismZModel == null) {
         // Use the helper to convert the PSF parameters back to a model
@@ -3967,10 +3998,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @return true, if is 3D
    * @throws ConfigurationException if the 3D model cannot be created
    */
-  public boolean is3D() throws ConfigurationException {
-    return (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
-        ? getAstigmatismZModel() != null
-        : false;
+  public boolean is3D() {
+    return (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE
+        && getAstigmatismZModel() != null);
   }
 
   /**

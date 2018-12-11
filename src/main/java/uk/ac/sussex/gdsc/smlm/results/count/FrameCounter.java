@@ -21,13 +21,15 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
  * Class to count per frame.
  */
 public class FrameCounter extends Counter {
-  private int current, previous;
+  private int current;
+  private int previous;
 
   /**
    * Instantiates a new frame counter with the current value of -1.
@@ -86,8 +88,10 @@ public class FrameCounter extends Counter {
   }
 
   /**
-   * Gets the previous frame. <p> Note: If the counter has never been advanced to a new frame then
-   * the previous will be the same as the current.
+   * Gets the previous frame.
+   *
+   * <p>Note: If the counter has never been advanced to a new frame then the previous will be the
+   * same as the current.
    *
    * @return the previous frame
    */

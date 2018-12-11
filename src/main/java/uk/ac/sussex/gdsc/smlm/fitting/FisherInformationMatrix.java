@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -184,8 +185,9 @@ public class FisherInformationMatrix {
 
   /**
    * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the central
-   * diagonal of the inverted Fisher information matrix. <p> The information matrix is inverted and
-   * the central diagonal returned.
+   * diagonal of the inverted Fisher information matrix.
+   *
+   * <p>The information matrix is inverted and the central diagonal returned.
    *
    * @return CRLB (or null if inversion failed)
    */
@@ -195,9 +197,11 @@ public class FisherInformationMatrix {
 
   /**
    * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the central
-   * diagonal of the inverted Fisher information matrix. <p> The information matrix is inverted and
-   * the central diagonal returned. If the inversion fails then the routine optionally returns the
-   * reciprocal of the diagonal element to find a (possibly loose) lower bound.
+   * diagonal of the inverted Fisher information matrix.
+   *
+   * <p>The information matrix is inverted and the central diagonal returned. If the inversion fails
+   * then the routine optionally returns the reciprocal of the diagonal element to find a (possibly
+   * loose) lower bound.
    *
    * @param allowReciprocal the allow reciprocal flag
    * @return CRLB (or null if inversion failed and the reciprocal is not used)
@@ -235,8 +239,9 @@ public class FisherInformationMatrix {
 
   /**
    * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the central diagonal of
-   * the inverted Fisher information matrix. <p> The information matrix is inverted and the central
-   * diagonal returned.
+   * the inverted Fisher information matrix.
+   *
+   * <p>The information matrix is inverted and the central diagonal returned.
    *
    * @return CRLB (or null if inversion failed)
    */
@@ -246,10 +251,11 @@ public class FisherInformationMatrix {
 
   /**
    * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the central diagonal of
-   * the inverted Fisher information matrix. <p> The information matrix is inverted and the square
-   * root of the central diagonal returned. If the inversion fails then the routine optionally
-   * returns the square root of the reciprocal of the diagonal element to find a (possibly loose)
-   * lower bound.
+   * the inverted Fisher information matrix.
+   *
+   * <p>The information matrix is inverted and the square root of the central diagonal returned. If
+   * the inversion fails then the routine optionally returns the square root of the reciprocal of
+   * the diagonal element to find a (possibly loose) lower bound.
    *
    * @param allowReciprocal the allow reciprocal flag
    * @return CRLB (or null if inversion failed and the reciprocal is not used)
@@ -332,8 +338,10 @@ public class FisherInformationMatrix {
    * returned. Note that zero can only be returned if there was no Fisher information. This is done
    * to match the return value from matrix inversion when there is no Fisher information for a
    * parameter i within the matrix. In that case the zero column and row is removed from the matrix
-   * before inversion and the inverted matrix contains zeros. <p> The reciprocal of the diagonal
-   * element of the Fisher information matrix is a (possibly loose) lower bound.
+   * before inversion and the inverted matrix contains zeros.
+   *
+   * <p>The reciprocal of the diagonal element of the Fisher information matrix is a (possibly
+   * loose) lower bound.
    *
    * @param d the input value
    * @return the reciprocal of the square root of the input value
@@ -347,9 +355,10 @@ public class FisherInformationMatrix {
    * then zero is returned. Note that zero can only be returned if there was no Fisher information.
    * This is done to match the return value from matrix inversion when there is no Fisher
    * information for a parameter i within the matrix. In that case the zero column and row is
-   * removed from the matrix before inversion and the inverted matrix contains zeros. <p> The square
-   * root of the reciprocal of the diagonal element of the Fisher information matrix is a (possibly
-   * loose) lower bound.
+   * removed from the matrix before inversion and the inverted matrix contains zeros.
+   *
+   * <p>The square root of the reciprocal of the diagonal element of the Fisher information matrix
+   * is a (possibly loose) lower bound.
    *
    * @param d the input value
    * @return the reciprocal of the square root of the input value

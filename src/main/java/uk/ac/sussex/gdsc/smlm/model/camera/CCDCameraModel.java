@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
@@ -75,10 +76,11 @@ public class CCDCameraModel extends FixedPixelCameraModel {
   }
 
   /**
-   * {@inheritDoc} <p> Note: This is an CCD camera model. The normalised variance represents the
-   * effective read noise in incident photons (i.e. before gain). This can be combined with the
-   * expected shot variance of a Poisson distribution (mean) to obtain the total variance in photon
-   * units:
+   * {@inheritDoc}
+   *
+   * <p>Note: This is an CCD camera model. The normalised variance represents the effective read
+   * noise in incident photons (i.e. before gain). This can be combined with the expected shot
+   * variance of a Poisson distribution (mean) to obtain the total variance in photon units:
    *
    * <pre>
    * Total variance (photons) = [Poisson mean] + [normalised variance]
@@ -94,10 +96,11 @@ public class CCDCameraModel extends FixedPixelCameraModel {
   }
 
   /**
-   * {@inheritDoc} <p> Note: This is an CCD camera model. The normalised variance represents the
-   * effective read noise in incident photons (i.e. before gain). This can be combined with the
-   * expected shot variance of a Poisson distribution (mean) to obtain the total variance in photon
-   * units:
+   * {@inheritDoc}
+   *
+   * <p>Note: This is an CCD camera model. The normalised variance represents the effective read
+   * noise in incident photons (i.e. before gain). This can be combined with the expected shot
+   * variance of a Poisson distribution (mean) to obtain the total variance in photon units:
    *
    * <pre>
    * Total variance (photons) = [Poisson mean] + [normalised variance]

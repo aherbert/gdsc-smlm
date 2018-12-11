@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.Arrays;
@@ -33,9 +34,11 @@ public class SpotFilterHelper {
   private int[] data = null;
 
   /**
-   * Count neighbours within a 2n+1 region around each spot. <p> This is performed using a block sum
-   * filter which may sub-optimal for small lists of spots. <p> The dimensions of the data will be
-   * extracted from the spot x/y coordinates.
+   * Count neighbours within a 2n+1 region around each spot.
+   *
+   * <p>This is performed using a block sum filter which may sub-optimal for small lists of spots.
+   *
+   * <p>The dimensions of the data will be extracted from the spot x/y coordinates.
    *
    * @param spots the spots
    * @param n The block size
@@ -70,8 +73,9 @@ public class SpotFilterHelper {
   }
 
   /**
-   * Count neighbours within a 2n+1 region around each spot. <p> This is performed using a block sum
-   * filter which may sub-optimal for small lists of spots.
+   * Count neighbours within a 2n+1 region around each spot.
+   *
+   * <p>This is performed using a block sum filter which may sub-optimal for small lists of spots.
    *
    * @param spots the spots
    * @param width The width of the data
@@ -89,8 +93,9 @@ public class SpotFilterHelper {
   }
 
   /**
-   * Count neighbours within a 2n+1 region around each spot. <p> This is performed using a block sum
-   * filter which may sub-optimal for small lists of spots.
+   * Count neighbours within a 2n+1 region around each spot.
+   *
+   * <p>This is performed using a block sum filter which may sub-optimal for small lists of spots.
    *
    * @param spots the spots
    * @param minx the minx
@@ -136,9 +141,11 @@ public class SpotFilterHelper {
   }
 
   /**
-   * Count neighbours within a 2n+1 region around each spot. <p> This is performed using a block sum
-   * filter which may sub-optimal for small lists of spots. <p> The dimensions of the data will be
-   * extracted from the spot x/y coordinates.
+   * Count neighbours within a 2n+1 region around each spot.
+   *
+   * <p>This is performed using a block sum filter which may sub-optimal for small lists of spots.
+   *
+   * <p>The dimensions of the data will be extracted from the spot x/y coordinates.
    *
    * @param spots the spots
    * @param n The block size
@@ -149,8 +156,9 @@ public class SpotFilterHelper {
   }
 
   /**
-   * Count neighbours within a 2n+1 region around each spot. <p> This is performed using a block sum
-   * filter which may sub-optimal for small lists of spots.
+   * Count neighbours within a 2n+1 region around each spot.
+   *
+   * <p>This is performed using a block sum filter which may sub-optimal for small lists of spots.
    *
    * @param spots the spots
    * @param width The width of the data

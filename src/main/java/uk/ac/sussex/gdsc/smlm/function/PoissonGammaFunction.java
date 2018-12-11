@@ -21,20 +21,24 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Implements the probability density function for a Poisson-Gamma Mixture. <p> The implementation
- * uses the Poisson-Gamma mixture described from Ulbrich &amp; Isacoff (2007). Nature Methods 4,
- * 319-321, SI equation 3:<br> <blockquote> {@code Gp,m(0) = e^-p}<br>
+ * Implements the probability density function for a Poisson-Gamma Mixture.
+ *
+ * <p>The implementation uses the Poisson-Gamma mixture described from Ulbrich &amp; Isacoff (2007).
+ * Nature Methods 4, 319-321, SI equation 3:<br> <blockquote> {@code Gp,m(0) = e^-p}<br>
  * {@code Gp,m(c|c>0) = sqrt(p/(c*m)) * e^(-c/m -p) * I1(2*sqrt(c*p/m))}<br> </blockquote>
  * Where:<br> c = the observed value at the pixel <br> p = the function value (expected number of
  * photons) <br> m = the gain of the pixel <br> I1 = Modified Bessel function of the first kind <br>
- * <p> The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS
- * camera which captures a Poisson process of emitted light, converted to electrons on the camera
- * chip, amplified by a gain and then read with Gaussian noise.
+ *
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
+ * amplified by a gain and then read with Gaussian noise.
  */
 public class PoissonGammaFunction
     implements LikelihoodFunction, LogLikelihoodFunction, GradientLikelihoodFunction {
@@ -71,7 +75,8 @@ public class PoissonGammaFunction
 
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
-   * <p> See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
@@ -106,9 +111,12 @@ public class PoissonGammaFunction
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
    * for observed Poisson counts. This avoids the computation of the Dirac delta function at c=0.
-   * <p> This method is suitable for use in integration routines. <p> If c==0 then the true
-   * probability is obtained by adding Math.exp(-p). <p> See Ulbrich &amp; Isacoff (2007). Nature
-   * Methods 4, 319-321, SI equation 3.
+   *
+   * <p>This method is suitable for use in integration routines.
+   *
+   * <p>If c==0 then the true probability is obtained by adding Math.exp(-p).
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
@@ -141,8 +149,9 @@ public class PoissonGammaFunction
 
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
-   * for no observed Poisson counts. This is the Dirac delta function at c=0. <p> See Ulbrich &amp;
-   * Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   * for no observed Poisson counts. This is the Dirac delta function at c=0.
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
    * @return The probability function for observed Poisson counts
@@ -154,8 +163,9 @@ public class PoissonGammaFunction
 
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
-   * for no observed Poisson counts. This is the Dirac delta function at c=0. <p> See Ulbrich &amp;
-   * Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   * for no observed Poisson counts. This is the Dirac delta function at c=0.
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
    * @param dG_dp the gradient of the function G(c) with respect to parameter p
@@ -170,9 +180,11 @@ public class PoissonGammaFunction
 
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
-   * <p> See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3. <p> Note: This
-   * implementation will underestimate the cumulative probability ({@code sum<1}) when the mean is
-   * close to 1 and the gain is low ({@code <10}).
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * <p>Note: This implementation will underestimate the cumulative probability ({@code sum<1}) when
+   * the mean is close to 1 and the gain is low ({@code <10}).
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
@@ -234,9 +246,12 @@ public class PoissonGammaFunction
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
    * for observed Poisson counts. This avoids the computation of the Dirac delta function at c=0.
-   * <p> This method is suitable for use in integration routines. <p> If c==0 then the true
-   * probability is obtained by adding Math.exp(-p). <p> See Ulbrich &amp; Isacoff (2007). Nature
-   * Methods 4, 319-321, SI equation 3.
+   *
+   * <p>This method is suitable for use in integration routines.
+   *
+   * <p>If c==0 then the true probability is obtained by adding Math.exp(-p).
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
@@ -278,9 +293,11 @@ public class PoissonGammaFunction
 
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
-   * <p> See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3. <p> This is a
-   * special version which computes only part of the gradient. The partial gradient is equal to the
-   * actual gradient plus the value of the function.
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * <p>This is a special version which computes only part of the gradient. The partial gradient is
+   * equal to the actual gradient plus the value of the function.
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
@@ -319,9 +336,14 @@ public class PoissonGammaFunction
 
   /**
    * Calculate the an unscaled probability density function for a Poisson-Gamma distribution model
-   * of EM-gain. <p> See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3. <p>
-   * This is unscaled as the factor exp^p has been removed. This stabilises computation for large p.
-   * <p> This is a special version which computes only part of the gradient. The partial gradient is
+   * of EM-gain.
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * <p>This is unscaled as the factor exp^p has been removed. This stabilises computation for large
+   * p.
+   *
+   * <p>This is a special version which computes only part of the gradient. The partial gradient is
    * equal to the actual gradient plus the value of the function.
    *
    * @param c The count to evaluate
@@ -360,7 +382,9 @@ public class PoissonGammaFunction
 
   /**
    * Calculate the log probability density function for a Poisson-Gamma distribution model of
-   * EM-gain. <p> See . Nature Methods 4, 319-321, SI equation 3.
+   * EM-gain.
+   *
+   * <p>See . Nature Methods 4, 319-321, SI equation 3.
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)

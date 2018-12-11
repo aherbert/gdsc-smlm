@@ -21,10 +21,13 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
- * Computes the sum using a circular mask. <p> Adapted from ij.plugin.filter.RankFilters
+ * Computes the sum using a circular mask.
+ *
+ * <p>Adapted from ij.plugin.filter.RankFilters
  */
 public class CircularSumFilter extends CircularFilter {
   /** {@inheritDoc} */
@@ -35,7 +38,7 @@ public class CircularSumFilter extends CircularFilter {
 
   /** {@inheritDoc} */
   @Override
-  protected Normaliser computeNormaliser(int nPoints) {
+  protected Normaliser computeNormaliser(int npoints) {
     return NonNormaliser.INSTANCE;
   }
 

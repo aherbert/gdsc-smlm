@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -29,10 +30,14 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * Calculates the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
  * function) and the scaled gradient vector of the function's partial first derivatives with respect
  * to the parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model
- * with coefficients (a) for a set of data points (x, y). <p> This procedure computes a modified
- * Chi-squared expression to perform Weighted Least Squares Estimation assuming a Poisson model with
- * a Gaussian noise component. The weight per observation is equal to 1/[variance + max(y, 0) + 1].
- * <p> See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
+ * with coefficients (a) for a set of data points (x, y).
+ *
+ * <p>This procedure computes a modified Chi-squared expression to perform Weighted Least Squares
+ * Estimation assuming a Poisson model with a Gaussian noise component. The weight per observation
+ * is equal to 1/[variance + max(y, 0) + 1].
+ *
+ *
+ * <p>See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
  * cameras - characterisation of a computationally efficient localization approach. Optical Express
  * 25, Issue 10, pp 11701-11716.
  */

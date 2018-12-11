@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
@@ -28,13 +29,13 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class Spot implements Comparable<Spot>, Cloneable {
   /** The x. */
-  final public int x;
+  public final int x;
 
   /** The y. */
-  final public int y;
+  public final int y;
 
   /** The intensity. */
-  final public float intensity;
+  public final float intensity;
 
   /** The score. */
   private float score;

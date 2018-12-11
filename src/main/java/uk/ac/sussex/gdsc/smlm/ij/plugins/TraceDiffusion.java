@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
@@ -91,6 +92,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   private static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "t-On (s)"};
   private static final boolean[] ROUNDED = new boolean[] {false, false, true};
   private static boolean[] displayHistograms = new boolean[NAMES.length];
+
   static {
     for (int i = 0; i < displayHistograms.length; i++) {
       displayHistograms[i] = false;
@@ -101,6 +103,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   private static final int T_ON = 2;
 
   private static boolean[] alwaysRemoveOutliers;
+
   static {
     alwaysRemoveOutliers = new boolean[NAMES.length];
     alwaysRemoveOutliers[TOTAL_SIGNAL] = false;
@@ -127,7 +130,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   private ClusteringSettings.Builder settings;
   private MemoryPeakResults results;
-  private boolean extraOptions, multiMode;
+  private boolean extraOptions;
+  private boolean multiMode;
   private int myMinN = 1;
 
   // The number of additional datasets
@@ -135,7 +139,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   // Store exposure time in seconds
   private double exposureTime = 0;
-  private double precision, beta;
+  private double precision;
+  private double beta;
   private double fitValue = Double.NaN;
 
   // Used to tile new plot windows
@@ -519,8 +524,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   /**
    * Calculate the diffusion coefficient (D) of the molecule. This is done by using the mean-squared
    * deviation between frames divided by the time interval (delta) between frames. This is divided
-   * by 4 to produce the diffusion coefficient from two-dimensional distance analysis. <p> See
-   * Uphoff, et al, 2013. Single-molecule DNA repair in live bacteria, PNAS 110, 8063-8068
+   * by 4 to produce the diffusion coefficient from two-dimensional distance analysis.
+   *
+   * <p>See Uphoff, et al, 2013. Single-molecule DNA repair in live bacteria, PNAS 110, 8063-8068
    *
    * @param msdPerMoleculeAdjacent the MSD per molecule adjacent
    * @return The D per molecule
@@ -736,7 +742,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     sb.append(settings.getMle()).append('\t');
     sb.append(traces.length).append('\t');
     sb.append(MathUtils.rounded(precision, 4)).append('\t');
-    double D = 0, s = 0;
+    double D = 0;
+    double s = 0;
     if (fitMSDResult != null) {
       D = fitMSDResult[0];
       s = fitMSDResult[1];
@@ -1124,8 +1131,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   }
 
   /**
-   * Fit the MSD using a linear fit that must pass through 0,0. <p> Update the plot by adding the
-   * fit line.
+   * Fit the MSD using a linear fit that must pass through 0,0.
+   *
+   * <p>Update the plot by adding the fit line.
    *
    * @param x the x
    * @param y the y
@@ -1369,7 +1377,8 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
   }
 
   private class LinearFunction implements MultivariateVectorFunction {
-    double[] x, y;
+    double[] x;
+    double[] y;
     double[][] jacobian;
 
     public LinearFunction(double[] x, double[] y, int length) {
@@ -1433,7 +1442,8 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
   }
 
   private class LinearFunctionWithIntercept implements MultivariateVectorFunction {
-    final double[] x, y;
+    final double[] x;
+    final double[] y;
     final boolean fitIntercept;
 
     public LinearFunctionWithIntercept(double[] x, double[] y, int length, boolean fitIntercept) {
@@ -1508,7 +1518,8 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
 
   private class LinearFunctionWithMSDCorrectedIntercept implements MultivariateVectorFunction {
     final double THIRD = 1 / 3.0;
-    final double[] x, y;
+    final double[] x;
+    final double[] y;
     final boolean fitIntercept;
 
     public LinearFunctionWithMSDCorrectedIntercept(double[] x, double[] y, int length,
@@ -1594,7 +1605,9 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
   }
 
   /**
-   * Fit the jump distance histogram. <p> Update the plot by adding the fit line(s).
+   * Fit the jump distance histogram.
+   *
+   * <p>Update the plot by adding the fit line(s).
    *
    * @param jumpDistances (in um^2)
    * @param jdHistogram the jump distance histogram
@@ -1694,8 +1707,9 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
   }
 
   /**
-   * Macro extension function. <p> Get the number of fitted species from the last call to fit the
-   * jump distances.
+   * Macro extension function.
+   *
+   * <p>Get the number of fitted species from the last call to fit the jump distances.
    *
    * @param args 0: Double[1] - output the number of species
    * @return Empty string
@@ -1711,8 +1725,10 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
   }
 
   /**
-   * Macro extension function. <p> Get the diffusion coefficient for the requested species from the
-   * last call to fit the jump distances.
+   * Macro extension function.
+   *
+   * <p>Get the diffusion coefficient for the requested species from the last call to fit the jump
+   * distances.
    *
    * @param args 0: Double[1] - input the index of the species; 1: Double[1] - output the
    *        coefficient
@@ -1731,8 +1747,10 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
   }
 
   /**
-   * Macro extension function. <p> Get the population fraction for the requested species from the
-   * last call to fit the jump distances.
+   * Macro extension function.
+   *
+   * <p>Get the population fraction for the requested species from the last call to fit the jump
+   * distances.
    *
    * @param args 0: Double[1] - input the index of the species; 1: Double[1] - output the population
    *        fraction
@@ -1751,15 +1769,18 @@ final LeastSquaresProblem problem = new LeastSquaresBuilder()
   }
 
   /**
-   * Macro extension function. <p> Get the diffusion coefficient and population fraction for the
-   * requested species from the last call to fit the jump distances.
+   * Macro extension function.
+   *
+   * <p>Get the diffusion coefficient and population fraction for the requested species from the
+   * last call to fit the jump distances.
    *
    * @param args 0: Double[1] - input the index of the species; 1: Double[1] - output the
    *        coefficient; 1: Double[1] - output the population fraction
    * @return Empty string
    */
   public static String getSpecies(Object[] args) {
-    double value = 0, value2 = 0;
+    double value = 0;
+    double value2 = 0;
     if (jumpDistanceParameters != null) {
       final int i = ((Double) args[0]).intValue();
       if (i >= 0 && i < jumpDistanceParameters[0].length) {

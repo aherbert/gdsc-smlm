@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -284,7 +285,8 @@ public class TraceExporter implements PlugIn {
     final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
     results2.copySettings(results);
     int nextId = results.getLast().getId();
-    int id = 0, idOut = 0;
+    int id = 0;
+    int idOut = 0;
     int lastT = 0;
     for (int i = 0, size = results.size(); i < size; i++) {
       final PeakResult r = results.get(i);

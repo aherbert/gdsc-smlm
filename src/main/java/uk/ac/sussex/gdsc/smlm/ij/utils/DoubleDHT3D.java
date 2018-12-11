@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.ImageStack;
@@ -36,7 +37,9 @@ public class DoubleDHT3D extends DoubleImage3D {
   private boolean isFrequencyDomain;
   private final DoubleDHT_3D dht;
   // Used for fast multiply operations
-  private double[] h2e, h2o, mag;
+  private double[] h2e;
+  private double[] h2o;
+  private double[] mag;
   private int[] jj;
 
   /**
@@ -145,8 +148,10 @@ public class DoubleDHT3D extends DoubleImage3D {
   /**
    * Initialise fast operations for {@link #multiply(DoubleDHT3D)} and
    * {@link #conjugateMultiply(DoubleDHT3D)}. This pre-computes the values needed for the
-   * operations. <p> Note: This initialises the DHT object for use as the argument to the operation,
-   * for example if a convolution kernel is to be applied to many DHT objects.
+   * operations.
+   *
+   * <p>Note: This initialises the DHT object for use as the argument to the operation, for example
+   * if a convolution kernel is to be applied to many DHT objects.
    */
   public void initialiseFastMultiply() {
     if (h2e == null) {
@@ -175,9 +180,10 @@ public class DoubleDHT3D extends DoubleImage3D {
   /**
    * Initialise fast operations for {@link #multiply(DoubleDHT3D)},
    * {@link #conjugateMultiply(DoubleDHT3D)} and {@link #divide(DoubleDHT3D)}. This pre-computes the
-   * values needed for the operations. <p> Note: This initialises the DHT object for use as the
-   * argument to the operation, for example if a deconvolution kernel is to be applied to many DHT
-   * objects.
+   * values needed for the operations.
+   *
+   * <p>Note: This initialises the DHT object for use as the argument to the operation, for example
+   * if a deconvolution kernel is to be applied to many DHT objects.
    */
   public void initialiseFastOperations() {
     initialiseFastMultiply();
@@ -683,8 +689,9 @@ public class DoubleDHT3D extends DoubleImage3D {
   }
 
   /**
-   * Swap the rectangle pixel values from a with b. <p> No bounds checks are performed so use with
-   * care!
+   * Swap the rectangle pixel values from a with b.
+   *
+   * <p>No bounds checks are performed so use with care!
    *
    * @param a the a pixels
    * @param ia the insert position for a

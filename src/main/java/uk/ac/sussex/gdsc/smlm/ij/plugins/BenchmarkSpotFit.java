@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
@@ -393,8 +394,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
   private static TIntObjectHashMap<FilterCandidates> filterCandidates;
-  private static double fP, fN;
-  private static int nP, nN;
+  private static double fP;
+  private static double fN;
+  private static int nP;
+  private static int nN;
 
   /** The last id. */
   static int lastId = -1;
@@ -440,7 +443,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     static final int MULTIDOUBLET = 3;
 
     final PreprocessedPeakResult result;
-    final int id, type, i;
+    final int id;
+    final int type;
+    final int i;
 
     public MultiPathPoint(PreprocessedPeakResult result, int id, int type, int i) {
       super(result.getX(), result.getY());
@@ -1286,7 +1291,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     return true;
   }
 
-  private int progress, stepProgress, totalProgress;
+  private int progress;
+  private int stepProgress;
+  private int totalProgress;
 
   /**
    * Show progress.
@@ -1535,8 +1542,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         }
 
         // Count the number of positive & negatives
-        int p = 0, n = 0;
-        double np = 0, nn = 0;
+        int p = 0;
+        int n = 0;
+        double np = 0;
+        double nn = 0;
 
         boolean reachedTarget = false;
         int nAfter = 0;
@@ -1640,10 +1649,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     final double nmPerPixel = simulationParameters.a;
-    double tp = 0, fp = 0;
-    int failcTP = 0, failcFP = 0;
-    int cTP = 0, cFP = 0;
-    int[] singleStatus = null, multiStatus = null, doubletStatus = null, multiDoubletStatus = null;
+    double tp = 0;
+    double fp = 0;
+    int failcTP = 0;
+    int failcFP = 0;
+    int cTP = 0;
+    int cFP = 0;
+    int[] singleStatus = null;
+    int[] multiStatus = null;
+    int[] doubletStatus = null;
+    int[] multiDoubletStatus = null;
     singleStatus = new int[FitStatus.values().length];
     multiStatus = new int[singleStatus.length];
     doubletStatus = new int[singleStatus.length];
@@ -2568,7 +2583,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     // Now compute the bounds using the desired limit
-    double l, u;
+    double l;
+    double u;
     switch (lower) {
       case ONE_PERCENT:
         l = getPercentile(h2, 0.01);
@@ -2771,9 +2787,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   @Override
-  public void itemStateChanged(ItemEvent e) {
-    if (e.getSource() instanceof Checkbox) {
-      final Checkbox checkbox = (Checkbox) e.getSource();
+  public void itemStateChanged(ItemEvent event) {
+    if (event.getSource() instanceof Checkbox) {
+      final Checkbox checkbox = (Checkbox) event.getSource();
 
       int failLimit;
       boolean includeNeighbours;

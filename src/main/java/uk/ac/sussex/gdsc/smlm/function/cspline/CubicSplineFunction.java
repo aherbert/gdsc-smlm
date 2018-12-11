@@ -21,26 +21,29 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 
 /**
- * Represent a cubic spline function. N splines are drawn into a target region. <p> The parameters
- * are [Background + n *{Intensity, X, Y, Z}]. The spline can be scaled-down before sampling (i.e.
- * drawing on the target region). Only one sample is taken per index in the target region.
+ * Represent a cubic spline function. N splines are drawn into a target region.
+ *
+ * <p>The parameters are [Background + n *{Intensity, X, Y, Z}]. The spline can be scaled-down
+ * before sampling (i.e. drawing on the target region). Only one sample is taken per index in the
+ * target region.
  */
 public abstract class CubicSplineFunction implements Gradient2Function {
   /** Index of the background in the parameters array. */
   public static final int BACKGROUND = 0;
   /** Index of the signal intensity in the parameters array. */
   public static final int SIGNAL = 1;
-  /** Index of the x-position in the parameters array */
+  /** Index of the x-position in the parameters array. */
   public static final int X_POSITION = 2;
-  /** Index of the y-position in the parameters array */
+  /** Index of the y-position in the parameters array. */
   public static final int Y_POSITION = 3;
-  /** Index of the z-position in the parameters array */
+  /** Index of the z-position in the parameters array. */
   public static final int Z_POSITION = 4;
   /** Index of the x-standard deviation in the parameters array */
 
@@ -354,7 +357,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * @param z the z (range 0-1)
      * @param order the order
      */
-    abstract public void computePowerTable(double x, double y, double z, int order);
+    public abstract void computePowerTable(double x, double y, double z, int order);
 
     /**
      * Compute the value at the given x-index. Assumes that the current y-index has been set with a
@@ -374,7 +377,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * @param customTricubicFunction the custom tricubic function
      * @return the value
      */
-    abstract public double computeValue(CustomTricubicFunction customTricubicFunction);
+    public abstract double computeValue(CustomTricubicFunction customTricubicFunction);
 
     /**
      * Compute the value and derivatives at the given x-index. Assumes that the current y-index has
@@ -412,7 +415,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * @param customTricubicFunction the custom tricubic function
      * @return the value
      */
-    abstract public double computeValue1(CustomTricubicFunction customTricubicFunction);
+    public abstract double computeValue1(CustomTricubicFunction customTricubicFunction);
 
     /**
      * Compute the value and derivatives at the given x-index. Assumes that the current y-index has
@@ -457,7 +460,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * @param customTricubicFunction the custom tricubic function
      * @return the value
      */
-    abstract public double computeValue2(CustomTricubicFunction customTricubicFunction);
+    public abstract double computeValue2(CustomTricubicFunction customTricubicFunction);
 
     /**
      * Checks if the power table is at the boundary of the cubic polynomial.
@@ -465,7 +468,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * @param dimension the dimension
      * @return true, if is node boundary
      */
-    abstract public boolean isNodeBoundary(int dimension);
+    public abstract boolean isNodeBoundary(int dimension);
   }
 
   /**
@@ -791,7 +794,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
    *
    * @return the number of splines to draw
    */
-  abstract public int getN();
+  public abstract int getN();
 
   /**
    * Gets the centre X.
@@ -935,11 +938,12 @@ public abstract class CubicSplineFunction implements Gradient2Function {
 
   /**
    * Checks if the gradient parameter is on a cubic spline node boundary. If true then the second
-   * order derivative will not be smooth as they are not constant across spline points. <p> This
-   * only applies to XYZ gradients.
+   * order derivative will not be smooth as they are not constant across spline points.
+   *
+   * <p>This only applies to XYZ gradients.
    *
    * @param gradientIndex the gradient index
    * @return true, if the peak is on a node boundary
    */
-  abstract public boolean isNodeBoundary(int gradientIndex);
+  public abstract boolean isNodeBoundary(int gradientIndex);
 }

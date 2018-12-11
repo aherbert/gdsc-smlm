@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -81,7 +82,8 @@ public class PulseActivationAnalysisTest {
         }
       }
     } catch (final AssertionFailedError ex) {
-      TestUtils.wrapAssertionFailedError(ex, () -> String.format("channels=%d, crosstalk=%d", n, m));
+      TestUtils.wrapAssertionFailedError(ex,
+          () -> String.format("channels=%d, crosstalk=%d", n, m));
     }
   }
 
@@ -158,7 +160,8 @@ public class PulseActivationAnalysisTest {
         }
       }
     } catch (final AssertionFailedError ex) {
-      TestUtils.wrapAssertionFailedError(ex, () -> String.format("channels=%d, crosstalk=%d", n, m));
+      TestUtils.wrapAssertionFailedError(ex,
+          () -> String.format("channels=%d, crosstalk=%d", n, m));
     }
   }
 

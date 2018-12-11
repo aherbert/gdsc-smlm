@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
@@ -44,7 +45,9 @@ public interface CoordinateStore {
   public double getZResolution();
 
   /**
-   * Queue a coordinate to the store. <p> It is not added to the store until flush is called.
+   * Queue a coordinate to the store.
+   *
+   * <p>It is not added to the store until flush is called.
    *
    * @param x the x
    * @param y the y

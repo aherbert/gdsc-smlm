@@ -21,19 +21,25 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
- * Computes the area average for each point within the array. <p> The algorithm computes the average
- * in the specified area. If the width is an integer the area is defined using an entire block. If
- * the width is non-integer it is rounded down and up to the adjacent integers. The sum of each
- * block is computed. The larger block is subtracted from the smaller block to give the edge sum.
- * The average is then computed using the sum of the smaller block and a proportion of the edge sum.
- * <p> Note: The algorithm allocates a disproportionate weighting to the corner pixels. Each edge
+ * Computes the area average for each point within the array.
+ *
+ * <p>The algorithm computes the average in the specified area. If the width is an integer the area
+ * is defined using an entire block. If the width is non-integer it is rounded down and up to the
+ * adjacent integers. The sum of each block is computed. The larger block is subtracted from the
+ * smaller block to give the edge sum. The average is then computed using the sum of the smaller
+ * block and a proportion of the edge sum.
+ *
+ *
+ * <p>Note: The algorithm allocates a disproportionate weighting to the corner pixels. Each edge
  * pixel should get a weighting of w and corner pixels w*w. Using simple weighting of the inner and
- * outer blocks results in all the outer pixels receiving the same weight. <p> Note: Due to lack of
- * small dimension checking the routines will fail if maxx or maxy are less than 2. All routines are
- * OK for 3x3 images and larger.
+ * outer blocks results in all the outer pixels receiving the same weight.
+ *
+ * <p>Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less
+ * than 2. All routines are OK for 3x3 images and larger.
  */
 public class AreaAverageFilter extends BaseWeightedFilter {
   // Use duplicate filters to support efficient caching of the weights
@@ -46,7 +52,9 @@ public class AreaAverageFilter extends BaseWeightedFilter {
 
   /**
    * Compute the block average within a 2w+1 size block around each point. Pixels within border
-   * regions (width = ceil(w)) are unchanged. <p> Note: the input data is destructively modified
+   * regions (width = ceil(w)) are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -108,8 +116,9 @@ public class AreaAverageFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the block average within a 2w+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2w+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -164,7 +173,9 @@ public class AreaAverageFilter extends BaseWeightedFilter {
 
   /**
    * Compute the block average within a 2w+1 size block around each point. Pixels within border
-   * regions (width = ceil(w)) are unchanged. <p> Note: the input data is destructively modified
+   * regions (width = ceil(w)) are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -225,8 +236,9 @@ public class AreaAverageFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the block average within a 2w+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2w+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data

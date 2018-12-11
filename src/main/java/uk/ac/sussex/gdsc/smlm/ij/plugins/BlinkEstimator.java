@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -56,9 +57,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 /**
- * Estimates the flourophore blinking rate from a set of localisations. <p> Uses the method of
- * Annibale, et al (2011). Quantitative Photo Activated Localization Microscopy: Unravelling the
- * Effect of Photoblinking. PLoS ONE 6, e22678.
+ * Estimates the flourophore blinking rate from a set of localisations.
+ *
+ * <p>Uses the method of Annibale, et al (2011). Quantitative Photo Activated Localization
+ * Microscopy: Unravelling the Effect of Photoblinking. PLoS ONE 6, e22678.
  */
 public class BlinkEstimator implements PlugIn {
   private static String TITLE = "Blink Estimator";
@@ -187,13 +189,13 @@ public class BlinkEstimator implements PlugIn {
     td = shift(td);
 
     // Fit curve
-    final double[] nPoints = new double[rangeFittedPoints + 1];
-    final double[][] parameters = new double[3][nPoints.length];
+    final double[] npoints = new double[rangeFittedPoints + 1];
+    final double[][] parameters = new double[3][npoints.length];
     final double[] r2 = new double[rangeFittedPoints + 1];
     final double[] adjustedR2 = new double[rangeFittedPoints + 1];
     for (int n = 0; n <= rangeFittedPoints; n++) {
-      nPoints[n] = n + nFittedPoints;
-      final double[] p = fit(td, Ntd, (int) nPoints[n], false);
+      npoints[n] = n + nFittedPoints;
+      final double[] p = fit(td, Ntd, (int) npoints[n], false);
       if (p == null) {
         // Leave as empty in the output plots
         continue;
@@ -206,14 +208,14 @@ public class BlinkEstimator implements PlugIn {
     }
 
     // Plot
-    plot("Fitted points", "N", nPoints, parameters[0]);
-    plot("Fitted points", "nBlinks", nPoints, parameters[1]);
-    plot("Fitted points", "tOff", nPoints, parameters[2]);
-    plot("Fitted points", "Adjusted R^2", nPoints, adjustedR2);
+    plot("Fitted points", "N", npoints, parameters[0]);
+    plot("Fitted points", "nBlinks", npoints, parameters[1]);
+    plot("Fitted points", "tOff", npoints, parameters[2]);
+    plot("Fitted points", "Adjusted R^2", npoints, adjustedR2);
   }
 
   /**
-   * Remove the first element of the array. Return the rest of the array
+   * Remove the first element of the array. Return the rest of the array.
    *
    * @param d the d
    * @return the shifted array
@@ -315,9 +317,11 @@ public class BlinkEstimator implements PlugIn {
   /**
    * Calculate the counts of molecules using different dark times. The distance threshold for
    * molecule tracing will be absolute or relative. If relative it is set using the average
-   * precision multiplied by the search distance. <p> Note that index 0 corresponds to a t-threshold
-   * of 1 in the tracing algorithm, i.e. adjacent frames in the sequence. This is equivalent to a
-   * dark time of (up to) the frame acquisition rate, i.e. the molecule is not allowed to blink.
+   * precision multiplied by the search distance.
+   *
+   * <p>Note that index 0 corresponds to a t-threshold of 1 in the tracing algorithm, i.e. adjacent
+   * frames in the sequence. This is equivalent to a dark time of (up to) the frame acquisition
+   * rate, i.e. the molecule is not allowed to blink.
    *
    * @param results the results
    * @param maxDarkTime the max dark time
@@ -356,14 +360,17 @@ public class BlinkEstimator implements PlugIn {
   }
 
   /**
-   * Calculate the dark time corresponding to the molecule counts. <p> Note that index 0 corresponds
-   * to a t-threshold of 1 in the tracing algorithm, i.e. adjacent frames in the sequence. This is
-   * equivalent to a dark time of (up to) the frame acquisition rate, i.e. the molecule is not
-   * allowed to blink. <p> The returned Td values are the lower bounds of the dark time, i.e.
-   * t-threshold 1 equals 0 dark frames (0ms), t-threshold 2 equals 1 dark frame (n ms per frame),
-   * etc. This behaviour can be changed by setting the {@link #timeAtLowerBound} flag to false. Then
-   * the time will reflect the upper bounds of the dark time, i.e. t-threshold 1 equals 1 dark
-   * frames (n ms per frame), t-threshold 2 equals 2 dark frames (2n ms per frame), etc.
+   * Calculate the dark time corresponding to the molecule counts.
+   *
+   * <p>Note that index 0 corresponds to a t-threshold of 1 in the tracing algorithm, i.e. adjacent
+   * frames in the sequence. This is equivalent to a dark time of (up to) the frame acquisition
+   * rate, i.e. the molecule is not allowed to blink.
+   *
+   * <p>The returned Td values are the lower bounds of the dark time, i.e. t-threshold 1 equals 0
+   * dark frames (0ms), t-threshold 2 equals 1 dark frame (n ms per frame), etc. This behaviour can
+   * be changed by setting the {@link #timeAtLowerBound} flag to false. Then the time will reflect
+   * the upper bounds of the dark time, i.e. t-threshold 1 equals 1 dark frames (n ms per frame),
+   * t-threshold 2 equals 2 dark frames (2n ms per frame), etc.
    *
    * @param Ntd the ntd
    * @return the dark time
@@ -414,8 +421,9 @@ public class BlinkEstimator implements PlugIn {
   }
 
   /**
-   * Fit the dark time to counts of molecules curve. Only use the first n fitted points. <p>
-   * Calculates:<br> N = The number of photoblinking molecules in the sample<br> nBlink = The
+   * Fit the dark time to counts of molecules curve. Only use the first n fitted points.
+   *
+   * <p>Calculates:<br> N = The number of photoblinking molecules in the sample<br> nBlink = The
    * average number of blinks per flourophore<br> tOff = The off-time
    *
    * @param td The dark time
@@ -474,7 +482,8 @@ public class BlinkEstimator implements PlugIn {
         mean += d;
       }
       mean /= obs.length;
-      double ssResiduals = 0, ssTotal = 0;
+      double ssResiduals = 0;
+      double ssTotal = 0;
       for (int i = 0; i < obs.length; i++) {
         // ssResiduals += (obs[i] - exp[i]) * (obs[i] - exp[i]);
         ssTotal += (obs[i] - mean) * (obs[i] - mean);
@@ -585,10 +594,15 @@ public class BlinkEstimator implements PlugIn {
   }
 
   /**
-   * Allow optimisation using Apache Commons Math 3 Gradient Optimiser <p> N(td) = N . (1 + nBlink .
-   * exp((1-td)/tOff) <p> where <p> N(td) = The number of calculated molecules at different dark
-   * times (td)<br> N = The number of photoblinking molecules in the sample<br> nBlink = The average
-   * number of blinks per flourophore<br> td = The dark time<br> tOff = The off-time<br>
+   * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
+   *
+   * <p>N(td) = N . (1 + nBlink . exp((1-td)/tOff)
+   *
+   * <p>where
+   *
+   * <p>N(td) = The number of calculated molecules at different dark times (td)<br> N = The number
+   * of photoblinking molecules in the sample<br> nBlink = The average number of blinks per
+   * flourophore<br> td = The dark time<br> tOff = The off-time<br>
    */
   public class BlinkingFunction extends LoggingOptimiserFunction
       implements MultivariateVectorFunction // , DifferentiableMultivariateVectorFunction

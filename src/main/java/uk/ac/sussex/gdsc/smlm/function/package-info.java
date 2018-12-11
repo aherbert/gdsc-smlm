@@ -22,8 +22,9 @@
  * #L%
  */
 /**
- * Provides interfaces and classes for functions that compute values and gradients. <p> Examples of
- * supported function are: <ul> <li>Fast computation of the <a
+ * Provides interfaces and classes for functions that compute values and gradients.
+ *
+ * <p>Examples of supported function are: <ul> <li>Fast computation of the <a
  * href="https://en.wikipedia.org/wiki/Error_function">Error function</a>. <li>Poisson probability
  * functions with Fisher information. <li>Poisson-Gaussian probability functions with Fisher
  * information (for CCD/sCMOS cameras). <li>Poisson-Gamma-Gaussian probability functions with Fisher
@@ -32,4 +33,5 @@
  *
  * @since 1.0.0
  */
+
 package uk.ac.sussex.gdsc.smlm.function;

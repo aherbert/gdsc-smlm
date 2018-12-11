@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
@@ -29,8 +30,9 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter;
 import java.util.List;
 
 /**
- * Specifies additional parameters for the job. <p> Can be used to collect additional information
- * during fitting.
+ * Specifies additional parameters for the job.
+ *
+ * <p>Can be used to collect additional information during fitting.
  */
 public class FitParameters {
   /**
@@ -59,7 +61,7 @@ public class FitParameters {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   /**
@@ -111,9 +113,11 @@ public class FitParameters {
 
   /**
    * The filter used to pick the fitting path when benchmarking. This should be an instance for each
-   * thread running fit jobs. <p> Note that during benchmarking all fitting paths will be computed.
-   * The current set of results is then built by validating the results with this filter (in
-   * addition to the fit configuration used to construct the FitWorker).
+   * thread running fit jobs.
+   *
+   * <p>Note that during benchmarking all fitting paths will be computed. The current set of results
+   * is then built by validating the results with this filter (in addition to the fit configuration
+   * used to construct the FitWorker).
    */
   public MultiPathFilter benchmarkFilter = null;
 
@@ -123,9 +127,10 @@ public class FitParameters {
   public double duplicateDistance = 0;
 
   /**
-   * The pass array. <p> If this is not null then it will be initialised to the length of the
-   * candidate list and used to store the pass/fail flag for each candidate up to the point that
-   * fitting was halted.
+   * The pass array.
+   *
+   * <p>If this is not null then it will be initialised to the length of the candidate list and used
+   * to store the pass/fail flag for each candidate up to the point that fitting was halted.
    */
   public boolean[] pass = null;
 }

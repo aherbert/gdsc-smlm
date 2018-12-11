@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import gnu.trove.list.linked.TIntLinkedList;
@@ -30,7 +31,8 @@ import gnu.trove.list.linked.TIntLinkedList;
  */
 public class Trace extends Cluster {
   private int nBlinks = -1;
-  private int[] onTimes, offTimes;
+  private int[] onTimes;
+  private int[] offTimes;
 
   /**
    * Instantiates a new trace.

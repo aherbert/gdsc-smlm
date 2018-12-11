@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
@@ -77,6 +78,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
   private static AutoThreshold.Method thresholdMethod = AutoThreshold.Method.DEFAULT;
   private static float fraction;
   private static int histogramSize;
+
   static {
     final DataEstimator de = new DataEstimator(new float[0], 0, 0);
     fraction = de.getFraction();
@@ -137,7 +139,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     percentile = gd.getNextNumber();
     noiseMethod = SettingsManager.getNoiseEstimatorMethodValues()[gd.getNextChoiceIndex()];
     myNoiseMethod = FitProtosHelper.convertNoiseEstimatorMethod(noiseMethod);
@@ -274,7 +276,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
   /** {@inheritDoc} */
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Do nothing
   }
 

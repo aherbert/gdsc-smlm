@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft;
@@ -135,7 +136,8 @@ public class DriftCalculator implements PlugIn {
   private static PlotWindow plotx = null;
   private static PlotWindow ploty = null;
 
-  private int interpolationStart, interpolationEnd;
+  private int interpolationStart;
+  private int interpolationEnd;
   private double[] calculatedTimepoints;
   private double[] lastdx;
   private double[] lastdy;
@@ -160,7 +162,8 @@ public class DriftCalculator implements PlugIn {
     int[] t;
     Rectangle alignBounds;
     List<double[]> alignments;
-    int from, to;
+    int from;
+    int to;
 
     public ImageAligner(AlignImagesFft aligner, ImageProcessor[] ip, int[] t, Rectangle alignBounds,
         List<double[]> alignments, int from, int to) {
@@ -195,9 +198,12 @@ public class DriftCalculator implements PlugIn {
    * Duplicate and translate images.
    */
   private class ImageTranslator implements Runnable {
-    ImageProcessor[] images, ip;
-    double[] dx, dy;
-    int from, to;
+    ImageProcessor[] images;
+    ImageProcessor[] ip;
+    double[] dx;
+    double[] dy;
+    int from;
+    int to;
 
     public ImageTranslator(ImageProcessor[] images, ImageProcessor[] ip, double dx[], double dy[],
         int from, int to) {
@@ -232,7 +238,8 @@ public class DriftCalculator implements PlugIn {
     int i;
     Rectangle bounds;
     float scale;
-    double[] dx, dy;
+    double[] dx;
+    double[] dy;
 
     public ImageBuilder(ArrayList<Localisation> localisations, ImageProcessor[] images, int i,
         Rectangle bounds, float scale, double[] dx, double[] dy) {
@@ -265,7 +272,8 @@ public class DriftCalculator implements PlugIn {
     ImageProcessor[] images;
     AlignImagesFft aligner;
     FHT[] fhtImages;
-    int from, to;
+    int from;
+    int to;
 
     public ImageFHTInitialiser(ImageStack stack, ImageProcessor[] images, AlignImagesFft aligner,
         FHT[] fhtImages, int from, int to) {
@@ -569,8 +577,9 @@ public class DriftCalculator implements PlugIn {
   }
 
   /**
-   * Calculates drift using the feducial markers within ROI. <p> Adapted from the drift calculation
-   * method in QuickPALM.
+   * Calculates drift using the feducial markers within ROI.
+   *
+   * <p>Adapted from the drift calculation method in QuickPALM.
    *
    * @param results the results
    * @param limits the limits
@@ -639,21 +648,21 @@ public class DriftCalculator implements PlugIn {
 
     final int n = countNonZeroValues(data);
 
-    int bandwidthInPoints = (int) (smoothing * n);
+    int bandwidthInpoints = (int) (smoothing * n);
 
     // Check the bounds for the smoothing
-    final int original = bandwidthInPoints;
+    final int original = bandwidthInpoints;
     if (minSmoothingPoints > 0) {
-      bandwidthInPoints = FastMath.max(bandwidthInPoints, minSmoothingPoints);
+      bandwidthInpoints = FastMath.max(bandwidthInpoints, minSmoothingPoints);
     }
     if (maxSmoothingPoints > 0) {
-      bandwidthInPoints = FastMath.min(bandwidthInPoints, maxSmoothingPoints);
+      bandwidthInpoints = FastMath.min(bandwidthInpoints, maxSmoothingPoints);
     }
 
-    final double newSmoothing = (double) bandwidthInPoints / n;
-    if (original != bandwidthInPoints) {
+    final double newSmoothing = (double) bandwidthInpoints / n;
+    if (original != bandwidthInpoints) {
       ImageJUtils.log("Updated smoothing parameter for %d data points to %s (%d smoothing points)",
-          n, MathUtils.rounded(newSmoothing), bandwidthInPoints);
+          n, MathUtils.rounded(newSmoothing), bandwidthInpoints);
     }
 
     return newSmoothing;
@@ -760,7 +769,8 @@ public class DriftCalculator implements PlugIn {
 
     final double[][] values = extractValues(originalDriftTimePoints, startT, endT, dx, dy);
 
-    PolynomialSplineFunction fx, fy;
+    PolynomialSplineFunction fx;
+    PolynomialSplineFunction fy;
     if (values[0].length < 3) {
       fx = new LinearInterpolator().interpolate(values[0], values[1]);
       fy = new LinearInterpolator().interpolate(values[0], values[2]);
@@ -881,7 +891,8 @@ public class DriftCalculator implements PlugIn {
     // For each ROI
     for (int i = 0; i < roiSpots.length; i++) {
       // Calculate centre-of-mass using the current position (coord + drift)
-      double cx = 0, cy = 0;
+      double cx = 0;
+      double cy = 0;
       for (final Spot s : roiSpots[i]) {
         cx += s.s * (s.x + dx[s.t]);
         cy += s.s * (s.y + dy[s.t]);

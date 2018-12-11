@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
@@ -181,7 +182,7 @@ public class DoubleDHT2DTest {
         final double[] pixels = correlation.getData();
 
         final int i = SimpleArrayUtils.findMaxIndex(pixels);
-        final int[] xy = correlation.getXY(i);
+        final int[] xy = correlation.getXy(i);
 
         // This is how far dht has to move to align with dht2.
         // To align dht2 with dht would be the opposite sign.

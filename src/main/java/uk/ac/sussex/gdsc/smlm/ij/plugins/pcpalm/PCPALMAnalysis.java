@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -65,12 +66,15 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve. <p>
- * Frequency domain analysis see Sengupta, et al (2013). Quantifying spatial resolution in
+ * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve.
+ *
+ * <p>Frequency domain analysis see Sengupta, et al (2013). Quantifying spatial resolution in
  * point-localisation superresolution images using pair correlation analysis. Nature Protocols 8,
- * pp345-354. <p> Spatial domain analysis see Puchnar, et al (2013). Counting molecules in single
- * organelles with superresolution microscopy allows tracking of the endosome maturation trajectory.
- * PNAS. doi:10.1073/pnas.1309676110
+ * pp345-354.
+ *
+ * <p>Spatial domain analysis see Puchnar, et al (2013). Counting molecules in single organelles
+ * with superresolution microscopy allows tracking of the endosome maturation trajectory. PNAS.
+ * doi:10.1073/pnas.1309676110
  */
 public class PCPALMAnalysis implements PlugInFilter {
   /** The title. */
@@ -93,10 +97,16 @@ public class PCPALMAnalysis implements PlugInFilter {
   private static boolean useBorder = true;
 
   // Limits for the molecules constructed from the input ROI
-  private double minx, miny, maxx, maxy;
+  private double minx;
+  private double miny;
+  private double maxx;
+  private double maxy;
 
-  private double area, weightedArea, weightedAreaInPx;
-  private int areaInPx, noOfMolecules;
+  private double area;
+  private double weightedArea;
+  private double weightedAreaInPx;
+  private int areaInPx;
+  private int noOfMolecules;
   private double uniquePoints;
 
   // Cache the ImageWindow for faster repeat processing
@@ -207,7 +217,7 @@ public class PCPALMAnalysis implements PlugInFilter {
   }
 
   /**
-   * Load all the results from a directory. File must have the XML suffix
+   * Load all the results from a directory. File must have the XML suffix.
    *
    * @return {@link PlugInFilter#DONE }
    */
@@ -352,8 +362,9 @@ public class PCPALMAnalysis implements PlugInFilter {
    * Extract all the PC-PALM molecules that are within the image ROI region. The coordinates bounds
    * are converted using relative scaling to the limits of the PC-PALM molecules. If a
    * non-rectangular ROI is used then a mask is extracted and used for the crop. If no image is
-   * provided then the full set of molecules is returned. <p> Set the area property to the region
-   * covered by the molecules.
+   * provided then the full set of molecules is returned.
+   *
+   * <p>Set the area property to the region covered by the molecules.
    *
    * @param imp the image
    * @return the array list
@@ -418,7 +429,7 @@ public class PCPALMAnalysis implements PlugInFilter {
       for (final Molecule m : PCPALMMolecules.molecules) {
         xyz[0] = m.x - xoffset;
         xyz[1] = m.y - yoffset;
-        if (dist.isWithinXY(xyz)) {
+        if (dist.isWithinXy(xyz)) {
           newMolecules.add(m);
         }
       }
@@ -813,7 +824,7 @@ public class PCPALMAnalysis implements PlugInFilter {
   }
 
   /**
-   * Gets the density of peaks in the image. The density is in squared pixels
+   * Gets the density of peaks in the image. The density is in squared pixels.
    *
    * @param im the image
    * @return The density (in pixels^-2)

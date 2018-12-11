@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver;
@@ -30,9 +31,11 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a
  * function) and the scaled gradient vector of the function's partial first derivatives with respect
  * to the parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model
- * with coefficients (a) for a set of data points (x, y). <p> Note that the Hessian matrix is scaled
- * by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving the non-linear model.
- * See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
+ * with coefficients (a) for a set of data points (x, y).
+ *
+ * <p>Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for
+ * convenience in solving the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation
+ * 15.5.8 for Nonlinear Models.
  */
 public class GradientCalculator {
   /** The number of params. */
@@ -47,8 +50,9 @@ public class GradientCalculator {
   }
 
   /**
-   * Evaluate the function and compute the sum-of-squares and the curvature matrix. <p> A call to
-   * {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   * Evaluate the function and compute the sum-of-squares and the curvature matrix.
+   *
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param x n observations
    * @param y Data to fit
@@ -134,9 +138,12 @@ public class GradientCalculator {
   }
 
   /**
-   * Evaluate the function and compute the sum-of-squares and the curvature matrix. <p> A call to
-   * {@link #isNaNGradients()} will indicate if the gradients were invalid. <p> Allows disabling the
-   * use of gradients. The output alpha and beta will be reduced in size by the number of indices
+   * Evaluate the function and compute the sum-of-squares and the curvature matrix.
+   *
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   *
+   * <p>Allows disabling the use of gradients. The output alpha and beta will be reduced in size by
+   * the number of indices
    *
    * @param x n observations
    * @param y Data to fit
@@ -282,9 +289,12 @@ public class GradientCalculator {
 
   /**
    * Evaluate the function and compute the sum-of-squares and the curvature matrix. Assumes the n
-   * observations (x) are sequential integers from 0. <p> If the function supports weights then
-   * these will be used to compute the SS and curvature matrix. <p> A call to
-   * {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   * observations (x) are sequential integers from 0.
+   *
+   * <p>If the function supports weights then these will be used to compute the SS and curvature
+   * matrix.
+   *
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param n The number of data points
    * @param y Data to fit
@@ -374,11 +384,15 @@ public class GradientCalculator {
 
   /**
    * Evaluate the function and compute the sum-of-squares and the curvature matrix. Assumes the n
-   * observations (x) are sequential integers from 0. <p> If the function supports weights then
-   * these will be used to compute the SS and curvature matrix. <p> A call to
-   * {@link #isNaNGradients()} will indicate if the gradients were invalid. <p> Allows disabling the
-   * use of gradients. The output alpha and beta will be reduced in size by the number of indices
-   * that were disabled. The remaining positions will be zero filled.
+   * observations (x) are sequential integers from 0.
+   *
+   * <p>If the function supports weights then these will be used to compute the SS and curvature
+   * matrix.
+   *
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   *
+   * <p>Allows disabling the use of gradients. The output alpha and beta will be reduced in size by
+   * the number of indices that were disabled. The remaining positions will be zero filled.
    *
    * @param n The number of data points
    * @param y Data to fit
@@ -526,8 +540,9 @@ public class GradientCalculator {
   }
 
   /**
-   * Get the weight factor using the computed weight <p> Check if the weight is below 1 and set to 1
-   * to avoid excessive weights.
+   * Get the weight factor using the computed weight.
+   *
+   * <p>Check if the weight is below 1 and set to 1 to avoid excessive weights.
    *
    * @param w The computed weight
    * @return The weight factor
@@ -725,8 +740,9 @@ public class GradientCalculator {
 
   /**
    * Evaluate the function and compute the sum-of-squares and the gradient with respect to the model
-   * parameters. <p> A call to {@link #isNaNGradients()} will indicate if the gradients were
-   * invalid.
+   * parameters.
+   *
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param x n observations
    * @param y Data to fit
@@ -783,8 +799,11 @@ public class GradientCalculator {
 
   /**
    * Compute the covariance matrix for the parameters of the function assuming a least squares fit
-   * of a Poisson process. <p> Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7,
-   * 377-383), equation 25. <p> The method involves inversion of a matrix and may fail.
+   * of a Poisson process.
+   *
+   * <p>Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+   *
+   * <p>The method involves inversion of a matrix and may fail.
    *
    * @param x n observations
    * @param a Set of m coefficients (if null then the function must be pre-initialised)
@@ -797,8 +816,11 @@ public class GradientCalculator {
 
   /**
    * Compute the covariance matrix for the parameters of the function assuming a least squares fit
-   * of a Poisson process. <p> Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7,
-   * 377-383), equation 25. <p> The method involves inversion of a matrix and may fail.
+   * of a Poisson process.
+   *
+   * <p>Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+   *
+   * <p>The method involves inversion of a matrix and may fail.
    *
    * @param n The number of data points
    * @param theta Set of m coefficients (if null then the function must be pre-initialised)
@@ -846,8 +868,11 @@ public class GradientCalculator {
 
   /**
    * Compute the variance of the parameters of the function assuming a least squares fit of a
-   * Poisson process. <p> Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7,
-   * 377-383), equation 25. <p> The method involves inversion of a matrix and may fail.
+   * Poisson process.
+   *
+   * <p>Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+   *
+   * <p>The method involves inversion of a matrix and may fail.
    *
    * @param x n observations
    * @param a Set of m coefficients (if null then the function must be pre-initialised)
@@ -860,8 +885,11 @@ public class GradientCalculator {
 
   /**
    * Compute the variance of the parameters of the function assuming a least squares fit of a
-   * Poisson process. <p> Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7,
-   * 377-383), equation 25. <p> The method involves inversion of a matrix and may fail.
+   * Poisson process.
+   *
+   * <p>Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+   *
+   * <p>The method involves inversion of a matrix and may fail.
    *
    * @param n The number of data points
    * @param theta Set of m coefficients (if null then the function must be pre-initialised)

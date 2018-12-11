@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -142,7 +143,8 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
     if (individuals == null) {
       return null;
     }
-    int first, second;
+    int first;
+    int second;
     if (individuals.size() == 2) {
       first = 0;
       second = 1;

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -52,9 +53,11 @@ public abstract class LikelihoodWrapper {
   private double[] lastVariables;
 
   /**
-   * Initialise the function. <p> The input parameters must be the full parameters for the
-   * non-linear function. Only those parameters with gradient indices should be passed in to the
-   * functions to obtain the value (and gradient).
+   * Initialise the function.
+   *
+   * <p>The input parameters must be the full parameters for the non-linear function. Only those
+   * parameters with gradient indices should be passed in to the functions to obtain the value (and
+   * gradient).
    *
    * @param f The function to be used to calculated the expected values
    * @param a The initial parameters for the function
@@ -120,8 +123,9 @@ public abstract class LikelihoodWrapper {
 
   /**
    * Compute the negative log likelihood. Returns positive infinity if the likelihood is zero at any
-   * point in the observed values. <p> The wrapped NonLinearFunction will be correctly initialised
-   * before this function is called.
+   * point in the observed values.
+   *
+   * <p>The wrapped NonLinearFunction will be correctly initialised before this function is called.
    *
    * @return The negative log likelihood
    */
@@ -146,8 +150,9 @@ public abstract class LikelihoodWrapper {
   /**
    * Compute the negative log likelihood and the gradient. Returns positive infinity if the
    * likelihood is zero at any point in the observed values. In this case the gradient computed is
-   * invalid. <p> The wrapped NonLinearFunction will be correctly initialised before this function
-   * is called
+   * invalid.
+   *
+   * <p>The wrapped NonLinearFunction will be correctly initialised before this function is called
    *
    * @param gradient The gradient (must be equal length to the variables array)
    * @return The negative log likelihood
@@ -172,8 +177,9 @@ public abstract class LikelihoodWrapper {
 
   /**
    * Compute the negative log likelihood at observed value i. Returns positive infinity if the
-   * likelihood is zero at the observed value. <p> The wrapped NonLinearFunction will be correctly
-   * initialised before this function is called
+   * likelihood is zero at the observed value.
+   *
+   * <p>The wrapped NonLinearFunction will be correctly initialised before this function is called
    *
    * @param i Observed value i
    * @return The negative log likelihood
@@ -200,8 +206,9 @@ public abstract class LikelihoodWrapper {
   /**
    * Compute the negative log likelihood and gradient of the function at observed value i. Returns
    * positive infinity if the likelihood is zero at the observed value. In this case the gradient
-   * computed will be invalid. <p> The wrapped NonLinearFunction will be correctly initialised
-   * before this function is called
+   * computed will be invalid.
+   *
+   * <p>The wrapped NonLinearFunction will be correctly initialised before this function is called
    *
    * @param gradient The gradient (must be equal length to the variables array)
    * @param i Observed value i
@@ -222,9 +229,10 @@ public abstract class LikelihoodWrapper {
   public abstract boolean canComputeGradient();
 
   /**
-   * Compute the Fisher's Information Matrix (I) for fitted variables. <p> Note that this is only a
-   * true Fisher information matrix if the function returns the expected value for a Poisson
-   * process. In this case the equation reduces to:
+   * Compute the Fisher's Information Matrix (I) for fitted variables.
+   *
+   * <p>Note that this is only a true Fisher information matrix if the function returns the expected
+   * value for a Poisson process. In this case the equation reduces to:
    *
    * <pre>
    * Iaa = sum(i) (dYi da) * (dYi da) / Yi
@@ -269,8 +277,9 @@ public abstract class LikelihoodWrapper {
 
   /**
    * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central
-   * diagonal of the inverted Fisher's Information Matrix (I). <p> The information matrix is
-   * inverted and the central diagonal returned.
+   * diagonal of the inverted Fisher's Information Matrix (I).
+   *
+   * <p>The information matrix is inverted and the central diagonal returned.
    *
    * @param variables The variables of the function
    * @return CRLB (or null if inversion failed)
@@ -281,9 +290,11 @@ public abstract class LikelihoodWrapper {
 
   /**
    * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central
-   * diagonal of the inverted Fisher's Information Matrix (I). <p> The information matrix is
-   * inverted and the central diagonal returned. If the inversion fails then the routine optionally
-   * returns the reciprocal of the diagonal element to find a (possibly loose) lower bound.
+   * diagonal of the inverted Fisher's Information Matrix (I).
+   *
+   * <p>The information matrix is inverted and the central diagonal returned. If the inversion fails
+   * then the routine optionally returns the reciprocal of the diagonal element to find a (possibly
+   * loose) lower bound.
    *
    * @param variables The variables of the function
    * @param allowReciprocal the allow reciprocal flag

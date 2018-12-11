@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
@@ -35,8 +36,10 @@ public interface FunctionSolver {
   public FunctionSolverType getType();
 
   /**
-   * Fit a function with coefficients (a) for a set of data points (y). <p> It is assumed that the
-   * data points x[i] corresponding to y[i] are consecutive integers from zero.
+   * Fit a function with coefficients (a) for a set of data points (y).
+   *
+   * <p>It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
+   * zero.
    *
    * @param y Set of data points to fit (input)
    * @param f The evaluated function data points (output)
@@ -81,11 +84,12 @@ public interface FunctionSolver {
 
   /**
    * Specifies if the function solver supports constraints on the parameters. If true then the
-   * constraints can be set before a call to the fit(...) method. <p> Note that constraints are to
-   * be used to specify the values that are absolutely not allowed. They are not meant to be as
-   * restrictive as the bounds for a solver that supports a bounded search. For example the
-   * constraints on a parameter may be 0 - Infinity but the bounds may be 5 - 15. A bounded solver
-   * can be used to search within the expected range for a parameter.
+   * constraints can be set before a call to the fit(...) method.
+   *
+   * <p>Note that constraints are to be used to specify the values that are absolutely not allowed.
+   * They are not meant to be as restrictive as the bounds for a solver that supports a bounded
+   * search. For example the constraints on a parameter may be 0 - Infinity but the bounds may be 5
+   * - 15. A bounded solver can be used to search within the expected range for a parameter.
    *
    * @return True if the function solver supports a constrained search
    */
@@ -107,8 +111,9 @@ public interface FunctionSolver {
 
   /**
    * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the
-   * bounds can be ignored for the fixed parameters. <p> The bounds can be used to set the expected
-   * range for a parameter.
+   * bounds can be ignored for the fixed parameters.
+   *
+   * <p>The bounds can be used to set the expected range for a parameter.
    *
    * @param lower the lower bounds
    * @param upper the upper bounds
@@ -126,8 +131,9 @@ public interface FunctionSolver {
 
   /**
    * Sets the weights for each of the observations. The weights must match the length of the
-   * observations passed to {@link #fit(double[], double[], double[], double[])}. <p> The weights
-   * are the variances of each observation.
+   * observations passed to {@link #fit(double[], double[], double[], double[])}.
+   *
+   * <p>The weights are the variances of each observation.
    *
    * @param weights the new weights
    */
@@ -141,8 +147,10 @@ public interface FunctionSolver {
   public double getValue();
 
   /**
-   * Evaluate a function with coefficients (a) for a set of data points (x, y). <p> It is assumed
-   * that the data points x[i] corresponding to y[i] are consecutive integers from zero.
+   * Evaluate a function with coefficients (a) for a set of data points (x, y).
+   *
+   * <p>It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
+   * zero.
    *
    * @param y Set of data points (input)
    * @param f The evaluated function data points (output)
@@ -153,8 +161,11 @@ public interface FunctionSolver {
 
   /**
    * Compute the deviations for a function with coefficients (a) for a set of data points (x, y).
-   * <p> It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
-   * zero. <p> The deviations should be the same values as the result from the
+   *
+   * <p>It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
+   * zero.
+   *
+   * <p>The deviations should be the same values as the result from the
    * {@link #fit(double[], double[], double[], double[])} method if this is called with the output
    * fit coefficients.
    *

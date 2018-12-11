@@ -21,21 +21,28 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Computes the block average for each point within the array. <p> block algorithm sweeps the entire
- * (2n+1)*(2n+1) region around each pixel. Speed ~ Order(N*N). <p> stripedBlock algorithm uses two
- * consecutive 1D passes using (2n+1) strips. Totals from the first pass are used in the second pass
- * resulting in a speed increase. Speed ~ Order(N). Results should match exactly the block
- * algorithm. <p> rollingBlock algorithm uses two consecutive 1D passes using (2n+1) strips. Each
- * pass is computed using a rolling total thus each pixel sum can be computed using a single
- * addition and subtraction of the end pixels of the strip. Due to cumulative error of the rolling
- * sum the results may differ from the other algorithms for large images (applies to the the float
- * version since integer arithmetic should be robust within Integer.MAX bounds). Speed ~ Order(1).
- * <p> Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less
+ * Computes the block average for each point within the array.
+ *
+ * <p>block algorithm sweeps the entire (2n+1)*(2n+1) region around each pixel. Speed ~ Order(N*N).
+ *
+ * <p>stripedBlock algorithm uses two consecutive 1D passes using (2n+1) strips. Totals from the
+ * first pass are used in the second pass resulting in a speed increase. Speed ~ Order(N). Results
+ * should match exactly the block algorithm.
+ *
+ * <p>rollingBlock algorithm uses two consecutive 1D passes using (2n+1) strips. Each pass is
+ * computed using a rolling total thus each pixel sum can be computed using a single addition and
+ * subtraction of the end pixels of the strip. Due to cumulative error of the rolling sum the
+ * results may differ from the other algorithms for large images (applies to the the float version
+ * since integer arithmetic should be robust within Integer.MAX bounds). Speed ~ Order(1).
+ *
+ *
+ * <p>Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less
  * than 2. All routines are OK for 3x3 images and larger.
  *
  * @deprecated Replaced by BlockMeanFilter
@@ -47,8 +54,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -69,8 +77,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -156,8 +165,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 3x3 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -213,8 +223,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -236,9 +247,12 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2w+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Uses a normalised [[w*w,
-   * w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the
-   * input data is destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -260,8 +274,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -312,9 +327,12 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2w+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Uses a normalised [[w*w,
-   * w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the
-   * input data is destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -383,8 +401,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 3x3 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -428,9 +447,11 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 3x3 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Uses a normalised [[w*w,
-   * w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -476,8 +497,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 5x5 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -525,9 +547,12 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 5x5 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Uses a normalised [[w*w,
-   * w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the
-   * input data is destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -576,8 +601,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 7x7 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -625,9 +651,12 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 7x7 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Uses a normalised [[w*w,
-   * w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the
-   * input data is destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -677,8 +706,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -695,9 +725,12 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2w+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Uses a normalised [[w*w,
-   * w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the
-   * input data is destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -714,8 +747,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2n+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -771,9 +805,12 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 2w+1 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Uses a normalised [[w*w,
-   * w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the
-   * input data is destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -890,8 +927,9 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the block average within a 3x3 size block around each point. Only pixels with a full
-   * block are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -927,9 +965,11 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute the weighted block average within a 3x3 size block around each point. Only pixels with
-   * a full block are processed. Pixels within border regions are unchanged. <p> Uses a normalised
-   * [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel. <p> Note: the input data is
-   * destructively modified
+   * a full block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -971,9 +1011,11 @@ public class AverageFilter extends BaseFilter {
 
   /**
    * Compute an approximate Gaussian convolution within a 3x3 size block around each point. Only
-   * pixels with a full block are processed. Pixels within border regions are unchanged. <p> Uses a
-   * normalised [[1, 2, 1], [2, 4, 2], [1, 2, 1]] convolution kernel. <p> Note: the input data is
-   * destructively modified
+   * pixels with a full block are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Uses a normalised [[1, 2, 1], [2, 4, 2], [1, 2, 1]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1016,8 +1058,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1033,8 +1076,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1109,8 +1153,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 3x3 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1178,8 +1223,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1199,9 +1245,12 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2w+1 size block around each point. <p> Uses a normalised
-   * [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note:
-   * the input data is destructively modified
+   * Compute the block average within a 2w+1 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1221,8 +1270,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1294,9 +1344,12 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2w+1 size block around each point. <p> Uses a normalised
-   * [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note:
-   * the input data is destructively modified
+   * Compute the block average within a 2w+1 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1379,8 +1432,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 3x3 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1441,9 +1495,11 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 3x3 size block around each point. <p> Uses a normalised
-   * [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel. <p> Note: the input data is
-   * destructively modified.
+   * Compute the block average within a 3x3 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1502,8 +1558,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 5x5 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 5x5 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1561,9 +1618,12 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 5x5 size block around each point. <p> Uses a normalised
-   * [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note:
-   * the input data is destructively modified.
+   * Compute the block average within a 5x5 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1623,8 +1683,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 7x7 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 7x7 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1684,9 +1745,12 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 7x7 size block around each point. <p> Uses a normalised
-   * [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note:
-   * the input data is destructively modified.
+   * Compute the block average within a 7x7 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1800,8 +1864,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1817,9 +1882,12 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2w+1 size block around each point. <p> Uses a normalised
-   * [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note:
-   * the input data is destructively modified
+   * Compute the block average within a 2w+1 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1835,8 +1903,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2n+1 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1874,10 +1943,10 @@ public class AverageFilter extends BaseFilter {
         float sum = data[index];
 
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           for (int d = offset.length; d-- > 0;) {
             sum += data[index + offset[d]];
           }
@@ -1908,9 +1977,12 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 2w+1 size block around each point. <p> Uses a normalised
-   * [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note:
-   * the input data is destructively modified
+   * Compute the block average within a 2w+1 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]]
+   * convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1993,10 +2065,10 @@ public class AverageFilter extends BaseFilter {
         float sum2 = 0;
 
         // Flag to indicate this pixels has a complete (2n1+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           for (int d = offset.length; d-- > 0;) {
             sum += data[index + offset[d]];
           }
@@ -2067,8 +2139,9 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block average within a 3x3 size block around each point. <p> Note: the input data
-   * is destructively modified
+   * Compute the block average within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -2105,10 +2178,10 @@ public class AverageFilter extends BaseFilter {
       int index2 = (y + 1) * maxx;
       for (int x = 0; x < maxx; x++) {
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           final float sum =
               data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1]
                   + data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
@@ -2145,9 +2218,11 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute the weighted block average within a 3x3 size block around each point. <p> Uses a
-   * normalised [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel. <p> Note: the input
-   * data is destructively modified.
+   * Compute the weighted block average within a 3x3 size block around each point.
+   *
+   * <p>Uses a normalised [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -2177,12 +2252,12 @@ public class AverageFilter extends BaseFilter {
       int index2 = (y + 1) * maxx;
       for (int x = 0; x < maxx; x++) {
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y > 0 && y < ylimit) && (x > 0 && x < xlimit);
+        final boolean isInnerXy = (y > 0 && y < ylimit) && (x > 0 && x < xlimit);
 
         // Sweep neighbourhood
         float sum1 = 0;
         float sum2 = 0;
-        if (isInnerXY) {
+        if (isInnerXy) {
           // Edges
           sum1 = data[index0] + data[index1 - 1] + data[index1 + 1] + data[index2];
           // Corners
@@ -2236,9 +2311,11 @@ public class AverageFilter extends BaseFilter {
   }
 
   /**
-   * Compute an approximate Gaussian convolution within a 3x3 size block around each point. <p> Uses
-   * a normalised [[1, 2, 1], [2, 4, 2], [1, 2, 1]] convolution kernel. <p> Note: the input data is
-   * destructively modified.
+   * Compute an approximate Gaussian convolution within a 3x3 size block around each point.
+   *
+   * <p>Uses a normalised [[1, 2, 1], [2, 4, 2], [1, 2, 1]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -2277,10 +2354,10 @@ public class AverageFilter extends BaseFilter {
       int index2 = (y + 1) * maxx;
       for (int x = 0; x < maxx; x++) {
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           final float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1]
               + 2 * data[index1 - 1] + 4 * data[index1] + 2 * data[index1 + 1] + data[index2 - 1]
               + 2 * data[index2] + data[index2 + 1];

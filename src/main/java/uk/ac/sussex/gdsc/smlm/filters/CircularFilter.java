@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -28,7 +29,9 @@ import uk.ac.sussex.gdsc.core.utils.StoredData;
 import java.awt.Rectangle;
 
 /**
- * Computes the filter using a circular mask. <p> Adapted from ij.plugin.filter.RankFilters
+ * Computes the filter using a circular mask.
+ *
+ * <p>Adapted from ij.plugin.filter.RankFilters
  */
 public abstract class CircularFilter extends BaseWeightedFilter {
   private int[] kernel = null;
@@ -69,14 +72,15 @@ public abstract class CircularFilter extends BaseWeightedFilter {
   /**
    * Computes the normaliser within a radius around each point.
    *
-   * @param nPoints the number of point in the circle
+   * @param npoints the number of point in the circle
    * @return the normaliser
    */
-  protected abstract Normaliser computeNormaliser(int nPoints);
+  protected abstract Normaliser computeNormaliser(int npoints);
 
   /**
-   * Compute the mean. Pixels within border regions (defined by 1 x radius) are unchanged. <p> Note:
-   * the input data is destructively modified
+   * Compute the mean. Pixels within border regions (defined by 1 x radius) are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -103,7 +107,9 @@ public abstract class CircularFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the mean. <p> Note: the input data is destructively modified
+   * Compute the mean.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -312,7 +318,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
    * @return: The output is an array that gives the length of each line of the structuring element
    *          (kernel) to the left (negative) and to the right (positive): [0] left in line 0, [1]
    *          right in line 0, [2] left in line 2, ... The maximum (absolute) value should be
-   *          kernelRadius. Array elements at the end: length-2: nPoints, number of pixels in the
+   *          kernelRadius. Array elements at the end: length-2: npoints, number of pixels in the
    *          kernel area length-1: kernelRadius in x direction (kernel width is 2*kernelRadius+1)
    *          Kernel height can be calculated as (array length - 1)/2 (odd number); Kernel radius in
    *          y direction is kernel height/2 (truncating integer division). Note that kernel width
@@ -339,16 +345,16 @@ public abstract class CircularFilter extends BaseWeightedFilter {
     kernel = new int[2 * kHeight + 2];
     kernel[2 * kRadius] = -kRadius;
     kernel[2 * kRadius + 1] = kRadius;
-    int nPoints = 2 * kRadius + 1;
+    int npoints = 2 * kRadius + 1;
     for (int y = 1; y <= kRadius; y++) { // lines above and below center together
       final int dx = (int) (Math.sqrt(r2 - y * y + 1e-10));
       kernel[2 * (kRadius - y)] = -dx;
       kernel[2 * (kRadius - y) + 1] = dx;
       kernel[2 * (kRadius + y)] = -dx;
       kernel[2 * (kRadius + y) + 1] = dx;
-      nPoints += 4 * dx + 2; // 2*dx+1 for each line, above&below
+      npoints += 4 * dx + 2; // 2*dx+1 for each line, above&below
     }
-    kernel[kernel.length - 2] = nPoints;
+    kernel[kernel.length - 2] = npoints;
     kernel[kernel.length - 1] = kRadius;
     // for (int i=0; i<kHeight;i++)IJ.log(i+": "+kernel[2*i]+"-"+kernel[2*i+1]);
     return kernel;
@@ -368,11 +374,11 @@ public abstract class CircularFilter extends BaseWeightedFilter {
       increment = 0.1;
     }
     for (double r = 0.5; r <= max; r += increment) {
-      final int nPoints = getNPoints(r);
-      if (nPoints > lastN) {
+      final int npoints = getNPoints(r);
+      if (npoints > lastN) {
         radii.add(r);
       }
-      lastN = nPoints;
+      lastN = npoints;
     }
     return radii.getValues();
   }
@@ -391,12 +397,12 @@ public abstract class CircularFilter extends BaseWeightedFilter {
     }
     final int r2 = (int) (radius * radius) + 1;
     final int kRadius = (int) (Math.sqrt(r2 + 1e-10));
-    int nPoints = 2 * kRadius + 1;
+    int npoints = 2 * kRadius + 1;
     for (int y = 1; y <= kRadius; y++) {
       final int dx = (int) (Math.sqrt(r2 - y * y + 1e-10));
-      nPoints += 4 * dx + 2;
+      npoints += 4 * dx + 2;
     }
-    return nPoints;
+    return npoints;
   }
 
   /**
@@ -414,7 +420,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
 
   /**
    * Count the number of points in the circle mask for the given radius. Then convert it into an
-   * approximate radius using sqrt(nPoints/pi)
+   * approximate radius using sqrt(npoints/pi)
    *
    * @param radius the radius
    * @return The diameter

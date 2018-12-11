@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
@@ -35,6 +36,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction
     extends SingleFreeCircularErfGaussian2DFunction {
   /** The gradient indices. */
   static final int[] gradientIndices;
+
   static {
     gradientIndices = createGradientIndices(1, new SingleNBFreeCircularErfGaussian2DFunction(1, 1));
   }

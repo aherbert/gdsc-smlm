@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
@@ -243,6 +244,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       "Sampled t-On", "Sampled t-Off", "Noise", "SNR", "SNR (continuous)", "Density", "Precision",
       "Precision (in-focus)", "X", "Y", "Z", "Width"};
   private static boolean[] displayHistograms = new boolean[NAMES.length];
+
   static {
     for (int i = 0; i < displayHistograms.length; i++) {
       displayHistograms[i] = true;
@@ -270,6 +272,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   private static final int WIDTH = 19;
 
   private static boolean[] integerDisplay;
+
   static {
     integerDisplay = new boolean[NAMES.length];
     integerDisplay[SAMPLES] = true;
@@ -284,6 +287,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     integerDisplay[DENSITY] = true;
   }
   private static boolean[] alwaysRemoveOutliers;
+
   static {
     alwaysRemoveOutliers = new boolean[NAMES.length];
     alwaysRemoveOutliers[PRECISION] = true;
@@ -308,7 +312,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   private MemoryPeakResults results = null;
 
   // Used by the ImageGenerator to show progress when the thread starts
-  private int frame, maxT, totalFrames;
+  private int frame;
+  private int maxT;
+  private int totalFrames;
 
   private boolean simpleMode = false;
   private boolean benchmarkMode = false;
@@ -318,7 +324,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
   // Hold private variables for settings that are ignored in simple/benchmark mode
   private boolean poissonNoise = true;
-  private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
+  private double minPhotons = 0;
+  private double minSNRt1 = 0;
+  private double minSNRtN = 0;
 
   // Compute the CRLB for the PSF using the fisher information
   private BasePoissonFisherInformation[] fiFunction = null;
@@ -809,7 +817,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           final double[] xyz = dist.next();
 
           // Ignore within border. We do not want to draw things we cannot fit.
-          // if (!distBorder.isWithinXY(xyz))
+          // if (!distBorder.isWithinXy(xyz))
           // continue;
 
           // Simulate random photons
@@ -1023,7 +1031,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     final PSFModel psf = createPSFModel(xyz);
     psfModelCache = psf;
 
-    double sd0, sd1;
+    double sd0;
+    double sd1;
     if (psf instanceof GaussianPSFModel) {
       sd0 = ((GaussianPSFModel) psf).getS0(xyz[2]);
       sd1 = ((GaussianPSFModel) psf).getS1(xyz[2]);
@@ -1063,7 +1072,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
     if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType())) {
       final CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
-      emCCD = helper.isEMCCD;
+      emCCD = helper.isEmCcd;
       totalGain = helper.getTotalGainSafe();
       // Store read noise in ADUs
       readNoise =
@@ -1491,7 +1500,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       }
 
       @Override
-      public boolean isWithinXY(double[] xyz) {
+      public boolean isWithinXy(double[] xyz) {
         return true;
       }
 
@@ -1763,7 +1772,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     final List<LocalisationModelSet> newLocalisations = new ArrayList<>(localisationSets.size());
     final SpatialDistribution bounds = createUniformDistribution(0);
     for (final LocalisationModelSet s : localisationSets) {
-      if (bounds.isWithinXY(s.toLocalisation().getCoordinates())) {
+      if (bounds.isWithinXy(s.toLocalisation().getCoordinates())) {
         newLocalisations.add(s);
       }
     }
@@ -2087,7 +2096,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
   /**
    * Create an image from the localisations using the configured PSF width. Draws a new stack image.
-   * <p> Note that the localisations are filtered using the signal. The input list of localisations
+   *
+   * <p>Note that the localisations are filtered using the signal. The input list of localisations
    * will be updated.
    *
    * @param localisationSets the localisation sets
@@ -2390,7 +2400,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
       // To save memory construct the Image PSF using only the slices that are within
       // the depth of field of the simulation
-      double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
+      double minZ = Double.POSITIVE_INFINITY;
+      double maxZ = Double.NEGATIVE_INFINITY;
       for (final LocalisationModelSet l : localisationSets) {
         for (final LocalisationModel m : l.getLocalisations()) {
           final double z = m.getZ();
@@ -2577,7 +2588,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
   private class Spot {
     final double[] psf;
-    final int x0min, x0max, x1min, x1max;
+    final int x0min;
+    final int x0max;
+    final int x1min;
+    final int x1max;
     final int[] samplePositions;
 
     public Spot(double[] psf, int x0min, int x0max, int x1min, int x1max, int[] samplePositions) {
@@ -2637,10 +2651,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   }
 
   /**
-   * Creates the CCD camera model. <p> Note that the model only has camera gain applied thus the
-   * normalised variance is the read noise in electrons. This is standard for a CCD model but omits
-   * the EM-gain for an EM-CCD model. This model is intended to be used to generate electron noise
-   * during the simulation.
+   * Creates the CCD camera model.
+   *
+   * <p>Note that the model only has camera gain applied thus the normalised variance is the read
+   * noise in electrons. This is standard for a CCD model but omits the EM-gain for an EM-CCD model.
+   * This model is intended to be used to generate electron noise during the simulation.
    *
    * @return the camera model
    */
@@ -2671,7 +2686,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     final ImageStack stack;
     final boolean poissonNoise;
     final RandomDataGenerator random;
-    final double emGain, qe;
+    final double emGain;
+    final double qe;
 
     public ImageGenerator(final List<LocalisationModelSet> localisationSets,
         List<LocalisationModelSet> newLocalisations, int startIndex, int t, PSFModel psfModel,
@@ -2825,7 +2841,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           final double backgroundInPhotons = localStats[0];
 
           // Note: The width estimate does not account for diffusion
-          float sx, sy;
+          float sx;
+          float sy;
           if (psfModel instanceof GaussianPSFModel) {
             final GaussianPSFModel m = (GaussianPSFModel) psfModel;
             sx = (float) m.getS0();
@@ -3463,7 +3480,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       try {
         // Get z depth
         final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
-        sp.getXYZ();
+        sp.getXyz();
 
         // Get precision
         final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
@@ -3645,7 +3662,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return size;
   }
 
-  private int currentIndex, finalIndex;
+  private int currentIndex;
+  private int finalIndex;
 
   private synchronized void incrementProgress() {
     IJ.showProgress(currentIndex, finalIndex);
@@ -3729,7 +3747,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   private static void rebuildNeighbours(List<LocalisationModel> localisations) {
     sortLocalisationsByIdThenTime(localisations);
 
-    int id = 0, t = 0;
+    int id = 0;
+    int t = 0;
     LocalisationModel previous = null;
     for (final LocalisationModel l : localisations) {
       if (l.getId() != id) {
@@ -4208,7 +4227,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   }
 
   /**
-   * Show a dialog allowing the parameters for a simple/benchmark simulation to be performed
+   * Show a dialog allowing the parameters for a simple/benchmark simulation to be performed.
    *
    * @return True if the parameters were collected
    */
@@ -4501,7 +4520,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         settings.setOriginY((int) gd.getNextNumber());
         SettingsManager.writeSettings(settings.build());
 
-        int ox, oy;
+        int ox;
+        int oy;
         if (settings.getRandomCrop()) {
           final RandomDataGenerator rg = new RandomDataGenerator(createRandomGenerator());
           ox = rg.nextInt(modelBounds.x, upperx);
@@ -5173,9 +5193,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   }
 
   @Override
-  public void itemStateChanged(ItemEvent e) {
+  public void itemStateChanged(ItemEvent event) {
     // When the checkbox is clicked, output example compounds to the ImageJ log
-    final Checkbox cb = (Checkbox) e.getSource();
+    final Checkbox cb = (Checkbox) event.getSource();
     if (cb.getState()) {
       cb.setState(false);
 
@@ -5750,7 +5770,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           return null;
         }
 
-        int ox = 0, oy = 0;
+        int ox = 0;
+        int oy = 0;
         if (lastCameraBounds != null) {
           ox = lastCameraBounds.x;
           oy = lastCameraBounds.y;

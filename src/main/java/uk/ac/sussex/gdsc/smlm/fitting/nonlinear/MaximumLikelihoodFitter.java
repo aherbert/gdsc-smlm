@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
@@ -61,13 +62,19 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * Uses Maximum Likelihood Estimation (MLE) to fit a nonlinear model with coefficients (a) for a set
- * of data points (x, y). <p> By default the probability mass function for observed value k is
- * modelled as a Poisson process:<br> pmf = e^-k.(l^k / k!) <br> where: <br> k = Observed number of
- * occurrences <br> l = Expected number of occurrences (the mean) <p> MLE = Max [ sum (ln(e^-k.(l^k
- * / k!)) ] <br> = Max [ sum (k.ln(l) - l) ] <p> The expected number of occurrences can be modelled
- * using any parameterised function, for example the Gaussian 2D function. <p> The probability mass
- * function can be changed to a Poisson-Gaussian or Poisson-Gamma-Gaussian distribution in order to
- * model the counts from a CCD/EMCCD camera.
+ * of data points (x, y).
+ *
+ * <p>By default the probability mass function for observed value k is modelled as a Poisson
+ * process:<br> pmf = e^-k.(l^k / k!) <br> where: <br> k = Observed number of occurrences <br> l =
+ * Expected number of occurrences (the mean)
+ *
+ * <p>MLE = Max [ sum (ln(e^-k.(l^k / k!)) ] <br> = Max [ sum (k.ln(l) - l) ]
+ *
+ * <p>The expected number of occurrences can be modelled using any parameterised function, for
+ * example the Gaussian 2D function.
+ *
+ * <p>The probability mass function can be changed to a Poisson-Gaussian or Poisson-Gamma-Gaussian
+ * distribution in order to model the counts from a CCD/EMCCD camera.
  */
 public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   /**
@@ -116,7 +123,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
 
     /**
      * Convert the unmapped point to the mapped equivalent. The mapped point is used by the Powell
-     * optimiser. <p> This is done by square rooting the value of the mapped indices.
+     * optimiser.
+     *
+     * <p>This is done by square rooting the value of the mapped indices.
      *
      * @param point the point
      * @return The mapped point
@@ -131,7 +140,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
 
     /**
      * Convert the mapped point to the unmapped equivalent. The unmapped point is used to evaluate
-     * the function. <p> This is done by squaring the value of the mapped indices.
+     * the function.
+     *
+     * <p>This is done by squaring the value of the mapped indices.
      *
      * @param point the point
      * @return The unmapped point
@@ -191,28 +202,34 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
      */
     POWELL_ADAPTER("Powell (adapter)", false),
     /**
-     * Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm. <p>
-     * BOBYQA could also be considered as a replacement of any derivative-based optimizer when the
-     * derivatives are approximated by finite differences. This is a bounded search.
+     * Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm.
+     *
+     * <p>BOBYQA could also be considered as a replacement of any derivative-based optimizer when
+     * the derivatives are approximated by finite differences. This is a bounded search.
      */
     BOBYQA("BOBYQA", false),
     /**
-     * Search using active Covariance Matrix Adaptation Evolution Strategy (CMA-ES). <p> The CMA-ES
-     * is a reliable stochastic optimization method which should be applied if derivative-based
-     * methods, e.g. conjugate gradient, fail due to a rugged search landscape. This is a bounded
-     * search.
+     * Search using active Covariance Matrix Adaptation Evolution Strategy (CMA-ES).
+     *
+     * <p>The CMA-ES is a reliable stochastic optimization method which should be applied if
+     * derivative-based methods, e.g. conjugate gradient, fail due to a rugged search landscape.
+     * This is a bounded search.
      */
     CMAES("CMAES", false),
     /**
      * Search using a non-linear conjugate gradient optimiser. Use the Fletcher-Reeves update
-     * formulas for the conjugate search directions. <p> This is a bounded search using simple
-     * truncation of coordinates at the bounds of the search space.
+     * formulas for the conjugate search directions.
+     *
+     * <p>This is a bounded search using simple truncation of coordinates at the bounds of the
+     * search space.
      */
     CONJUGATE_GRADIENT_FR("Conjugate Gradient Fletcher-Reeves", true),
     /**
      * Search using a non-linear conjugate gradient optimiser. Use the Polak-Ribière update formulas
-     * for the conjugate search directions. <p> This is a bounded search using simple truncation of
-     * coordinates at the bounds of the search space.
+     * for the conjugate search directions.
+     *
+     * <p>This is a bounded search using simple truncation of coordinates at the bounds of the
+     * search space.
      */
     CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière", true),
     /**
@@ -276,9 +293,12 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   private double sigma;
 
   private boolean gradientLineMinimisation = true;
-  private double relativeThreshold = 1e-4, absoluteThreshold = 1e-10;
-  private double[] lower, upper;
-  private double[] lowerConstraint, upperConstraint;
+  private double relativeThreshold = 1e-4;
+  private double absoluteThreshold = 1e-10;
+  private double[] lower;
+  private double[] upper;
+  private double[] lowerConstraint;
+  private double[] upperConstraint;
 
   // The function to use for the Powell optimiser (which may have parameters mapped using the sqrt
   // function)
@@ -383,9 +403,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
       } else if (searchMethod == SearchMethod.BOBYQA) {
         // Differentiable approximation using Powell's BOBYQA algorithm.
         // This is slower than the Powell optimiser and requires a high number of evaluations.
-        final int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
+        final int numberOfInterpolationpoints = this.getNumberOfFittedParameters() + 2;
 
-        final BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
+        final BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationpoints);
         baseOptimiser = o;
         optimum = o.optimize(new MaxEval(getMaxEvaluations()),
             new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)),

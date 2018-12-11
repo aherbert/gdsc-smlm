@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
@@ -34,12 +35,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class LogFactorial {
   /**
-   * The master table containing {@code log(n!)}. <p> This should only ever be modified when holding
-   * the lock!
+   * The master table containing {@code log(n!)}.
+   *
+   * <p>This should only ever be modified when holding the lock!
    */
   private static volatile double[] MASTER_TABLE;
 
-  /** All long-representable factorials */
+  /** All long-representable factorials. */
   static final long[] FACTORIALS =
       new long[] {1l, 1l, 2l, 6l, 24l, 120l, 720l, 5040l, 40320l, 362880l, 3628800l, 39916800l,
           479001600l, 6227020800l, 87178291200l, 1307674368000l, 20922789888000l, 355687428096000l,
@@ -57,7 +59,9 @@ public class LogFactorial {
   private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
   /**
-   * Gets the maximum N that is tabulated. <p> Note: This has synchronisation overhead.
+   * Gets the maximum N that is tabulated.
+   *
+   * <p>Note: This has synchronisation overhead.
    *
    * @return the max N
    */
@@ -71,8 +75,9 @@ public class LogFactorial {
   }
 
   /**
-   * Increase the tabulated values up to a max n. Does nothing if already above the given n. <p>
-   * Note: This has synchronisation overhead.
+   * Increase the tabulated values up to a max n. Does nothing if already above the given n.
+   *
+   * <p>Note: This has synchronisation overhead.
    *
    * @param n the n
    */
@@ -122,8 +127,9 @@ public class LogFactorial {
   }
 
   /**
-   * Reduces the tabulated values down to a max n. Does nothing if already below the given n. <p>
-   * Note: This has synchronisation overhead.
+   * Reduces the tabulated values down to a max n. Does nothing if already below the given n.
+   *
+   * <p>Note: This has synchronisation overhead.
    *
    * @param n the new table max N
    */
@@ -164,8 +170,9 @@ public class LogFactorial {
   }
 
   /**
-   * Compute the log of n!. Uses tabulated values or the gamma function if n is large. <p> Note:
-   * This has no synchronisation overhead.
+   * Compute the log of n!. Uses tabulated values or the gamma function if n is large.
+   *
+   * <p>Note: This has no synchronisation overhead.
    *
    * @param n the n (must be positive)
    * @return log(n!)
@@ -183,7 +190,9 @@ public class LogFactorial {
   }
 
   /**
-   * Compute the log of k!. Uses the gamma function <p> Note: This has no synchronisation overhead.
+   * Compute the log of k!. Uses the gamma function.
+   *
+   * <p>Note: This has no synchronisation overhead.
    *
    * @param k the k
    * @return log(k!)
@@ -205,10 +214,11 @@ public class LogFactorial {
   private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
 
   /**
-   * Instantiates a new log factorial using the current static table. <p> The size of the static
-   * table can be obtained using {@link #getTableMaxN()}. Note that the table may be changed by
-   * other threads. The size of the newly constructed object can be obtained using
-   * {@link #getMaxN()}.
+   * Instantiates a new log factorial using the current static table.
+   *
+   * <p>The size of the static table can be obtained using {@link #getTableMaxN()}. Note that the
+   * table may be changed by other threads. The size of the newly constructed object can be obtained
+   * using {@link #getMaxN()}.
    */
   public LogFactorial() {
     // Copy the static values already present
@@ -235,7 +245,9 @@ public class LogFactorial {
   }
 
   /**
-   * Gets the maximum N that is tabulated. <p> Note: This has synchronisation overhead.
+   * Gets the maximum N that is tabulated.
+   *
+   * <p>Note: This has synchronisation overhead.
    *
    * @return the max N
    */
@@ -249,8 +261,9 @@ public class LogFactorial {
   }
 
   /**
-   * Increase the tabulated values up to a max n. Does nothing if already above the given n. <p>
-   * Note: This has synchronisation overhead.
+   * Increase the tabulated values up to a max n. Does nothing if already above the given n.
+   *
+   * <p>Note: This has synchronisation overhead.
    *
    * @param n the n
    */
@@ -289,8 +302,11 @@ public class LogFactorial {
   }
 
   /**
-   * Ensure the table contains values for the specified range of N. <p> This can be called before
-   * using the object with a known range of n. <p> Note: This has synchronisation overhead.
+   * Ensure the table contains values for the specified range of N.
+   *
+   * <p>This can be called before using the object with a known range of n.
+   *
+   * <p>Note: This has synchronisation overhead.
    *
    * @param minN the min N
    * @param maxN the max N
@@ -342,8 +358,9 @@ public class LogFactorial {
   }
 
   /**
-   * Check the table has computed values in the range minN to maxN inclusive. <p> Only call when
-   * holding the read lock.
+   * Check the table has computed values in the range minN to maxN inclusive.
+   *
+   * <p>Only call when holding the read lock.
    *
    * @param minN the min N
    * @param maxN the max N
@@ -359,7 +376,9 @@ public class LogFactorial {
   }
 
   /**
-   * Get the log of n! using tabulated values. <p> Note: This has no synchronisation overhead.
+   * Get the log of n! using tabulated values.
+   *
+   * <p>Note: This has no synchronisation overhead.
    *
    * @param n the n (must be positive)
    * @return log(n!)
@@ -372,8 +391,11 @@ public class LogFactorial {
   }
 
   /**
-   * Get the log of n! using tabulated values. <p> Note: This has no synchronisation overhead. <p>
-   * No checks are made that the object table contains a pre-computed value, for instance in the
+   * Get the log of n! using tabulated values.
+   *
+   * <p>Note: This has no synchronisation overhead.
+   *
+   * <p>No checks are made that the object table contains a pre-computed value, for instance in the
    * case where the table was created using {@link #ensureRange(int, int)} there may be values
    * outside the range that are zero.
    *
@@ -396,8 +418,9 @@ public class LogFactorial {
   }
 
   /**
-   * Copy the object with the given table size. <p> If n is larger then the current size then the
-   * table will be expanded.
+   * Copy the object with the given table size.
+   *
+   * <p>If n is larger then the current size then the table will be expanded.
    *
    * @param n the n
    * @return the log factorial

@@ -21,15 +21,18 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
- * Specifies the illumination with radial fall-off to simulate a wide field confocal microscope. <p>
- * The intensity falls-off from the centre to the edge proportional to the square of the distance to
- * the centre. There is uniform intensity in the z-axis.
+ * Specifies the illumination with radial fall-off to simulate a wide field confocal microscope.
+ *
+ * <p>The intensity falls-off from the centre to the edge proportional to the square of the distance
+ * to the centre. There is uniform intensity in the z-axis.
  */
 public class RadialFalloffIllumination implements SpatialIllumination {
-  private final double photons, radius2;
+  private final double photons;
+  private final double radius2;
   private final double pulsePhotons;
   private final int pulseInterval;
 

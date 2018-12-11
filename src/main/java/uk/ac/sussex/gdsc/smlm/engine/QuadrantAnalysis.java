@@ -21,7 +21,10 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
+
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Performs quadrant analysis on fit residuals to look for asymmetry.
@@ -30,58 +33,58 @@ public class QuadrantAnalysis {
   // Make these public for simplicity
 
   /** The sum of the 4 quadrants using the X dividing lines (two diagonals through the centre). */
-  public double ABCD;
+  public double sumABCD;
   /** The sum of the A quadrant using the X dividing lines (two diagonals through the centre). */
-  public double A;
+  public double sumA;
   /** The sum of the B quadrant using the X dividing lines (two diagonals through the centre). */
-  public double B;
+  public double sumB;
   /** The sum of the C quadrant using the X dividing lines (two diagonals through the centre). */
-  public double C;
+  public double sumC;
   /** The sum of the D quadrant using the X dividing lines (two diagonals through the centre). */
-  public double D;
+  public double sumD;
   /**
    * The sum of the 4 quadrants using the + dividing lines (horizontal and vertical through the
-   * centre)
+   * centre).
    */
-  public double ABCD2;
+  public double sumABCD2;
   /**
    * The sum of the A quadrant using the + dividing lines (horizontal and vertical through the
-   * centre)
+   * centre).
    */
-  public double A2;
+  public double sumA2;
   /**
    * The sum of the B quadrant using the + dividing lines (horizontal and vertical through the
-   * centre)
+   * centre).
    */
-  public double B2;
+  public double sumB2;
   /**
    * The sum of the C quadrant using the + dividing lines (horizontal and vertical through the
-   * centre)
+   * centre).
    */
-  public double C2;
+  public double sumC2;
   /**
    * The sum of the D quadrant using the + dividing lines (horizontal and vertical through the
    * centre)
    */
-  public double D2;
+  public double sumD2;
 
-  /** {@link #A} + {@link #C} */
-  public double AC;
-  /** {@link #B} + {@link #D} */
-  public double BD;
+  /** {@link #sumA} + {@link #sumC}. */
+  public double sumAC;
+  /** {@link #sumB} + {@link #sumD}. */
+  public double sumBD;
   /**
-   * The asymmetry score for the + dividing lines. Math.abs({@link #AC} - {@link #BD}) /
-   * {@link #ABCD}
+   * The asymmetry score for the + dividing lines. Math.abs({@link #sumAC} - {@link #sumBD}) /
+   * {@link #sumABCD}.
    */
   public double score1;
 
-  /** {@link #A2} + {@link #C2} */
-  public double AC2;
-  /** {@link #B2} + {@link #D2} */
-  public double BD2;
+  /** {@link #sumA2} + {@link #sumC2}. */
+  public double sumAC2;
+  /** {@link #sumB2} + {@link #sumD2}. */
+  public double sumBD2;
   /**
-   * The asymmetry score for the + dividing lines. Math.abs({@link #AC2} - {@link #BD2}) /
-   * {@link #ABCD2}
+   * The asymmetry score for the + dividing lines. Math.abs({@link #sumAC2} - {@link #sumBD2}) /
+   * {@link #sumABCD2}.
    */
   public double score2;
 
@@ -89,68 +92,73 @@ public class QuadrantAnalysis {
   public int[] vector;
   /**
    * The maximum asymmetry score for quadrant analysis. The max of {@link #score1} and
-   * {@link #score2}
+   * {@link #score2}.
    */
   public double score;
 
   /**
    * Proposed x coordinate for centre 1 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public double x1;
   /**
    * Proposed y coordinate for centre 1 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public double y1;
   /**
    * Proposed x coordinate for centre 2 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public double x2;
   /**
    * Proposed y coordinate for centre 2 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public double y2;
 
   /**
    * Proposed integer x coordinate for centre 1 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public int xi1;
   /**
    * Proposed integer y coordinate for centre 1 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public int yi1;
   /**
    * Proposed integer x coordinate for centre 2 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public int xi2;
   /**
    * Proposed integer y coordinate for centre 2 created by
-   * {@link #computeDoubletCentres(int, int, int, int, double, double)}
+   * {@link #computeDoubletCentres(int, int, int, int, double, double)}.
    */
   public int yi2;
 
   /**
-   * Perform quadrant analysis as per rapidSTORM <p> When two fluorophores emit close to each other,
-   * typically the nonlinear fit will result in a suspected fluorophore position midway between the
-   * two fluorophores and with a high amplitude. In this case, the fit results show a characteristic
-   * handle structure: The two true fluorophore emissions leave slightly positive residues, while
-   * there are negative residues on an axis perpendicular to the one connecting the fluorophores.
-   * <p> This condition is detected well by quadrant-differential residue analysis: The residue
+   * Perform quadrant analysis as per rapidSTORM.
+   *
+   * <p>When two fluorophores emit close to each other, typically the nonlinear fit will result in a
+   * suspected fluorophore position midway between the two fluorophores and with a high amplitude.
+   * In this case, the fit results show a characteristic handle structure: The two true fluorophore
+   * emissions leave slightly positive residues, while there are negative residues on an axis
+   * perpendicular to the one connecting the fluorophores.
+   *
+   * <p>This condition is detected well by quadrant-differential residue analysis: The residue
    * matrix is divided into quadrants, with the pixels above both diagonals forming the upper
    * quadrant, the pixels above the main and below the off diagonal forming the right quadrants and
    * so on. Pixels right on the diagonals are ignored. Then, the opposing quadrants are summed, and
    * these sums substracted from another, resulting in two quadrant differences: upper and lower
    * minus right and left and right and left minus upper and lower. This process is repeated for the
-   * quadrants defined by the central row and the central column. <p> The maximum sum obtained in
-   * this way divided by the sum of the absolute quadrant contributions is an observable correlating
-   * highly with the true presence of double emitters. Also, the quadrants containing the positive
-   * contribution in the highest sum indicate along which axis the double emission happened.
+   * quadrants defined by the central row and the central column.
+   *
+   * <p>The maximum sum obtained in this way divided by the sum of the absolute quadrant
+   * contributions is an observable correlating highly with the true presence of double emitters.
+   * Also, the quadrants containing the positive contribution in the highest sum indicate along
+   * which axis the double emission happened.
    *
    * @param residuals the residuals
    * @param width the width
@@ -175,36 +183,36 @@ public class QuadrantAnalysis {
     // DD.BB
     // D.C.B
     // .CCC.
-    ABCD = 0;
-    A = 0;
-    B = 0;
-    C = 0;
-    D = 0;
-    for (int y = cy, x1 = cx, x2 = cx; y < height; y++, x1--, x2++) {
+    sumABCD = 0;
+    sumA = 0;
+    sumB = 0;
+    sumC = 0;
+    sumD = 0;
+    for (int y = cy, xa = cx, xb = cx; y < height; y++, xa--, xb++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        ABCD += Math.abs(residuals[index]);
-        if (x < x1) {
-          D += residuals[index];
-        } else if (x < x2 && x > x1) {
-          C += residuals[index];
-        } else if (x > x2) {
-          B += residuals[index];
+        sumABCD += Math.abs(residuals[index]);
+        if (x < xa) {
+          sumD += residuals[index];
+        } else if (x < xb && x > xa) {
+          sumC += residuals[index];
+        } else if (x > xb) {
+          sumB += residuals[index];
         } else {
-          ABCD -= Math.abs(residuals[index]);
+          sumABCD -= Math.abs(residuals[index]);
         }
       }
     }
-    for (int y = cy - 1, x1 = cx - 1, x2 = cx + 1; y >= 0; y--, x1--, x2++) {
+    for (int y = cy - 1, xa = cx - 1, xb = cx + 1; y >= 0; y--, xa--, xb++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        ABCD += Math.abs(residuals[index]);
-        if (x < x1) {
-          D += residuals[index];
-        } else if (x < x2 && x > x1) {
-          A += residuals[index];
-        } else if (x > x2) {
-          B += residuals[index];
+        sumABCD += Math.abs(residuals[index]);
+        if (x < xa) {
+          sumD += residuals[index];
+        } else if (x < xb && x > xa) {
+          sumA += residuals[index];
+        } else if (x > xb) {
+          sumB += residuals[index];
         } else {
-          ABCD -= Math.abs(residuals[index]);
+          sumABCD -= Math.abs(residuals[index]);
         }
       }
     }
@@ -215,28 +223,28 @@ public class QuadrantAnalysis {
     // .....
     // DD.CC
     // DD.CC
-    ABCD2 = 0;
-    A2 = 0;
-    B2 = 0;
-    C2 = 0;
-    D2 = 0;
+    sumABCD2 = 0;
+    sumA2 = 0;
+    sumB2 = 0;
+    sumC2 = 0;
+    sumD2 = 0;
     for (int y = cy + 1; y < height; y++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        ABCD2 += Math.abs(residuals[index]);
+        sumABCD2 += Math.abs(residuals[index]);
         if (x < cx) {
-          D2 += residuals[index];
+          sumD2 += residuals[index];
         } else if (x > cx) {
-          C2 += residuals[index];
+          sumC2 += residuals[index];
         }
       }
     }
     for (int y = cy - 1; y >= 0; y--) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        ABCD2 += Math.abs(residuals[index]);
+        sumABCD2 += Math.abs(residuals[index]);
         if (x < cx) {
-          A2 += residuals[index];
+          sumA2 += residuals[index];
         } else if (x > cx) {
-          B2 += residuals[index];
+          sumB2 += residuals[index];
         }
       }
     }
@@ -247,9 +255,9 @@ public class QuadrantAnalysis {
     // DD.BB
     // D.C.B
     // .CCC.
-    AC = A + C;
-    BD = B + D;
-    score1 = Math.abs(AC - BD) / ABCD;
+    sumAC = sumA + sumC;
+    sumBD = sumB + sumD;
+    score1 = Math.abs(sumAC - sumBD) / sumABCD;
 
     // + quadrant:
     // AA.BB
@@ -257,15 +265,15 @@ public class QuadrantAnalysis {
     // .....
     // DD.CC
     // DD.CC
-    AC2 = A2 + C2;
-    BD2 = B2 + D2;
-    score2 = Math.abs(AC2 - BD2) / ABCD2;
+    sumAC2 = sumA2 + sumC2;
+    sumBD2 = sumB2 + sumD2;
+    score2 = Math.abs(sumAC2 - sumBD2) / sumABCD2;
 
     if (score1 > score2) {
-      vector = (AC > BD) ? new int[] {0, 1} : new int[] {1, 0};
+      vector = (sumAC > sumBD) ? new int[] {0, 1} : new int[] {1, 0};
       score = score1;
     } else {
-      vector = (AC2 > BD2) ? new int[] {1, 1} : new int[] {1, -1};
+      vector = (sumAC2 > sumBD2) ? new int[] {1, 1} : new int[] {1, -1};
       score = score2;
     }
 
@@ -274,8 +282,10 @@ public class QuadrantAnalysis {
 
   /**
    * Locate the 2 new centres by moving out into the quadrant defined by the computed vector by the
-   * defined shift <p> Requires a valid call to
-   * {@link #quadrantAnalysis(double[], int, int, int, int)} to create the vector
+   * defined shift
+   *
+   * <p>Requires a valid call to {@link #quadrantAnalysis(double[], int, int, int, int)} to create
+   * the vector
    *
    * @param width the width
    * @param height the height
@@ -287,10 +297,7 @@ public class QuadrantAnalysis {
    */
   public boolean computeDoubletCentres(final int width, final int height, final int cx,
       final int cy, double shiftx, double shifty) {
-    if (vector == null) {
-      return false;
-    }
-    if (cx < 0 || cx >= width || cy < 0 || cy >= height) {
+    if (vector == null || cx < 0 || cx >= width || cy < 0 || cy >= height) {
       return false;
     }
 
@@ -300,27 +307,14 @@ public class QuadrantAnalysis {
     x2 = cx + 0.5 - vector[0] * shiftx;
     y2 = cy + 0.5 - vector[1] * shifty;
 
+    final double maxWidth = width - 0.01;
+    final double maxHeight = height - 0.01;
+
     // Check bounds
-    if (x1 < 0) {
-      x1 = 0;
-    } else if (x1 >= width) {
-      x1 = width - 0.01;
-    }
-    if (y1 < 0) {
-      y1 = 0;
-    } else if (y1 >= height) {
-      y1 = height - 0.01;
-    }
-    if (x2 < 0) {
-      x2 = 0;
-    } else if (x2 >= width) {
-      x2 = width - 0.01;
-    }
-    if (y2 < 0) {
-      y2 = 0;
-    } else if (y2 >= height) {
-      y2 = height - 0.01;
-    }
+    x1 = MathUtils.clip(0, maxWidth, x1);
+    y1 = MathUtils.clip(0, maxHeight, y1);
+    x2 = MathUtils.clip(0, maxWidth, x2);
+    y2 = MathUtils.clip(0, maxHeight, y2);
 
     xi1 = (int) (x1);
     yi1 = (int) (y1);
@@ -339,26 +333,10 @@ public class QuadrantAnalysis {
       y2 = cy + 0.5 - vector[1];
 
       // Check bounds again
-      if (x1 < 0) {
-        x1 = 0;
-      } else if (x1 >= width) {
-        x1 = width - 0.01;
-      }
-      if (y1 < 0) {
-        y1 = 0;
-      } else if (y1 >= height) {
-        y1 = height - 0.01;
-      }
-      if (x2 < 0) {
-        x2 = 0;
-      } else if (x2 >= width) {
-        x2 = width - 0.01;
-      }
-      if (y2 < 0) {
-        y2 = 0;
-      } else if (y2 >= height) {
-        y2 = height - 0.01;
-      }
+      x1 = MathUtils.clip(0, maxWidth, x1);
+      y1 = MathUtils.clip(0, maxHeight, y1);
+      x2 = MathUtils.clip(0, maxWidth, x2);
+      y2 = MathUtils.clip(0, maxHeight, y2);
 
       xi1 = (int) (x1);
       yi1 = (int) (y1);
@@ -374,17 +352,17 @@ public class QuadrantAnalysis {
   /**
    * Gets the angle between two vectors.
    *
-   * @param a the a
-   * @param b the b
+   * @param v1 the first vector
+   * @param v2 the second vector
    * @return the angle (in radians)
    */
-  public static double getAngle(int[] a, double[] b) {
-    double d1 = a[0] * a[0] + a[1] * a[1];
-    double d2 = b[0] * b[0] + b[1] * b[1];
+  public static double getAngle(int[] v1, double[] v2) {
+    double d1 = (double) v1[0] * v1[0] + v1[1] * v1[1];
+    double d2 = v2[0] * v2[0] + v2[1] * v2[1];
     if (d1 > 0.0 && d2 > 0.0) {
       d1 = Math.sqrt(d1);
       d2 = Math.sqrt(d2);
-      final double sum = a[0] * b[0] + a[1] * b[1];
+      final double sum = v1[0] * v2[0] + v1[1] * v2[1];
       final double cosang = sum / (d1 * d2);
 
       if (cosang > 1.0) {
@@ -401,17 +379,17 @@ public class QuadrantAnalysis {
   /**
    * Gets the angle between two vectors.
    *
-   * @param a the a
-   * @param b the b
+   * @param v1 the first vector
+   * @param v2 the second vector
    * @return the angle (in radians)
    */
-  public static double getAngle(double[] a, double[] b) {
-    double d1 = a[0] * a[0] + a[1] * a[1];
-    double d2 = b[0] * b[0] + b[1] * b[1];
+  public static double getAngle(double[] v1, double[] v2) {
+    double d1 = v1[0] * v1[0] + v1[1] * v1[1];
+    double d2 = v2[0] * v2[0] + v2[1] * v2[1];
     if (d1 > 0.0 && d2 > 0.0) {
       d1 = Math.sqrt(d1);
       d2 = Math.sqrt(d2);
-      final double sum = a[0] * b[0] + a[1] * b[1];
+      final double sum = v1[0] * v2[0] + v1[1] * v2[1];
       final double cosang = sum / (d1 * d2);
 
       if (cosang > 1.0) {

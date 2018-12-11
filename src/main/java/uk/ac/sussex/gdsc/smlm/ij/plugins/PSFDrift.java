@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -84,8 +85,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Produces an drift curve for a PSF image using fitting. <p> The input images must be a z-stack of
- * a PSF. These can be produced using the PSFCreator plugin.
+ * Produces an drift curve for a PSF image using fitting.
+ *
+ * <p>The input images must be a z-stack of a PSF. These can be produced using the PSFCreator
+ * plugin.
  */
 public class PSFDrift implements PlugIn {
   private static final String TITLE = "PSF Drift";
@@ -127,7 +130,8 @@ public class PSFDrift implements PlugIn {
 
   private class Job {
     final int z;
-    final double cx, cy;
+    final double cx;
+    final double cy;
     final int index;
 
     public Job(int z, double cx, double cy, int index) {
@@ -155,14 +159,18 @@ public class PSFDrift implements PlugIn {
     final ImagePSFModel psf;
     final BlockingQueue<Job> jobs;
     final FitConfiguration fitConfig2;
-    final double sx, sy, a;
+    final double sx;
+    final double sy;
+    final double a;
     final double[][] xy;
     final int w;
     final int w2;
     final RandomDataGenerator random;
 
-    private double[] lb, ub = null;
-    private double[] lc, uc = null;
+    private double[] lb;
+    private double[] ub = null;
+    private double[] lc;
+    private double[] uc = null;
 
     public Worker(BlockingQueue<Job> jobs, ImagePSFModel psf, int width,
         FitConfiguration fitConfig) {
@@ -629,7 +637,8 @@ public class PSFDrift implements PlugIn {
     if (recall[centre] < recallLimit) {
       return;
     }
-    int start = centre, end = centre;
+    int start = centre;
+    int end = centre;
     for (int i = centre; i-- > 0;) {
       if (recall[i] < recallLimit) {
         break;
@@ -726,7 +735,8 @@ public class PSFDrift implements PlugIn {
       TurboList<double[]> offset) {
     // Add an offset for the remaining slices
     if (positionsToAverage > 0) {
-      double cx = 0, cy = 0;
+      double cx = 0;
+      double cy = 0;
       int n = 0;
       for (int i = 0; n < positionsToAverage && i < offset.size(); i++) {
         cx += offset.get(i)[1];
@@ -735,7 +745,8 @@ public class PSFDrift implements PlugIn {
       }
       cx /= n;
       cy /= n;
-      double cx2 = 0, cy2 = 0;
+      double cx2 = 0;
+      double cy2 = 0;
       double n2 = 0;
       for (int i = offset.size(); n2 < positionsToAverage && i-- > 0;) {
         cx2 += offset.get(i)[1];
@@ -1057,12 +1068,15 @@ public class PSFDrift implements PlugIn {
     final int centre = psfSettings.getCentreImage();
 
     // Extract valid values (some can be NaN)
-    double[] slice0, slice1;
-    double[] sw0 = new double[w0.length], sw1 = new double[w1.length];
+    double[] slice0;
+    double[] slice1;
+    double[] sw0 = new double[w0.length];
+    double[] sw1 = new double[w1.length];
     {
       final TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
       final TDoubleArrayList s1 = new TDoubleArrayList(w0.length);
-      int c0 = 0, c1 = 0;
+      int c0 = 0;
+      int c1 = 0;
       for (int i = 0; i < w0.length; i++) {
         if (Double.isFinite(w0[i])) {
           s0.add(i + 1);
@@ -1156,7 +1170,7 @@ public class PSFDrift implements PlugIn {
     gd2.addMessage("");
     gd2.addAndGetButton("Reset", new ActionListener() {
       @Override
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent event) {
         tf.setText(Integer.toString(newCentre));
       }
     });
@@ -1244,7 +1258,7 @@ public class PSFDrift implements PlugIn {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       centre = (int) gd.getNextNumber();
       updateCentre = gd.getNextBoolean();
       updateHWHM = gd.getNextBoolean();

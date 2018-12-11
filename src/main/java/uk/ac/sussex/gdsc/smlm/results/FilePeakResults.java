@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -86,8 +87,10 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
   protected abstract void write(String data);
 
   /**
-   * Write the result and increment the size by the count. <p> This method is synchronised to ensure
-   * that the change to the size or the output file are thread safe.
+   * Write the result and increment the size by the count.
+   *
+   * <p>This method is synchronised to ensure that the change to the size or the output file are
+   * thread safe.
    *
    * @param count the count
    * @param result the result

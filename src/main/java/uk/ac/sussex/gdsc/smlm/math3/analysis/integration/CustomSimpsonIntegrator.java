@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -34,9 +35,12 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Implements <a href="http://mathworld.wolfram.com/SimpsonsRule.html"> Simpson's Rule</a> for
  * integration of real univariate functions. For reference, see <b>Introduction to Numerical
- * Analysis</b>, ISBN 038795452X, chapter 3. <p> This implementation employs the basic trapezoid
- * rule to calculate Simpson's rule. <p> Extends the default CustomSimpsonIntegrator to allow the
- * last computed sum to be returned even upon failure.
+ * Analysis</b>, ISBN 038795452X, chapter 3.
+ *
+ * <p>This implementation employs the basic trapezoid rule to calculate Simpson's rule.
+ *
+ * <p>Extends the default CustomSimpsonIntegrator to allow the last computed sum to be returned even
+ * upon failure.
  *
  * @since 1.2
  */

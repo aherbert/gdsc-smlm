@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -156,13 +157,13 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
     addWindowListener(new WindowAdapter() {
       @Override
-      public void windowOpened(WindowEvent e) {
+      public void windowOpened(WindowEvent event) {
         model.setLive(true);
         WindowManager.addWindow(PeakResultTableModelFrame.this);
       }
 
       @Override
-      public void windowClosed(WindowEvent e) {
+      public void windowClosed(WindowEvent event) {
         model.setLive(false);
         WindowManager.removeWindow(PeakResultTableModelFrame.this);
       }
@@ -214,7 +215,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     editDeleteAll.setEnabled(false);
     editReadOnly.addActionListener(new ActionListener() {
       @Override
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent event) {
         final boolean allowDelete = !isReadOnly();
         editDelete.setEnabled(allowDelete);
         editDeleteAll.setEnabled(allowDelete);
@@ -254,8 +255,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
   /** {@inheritDoc} */
   @Override
-  public void actionPerformed(ActionEvent e) {
-    final Object src = e.getSource();
+  public void actionPerformed(ActionEvent event) {
+    final Object src = event.getSource();
     if (src == fileSave) {
       doSave();
     } else if (src == editDelete) {
@@ -549,12 +550,12 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     // the same selection model. Each JList updates using the same selection.
     selectionModel.addListSelectionListener(new ListSelectionListener() {
       @Override
-      public void valueChanged(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) {
+      public void valueChanged(ListSelectionEvent event) {
+        if (event.getValueIsAdjusting()) {
           return;
         }
-        System.out.printf("Model Selected %d-%d [%b] : %s\n", e.getFirstIndex(), e.getLastIndex(),
-            e.getValueIsAdjusting(),
+        System.out.printf("Model Selected %d-%d [%b] : %s\n", event.getFirstIndex(),
+            event.getLastIndex(), event.getValueIsAdjusting(),
             Arrays.toString(ListSelectionModelHelper.getSelectedIndices(selectionModel)));
       }
     });
@@ -593,7 +594,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
           d.setTitle("D");
           // d.addListSelectionListener(new ListSelectionListener()
           // {
-          // public void valueChanged(ListSelectionEvent e)
+          // public void valueChanged(ListSelectionEvent event)
           // {
           // // Only process the event if the value is not adjusting.
           // // Then to determine what has changed only process the
@@ -623,7 +624,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
           // d2.addListSelectionListener(new ListSelectionListener()
           // {
-          // public void valueChanged(ListSelectionEvent e)
+          // public void valueChanged(ListSelectionEvent event)
           // {
           // if (e.getValueIsAdjusting())
           // return;

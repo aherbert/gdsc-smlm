@@ -21,16 +21,19 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a
  * function) and the gradient vector of the function's partial first derivatives with respect to the
  * parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model with
- * coefficients (a) for a set of data points (x, y). <p> This calculator computes a modified
- * Chi-squared expression to perform Maximum Likelihood Estimation assuming Poisson model. See
- * Laurence &amp; Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339.
- * The input data must be Poisson distributed for this to be relevant.
+ * coefficients (a) for a set of data points (x, y).
+ *
+ * <p>This calculator computes a modified Chi-squared expression to perform Maximum Likelihood
+ * Estimation assuming Poisson model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood
+ * estimator. Nature Methods 7, 338-339. The input data must be Poisson distributed for this to be
+ * relevant.
  */
 public class MLEGradientCalculator7 extends MLEGradientCalculator {
   /**

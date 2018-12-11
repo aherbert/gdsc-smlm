@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -33,9 +34,10 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.util.Arrays;
 
 /**
- * Filter results using the combination of two filters. <p> Note that is the filter is not a
- * DirectFilter then the result of filtering a PreprocessedPeakResult is always true using that
- * filter.
+ * Filter results using the combination of two filters.
+ *
+ * <p>Note that is the filter is not a DirectFilter then the result of filtering a
+ * PreprocessedPeakResult is always true using that filter.
  */
 public abstract class CombinedFilter extends DirectFilter {
   /** The first filter. */
@@ -231,10 +233,11 @@ public abstract class CombinedFilter extends DirectFilter {
   }
 
   /**
-   * {@inheritDoc} <p> The method from the combined filter doesn't throw, leaving that to the
-   * underlying filters. This does mean that a combined filter can be created from two already
-   * initialised filters and the flags returned may not exactly recreate the state, since they are
-   * joined.
+   * {@inheritDoc}
+   *
+   * <p>The method from the combined filter doesn't throw, leaving that to the underlying filters.
+   * This does mean that a combined filter can be created from two already initialised filters and
+   * the flags returned may not exactly recreate the state, since they are joined.
    *
    * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#getFilterSetupFlags()
    */
@@ -251,10 +254,11 @@ public abstract class CombinedFilter extends DirectFilter {
   }
 
   /**
-   * {@inheritDoc} <p> The method from the combined filter doesn't throw, leaving that to the
-   * underlying filters. This does mean that a combined filter can be created from two already
-   * initialised filters and the data returned may not exactly recreate the state, since they are
-   * joined.
+   * {@inheritDoc}
+   *
+   * <p>The method from the combined filter doesn't throw, leaving that to the underlying filters.
+   * This does mean that a combined filter can be created from two already initialised filters and
+   * the data returned may not exactly recreate the state, since they are joined.
    *
    * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#getFilterSetupData()
    */

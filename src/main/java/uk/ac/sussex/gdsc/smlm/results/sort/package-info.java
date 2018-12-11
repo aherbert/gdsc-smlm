@@ -27,14 +27,18 @@
  *
  * @since 1.0.0
  */
+
 package uk.ac.sussex.gdsc.smlm.results.sort;
 
 /*
  * Java 1.7 Arrays.sort can throw an exception when Object1.compareTo(Object2) does not equal
- * -Object2.compareTo(Object1). This was silently ignored in previous JVMs. <p> The exception is
- * throw in java.utils.ComparableTimSort: throw new
- * IllegalArgumentException("Comparison method violates its general contract!"); <p> This can occur
- * when sorting mixed lists of PeakResult objects using their compareTo method as sub-classes may
- * have different a compareTo method. To work around this the compareTo method has been removed from
- * the PeakResult object and comparators added to this package for common comparisons.
+ * -Object2.compareTo(Object1). This was silently ignored in previous JVMs.
+ *
+ * <p>The exception is throw in java.utils.ComparableTimSort: throw new
+ * IllegalArgumentException("Comparison method violates its general contract!");
+ *
+ * <p>This can occur when sorting mixed lists of PeakResult objects using their compareTo method as
+ * sub-classes may have different a compareTo method. To work around this the compareTo method has
+ * been removed from the PeakResult object and comparators added to this package for common
+ * comparisons.
  */

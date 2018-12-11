@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.smlm.function.Bessel;
@@ -32,8 +33,9 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class AiryPattern {
   /**
-   * Convert Airy radius to Gaussian approximation <p> See Abraham, et al (2009) Opt Express 17:
-   * 23352.
+   * Convert Airy radius to Gaussian approximation.
+   *
+   * <p>See Abraham, et al (2009) Opt Express 17: 23352.
    */
   public static final double FACTOR = 1.323;
 
@@ -70,8 +72,9 @@ public class AiryPattern {
   }
 
   /**
-   * Calculate the total power of the AiryPattern at distance x from the centre <p> Appears to be
-   * numerically unstable at {@code x<<1}.
+   * Calculate the total power of the AiryPattern at distance x from the centre.
+   *
+   * <p>Appears to be numerically unstable at {@code x<<1}.
    *
    * @param x the x
    * @return The total power

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
@@ -315,7 +316,8 @@ public class FitResult {
   private final int nPeaks;
   private final int nFittedParameters;
   private Object data;
-  private final int iterations, evaluations;
+  private final int iterations;
+  private final int evaluations;
 
   /**
    * Constructor.

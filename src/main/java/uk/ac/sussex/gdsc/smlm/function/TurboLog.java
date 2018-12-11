@@ -21,17 +21,22 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Implementation of the ICSILog algorithm as described in O. Vinyals, G. Friedland, N. Mirghafori
  * "Revisiting a basic function on current CPUs: A fast logarithm implementation with adjustable
- * accuracy" (2007). <p> This class is based on the original algorithm description. <p> The
- * algorithm has been changed to detects when the unbiased exponent is zero and maintains the
- * precision. <p> Using look-up table the relative error
- * {@code ((fastLog(x)-Math.log(x))/Math.log(x))} is large ({@code e>>1}) when the input value
- * {@code x} is close to 1. So the algorithm detects values close to 1 and uses
- * {@code Math.log(double)} instead.
+ * accuracy" (2007).
+ *
+ * <p>This class is based on the original algorithm description.
+ *
+ * <p>The algorithm has been changed to detects when the unbiased exponent is zero and maintains the
+ * precision.
+ *
+ * <p>Using look-up table the relative error {@code ((fastLog(x)-Math.log(x))/Math.log(x))} is large
+ * ({@code e>>1}) when the input value {@code x} is close to 1. So the algorithm detects values
+ * close to 1 and uses {@code Math.log(double)} instead.
  *
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-
@@ -237,9 +242,12 @@ public class TurboLog extends FastLog {
 
   /**
    * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is
-   * no assumed leading 1. <p> Note that if the mantissa is zero this will fail! <p> No rounding to
-   * be done on sub-normal as the mantissa is shifted {@code << 1} so the least significant digit is
-   * always 0.
+   * no assumed leading 1.
+   *
+   * <p>Note that if the mantissa is zero this will fail!
+   *
+   * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
+   * significant digit is always 0.
    *
    * @param m the mantissa (already bit shifted by 1)
    * @return the log(x)
@@ -261,8 +269,9 @@ public class TurboLog extends FastLog {
   }
 
   /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
@@ -338,9 +347,12 @@ public class TurboLog extends FastLog {
 
   /**
    * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is
-   * no assumed leading 1. <p> Note that if the mantissa is zero this will fail! <p> No rounding to
-   * be done on sub-normal as the mantissa is shifted {@code << 1} so the least significant digit is
-   * always 0.
+   * no assumed leading 1.
+   *
+   * <p>Note that if the mantissa is zero this will fail!
+   *
+   * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
+   * significant digit is always 0.
    *
    * @param m the mantissa (already bit shifted by 1)
    * @return the log(x)
@@ -362,8 +374,9 @@ public class TurboLog extends FastLog {
   }
 
   /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog(Double.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code >fastLog(Double.MAX_VALUE)}). <li>If the argument is positive zero or
@@ -440,9 +453,12 @@ public class TurboLog extends FastLog {
 
   /**
    * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is
-   * no assumed leading 1. <p> Note that if the mantissa is zero this will fail! <p> No rounding to
-   * be done on sub-normal as the mantissa is shifted {@code << 1} so the least significant digit is
-   * always 0.
+   * no assumed leading 1.
+   *
+   * <p>Note that if the mantissa is zero this will fail!
+   *
+   * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
+   * significant digit is always 0.
    *
    * @param m the mantissa (already bit shifted by 1)
    * @return the log(x)
@@ -464,8 +480,9 @@ public class TurboLog extends FastLog {
   }
 
   /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog(Double.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code >fastLog(Double.MAX_VALUE)}). <li>If the argument is positive zero or

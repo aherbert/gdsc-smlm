@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import java.util.Arrays;
@@ -33,11 +34,11 @@ public class PeakResult implements Cloneable {
   public static final int BACKGROUND = 0;
   /** Index of the intensity in the parameters array. */
   public static final int INTENSITY = 1;
-  /** Index of the x-position in the parameters array */
+  /** Index of the x-position in the parameters array. */
   public static final int X = 2;
-  /** Index of the y-position in the parameters array */
+  /** Index of the y-position in the parameters array. */
   public static final int Y = 3;
-  /** Index of the z-position in the parameters array */
+  /** Index of the z-position in the parameters array. */
   public static final int Z = 4;
   /** Number of standard parameters. */
   public static final int STANDARD_PARAMETERS = 5;
@@ -441,9 +442,11 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * Gets the mean intensity. <p> This requires a knowledge of the PSF used to create the result. It
-   * could be the peak signal in the PSF or the average signal over a range of the PSF, e.g. the
-   * area covered from the maxima to half-maxima for spots.
+   * Gets the mean intensity.
+   *
+   * <p>This requires a knowledge of the PSF used to create the result. It could be the peak signal
+   * in the PSF or the average signal over a range of the PSF, e.g. the area covered from the maxima
+   * to half-maxima for spots.
    *
    * @return the mean intensity
    */
@@ -452,9 +455,11 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * Sets the mean intensity. <p> This requires a knowledge of the PSF used to create the result. It
-   * could be the peak signal in the PSF or the average signal over a range of the PSF, e.g. the
-   * area covered from the maxima to half-maxima for spots.
+   * Sets the mean intensity.
+   *
+   * <p>This requires a knowledge of the PSF used to create the result. It could be the peak signal
+   * in the PSF or the average signal over a range of the PSF, e.g. the area covered from the maxima
+   * to half-maxima for spots.
    *
    * @param meanIntensity the new mean intensity
    */
@@ -529,8 +534,9 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * Gets the localisation precision. Default = Double.NaN. Derived classes can override this. <p>
-   * This is provided so that results can be loaded from external sources.
+   * Gets the localisation precision. Default = Double.NaN. Derived classes can override this.
+   *
+   * <p>This is provided so that results can be loaded from external sources.
    *
    * @return the precision (in nm)
    */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -321,7 +322,7 @@ public class CameraModelAnalysis
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     dirty = true;
     settings.setPhotons(gd.getNextNumber());
     settings.setMode(gd.getNextChoiceIndex());
@@ -340,7 +341,7 @@ public class CameraModelAnalysis
   }
 
   @Override
-  public void optionCollected(OptionCollectedEvent e) {
+  public void optionCollected(OptionCollectedEvent event) {
     if (gd.getPreviewCheckbox().getState()) {
       boolean ok = false;
       try {
@@ -358,7 +359,7 @@ public class CameraModelAnalysis
 
   /** {@inheritDoc} */
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Ignore
   }
 
@@ -904,7 +905,8 @@ public class CameraModelAnalysis
       // Number of sub intervals
       final int n = g.length - 1;
       final double h = 1; // h = (a-b) / n = sub-interval width
-      double sum2 = 0, sum4 = 0;
+      double sum2 = 0;
+      double sum4 = 0;
       for (int j = 1; j <= n / 2 - 1; j++) {
         sum2 += g[2 * j];
       }
@@ -1323,7 +1325,8 @@ public class CameraModelAnalysis
     if (settings.getSimpsonIntegration()) {
       int c0 = -1;
       double dirac = 0;
-      int minc = 0, maxc = 0;
+      int minc = 0;
+      int maxc = 0;
       CachingUnivariateFunction uf = null;
 
       if (settings.getMode() == MODE_EM_CCD && isPoissonGammaLikelihoodFunction(settings)) {
@@ -1475,8 +1478,9 @@ public class CameraModelAnalysis
 
   /**
    * Compute the Kolmogorov distance as the supremum (maximum) difference between the two cumulative
-   * probability distributions. https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test <p>
-   * Also compute the mean distance between the two CDFs over the range of CDF 1.
+   * probability distributions. https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test
+   *
+   * <p>Also compute the mean distance between the two CDFs over the range of CDF 1.
    *
    * @param cdf1 the cdf 1
    * @param cdf2 the cdf 2

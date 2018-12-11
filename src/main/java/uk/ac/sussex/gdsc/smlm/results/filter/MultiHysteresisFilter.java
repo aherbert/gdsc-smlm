@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
@@ -34,8 +35,9 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision. <p>
- * Any results with the strict limits are included. Any results outside the weak limits are
+ * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision.
+ *
+ * <p>Any results with the strict limits are included. Any results outside the weak limits are
  * excluded. Any results between the strict and weak limits are included only if they can be traced
  * through time, optionally via other candidates, to a valid result.
  */

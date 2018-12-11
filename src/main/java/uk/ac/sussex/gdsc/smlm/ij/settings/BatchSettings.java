@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.settings;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;

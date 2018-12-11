@@ -49,6 +49,7 @@ public class PoissonLikelihoodWrapperTest {
   DoubleEquality eq = new DoubleEquality(5e-3, 0.001);
 
   static String[] NAME;
+
   static {
     NAME = new String[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
     for (int i = 0; i < NAME.length; i++) {

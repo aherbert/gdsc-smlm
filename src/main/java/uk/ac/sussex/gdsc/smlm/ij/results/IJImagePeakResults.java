@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -96,15 +97,17 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   public static final int DISPLAY_NEGATIVES = 0x80;
   /**
    * Mapped all non-zero values to 1-255 in the 8-bit displayed image. Zero and below are mapped to
-   * 0 in the LUT. <p> This cannot be used with {@link #DISPLAY_EQUALIZED} or
-   * {@link #DISPLAY_NEGATIVES}.
+   * 0 in the LUT.
+   *
+   * <p>This cannot be used with {@link #DISPLAY_EQUALIZED} or {@link #DISPLAY_NEGATIVES}.
    */
   public static final int DISPLAY_MAPPED = 0x0100;
   /**
    * Mapped even zero to 1-255 in the 8-bit displayed image. -0.0f and below is mapped to 0 in the
    * LUT. This can be used for example to display the result of a probability calculation where 0 is
-   * a valid display value but must be distinguished from pixels that have no value computed. <p>
-   * Must be used with {@link #DISPLAY_MAPPED}.
+   * a valid display value but must be distinguished from pixels that have no value computed.
+   *
+   * <p>Must be used with {@link #DISPLAY_MAPPED}.
    */
   public static final int DISPLAY_MAP_ZERO = 0x0200;
   /**
@@ -120,16 +123,18 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   protected final String title;
 
   /**
-   * The image width. This is in output image coordinates. <p> The bounding rectangle for displayed
-   * coordinates is not stored but could be inferred from the origin, the scale and the output
-   * width/height.
+   * The image width. This is in output image coordinates.
+   *
+   * <p>The bounding rectangle for displayed coordinates is not stored but could be inferred from
+   * the origin, the scale and the output width/height.
    */
   protected final int imageWidth;
 
   /**
-   * The image height. This is in output image coordinates. <p> The bounding rectangle for displayed
-   * coordinates is not stored but could be inferred from the origin, the scale and the output
-   * width/height.
+   * The image height. This is in output image coordinates.
+   *
+   * <p>The bounding rectangle for displayed coordinates is not stored but could be inferred from
+   * the origin, the scale and the output width/height.
    */
   protected final int imageHeight;
 
@@ -176,13 +181,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   private int currentFrame;
 
   /**
-   * The x origin. This defines the minimum of the bounding rectangle for displayed coordinates. <p>
-   * The x coordinates can be transformed to output image coordinates using {@link #mapX(float)}.
+   * The x origin. This defines the minimum of the bounding rectangle for displayed coordinates.
+   *
+   * <p>The x coordinates can be transformed to output image coordinates using {@link #mapX(float)}.
    */
   protected int ox;
   /**
-   * The y origin. This defines the minimum of the bounding rectangle for displayed coordinates. <p>
-   * The y coordinates can be transformed to output image coordinates using {@link #mapY(float)}.
+   * The y origin. This defines the minimum of the bounding rectangle for displayed coordinates.
+   *
+   * <p>The y coordinates can be transformed to output image coordinates using {@link #mapY(float)}.
    */
   protected int oy;
 
@@ -246,7 +253,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     // Handle invalid bounds with an empty single pixel image
     final boolean validBounds = imageWidth > 0 && imageHeight > 0
         && (double) imageWidth * (double) imageHeight < Integer.MAX_VALUE;
-    int w, h;
+    int w;
+    int h;
     if (validBounds) {
       w = imageWidth;
       h = imageHeight;
@@ -361,7 +369,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
 
   /**
    * Check the display flags when {@link #begin()} is called to ensure the image settings are OK.
-   * Update the flags if necessary. <p> Use to perform any other processing before begin().
+   * Update the flags if necessary.
+   *
+   * <p>Use to perform any other processing before begin().
    */
   protected void preBegin() {
     if ((displayFlags & DISPLAY_SIGNAL) != 0) {
@@ -516,7 +526,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     } else {
       // 32-bit image. Just copy the data but find the maximum
       final float[] pixels = (float[]) this.pixels;
-      double max, min;
+      double max;
+      double min;
 
       if ((displayFlags & DISPLAY_NEGATIVES) != 0) {
         // We use NaN to mark the data as empty.
@@ -598,10 +609,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     updateImage();
   }
 
-  private void addData(int nPoints, int nValues, int[] indices, float[] values) {
+  private void addData(int npoints, int nValues, int[] indices, float[] values) {
     // Add the values to the configured indices
     synchronized (data) {
-      size += nPoints;
+      size += npoints;
 
       if ((displayFlags & DISPLAY_REPLACE) != 0) {
         // Replace the data
@@ -648,9 +659,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
-   * Gets the value to add to the image data. <p> We construct the indices based on the current
-   * settings. 1, 2, or 4 indices will be returned with their values. The number of indices is
-   * stored in the 5th position of the indices array.
+   * Gets the value to add to the image data.
+   *
+   * <p>We construct the indices based on the current settings. 1, 2, or 4 indices will be returned
+   * with their values. The number of indices is stored in the 5th position of the indices array.
    *
    * @param peak the peak
    * @param params the peak params
@@ -681,9 +693,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
-   * Gets the value to add to the image data. <p> We construct the indices based on the current
-   * settings. 1, 2, or 4 indices will be returned with their values. The number of indices is
-   * stored in the 5th position of the indices array.
+   * Gets the value to add to the image data.
+   *
+   * <p>We construct the indices based on the current settings. 1, 2, or 4 indices will be returned
+   * with their values. The number of indices is stored in the 5th position of the indices array.
    *
    * @param v the value
    * @param x the x position
@@ -720,7 +733,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
 
     // Get the 4 neighbours and avoid overrun. In this case the edge pixel will get the entire
     // value.
-    final int xDelta, yDelta;
+    final int xDelta;
+    final int yDelta;
 
     // Note: The image width/height could be zero making the deltas invalid. However in this case
     // the
@@ -858,7 +872,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     final int[] indices = new int[5];
     final float[] values = new float[4];
 
-    int nPoints = 0;
+    int npoints = 0;
     int nValues = 0;
 
     // Buffer output in batches
@@ -882,8 +896,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
       }
 
       if (shouldUpdate(peak)) {
-        addData(nPoints, nValues, allIndices, allValues);
-        nPoints = 0;
+        addData(npoints, nValues, allIndices, allValues);
+        npoints = 0;
         nValues = 0;
         updateToFrame(peak);
       }
@@ -896,12 +910,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
         nValues++;
       }
 
-      nPoints++;
+      npoints++;
 
       if (nValues > limit) // || replace)
       {
-        addData(nPoints, nValues, allIndices, allValues);
-        nPoints = 0;
+        addData(npoints, nValues, allIndices, allValues);
+        npoints = 0;
         nValues = 0;
         updateImage();
         if (!imageActive) {
@@ -911,7 +925,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     }
 
     // Now add the values to the configured indices
-    addData(nPoints, nValues, allIndices, allValues);
+    addData(npoints, nValues, allIndices, allValues);
 
     updateImage();
   }
@@ -932,7 +946,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     final int[] indices = new int[5];
     final float[] values = new float[4];
 
-    int nPoints = 0;
+    int npoints = 0;
     int nValues = 0;
 
     // Buffer output in batches
@@ -961,12 +975,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
         nValues++;
       }
 
-      nPoints++;
+      npoints++;
 
       if (nValues > limit) // || replace)
       {
-        addData(nPoints, nValues, allIndices, allValues);
-        nPoints = 0;
+        addData(npoints, nValues, allIndices, allValues);
+        npoints = 0;
         nValues = 0;
         updateImage();
         if (!imageActive) {
@@ -976,7 +990,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     }
 
     // Now add the values to the configured indices
-    addData(nPoints, nValues, allIndices, allValues);
+    addData(npoints, nValues, allIndices, allValues);
 
     updateImage();
   }
@@ -1061,7 +1075,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     final int[] indices = new int[5];
     final float[] values = new float[4];
 
-    int nPoints = 0;
+    int npoints = 0;
     int nValues = 0;
 
     // Buffer output in batches
@@ -1083,8 +1097,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
       }
 
       if (shouldUpdate(result.getFrame())) {
-        addData(nPoints, nValues, allIndices, allValues);
-        nPoints = 0;
+        addData(npoints, nValues, allIndices, allValues);
+        npoints = 0;
         nValues = 0;
         updateToFrame(result.getFrame());
       }
@@ -1097,12 +1111,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
         nValues++;
       }
 
-      nPoints++;
+      npoints++;
 
       if (nValues > limit) // || replace)
       {
-        addData(nPoints, nValues, allIndices, allValues);
-        nPoints = 0;
+        addData(npoints, nValues, allIndices, allValues);
+        npoints = 0;
         nValues = 0;
         updateImage();
         if (!imageActive) {
@@ -1112,7 +1126,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     }
 
     // Now add the values to the configured indices
-    addData(nPoints, nValues, allIndices, allValues);
+    addData(npoints, nValues, allIndices, allValues);
 
     updateImage();
   }
@@ -1299,7 +1313,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   /**
    * Produce a final output image as a stack. Specify the number of peak frames to combine into each
    * stack frame, e.g. a window size of 10 will combine 10 consecutive fitting frames into 1 plane.
-   * <p> This setting only applies before the {@link #begin()} method.
+   *
+   * <p>This setting only applies before the {@link #begin()} method.
    *
    * @param rollingWindowSize the rollingWindowSize to set
    */

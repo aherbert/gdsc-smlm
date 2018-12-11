@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
@@ -42,9 +43,10 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver {
   protected final int[] indices;
 
   /**
-   * Instantiates a new scaled function solver. <p> Indexed parameters are up-scaled prior to
-   * calling the inner function solver. Output parameters, deviations and the function value are are
-   * down-scaled upon completion.
+   * Instantiates a new scaled function solver.
+   *
+   * <p>Indexed parameters are up-scaled prior to calling the inner function solver. Output
+   * parameters, deviations and the function value are are down-scaled upon completion.
    *
    * @param solver the solver
    * @param scale the scale
@@ -118,8 +120,10 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver {
   }
 
   /**
-   * {@inheritDoc} <p> This value is NOT scaled. It is assumed that the caller requires the value of
-   * the solution unmodified.
+   * {@inheritDoc}
+   *
+   * <p>This value is NOT scaled. It is assumed that the caller requires the value of the solution
+   * unmodified.
    *
    * @see uk.ac.sussex.gdsc.smlm.fitting.WrappedFunctionSolver#getValue()
    */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -40,17 +41,19 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
 
 /**
  * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a set of data
- * points (x, y). <p> The MLEFunctionSolver is supported if the flag to use a Poisson MLE model is
- * set. If the function supports weights then the WLSEFunctionSolver is supported. The default
- * implementation supports the LSEFunctionSolver.
+ * points (x, y).
+ *
+ * <p>The MLEFunctionSolver is supported if the flag to use a Poisson MLE model is set. If the
+ * function supports weights then the WLSEFunctionSolver is supported. The default implementation
+ * supports the LSEFunctionSolver.
  */
 public class NonLinearFit extends LSEBaseFunctionSolver
     implements MLEFunctionSolver, WLSEFunctionSolver {
-  /** Index for the best sum-of-squares in {@link #sumOfSquaresWorking} */
+  /** Index for the best sum-of-squares in {@link #sumOfSquaresWorking}. */
   protected static final int SUM_OF_SQUARES_BEST = 0;
-  /** Index for the new sum-of-squares in {@link #sumOfSquaresWorking} */
+  /** Index for the new sum-of-squares in {@link #sumOfSquaresWorking}. */
   protected static final int SUM_OF_SQUARES_OLD = 1;
-  /** Index for the previous sum-of-squares in {@link #sumOfSquaresWorking} */
+  /** Index for the previous sum-of-squares in {@link #sumOfSquaresWorking}. */
   protected static final int SUM_OF_SQUARES_NEW = 2;
 
   /** The solver. */
@@ -271,9 +274,11 @@ public class NonLinearFit extends LSEBaseFunctionSolver
   }
 
   /**
-   * Creates the linear problem. <p> The Hessian and gradient parameter from the current best
-   * scoring parameter set are assumed to be in alpha and beta. These are copied into the working
-   * variables covar and da. The lambda parameter is used to weight the diagonal of the Hessian.
+   * Creates the linear problem.
+   *
+   * <p>The Hessian and gradient parameter from the current best scoring parameter set are assumed
+   * to be in alpha and beta. These are copied into the working variables covar and da. The lambda
+   * parameter is used to weight the diagonal of the Hessian.
    *
    * @param m the number of fit parameters
    */
@@ -288,8 +293,11 @@ public class NonLinearFit extends LSEBaseFunctionSolver
   }
 
   /**
-   * Solves (one) linear equation, a x = b <p> On input have a[n][n], b[n]. On output b replaced by
-   * x[n]. <p> Note: Any zero elements in b are not solved.
+   * Solves (one) linear equation, a x = b.
+   *
+   * <p>On input have a[n][n], b[n]. On output b replaced by x[n].
+   *
+   * <p>Note: Any zero elements in b are not solved.
    *
    * @param a the a
    * @param b the b
@@ -320,8 +328,9 @@ public class NonLinearFit extends LSEBaseFunctionSolver
 
   /**
    * Update the fit parameters. Note that not all parameters are fit and therefore the gradients
-   * indices are used to map the fit parameters to the parameters array. <p> This method can be
-   * overridden to provide bounded update to the parameters.
+   * indices are used to map the fit parameters to the parameters array.
+   *
+   * <p>This method can be overridden to provide bounded update to the parameters.
    *
    * @param a the current fit parameters
    * @param gradientIndices the gradient indices (maps the fit parameter index to the parameter
@@ -416,8 +425,10 @@ public class NonLinearFit extends LSEBaseFunctionSolver
 
   /**
    * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a set of
-   * data points (x, y). <p> It is assumed that the data points x[i] corresponding to y[i] are
-   * consecutive integers from zero.
+   * data points (x, y).
+   *
+   * <p>It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
+   * zero.
    *
    * @param y Set of n data points to fit (input)
    * @param yFit Fitted data points (output)
@@ -542,10 +553,11 @@ public class NonLinearFit extends LSEBaseFunctionSolver
   }
 
   /**
-   * Sets to true to perform Maximum Likelihood Estimation assuming Poisson model. <p> This modifies
-   * the standard LVM as described in Laurence &amp; Chromy (2010) Efficient maximum likelihood
-   * estimator. Nature Methods 7, 338-339. The input data must be Poisson distributed for this to be
-   * relevant.
+   * Sets to true to perform Maximum Likelihood Estimation assuming Poisson model.
+   *
+   * <p>This modifies the standard LVM as described in Laurence &amp; Chromy (2010) Efficient
+   * maximum likelihood estimator. Nature Methods 7, 338-339. The input data must be Poisson
+   * distributed for this to be relevant.
    *
    * @param mle true to perform Maximum Likelihood Estimation
    */

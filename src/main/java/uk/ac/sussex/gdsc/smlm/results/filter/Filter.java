@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
@@ -92,9 +93,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Filter the results <p> The number of consecutive rejections are counted per frame. When the
-   * configured number of failures is reached all remaining results for the frame are rejected. This
-   * assumes the results are ordered by the frame.
+   * Filter the results.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
    *
    * @param results the results
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -132,12 +135,16 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Filter the results <p> The number of consecutive rejections are counted per frame. When the
-   * configured number of failures is reached all remaining results for the frame are rejected. This
-   * assumes the results are ordered by the frame. <p> Note that this method is to be used to score
-   * a set of results that may have been extracted from a larger set since the number of consecutive
-   * failures before each peak are expected to be stored in the origY property. Set this to zero and
-   * the results should be identical to {@link #filter(MemoryPeakResults, int)}
+   * Filter the results.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note that this method is to be used to score a set of results that may have been extracted
+   * from a larger set since the number of consecutive failures before each peak are expected to be
+   * stored in the origY property. Set this to zero and the results should be identical to
+   * {@link #filter(MemoryPeakResults, int)}
    *
    * @param results the results
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -182,12 +189,15 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   private static final int TN = 3;
 
   /**
-   * Filter the results <p> Input PeakResults must be allocated a score for true positive, false
-   * positive, true negative and false negative (accessed via the object property get methods). The
-   * filter is run and results that pass accumulate scores for true positive and false positive,
-   * otherwise the scores are accumulated for true negative and false negative. The simplest scoring
-   * scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite. <p>
-   * The number of failures before each peak is stored in the origX property of the PeakResult.
+   * Filter the results.
+   *
+   * <p>Input PeakResults must be allocated a score for true positive, false positive, true negative
+   * and false negative (accessed via the object property get methods). The filter is run and
+   * results that pass accumulate scores for true positive and false positive, otherwise the scores
+   * are accumulated for true negative and false negative. The simplest scoring scheme is to mark
+   * valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+   *
+   * <p>The number of failures before each peak is stored in the origX property of the PeakResult.
    *
    * @param results the results
    * @param score If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
@@ -241,18 +251,24 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Filter the results <p> Input PeakResults must be allocated a score for true positive, false
-   * positive, true negative and false negative (accessed via the object property get methods). The
-   * filter is run and results that pass accumulate scores for true positive and false positive,
-   * otherwise the scores are accumulated for true negative and false negative. The simplest scoring
-   * scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite. <p>
-   * The number of consecutive rejections are counted per frame. When the configured number of
+   * Filter the results.
+   *
+   * <p>Input PeakResults must be allocated a score for true positive, false positive, true negative
+   * and false negative (accessed via the object property get methods). The filter is run and
+   * results that pass accumulate scores for true positive and false positive, otherwise the scores
+   * are accumulated for true negative and false negative. The simplest scoring scheme is to mark
+   * valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
    * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame. <p> Note that this method is to be used to score a set of results
-   * that may have been extracted from a larger set since the number of consecutive failures before
-   * each peak are expected to be stored in the origY property. Set this to zero and the results
-   * should be identical to {@link #filterSubset(MemoryPeakResults, double[])}. <p> The number of
-   * failures before each peak is stored in the origX property of the PeakResult.
+   * are ordered by the frame.
+   *
+   * <p>Note that this method is to be used to score a set of results that may have been extracted
+   * from a larger set since the number of consecutive failures before each peak are expected to be
+   * stored in the origY property. Set this to zero and the results should be identical to
+   * {@link #filterSubset(MemoryPeakResults, double[])}.
+   *
+   * <p>The number of failures before each peak is stored in the origX property of the PeakResult.
    *
    * @param results the results
    * @param score If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
@@ -308,15 +324,19 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Filter the results <p> Input PeakResults must be allocated a score for true positive, false
-   * positive, true negative and false negative (accessed via the object property get methods). The
-   * filter is run and results that pass accumulate scores for true positive and false positive,
-   * otherwise the scores are accumulated for true negative and false negative. The simplest scoring
-   * scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite. <p>
-   * The number of consecutive rejections are counted per frame. When the configured number of
+   * Filter the results.
+   *
+   * <p>Input PeakResults must be allocated a score for true positive, false positive, true negative
+   * and false negative (accessed via the object property get methods). The filter is run and
+   * results that pass accumulate scores for true positive and false positive, otherwise the scores
+   * are accumulated for true negative and false negative. The simplest scoring scheme is to mark
+   * valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
    * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame. <p> The number of failures before each peak is stored in the origX
-   * property of the PeakResult.
+   * are ordered by the frame.
+   *
+   * <p>The number of failures before each peak is stored in the origX property of the PeakResult.
    *
    * @param results the results
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -376,18 +396,24 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Filter the results <p> Input PeakResults must be allocated a score for true positive, false
-   * positive, true negative and false negative (accessed via the object property get methods). The
-   * filter is run and results that pass accumulate scores for true positive and false positive,
-   * otherwise the scores are accumulated for true negative and false negative. The simplest scoring
-   * scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite. <p>
-   * The number of consecutive rejections are counted per frame. When the configured number of
+   * Filter the results.
+   *
+   * <p>Input PeakResults must be allocated a score for true positive, false positive, true negative
+   * and false negative (accessed via the object property get methods). The filter is run and
+   * results that pass accumulate scores for true positive and false positive, otherwise the scores
+   * are accumulated for true negative and false negative. The simplest scoring scheme is to mark
+   * valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
    * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame. <p> Note that this method is to be used to score a set of results
-   * that may have been extracted from a larger set since the number of consecutive failures before
-   * each peak are expected to be stored in the origY property. Set this to zero and the results
-   * should be identical to {@link #filterSubset(MemoryPeakResults, int, double[])}. <p> The number
-   * of failures before each peak is stored in the origX property of the PeakResult.
+   * are ordered by the frame.
+   *
+   * <p>Note that this method is to be used to score a set of results that may have been extracted
+   * from a larger set since the number of consecutive failures before each peak are expected to be
+   * stored in the origY property. Set this to zero and the results should be identical to
+   * {@link #filterSubset(MemoryPeakResults, int, double[])}.
+   *
+   * <p>The number of failures before each peak is stored in the origX property of the PeakResult.
    *
    * @param results the results
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -450,9 +476,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Filter the results and return the performance score. Allows benchmarking the filter by marking
-   * the results as true or false. <p> Any input PeakResult with an original value that is not zero
-   * will be treated as a true result, all other results are false. The filter is run and the
-   * results are marked as true positive, false negative and false positive.
+   * the results as true or false.
+   *
+   * <p>Any input PeakResult with an original value that is not zero will be treated as a true
+   * result, all other results are false. The filter is run and the results are marked as true
+   * positive, false negative and false positive.
    *
    * @param resultsList a list of results to analyse
    * @return the score
@@ -486,9 +514,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Filter the results and return the performance score. Allows benchmarking the filter by marking
-   * the results as true or false. <p> Any input PeakResult with an original value that is not zero
-   * will be treated as a true result, all other results are false. The filter is run and the
-   * results are marked as true positive, false negative and false positive.
+   * the results as true or false.
+   *
+   * <p>Any input PeakResult with an original value that is not zero will be treated as a true
+   * result, all other results are false. The filter is run and the results are marked as true
+   * positive, false negative and false positive.
    *
    * @param resultsList a list of results to analyse
    * @param tn The initial true negatives (used when the results have been pre-filtered)
@@ -526,12 +556,15 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Filter the results and return the performance score. Allows benchmarking the filter by marking
-   * the results as true or false. <p> Any input PeakResult with an original value that is not zero
-   * will be treated as a true result, all other results are false. The filter is run and the
-   * results are marked as true positive, false negative and false positive. <p> The number of
-   * consecutive rejections are counted per frame. When the configured number of failures is reached
-   * all remaining results for the frame are rejected. This assumes the results are ordered by the
-   * frame.
+   * the results as true or false.
+   *
+   * <p>Any input PeakResult with an original value that is not zero will be treated as a true
+   * result, all other results are false. The filter is run and the results are marked as true
+   * positive, false negative and false positive.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
    *
    * @param resultsList a list of results to analyse
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -585,12 +618,17 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Filter the results and return the performance score. Allows benchmarking the filter by marking
-   * the results as true or false. <p> Any input PeakResult with an original value that is not zero
-   * will be treated as a true result, all other results are false. The filter is run and the
-   * results are marked as true positive, false negative and false positive. <p> The number of
-   * consecutive rejections are counted per frame. When the configured number of failures is reached
-   * all remaining results for the frame are rejected. This assumes the results are ordered by the
-   * frame. <p> Note that this method is to be used to score a subset that was generated using
+   * the results as true or false.
+   *
+   * <p>Any input PeakResult with an original value that is not zero will be treated as a true
+   * result, all other results are false. The filter is run and the results are marked as true
+   * positive, false negative and false positive.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note that this method is to be used to score a subset that was generated using
    * {@link #filterSubset(MemoryPeakResults, int, double[])} since the number of consecutive
    * failures before each peak are expected to be stored in the origX property.
    *
@@ -653,14 +691,17 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Filter the results and return the performance score. Allows benchmarking the filter by marking
-   * the results as true or false. <p> Input PeakResults must be allocated a score for true
-   * positive, false positive, true negative and false negative (accessed via the object property
-   * get methods). The filter is run and results that pass accumulate scores for true positive and
-   * false positive, otherwise the scores are accumulated for true negative and false negative. The
-   * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the
-   * opposite. <p> The number of consecutive rejections are counted per frame. When the configured
-   * number of failures is reached all remaining results for the frame are rejected. This assumes
-   * the results are ordered by the frame.
+   * the results as true or false.
+   *
+   * <p>Input PeakResults must be allocated a score for true positive, false positive, true negative
+   * and false negative (accessed via the object property get methods). The filter is run and
+   * results that pass accumulate scores for true positive and false positive, otherwise the scores
+   * are accumulated for true negative and false negative. The simplest scoring scheme is to mark
+   * valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
    *
    * @param resultsList a list of results to analyse
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -714,17 +755,22 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Filter the results and return the performance score. Allows benchmarking the filter by marking
-   * the results as true or false. <p> Input PeakResults must be allocated a score for true
-   * positive, false positive, true negative and false negative (accessed via the object property
-   * get methods). The filter is run and results that pass accumulate scores for true positive and
-   * false positive, otherwise the scores are accumulated for true negative and false negative. The
-   * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the
-   * opposite. <p> The number of consecutive rejections are counted per frame. When the configured
-   * number of failures is reached all remaining results for the frame are rejected. This assumes
-   * the results are ordered by the frame. <p> Note that this method is to be used to score a set of
-   * results that may have been extracted from a larger set since the number of consecutive failures
-   * before each peak are expected to be stored in the origY property. Set this to zero and the
-   * results should be identical to {@link #fractionScore(List, int)}.
+   * the results as true or false.
+   *
+   * <p>Input PeakResults must be allocated a score for true positive, false positive, true negative
+   * and false negative (accessed via the object property get methods). The filter is run and
+   * results that pass accumulate scores for true positive and false positive, otherwise the scores
+   * are accumulated for true negative and false negative. The simplest scoring scheme is to mark
+   * valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note that this method is to be used to score a set of results that may have been extracted
+   * from a larger set since the number of consecutive failures before each peak are expected to be
+   * stored in the origY property. Set this to zero and the results should be identical to
+   * {@link #fractionScore(List, int)}.
    *
    * @param resultsList a list of results to analyse
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -780,17 +826,21 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Filter the results and return the performance score. Allows benchmarking the filter by marking
-   * the results as true or false. <p> Input PeakResults must be allocated a score for true
-   * positive, false positive, true negative and false negative (accessed via the object property
-   * get methods). The filter is run and results that pass accumulate scores for true positive and
-   * false positive, otherwise the scores are accumulated for true negative and false negative. The
-   * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the
-   * opposite. <p> The number of consecutive rejections are counted per frame. When the configured
-   * number of failures is reached all remaining results for the frame are rejected. This assumes
-   * the results are ordered by the frame. <p> Note that this method is to be used to score a subset
-   * that was generated using {@link #filterSubset(MemoryPeakResults, int, double[])} since the
-   * number of consecutive failures before each peak are expected to be stored in the origX
-   * property.
+   * the results as true or false.
+   *
+   * <p>Input PeakResults must be allocated a score for true positive, false positive, true negative
+   * and false negative (accessed via the object property get methods). The filter is run and
+   * results that pass accumulate scores for true positive and false positive, otherwise the scores
+   * are accumulated for true negative and false negative. The simplest scoring scheme is to mark
+   * valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note that this method is to be used to score a subset that was generated using
+   * {@link #filterSubset(MemoryPeakResults, int, double[])} since the number of consecutive
+   * failures before each peak are expected to be stored in the origX property.
    *
    * @param resultsList a list of results to analyse
    * @param failures the number of failures to allow per frame before all peaks are rejected
@@ -1046,8 +1096,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 
   /**
    * Compare to the other filter, count the number of weakest parameters. If negative then this
-   * filter has more weak parameters. If positive then this filter has less weak parameters. <p>
-   * This method does not check for null or if the other filter has a different number of
+   * filter has more weak parameters. If positive then this filter has less weak parameters.
+   *
+   * <p>This method does not check for null or if the other filter has a different number of
    * parameters.
    *
    * @param o The other filter
@@ -1140,8 +1191,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   public abstract double getParameterIncrement(int index);
 
   /**
-   * Return a value to use to disable the parameter <p> Override this method if zero does not
-   * disable the parameter.
+   * Return a value to use to disable the parameter.
+   *
+   * <p>Override this method if zero does not disable the parameter.
    *
    * @param index the index
    * @return The disabled value of the specified parameter
@@ -1170,12 +1222,14 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   public abstract ParameterType getParameterType(int index);
 
   /**
-   * Create a new filter by adjusting the specified parameter. <p> A positive delta will adjust the
-   * parameter to be larger. A negative delta will adjust the parameter to be smaller. The
-   * adjustment is relative to the parameter value, e.g. 0.1 is 10%. <p> Filters can adjust the
-   * parameter by a different amount, e.g. by the delta multiplied by a range expected to change the
-   * filter performance. This may be relevant in the case where the value is presently zero since no
-   * relative change is possible.
+   * Create a new filter by adjusting the specified parameter.
+   *
+   * <p>A positive delta will adjust the parameter to be larger. A negative delta will adjust the
+   * parameter to be smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
+   *
+   * <p>Filters can adjust the parameter by a different amount, e.g. by the delta multiplied by a
+   * range expected to change the filter performance. This may be relevant in the case where the
+   * value is presently zero since no relative change is possible.
    *
    * @param index The parameter index
    * @param delta The amount to adjust the parameter
@@ -1184,9 +1238,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   public abstract Filter adjustParameter(int index, double delta);
 
   /**
-   * Adjust the specified parameter value. <p> A positive delta will adjust the parameter to be
-   * larger. A negative delta will adjust the parameter to be smaller. The adjustment is relative to
-   * the parameter value, e.g. 0.1 is 10%.
+   * Adjust the specified parameter value.
+   *
+   * <p>A positive delta will adjust the parameter to be larger. A negative delta will adjust the
+   * parameter to be smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
    *
    * @param value the value
    * @param delta the delta
@@ -1202,9 +1257,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Adjust the specified parameter value. <p> A positive delta will adjust the parameter to be
-   * larger. A negative delta will adjust the parameter to be smaller. The adjustment is relative to
-   * the parameter value, e.g. 0.1 is 10%.
+   * Adjust the specified parameter value.
+   *
+   * <p>A positive delta will adjust the parameter to be larger. A negative delta will adjust the
+   * parameter to be smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
    *
    * @param value the value
    * @param delta the delta
@@ -1220,10 +1276,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Adjust the specified parameter value. <p> A positive delta will adjust the parameter to be
-   * larger. A negative delta will adjust the parameter to be smaller. The adjustment is relative to
-   * the parameter value, e.g. 0.1 is 10%. The adjustment is rounded up to the next valid integer to
-   * ensure a new parameter value is created.
+   * Adjust the specified parameter value.
+   *
+   * <p>A positive delta will adjust the parameter to be larger. A negative delta will adjust the
+   * parameter to be smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
+   * The adjustment is rounded up to the next valid integer to ensure a new parameter value is
+   * created.
    *
    * @param value the value
    * @param delta the delta
@@ -1448,7 +1506,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Return the value or Float.POSITIVE_INFINITY if value is not positive
+   * Return the value or Float.POSITIVE_INFINITY if value is not positive.
    *
    * @param value the value
    * @return The limit
@@ -1461,7 +1519,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Return the value squared or Float.POSITIVE_INFINITY if value is not positive
+   * Return the value squared or Float.POSITIVE_INFINITY if value is not positive.
    *
    * @param value the value
    * @return The squared limit
@@ -1474,7 +1532,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Return the value or Double.POSITIVE_INFINITY if value is not positive
+   * Return the value or Double.POSITIVE_INFINITY if value is not positive.
    *
    * @param value the value
    * @return The limit
@@ -1487,7 +1545,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Return the value squared or Double.POSITIVE_INFINITY if value is not positive
+   * Return the value squared or Double.POSITIVE_INFINITY if value is not positive.
    *
    * @param value the value
    * @return The squared limit

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -34,9 +35,10 @@ import java.util.Arrays;
 public class FunctionHelper {
   /**
    * Gets the mean value using a fraction of the cumulative value, when values are sorted in
-   * descending order. All values must be positive. The input values are modified by sorting. <p> If
-   * {@code fraction <= 0} then the max value is returned. If {@code fraction >=1} then the mean of
-   * the data is returned.
+   * descending order. All values must be positive. The input values are modified by sorting.
+   *
+   * <p>If {@code fraction <= 0} then the max value is returned. If {@code fraction >=1} then the
+   * mean of the data is returned.
    *
    * @param values the values
    * @param fraction the fraction
@@ -74,8 +76,9 @@ public class FunctionHelper {
 
   /**
    * Gets the x-value corresponding to a fraction of the cumulative value, when values are sorted in
-   * descending order. All values must be positive. The input values are modified by sorting. <p> If
-   * {@code fraction <= 0} then zero is returned. If {@code fraction >= 1} then data.length is
+   * descending order. All values must be positive. The input values are modified by sorting.
+   *
+   * <p>If {@code fraction <= 0} then zero is returned. If {@code fraction >= 1} then data.length is
    * returned.
    *
    * @param values the values

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -55,12 +56,16 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
   }
 
   /**
-   * Crossover the chromosome to form a new sequences. <p> The number of children are chosen from a
-   * Poisson distribution with an average using the mean children. A minimum of 1 child is selected
-   * to ensure crossover. <p> The number of positions are chosen from a Poisson distribution with an
-   * average using a fraction of the total positions. A minimum of 1 crossover position is selected
-   * to ensure crossover. <p> The positions are then chosen randomly and the new chromosome
-   * generated.
+   * Crossover the chromosome to form a new sequences.
+   *
+   * <p>The number of children are chosen from a Poisson distribution with an average using the mean
+   * children. A minimum of 1 child is selected to ensure crossover.
+   *
+   * <p>The number of positions are chosen from a Poisson distribution with an average using a
+   * fraction of the total positions. A minimum of 1 crossover position is selected to ensure
+   * crossover.
+   *
+   * <p>The positions are then chosen randomly and the new chromosome generated.
    *
    * @see uk.ac.sussex.gdsc.smlm.ga.Recombiner#cross(Chromosome, Chromosome)
    */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
@@ -29,9 +30,11 @@ import org.apache.commons.math3.special.Gamma;
 import java.util.Arrays;
 
 /**
- * Computes probability values from the Chi-squared distribution <p> Note that Wilk's theorem states
- * that the log-likelihood ratio asymptotically approaches a Chi-squared distribution with degrees
- * of freedom equal to the difference in dimensionality of the two models (alternative and null).
+ * Computes probability values from the Chi-squared distribution
+ *
+ * <p>Note that Wilk's theorem states that the log-likelihood ratio asymptotically approaches a
+ * Chi-squared distribution with degrees of freedom equal to the difference in dimensionality of the
+ * two models (alternative and null).
  *
  * @see <a
  *      href="https://en.wikipedia.org/wiki/Likelihood-ratio_test#Distribution:_Wilks%E2%80%99_theorem">Wilks
@@ -54,9 +57,12 @@ public class ChiSquaredDistributionTable {
 
   /**
    * Instantiates a new chi squared distribution table with p the cumulative probability of the
-   * chi-squared distribution. <p> Setting q will cause {@link #getCrititalValue(int)} to generate a
-   * value where the probability of a random chi-squared observation above that value is equal to q.
-   * <p> Setting Q to a lower value allows poorer Chi squared values to be passed as significant. A
+   * chi-squared distribution.
+   *
+   * <p>Setting q will cause {@link #getCrititalValue(int)} to generate a value where the
+   * probability of a random chi-squared observation above that value is equal to q.
+   *
+   * <p>Setting Q to a lower value allows poorer Chi squared values to be passed as significant. A
    * typical value is 0.05 to 0.001.
    *
    * @param significance the significance
@@ -115,9 +121,10 @@ public class ChiSquaredDistributionTable {
   }
 
   /**
-   * Get the p-value for significance. <p> Refers to the probability of Chi squared being more
-   * extreme than the critical value by chance. The direction of the extreme is determined by
-   * {@link #isUpperTailed()}.
+   * Get the p-value for significance.
+   *
+   * <p>Refers to the probability of Chi squared being more extreme than the critical value by
+   * chance. The direction of the extreme is determined by {@link #isUpperTailed()}.
    *
    * @return the q value
    */
@@ -127,8 +134,10 @@ public class ChiSquaredDistributionTable {
 
   /**
    * Gets the critical value of chi squared value for the configured significance level and degrees
-   * of freedom. <p> This is the value of Chi squared where the chance of obtaining a value more
-   * extreme than this point is equal to the configured significance level.
+   * of freedom.
+   *
+   * <p>This is the value of Chi squared where the chance of obtaining a value more extreme than
+   * this point is equal to the configured significance level.
    *
    * @param degreesOfFreedom the degrees of freedom
    * @return the chi squared
@@ -145,8 +154,10 @@ public class ChiSquaredDistributionTable {
 
   /**
    * Checks if the value of chi-squared is more extreme than the critical value at the configured
-   * significance level. <p> Returns true iff the null hypothesis can be rejected with 100 * (1 -
-   * significance) percent confidence.
+   * significance level.
+   *
+   * <p>Returns true iff the null hypothesis can be rejected with 100 * (1 - significance) percent
+   * confidence.
    *
    * @param chiSquared the chi squared
    * @param degreesOfFreedom the degrees of freedom
@@ -168,9 +179,10 @@ public class ChiSquaredDistributionTable {
   }
 
   /**
-   * Compute the q-value of the Chi-squared distribution. <p> This is the probability of obtaining a
-   * value more extreme than this point by chance. A chi-squared value is significant if q is higher
-   * than the p-value for significance (e.g. 0.05).
+   * Compute the q-value of the Chi-squared distribution.
+   *
+   * <p>This is the probability of obtaining a value more extreme than this point by chance. A
+   * chi-squared value is significant if q is higher than the p-value for significance (e.g. 0.05).
    *
    * @param chiSquared the chi squared
    * @param degreesOfFreedom the degrees of freedom
@@ -185,8 +197,9 @@ public class ChiSquaredDistributionTable {
 
   /**
    * Compute the p-value of the Chi-squared distribution. This is the cumulative probability of the
-   * chi-squared distribution. <p> This is the probability of obtaining a value less extreme than
-   * this point by chance.
+   * chi-squared distribution.
+   *
+   * <p>This is the probability of obtaining a value less extreme than this point by chance.
    *
    * @param chiSquared the chi squared
    * @param degreesOfFreedom the degrees of freedom

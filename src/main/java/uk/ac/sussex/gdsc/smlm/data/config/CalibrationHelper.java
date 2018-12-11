@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -42,8 +43,9 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
  */
 public class CalibrationHelper {
   /**
-   * Gets a distance converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets a distance converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param calibration the calibration
    * @param toDistanceUnit the distance unit
@@ -62,8 +64,9 @@ public class CalibrationHelper {
   }
 
   /**
-   * Gets a intensity converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets a intensity converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param calibration the calibration
    * @param toIntensityUnit the intensity unit
@@ -82,8 +85,9 @@ public class CalibrationHelper {
   }
 
   /**
-   * Gets a time converter to update values. <p> If the conversion is not possible then an exception
-   * is thrown.
+   * Gets a time converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param calibration the calibration
    * @param toTimeUnit the time unit
@@ -103,8 +107,9 @@ public class CalibrationHelper {
   }
 
   /**
-   * Gets an angle converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets an angle converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param calibration the calibration
    * @param toAngleUnit the angle unit
@@ -121,8 +126,10 @@ public class CalibrationHelper {
   }
 
   /**
-   * Gets a distance converter to update values. <p> If the calibration is already in the given
-   * units or conversion is not possible then an identity converter will be returned.
+   * Gets a distance converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param calibration the calibration
    * @param toDistanceUnit the distance unit
@@ -142,8 +149,10 @@ public class CalibrationHelper {
   }
 
   /**
-   * Gets an intensity converter to update values. <p> If the calibration is already in the given
-   * units or conversion is not possible then an identity converter will be returned.
+   * Gets an intensity converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param calibration the calibration
    * @param toIntensityUnit the intensity unit
@@ -163,8 +172,10 @@ public class CalibrationHelper {
   }
 
   /**
-   * Gets an time converter to update values. <p> If the calibration is already in the given units
-   * or conversion is not possible then an identity converter will be returned.
+   * Gets an time converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param calibration the calibration
    * @param toTimeUnit the time unit
@@ -181,8 +192,10 @@ public class CalibrationHelper {
   }
 
   /**
-   * Gets an angle converter to update values. <p> If the calibration is already in the given units
-   * or conversion is not possible then an identity converter will be returned.
+   * Gets an angle converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param calibration the calibration
    * @param toAngleUnit the angle unit

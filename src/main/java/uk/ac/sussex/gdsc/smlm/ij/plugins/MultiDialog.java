@@ -24,6 +24,7 @@
 /*
  *
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -69,7 +70,10 @@ public class MultiDialog extends Dialog
   private java.util.List<String> selected;
   private boolean selectAll = false;
 
-  private Button cancel, okay, all, none;
+  private Button cancel;
+  private Button okay;
+  private Button all;
+  private Button none;
   private boolean wasCanceled;
   private List list;
   private final String macroOptions;
@@ -113,7 +117,9 @@ public class MultiDialog extends Dialog
    */
   public abstract static class BaseItems implements Items {
     /**
-     * Returns the same formatted name. <p> {@inheritDoc}
+     * Returns the same formatted name.
+     *
+     * <p>{@inheritDoc}
      *
      * @see uk.ac.sussex.gdsc.smlm.ij.plugins.MultiDialog.Items#removeFormatting(java.lang.String)
      */
@@ -337,8 +343,8 @@ public class MultiDialog extends Dialog
 
   /** {@inheritDoc} */
   @Override
-  public void actionPerformed(ActionEvent e) {
-    final Object source = e.getSource();
+  public void actionPerformed(ActionEvent event) {
+    final Object source = event.getSource();
     if (source == okay || source == cancel) {
       wasCanceled = source == cancel;
       dispose();
@@ -360,11 +366,11 @@ public class MultiDialog extends Dialog
   }
 
   @Override
-  public void keyPressed(KeyEvent e) {
-    final int keyCode = e.getKeyCode();
+  public void keyPressed(KeyEvent event) {
+    final int keyCode = event.getKeyCode();
     IJ.setKeyDown(keyCode);
     if (keyCode == KeyEvent.VK_ENTER) {
-      final Object source = e.getSource();
+      final Object source = event.getSource();
       if (source == okay || source == cancel || source == list) {
         wasCanceled = source == cancel;
         dispose();
@@ -382,7 +388,7 @@ public class MultiDialog extends Dialog
       dispose();
       IJ.resetEscape();
     } else if (keyCode == KeyEvent.VK_W
-        && (e.getModifiers() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
+        && (event.getModifiers() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
       wasCanceled = true;
       dispose();
     }
@@ -461,44 +467,44 @@ public class MultiDialog extends Dialog
 
   /** {@inheritDoc} */
   @Override
-  public void windowClosing(WindowEvent e) {
+  public void windowClosing(WindowEvent event) {
     wasCanceled = true;
     dispose();
   }
 
   //@formatter:off
   @Override
-  public void windowActivated(WindowEvent e)
+  public void windowActivated(WindowEvent event)
     {
     // Ignore
   }
 
   @Override
-  public void windowOpened(WindowEvent e)
+  public void windowOpened(WindowEvent event)
     {
     // Ignore
   }
 
   @Override
-  public void windowClosed(WindowEvent e)
+  public void windowClosed(WindowEvent event)
     {
     // Ignore
   }
 
   @Override
-  public void windowIconified(WindowEvent e)
+  public void windowIconified(WindowEvent event)
     {
     // Ignore
   }
 
   @Override
-  public void windowDeiconified(WindowEvent e)
+  public void windowDeiconified(WindowEvent event)
     {
     // Ignore
   }
 
   @Override
-  public void windowDeactivated(WindowEvent e)
+  public void windowDeactivated(WindowEvent event)
     {
     // Ignore
   }

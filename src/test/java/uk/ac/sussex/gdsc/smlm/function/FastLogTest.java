@@ -968,8 +968,9 @@ public class FastLogTest {
   }
 
   /**
-   * Get a supplier for the string using the format and arguments. <p> This can be used where it is
-   * not convenient to create a lambda function using:
+   * Get a supplier for the string using the format and arguments.
+   *
+   * <p>This can be used where it is not convenient to create a lambda function using:
    *
    * <pre>
    * <code>

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -81,9 +82,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model. <p> See
- * Sengupta, et al (2013). Quantifying spatial resolution in point-localisation superresolution
- * images using pair correlation analysis. Nature Protocols 8, pp345-354.
+ * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.
+ *
+ * <p>See Sengupta, et al (2013). Quantifying spatial resolution in point-localisation
+ * superresolution images using pair correlation analysis. Nature Protocols 8, pp345-354.
  */
 public class PCPALMFitting implements PlugIn {
   /** The title. */
@@ -119,8 +121,11 @@ public class PCPALMFitting implements PlugIn {
   private int boundedEvaluations;
 
   // Information criterion of models
-  private double ic1, ic2, ic3;
-  private boolean valid1, valid2;
+  private double ic1;
+  private double ic2;
+  private double ic3;
+  private boolean valid1;
+  private boolean valid2;
 
   // Used for the results table
   private static TextWindow resultsTable = null;
@@ -465,8 +470,11 @@ public class PCPALMFitting implements PlugIn {
   }
 
   /**
-   * Perform the PC Analysis <p> Spatial domain results can just be combined to an average curve.
-   * <p> Frequency domain results can be fit using the g(r) model.
+   * Perform the PC Analysis.
+   *
+   * <p>Spatial domain results can just be combined to an average curve.
+   *
+   * <p>Frequency domain results can be fit using the g(r) model.
    */
   private void analyse() {
     previous_gr = gr;
@@ -747,7 +755,8 @@ public class PCPALMFitting implements PlugIn {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter("[\t ,]+");
 
-          double r, g;
+          double r;
+          double g;
           try {
             r = scanner.nextDouble();
             g = scanner.nextDouble();
@@ -1452,9 +1461,17 @@ public class PCPALMFitting implements PlugIn {
   }
 
   /**
-   * Allow optimisation using Apache Commons Math 3 Gradient Optimiser <p> g(r)peaks = g(r)stoch + 1
-   * <p> where <p> g(r)stoch = (1/4*pi*s^2*p) * exp(-r^2/4s^2) <p> s = average single molecule
-   * positional uncertainty (precision) <p> p = average protein density
+   * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
+   *
+   * <p>g(r)peaks = g(r)stoch + 1
+   *
+   * <p>where
+   *
+   * <p>g(r)stoch = (1/4*pi*s^2*p) * exp(-r^2/4s^2)
+   *
+   * <p>s = average single molecule positional uncertainty (precision)
+   *
+   * <p>p = average protein density
    */
   private class RandomModelFunction extends BaseModelFunction
       implements MultivariateVectorFunction {
@@ -1581,13 +1598,26 @@ public class PCPALMFitting implements PlugIn {
 
   /**
    * Base implementation of the PC-PALM clustered model. This is used to fit g(r) curves of membrane
-   * proteins which appear to be distributed as per a fluctuations model. <p> g(r)peaks = g(r)stoch
-   * + g(r)protein <p> where <p> g(r)stoch = (1/4*pi*s^2*p) * exp(-r^2/4s^2) <p> s = average single
-   * molecule positional uncertainty (precision)<br> p = average protein density <p> g(r)protein =
-   * (A*exp(-r/l)+1) conv g(r)PSF <p> A = proportional to density of proteins in the cluster<br> l =
-   * proportional to length of the cluster<br> conv = a convolution operation <p> g(r)PSF =
-   * (1/4*pi*s^2) * exp(-r^2/4s^2) <p> Note: The clustered model described in the PLoS One paper
-   * models g(r)protein using the exponential directly, i.e. there is no convolution !!!
+   * proteins which appear to be distributed as per a fluctuations model.
+   *
+   * <p>g(r)peaks = g(r)stoch + g(r)protein
+   *
+   * <p>where
+   *
+   * <p>g(r)stoch = (1/4*pi*s^2*p) * exp(-r^2/4s^2)
+   *
+   * <p>s = average single molecule positional uncertainty (precision)<br> p = average protein
+   * density
+   *
+   * <p>g(r)protein = (A*exp(-r/l)+1) conv g(r)PSF
+   *
+   * <p>A = proportional to density of proteins in the cluster<br> l = proportional to length of the
+   * cluster<br> conv = a convolution operation
+   *
+   * <p>g(r)PSF = (1/4*pi*s^2) * exp(-r^2/4s^2)
+   *
+   * <p>Note: The clustered model described in the PLoS One paper models g(r)protein using the
+   * exponential directly, i.e. there is no convolution !!!
    */
   private abstract class ClusteredModelFunction extends BaseModelFunction {
     double[] lastValue = null;
@@ -1751,7 +1781,8 @@ public class PCPALMFitting implements PlugIn {
 
   private class SumOfSquaresModelFunction {
     BaseModelFunction f;
-    double[] x, y;
+    double[] x;
+    double[] y;
 
     // Cache the value
     double[] lastParameters;
@@ -1874,12 +1905,23 @@ public class PCPALMFitting implements PlugIn {
   /**
    * Base implementation of the emulsion clustered model. This model assumes a random distribution
    * of non-overlapping circles in 2D. The molecules can be located at any position within the
-   * circles. <p> g(r)peaks = g(r)stoch + g(r)protein <p> where <p> g(r)stoch = (1/4*pi*s^2*p) *
-   * exp(-r^2/4s^2) <p> s = average single molecule positional uncertainty (precision)<br> p =
-   * average protein density <p> g(r)protein = (A*exp(-r/alpha)*cos(pi*r/(2*r0))+1) <p> A =
-   * proportional to density of proteins in the cluster<br> alpha = measure of the coherence length
-   * between circles<br> r0 = Average circle radius <p> Note: Described in figure 3 of Veatch, et al
-   * (2012) Plos One, e31457
+   * circles.
+   *
+   * <p>g(r)peaks = g(r)stoch + g(r)protein
+   *
+   * <p>where
+   *
+   * <p>g(r)stoch = (1/4*pi*s^2*p) * exp(-r^2/4s^2)
+   *
+   * <p>s = average single molecule positional uncertainty (precision)<br> p = average protein
+   * density
+   *
+   * <p>g(r)protein = (A*exp(-r/alpha)*cos(pi*r/(2*r0))+1)
+   *
+   * <p>A = proportional to density of proteins in the cluster<br> alpha = measure of the coherence
+   * length between circles<br> r0 = Average circle radius
+   *
+   * <p>Note: Described in figure 3 of Veatch, et al (2012) Plos One, e31457
    */
   private abstract class EmulsionModelFunction extends BaseModelFunction {
     double[] lastValue = null;

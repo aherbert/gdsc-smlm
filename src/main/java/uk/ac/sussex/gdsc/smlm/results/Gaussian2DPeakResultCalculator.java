@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
@@ -66,7 +67,8 @@ public interface Gaussian2DPeakResultCalculator {
    * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D
    * PSF. This is an approximation of the precision of fitting to an optical PSF. Uses the Mortensen
    * formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-   * <p> This method will use the background noise to approximate the expected background value of
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
    * each pixel.
    *
    * @param params the params
@@ -89,7 +91,8 @@ public interface Gaussian2DPeakResultCalculator {
    * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D
    * PSF. This is an approximation of the variance of fitting to an optical PSF. Uses the Mortensen
    * formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-   * <p> This method will use the background noise to approximate the expected background value of
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
    * each pixel.
    *
    * @param params the params
@@ -112,8 +115,10 @@ public interface Gaussian2DPeakResultCalculator {
    * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a
    * Gaussian2D PSF. This is an approximation of the precision of fitting to an optical PSF. Uses
    * the Mortensen formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383),
-   * equation 6. <p> This method will use the background noise to approximate the expected
-   * background value of each pixel.
+   * equation 6.
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
+   * each pixel.
    *
    * @param params the params
    * @param noise the noise
@@ -136,8 +141,10 @@ public interface Gaussian2DPeakResultCalculator {
    * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a
    * Gaussian2D PSF. This is an approximation of the variance of fitting to an optical PSF. Uses the
    * Mortensen formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383),
-   * equation 6. <p> This method will use the background noise to approximate the expected
-   * background value of each pixel.
+   * equation 6.
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
+   * each pixel.
    *
    * @param params the params
    * @param noise the noise

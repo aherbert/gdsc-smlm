@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -71,10 +72,12 @@ import java.util.List;
 
 /**
  * Run different filtering methods on a set of labelled peak results outputting performance
- * statistics on the success of the filter. <p> All results files in a specified directory are read.
- * If the peak result original value is set to 1 it is considered a true peak, 0 for a false peak.
- * Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported
- * are shown in a table, e.g. precision, Jaccard, F-score.
+ * statistics on the success of the filter.
+ *
+ * <p>All results files in a specified directory are read. If the peak result original value is set
+ * to 1 it is considered a true peak, 0 for a false peak. Filtering is done using e.g. SNR
+ * threshold, Precision thresholds, etc. The statistics reported are shown in a table, e.g.
+ * precision, Jaccard, F-score.
  */
 public class FilterAnalysis implements PlugIn {
   private static final String TITLE = "Filter Analysis";
@@ -507,12 +510,14 @@ public class FilterAnalysis implements PlugIn {
 
   /**
    * Run different filtering methods on a set of labelled peak results outputting performance
-   * statistics on the success of the filter to an ImageJ table. <p> If the peak result original
-   * value is set to 1 it is considered a true peak, 0 for a false peak. Filtering is done using
-   * e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table,
-   * e.g. precision, Jaccard, F-score. <p> For each filter set a plot is shown of the Jaccard score
-   * verses the filter value, thus filters should be provided in ascending numerical order otherwise
-   * they are sorted.
+   * statistics on the success of the filter to an ImageJ table.
+   *
+   * <p>If the peak result original value is set to 1 it is considered a true peak, 0 for a false
+   * peak. Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics
+   * reported are shown in a table, e.g. precision, Jaccard, F-score.
+   *
+   * <p>For each filter set a plot is shown of the Jaccard score verses the filter value, thus
+   * filters should be provided in ascending numerical order otherwise they are sorted.
    *
    * @param resultsList the results list
    * @param filterSets the filter sets
@@ -865,8 +870,10 @@ public class FilterAnalysis implements PlugIn {
   }
 
   private class NamedPlot implements Comparable<NamedPlot> {
-    String name, xAxisName;
-    double[] xValues, yValues;
+    String name;
+    String xAxisName;
+    double[] xValues;
+    double[] yValues;
     double score;
 
     public NamedPlot(String name, String xAxisName, double[] xValues, double[] yValues) {

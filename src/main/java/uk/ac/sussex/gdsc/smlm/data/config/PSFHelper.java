@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -93,9 +94,10 @@ public class PSFHelper {
   }
 
   /**
-   * Gets the Gaussian 2D x-width and y-width indices for the PeakResult parameters. <p> Note that
-   * the indices can be used directly with the PeakResult parameters array as they have been
-   * adjusted using an offset of PeakResult.STANDARD_PARAMETERS.
+   * Gets the Gaussian 2D x-width and y-width indices for the PeakResult parameters.
+   *
+   * <p>Note that the indices can be used directly with the PeakResult parameters array as they have
+   * been adjusted using an offset of PeakResult.STANDARD_PARAMETERS.
    *
    * @param psf the psf
    * @return the Gaussian 2D x-width and y-width indices for the PeakResult parameters.
@@ -133,7 +135,8 @@ public class PSFHelper {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
-    double sx, sy;
+    double sx;
+    double sy;
     switch (psf.getPsfType()) {
       case ONE_AXIS_GAUSSIAN_2D:
         sx = getParameterValue(psf, INDEX_SX, 1);
@@ -190,9 +193,10 @@ public class PSFHelper {
   }
 
   /**
-   * Gets the Gaussian 2D angle index for the PeakResult parameters. <p> Note that the index can be
-   * used directly with the PeakResult parameters array as they have been adjusted using an offset
-   * of PeakResult.STANDARD_PARAMETERS.
+   * Gets the Gaussian 2D angle index for the PeakResult parameters.
+   *
+   * <p>Note that the index can be used directly with the PeakResult parameters array as they have
+   * been adjusted using an offset of PeakResult.STANDARD_PARAMETERS.
    *
    * @param psf the psf
    * @return the Gaussian 2D x-width and y-width indices for the PeakResult parameters.

@@ -21,16 +21,21 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
  * Computes the sum of the neighbourhood for each point within the array using a rolling block
- * algorithm. <p> rollingBlock algorithm uses two consecutive 1D passes using (2n+1) strips. Each
- * pass is computed using a rolling total thus each pixel sum can be computed using a single
- * addition and subtraction of the end pixels of the strip. Speed ~ Order(1). <p> Note: Due to lack
- * of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
- * are OK for 3x3 images and larger. <p> This algorithm does not mirror edge pixels in contrast to
- * the BlockSumFilter.
+ * algorithm.
+ *
+ * <p>rollingBlock algorithm uses two consecutive 1D passes using (2n+1) strips. Each pass is
+ * computed using a rolling total thus each pixel sum can be computed using a single addition and
+ * subtraction of the end pixels of the strip. Speed ~ Order(1).
+ *
+ * <p>Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less
+ * than 2. All routines are OK for 3x3 images and larger.
+ *
+ * <p>This algorithm does not mirror edge pixels in contrast to the BlockSumFilter.
  */
 public class IntBlockSumFilter extends BaseFilter {
   private int[] buffer = null;
@@ -38,8 +43,9 @@ public class IntBlockSumFilter extends BaseFilter {
 
   /**
    * Compute the filter within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -56,8 +62,9 @@ public class IntBlockSumFilter extends BaseFilter {
 
   /**
    * Compute the filter within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -140,8 +147,9 @@ public class IntBlockSumFilter extends BaseFilter {
 
   /**
    * Compute the filter within a 3x3 size block around each point. Only pixels with a full block are
-   * processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -224,8 +232,9 @@ public class IntBlockSumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the filter within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the filter within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -241,8 +250,9 @@ public class IntBlockSumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the filter within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the filter within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -315,8 +325,9 @@ public class IntBlockSumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the filter within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the filter within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data

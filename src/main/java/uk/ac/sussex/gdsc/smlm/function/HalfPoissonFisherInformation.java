@@ -21,17 +21,22 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Calculate half the Fisher information for a Poisson distribution. This is suitable for modelling
- * an EM-CCD camera (Poisson-Gamma-Gaussian distribution) when the mean is high. <p> <a
+ * an EM-CCD camera (Poisson-Gamma-Gaussian distribution) when the mean is high.
+ *
+ * <p><a
  * href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
 public class HalfPoissonFisherInformation extends BasePoissonFisherInformation {
   /*
-   * {@inheritDoc} <p> The input parameter refers to the mean of the Poisson distribution. The
-   * Fisher information is 1/(2*mean).
+   * {@inheritDoc}
+   *
+   * <p>The input parameter refers to the mean of the Poisson distribution. The Fisher information
+   * is 1/(2*mean).
    *
    * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
    */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -78,7 +79,9 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
   }
 
   /**
-   * {@inheritDoc} <p> Note: This does not check against the current size so can return stale data.
+   * {@inheritDoc}
+   *
+   * <p>Note: This does not check against the current size so can return stale data.
    *
    * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#get(int)
    */
@@ -94,10 +97,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
   }
 
   /**
-   * Ensure that the specified number of elements can be added to the array. <p> This is not
-   * synchronized. However any class using the safeAdd() methods in different threads should be
-   * using the same synchronized method to add data thus this method will be within synchronized
-   * code.
+   * Ensure that the specified number of elements can be added to the array.
+   *
+   * <p>This is not synchronized. However any class using the safeAdd() methods in different threads
+   * should be using the same synchronized method to add data thus this method will be within
+   * synchronized code.
    *
    * @param length the length
    */
@@ -263,7 +267,8 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     // Adapted from java.utisl.ArrayList
 
     final ArrayPeakResultStore c = new ArrayPeakResultStore(results2);
-    int r = 0, w = 0;
+    int r = 0;
+    int w = 0;
     boolean modified = false;
     try {
       for (; r < size; r++) {
@@ -316,8 +321,10 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
   }
 
   /**
-   * {@inheritDoc} <p> Note: This does not remove the references to the underlying data or
-   * reallocate storage thus {@link #get(int)} can return stale data.
+   * {@inheritDoc}
+   *
+   * <p>Note: This does not remove the references to the underlying data or reallocate storage thus
+   * {@link #get(int)} can return stale data.
    *
    * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#clear()
    */
@@ -368,8 +375,10 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
   }
 
   /**
-   * {@inheritDoc} <p> Note: This does not remove the references to the underlying data or
-   * reallocate storage thus {@link #get(int)} can return stale data.
+   * {@inheritDoc}
+   *
+   * <p>Note: This does not remove the references to the underlying data or reallocate storage thus
+   * {@link #get(int)} can return stale data.
    *
    * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#removeIf(uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate)
    */

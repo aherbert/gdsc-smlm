@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
@@ -139,7 +140,7 @@ public class ResultsManager implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   private static String TITLE = "Peak Results Manager";
@@ -564,7 +565,7 @@ public class ResultsManager implements PlugIn {
       final Label saveLabel = gd.getLastLabel();
       final ItemListener listener = new ItemListener() {
         @Override
-        public void itemStateChanged(ItemEvent e) {
+        public void itemStateChanged(ItemEvent event) {
           final boolean enable = INPUT_FILE.equals(inputChoice.getSelectedItem());
           if (enable != messageLabel.isVisible()) {
             messageLabel.setVisible(enable);
@@ -934,9 +935,10 @@ public class ResultsManager implements PlugIn {
 
   /**
    * Add a list of input sources to the generic dialog. The choice field will be named 'input'. If a
-   * file input option is selected then a field will be added name 'Input_file'. <p> If the source
-   * is a memory source then it will not be added if it is empty. If not empty then a summary of the
-   * number of localisation is added as a message to the dialog.
+   * file input option is selected then a field will be added name 'Input_file'.
+   *
+   * <p>If the source is a memory source then it will not be added if it is empty. If not empty then
+   * a summary of the number of localisation is added as a message to the dialog.
    *
    * @param gd the dialog
    * @param inputOption the input option
@@ -948,9 +950,10 @@ public class ResultsManager implements PlugIn {
 
   /**
    * Add a list of input sources to the generic dialog. The choice field will be named inputName. If
-   * a file input option is selected then a field will be added name 'Input_file'. <p> If the source
-   * is a memory source then it will not be added if it is empty. If not empty then a summary of the
-   * number of localisation is added as a message to the dialog.
+   * a file input option is selected then a field will be added name 'Input_file'.
+   *
+   * <p>If the source is a memory source then it will not be added if it is empty. If not empty then
+   * a summary of the number of localisation is added as a message to the dialog.
    *
    * @param gd the dialog
    * @param inputName the input name
@@ -1013,7 +1016,7 @@ public class ResultsManager implements PlugIn {
         final Panel p = gd.getLastPanel();
         final ItemListener listener = new ItemListener() {
           @Override
-          public void itemStateChanged(ItemEvent e) {
+          public void itemStateChanged(ItemEvent event) {
             final boolean enable = INPUT_FILE.equals(c.getSelectedItem());
             if (enable != l.isVisible()) {
               l.setVisible(enable);
@@ -1204,8 +1207,10 @@ public class ResultsManager implements PlugIn {
   /**
    * Load the results from the named input option. If the results are not empty then a check can be
    * made for calibration, and data using the legacy standard units (distance in Pixel and intensity
-   * in Count). <p> If the calibration cannot be obtained or the units are incorrect then the null
-   * will be returned.
+   * in Count).
+   *
+   * <p>If the calibration cannot be obtained or the units are incorrect then the null will be
+   * returned.
    *
    * @param inputOption the input option
    * @param checkCalibration Set to true to ensure the results have a valid calibration

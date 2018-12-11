@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiAstigmatismErfGaussian2DFunction;
@@ -37,8 +38,9 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleNBCircularErfGaussian2
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
 
 /**
- * Creates the appropriate Gaussian function. <p> Note that currently all functions support
- * computing gradients for x/y position.
+ * Creates the appropriate Gaussian function.
+ *
+ * <p>Note that currently all functions support computing gradients for x/y position.
  */
 public class GaussianFunctionFactory {
   /**
@@ -198,7 +200,9 @@ public class GaussianFunctionFactory {
   private final AstigmatismZModel zModel;
 
   /**
-   * Instantiates a new gaussian function factory. <p> This is a simple instance that calls
+   * Instantiates a new gaussian function factory.
+   *
+   * <p>This is a simple instance that calls
    * {@link #create2D(int, int, int, int, AstigmatismZModel)} with a fixed set of flags and z-model.
    *
    * @param flags the flags
@@ -210,8 +214,10 @@ public class GaussianFunctionFactory {
   }
 
   /**
-   * Create the correct 2D Gaussian function for the specified parameters. <p> Defaults to using the
-   * ERF Gaussian functions if the user has not requested a simple Gaussian or angle fitting.
+   * Create the correct 2D Gaussian function for the specified parameters.
+   *
+   * <p>Defaults to using the ERF Gaussian functions if the user has not requested a simple Gaussian
+   * or angle fitting.
    *
    * @param nPeaks The number of peaks (N)
    * @param maxx The maximum X-dimension
@@ -223,8 +229,10 @@ public class GaussianFunctionFactory {
   }
 
   /**
-   * Create the correct 2D Gaussian function for the specified parameters. <p> Defaults to using the
-   * ERF Gaussian functions if the user has not requested a simple Gaussian or angle fitting.
+   * Create the correct 2D Gaussian function for the specified parameters.
+   *
+   * <p>Defaults to using the ERF Gaussian functions if the user has not requested a simple Gaussian
+   * or angle fitting.
    *
    * @param nPeaks The number of peaks (N)
    * @param maxx The maximum X-dimension

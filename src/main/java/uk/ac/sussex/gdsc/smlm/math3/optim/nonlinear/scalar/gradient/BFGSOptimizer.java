@@ -45,14 +45,18 @@ import java.util.Locale;
 
 /**
  * Implementation of the Broyden-Fletcher-Goldfarb-Shanno (BFGS) variant of the
- * Davidson-Fletcher-Powell (DFP) minimisation. <p> This is not part of the Apache Commons Math
- * library but extends the same base classes to allow an easy swap with existing code based on the
- * Apache library. <p> Note that although rare, it may happen that the algorithm converges since the
- * search direction no longer leads downhill. In case of doubt restarting the algorithm should
- * overcome this issue. <p> The implementation is based upon that presented in: Numerical Recipes in
- * C++, The Art of Scientific Computing, Second Edition, W.H. Press, S.A. Teukolsky, W.T.
- * Vetterling, B.P. Flannery (Cambridge University Press, Cambridge, 2002). The algorithm has been
- * updated to support a bounded search and convergence checking on position and gradient.
+ * Davidson-Fletcher-Powell (DFP) minimisation.
+ *
+ * <p>This is not part of the Apache Commons Math library but extends the same base classes to allow
+ * an easy swap with existing code based on the Apache library.
+ *
+ * <p>Note that although rare, it may happen that the algorithm converges since the search direction
+ * no longer leads downhill. In case of doubt restarting the algorithm should overcome this issue.
+ *
+ * <p>The implementation is based upon that presented in: Numerical Recipes in C++, The Art of
+ * Scientific Computing, Second Edition, W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
+ * (Cambridge University Press, Cambridge, 2002). The algorithm has been updated to support a
+ * bounded search and convergence checking on position and gradient.
  */
 public class BFGSOptimizer extends GradientMultivariateOptimizer {
   /** Maximum step length used in line search. */
@@ -71,8 +75,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
   private PositionChecker positionChecker = null;
 
   /** Flags to indicate if bounds are present. */
-  private boolean isLower, isUpper;
-  private double[] lower, upper;
+  private boolean isLower;
+  private boolean isUpper;
+  private double[] lower;
+  private double[] upper;
 
   private double sign = 0;
 
@@ -425,7 +431,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
           hdg[i] += hessian[i][j] * dg[j];
         }
       }
-      double fac = 0, fae = 0, sumdg = 0, sumxi = 0;
+      double fac = 0;
+      double fae = 0;
+      double sumdg = 0;
+      double sumxi = 0;
       for (int i = 0; i < n; i++) {
         fac += dg[i] * xi[i];
         fae += dg[i] * hdg[i];
@@ -541,10 +550,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
   }
 
   /**
-   * Internal class for a line search with backtracking <p> Adapted from NR::lnsrch, as discussed in
-   * Numerical Recipes section 9.7. The algorithm has been changed to support bounds on the point,
-   * limits on the search direction in all dimensions and checking for bad function evaluations when
-   * backtracking.
+   * Internal class for a line search with backtracking.
+   *
+   * <p>Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm has
+   * been changed to support bounds on the point, limits on the search direction in all dimensions
+   * and checking for bad function evaluations when backtracking.
    */
   private class LineStepSearch {
     /**
@@ -571,8 +581,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
      */
     double[] lineSearch(double[] xOld, final double fOld, double[] gradient,
         double[] searchDirection) throws LineSearchRoundoffException {
-      final double ALF = 1.0e-4, TOLX = epsilon;
-      double alam2 = 0.0, f2 = 0.0;
+      final double ALF = 1.0e-4;
+      final double TOLX = epsilon;
+      double alam2 = 0.0;
+      double f2 = 0.0;
 
       // New point
       final double[] x = new double[xOld.length];
@@ -692,7 +704,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
   }
 
   /**
-   * Checks if there are lower or upper bounds that are not -Infinity or +Infinity
+   * Checks if there are lower or upper bounds that are not -Infinity or +Infinity.
    *
    * @throws MathUnsupportedOperationException if invalid bounds were passed to the
    *         {@link #optimize(OptimizationData[]) optimize} method.

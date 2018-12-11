@@ -21,13 +21,15 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
  * Calculator for the Fisher information, a symmetric positive definite matrix containing the amount
  * of information that an observable random variable X carries about an unknown parameter θ of a
- * distribution that models X. <p> The calculator will compute the Fisher Information Matrix (I)
- * using numerical gradients:
+ * distribution that models X.
+ *
+ * <p>The calculator will compute the Fisher Information Matrix (I) using numerical gradients:
  *
  * <pre>
  * Iij = E [ (d log f(X;θ) / dθi) (d log f(X;θ) / dθj) | θ ]

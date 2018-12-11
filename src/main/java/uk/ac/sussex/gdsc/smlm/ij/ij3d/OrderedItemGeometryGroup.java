@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import org.scijava.java3d.Appearance;
@@ -32,7 +33,9 @@ import org.scijava.vecmath.Point3f;
 
 /**
  * This class represents a list as a number of repeated shapes in the universe. The shape is defined
- * using a geometry array. <p> The order is fixed but can be user defined.
+ * using a geometry array.
+ *
+ * <p>The order is fixed but can be user defined.
  *
  * @author Alex Herbert
  */

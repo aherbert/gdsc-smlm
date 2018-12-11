@@ -21,12 +21,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Support direct filtering of PreprocessedPeakResult objects. <p> The decision to support for
- * filtering as both a DirectFilter and Filter concurrently is left to the implementing class. It is
- * not a requirement.
+ * Support direct filtering of PreprocessedPeakResult objects.
+ *
+ * <p>The decision to support for filtering as both a DirectFilter and Filter concurrently is left
+ * to the implementing class. It is not a requirement.
  */
 public interface IDirectFilter {
   /**
@@ -154,8 +156,9 @@ public interface IDirectFilter {
   public int getValidationFlags();
 
   /**
-   * Called before the accept method is called for PreprocessedPeakResult <p> This should be called
-   * once to initialise the filter before processing a batch of results.
+   * Called before the accept method is called for PreprocessedPeakResult.
+   *
+   * <p>This should be called once to initialise the filter before processing a batch of results.
    *
    * @see #validate(PreprocessedPeakResult)
    */
@@ -163,8 +166,9 @@ public interface IDirectFilter {
 
   /**
    * Called before the accept method is called for PreprocessedPeakResult. The flags can control the
-   * type of filtering requested. Filters are asked to respect the flags defined in this class. <p>
-   * This should be called once to initialise the filter before processing a batch of results.
+   * type of filtering requested. Filters are asked to respect the flags defined in this class.
+   *
+   * <p>This should be called once to initialise the filter before processing a batch of results.
    *
    * @param flags Flags used to control the filter
    * @see #validate(PreprocessedPeakResult)
@@ -173,8 +177,9 @@ public interface IDirectFilter {
 
   /**
    * Called before the accept method is called for PreprocessedPeakResult. The filter data can
-   * control the type of filtering requested. <p> This should be called once to initialise the
-   * filter before processing a batch of results.
+   * control the type of filtering requested.
+   *
+   * <p>This should be called once to initialise the filter before processing a batch of results.
    *
    * @param flags Flags used to control the filter
    * @param filterSetupData Data used to control the filter
@@ -201,8 +206,10 @@ public interface IDirectFilter {
   public FilterSetupData[] getFilterSetupData() throws IllegalStateException;
 
   /**
-   * Filter the peak result. <p> Calls {@link #validate(PreprocessedPeakResult)} and stores the
-   * result. This can be obtained using {@link #getResult()}.
+   * Filter the peak result.
+   *
+   * <p>Calls {@link #validate(PreprocessedPeakResult)} and stores the result. This can be obtained
+   * using {@link #getResult()}.
    *
    * @param peak The peak result
    * @return true if the peak should be accepted

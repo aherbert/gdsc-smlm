@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -165,7 +166,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private ImageSource source = null;
   private String resultsSuffix = null;
   private PeakResultsList results;
-  private long time, runTime;
+  private long time;
+  private long runTime;
   private FitEngineConfiguration config = null;
   private FitConfiguration fitConfig;
   private ResultsSettings.Builder resultsSettings;
@@ -417,7 +419,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
           imageSource = new IJImageSource(imp);
         } catch (final IllegalArgumentException ex) {
           // This can happen if the image has an origin not in integer pixels
-          // ex.g. the plugin is run on a plot
+          // e.g. the plugin is run on a plot
           IJ.error(TITLE, "Error using image: " + imp.getTitle() + "\n \n" + ex.getMessage());
           return DONE;
         }
@@ -505,8 +507,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * Initialise a new image for fitting and prepare the output results. <p> Calls
-   * {@link #initialise(ImageSource, Rectangle, boolean)} then {@link #initialiseFitting()}.
+   * Initialise a new image for fitting and prepare the output results.
+   *
+   * <p>Calls {@link #initialise(ImageSource, Rectangle, boolean)} then
+   * {@link #initialiseFitting()}.
    *
    * @param imageSource The image source
    * @param bounds The region to process from the image
@@ -523,9 +527,13 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * Initialise a new image. <p> Does not set-up for fitting. This can be done using a subsequent
-   * call to {@link #initialiseFitting()}. <p> This mechanism allows additional result outputs to be
-   * added after initialisation using {@link #addPeakResults(PeakResults)}.
+   * Initialise a new image.
+   *
+   * <p>Does not set-up for fitting. This can be done using a subsequent call to
+   * {@link #initialiseFitting()}.
+   *
+   * <p>This mechanism allows additional result outputs to be added after initialisation using
+   * {@link #addPeakResults(PeakResults)}.
    *
    * @param imageSource The image source
    * @param bounds The region to process from the image
@@ -1334,8 +1342,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * Adds the PSF options. <p> Note that if an astigmatic PSF is selected then the model must be
-   * created with {@link #configurePSFModel(FitEngineConfiguration, int)}.
+   * Adds the PSF options.
+   *
+   * <p>Note that if an astigmatic PSF is selected then the model must be created with
+   * {@link #configurePSFModel(FitEngineConfiguration, int)}.
    *
    * @param gd the dialog
    * @param fitConfiguration the fit configuration
@@ -1346,8 +1356,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * Adds the PSF options. <p> Note that if an astigmatic PSF is selected then the model must be
-   * created with {@link #configurePSFModel(FitEngineConfiguration, int)}.
+   * Adds the PSF options.
+   *
+   * <p>Note that if an astigmatic PSF is selected then the model must be created with
+   * {@link #configurePSFModel(FitEngineConfiguration, int)}.
    *
    * @param gd the dialog
    * @param fitConfigurationProvider the fit configuration provider
@@ -1571,8 +1583,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     gd.addOptionCollectedListener(new OptionCollectedListener() {
       @Override
-      public void optionCollected(OptionCollectedEvent e) {
-        if (label.equals(e.getLabel())) {
+      public void optionCollected(OptionCollectedEvent event) {
+        if (label.equals(event.getLabel())) {
           updateFlag(flagLabel, rp.isAbsolute());
         }
       }
@@ -1886,8 +1898,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * Check if additional calibration information is required <p> Check the calibration is valid for
-   * fitting.
+   * Check if additional calibration information is required.
+   *
+   * <p>Check the calibration is valid for fitting.
    *
    * @param calibration the calibration
    * @return True if additional calibration information is required, false if the system is
@@ -2045,7 +2058,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
       gd.addAndGetButton("Run PSF calculator", new ActionListener() {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent event) {
           // Run the PSF Calculator
           final PSFCalculator calculator = new PSFCalculator();
           calculatorSettings.setPixelPitch(calibration.getNmPerPixel() / 1000.0);
@@ -2067,10 +2080,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   @Override
-  public void itemStateChanged(ItemEvent e) {
-    if (e.getSource() instanceof Choice) {
+  public void itemStateChanged(ItemEvent event) {
+    if (event.getSource() instanceof Choice) {
       // Update the settings from the template
-      final Choice choice = (Choice) e.getSource();
+      final Choice choice = (Choice) event.getSource();
       final String templateName = choice.getSelectedItem();
       // System.out.println("Update to " + templateName);
 
@@ -2098,12 +2111,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
           refreshSettings(template.getResultsSettings());
         }
       }
-    } else if (e.getSource() instanceof Checkbox) {
-      if (e.getSource() == textSmartFilter) {
+    } else if (event.getSource() instanceof Checkbox) {
+      if (event.getSource() == textSmartFilter) {
         // Prevent both filters being enabled
         textDisableSimpleFilter.setState(textSmartFilter.getState());
         updateFilterInput();
-      } else if (e.getSource() == textDisableSimpleFilter) {
+      } else if (event.getSource() == textDisableSimpleFilter) {
         updateFilterInput();
       }
     }
@@ -2358,7 +2371,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   /**
    * Show a dialog to configure the PSF model. The updated settings are saved to the settings file.
-   * <p> If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
+   *
+   * <p>If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
    *
    * @param config the config
    * @return true, if successful
@@ -2369,7 +2383,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   /**
    * Show a dialog to configure the PSF model. The updated settings are saved to the settings file.
-   * <p> If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
+   *
+   * <p>If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
    *
    * @param config the config
    * @param flags the flags
@@ -2400,10 +2415,13 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   /**
    * Show a dialog to configure the results filter. The updated settings are saved to the settings
-   * file. <p> If the configuration is for a 3D PSF then a dialog to configure the z range for the
-   * results is shown (see {@link #configureZFilter(FitEngineConfiguration, int)}). <p> If the
-   * configuration is for a smart filter then a dialog to configure the smart filter is shown (see
-   * {@link #configureSmartFilter(FitEngineConfiguration, int)}).
+   * file.
+   *
+   * <p>If the configuration is for a 3D PSF then a dialog to configure the z range for the results
+   * is shown (see {@link #configureZFilter(FitEngineConfiguration, int)}).
+   *
+   * <p>If the configuration is for a smart filter then a dialog to configure the smart filter is
+   * shown (see {@link #configureSmartFilter(FitEngineConfiguration, int)}).
    *
    * @param config the config
    * @param flags the flags
@@ -2417,10 +2435,13 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   /**
    * Show a dialog to configure the results z filter. The updated settings are saved to the settings
-   * file. <p> If the fit configuration PSF is not 3D or the simple filter is disabled then this
-   * method returns true. If it is enabled then a dialog is shown to input the configuration for the
-   * z filter. <p> Note: The PSF and any z-model must be correctly configured for fitting in pixel
-   * units.
+   * file.
+   *
+   * <p>If the fit configuration PSF is not 3D or the simple filter is disabled then this method
+   * returns true. If it is enabled then a dialog is shown to input the configuration for the z
+   * filter.
+   *
+   * <p>Note: The PSF and any z-model must be correctly configured for fitting in pixel units.
    *
    * @param config the config
    * @param flags the flags
@@ -2472,11 +2493,14 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   /**
    * Show a dialog to configure the smart filter. The updated settings are saved to the settings
-   * file. <p> If the fit configuration isSmartFilter is not enabled then this method returns true.
-   * If it is enabled then a dialog is shown to input the configuration for a smart filter. If no
-   * valid filter can be created from the input then the method returns false. <p> Note: If the
-   * smart filter is successfully configured then the user may want to disable the standard fit
-   * validation.
+   * file.
+   *
+   * <p>If the fit configuration isSmartFilter is not enabled then this method returns true. If it
+   * is enabled then a dialog is shown to input the configuration for a smart filter. If no valid
+   * filter can be created from the input then the method returns false.
+   *
+   * <p>Note: If the smart filter is successfully configured then the user may want to disable the
+   * standard fit validation.
    *
    * @param config the config
    * @param flags the flags
@@ -2524,11 +2548,14 @@ public class PeakFit implements PlugInFilter, ItemListener {
   /**
    * Show a dialog to configure the data filter. The data filter type and the first data filter must
    * ALREADY be set in the configuration. The subsequent filters are then configured, e.g. for
-   * difference and jury filters. <p> The updated settings are saved to the settings file. An error
-   * message is shown if the dialog is cancelled or the configuration is invalid. <p> If the
-   * configuration is for a per-pixel camera type (e.g. sCMOS) then the camera model will be loaded
-   * using the configured camera model name. This will be used to validate the filter to check the
-   * filter supports the per-pixel camera type.
+   * difference and jury filters.
+   *
+   * <p>The updated settings are saved to the settings file. An error message is shown if the dialog
+   * is cancelled or the configuration is invalid.
+   *
+   * <p>If the configuration is for a per-pixel camera type (e.g. sCMOS) then the camera model will
+   * be loaded using the configured camera model name. This will be used to validate the filter to
+   * check the filter supports the per-pixel camera type.
    *
    * @param config the config
    * @param flags the flags
@@ -2682,11 +2709,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   /**
    * Show a dialog to configure the fit solver. The updated settings are saved to the settings file.
-   * An error message is shown if the dialog is cancelled or the configuration is invalid. <p> The
-   * bounds are used to validate the camera model. The camera model must be large enough to cover
-   * the source bounds. If larger then it will be cropped. Optionally an internal region of the
-   * input image can be specifed. This is relative to the width and height of the input image. If no
-   * camera model is present then the bounds can be null.
+   * An error message is shown if the dialog is cancelled or the configuration is invalid.
+   *
+   * <p>The bounds are used to validate the camera model. The camera model must be large enough to
+   * cover the source bounds. If larger then it will be cropped. Optionally an internal region of
+   * the input image can be specifed. This is relative to the width and height of the input image.
+   * If no camera model is present then the bounds can be null.
    *
    * @param config the config
    * @param sourceBounds the source image bounds (used to validate the camera model dimensions)
@@ -3022,13 +3050,19 @@ public class PeakFit implements PlugInFilter, ItemListener {
   /**
    * Crop a camera model for processing data from a cropped image frame of the given bounds. The
    * target bounds are created by combining the crop with the source bounds. The camera model bounds
-   * will be checked to verify that the target fits within the model. <p> If the model is smaller
-   * then an error is thrown. <p> If the model is larger then a crop will be made using a dialog to
-   * select the crop. <p> If the model is the same size then no crop is made, even if the origin is
-   * incorrect. <p> Optionally the model can be updated so that the origin is relative to the source
-   * bounds. If no crop is used the origin will be 0,0. Otherwise it will be equal to the crop
-   * origin. <p> This method can be used to prepare a camera model for processing images frames of
-   * crop width x height.
+   * will be checked to verify that the target fits within the model.
+   *
+   * <p>If the model is smaller then an error is thrown.
+   *
+   * <p>If the model is larger then a crop will be made using a dialog to select the crop.
+   *
+   * <p>If the model is the same size then no crop is made, even if the origin is incorrect.
+   *
+   * <p>Optionally the model can be updated so that the origin is relative to the source bounds. If
+   * no crop is used the origin will be 0,0. Otherwise it will be equal to the crop origin.
+   *
+   * <p>This method can be used to prepare a camera model for processing images frames of crop width
+   * x height.
    *
    * @param cameraModel the camera model
    * @param sourceBounds the source bounds
@@ -3103,9 +3137,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * Add a result output. <p> This can be called after
-   * {@link #initialiseImage(ImageSource, Rectangle, boolean)} and before
-   * {@link #initialiseFitting()} to add to the configured result outputs.
+   * Add a result output.
+   *
+   * <p>This can be called after {@link #initialiseImage(ImageSource, Rectangle, boolean)} and
+   * before {@link #initialiseFitting()} to add to the configured result outputs.
    *
    * @param peakResults the peak results
    */
@@ -3266,7 +3301,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   /**
    * Locate the peaks in the configured image source. Results are saved to the configured output.
-   * <p> This must be called after initialisation with an image source. Note that each call to this
+   *
+   * <p>This must be called after initialisation with an image source. Note that each call to this
    * method must be preceded with initialisation to prepare the image and output options.
    */
   @SuppressWarnings("null")
@@ -3709,9 +3745,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * Refresh settings. <p> If this is a custom template then use all the settings. If a default
-   * template then leave some existing spot settings untouched as the user may have updated them
-   * (e.g. PSF width).
+   * Refresh settings.
+   *
+   * <p>If this is a custom template then use all the settings. If a default template then leave
+   * some existing spot settings untouched as the user may have updated them (e.g. PSF width).
    *
    * @param fitEngineSettings the config
    * @param isCustomTemplate True if a custom template.

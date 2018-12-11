@@ -28,10 +28,12 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMTools;
 import ij.plugin.PlugIn;
 
 /**
- * Default ImageJ plugin (no Java package) to run the {@link SMLMTools} plugin. <p> This class
- * allows the project to be run in debug mode from an IDE (e.g. Eclipse). The Maven output directory
- * will be target/classes. Create a symbolic link to that directory from the project root and name
- * it plugins. Optionally create a link to the macros directory to allow the toolset to be loaded:
+ * Default ImageJ plugin (no Java package) to run the {@link SMLMTools} plugin.
+ *
+ * <p>This class allows the project to be run in debug mode from an IDE (e.g. Eclipse). The Maven
+ * output directory will be target/classes. Create a symbolic link to that directory from the
+ * project root and name it plugins. Optionally create a link to the macros directory to allow the
+ * toolset to be loaded:
  *
  * <pre>
  * ${root}/plugins -&gt; ${root}/target/classes
@@ -46,7 +48,7 @@ import ij.plugin.PlugIn;
  *
  * ImageJ will load this class from the plugins directory. This class can call all other plugins.
  */
-public class SMLM_Plugins implements PlugIn {
+public class Smlm_PlugIn implements PlugIn {
   /** {@inheritDoc} */
   @SuppressWarnings("unused")
   @Override

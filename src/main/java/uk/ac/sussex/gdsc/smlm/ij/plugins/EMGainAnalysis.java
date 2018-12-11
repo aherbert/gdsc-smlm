@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -70,23 +71,34 @@ import java.util.Arrays;
 
 /**
  * Analysis a white light image from an EM-CCD camera, construct a histogram of pixel intensity and
- * fit the histogram to obtain the bias, EM-gain, read noise and photons per pixel. <p> See Ulbrich
- * &amp; Isacoff (2007) Subunit counting in membrane-bound proteins. Nature Methods 4, 319-321
- * (Supplementary Information).
+ * fit the histogram to obtain the bias, EM-gain, read noise and photons per pixel.
+ *
+ * <p>See Ulbrich &amp; Isacoff (2007) Subunit counting in membrane-bound proteins. Nature Methods
+ * 4, 319-321 (Supplementary Information).
  */
 public class EMGainAnalysis implements PlugInFilter {
   private static final String TITLE = "EM-Gain Analysis";
   private final int FLAGS = DOES_8G | DOES_16 | NO_CHANGES | NO_UNDO;
   private final int MINIMUM_PIXELS = 1000000;
 
-  private static double bias = 500, gain = 40, noise = 3;
-  private static boolean _simulate = false, showApproximation = false, relativeDelta = false;
+  private static double bias = 500;
+  private static double gain = 40;
+  private static double noise = 3;
+  private static boolean _simulate = false;
+  private static boolean showApproximation = false;
+  private static boolean relativeDelta = false;
   private static String[] APPROXIMATION =
       {"PoissonGammaGaussian", "PoissonGamma", "PoissonGaussian", "Poisson"};
   private static int approximation = 0;
-  private boolean simulate = false, extraOptions = false;
-  private static double _photons = 1, _bias = 500, _gain = 40, _noise = 3;
-  private static double head = 0.01, tail = 0.025, _offset = 0;
+  private boolean simulate = false;
+  private boolean extraOptions = false;
+  private static double _photons = 1;
+  private static double _bias = 500;
+  private static double _gain = 40;
+  private static double _noise = 3;
+  private static double head = 0.01;
+  private static double tail = 0.025;
+  private static double _offset = 0;
   private static int simulationSize = 20000;
   private static boolean usePDF = false;
 
@@ -533,8 +545,9 @@ public class EMGainAnalysis implements PlugInFilter {
 
   /**
    * Calculate the probability density function for EM-gain. The maximum count to evaluate is
-   * calculated dynamically so that the cumulative probability does not change. <p> See Ulbrich &
-   * Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   * calculated dynamically so that the cumulative probability does not change.
+   *
+   * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param step the step between counts to evaluate
    * @param p The average number of photons per pixel input to the EM-camera
@@ -557,8 +570,9 @@ public class EMGainAnalysis implements PlugInFilter {
   }
 
   /**
-   * Calculate the probability density function for EM-gain. <p> See Ulbrich & Isacoff (2007).
-   * Nature Methods 4, 319-321, SI equation 3.
+   * Calculate the probability density function for EM-gain.
+   *
+   * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera
@@ -570,8 +584,9 @@ public class EMGainAnalysis implements PlugInFilter {
   }
 
   /**
-   * Calculate the probability density function for EM-gain. <p> See Ulbrich & Isacoff (2007).
-   * Nature Methods 4, 319-321, SI equation 3.
+   * Calculate the probability density function for EM-gain.
+   *
+   * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param max The maximum count to evaluate
    * @param step the step between counts to evaluate
@@ -597,7 +612,8 @@ public class EMGainAnalysis implements PlugInFilter {
   }
 
   private class PDF {
-    final double[] x, p;
+    final double[] x;
+    final double[] p;
 
     PDF(double[] x, double[] p) {
       this.x = x;
@@ -607,7 +623,9 @@ public class EMGainAnalysis implements PlugInFilter {
 
   /**
    * Calculate the probability density function for EM-gain, convolve with a Gaussian and then add a
-   * constant offset. <p> See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI.
+   * constant offset.
+   *
+   * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI.
    *
    * @param max The maximum count to evaluate
    * @param step the step between counts to evaluate
@@ -669,7 +687,9 @@ public class EMGainAnalysis implements PlugInFilter {
 
   /**
    * Calculate the probability density function for EM-gain, convolve with a Gaussian and then add a
-   * constant offset. <p> See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI.
+   * constant offset.
+   *
+   * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI.
    *
    * @param max The maximum count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera
@@ -1029,8 +1049,9 @@ public class EMGainAnalysis implements PlugInFilter {
   }
 
   /**
-   * Gets the step size. <p> Note: Currently this just returns 1 as it should be a PMF so only uses
-   * discrete values.
+   * Gets the step size.
+   *
+   * <p>Note: Currently this just returns 1 as it should be a PMF so only uses discrete values.
    *
    * @param photons the photons
    * @param gain the gain

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
@@ -74,11 +75,16 @@ import java.util.regex.Pattern;
 
 /**
  * Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
- * <p> Points are added to the nearest cluster if they are below the distance threshold to the
+ *
+ *
+ * <p>Points are added to the nearest cluster if they are below the distance threshold to the
  * cluster centroid. The cluster centroid is updated. All points above the cluster distance
- * threshold remain as single molecules. <p> The purpose is to join colocalising molecules into
- * clusters. <p> See Puchnar, et al (2013). Counting molecules in single organelles with
- * superresolution microscopy allows tracking of the endosome maturation trajectory. PNAS.
+ * threshold remain as single molecules.
+ *
+ * <p>The purpose is to join colocalising molecules into clusters.
+ *
+ * <p>See Puchnar, et al (2013). Counting molecules in single organelles with superresolution
+ * microscopy allows tracking of the endosome maturation trajectory. PNAS.
  * doi:10.1073/pnas.1309676110
  */
 public class PCPALMClusters implements PlugIn {
@@ -516,8 +522,9 @@ public class PCPALMClusters implements PlugIn {
 
   /**
    * If the histogram is calibrated then ask the user if they wish to subtract a calibrated noise
-   * histogram. <p> Loads a noise histogram from a user selected file and check the units match
-   * those provided
+   * histogram.
+   *
+   * <p>Loads a noise histogram from a user selected file and check the units match those provided
    *
    * @param histogramData the histogram data
    * @return The histogram (or null)

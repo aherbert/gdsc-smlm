@@ -21,11 +21,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows checking for
- * duplicates. <p> Uses a block resolution of 1.
+ * duplicates.
+ *
+ * <p>Uses a block resolution of 1.
  */
 public class GridCoordinateStore1 extends GridCoordinateStore {
   // Note: We have package level constructors so that the factory must be used to create an

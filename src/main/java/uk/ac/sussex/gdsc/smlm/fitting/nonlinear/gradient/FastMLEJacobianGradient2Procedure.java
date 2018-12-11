@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function;
@@ -30,11 +31,14 @@ import java.util.Arrays;
 
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second
- * partial derivatives. <p> Computes the Jacobian matrix of the partial derivatives, dFi/dxj, for
- * all n parameters. dFi is the first partial derivative of the log likelihood function with respect
- * to parameter i. dFi/dxj is the first partial derivative of dFi with respect to parameter j. <p>
- * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
- * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12.
+ * partial derivatives.
+ *
+ * <p>Computes the Jacobian matrix of the partial derivatives, dFi/dxj, for all n parameters. dFi is
+ * the first partial derivative of the log likelihood function with respect to parameter i. dFi/dxj
+ * is the first partial derivative of dFi with respect to parameter j.
+ *
+ * <p>Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+ * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
     implements ExtendedGradient2Procedure {

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import java.util.ArrayList;
@@ -36,7 +37,8 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   private final int time;
   private final List<LocalisationModel> localisations = new ArrayList<>();
   private double[] data = null;
-  private LocalisationModelSet previous, next;
+  private LocalisationModelSet previous;
+  private LocalisationModelSet next;
 
   /**
    * Create a new localisation.

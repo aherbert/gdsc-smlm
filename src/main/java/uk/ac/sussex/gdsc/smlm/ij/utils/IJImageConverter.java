@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
@@ -52,9 +53,10 @@ public class IJImageConverter {
 
   /**
    * Get the data from the image processor as a float array (include cropping to the ROI). Data is
-   * duplicated if the InputImage is a FloatProcessor. <p> Allows reuse of an existing buffer if
-   * provided. This will not be truncated if it is larger than the ImageProcessor ROI bounds. If
-   * smaller then a new buffer will be created.
+   * duplicated if the InputImage is a FloatProcessor.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the ImageProcessor ROI bounds. If smaller then a new buffer will be created.
    *
    * @param ip the image
    * @param buffer the buffer
@@ -70,10 +72,13 @@ public class IJImageConverter {
 
   /**
    * Get the data from the image as a float array (include cropping to the ROI). Data is duplicated
-   * if the input is already a float array. <p> Allows reuse of an existing buffer if provided. This
-   * will not be truncated if it is larger than the ImageProcessor ROI bounds. If smaller then a new
-   * buffer will be created. <p> If the object pixels array is incorrect size (it should be
-   * width*height) then null will be returned.
+   * if the input is already a float array.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the ImageProcessor ROI bounds. If smaller then a new buffer will be created.
+   *
+   * <p>If the object pixels array is incorrect size (it should be width*height) then null will be
+   * returned.
    *
    * @param oPixels the pixels object
    * @param width the width
@@ -89,9 +94,10 @@ public class IJImageConverter {
 
   /**
    * Get the data from the image processor as a double array (include cropping to the ROI). Data is
-   * duplicated if the InputImage is a FloatProcessor. <p> Allows reuse of an existing buffer if
-   * provided. This will not be truncated if it is larger than the ImageProcessor ROI bounds. If
-   * smaller then a new buffer will be created.
+   * duplicated if the InputImage is a FloatProcessor.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the ImageProcessor ROI bounds. If smaller then a new buffer will be created.
    *
    * @param ip the image
    * @param buffer the buffer
@@ -107,10 +113,13 @@ public class IJImageConverter {
 
   /**
    * Get the data from the image as a double array (include cropping to the ROI). Data is duplicated
-   * if the input is already a double array. <p> Allows reuse of an existing buffer if provided.
-   * This will not be truncated if it is larger than the ImageProcessor ROI bounds. If smaller then
-   * a new buffer will be created. <p> If the object pixels array is incorrect size (it should be
-   * width*height) then null will be returned.
+   * if the input is already a double array.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the ImageProcessor ROI bounds. If smaller then a new buffer will be created.
+   *
+   * <p>If the object pixels array is incorrect size (it should be width*height) then null will be
+   * returned.
    *
    * @param oPixels the pixels object
    * @param width the width
@@ -126,9 +135,10 @@ public class IJImageConverter {
 
   /**
    * Get the data from the image pixels as a float array. Data is not duplicated if the input is
-   * already a float array unless a buffer is provided. <p> Allows reuse of an existing buffer if
-   * provided. This will not be truncated if it is larger than the pixels array. If smaller then a
-   * new buffer will be created.
+   * already a float array unless a buffer is provided.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the pixels array. If smaller then a new buffer will be created.
    *
    * @param oPixels the pixels
    * @param buffer the buffer

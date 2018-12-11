@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.clustering.DensityCounter;
@@ -133,10 +134,12 @@ public class PulseActivationAnalysis
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
-  private static Correction[] specificCorrection, nonSpecificCorrection;
+  private static Correction[] specificCorrection;
+  private static Correction[] nonSpecificCorrection;
+
   static {
     final EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
     specificCorrection = correction.toArray(new Correction[correction.size()]);
@@ -164,11 +167,12 @@ public class PulseActivationAnalysis
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   private abstract class Shape {
-    float x, y;
+    float x;
+    float y;
 
     Shape(float x, float y) {
       this.x = x;
@@ -211,8 +215,10 @@ public class PulseActivationAnalysis
   }
 
   private class Line extends Shape {
-    double radius, length;
-    float sina, cosa;
+    double radius;
+    double length;
+    float sina;
+    float cosa;
 
     /**
      * Instantiates a new line.
@@ -309,6 +315,7 @@ public class PulseActivationAnalysis
   private PeakResultsList[] output = null;
   private static Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
   private static String[] MAGNIFICATION;
+
   static {
     final ArrayList<String> list = new ArrayList<>();
     for (int i = 1; i <= 256; i *= 2) {
@@ -322,7 +329,8 @@ public class PulseActivationAnalysis
 
   private class Activation implements Molecule {
     final Trace trace;
-    float x, y;
+    float x;
+    float y;
     final int channel;
     int currentChannel;
 
@@ -372,7 +380,8 @@ public class PulseActivationAnalysis
     }
   }
 
-  private Activation[] specificActivations, nonSpecificActivations;
+  private Activation[] specificActivations;
+  private Activation[] nonSpecificActivations;
   private int[] count;
 
   /** {@inheritDoc} */
@@ -672,7 +681,8 @@ public class PulseActivationAnalysis
     // activated by a pulse from channel M is activated by a pulse from channel N.
     // targetChannel = M
     // activationChannel = N
-    int index1, index2 = -1;
+    int index1;
+    int index2 = -1;
     if (channels == 2) {
       if (targetChannel == 1) {
         index1 = setCrosstalk(C12, crosstalk[1]);
@@ -713,8 +723,10 @@ public class PulseActivationAnalysis
   }
 
   /**
-   * Compute crosstalk. <p> "The crosstalk ratios can be calculated from the ratios of incorrectly
-   * to correctly colored localizations."
+   * Compute crosstalk.
+   *
+   * <p>"The crosstalk ratios can be calculated from the ratios of incorrectly to correctly colored
+   * localizations."
    *
    * @param count the count
    * @param target the target
@@ -759,10 +771,11 @@ public class PulseActivationAnalysis
   }
 
   /**
-   * Unmix the observed local densities into the actual densities for 2-channels. <p> Crosstalk from
-   * M into N is defined as the number of times the molecule that should be activated by a pulse
-   * from channel M is activated by a pulse from channel N. A value less than 1 is expected
-   * (otherwise the fluorophore is not being specifically activated by channel M).
+   * Unmix the observed local densities into the actual densities for 2-channels.
+   *
+   * <p>Crosstalk from M into N is defined as the number of times the molecule that should be
+   * activated by a pulse from channel M is activated by a pulse from channel N. A value less than 1
+   * is expected (otherwise the fluorophore is not being specifically activated by channel M).
    *
    * @param D1 the observed density in channel 1
    * @param D2 the observed density in channel 2
@@ -785,10 +798,11 @@ public class PulseActivationAnalysis
   }
 
   /**
-   * Unmix the observed local densities into the actual densities for 3-channels. <p> Crosstalk from
-   * M into N is defined as the number of times the molecule that should be activated by a pulse
-   * from channel M is activated by a pulse from channel N. A value less than 1 is expected
-   * (otherwise the fluorophore is not being specifically activated by channel M).
+   * Unmix the observed local densities into the actual densities for 3-channels.
+   *
+   * <p>Crosstalk from M into N is defined as the number of times the molecule that should be
+   * activated by a pulse from channel M is activated by a pulse from channel N. A value less than 1
+   * is expected (otherwise the fluorophore is not being specifically activated by channel M).
    *
    * @param D1 the observed density in channel 1
    * @param D2 the observed density in channel 2
@@ -1135,9 +1149,9 @@ public class PulseActivationAnalysis
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     // The event is null when the NonBlockingExtendedGenericDialog is first shown
-    if (e == null) {
+    if (event == null) {
       // Do not ignore this if a macro
       if (ImageJUtils.isMacro()) {
         return true;
@@ -1216,7 +1230,7 @@ public class PulseActivationAnalysis
 
   /** {@inheritDoc} */
   @Override
-  public void optionCollected(OptionCollectedEvent e) {
+  public void optionCollected(OptionCollectedEvent event) {
     resultsSettings = resultsSettingsBuilder.build();
 
     if (lastRunSettings != null && resultsSettings.equals(lastRunSettings.resultsSettings)) {
@@ -1444,10 +1458,11 @@ public class PulseActivationAnalysis
   }
 
   /**
-   * Auto adjust. Copied from {@link ij.plugin.frame.ContrastAdjuster }. <p> Although the
-   * ContrastAdjuster records its actions as 'run("Enhance Contrast", "saturated=0.35");' it
-   * actually does something else which makes the image easier to see than the afore mentioned
-   * command.
+   * Auto adjust. Copied from {@link ij.plugin.frame.ContrastAdjuster }.
+   *
+   * <p>Although the ContrastAdjuster records its actions as 'run("Enhance Contrast",
+   * "saturated=0.35");' it actually does something else which makes the image easier to see than
+   * the afore mentioned command.
    *
    * @param imp the image
    * @param ip the image
@@ -1506,7 +1521,8 @@ public class PulseActivationAnalysis
 
   private static void reset(ImagePlus imp) {
     final int bitDepth = imp.getBitDepth();
-    double defaultMin, defaultMax;
+    double defaultMin;
+    double defaultMax;
     if (bitDepth == 16 || bitDepth == 32) {
       imp.resetDisplayRange();
       defaultMin = imp.getDisplayRangeMin();
@@ -1990,7 +2006,10 @@ public class PulseActivationAnalysis
 
     // Determine the other channels activation probability using crosstalk
     final double[] p0 = {p, p, p};
-    int index1, index2, c1, c2;
+    int index1;
+    int index2;
+    int c1;
+    int c2;
     switch (c) {
       case 0:
         index1 = C12;
@@ -2076,7 +2095,8 @@ public class PulseActivationAnalysis
     final int[] sample = RandomUtils.sample(k, n, rand);
     while (k-- > 0) {
       final float[] xy = molecules[sample[k]];
-      float x, y;
+      float x;
+      float y;
       do {
         x = (float) (xy[0] + rand.nextGaussian() * precision);
       }
@@ -2165,7 +2185,7 @@ public class PulseActivationAnalysis
   }
 
   @Override
-  public void actionPerformed(ActionEvent e) {
+  public void actionPerformed(ActionEvent event) {
     final ImagePlus imp = WindowManager.getImage(results.getName() + " " + TITLE);
     if (imp == null || output == null) {
       return;

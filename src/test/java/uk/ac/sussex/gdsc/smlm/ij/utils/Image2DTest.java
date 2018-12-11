@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.process.ImageProcessor;
@@ -133,10 +134,10 @@ public abstract class Image2DTest {
 
       final Image2D croppedData = image.crop(x, y, w, h);
       final int i = findMinIndex(croppedData);
-      final int[] xy = croppedData.getXY(i);
+      final int[] xy = croppedData.getXy(i);
 
       final int j = image.findMinIndex(x, y, w, h);
-      final int[] xy2 = image.getXY(j);
+      final int[] xy2 = image.getXy(j);
 
       Assertions.assertEquals(xy[0] + x, xy2[0]);
       Assertions.assertEquals(xy[1] + y, xy2[1]);
@@ -164,10 +165,10 @@ public abstract class Image2DTest {
 
       final Image2D croppedData = image.crop(x, y, w, h);
       final int i = findMaxIndex(croppedData);
-      final int[] xy = croppedData.getXY(i);
+      final int[] xy = croppedData.getXy(i);
 
       final int j = image.findMaxIndex(x, y, w, h);
-      final int[] xy2 = image.getXY(j);
+      final int[] xy2 = image.getXy(j);
 
       Assertions.assertEquals(xy[0] + x, xy2[0]);
       Assertions.assertEquals(xy[1] + y, xy2[1]);

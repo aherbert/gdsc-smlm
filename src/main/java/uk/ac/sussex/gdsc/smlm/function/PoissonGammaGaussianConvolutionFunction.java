@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -30,14 +31,17 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Implements the probability density function for a Poisson-Gamma-Gaussian Mixture. The Gaussian is
  * assumed to have mean of zero. If no mean (zero or below) is provided for the Poisson distribution
- * then the probability density function matches that of the Gaussian. <p> The implementation uses
- * full convolution described from Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI
- * equation 3:<br> P(D) = A Sum_q e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)<br>
- * Where:<br> A = normalisation constant var = the variance of the pixel <br> g = the gain of the
- * pixel <br> u = the function value (expected number of photons) <br> D = the observed value at the
- * pixel <p> The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS
- * camera which captures a Poisson process of emitted light, converted to electrons on the camera
- * chip, amplified by a gain and then read with Gaussian noise.
+ * then the probability density function matches that of the Gaussian.
+ *
+ * <p>The implementation uses full convolution described from Ulbrich &amp; Isacoff (2007). Nature
+ * Methods 4, 319-321, SI equation 3:<br> P(D) = A Sum_q e^-u * u^q / q! * 1/sqrt(2pi var) * e ^
+ * -((D-q*g)^2 / 2*var)<br> Where:<br> A = normalisation constant var = the variance of the pixel
+ * <br> g = the gain of the pixel <br> u = the function value (expected number of photons) <br> D =
+ * the observed value at the pixel
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
+ * amplified by a gain and then read with Gaussian noise.
  */
 public class PoissonGammaGaussianConvolutionFunction
     implements LikelihoodFunction, LogLikelihoodFunction {

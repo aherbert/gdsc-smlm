@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.utils;
 
 /**
@@ -32,7 +33,9 @@ public class JSONUtils {
 
   /**
    * Simplify the JSON string. Removes redundant double quotes around fields, e.g. if they have only
-   * letters or digits. <p> If the input is null then an empty string will be returned.
+   * letters or digits.
+   *
+   * <p>If the input is null then an empty string will be returned.
    *
    * @param json the json
    * @return the simplified string

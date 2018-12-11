@@ -55,6 +55,7 @@ public class PoissonGammaGaussianFunctionTest {
   // This summing on the integer intervals (for a PMF) is invalid.
   // Store the expected sum at different gain below 10 for testing.
   static double[] pgSum = new double[11];
+
   static {
     // Compute the sum at expected photons around 1. This produces
     // the highest sum as the contribution from the Poisson-Gamma to c=0

@@ -21,11 +21,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Base class for any probability distribution that can calculate the Fisher information for a
- * Poisson distributed mean. <p> <a
+ * Poisson distributed mean.
+ *
+ * <p><a
  * href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
 public abstract class BasePoissonFisherInformation implements FisherInformation, Cloneable {

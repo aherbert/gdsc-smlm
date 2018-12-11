@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -50,9 +51,10 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Reads the fit results from file using the Tagged Spot File (TSF) format. <p> Has only limited
- * support for TSF in that only 1 channel, position, slice and fluorophore type can be read into a
- * dataset.
+ * Reads the fit results from file using the Tagged Spot File (TSF) format.
+ *
+ * <p>Has only limited support for TSF in that only 1 channel, position, slice and fluorophore type
+ * can be read into a dataset.
  *
  * @author Alex Herbert
  */
@@ -392,6 +394,7 @@ public class TSFPeakResultsReader {
   private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit[] thetaUnitsMap;
   private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit[] locationUnitsMap;
   private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit[] intensityUnitsMap;
+
   static {
     // These should have 1:1 mapping. We can extends the TSF proto if necessary.
     cameraTypeMap = new uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType[CameraType

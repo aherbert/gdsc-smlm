@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import java.util.logging.Logger;
@@ -92,9 +93,13 @@ public abstract class StoppingCriteria {
   /**
    * Called after each iteration of the fit. If the error value has reduced then the class should
    * decide if the fit is good enough (set areAchived to true) and can be stopped (set notSatisfied
-   * to false). <p> If the fitting process appears to be failing then notSatisfied can be set to
-   * false to stop iterating. <p> Note that if the error value is higher the NonLinearFit class will
-   * not update the fit coefficients.
+   * to false).
+   *
+   * <p>If the fitting process appears to be failing then notSatisfied can be set to false to stop
+   * iterating.
+   *
+   * <p>Note that if the error value is higher the NonLinearFit class will not update the fit
+   * coefficients.
    *
    * @param oldError Previous error value for the fit
    * @param newError New error value for the fit
@@ -104,8 +109,9 @@ public abstract class StoppingCriteria {
 
   /**
    * Increment the current iteration and set the best coefficient values (using
-   * {@link #copyCoefficients(double[]) }) if the fit was improved. <p> Sets the notSatisfied flag
-   * to false if the maximum number of iterations is reached.
+   * {@link #copyCoefficients(double[]) }) if the fit was improved.
+   *
+   * <p>Sets the notSatisfied flag to false if the maximum number of iterations is reached.
    *
    * @param a The parameters
    * @param improved Flag to indicate if the parameters have improved the fit
@@ -164,8 +170,9 @@ public abstract class StoppingCriteria {
   }
 
   /**
-   * Use this to pass in a recommended minimum number of iterations to the stopping criteria <p>
-   * Note: Implementing classes may ignore this parameter
+   * Use this to pass in a recommended minimum number of iterations to the stopping criteria.
+   *
+   * <p>Note: Implementing classes may ignore this parameter
    *
    * @param minimumIterations the minimumIterations to set
    */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
@@ -36,12 +37,15 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using
- * weighted least squares estimation. <p> This solver computes a modified Chi-squared expression to
- * perform Weighted Least Squares Estimation assuming a Poisson model with a Gaussian noise
- * component. The weight per observation is equal to 1/[variance + max(y, 0) + 1]. <p> See Ruisheng,
- * et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras -
- * characterisation of a computationally efficient localization approach. Optical Express 25, Issue
- * 10, pp 11701-11716.
+ * weighted least squares estimation.
+ *
+ * <p>This solver computes a modified Chi-squared expression to perform Weighted Least Squares
+ * Estimation assuming a Poisson model with a Gaussian noise component. The weight per observation
+ * is equal to 1/[variance + max(y, 0) + 1].
+ *
+ * <p>See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
+ * cameras - characterisation of a computationally efficient localization approach. Optical Express
+ * 25, Issue 10, pp 11701-11716.
  */
 public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     implements WLSEFunctionSolver {

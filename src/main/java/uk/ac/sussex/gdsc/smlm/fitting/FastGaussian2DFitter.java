@@ -21,21 +21,29 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Fits a 2-dimensional Gaussian function for the specified peak. Can optionally fit an elliptical
- * Gaussian function. <p> Performs fitting using the configured algorithm. <p> This is based on the
- * Gaussian2DFitter class but does not support estimating the width of each Gaussian. Widths must be
- * provided in the fit configuration. Settings from the fit configuration are cached and thus
- * updates to the configuration after construction may be ignored.
+ * Gaussian function.
+ *
+ * <p>Performs fitting using the configured algorithm.
+ *
+ * <p>This is based on the Gaussian2DFitter class but does not support estimating the width of each
+ * Gaussian. Widths must be provided in the fit configuration. Settings from the fit configuration
+ * are cached and thus updates to the configuration after construction may be ignored.
  */
 public class FastGaussian2DFitter extends Gaussian2DFitter {
   // Cache the fitting defaults
-  private final boolean isZFitting, isWidth1Fitting, isAngleFitting;
-  private final double angle, sx, sy;
+  private final boolean isZFitting;
+  private final boolean isWidth1Fitting;
+  private final boolean isAngleFitting;
+  private final double angle;
+  private final double sx;
+  private final double sy;
 
   /**
    * Constructor.
@@ -105,7 +113,9 @@ public class FastGaussian2DFitter extends Gaussian2DFitter {
       double xpos = params[j + Gaussian2DFunction.X_POSITION];
       double ypos = params[j + Gaussian2DFunction.Y_POSITION];
 
-      double sx, sy, angle;
+      double sx;
+      double sy;
+      double angle;
       if (isZFitting) {
         // Use the widths at z=0.
         // These are used to determine the centre-of-mass range search.

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -143,8 +144,9 @@ public abstract class Image3D {
   protected abstract void createData(int size);
 
   /**
-   * Copy the data from the given index to the buffer. <p> Utility method to handle conversion with
-   * ImageJ ImageProcessor objects.
+   * Copy the data from the given index to the buffer.
+   *
+   * <p>Utility method to handle conversion with ImageJ ImageProcessor objects.
    *
    * @param i the index
    * @param buffer the buffer
@@ -154,8 +156,9 @@ public abstract class Image3D {
   protected abstract void copyTo(int i, float[] buffer, int j, int size);
 
   /**
-   * Copy the data from the given buffer to the given index. <p> Utility method to handle conversion
-   * with ImageJ ImageProcessor objects.
+   * Copy the data from the given buffer to the given index.
+   *
+   * <p>Utility method to handle conversion with ImageJ ImageProcessor objects.
    *
    * @param i the index
    * @param buffer the buffer
@@ -261,7 +264,7 @@ public abstract class Image3D {
    * @return the xyz components
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public int[] getXYZ(int i) throws IllegalArgumentException {
+  public int[] getXyz(int i) throws IllegalArgumentException {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -281,7 +284,7 @@ public abstract class Image3D {
    * @param xyz the xyz components (must be an array of at least length 3)
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public void getXYZ(int i, int[] xyz) throws IllegalArgumentException {
+  public void getXyz(int i, int[] xyz) throws IllegalArgumentException {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -529,10 +532,11 @@ public abstract class Image3D {
   }
 
   /**
-   * Compute 3D intersect with this object. <p> If any of w,h,d are negative then the corresponding
-   * x,y,z is updated and the w,h,d is inverted. The maximum bounds of the given dimensions are then
-   * computed by adding the w,h,d to the x,y,z. The bounds are then clipped to the image dimensions
-   * and the intersect returned.
+   * Compute 3D intersect with this object.
+   *
+   * <p>If any of w,h,d are negative then the corresponding x,y,z is updated and the w,h,d is
+   * inverted. The maximum bounds of the given dimensions are then computed by adding the w,h,d to
+   * the x,y,z. The bounds are then clipped to the image dimensions and the intersect returned.
    *
    * @param x the x index
    * @param y the y index
@@ -566,10 +570,11 @@ public abstract class Image3D {
   }
 
   /**
-   * Compute 3D intersect with this object or throw an exception if the intersect has no volume. <p>
-   * If any of w,h,d are negative then the corresponding x,y,z is updated and the w,h,d is inverted.
-   * The maximum bounds of the given dimensions are then computed by adding the w,h,d to the x,y,z.
-   * The bounds are then clipped to the image dimensions and the intersect returned.
+   * Compute 3D intersect with this object or throw an exception if the intersect has no volume.
+   *
+   * <p>If any of w,h,d are negative then the corresponding x,y,z is updated and the w,h,d is
+   * inverted. The maximum bounds of the given dimensions are then computed by adding the w,h,d to
+   * the x,y,z. The bounds are then clipped to the image dimensions and the intersect returned.
    *
    * @param x the x index
    * @param y the y index
@@ -814,8 +819,9 @@ public abstract class Image3D {
 
   /**
    * Compute the rolling sum table for use in
-   * {@link #computeSum(double[], int, int, int, int, int, int)}. <p> This is a table of the sum of
-   * the volume from 0,0,0 to x,y,z inclusive.
+   * {@link #computeSum(double[], int, int, int, int, int, int)}.
+   *
+   * <p>This is a table of the sum of the volume from 0,0,0 to x,y,z inclusive.
    *
    * @param table the table (will be reused if the correct size)
    * @return the rolling sum table
@@ -1007,7 +1013,12 @@ public abstract class Image3D {
     // k = kmax when k>kmax
 
     // Compute bounds assuming w,h,d is small and positive.
-    int x_1, y_1, z_1, x_w_1, y_h_1, z_d_1;
+    int x_1;
+    int y_1;
+    int z_1;
+    int x_w_1;
+    int y_h_1;
+    int z_d_1;
     if (x < 0) {
       x_1 = 0;
       x_w_1 = MathUtils.clip(0, nc, x + w);

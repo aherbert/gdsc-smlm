@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -32,6 +33,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 public class CalibrationProtosHelper {
   /** The default Calibration. */
   public static final Calibration defaultCalibration;
+
   static {
     final Calibration.Builder builder = Calibration.newBuilder();
     // Note: Ideally we would set QE to be 1 but this will involve creating a

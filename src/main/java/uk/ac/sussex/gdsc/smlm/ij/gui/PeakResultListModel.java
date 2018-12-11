@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
@@ -50,8 +51,9 @@ public class PeakResultListModel extends AbstractListModel<PeakResult> {
   }
 
   /**
-   * Instantiates a new peak result model using the store. <p> The default store implementation is a
-   * set to avoid duplicate entries in the model.
+   * Instantiates a new peak result model using the store.
+   *
+   * <p>The default store implementation is a set to avoid duplicate entries in the model.
    *
    * @param results the results
    */
@@ -167,8 +169,9 @@ public class PeakResultListModel extends AbstractListModel<PeakResult> {
   /**
    * Deletes the components at the specified range of indexes. The removal is inclusive, so
    * specifying a range of (1,5) removes the component at index 1 and the component at index 5, as
-   * well as all components in between. <p> Throws an <code>ArrayIndexOutOfBoundsException</code> if
-   * the index was invalid.
+   * well as all components in between.
+   *
+   * <p>Throws an <code>ArrayIndexOutOfBoundsException</code> if the index was invalid.
    *
    * @param fromIndex the index of the lower end of the range
    * @param toIndex the index of the upper end of the range

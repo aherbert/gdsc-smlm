@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.search;
 
 import org.apache.commons.math3.util.FastMath;
@@ -33,15 +34,15 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class ConvergenceToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T> {
   /** The relative tolerance threshold. */
-  final public double relative;
+  public final double relative;
   /** The absolute tolerance threshold. */
-  final public double absolute;
+  public final double absolute;
   /** The check score flag. */
-  final public boolean checkScore;
+  public final boolean checkScore;
   /** The check sequence flag. */
-  final public boolean checkSequence;
+  public final boolean checkSequence;
   /** The max iterations. */
-  final public int maxIterations;
+  public final int maxIterations;
 
   private int iterations = 0;
 

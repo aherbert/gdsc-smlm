@@ -23,17 +23,23 @@
  */
 
 /**
- * Provides classes for computation of 2D Gaussian function using the Error function. <p> The 2D
- * Gaussian function is used as a model of the Point Spread Function (PSF) of a microscope and can
- * be fit to Single Molecule Localisation Microscopy data. <p> The functions in this package can
- * compute the Gaussian function over a 2D range that represents for example the pixels in an image.
- * This package evaluates the function as an integral over the 1x1 area surrounding point (X,Y). <p>
- * The function is evaluated using the XY separability of the Gaussian. Each dimension must align
+ * Provides classes for computation of 2D Gaussian function using the Error function.
+ *
+ * <p>The 2D Gaussian function is used as a model of the Point Spread Function (PSF) of a microscope
+ * and can be fit to Single Molecule Localisation Microscopy data.
+ *
+ * <p>The functions in this package can compute the Gaussian function over a 2D range that
+ * represents for example the pixels in an image. This package evaluates the function as an integral
+ * over the 1x1 area surrounding point (X,Y).
+ *
+ * <p>The function is evaluated using the XY separability of the Gaussian. Each dimension must align
  * with the XY axes and so the functions <strong>cannot</strong> support rotated elliptical 2D
- * Gaussians. <p> This work is based on the paper:<br> Smith et al, (2010). Fast, single-molecule
- * localisation that achieves theoretically minimum uncertainty. Nature Methods 7, 373-375
- * (supplementary note).
+ * Gaussians.
+ *
+ * <p>This work is based on the paper:<br> Smith et al, (2010). Fast, single-molecule localisation
+ * that achieves theoretically minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
  *
  * @since 1.0.0
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;

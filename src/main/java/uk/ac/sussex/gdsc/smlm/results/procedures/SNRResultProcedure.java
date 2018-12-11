@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -55,8 +56,9 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
   }
 
   /**
-   * Gets the SNR for the results. <p> The SNR is computed using the mean signal divided by the
-   * noise.
+   * Gets the SNR for the results.
+   *
+   * <p>The SNR is computed using the mean signal divided by the noise.
    *
    * @return the snr
    */

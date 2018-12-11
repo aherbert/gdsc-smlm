@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -88,7 +89,8 @@ public class SpotFit implements PlugIn {
     private SimplePeakResultValidationData validationData;
     private final Gaussian2DFitter gf;
 
-    private final double[] lower, upper;
+    private final double[] lower;
+    private final double[] upper;
 
     static final Pattern pattern = Pattern.compile("\t");
 
@@ -161,7 +163,7 @@ public class SpotFit implements PlugIn {
     }
 
     @Override
-    public void mouseClicked(ImagePlus imp, MouseEvent e) {
+    public void mouseClicked(ImagePlus imp, MouseEvent event) {
       if (!active) {
         return;
       }
@@ -175,15 +177,15 @@ public class SpotFit implements PlugIn {
       }
 
       // Mark this event as handled
-      e.consume();
+      event.consume();
 
       // TODO - More control over fitting.
 
       // Ensure rapid mouse click / new options does not break things
       synchronized (this) {
         final ImageCanvas ic = imp.getCanvas();
-        int x = ic.offScreenX(e.getX());
-        int y = ic.offScreenY(e.getY());
+        int x = ic.offScreenX(event.getX());
+        int y = ic.offScreenY(event.getY());
 
         if (logging) {
           ImageJUtils.log("Clicked %d,%d", x, y);
@@ -198,7 +200,7 @@ public class SpotFit implements PlugIn {
 
         final ImageExtractor ie = ImageExtractor.wrap(null, imp.getWidth(), imp.getHeight());
 
-        if (isRemoveEvent(e)) {
+        if (isRemoveEvent(event)) {
           removeSpots(imp, channel, slice, frame, x, y, ie);
           return;
         }
@@ -248,8 +250,8 @@ public class SpotFit implements PlugIn {
       }
     }
 
-    private static boolean isRemoveEvent(MouseEvent e) {
-      return e.isAltDown() || e.isShiftDown() || e.isControlDown();
+    private static boolean isRemoveEvent(MouseEvent event) {
+      return event.isAltDown() || event.isShiftDown() || event.isControlDown();
     }
 
     private int findMaxima(ImageProcessor ip, ImageExtractor ie, int x, int y) {

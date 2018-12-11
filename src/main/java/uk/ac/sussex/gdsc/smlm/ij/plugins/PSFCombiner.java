@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -48,8 +49,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Produces an average PSF image from multiple PSF images. <p> The input images must be a z-stack of
- * a PSF. These can be produced using the PSFCreator plugin.
+ * Produces an average PSF image from multiple PSF images.
+ *
+ * <p>The input images must be a z-stack of a PSF. These can be produced using the PSFCreator
+ * plugin.
  */
 public class PSFCombiner implements PlugIn {
   private static final String TITLE = "PSF Combiner";
@@ -166,9 +169,12 @@ public class PSFCombiner implements PlugIn {
     }
 
     // Find the lowest & highest dimensions
-    int minStart = Integer.MAX_VALUE, maxStart = Integer.MIN_VALUE;
-    int minEnd = Integer.MAX_VALUE, maxEnd = Integer.MIN_VALUE;
-    int minSize = Integer.MAX_VALUE, maxSize = 0;
+    int minStart = Integer.MAX_VALUE;
+    int maxStart = Integer.MIN_VALUE;
+    int minEnd = Integer.MAX_VALUE;
+    int maxEnd = Integer.MIN_VALUE;
+    int minSize = Integer.MAX_VALUE;
+    int maxSize = 0;
     for (final PSF psf : input) {
       if (minStart > psf.start) {
         minStart = psf.start;

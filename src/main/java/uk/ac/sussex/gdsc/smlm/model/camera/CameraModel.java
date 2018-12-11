@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
@@ -49,9 +50,13 @@ public interface CameraModel {
 
   /**
    * Crop the camera to the given bounds. The bounds are expected to fit within the camera bounds.
-   * <p> This can be used to create a more efficient representation if no data outside the bounds
-   * are required. <p> The origin of the new model can optionally be reset to 0,0. <p> Note: If the
-   * bounds match the current bounds then the returned model may not be a copy.
+   *
+   * <p>This can be used to create a more efficient representation if no data outside the bounds are
+   * required.
+   *
+   * <p>The origin of the new model can optionally be reset to 0,0.
+   *
+   * <p>Note: If the bounds match the current bounds then the returned model may not be a copy.
    *
    * @param bounds the bounds
    * @param resetOrigin the reset origin flag

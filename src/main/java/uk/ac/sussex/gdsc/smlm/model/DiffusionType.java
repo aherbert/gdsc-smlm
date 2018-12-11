@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
@@ -55,7 +56,7 @@ public enum DiffusionType {
    *
    * @return the name
    */
-  abstract public String getName();
+  public abstract String getName();
 
   /**
    * Get the diffusion type from a given string. Returns null if the text is not a valid type.

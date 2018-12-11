@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +33,7 @@ public class CalibrationTest {
   double[] test_s = {80, 100, 140};
   double[] test_N = {1, 10, 30, 100, 1000};
   double[] test_b2 = {0, 1, 2, 4, 8};
-  int minPoints = 3, maxPoints = 20;
+  int minpoints = 3, maxpoints = 20;
 
   @Test
   public void canGet() {

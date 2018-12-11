@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
@@ -38,7 +39,9 @@ public class FloatDHT3D extends FloatImage3D {
   private boolean isFrequencyDomain;
   private final FloatDHT_3D dht;
   // Used for fast multiply operations
-  private double[] h2e, h2o, mag;
+  private double[] h2e;
+  private double[] h2o;
+  private double[] mag;
   private int[] jj;
 
   /**
@@ -147,7 +150,8 @@ public class FloatDHT3D extends FloatImage3D {
   /**
    * Initialise fast operations for {@link #multiply(FloatDHT3D)} and
    * {@link #conjugateMultiply(FloatDHT3D)}. This pre-computes the values needed for the operations.
-   * <p> Note: This initialises the FHT object for use as the argument to the operation, for example
+   *
+   * <p>Note: This initialises the FHT object for use as the argument to the operation, for example
    * if a convolution kernel is to be applied to many FHT objects.
    */
   public void initialiseFastMultiply() {
@@ -177,9 +181,10 @@ public class FloatDHT3D extends FloatImage3D {
   /**
    * Initialise fast operations for {@link #multiply(FloatDHT3D)},
    * {@link #conjugateMultiply(FloatDHT3D)} and {@link #divide(FloatDHT3D)}. This pre-computes the
-   * values needed for the operations. <p> Note: This initialises the FHT object for use as the
-   * argument to the operation, for example if a deconvolution kernel is to be applied to many FHT
-   * objects.
+   * values needed for the operations.
+   *
+   * <p>Note: This initialises the FHT object for use as the argument to the operation, for example
+   * if a deconvolution kernel is to be applied to many FHT objects.
    */
   public void initialiseFastOperations() {
     initialiseFastMultiply();
@@ -687,8 +692,9 @@ public class FloatDHT3D extends FloatImage3D {
   }
 
   /**
-   * Swap the rectangle pixel values from a with b. <p> No bounds checks are performed so use with
-   * care!
+   * Swap the rectangle pixel values from a with b.
+   *
+   * <p>No bounds checks are performed so use with care!
    *
    * @param a the a pixels
    * @param ia the insert position for a

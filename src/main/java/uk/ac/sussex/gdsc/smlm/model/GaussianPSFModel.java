@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
@@ -186,9 +187,10 @@ public class GaussianPSFModel extends PSFModel {
 
   /**
    * Construct a Gaussian 2D function on the provided data. Only evaluates the function within +/- 5
-   * standard deviations in each direction from the centre (allows populating large images). <p>
-   * Builds the pixel approximation using the Gaussian error function as described in Smith et al,
-   * (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+   * standard deviations in each direction from the centre (allows populating large images).
+   *
+   * <p>Builds the pixel approximation using the Gaussian error function as described in Smith et
+   * al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
    * Nature Methods 7, 373-375 (supplementary note).
    *
    * @param data The data (can be null)
@@ -243,9 +245,10 @@ public class GaussianPSFModel extends PSFModel {
 
   /**
    * Construct a Gaussian 2D function on the provided data. Only evaluates the function within +/- 5
-   * standard deviations in each direction from the centre (allows populating large images). <p>
-   * Builds the pixel approximation using the Gaussian error function as described in Smith et al,
-   * (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+   * standard deviations in each direction from the centre (allows populating large images).
+   *
+   * <p>Builds the pixel approximation using the Gaussian error function as described in Smith et
+   * al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
    * Nature Methods 7, 373-375 (supplementary note).
    *
    * @param data The data (can be null)
@@ -302,9 +305,11 @@ public class GaussianPSFModel extends PSFModel {
 
   /**
    * Construct a Gaussian 2D function based at the origin using the specified range in each
-   * dimension. <p> Builds the pixel approximation using the Gaussian error function as described in
-   * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
-   * uncertainty. Nature Methods 7, 373-375 (supplementary note).
+   * dimension.
+   *
+   * <p>Builds the pixel approximation using the Gaussian error function as described in Smith et
+   * al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
+   * Nature Methods 7, 373-375 (supplementary note).
    *
    * @param x0range The maximum range in dimension 0 (width)
    * @param x1range The maximum range in dimension 1 (height)

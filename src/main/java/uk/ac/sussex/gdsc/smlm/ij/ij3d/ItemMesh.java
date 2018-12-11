@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -52,8 +53,10 @@ import customnode.CustomMesh;
 
 /**
  * Use a mesh object to represent a set of points. The object is duplicated, scaled and translated
- * for each point. <p> Note: TransparentItemShape is only supported if {@link #hasColor4()} is true,
- * i.e. the input geometry has per vertex colours with alpha.
+ * for each point.
+ *
+ * <p>Note: TransparentItemShape is only supported if {@link #hasColor4()} is true, i.e. the input
+ * geometry has per vertex colours with alpha.
  */
 public class ItemMesh extends CustomMesh implements UpdateableItemShape, TransparentItemShape {
   /** The vertex count of the original geometry array. */
@@ -87,9 +90,12 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   protected ArrayColorUpdater colorUpdater;
 
   /**
-   * Instantiates a new item mesh. <p> This will repeat the object for each input point. The object
-   * is assumed to be centred on the origin. It will be scaled and translated for each input point.
-   * <p> The input geometry array vertex format is checked and unsupported formats throw an
+   * Instantiates a new item mesh.
+   *
+   * <p>This will repeat the object for each input point. The object is assumed to be centred on the
+   * origin. It will be scaled and translated for each input point.
+   *
+   * <p>The input geometry array vertex format is checked and unsupported formats throw an
    * exception. Currently this only supports coordinates, normals and color. Strip and Fan arrays
    * are supported.
    *
@@ -109,9 +115,12 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   }
 
   /**
-   * Instantiates a new item mesh. <p> This will repeat the object for each input point. The object
-   * is assumed to be centred on the origin. It will be scaled and translated for each input point.
-   * <p> The input geometry array vertex format is checked and unsupported formats throw an
+   * Instantiates a new item mesh.
+   *
+   * <p>This will repeat the object for each input point. The object is assumed to be centred on the
+   * origin. It will be scaled and translated for each input point.
+   *
+   * <p>The input geometry array vertex format is checked and unsupported formats throw an
    * exception. Currently this only supports coordinates, normals and color. Strip and Fan arrays
    * are supported.
    *

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -44,9 +45,10 @@ import java.util.Arrays;
  */
 public class TransparentItemTriangleMesh extends ItemTriangleMesh implements TransparentItemShape {
   /**
-   * Instantiates a new transparent item triangle mesh. <p> This will repeat the object for each
-   * input point. The object is assumed to be centred on the origin. It will be scaled and
-   * translated for each input point.
+   * Instantiates a new transparent item triangle mesh.
+   *
+   * <p>This will repeat the object for each input point. The object is assumed to be centred on the
+   * origin. It will be scaled and translated for each input point.
    *
    * @param objectVertices the vertices of the object for a single point
    * @param points the points
@@ -60,11 +62,13 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
   }
 
   /**
-   * Instantiates a new transparent item triangle mesh. <p> This will repeat the object for each
-   * input point. The object is assumed to be centred on the origin. It will be scaled and
-   * translated for each input point. <p> The crease angle is used to collapse facets normals at a
-   * vertex into a single normal for smoothing shading. Set to 0 to draw the polygon with no
-   * shading.
+   * Instantiates a new transparent item triangle mesh.
+   *
+   * <p>This will repeat the object for each input point. The object is assumed to be centred on the
+   * origin. It will be scaled and translated for each input point.
+   *
+   * <p>The crease angle is used to collapse facets normals at a vertex into a single normal for
+   * smoothing shading. Set to 0 to draw the polygon with no shading.
    *
    * @param objectVertices the vertices of the object for a single point
    * @param points the points

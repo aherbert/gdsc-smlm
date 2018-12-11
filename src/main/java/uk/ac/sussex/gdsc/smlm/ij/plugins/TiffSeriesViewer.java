@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -76,7 +77,8 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
   private static int nImages = (int) Prefs.get(Constants.tiffSeriesOutputNImages, 1);
   private static String outputDirectory = Prefs.get(Constants.tiffSeriesOutputDirectory, "");
 
-  private Label label, label2;
+  private Label label;
+  private Label label2;
 
   /** {@inheritDoc} */
   @Override
@@ -139,7 +141,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       final Choice choice = gd.getLastChoice();
       choice.addItemListener(new ItemListener() {
         @Override
-        public void itemStateChanged(ItemEvent e) {
+        public void itemStateChanged(ItemEvent event) {
           inputMode = choice.getSelectedIndex();
           updateLabel();
         }
@@ -184,7 +186,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       final Choice choice = gd.getLastChoice();
       choice.addItemListener(new ItemListener() {
         @Override
-        public void itemStateChanged(ItemEvent e) {
+        public void itemStateChanged(ItemEvent event) {
           outputMode = choice.getSelectedIndex();
           updateLabel2();
         }

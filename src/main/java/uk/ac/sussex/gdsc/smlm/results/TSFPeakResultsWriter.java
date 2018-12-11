@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -52,9 +53,12 @@ import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Saves the fit results to file using the Tagged Spot File (TSF) format. <p> Write out a TSF file
- * assuming the results are in the standard GSDC SMLM format (intensity in counts, angles in
- * degrees). <p> To satisfy the format the calibration must be set including the amplification
+ * Saves the fit results to file using the Tagged Spot File (TSF) format.
+ *
+ * <p>Write out a TSF file assuming the results are in the standard GSDC SMLM format (intensity in
+ * counts, angles in degrees).
+ *
+ * <p>To satisfy the format the calibration must be set including the amplification
  * (electrons/count) and camera bias. The bias is removed from the background. If amplification is
  * not strictly positive then the calibration gain will be written to the TSF 'electron conversion
  * factor' field.
@@ -74,7 +78,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
   private int size = 0;
   private AtomicInteger id;
 
-  private int isx, isy, ia;
+  private int isx;
+  private int isy;
+  private int ia;
   private FitMode fitMode;
 
   private int boxSize = 0;
@@ -383,6 +389,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
   private static ThetaUnits[] thetaUnitsMap;
   private static LocationUnits[] locationUnitsMap;
   private static IntensityUnits[] intensityUnitsMap;
+
   static {
     // These should have 1:1 mapping. We can extends the TSF proto if necessary.
     cameraTypeMap = new CameraType[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType

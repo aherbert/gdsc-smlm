@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -106,8 +107,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Produces a 2D Gaussian astigmatism model for a 2D astigmatic PSF. <p> The input images must be a
- * z-stack of a PSF.
+ * Produces a 2D Gaussian astigmatism model for a 2D astigmatic PSF.
+ *
+ * <p>The input images must be a z-stack of a PSF.
  */
 public class AstigmatismModelManager implements PlugIn {
   private static final String TITLE = "Astigmatism Model Manager";
@@ -119,12 +121,22 @@ public class AstigmatismModelManager implements PlugIn {
   private ImagePlus imp;
   private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
-  private int cx, cy;
+  private int cx;
+  private int cy;
   private MemoryPeakResults results;
-  private double[] z, x, y, I, sx, sy;
-  private PlotWindow xyPlot, sPlot;
-  private int minz, maxz;
-  private double[] fitZ, fitSx, fitSy;
+  private double[] z;
+  private double[] x;
+  private double[] y;
+  private double[] I;
+  private double[] sx;
+  private double[] sy;
+  private PlotWindow xyPlot;
+  private PlotWindow sPlot;
+  private int minz;
+  private int maxz;
+  private double[] fitZ;
+  private double[] fitSx;
+  private double[] fitSy;
   private double[] parameters;
 
   private static AstigmatismModelSettings.Builder getSettings() {
@@ -265,6 +277,7 @@ public class AstigmatismModelManager implements PlugIn {
       };
   //@formatter:on
   private static String[] OPTIONS2;
+
   static {
     OPTIONS2 = Arrays.copyOf(OPTIONS, 1);
   }
@@ -805,7 +818,7 @@ public class AstigmatismModelManager implements PlugIn {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       final int oldMinz = minz;
       final int oldMaxz = maxz;
       minz = (int) gd.getNextNumber();
@@ -868,7 +881,10 @@ public class AstigmatismModelManager implements PlugIn {
             / 2;
 
     // Start with Ax, Bx, Ay, By as zero.
-    final double Ax = 0, Bx = 0, Ay = 0, By = 0;
+    final double Ax = 0;
+    final double Bx = 0;
+    final double Ay = 0;
+    final double By = 0;
 
     // Equations assume that x direction is focused above (positive).
     // If this is not the case we can invert the gamma parameter.
@@ -1015,7 +1031,10 @@ public class AstigmatismModelManager implements PlugIn {
       final double one_d2 = 1.0 / MathUtils.pow2(p[P_D]);
 
       final double[] value = new double[fitZ.length * 2];
-      double z, z2, z3, z4;
+      double z;
+      double z2;
+      double z3;
+      double z4;
 
       for (int i = 0, j = fitZ.length; i < fitZ.length; i++, j++) {
         // X : z -> z-gamma
@@ -1056,7 +1075,12 @@ public class AstigmatismModelManager implements PlugIn {
       pl[P_D] = 1.0 / MathUtils.pow2(pl[P_D]);
 
       final double[][] value = new double[fitZ.length * 2][p.length];
-      double z, z2, z3, z4, v1, v2;
+      double z;
+      double z2;
+      double z3;
+      double z4;
+      double v1;
+      double v2;
 
       // X : z -> z-gamma
       for (int i = 0; i < fitZ.length; i++) {
@@ -1445,7 +1469,8 @@ public class AstigmatismModelManager implements PlugIn {
     plot.setColor(Color.YELLOW);
 
     if (pluginSettings.getShowDepthOfFocus()) {
-      final double z0x = gamma, z0y = -gamma;
+      final double z0x = gamma;
+      final double z0y = -gamma;
       plot.setColor(Color.RED.darker());
       plot.drawDottedLine(z0x - d, miny, z0x - d, maxy, 4);
       plot.drawDottedLine(z0x + d, miny, z0x + d, maxy, 4);
@@ -1513,7 +1538,7 @@ public class AstigmatismModelManager implements PlugIn {
         gd.setOKLabel(" Close ");
         gd.addAndGetButton("Reset", new ActionListener() {
           @Override
-          public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent event) {
             update();
             // The events triggered by setting these should be ignored now
             tfz.setText("0");
@@ -1527,7 +1552,7 @@ public class AstigmatismModelManager implements PlugIn {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       z = gd.getNextNumber();
       pluginSettings.setCalibratedImage(gd.getNextBoolean());
       if (gd.invalidNumber()) {

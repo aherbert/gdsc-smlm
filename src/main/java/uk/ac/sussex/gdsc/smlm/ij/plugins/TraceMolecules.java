@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
@@ -112,7 +113,7 @@ public class TraceMolecules implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     public static OptimiserPlot get(int ordinal) {
       if (ordinal < 0 || ordinal >= values().length) {
@@ -156,6 +157,7 @@ public class TraceMolecules implements PlugIn {
   private static final String[] FILENAMES = new String[] {"total_signal", "signal_per_frame",
       "blinks", "t_on", "t_off", "total_t_on", "total_t_off"};
   private static boolean[] displayHistograms = new boolean[NAMES.length];
+
   static {
     for (int i = 0; i < displayHistograms.length; i++) {
       displayHistograms[i] = true;
@@ -170,6 +172,7 @@ public class TraceMolecules implements PlugIn {
   private static final int TOTAL_T_OFF = 6;
 
   private static boolean[] integerDisplay;
+
   static {
     integerDisplay = new boolean[NAMES.length];
     integerDisplay[BLINKS] = true;
@@ -180,6 +183,7 @@ public class TraceMolecules implements PlugIn {
     // integerDisplay[TOTAL_T_OFF] = true;
   }
   private static boolean[] alwaysRemoveOutliers;
+
   static {
     alwaysRemoveOutliers = new boolean[NAMES.length];
     alwaysRemoveOutliers[TOTAL_SIGNAL] = false;
@@ -199,8 +203,11 @@ public class TraceMolecules implements PlugIn {
   private FloatProcessor fp;
   private Calibration cal;
   // Store the pixel value for the first plotted result
-  private int origX, origY;
-  private boolean debugMode = false, altKeyDown, optimiseBlinkingRate = false;
+  private int origX;
+  private int origY;
+  private boolean debugMode = false;
+  private boolean altKeyDown;
+  private boolean optimiseBlinkingRate = false;
 
   /** {@inheritDoc} */
   @Override
@@ -463,8 +470,10 @@ public class TraceMolecules implements PlugIn {
 
   /**
    * Save the traces to the file. A File open dialog is presented and the selected filename
-   * returned. <p> If the id is above zero then the file open dialog title will have the id appended
-   * and the filename is searched for .[0-9]+. and it is replaced with .id.
+   * returned.
+   *
+   * <p>If the id is above zero then the file open dialog title will have the id appended and the
+   * filename is searched for .[0-9]+. and it is replaced with .id.
    *
    * @param sourceResults the source results
    * @param traces the traces
@@ -1052,8 +1061,9 @@ public class TraceMolecules implements PlugIn {
 
   /**
    * Runs the tracing algorithm using distances and time thresholds between min and max with the
-   * configured number of steps. Steps are spaced using a logarithmic scale. <p> Returns a list of
-   * [distance,time,N traces]
+   * configured number of steps. Steps are spaced using a logarithmic scale.
+   *
+   * <p>Returns a list of [distance,time,N traces]
    *
    * @param peakResults the peak results
    * @param minDistanceThreshold the min distance threshold
@@ -1071,8 +1081,9 @@ public class TraceMolecules implements PlugIn {
 
   /**
    * Runs the tracing algorithm using distances and time thresholds between min and max with the
-   * configured number of steps. Steps are spaced using a logarithmic scale. <p> Returns a list of
-   * [distance,time,N traces]
+   * configured number of steps. Steps are spaced using a logarithmic scale.
+   *
+   * <p>Returns a list of [distance,time,N traces]
    *
    * @param manager the manager
    * @param minDistanceThreshold the min distance threshold
@@ -1384,7 +1395,8 @@ public class TraceMolecules implements PlugIn {
    * @param results the results
    */
   private void createPlotResults(List<double[]> results) {
-    final int w = 400, h = 400;
+    final int w = 400;
+    final int h = 400;
     switch (OptimiserPlot.get(settings.getOptimiserPlot())) {
       case NONE:
         return;
@@ -1446,16 +1458,16 @@ public class TraceMolecules implements PlugIn {
       return;
     }
     final Calibration cal = imp.getCalibration();
-    final int nPoints = zeroCrossingPoints.size();
-    final float[] xPoints = new float[nPoints];
-    final float[] yPoints = new float[nPoints];
-    for (int i = 0; i < nPoints; i++) {
+    final int npoints = zeroCrossingPoints.size();
+    final float[] xpoints = new float[npoints];
+    final float[] ypoints = new float[npoints];
+    for (int i = 0; i < npoints; i++) {
       final double[] point = zeroCrossingPoints.get(i);
       // Convert to pixel coordinates.
-      xPoints[i] = (float) (cal.xOrigin + (point[0] / cal.pixelWidth));
-      yPoints[i] = (float) (cal.yOrigin + (point[1] / cal.pixelHeight));
+      xpoints[i] = (float) (cal.xOrigin + (point[0] / cal.pixelWidth));
+      ypoints[i] = (float) (cal.yOrigin + (point[1] / cal.pixelHeight));
     }
-    roi = new PolygonRoi(xPoints, yPoints, nPoints, Roi.POLYLINE);
+    roi = new PolygonRoi(xpoints, ypoints, npoints, Roi.POLYLINE);
     imp.setRoi(roi);
   }
 

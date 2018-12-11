@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
@@ -57,6 +58,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private static final int METHOD_SPATIAL = 0;
   private static final int METHOD_FHT = 1;
   private static final String[] FILTERS;
+
   static {
     FILTERS = SettingsManager.getNames((Object[]) Operation.values());
   }
@@ -76,7 +78,8 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private boolean lastZero;
   private KernelFilter kf = null;
   private FHTFilter ff = null;
-  private ImagePlus dataImp, kernelImp;
+  private ImagePlus dataImp;
+  private ImagePlus kernelImp;
 
   /** {@inheritDoc} */
   @Override
@@ -150,7 +153,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     title = gd.getNextChoice();
     method = gd.getNextChoiceIndex();
     filter = gd.getNextChoiceIndex();
@@ -166,7 +169,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   }
 
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Create the kernel from the image
     boolean build = kernelImp.getID() != lastId || method != lastMethod || filter != lastFilter;
     build = build || (method == METHOD_SPATIAL && kf == null);
@@ -212,7 +215,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
       lastZero = zero;
     }
 
-    ticker = Ticker.create(new ImageJTrackProgress(), nPasses, nPasses != 1);
+    ticker = Ticker.create(new ImageJTrackProgress(), passes, passes != 1);
     ticker.start();
   }
 }

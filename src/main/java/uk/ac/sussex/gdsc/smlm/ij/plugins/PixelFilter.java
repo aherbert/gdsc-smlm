@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
@@ -71,7 +72,8 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     // Compute rolling sums
     final FloatProcessor fp = ip.toFloat(0, null);
     final float[] data = (float[]) ip.toFloat(0, null).getPixels();
-    double[] s = null, ss = null;
+    double[] s = null;
+    double[] ss = null;
     if (preview && cachedS != null) {
       s = cachedS;
       ss = cachedSS;
@@ -274,7 +276,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     label.setText("");
     radius = (int) gd.getNextNumber();
     error = gd.getNextNumber();
@@ -286,7 +288,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Ignore
   }
 }

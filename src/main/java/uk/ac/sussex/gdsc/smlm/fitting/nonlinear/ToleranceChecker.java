@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 /**
@@ -83,10 +84,13 @@ public class ToleranceChecker {
 
   /**
    * Build an instance with specified thresholds. This only checks convergence using the parameters.
-   * <p> In order to perform only relative checks, the absolute tolerance must be set to a negative
+   *
+   * <p>In order to perform only relative checks, the absolute tolerance must be set to a negative
    * value. In order to perform only absolute checks, the relative tolerance must be set to a
-   * negative value. <p> Note: If a tolerance is set to zero then an exact match will achieve
-   * equality. Only negative values disable the tolerance.
+   * negative value.
+   *
+   * <p>Note: If a tolerance is set to zero then an exact match will achieve equality. Only negative
+   * values disable the tolerance.
    *
    * @param relativeParameters relative tolerance threshold on the parameters. Set to negative to
    *        disable.
@@ -101,10 +105,14 @@ public class ToleranceChecker {
   }
 
   /**
-   * Build an instance with specified thresholds. <p> In order to perform only relative checks, the
-   * absolute tolerance must be set to a negative value. In order to perform only absolute checks,
-   * the relative tolerance must be set to a negative value. <p> Note: If a tolerance is set to zero
-   * then an exact match will achieve equality. Only negative values disable the tolerance.
+   * Build an instance with specified thresholds.
+   *
+   * <p>In order to perform only relative checks, the absolute tolerance must be set to a negative
+   * value. In order to perform only absolute checks, the relative tolerance must be set to a
+   * negative value.
+   *
+   * <p>Note: If a tolerance is set to zero then an exact match will achieve equality. Only negative
+   * values disable the tolerance.
    *
    * @param relativeValue relative tolerance threshold on the value. Set to negative to disable.
    * @param absoluteValue absolute tolerance threshold on the value. Set to negative to disable.
@@ -124,10 +132,14 @@ public class ToleranceChecker {
   }
 
   /**
-   * Build an instance with specified thresholds. <p> In order to perform only relative checks, the
-   * absolute tolerance must be set to a negative value. In order to perform only absolute checks,
-   * the relative tolerance must be set to a negative value. <p> Note: If a tolerance is set to zero
-   * then an exact match will achieve equality. Only negative values disable the tolerance.
+   * Build an instance with specified thresholds.
+   *
+   * <p>In order to perform only relative checks, the absolute tolerance must be set to a negative
+   * value. In order to perform only absolute checks, the relative tolerance must be set to a
+   * negative value.
+   *
+   * <p>Note: If a tolerance is set to zero then an exact match will achieve equality. Only negative
+   * values disable the tolerance.
    *
    * @param minimiseValue Set to true to ensure the value is minimised at converge (otherwise it is
    *        maximised)

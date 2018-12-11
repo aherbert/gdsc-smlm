@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -62,8 +63,9 @@ public class Gaussian2DPeakResultHelper {
 
   /**
    * The default points to use for maximum likelihood precision computation, see
-   * {@link #getMLVarianceX(double, double, double, double, boolean, int)} <p> Testing shows that 10
-   * integration points is the fastest for realistic input parameters.
+   * {@link #getMLVarianceX(double, double, double, double, boolean, int)}
+   *
+   * <p>Testing shows that 10 integration points is the fastest for realistic input parameters.
    */
   public static final int POINTS = 10;
 
@@ -73,7 +75,8 @@ public class Gaussian2DPeakResultHelper {
     static final double ONE_OVER_ROOT2 = 1.0 / ROOT2;
 
     final CalibrationReader calibration;
-    final int isx, isy;
+    final int isx;
+    final int isy;
     private boolean oneAxisSD;
 
     // Set dynamically when needed
@@ -84,11 +87,14 @@ public class Gaussian2DPeakResultHelper {
     boolean emCCD;
 
     /**
-     * Instantiates a new Gaussian 2D peak result helper. <p> The calibration need only contain the
-     * information required for the given helper function. It is suggested to create this helper
-     * instance and then call the helper function once to determine if the helper is valid, catching
-     * and handling the configuration exception as appropriate. <p> Note: A factory method is
-     * provided to simplify creation for a specific helper function.
+     * Instantiates a new Gaussian 2D peak result helper.
+     *
+     * <p>The calibration need only contain the information required for the given helper function.
+     * It is suggested to create this helper instance and then call the helper function once to
+     * determine if the helper is valid, catching and handling the configuration exception as
+     * appropriate.
+     *
+     * <p>Note: A factory method is provided to simplify creation for a specific helper function.
      *
      * @param psf the psf
      * @param calibration the calibration (used for converting the parameters)
@@ -506,8 +512,9 @@ public class Gaussian2DPeakResultHelper {
   public static final int INDEX_A = PeakResult.STANDARD_PARAMETERS + 2;
 
   /**
-   * Creates a new Gaussian 2D peak result calculator. <p> The calibration need only contain the
-   * information required for the specified functions.
+   * Creates a new Gaussian 2D peak result calculator.
+   *
+   * <p>The calibration need only contain the information required for the specified functions.
    *
    * @param psf the psf
    * @param calibration the calibration (used for converting the parameters)
@@ -524,8 +531,9 @@ public class Gaussian2DPeakResultHelper {
   }
 
   /**
-   * Creates a new Gaussian 2D peak result calculator. <p> The calibration need only contain the
-   * information required for the specified functions.
+   * Creates a new Gaussian 2D peak result calculator.
+   *
+   * <p>The calibration need only contain the information required for the specified functions.
    *
    * @param psf the psf
    * @param calibrationReader the calibration reader (used for converting the parameters)
@@ -568,7 +576,8 @@ public class Gaussian2DPeakResultHelper {
    * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D
    * PSF. This is an approximation of the precision of fitting to an optical PSF. Uses the Mortensen
    * formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-   * <p> This method will use the background noise to approximate the expected background value of
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
    * each pixel.
    *
    * @param a The size of the pixels in nm
@@ -595,7 +604,8 @@ public class Gaussian2DPeakResultHelper {
    * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D
    * PSF. This is an approximation of the precision of fitting to an optical PSF. Uses the Mortensen
    * formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-   * <p> This method will use the background noise to approximate the expected background value of
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
    * each pixel.
    *
    * @param a The size of the pixels in nm
@@ -622,8 +632,10 @@ public class Gaussian2DPeakResultHelper {
    * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a
    * Gaussian2D PSF. This is an approximation of the precision of fitting to an optical PSF. Uses
    * the Mortensen formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383),
-   * SI equation 54. <p> This method will use the background noise to approximate the expected
-   * background value of each pixel.
+   * SI equation 54.
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
+   * each pixel.
    *
    * @param a The size of the pixels in nm
    * @param s The peak standard deviation in nm
@@ -649,8 +661,10 @@ public class Gaussian2DPeakResultHelper {
    * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a
    * Gaussian2D PSF. This is an approximation of the precision of fitting to an optical PSF. Uses
    * the Mortensen formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383),
-   * SI equation 54. <p> This method will use the background noise to approximate the expected
-   * background value of each pixel.
+   * SI equation 54.
+   *
+   * <p>This method will use the background noise to approximate the expected background value of
+   * each pixel.
    *
    * @param a The size of the pixels in nm
    * @param s The peak standard deviation in nm
@@ -676,9 +690,10 @@ public class Gaussian2DPeakResultHelper {
    * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D
    * PSF. This is an approximation of the precision of fitting to an optical PSF for least squares
    * estimation. Uses the Mortensen formula for an EMCCD camera (Mortensen, et al (2010) Nature
-   * Methods 7, 377-383), equation 6. <p> If the expected photons per pixel is unknown then use the
-   * standard deviation across the image and the method
-   * {@link #getPrecision(double, double, double, double, boolean)}.
+   * Methods 7, 377-383), equation 6.
+   *
+   * <p>If the expected photons per pixel is unknown then use the standard deviation across the
+   * image and the method {@link #getPrecision(double, double, double, double, boolean)}.
    *
    * @param a The size of the pixels in nm
    * @param s The peak standard deviation in nm
@@ -720,9 +735,10 @@ public class Gaussian2DPeakResultHelper {
    * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D
    * PSF. This is an approximation of the precision of fitting to an optical PSF for least squares
    * estimation. Uses the Mortensen formula for an EMCCD camera (Mortensen, et al (2010) Nature
-   * Methods 7, 377-383), equation 6. <p> If the expected photons per pixel is unknown then use the
-   * standard deviation across the image and the method
-   * {@link #getPrecision(double, double, double, double, boolean)}.
+   * Methods 7, 377-383), equation 6.
+   *
+   * <p>If the expected photons per pixel is unknown then use the standard deviation across the
+   * image and the method {@link #getPrecision(double, double, double, double, boolean)}.
    *
    * @param a The size of the pixels in nm
    * @param s The peak standard deviation in nm
@@ -807,12 +823,12 @@ public class Gaussian2DPeakResultHelper {
    *        expectation value across the image (Note that this is b^2 not b, which could be the
    *        standard deviation of the image pixels)
    * @param emCCD True if an emCCD camera
-   * @param integrationPoints the number of integration points for the LegendreGaussIntegrator
+   * @param integrationpoints the number of integration points for the LegendreGaussIntegrator
    * @return The location precision in nm in each dimension (X/Y)
    */
   public static double getMLPrecisionX(double a, double s, double N, double b2, boolean emCCD,
-      int integrationPoints) {
-    return Math.sqrt(getMLVarianceX(a, s, N, b2, emCCD, integrationPoints));
+      int integrationpoints) {
+    return Math.sqrt(getMLVarianceX(a, s, N, b2, emCCD, integrationpoints));
   }
 
   /**
@@ -838,8 +854,10 @@ public class Gaussian2DPeakResultHelper {
    * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a
    * Gaussian2D PSF. This is an approximation of the precision of fitting to an optical PSF. Uses
    * the Mortensen formula for an EMCCD camera (Mortensen, et al (2010) Nature Methods 7, 377-383),
-   * SI equation 54. <p> In the event of failure to integrate the formula the variance for Least
-   * Squares Estimation is returned.
+   * SI equation 54.
+   *
+   * <p>In the event of failure to integrate the formula the variance for Least Squares Estimation
+   * is returned.
    *
    * @param a The size of the pixels in nm
    * @param s The peak standard deviation in nm
@@ -848,11 +866,11 @@ public class Gaussian2DPeakResultHelper {
    *        expectation value across the image (Note that this is b^2 not b, which could be the
    *        standard deviation of the image pixels)
    * @param emCCD True if an emCCD camera
-   * @param integrationPoints the number of integration points for the LegendreGaussIntegrator
+   * @param integrationpoints the number of integration points for the LegendreGaussIntegrator
    * @return The location variance in nm in each dimension (X/Y)
    */
   public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD,
-      int integrationPoints) {
+      int integrationpoints) {
     if (N <= 0) {
       return Double.POSITIVE_INFINITY;
     }
@@ -865,7 +883,7 @@ public class Gaussian2DPeakResultHelper {
 
     final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
     try {
-      final double I1 = computeI1(rho, integrationPoints);
+      final double I1 = computeI1(rho, integrationpoints);
       if (I1 > 0) {
         return F * (sa2 / N) * (1 / I1);
         // else
@@ -889,10 +907,10 @@ public class Gaussian2DPeakResultHelper {
    * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
    *
    * @param rho the rho
-   * @param integrationPoints the number of integration points for the LegendreGaussIntegrator
+   * @param integrationpoints the number of integration points for the LegendreGaussIntegrator
    * @return the I1 value
    */
-  private static double computeI1(final double rho, int integrationPoints) {
+  private static double computeI1(final double rho, int integrationpoints) {
     if (rho == 0) {
       return 1;
     }
@@ -903,7 +921,7 @@ public class Gaussian2DPeakResultHelper {
     final int maximalIterationCount = 32;
 
     // Use an integrator that does not use the boundary since log(0) is undefined.
-    final UnivariateIntegrator i = new IterativeLegendreGaussIntegrator(integrationPoints,
+    final UnivariateIntegrator i = new IterativeLegendreGaussIntegrator(integrationpoints,
         relativeAccuracy, absoluteAccuracy, minimalIterationCount, maximalIterationCount);
 
     // Specify the function to integrate
@@ -973,9 +991,11 @@ public class Gaussian2DPeakResultHelper {
   }
 
   /**
-   * Creates the params array for a Gaussian 2D peak result. <p> The psf parameters are used to
-   * determine if the PSF is one axis, two axis or two axis and angle. If no PSF parameters are
-   * given then a 1 axis Gaussian is created with a standard deviation of 1.
+   * Creates the params array for a Gaussian 2D peak result.
+   *
+   * <p>The psf parameters are used to determine if the PSF is one axis, two axis or two axis and
+   * angle. If no PSF parameters are given then a 1 axis Gaussian is created with a standard
+   * deviation of 1.
    *
    * @param background the background
    * @param intensity the intensity
@@ -1177,11 +1197,13 @@ public class Gaussian2DPeakResultHelper {
   }
 
   /**
-   * Gets the average signal value within a range r standard deviations of the centre. <p> The
-   * average signal value is taken using the expected sum of the Gaussian within the range divided
-   * by the elliptical area of the same range. The expected sum is computed using
-   * {@link #cumulative2D(double)} and the area would be pi * sx * sy * r * r. <p> Note: Argument sx
-   * and sy are not checked that they are positive.
+   * Gets the average signal value within a range r standard deviations of the centre.
+   *
+   * <p>The average signal value is taken using the expected sum of the Gaussian within the range
+   * divided by the elliptical area of the same range. The expected sum is computed using
+   * {@link #cumulative2D(double)} and the area would be pi * sx * sy * r * r.
+   *
+   * <p>Note: Argument sx and sy are not checked that they are positive.
    *
    * @param intensity the total intensity of the Gaussian
    * @param sx the Gaussian standard deviation in the X dimension
@@ -1194,11 +1216,13 @@ public class Gaussian2DPeakResultHelper {
   }
 
   /**
-   * Gets the average signal value within 1 standard deviations of the centre. <p> The average
-   * signal value is taken using the expected sum of the Gaussian within the range divided by the
-   * elliptical area of the same range. The expected sum is computed using
-   * {@link #cumulative2D(double)} and the area would be pi * sx * sy. <p> Note: Argument sx and sy
-   * are not checked that they are positive.
+   * Gets the average signal value within 1 standard deviations of the centre.
+   *
+   * <p>The average signal value is taken using the expected sum of the Gaussian within the range
+   * divided by the elliptical area of the same range. The expected sum is computed using
+   * {@link #cumulative2D(double)} and the area would be pi * sx * sy.
+   *
+   * <p>Note: Argument sx and sy are not checked that they are positive.
    *
    * @param intensity the total intensity of the Gaussian
    * @param sx the Gaussian standard deviation in the X dimension
@@ -1210,13 +1234,16 @@ public class Gaussian2DPeakResultHelper {
   }
 
   /**
-   * Gets the average signal value within 2 standard deviations of the centre. <p> The average
-   * signal value is taken using the expected sum of the Gaussian within the range divided by the
-   * elliptical area of the same range. The expected sum is computed using
-   * {@link #cumulative2D(double)} and the area would be pi * sx * sy * 2 * 2. <p> As an alternative
-   * definition, the standard deviation of the background can be computed using the standard
-   * deviation of the signal in the region around the Gaussian. <p> Note: Argument sx and sy are not
-   * checked that they are positive.
+   * Gets the average signal value within 2 standard deviations of the centre.
+   *
+   * <p>The average signal value is taken using the expected sum of the Gaussian within the range
+   * divided by the elliptical area of the same range. The expected sum is computed using
+   * {@link #cumulative2D(double)} and the area would be pi * sx * sy * 2 * 2.
+   *
+   * <p>As an alternative definition, the standard deviation of the background can be computed using
+   * the standard deviation of the signal in the region around the Gaussian.
+   *
+   * <p>Note: Argument sx and sy are not checked that they are positive.
    *
    * @param intensity the total intensity of the Gaussian
    * @param sx the Gaussian standard deviation in the X dimension
@@ -1229,11 +1256,13 @@ public class Gaussian2DPeakResultHelper {
 
   /**
    * Gets the average signal value using the range r standard deviations of the centre defined by
-   * the given the cumulative 2D normal distribution {@code F(r)}. <p> The average signal value is
-   * taken using the expected sum of the Gaussian within the range divided by the elliptical area of
-   * the same range. The expected range is computed using {@link #inverseCumulative2D(double)} and
-   * the area would be pi * sx * sy * r * r. <p> Note: Argument sx and sy are not checked that they
-   * are positive.
+   * the given the cumulative 2D normal distribution {@code F(r)}.
+   *
+   * <p>The average signal value is taken using the expected sum of the Gaussian within the range
+   * divided by the elliptical area of the same range. The expected range is computed using
+   * {@link #inverseCumulative2D(double)} and the area would be pi * sx * sy * r * r.
+   *
+   * <p>Note: Argument sx and sy are not checked that they are positive.
    *
    * @param intensity the total intensity of the Gaussian
    * @param sx the Gaussian standard deviation in the X dimension
@@ -1250,20 +1279,23 @@ public class Gaussian2DPeakResultHelper {
 
   /**
    * Gets the average signal value using the range r standard deviations of the centre that covers
-   * half of the total 2D Gaussian (cumulative 2D normal distribution {@code F(r)=0.5}). <p> The
-   * average signal value is taken using the expected sum of the Gaussian within the range divided
-   * by the elliptical area of the same range. The expected range is computed using
-   * {@link #inverseCumulative2D(double)} and the area would be pi * sx * sy * r * r. <p> Note: When
-   * F(r)=0.5 then the inverseCumulative2D function computes the factor to convert a standard
-   * deviation of a 1D Gaussian to a Half-Width at Half Maxima (HWHM):
+   * half of the total 2D Gaussian (cumulative 2D normal distribution {@code F(r)=0.5}).
+   *
+   * <p>The average signal value is taken using the expected sum of the Gaussian within the range
+   * divided by the elliptical area of the same range. The expected range is computed using
+   * {@link #inverseCumulative2D(double)} and the area would be pi * sx * sy * r * r.
+   *
+   * <p>Note: When F(r)=0.5 then the inverseCumulative2D function computes the factor to convert a
+   * standard deviation of a 1D Gaussian to a Half-Width at Half Maxima (HWHM):
    *
    * <pre>
    * HWHM = sqrt(2 * log(2))
    * (F(r)=0.5 = sqrt(-2 * log(0.5)) = sqrt(-2 * log(1 / 2)) = sqrt(-2 * (log(1) - log(2))) = sqrt(-2 * -log(2))
    * </pre>
    *
-   * Thus this computes the mean signal within the HWHM of a 2D Gaussian. <p> Note: Argument sx and
-   * sy are not checked that they are positive.
+   * Thus this computes the mean signal within the HWHM of a 2D Gaussian.
+   *
+   * <p>Note: Argument sx and sy are not checked that they are positive.
    *
    * @param intensity the total intensity of the Gaussian
    * @param sx the Gaussian standard deviation in the X dimension

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
@@ -29,11 +30,13 @@ package uk.ac.sussex.gdsc.smlm.results;
 public class PeakResultHelper {
   /**
    * Convert the local background to an estimate of noise. Local background and noise are in ADU
-   * count units. <p> This assumes the local background is photon shot noise. The background is
-   * first converted to photons using the gain. The shot noise is taken assuming a Poisson
-   * distribution (thus the variance equals the number of photons). This is amplified by 2 if the
-   * data was taken on an EM-CCD camera. The square root is the noise in photons. This is converted
-   * back to ADUs using the gain. E.G.
+   * count units.
+   *
+   * <p>This assumes the local background is photon shot noise. The background is first converted to
+   * photons using the gain. The shot noise is taken assuming a Poisson distribution (thus the
+   * variance equals the number of photons). This is amplified by 2 if the data was taken on an
+   * EM-CCD camera. The square root is the noise in photons. This is converted back to ADUs using
+   * the gain. E.G.
    *
    * <pre>
    * return Math.sqrt((background / gain) * ((emCCD) ? 2 : 1)) * gain;
@@ -53,10 +56,11 @@ public class PeakResultHelper {
 
   /**
    * Convert the local background to an estimate of noise. Local background and noise are in photons
-   * units. <p> This assumes the local background is photon shot noise. The shot noise is taken
-   * assuming a Poisson distribution (thus the variance equals the number of photons). This is
-   * amplified by 2 if the data was taken on an EM-CCD camera. The square root is the noise in
-   * photons.
+   * units.
+   *
+   * <p>This assumes the local background is photon shot noise. The shot noise is taken assuming a
+   * Poisson distribution (thus the variance equals the number of photons). This is amplified by 2
+   * if the data was taken on an EM-CCD camera. The square root is the noise in photons.
    *
    * <pre>
    * return Math.sqrt((background) * ((emCCD) ? 2 : 1));
@@ -74,8 +78,9 @@ public class PeakResultHelper {
   }
 
   /**
-   * Convert the noise to local background. Local background and noise are in ADU count units. <p>
-   * This assumes the local background is photon shot noise. This is the opposite conversion to
+   * Convert the noise to local background. Local background and noise are in ADU count units.
+   *
+   * <p>This assumes the local background is photon shot noise. This is the opposite conversion to
    * {@link #localBackgroundToNoise(double, double, boolean)}.
    *
    * @param noise the noise
@@ -96,8 +101,9 @@ public class PeakResultHelper {
   }
 
   /**
-   * Convert the noise to local background. Local background and noise are in ADU count units. <p>
-   * This assumes the local background is photon shot noise. This is the opposite conversion to
+   * Convert the noise to local background. Local background and noise are in ADU count units.
+   *
+   * <p>This assumes the local background is photon shot noise. This is the opposite conversion to
    * {@link #localBackgroundToNoise(double, boolean)}.
    *
    * @param noise the noise

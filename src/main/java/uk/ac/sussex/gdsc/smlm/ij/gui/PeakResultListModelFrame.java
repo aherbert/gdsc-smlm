@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
@@ -154,12 +155,12 @@ public class PeakResultListModelFrame extends JFrame {
     // the same selection model. Each JList updates using the same selection.
     selectionModel.addListSelectionListener(new ListSelectionListener() {
       @Override
-      public void valueChanged(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) {
+      public void valueChanged(ListSelectionEvent event) {
+        if (event.getValueIsAdjusting()) {
           return;
         }
-        System.out.printf("Model Selected %d-%d [%b] : %s\n", e.getFirstIndex(), e.getLastIndex(),
-            e.getValueIsAdjusting(),
+        System.out.printf("Model Selected %d-%d [%b] : %s\n", event.getFirstIndex(),
+            event.getLastIndex(), event.getValueIsAdjusting(),
             Arrays.toString(ListSelectionModelHelper.getSelectedIndices(selectionModel)));
       }
     });
@@ -180,7 +181,7 @@ public class PeakResultListModelFrame extends JFrame {
           final PeakResultListModelFrame d = new PeakResultListModelFrame(model, selectionModel);
           // d.addListSelectionListener(new ListSelectionListener()
           // {
-          // public void valueChanged(ListSelectionEvent e)
+          // public void valueChanged(ListSelectionEvent event)
           // {
           // // Only process the event if the value is not adjusting.
           // // Then to determine what has changed only process the
@@ -200,7 +201,7 @@ public class PeakResultListModelFrame extends JFrame {
           final PeakResultListModelFrame d2 = new PeakResultListModelFrame(model, selectionModel);
           // d2.addListSelectionListener(new ListSelectionListener()
           // {
-          // public void valueChanged(ListSelectionEvent e)
+          // public void valueChanged(ListSelectionEvent event)
           // {
           // if (e.getValueIsAdjusting())
           // return;

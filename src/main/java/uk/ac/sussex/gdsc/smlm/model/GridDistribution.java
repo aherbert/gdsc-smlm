@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
@@ -30,22 +31,27 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.Arrays;
 
 /**
- * Populates an image with well spaced unary or binary localisations. <p> Creates a grid layout
- * using cells of the specified size within the image area. Each cell can have one or two
- * localisations. The first localisation is placed within the central 50% of the cell. The second
- * localisation (if present) is placed randomly up to a maximum distance away. When all cells have
- * been sampled then no more localisations are generated.
+ * Populates an image with well spaced unary or binary localisations.
+ *
+ * <p>Creates a grid layout using cells of the specified size within the image area. Each cell can
+ * have one or two localisations. The first localisation is placed within the central 50% of the
+ * cell. The second localisation (if present) is placed randomly up to a maximum distance away. When
+ * all cells have been sampled then no more localisations are generated.
  */
 public class GridDistribution implements SpatialDistribution {
   private final RandomGenerator randomGenerator;
   private final RandomDataGenerator dataGenerator;
-  private final int size, cellSize;
+  private final int size;
+  private final int cellSize;
   private final double pBinary;
-  private final double minBinaryDistance, maxBinaryDistance;
-  private final double min, depth;
+  private final double minBinaryDistance;
+  private final double maxBinaryDistance;
+  private final double min;
+  private final double depth;
 
   private int cell = -1;
-  private final int nCellsPerRow, nCells;
+  private final int nCellsPerRow;
+  private final int nCells;
   private double[] previous = null;
 
   /**
@@ -180,7 +186,7 @@ public class GridDistribution implements SpatialDistribution {
 
   /** {@inheritDoc} */
   @Override
-  public boolean isWithinXY(double[] xyz) {
+  public boolean isWithinXy(double[] xyz) {
     for (int i = 0; i < 2; i++) {
       if (xyz[i] < 0 || xyz[i] > size) {
         return false;

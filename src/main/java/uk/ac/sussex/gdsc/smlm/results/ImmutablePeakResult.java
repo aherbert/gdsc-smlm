@@ -21,13 +21,15 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
 
 /**
- * Specifies a peak fitting result that cannot be modified. <p> Any method that modifies the result
- * will throw a data exception.
+ * Specifies a peak fitting result that cannot be modified.
+ *
+ * <p>Any method that modifies the result will throw a data exception.
  */
 public class ImmutablePeakResult extends AttributePeakResult {
   private boolean built = false;

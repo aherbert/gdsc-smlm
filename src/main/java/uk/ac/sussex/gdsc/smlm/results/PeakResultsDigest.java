@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import java.util.concurrent.Callable;
@@ -110,9 +111,11 @@ public class PeakResultsDigest {
   }
 
   /**
-   * Gets the digest. <p> Note that the digest is the empty string when the size is zero. This is
-   * different from using a MessageDigest on nothing which will still return a digest string, for
-   * example when using PeakResultDigest.getDigest().
+   * Gets the digest.
+   *
+   * <p>Note that the digest is the empty string when the size is zero. This is different from using
+   * a MessageDigest on nothing which will still return a digest string, for example when using
+   * PeakResultDigest.getDigest().
    *
    * @return the digest
    */
@@ -158,9 +161,10 @@ public class PeakResultsDigest {
   }
 
   /**
-   * Check if the digest matches the other digest. <p> Note: This will return true if there is no
-   * digest only if the state of the other digest is the same. It is left to the user to check that
-   * the state is valid.
+   * Check if the digest matches the other digest.
+   *
+   * <p>Note: This will return true if there is no digest only if the state of the other digest is
+   * the same. It is left to the user to check that the state is valid.
    *
    * @param other the other digest
    * @return true, if successful

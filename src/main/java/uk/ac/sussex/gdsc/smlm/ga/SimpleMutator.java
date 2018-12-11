@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -35,7 +36,9 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
   final double fraction;
 
   private boolean override = false;
-  private double[] stepSize, lower, upper;
+  private double[] stepSize;
+  private double[] lower;
+  private double[] upper;
   private int[] positions;
   private int positionsCount;
 
@@ -52,8 +55,9 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 
   /**
    * Override the mutation parameters that are obtained from the Chromosome interface. The arrays
-   * must match the fixed size of the Chromosome sequences to be mutated. <p> All settings are
-   * overridden even if null arrays are passed for some arguments.
+   * must match the fixed size of the Chromosome sequences to be mutated.
+   *
+   * <p>All settings are overridden even if null arrays are passed for some arguments.
    *
    * @param stepSize The mutation step size (must not be null)
    * @param lower The lower limit for the sequence positions (can be null)
@@ -80,7 +84,7 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
   }
 
   /**
-   * Determine the positions that have a step size greater than zero, i.e. can be mutated
+   * Determine the positions that have a step size greater than zero, i.e. can be mutated.
    *
    * @param step The step sizes for each sequence position
    */
@@ -95,11 +99,13 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
   }
 
   /**
-   * Mutates the chromosome to form a new sequence. <p> The number of positions are chosen from a
-   * Poisson distribution with an average using a fraction of the total positions. The positions are
-   * then chosen randomly. Note that the same position may be chosen multiple times. The random
-   * shifts for each mutation are taken from a Gaussian using the chromosome mutation step range as
-   * the standard deviation. Set step size to zero for no mutation at a position.
+   * Mutates the chromosome to form a new sequence.
+   *
+   * <p>The number of positions are chosen from a Poisson distribution with an average using a
+   * fraction of the total positions. The positions are then chosen randomly. Note that the same
+   * position may be chosen multiple times. The random shifts for each mutation are taken from a
+   * Gaussian using the chromosome mutation step range as the standard deviation. Set step size to
+   * zero for no mutation at a position.
    *
    * @see uk.ac.sussex.gdsc.smlm.ga.Mutator#mutate(uk.ac.sussex.gdsc.smlm.ga.Chromosome)
    */
@@ -110,7 +116,9 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
     final double mean = fraction * chromosome.length();
     if (mean > 0) {
       int count = (int) random.nextPoisson(mean);
-      final double[] step, min, max;
+      final double[] step;
+      final double[] min;
+      final double[] max;
       // Only override if the length is correct
       if (override && stepSize.length == chromosome.length()) {
         step = stepSize;

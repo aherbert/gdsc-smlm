@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
@@ -43,10 +44,12 @@ public interface MLEFunctionSolver extends FunctionSolver {
 
   /**
    * Gets the probability Q that a value of the log likelihood ratio as poor as the value should
-   * occur by chance. <p> A low value indicates greater statistical significance, i.e. greater
-   * confidence that the observed deviation from the null hypothesis is significant, with the null
-   * hypothesis being that the fit is good (i.e. model with fewer parameters is better). The
-   * confidence in rejecting the null hypothesis is 100 * (1 - q) percent.
+   * occur by chance.
+   *
+   * <p>A low value indicates greater statistical significance, i.e. greater confidence that the
+   * observed deviation from the null hypothesis is significant, with the null hypothesis being that
+   * the fit is good (i.e. model with fewer parameters is better). The confidence in rejecting the
+   * null hypothesis is 100 * (1 - q) percent.
    *
    * @return the q-value
    */

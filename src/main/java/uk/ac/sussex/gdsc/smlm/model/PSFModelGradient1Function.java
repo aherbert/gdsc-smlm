@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -71,7 +72,9 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
   }
 
   /**
-   * {@inheritDoc} <p> The parameters must be [background,intensity,x,y,z]
+   * {@inheritDoc}
+   *
+   * <p>The parameters must be [background,intensity,x,y,z]
    *
    * @see uk.ac.sussex.gdsc.smlm.function.ValueFunction#initialise0(double[])
    */
@@ -97,7 +100,9 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
   }
 
   /**
-   * {@inheritDoc} <p> The parameters must be [background,intensity,x,y,z]
+   * {@inheritDoc}
+   *
+   * <p>The parameters must be [background,intensity,x,y,z]
    *
    * @see uk.ac.sussex.gdsc.smlm.function.GradientFunction#initialise(double[])
    */
@@ -117,7 +122,9 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
   }
 
   /**
-   * {@inheritDoc} <p> The parameters must be [background,intensity,x,y,z]
+   * {@inheritDoc}
+   *
+   * <p>The parameters must be [background,intensity,x,y,z]
    *
    * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Function#initialise1(double[])
    */

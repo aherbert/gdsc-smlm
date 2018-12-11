@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
@@ -187,8 +188,8 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
       // XXX - debugging
       final String msg = ex.getMessage();
       if (msg != null) {
-        System.out.printf("%s failed: %s - %s\n", getClass().getSimpleName(), ex.fitStatus.getName(),
-            msg);
+        System.out.printf("%s failed: %s - %s\n", getClass().getSimpleName(),
+            ex.fitStatus.getName(), msg);
       } else {
         System.out.printf("%s failed: %s\n", getClass().getSimpleName(), ex.fitStatus.getName());
       }
@@ -217,7 +218,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Prepare y for fitting, ex.g. ensure strictly positive values.
+   * Prepare y for fitting, e.g. ensure strictly positive values.
    *
    * @param y the y
    * @param a the parameters
@@ -227,8 +228,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
 
   /**
    * Compute the fit value using the parameters. The y data is the same as that passed to
-   * {@link #prepareFitValue(double[], double[])}. <p> This method is followed by a call to
-   * {@link #computeStep(double[])} so the step could be pre-computed here.
+   * {@link #prepareFitValue(double[], double[])}.
+   *
+   * <p>This method is followed by a call to {@link #computeStep(double[])} so the step could be
+   * pre-computed here.
    *
    * @param a the parameters
    * @return the fit value
@@ -244,9 +247,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
 
   /**
    * Determine if the step should be accepted. If accepted then the current parameters and function
-   * value are updated and any bounds on the step size may be updated. <p> Note that although this
-   * class handles convergence on the value/parameters it is left to the sub-class to determine if
-   * each step should be accepted.
+   * value are updated and any bounds on the step size may be updated.
+   *
+   * <p>Note that although this class handles convergence on the value/parameters it is left to the
+   * sub-class to determine if each step should be accepted.
    *
    * @param currentValue the current value
    * @param a the current parameters
@@ -275,9 +279,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   /**
    * Compute the Fisher Information matrix for the parameters a from the last call to
    * {@link #computeFitValue(double[])}. This can be used to set the covariances for each of the
-   * fitted parameters. <p> Alternatively a sub-class can override
+   * fitted parameters.
+   *
+   * <p>Alternatively a sub-class can override
    * {@link #computeDeviationsAndValues(double[], double[])} directly and provide a dummy
-   * implementation of this function as it will not be used, ex.g. throw an exception.
+   * implementation of this function as it will not be used, e.g. throw an exception.
    *
    * @param yFit the y fit (may be null)
    * @return the Fisher Information matrix
@@ -286,10 +292,14 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
 
   /**
    * Compute the function y-values using the y and parameters a from the last call to
-   * {@link #computeFitValue(double[])}. <p> Utility method to compute the function values using the
-   * preinitialised function. Sub-classes may override this if they have cached the function values
-   * from the last execution of a forEach procedure. <p> The base gradient function is used. If
-   * sub-classes wrap the function (ex.g. with per-observation weights) then these will be omitted.
+   * {@link #computeFitValue(double[])}.
+   *
+   * <p>Utility method to compute the function values using the preinitialised function. Sub-classes
+   * may override this if they have cached the function values from the last execution of a forEach
+   * procedure.
+   *
+   * <p>The base gradient function is used. If sub-classes wrap the function (e.g. with
+   * per-observation weights) then these will be omitted.
    *
    * @param yFit the y fit values
    */
@@ -328,7 +338,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Prepare y for computing the function value, ex.g. ensure strictly positive values.
+   * Prepare y for computing the function value, e.g. ensure strictly positive values.
    *
    * @param y the y
    * @param a the parameters
@@ -354,7 +364,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Prepare y for computing the Fisher information matrix, ex.g. ensure strictly positive values.
+   * Prepare y for computing the Fisher information matrix, e.g. ensure strictly positive values.
    *
    * @param y the y
    * @param a the parameters
@@ -388,8 +398,9 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   /**
    * Warning: If the function is changed then the clamp values may require updating. However setting
    * a new function does not set the clamp values to null to allow caching when the clamp values are
-   * unchanged, ex.g. evaluation of a different function in the same parameter space. <p> Setting a
-   * new function removes the current bounds.
+   * unchanged, e.g. evaluation of a different function in the same parameter space.
+   *
+   * <p>Setting a new function removes the current bounds.
    *
    * @param f the new gradient function
    * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(uk.ac.sussex.gdsc.smlm.function.GradientFunction)
@@ -413,7 +424,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   }
 
   /**
-   * Gets the weights for observations of size n, ex.g. the per observation variance term.
+   * Gets the weights for observations of size n, e.g. the per observation variance term.
    *
    * @param n the size
    * @return the weights

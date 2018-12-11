@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -33,14 +34,18 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 
 /**
- * Solves (one) linear equation, A x = b. <p> Wraps the LinearSolver class from the EJML (Efficient
- * Java Matrix Library) library. <p> This class assumes that the input matrix is symmetric positive
- * definite matrices, for instance it has been generated in the numerical solution of partial
- * differential equations (for example a Hessian matrix). <p> The solve and invert methods uses two
- * solvers, the first is an optimised solver chosen for speed. If the solver fails then a pseudo
- * inverse solver is used so that a solution can be found. For example the first solver may fail if
- * zeros occur on the diagonal of the matrix, for example if no gradient is available for a
- * parameter.
+ * Solves (one) linear equation, A x = b.
+ *
+ * <p>Wraps the LinearSolver class from the EJML (Efficient Java Matrix Library) library.
+ *
+ * <p>This class assumes that the input matrix is symmetric positive definite matrices, for instance
+ * it has been generated in the numerical solution of partial differential equations (for example a
+ * Hessian matrix).
+ *
+ * <p>The solve and invert methods uses two solvers, the first is an optimised solver chosen for
+ * speed. If the solver fails then a pseudo inverse solver is used so that a solution can be found.
+ * For example the first solver may fail if zeros occur on the diagonal of the matrix, for example
+ * if no gradient is available for a parameter.
  */
 public class EJMLLinearSolver {
   /**
@@ -206,7 +211,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
    * @param B the vector b
@@ -218,7 +225,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
    * @param B the vector b
@@ -230,7 +239,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
    * @param B the vector b
@@ -242,7 +253,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
    * @param B the vector b
@@ -255,7 +268,9 @@ public class EJMLLinearSolver {
 
   /**
    * Solves (one) linear equation, A x = b by direct inversion. Works on small matrices up to size
-   * 5. <p> On output b replaced by x. Matrix a may be modified.
+   * 5.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
    * @param B the vector b
@@ -267,7 +282,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param solver the solver
    * @param A the matrix A
@@ -291,9 +308,12 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> Output is written to x. <p> If checking the solution
-   * then A and/or B will not be modified. If no solution checking is enabled then A and/or B could
-   * be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>Output is written to x.
+   *
+   * <p>If checking the solution then A and/or B will not be modified. If no solution checking is
+   * enabled then A and/or B could be modified.
    *
    * @param solver the solver
    * @param A the matrix A
@@ -314,8 +334,11 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> Output is written to x. <p> A and/or B will not be
-   * modified. If you do not care then use
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>Output is written to x.
+   *
+   * <p>A and/or B will not be modified. If you do not care then use
    * {@link #solveUnsafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
    *
    * @param solver the solver
@@ -343,8 +366,11 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> Output is written to x. <p> A and/or B may be
-   * modified. Check the solver before calling or use
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>Output is written to x.
+   *
+   * <p>A and/or B may be modified. Check the solver before calling or use
    * {@link #solveSafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
    *
    * @param solver the solver
@@ -396,8 +422,11 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
-   * <p> Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
+   *
+   * <p>Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the
    * PseudoInverse decomposition.
    *
    * @param A the matrix A
@@ -451,8 +480,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Computes the inverse of the 'A' matrix passed into the last successful solve method. <p> On
-   * output a[n][n] replaced by the inverse of the solved matrix a.
+   * Computes the inverse of the 'A' matrix passed into the last successful solve method.
+   *
+   * <p>On output a[n][n] replaced by the inverse of the solved matrix a.
    *
    * @param A the matrix a
    *
@@ -680,8 +710,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Invert symmetric positive definite matrix A and returns only the diagonal. <p> Only supports
-   * matrix size up to 5.
+   * Invert symmetric positive definite matrix A and returns only the diagonal.
+   *
+   * <p>Only supports matrix size up to 5.
    *
    * @param A the matrix A
    * @return The diagonal of A^-1 (or null if the matrix is singular (no solution) or too large)
@@ -693,7 +724,9 @@ public class EJMLLinearSolver {
 
   /**
    * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the
-   * inverse of a. <p> Note: If the matrix is singular then a pseudo inverse will be computed.
+   * inverse of a.
+   *
+   * <p>Note: If the matrix is singular then a pseudo inverse will be computed.
    *
    * @param A the matrix a
    * @return False if there is no solution
@@ -854,8 +887,9 @@ public class EJMLLinearSolver {
 
   /**
    * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal.
-   * Will not modify the matrix. <p> Note: If the matrix is singular then a pseudo inverse will be
-   * computed.
+   * Will not modify the matrix.
+   *
+   * <p>Note: If the matrix is singular then a pseudo inverse will be computed.
    *
    * @param A the matrix a
    * @return The diagonal of the inverted matrix (or null)
@@ -893,8 +927,9 @@ public class EJMLLinearSolver {
 
   /**
    * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal.
-   * May modify the matrix. <p> Note: If the matrix is singular then a pseudo inverse will be
-   * computed.
+   * May modify the matrix.
+   *
+   * <p>Note: If the matrix is singular then a pseudo inverse will be computed.
    *
    * @param A the matrix a
    * @return The diagonal of the inverted matrix (or null)
@@ -937,7 +972,8 @@ public class EJMLLinearSolver {
    * @return the row/column format
    */
   public static double[][] toSquareData(DenseMatrix64F A) {
-    final int numRows = A.numRows, numCols = A.numCols;
+    final int numRows = A.numRows;
+    final int numCols = A.numCols;
     final double[][] out = new double[numRows][];
     for (int i = 0, pos = 0; i < numRows; i++, pos += numRows) {
       out[i] = new double[numCols];
@@ -962,8 +998,10 @@ public class EJMLLinearSolver {
   /**
    * Create a new DenseMatrix from the input matrix a. Modifications to the matrix are not passed
    * through to the input array! The matrix can be converted back using
-   * {@link #toSquareData(DenseMatrix64F, double[][])}. <p> This is provided as a bridge method
-   * between the functions that accept primitive arrays and those that accept DenseMatrix.
+   * {@link #toSquareData(DenseMatrix64F, double[][])}.
+   *
+   * <p>This is provided as a bridge method between the functions that accept primitive arrays and
+   * those that accept DenseMatrix.
    *
    * @param a the matrix
    * @return the dense matrix
@@ -974,8 +1012,10 @@ public class EJMLLinearSolver {
 
   /**
    * Create a new DenseMatrix from the input matrix a. Modifications to the matrix are passed
-   * through to the input array! <p> This is provided as a bridge method between the functions that
-   * accept primitive arrays and those that accept DenseMatrix.
+   * through to the input array!
+   *
+   * <p>This is provided as a bridge method between the functions that accept primitive arrays and
+   * those that accept DenseMatrix.
    *
    * @param a the matrix
    * @param n the number of columns/rows
@@ -987,8 +1027,10 @@ public class EJMLLinearSolver {
 
   /**
    * Wrap the input array b in a DenseMatrix. Modifications to the matrix are passed through to the
-   * input array. <p> This is provided as a bridge method between the functions that accept
-   * primitive arrays and those that accept DenseMatrix.
+   * input array.
+   *
+   * <p>This is provided as a bridge method between the functions that accept primitive arrays and
+   * those that accept DenseMatrix.
    *
    * @param b the array
    * @return the dense matrix
@@ -1000,7 +1042,9 @@ public class EJMLLinearSolver {
   // Methods for input of primitive arrays
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x.
    *
    * @param a the a
    * @param b the b
@@ -1011,7 +1055,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x.
    *
    * @param a the a
    * @param b the b
@@ -1022,7 +1068,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x.
    *
    * @param a the a
    * @param b the b
@@ -1033,7 +1081,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x.
    *
    * @param a the a
    * @param b the b
@@ -1045,7 +1095,9 @@ public class EJMLLinearSolver {
 
   /**
    * Solves (one) linear equation, A x = b by direct inversion. Works on small matrices up to size
-   * 5. <p> On output b replaced by x.
+   * 5.
+   *
+   * <p>On output b replaced by x.
    *
    * @param a the a
    * @param b the b
@@ -1056,9 +1108,12 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. <p> Solve using the
-   * CholeskyLDLT method or, if that fails (due to a singular matrix), the PseudoInversion
-   * decomposition.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x.
+   *
+   * <p>Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the
+   * PseudoInversion decomposition.
    *
    * @param a the a
    * @param b the b
@@ -1069,10 +1124,11 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Computes the inverse of the 'A' matrix passed into the last successful solve method. <p> On
-   * output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was
-   * removed (as it was set to zero in the input matrix) then the resulting column/row index will be
-   * set to zero.
+   * Computes the inverse of the 'A' matrix passed into the last successful solve method.
+   *
+   * <p>On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index
+   * was removed (as it was set to zero in the input matrix) then the resulting column/row index
+   * will be set to zero.
    *
    * @param a the matrix a
    * @return False if the last solve attempt failed, or inversion produces non finite values
@@ -1175,8 +1231,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Invert symmetric positive definite matrix A and returns only the diagonal. <p> Only supports
-   * matrix size up to 5.
+   * Invert symmetric positive definite matrix A and returns only the diagonal.
+   *
+   * <p>Only supports matrix size up to 5.
    *
    * @param a the matrix a
    * @return The diagonal of A^-1 (or null if the matrix is singular (no solution) or too large)
@@ -1190,7 +1247,9 @@ public class EJMLLinearSolver {
 
   /**
    * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the
-   * inverse of a. <p> Note: If the matrix is singular then a pseudo inverse will be computed.
+   * inverse of a.
+   *
+   * <p>Note: If the matrix is singular then a pseudo inverse will be computed.
    *
    * @param a the matrix a
    * @return False if there is no solution
@@ -1206,7 +1265,8 @@ public class EJMLLinearSolver {
 
   /**
    * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal.
-   * <p> Note: If the matrix is singular then a pseudo inverse will be computed.
+   *
+   * <p>Note: If the matrix is singular then a pseudo inverse will be computed.
    *
    * @param a the matrix a
    * @return The diagonal of the inverted matrix (or null)
@@ -1217,7 +1277,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param a the a
    * @param b the b
@@ -1228,7 +1290,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param a the a
    * @param b the b
@@ -1239,7 +1303,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param a the a
    * @param b the b
@@ -1250,7 +1316,9 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param a the a
    * @param b the b
@@ -1262,7 +1330,9 @@ public class EJMLLinearSolver {
 
   /**
    * Solves (one) linear equation, A x = b by direct inversion. Works on small matrices up to size
-   * 5. <p> On output b replaced by x. Matrix a may be modified.
+   * 5.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param a the a
    * @param b the b
@@ -1273,8 +1343,11 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b <p> On output b replaced by x. Matrix a may be modified.
-   * <p> Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
+   *
+   * <p>Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the
    * PseudoInversion decomposition.
    *
    * @param a the a
@@ -1286,10 +1359,11 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Computes the inverse of the 'A' matrix passed into the last successful solve method. <p> On
-   * output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was
-   * removed (as it was set to zero in the input matrix) then the resulting column/row index will be
-   * set to zero.
+   * Computes the inverse of the 'A' matrix passed into the last successful solve method.
+   *
+   * <p>On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index
+   * was removed (as it was set to zero in the input matrix) then the resulting column/row index
+   * will be set to zero.
    *
    * @param a the matrix a
    * @return False if the last solve attempt failed, or inversion produces non finite values
@@ -1319,7 +1393,9 @@ public class EJMLLinearSolver {
 
   /**
    * Computes the inverse of the symmetric positive definite matrix. On output a is replaced by the
-   * inverse of a. <p> Note: If the matrix is singular then a pseudo inverse will be computed.
+   * inverse of a.
+   *
+   * <p>Note: If the matrix is singular then a pseudo inverse will be computed.
    *
    * @param a the matrix a
    * @param n the number of columns/rows
@@ -1331,7 +1407,8 @@ public class EJMLLinearSolver {
 
   /**
    * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal.
-   * <p> Note: If the matrix is singular then a pseudo inverse will be computed.
+   *
+   * <p>Note: If the matrix is singular then a pseudo inverse will be computed.
    *
    * @param a the matrix a
    * @param n the number of columns/rows

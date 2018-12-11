@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -36,14 +37,16 @@ import java.util.Arrays;
 
 /**
  * Generates a Point Spread Function using an image constructed from diffraction limited spots
- * imaged axially through the plane of focus. <p> The input image must be square. The X/Y centre is
- * the middle of the square. The stack can have any number of slices. The z-centre must be
- * identified. Any pixels below zero will be set to zero. <p> The model can be used to draw a PSF
- * for a point on an image. If the z coordinate is positive then the PSF image from a positive index
- * (above the z-centre) is used. If the z-coordinate is negative then the PSF image from a negative
- * index (below the z-centre) is used. I.e. the input stack is assumed to be imaged axially with
- * increasing z-stage position moving the stage closer to the objective. Thus higher z coordinates
- * correspond to further into the stack.
+ * imaged axially through the plane of focus.
+ *
+ * <p>The input image must be square. The X/Y centre is the middle of the square. The stack can have
+ * any number of slices. The z-centre must be identified. Any pixels below zero will be set to zero.
+ *
+ * <p>The model can be used to draw a PSF for a point on an image. If the z coordinate is positive
+ * then the PSF image from a positive index (above the z-centre) is used. If the z-coordinate is
+ * negative then the PSF image from a negative index (below the z-centre) is used. I.e. the input
+ * stack is assumed to be imaged axially with increasing z-stage position moving the stage closer to
+ * the objective. Thus higher z coordinates correspond to further into the stack.
  */
 public class ImagePSFModel extends PSFModel {
   /** The default noise fraction. */
@@ -52,17 +55,20 @@ public class ImagePSFModel extends PSFModel {
 
   private double[][] sumImage;
   private double[][] cumulativeImage;
-  private int psfWidth, zCentre;
+  private int psfWidth;
+  private int zCentre;
   private double[][] xyCentre;
   private double unitsPerPixel;
   private double unitsPerSlice;
-  private double[] hwhm0, hwhm1;
+  private double[] hwhm0;
+  private double[] hwhm1;
   private int lastSlice;
 
   /**
-   * Construct the ImagePSF. <p> The noise fraction parameter can specify how to remove noise. All
-   * pixels below the fraction are set to zero. The remaining pixels are normalised to 1 to create a
-   * PDF for the image.
+   * Construct the ImagePSF.
+   *
+   * <p>The noise fraction parameter can specify how to remove noise. All pixels below the fraction
+   * are set to zero. The remaining pixels are normalised to 1 to create a PDF for the image.
    *
    * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
    *        YX order.
@@ -260,7 +266,8 @@ public class ImagePSFModel extends PSFModel {
    * @param noiseFraction the noise fraction
    */
   private static void subtractNoise(double[] image, double noiseFraction) {
-    double max = 0, sum = 0;
+    double max = 0;
+    double sum = 0;
     for (final double v : image) {
       if (max < v) {
         max = v;
@@ -356,7 +363,8 @@ public class ImagePSFModel extends PSFModel {
     } else {
       // Normalise as we go
       final int n = s.length;
-      double mean = 0, sum = 0;
+      double mean = 0;
+      double sum = 0;
 
       for (int i = 0; i < n; i++) {
         mean += (s[i] - mean) / (i + 1);
@@ -852,7 +860,8 @@ public class ImagePSFModel extends PSFModel {
 
     final double[] sumPsf = cumulativeImage[slice];
 
-    final RandomGenerator randomX, randomY;
+    final RandomGenerator randomX;
+    final RandomGenerator randomY;
 
     // Use the input generator
     randomX = rand.getRandomGenerator();
@@ -905,7 +914,9 @@ public class ImagePSFModel extends PSFModel {
     double[] x = new double[n];
     double[] y = new double[n];
     int count = 0;
-    double sx = 0, sy = 0, s = 0;
+    double sx = 0;
+    double sy = 0;
+    double s = 0;
     for (int i = 0; i < n; i++) {
       final double p = randomX.nextDouble();
       // If outside the observed PSF then skip
@@ -1107,8 +1118,13 @@ public class ImagePSFModel extends PSFModel {
       // Compute the sum around the centre until we reach half
       final double[] sumPsf = sumImage[slice];
 
-      int lowerU, upperU, lowerV, upperV;
-      double s, lastS, fraction;
+      int lowerU;
+      int upperU;
+      int lowerV;
+      int upperV;
+      double s;
+      double lastS;
+      double fraction;
 
       // x0 direction
       lowerU = cx;

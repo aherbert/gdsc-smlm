@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -30,23 +31,31 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * Implements the probability density function for a combined Poisson distribution used to model a
- * Poisson-Gaussian mixture by modelling the Gaussian as an independent Poisson process. <p> This is
- * a simple implementation of the LikelihoodFunction interface. <p> The likelihood function is
- * designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a Poisson
- * process of emitted light, converted to electrons on the camera chip, amplified by a gain and then
- * read. <p> This uses the MLE-sCMOS formula from Huang, et al (2013), Supplementary Notes Eq
- * 3.3:<br> P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi) = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x
- * / gamma(x+1) <br> Where:<br> i = the pixel index <br> vari = the variance of the pixel <br> gi =
+ * Poisson-Gaussian mixture by modelling the Gaussian as an independent Poisson process.
+ *
+ * <p>This is a simple implementation of the LikelihoodFunction interface.
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
+ * amplified by a gain and then read.
+ *
+ * <p>This uses the MLE-sCMOS formula from Huang, et al (2013), Supplementary Notes Eq 3.3:<br>
+ * P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi) = e^-(ui+vari/gi^2) (ui+vari/gi^2)^x /
+ * gamma(x+1) <br> Where:<br> i = the pixel index <br> vari = the variance of the pixel <br> gi =
  * the gain of the pixel <br> oi = the offset of the pixel <br> ui = the function value (expected
  * number of photons) <br> Di = the observed value at the pixel x = the observed random variable
- * (observed number of photons adjusted by a pixel dependent constant) <br> <p> The log-likelihood
- * function is: <br> LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br> = -(ui+vari/gi^2) +
- * x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br> <p> The negative log-likelihood (and gradient) can be
- * evaluated over the entire set of observed values or for a chosen observed value. <p> To allow a
- * likelihood to be computed: (a) when the function predicts negative photon count data the function
- * prediction is set to zero; (b) if the observed random variable (x) is negative it is also set to
- * zero. This occurs when true signal readout from the sCMOS camera is low enough to be negated by
- * readout noise. In this case the noise can be ignored.
+ * (observed number of photons adjusted by a pixel dependent constant) <br>
+ *
+ * <p>The log-likelihood function is: <br> LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi))
+ * <br> = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
+ *
+ * <p>The negative log-likelihood (and gradient) can be evaluated over the entire set of observed
+ * values or for a chosen observed value.
+ *
+ * <p>To allow a likelihood to be computed: (a) when the function predicts negative photon count
+ * data the function prediction is set to zero; (b) if the observed random variable (x) is negative
+ * it is also set to zero. This occurs when true signal readout from the sCMOS camera is low enough
+ * to be negated by readout noise. In this case the noise can be ignored.
  *
  * @see "Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658."
  */

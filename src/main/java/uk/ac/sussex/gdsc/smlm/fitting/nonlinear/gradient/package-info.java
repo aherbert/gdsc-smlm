@@ -24,7 +24,9 @@
 
 /**
  * Provides computation of the problem for a generic (non-linear) function that models the given the
- * data. <p> Types of problem supported are: <ul> <li>The Hessian-type matrix of partial first-order
+ * data.
+ *
+ * <p>Types of problem supported are: <ul> <li>The Hessian-type matrix of partial first-order
  * derivatives used in the <a
  * href="https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm"> Levenberg–Marquardt
  * algorithm</a>. <li>The Hessian-type matrix of partial first-order derivatives used in Laurence
@@ -36,4 +38,5 @@
  *
  * @since 1.0.0
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;

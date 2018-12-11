@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -39,12 +40,14 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.Arrays;
 
 /**
- * Contains methods for generating models of a Point Spread Function using a Airy pattern. <p>
- * Out-of-focus regions are computed using a width spreading of the Airy pattern. A true diffraction
- * model for out-of-focus regions is not implemented.
+ * Contains methods for generating models of a Point Spread Function using a Airy pattern.
+ *
+ * <p>Out-of-focus regions are computed using a width spreading of the Airy pattern. A true
+ * diffraction model for out-of-focus regions is not implemented.
  */
 public class AiryPSFModel extends PSFModel {
-  private double zeroW0, zeroW1;
+  private double zeroW0;
+  private double zeroW1;
   private double w0;
   private double w1;
   private double zDepth = 0;
@@ -68,6 +71,7 @@ public class AiryPSFModel extends PSFModel {
    * The Airy power corresponding to the rings of the Airy pattern.
    */
   public static double[] POWER;
+
   static {
     POWER = new double[RINGS.length];
     for (int i = 1; i < POWER.length; i++) {
@@ -771,7 +775,8 @@ public class AiryPSFModel extends PSFModel {
     // Integrate up to a set number of dark rings
     final int samples = 1000;
     final double step = RINGS[SAMPLE_RINGS] / samples;
-    double to = 0, from = 0;
+    double to = 0;
+    double from = 0;
     r = new double[samples + 1];
     sum = new double[samples + 1];
     for (int i = 1; i < sum.length; i++) {

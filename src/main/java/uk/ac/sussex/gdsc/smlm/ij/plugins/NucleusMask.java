@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -72,7 +73,9 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
     createMask();
   }
 
-  private double diameter, nmPerPixel, nmPerSlice;
+  private double diameter;
+  private double nmPerPixel;
+  private double nmPerSlice;
 
   private boolean showDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -297,13 +300,13 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
   }
 
   @Override
-  public void mouseClicked(MouseEvent e) {
-    if (e == null) {
+  public void mouseClicked(MouseEvent event) {
+    if (event == null) {
       return;
     }
     final ImageCanvas ic = imp.getCanvas();
-    final int cx = ic.offScreenX(e.getX());
-    final int cy = ic.offScreenY(e.getY());
+    final int cx = ic.offScreenX(event.getX());
+    final int cy = ic.offScreenY(event.getY());
     final int radius = (int) Math.ceil(diameter * 500 / nmPerPixel);
     final int radiusz = (int) Math.ceil(diameter * 500 / nmPerSlice);
     if (sphere == null) {
@@ -328,28 +331,28 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
   }
 
   @Override
-  public void mousePressed(MouseEvent e) {
+  public void mousePressed(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseReleased(MouseEvent e) {
+  public void mouseReleased(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseEntered(MouseEvent e) {
+  public void mouseEntered(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseExited(MouseEvent e) {
+  public void mouseExited(MouseEvent event) {
     // Ignore
   }
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     final double old = diameter;
     diameter = gd.getNextNumber();
     if (diameter != old) {

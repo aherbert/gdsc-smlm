@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -123,8 +124,9 @@ public abstract class Image2D {
   protected abstract void createData(int size);
 
   /**
-   * Copy the data from the given index to the buffer. <p> Utility method to handle conversion with
-   * ImageJ ImageProcessor objects.
+   * Copy the data from the given index to the buffer.
+   *
+   * <p>Utility method to handle conversion with ImageJ ImageProcessor objects.
    *
    * @param i the index
    * @param buffer the buffer
@@ -134,8 +136,9 @@ public abstract class Image2D {
   protected abstract void copyTo(int i, float[] buffer, int j, int size);
 
   /**
-   * Copy the data from the given buffer to the given index. <p> Utility method to handle conversion
-   * with ImageJ ImageProcessor objects.
+   * Copy the data from the given buffer to the given index.
+   *
+   * <p>Utility method to handle conversion with ImageJ ImageProcessor objects.
    *
    * @param i the index
    * @param buffer the buffer
@@ -228,7 +231,7 @@ public abstract class Image2D {
    * @return the xy components
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public int[] getXY(int i) throws IllegalArgumentException {
+  public int[] getXy(int i) throws IllegalArgumentException {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -246,7 +249,7 @@ public abstract class Image2D {
    * @param xy the xy components (must be an array of at least length 2)
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public void getXY(int i, int[] xy) throws IllegalArgumentException {
+  public void getXy(int i, int[] xy) throws IllegalArgumentException {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -403,10 +406,11 @@ public abstract class Image2D {
   }
 
   /**
-   * Compute 2D intersect with this object. <p> If any of w,d are negative then the corresponding
-   * x,y is updated and the w,d is inverted. The maximum bounds of the given dimensions are then
-   * computed by adding the w,d to the x,y. The bounds are then clipped to the image dimensions and
-   * the intersect returned.
+   * Compute 2D intersect with this object.
+   *
+   * <p>If any of w,d are negative then the corresponding x,y is updated and the w,d is inverted.
+   * The maximum bounds of the given dimensions are then computed by adding the w,d to the x,y. The
+   * bounds are then clipped to the image dimensions and the intersect returned.
    *
    * @param x the x index
    * @param y the y index
@@ -432,9 +436,10 @@ public abstract class Image2D {
   }
 
   /**
-   * Compute 2D intersect with this object or throw an exception if the intersect has no volume. <p>
-   * If any of w,d are negative then the corresponding x,y is updated and the w,d is inverted. The
-   * maximum bounds of the given dimensions are then computed by adding the w,d to the x,y. The
+   * Compute 2D intersect with this object or throw an exception if the intersect has no volume.
+   *
+   * <p>If any of w,d are negative then the corresponding x,y is updated and the w,d is inverted.
+   * The maximum bounds of the given dimensions are then computed by adding the w,d to the x,y. The
    * bounds are then clipped to the image dimensions and the intersect returned.
    *
    * @param x the x index
@@ -646,8 +651,9 @@ public abstract class Image2D {
   }
 
   /**
-   * Compute the rolling sum table for use in {@link #computeSum(double[], int, int, int, int)}. <p>
-   * This is a table of the sum of the volume from 0,0 to x,y inclusive.
+   * Compute the rolling sum table for use in {@link #computeSum(double[], int, int, int, int)}.
+   *
+   * <p>This is a table of the sum of the volume from 0,0 to x,y inclusive.
    *
    * @param table the table (will be reused if the correct size)
    * @return the rolling sum table
@@ -775,7 +781,10 @@ public abstract class Image2D {
     // j = jmax when j>jmax
 
     // Compute bounds assuming w,d is small and positive.
-    int x_1, y_1, x_w_1, y_h_1;
+    int x_1;
+    int y_1;
+    int x_w_1;
+    int y_h_1;
     if (x < 0) {
       x_1 = 0;
       x_w_1 = MathUtils.clip(0, nc, x + w);

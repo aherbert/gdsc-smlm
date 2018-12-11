@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
@@ -148,7 +149,8 @@ public abstract class ImageSource {
 
   /**
    * Gets the x origin of the image frame. This may be non-zero to specify a crop of an image frame.
-   * <p> Note that the origin is ignored by the method {@link #next(Rectangle)} and
+   *
+   * <p>Note that the origin is ignored by the method {@link #next(Rectangle)} and
    * {@link #get(int, Rectangle)} as these use a rectangle relative to the image source origin.
    *
    * @return the x origin
@@ -159,7 +161,8 @@ public abstract class ImageSource {
 
   /**
    * Gets the y origin of the image frame. This may be non-zero to specify a crop of an image frame.
-   * <p> Note that the origin is ignored by the method {@link #next(Rectangle)} and
+   *
+   * <p>Note that the origin is ignored by the method {@link #next(Rectangle)} and
    * {@link #get(int, Rectangle)} as these use a rectangle relative to the image source origin.
    *
    * @return the y origin
@@ -219,8 +222,10 @@ public abstract class ImageSource {
 
   /**
    * Get the end frame number of the source returned by the last call to {@link #get(int)} or
-   * {@link #next()}. <p> This may be larger than the result returned by {@link #getFrames()} if the
-   * ImageSource is selecting a subset of the possible frames.
+   * {@link #next()}.
+   *
+   * <p>This may be larger than the result returned by {@link #getFrames()} if the ImageSource is
+   * selecting a subset of the possible frames.
    *
    * @return The end frame number of the latest block of data
    */
@@ -230,8 +235,10 @@ public abstract class ImageSource {
 
   /**
    * Set the current frame number(s) of the source returned by the last call to {@link #get(int)} or
-   * {@link #next()}. <p> This should be called by subclasses that perform more complex frame
-   * manipulation than just getting a single frame.
+   * {@link #next()}.
+   *
+   * <p>This should be called by subclasses that perform more complex frame manipulation than just
+   * getting a single frame.
    *
    * @param startFrame the start frame of the current block of data
    * @param endFrame the end frame of the current block of data
@@ -243,8 +250,9 @@ public abstract class ImageSource {
 
   /**
    * Get the next frame. Return null if the frame is not available and set the current frame to
-   * zero. The data is is packed in yx order: index = y * width + x; <p> Provides serial access to
-   * the data after a successful call to {@link #open()}.
+   * zero. The data is is packed in yx order: index = y * width + x;
+   *
+   * <p>Provides serial access to the data after a successful call to {@link #open()}.
    *
    * @return the next frame (or null if at the end)
    */
@@ -258,10 +266,12 @@ public abstract class ImageSource {
 
   /**
    * Get the next frame. Return null if the frame is not available and set the current frame to
-   * zero. The data is is packed in yx order: index = y * width + x; <p> Provides serial access to
-   * the data after a successful call to {@link #open()} <p> Note: The bounds are relative to the
-   * image source origin so that bounds.x + bounds.width must be less or equal to than
-   * {@link #getWidth()}, similarly for height.
+   * zero. The data is is packed in yx order: index = y * width + x;
+   *
+   * <p>Provides serial access to the data after a successful call to {@link #open()}
+   *
+   * <p>Note: The bounds are relative to the image source origin so that bounds.x + bounds.width
+   * must be less or equal to than {@link #getWidth()}, similarly for height.
    *
    * @param bounds The bounding limits of the frame to extract
    * @return the next frame (or null if at the end)
@@ -280,8 +290,9 @@ public abstract class ImageSource {
 
   /**
    * Get the next frame of raw pixels. Return null if the frame is not available and set the current
-   * frame to zero. The data is is packed in yx order: index = y * width + x; <p> Provides serial
-   * access to the data after a successful call to {@link #open()}
+   * frame to zero. The data is is packed in yx order: index = y * width + x;
+   *
+   * <p>Provides serial access to the data after a successful call to {@link #open()}
    *
    * @return the next frame (or null if at the end)
    */
@@ -314,8 +325,9 @@ public abstract class ImageSource {
   protected abstract boolean initialiseSequentialRead();
 
   /**
-   * Get the next frame of raw pixels. The data is is packed in yx order: index = y * width + x; <p>
-   * Must be implemented by sub-classes.
+   * Get the next frame of raw pixels. The data is is packed in yx order: index = y * width + x;
+   *
+   * <p>Must be implemented by sub-classes.
    *
    * @return the next frame (or null if at the end)
    */
@@ -323,9 +335,10 @@ public abstract class ImageSource {
 
   /**
    * Get a specific frame from the results. Return null if the frame is not available and set the
-   * current frame to zero. <p> Provides random access to the data after a successful call to
-   * {@link #open()}. This operation may be significantly slower than using {@link #next()} to read
-   * all the data.
+   * current frame to zero.
+   *
+   * <p>Provides random access to the data after a successful call to {@link #open()}. This
+   * operation may be significantly slower than using {@link #next()} to read all the data.
    *
    * @param frame the frame
    * @return the frame (or null)
@@ -336,10 +349,13 @@ public abstract class ImageSource {
 
   /**
    * Get a specific frame from the results. Return null if the frame is not available and set the
-   * current frame to zero. <p> Provides random access to the data after a successful call to
-   * {@link #open()}. This operation may be significantly slower than using {@link #next()} to read
-   * all the data. <p> Note: The bounds are relative to the image source origin so that bounds.x +
-   * bounds.width must be less or equal to than {@link #getWidth()}, similarly for height.
+   * current frame to zero.
+   *
+   * <p>Provides random access to the data after a successful call to {@link #open()}. This
+   * operation may be significantly slower than using {@link #next()} to read all the data.
+   *
+   * <p>Note: The bounds are relative to the image source origin so that bounds.x + bounds.width
+   * must be less or equal to than {@link #getWidth()}, similarly for height.
    *
    * @param frame the frame
    * @param bounds The bounding limits of the frame to extract
@@ -361,9 +377,10 @@ public abstract class ImageSource {
 
   /**
    * Get a specific frame of raw pixels from the results. Return null if the frame is not available
-   * and set the current frame to zero. <p> Provides random access to the data after a successful
-   * call to {@link #open()}. This operation may be significantly slower than using {@link #next()}
-   * to read all the data.
+   * and set the current frame to zero.
+   *
+   * <p>Provides random access to the data after a successful call to {@link #open()}. This
+   * operation may be significantly slower than using {@link #next()} to read all the data.
    *
    * @param frame the frame
    * @return the frame (or null)
@@ -379,7 +396,8 @@ public abstract class ImageSource {
 
   /**
    * Get a specific frame of raw pixels from the results. Return null if the frame is not available.
-   * <p> Must be implemented by sub-classes.
+   *
+   * <p>Must be implemented by sub-classes.
    *
    * @param frame the frame
    * @return The frame data
@@ -427,10 +445,11 @@ public abstract class ImageSource {
   }
 
   /**
-   * Return true if the frame is within the limits of the image source. <p> Note that the
-   * {@link #get(int)} method may still return null. This method can be used to determine if the
-   * {@link #get(int)} method has skipped data, e.g. if interlaced, or if the data has actually
-   * ended.
+   * Return true if the frame is within the limits of the image source.
+   *
+   * <p>Note that the {@link #get(int)} method may still return null. This method can be used to
+   * determine if the {@link #get(int)} method has skipped data, e.g. if interlaced, or if the data
+   * has actually ended.
    *
    * @param frame the frame
    * @return true if valid

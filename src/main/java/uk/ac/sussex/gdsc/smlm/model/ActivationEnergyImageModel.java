@@ -21,14 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
  * Contains a model for an image of blinking fluorophores under pulsed activation illumination.
  * Activation energy is sampled from an exponential distribution. Fluorophores are created when the
- * activation energy has been achieved under the given illumination. <p> Based on the work of
- * Coltharp et al (2012) Accurate Construction of photoactivated localization microscopy images for
- * quantitative measurements. PLOS One 7, Issue 12, pp 1-15
+ * activation energy has been achieved under the given illumination.
+ *
+ * <p>Based on the work of Coltharp et al (2012) Accurate Construction of photoactivated
+ * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
 public class ActivationEnergyImageModel extends ImageModel {
   private double eAct;

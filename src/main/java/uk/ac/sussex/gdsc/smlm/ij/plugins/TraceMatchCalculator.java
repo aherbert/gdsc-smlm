@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -72,7 +73,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   private static TextWindow resultsWindow = null;
   private static TextWindow pairsWindow = null;
   private static TextWindow triplesWindow = null;
-  private static ImageROIPainter pairPainter = null, triplePainter = null;
+  private static ImageROIPainter pairPainter = null;
+  private static ImageROIPainter triplePainter = null;
 
   /** {@inheritDoc} */
   @Override
@@ -497,7 +499,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   private class TimeComparablePointPair extends PointPair
       implements Comparable<TimeComparablePointPair> {
     int startT = Integer.MAX_VALUE;
-    public Pulse p1, p2;
+    public Pulse p1;
+    public Pulse p2;
 
     public TimeComparablePointPair(PointPair pair) {
       super(pair.getPoint1(), pair.getPoint2());
@@ -593,7 +596,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   }
 
   private class Triple {
-    public Pulse p1, p2, p3;
+    public Pulse p1;
+    public Pulse p2;
+    public Pulse p3;
 
     public Triple(Pulse p1, Pulse p2, Pulse p3) {
       this.p1 = p1;

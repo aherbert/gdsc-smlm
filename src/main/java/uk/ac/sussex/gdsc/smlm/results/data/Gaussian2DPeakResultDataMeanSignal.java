@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.data;
 
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -29,8 +30,10 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the mean signal from the PeakResult assuming a Gaussian 2D PSF. The result must have the
  * standard deviation for each dimension in the first two additional parameters of the PeakResult
- * parameter array. <p> Assumes that the mean signal is the total signal within 1 standard deviation
- * of the centre divided by the elliptical area of the Gaussian.
+ * parameter array.
+ *
+ * <p>Assumes that the mean signal is the total signal within 1 standard deviation of the centre
+ * divided by the elliptical area of the Gaussian.
  */
 public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat {
   /** The index of the x width. */

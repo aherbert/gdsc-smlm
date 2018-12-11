@@ -23,9 +23,12 @@
  */
 
 /**
- * Provides filters for post-processing results. <p> Note: Filtering functionality was included in
- * prototype code. Currently this is deprecated but may be added in future version.
+ * Provides filters for post-processing results.
+ *
+ * <p>Note: Filtering functionality was included in prototype code. Currently this is deprecated but
+ * may be added in future version.
  *
  * @since 1.0.0
  */
+
 package uk.ac.sussex.gdsc.smlm.engine.filter;

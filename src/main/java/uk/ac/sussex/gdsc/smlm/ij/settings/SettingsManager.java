@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.settings;
 
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
@@ -124,6 +125,7 @@ public class SettingsManager {
 
   /** The settings directory. */
   private static File settingsDirectory;
+
   static {
     setSettingsDirectory(Prefs.get(Constants.settingsDirectory, DEFAULT_DIRECTORY));
   }
@@ -662,8 +664,9 @@ public class SettingsManager {
   /**
    * Convert a list of objects into names (e.g. pass in (Object[])enum.getValues()). The first
    * letter is capitalised. The rest of the name is converted to lowercase if it is all uppercase.
-   * Remaining mixed case names are left unchanged. <p> Used to convert the settings enumerations
-   * into names used with dialogs.
+   * Remaining mixed case names are left unchanged.
+   *
+   * <p>Used to convert the settings enumerations into names used with dialogs.
    *
    * @param objects the objects
    * @return the names
@@ -1166,7 +1169,9 @@ public class SettingsManager {
   }
 
   /**
-   * Write the message to file. <p> If this fails then an error message is written to the ImageJ log
+   * Write the message to file.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param message the message
    * @param filename the filename
@@ -1178,7 +1183,9 @@ public class SettingsManager {
   }
 
   /**
-   * Write the message to file. <p> If this fails then an error message is written to the ImageJ log
+   * Write the message to file.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param message the message
    * @param file the file
@@ -1198,7 +1205,9 @@ public class SettingsManager {
   }
 
   /**
-   * Write the message. <p> If this fails then an error message is written to the ImageJ log
+   * Write the message.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param message the message
    * @param output the output
@@ -1218,8 +1227,9 @@ public class SettingsManager {
   }
 
   /**
-   * Read the message from file. <p> If this fails then an error message is written to the ImageJ
-   * log
+   * Read the message from file.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param parser the parser
    * @param filename the filename
@@ -1231,8 +1241,9 @@ public class SettingsManager {
   }
 
   /**
-   * Read the message from file. <p> If this fails then an error message is written to the ImageJ
-   * log
+   * Read the message from file.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param parser the parser
    * @param file the file
@@ -1256,8 +1267,9 @@ public class SettingsManager {
   }
 
   /**
-   * Read the message from file. <p> If this fails then an error message is written to the ImageJ
-   * log
+   * Read the message from file.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param parser the parser
    * @param input the input
@@ -1305,8 +1317,9 @@ public class SettingsManager {
   }
 
   /**
-   * Write the message to file in JSON text format. <p> If this fails then an error message is
-   * written to the ImageJ log
+   * Write the message to file in JSON text format.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param message the message
    * @param filename the filename
@@ -1318,8 +1331,9 @@ public class SettingsManager {
   }
 
   /**
-   * Write the message to file in JSON text format. <p> If this fails then an error message is
-   * written to the ImageJ log
+   * Write the message to file in JSON text format.
+   *
+   * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param message the message
    * @param file the file

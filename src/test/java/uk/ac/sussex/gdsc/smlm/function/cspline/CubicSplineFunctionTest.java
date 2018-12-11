@@ -93,6 +93,7 @@ public abstract class CubicSplineFunctionTest {
   static final CubicSplineData splineData, splineDataFloat;
   static final double cx, cy, cz;
   static final int scale;
+
   static {
     // Create a Guassian PSF twice the size of the test Gaussian for interpolation
     scale = 2;

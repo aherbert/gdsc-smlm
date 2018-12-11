@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
@@ -33,23 +34,28 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * This is a function to compute the likelihood assuming a Poisson-Gamma-Gaussian distribution. <p>
- * For each observed value the log-likelihood is computed from the Poisson-Gamma-Gaussian
+ * This is a function to compute the likelihood assuming a Poisson-Gamma-Gaussian distribution.
+ *
+ * <p>For each observed value the log-likelihood is computed from the Poisson-Gamma-Gaussian
  * distribution (a Poisson convolved with a Gamma distribution convolved with a Gaussian). The
  * Poisson-Gamma distribution is derived analytically in the paper Ulbrich &amp; Isacoff (2007).
  * Nature Methods 4, 319-321 to explain the probability distribution of ADUs given a fixed photon
  * level per pixel and set gain in an EM-CCD camera (The Poisson distribution models the photon
  * count and the Gamma distribution models the EM-gain). This is then numerically convolved with a
- * Gaussian distribution to model the read noise of the camera. <p> The distribution of Ulbrich
- * &amp; Isacoff has no analytical solution to the convolution with a Gaussian. However the
- * convolution with a Gaussian has the most effect when the counts are low. The
- * Poisson-Gamma-Gaussian can be approximated using the Poisson-Gamma and a partial convolution with
- * a Gaussian at low counts. This method is provided as Python source code within the supplementary
- * information of the paper Mortensen, et al (2010) Nature Methods 7, 377-383. This Java
- * implementation is based on the Python code. <P> The mean of the Poisson distribution is set using
- * the expected value. The scale (EM-gain) for the Gamma distribution and standard deviation of the
- * Gaussian is fixed and set in the constructor. The mean of the Gaussian is assumed to be zero. <p>
- * The likelihood function is designed to model on-chip amplification of a EMCCD camera which
+ * Gaussian distribution to model the read noise of the camera.
+ *
+ * <p>The distribution of Ulbrich &amp; Isacoff has no analytical solution to the convolution with a
+ * Gaussian. However the convolution with a Gaussian has the most effect when the counts are low.
+ * The Poisson-Gamma-Gaussian can be approximated using the Poisson-Gamma and a partial convolution
+ * with a Gaussian at low counts. This method is provided as Python source code within the
+ * supplementary information of the paper Mortensen, et al (2010) Nature Methods 7, 377-383. This
+ * Java implementation is based on the Python code.
+ *
+ * <p>The mean of the Poisson distribution is set using the expected value. The scale (EM-gain) for
+ * the Gamma distribution and standard deviation of the Gaussian is fixed and set in the
+ * constructor. The mean of the Gaussian is assumed to be zero.
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD camera which
  * captures a Poisson process of emitted light, converted to electrons on the camera chip, amplified
  * by gain modelled by the Gamma distribution and then read with Gaussian noise.
  */
@@ -102,7 +108,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
   private class PGGFunction implements UnivariateFunction {
     int i = 0;
-    final double o, e;
+    final double o;
+    final double e;
 
     public PGGFunction(double o, double e) {
       this.o = o;
@@ -177,9 +184,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
   }
 
   /**
-   * {@inheritDoc} <p> This code is adapted from the Python source code within the supplementary
-   * information of the paper Mortensen, et al (2010) Nature Methods 7, 377-383. <p> The output is a
-   * PMF. Ideally the input x should be discrete but this is not a requirement.
+   * {@inheritDoc}
+   *
+   * <p>This code is adapted from the Python source code within the supplementary information of the
+   * paper Mortensen, et al (2010) Nature Methods 7, 377-383.
+   *
+   * <p>The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
    *
    * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
    */
@@ -438,8 +448,11 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
   }
 
   /**
-   * {@inheritDoc} <p> This computes the log of {@link #likelihood(double, double)}. <p> The output
-   * is a PMF. Ideally the input x should be discrete but this is not a requirement.
+   * {@inheritDoc}
+   *
+   * <p>This computes the log of {@link #likelihood(double, double)}.
+   *
+   * <p>The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
    *
    * @param o The observed count
    * @param e The expected count
@@ -614,14 +627,14 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
         case LEGENDRE_GAUSS_PDF:
           // Not sure how to configure this.
           // The integration points are used for each sub-interval.
-          // Function evaluations = integrationPoints * intervals.
+          // Function evaluations = integrationpoints * intervals.
           // The intervals start at 1,2 and increase by at least 4 at each stage after that.
-          // At least 1 stage is done thus 3 * integrationPoints functions evaluations
+          // At least 1 stage is done thus 3 * integrationpoints functions evaluations
           // will be done for minimalIterationCount=1.
           minimalIterationCount = 1;
           final int maximalIterationCount = 32;
-          final int integrationPoints = 8;
-          i = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
+          final int integrationpoints = 8;
+          i = new IterativeLegendreGaussIntegrator(integrationpoints, relativeAccuracy,
               absoluteAccuracy, minimalIterationCount, maximalIterationCount);
           break;
 

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
@@ -442,7 +443,8 @@ public class DiffusionRateTest implements PlugIn {
     // D = 2D diffusion coefficient
     // t = time
 
-    final PolynomialFunction fitted2D, fitted3D;
+    final PolynomialFunction fitted2D;
+    final PolynomialFunction fitted3D;
     if (r2D.getN() > 0) {
       // Do linear regression to get diffusion rate
 
@@ -929,7 +931,8 @@ public class DiffusionRateTest implements PlugIn {
     int id = 0;
     int peak = 1;
     int n = 0;
-    double cx = 0, cy = 0;
+    double cx = 0;
+    double cy = 0;
     // Get the mean square distance
     double sum = 0;
     int count = 0;

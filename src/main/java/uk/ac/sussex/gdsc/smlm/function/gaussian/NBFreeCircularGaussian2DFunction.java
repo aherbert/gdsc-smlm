@@ -21,14 +21,17 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a configured number of peaks. <p> The single
- * parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
- * 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
- * coordinates. <p> Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y]
- * = MaxX*y + x.
+ * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
+ *
+ * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
+ * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
+ * coordinates.
+ *
+ * <p>Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
  */
 public class NBFreeCircularGaussian2DFunction extends FreeCircularGaussian2DFunction {
   /**
@@ -51,7 +54,9 @@ public class NBFreeCircularGaussian2DFunction extends FreeCircularGaussian2DFunc
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks. <p> {@inheritDoc}
+   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+   *
+   * <p>{@inheritDoc}
    *
    * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */

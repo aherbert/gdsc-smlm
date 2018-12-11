@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -50,8 +51,9 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults {
   }
 
   /**
-   * Creates a PeakResults object that is synchronized if not already a thread-safe instance. <p>
-   * The input is unchanged if already a thread-safe instance.
+   * Creates a PeakResults object that is synchronized if not already a thread-safe instance.
+   *
+   * <p>The input is unchanged if already a thread-safe instance.
    *
    * @param peakResults the peak results
    * @return the peak results
@@ -66,7 +68,9 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults {
 
   /**
    * Creates a PeakResults object that is synchronized if the thread count is above 1, otherwise the
-   * input results are returned. <p> The input is unchanged if already a thread-safe instance.
+   * input results are returned.
+   *
+   * <p>The input is unchanged if already a thread-safe instance.
    *
    * @param peakResults the peak results
    * @param threadCount the thread count

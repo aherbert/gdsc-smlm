@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -29,9 +30,12 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 
 /**
  * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a set of data
- * points (x, y). <p> Support bounded parameters using a hard-stop limit. <p> Support parameter
- * clamping to prevent large parameter shifts. Optionally update the clamping when the search
- * direction changes.
+ * points (x, y).
+ *
+ * <p>Support bounded parameters using a hard-stop limit.
+ *
+ * <p>Support parameter clamping to prevent large parameter shifts. Optionally update the clamping
+ * when the search direction changes.
  */
 public class BoundedNonLinearFit extends NonLinearFit {
   private ParameterBounds bounds;
@@ -143,8 +147,9 @@ public class BoundedNonLinearFit extends NonLinearFit {
   /**
    * Warning: If the function is changed then the clamp values may require updating. However setting
    * a new function does not set the clamp values to null to allow caching when the clamp values are
-   * unchanged, e.g. evaluation of a different function in the same parameter space. <p> Setting a
-   * new function removes the current bounds.
+   * unchanged, e.g. evaluation of a different function in the same parameter space.
+   *
+   * <p>Setting a new function removes the current bounds.
    *
    * @param f the new gradient function
    * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(uk.ac.sussex.gdsc.smlm.function.GradientFunction)

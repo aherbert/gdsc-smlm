@@ -49,6 +49,7 @@ public class IJImagePeakResultsTest {
 
   static Calibration calibration;
   static PSF psf;
+
   static {
     psf = PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D);
     final CalibrationWriter cw = new CalibrationWriter();

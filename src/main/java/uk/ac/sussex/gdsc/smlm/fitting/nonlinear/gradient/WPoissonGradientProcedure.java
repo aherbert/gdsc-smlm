@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -29,12 +30,15 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import java.util.Arrays;
 
 /**
- * Calculates the Fisher information matrix for a Poisson process. <p> This procedure is based on
- * computation of a modified Chi-squared expression to perform Weighted Least Squares Estimation
- * assuming a Poisson model with a Gaussian noise component. The weight per observation is equal to
- * 1/[variance + max(y, 0) + 1]. <p> See Ruisheng, et al (2017) Algorithmic corrections for
- * localization microscopy with sCMOS cameras - characterisation of a computationally efficient
- * localization approach. Optical Express 25, Issue 10, pp 11701-11716.
+ * Calculates the Fisher information matrix for a Poisson process.
+ *
+ * <p>This procedure is based on computation of a modified Chi-squared expression to perform
+ * Weighted Least Squares Estimation assuming a Poisson model with a Gaussian noise component. The
+ * weight per observation is equal to 1/[variance + max(y, 0) + 1].
+ *
+ * <p>See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
+ * cameras - characterisation of a computationally efficient localization approach. Optical Express
+ * 25, Issue 10, pp 11701-11716.
  */
 public class WPoissonGradientProcedure implements Gradient1Procedure {
   /** The weights. */
@@ -112,11 +116,12 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * Iab = sum(i) (dYi da) * (dYi db) / (max(0, Oi) + 1 + vari)
    * </pre>
    *
-   * <p> See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
-   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. <p> See Ruisheng,
-   * et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras -
-   * characterisation of a computationally efficient localization approach. Optical Express 25,
-   * Issue 10, pp 11701-11716.
+   * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
+   *
+   * <p>See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
+   * cameras - characterisation of a computationally efficient localization approach. Optical
+   * Express 25, Issue 10, pp 11701-11716.
    *
    * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
@@ -254,8 +255,10 @@ public class Workflow<S, R> {
 
   /**
    * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input if the
-   * previous is null. <p> Use this method to add workers that can operate in parallel on the output
-   * from a previous worker.
+   * previous is null.
+   *
+   * <p>Use this method to add workers that can operate in parallel on the output from a previous
+   * worker.
    *
    * @param worker the worker
    * @param previous the previous worker id

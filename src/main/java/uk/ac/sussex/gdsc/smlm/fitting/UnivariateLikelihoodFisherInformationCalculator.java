@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -40,9 +41,9 @@ import java.util.Arrays;
  * E = Expected value
  * f(X;θ) = Likelihood function for data X given parameters θ
  * </pre>
- * 
- * <p> The calculator assumes a gradient function outputs a single value (v) that can be input into
- * a univariate probability distribution. The Fisher information is derived using using the equation
+ *
+ * <p>The calculator assumes a gradient function outputs a single value (v) that can be input into a
+ * univariate probability distribution. The Fisher information is derived using using the equation
  * of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq S3.
  *
  * <pre>

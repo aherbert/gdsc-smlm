@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ import java.util.regex.Pattern;
  * Show the version information contained in the source jar manifest.
  */
 public class Version {
-  /** Constant for the string "unknown" */
+  /** Constant for the string "unknown". */
   public static final String UNKNOWN = "";
   private static String version = null;
   private static String buildDate = null;

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
@@ -63,6 +64,7 @@ public class DarkTimeAnalysis implements PlugIn {
           ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY,
           ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY,
           ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY};
+
   static {
     final ArrayList<String> methods = new ArrayList<>();
     methods.add("Tracing");

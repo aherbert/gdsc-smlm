@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -322,7 +323,9 @@ public class Shape3DHelper {
   public static List<Point3f> createDisc(final double x, final double y, final double z,
       final double nx, final double ny, final double nz, final double radius,
       final int edgePoints) {
-    double ax, ay, az;
+    double ax;
+    double ay;
+    double az;
 
     if (Math.abs(nx) >= Math.abs(ny)) {
       final double scale = 1 / Math.sqrt(nx * nx + nz * nz);
@@ -614,7 +617,9 @@ public class Shape3DHelper {
   private static List<Point3f> createDiscEdge(boolean includeCenter, final double x, final double y,
       final double z, final double nx, final double ny, final double nz, final double radius,
       final int edgePoints) {
-    double ax, ay, az;
+    double ax;
+    double ay;
+    double az;
 
     if (Math.abs(nx) >= Math.abs(ny)) {
       final double scale = 1 / Math.sqrt(nx * nx + nz * nz);

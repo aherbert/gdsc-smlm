@@ -12,6 +12,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
 import org.apache.commons.math3.analysis.integration.BaseAbstractUnivariateIntegrator;
@@ -26,15 +27,21 @@ import org.apache.commons.math3.util.FastMath;
 //@formatter:off
 
 /**
- * <p>
+ *
+*
+* <p>
  * <strong>Note:</strong> This class has been adapted from
  * {@code org.apache.commons.math3.distribution} for use in the {@link CustomSimpsonIntegrator}.
- * <p>
+ *
+*
+* <p>
  * Implements the <a href="http://mathworld.wolfram.com/TrapezoidalRule.html">
  * Trapezoid Rule</a> for integration of real univariate functions. For
  * reference, see <b>Introduction to Numerical Analysis</b>, ISBN 038795452X,
  * chapter 3.
- * <p>
+ *
+*
+* <p>
  * The function should be integrable.</p>
  *
  * @since 1.2
@@ -125,7 +132,9 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
      * Compute the n-th stage integral of trapezoid rule. This function
      * should only be called by API <code>integrate()</code> in the package.
      * To save time it does not verify arguments - caller does.
-     * <p>
+     *
+*
+* <p>
      * The interval is divided equally into 2^n sections rather than an
      * arbitrary m sections because this configuration can best utilize the
      * already computed values.</p>
@@ -168,7 +177,9 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
      * Compute the n-th stage integral of trapezoid rule. This function
      * should only be called by API <code>integrate()</code> in the package.
      * To save time it does not verify arguments - caller does.
-     * <p>
+     *
+*
+* <p>
      * The interval is divided equally into 2^n sections rather than an
      * arbitrary m sections because this configuration can best utilize the
      * already computed values.</p>

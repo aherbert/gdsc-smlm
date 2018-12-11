@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
@@ -34,25 +35,33 @@ import org.apache.commons.math3.util.FastMath;
  * Where:<br> i = the pixel index <br> vari = the variance of the pixel <br> gi = the gain of the
  * pixel <br> oi = the offset of the pixel <br> ui = the function value (expected number of photons)
  * <br> Di = the observed value at the pixel x = the observed random variable (observed number of
- * photons adjusted by a pixel dependent constant) <br> <p> The negative log-likelihood function is:
- * <br> -LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br> = (ui+vari/gi^2) - x *
- * ln(ui+vari/gi^2) + ln(gamma(x+1)) <br> <p> The negative log-likelihood (and gradient) can be
- * evaluated over the entire set of observed values or for a chosen observed value. <p> To allow a
- * likelihood to be computed: (a) when the function predicts negative photon count data the function
- * prediction is set to zero; (b) if the observed random variable (x) is negative it is also set to
- * zero. This occurs when true signal readout from the sCMOS camera is low enough to be negated by
- * readout noise. In this case the noise can be ignored.
+ * photons adjusted by a pixel dependent constant) <br>
+ *
+ * <p>The negative log-likelihood function is: <br> -LL(P_sCMOS (x=[(Di-oi)/gi +
+ * vari/gi^2]|ui,vari,gi,oi)) <br> = (ui+vari/gi^2) - x * ln(ui+vari/gi^2) + ln(gamma(x+1)) <br>
+ *
+ * <p>The negative log-likelihood (and gradient) can be evaluated over the entire set of observed
+ * values or for a chosen observed value.
+ *
+ * <p>To allow a likelihood to be computed: (a) when the function predicts negative photon count
+ * data the function prediction is set to zero; (b) if the observed random variable (x) is negative
+ * it is also set to zero. This occurs when true signal readout from the sCMOS camera is low enough
+ * to be negated by readout noise. In this case the noise can be ignored.
  *
  * @see "Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658."
  */
 public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
   private final double logNormalisation;
-  private final double[] var_g2, x, logG;
+  private final double[] var_g2;
+  private final double[] x;
+  private final double[] logG;
 
   /**
-   * Initialise the function. <p> The input parameters must be the full parameters for the
-   * non-linear function. Only those parameters with gradient indices should be passed in to the
-   * functions to obtain the value (and gradient).
+   * Initialise the function.
+   *
+   * <p>The input parameters must be the full parameters for the non-linear function. Only those
+   * parameters with gradient indices should be passed in to the functions to obtain the value (and
+   * gradient).
    *
    * @param f The function to be used to calculated the expected values (Note that the expected
    *        value is the number of photons)
@@ -139,8 +148,9 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
 
   /**
    * Initialise the function using pre-computed per pixel working variables. This allows the
-   * pre-computation to be performed once for the sCMOS pixels for all likelihood computations. <p>
-   * The input parameters must be the full parameters for the non-linear function. Only those
+   * pre-computation to be performed once for the sCMOS pixels for all likelihood computations.
+   *
+   * <p>The input parameters must be the full parameters for the non-linear function. Only those
    * parameters with gradient indices should be passed in to the functions to obtain the value (and
    * gradient).
    *

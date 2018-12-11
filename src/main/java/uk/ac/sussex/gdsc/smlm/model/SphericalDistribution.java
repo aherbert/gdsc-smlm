@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
@@ -31,7 +32,9 @@ import org.apache.commons.math3.util.FastMath;
  * Samples uniformly from the specified spherical volume.
  */
 public class SphericalDistribution implements SpatialDistribution {
-  private final double radius, r2, range;
+  private final double radius;
+  private final double r2;
+  private final double range;
   private final RandomGenerator randomGenerator;
   private boolean useRejectionMethod = true;
   private final double[] origin = new double[3];
@@ -116,7 +119,7 @@ public class SphericalDistribution implements SpatialDistribution {
 
   /** {@inheritDoc} */
   @Override
-  public boolean isWithinXY(double[] xyz) {
+  public boolean isWithinXy(double[] xyz) {
     final double[] delta = {xyz[0] - origin[0], xyz[1] - origin[1]};
     return (delta[0] * delta[0] + delta[1] * delta[1]) < r2;
   }

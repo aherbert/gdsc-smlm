@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
@@ -55,9 +56,13 @@ public class CombinedOrFailCounter extends CombinedFailCounter {
   }
 
   /**
-   * Join the fail counters. <p> If both are not null then return a combined fail counter. <p> If
-   * either are null then a single counter will be returned. <p> If both are null then null will be
-   * returned.
+   * Join the fail counters.
+   *
+   * <p>If both are not null then return a combined fail counter.
+   *
+   * <p>If either are null then a single counter will be returned.
+   *
+   * <p>If both are null then null will be returned.
    *
    * @param c1 the first counter
    * @param c2 the second counter

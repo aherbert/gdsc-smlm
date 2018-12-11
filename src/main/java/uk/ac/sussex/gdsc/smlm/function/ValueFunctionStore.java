@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
@@ -32,7 +33,7 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure {
 
   /** The counter i. */
   protected int i;
-  /** The values from the last call to {@link #forEach(ValueProcedure)} */
+  /** The values from the last call to {@link #forEach(ValueProcedure)}. */
   public double[] values;
 
   /**

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -208,23 +209,23 @@ public class CalibrationWriter extends CalibrationReader {
   /**
    * Sets the camera type to EMCCD or CCD.
    *
-   * @param isEMCCD true if an EMCCD
-   * @deprecated This has been replaced by
-   *             {@link #setCameraType(uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType)}
+   * @param isEmCcd true if an EMCCD
+   * @deprecated This has been replaced by {@link #setCameraType(CalibrationProtos.CameraType)}
    */
   @Deprecated
-  public void setEmCCD(boolean isEMCCD) {
-    setCameraType((isEMCCD) ? CameraType.EMCCD : CameraType.CCD);
+  public void setEmCcd(boolean isEmCcd) {
+    setCameraType((isEmCcd) ? CameraType.EMCCD : CameraType.CCD);
   }
 
   /**
-   * Sets the camera quantum efficiency (e-/photon) used when modelling a microscope camera. <p>
-   * Note that the camera noise model assumes that photons are converted to counts by a process that
-   * is not perfect (i.e. it has noise). The underlying process is photons converted to electrons in
-   * the camera chip and then amplification (count/electron) occurring in the camera hardware.
-   * Ideally this should be recorded by storing the QE and the amplification. However the total gain
-   * (Count/photon) is already stored with the results. Thus the amplification can be inferred by
-   * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+   * Sets the camera quantum efficiency (e-/photon) used when modelling a microscope camera.
+   *
+   * <p>Note that the camera noise model assumes that photons are converted to counts by a process
+   * that is not perfect (i.e. it has noise). The underlying process is photons converted to
+   * electrons in the camera chip and then amplification (count/electron) occurring in the camera
+   * hardware. Ideally this should be recorded by storing the QE and the amplification. However the
+   * total gain (Count/photon) is already stored with the results. Thus the amplification can be
+   * inferred by dividing the total gain by the quantum efficiency which should be in the range 0-1.
    *
    * @param quantumEfficiency the new quantum efficiency
    */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
@@ -324,7 +325,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
     final double[] distanceThresholds = getDistances(dThreshold, increments, delta);
     final double[] pairDistances = getPairDistances(allMatches);
     // Re-use storage for the ID analysis
-    TIntHashSet id1 = null, id2 = null, matchId1 = null, matchId2 = null;
+    TIntHashSet id1 = null;
+    TIntHashSet id2 = null;
+    TIntHashSet matchId1 = null;
+    TIntHashSet matchId2 = null;
     if (doIdAnalysis) {
       if (doIdAnalysis1) {
         id1 = getIds(results1);
@@ -352,7 +356,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
       final MatchResult result =
           new MatchResult(tp2, fp2, fn2, (tp2 > 0) ? Math.sqrt(rms / tp2) : 0);
 
-      MatchResult idResult1 = null, idResult2 = null;
+      MatchResult idResult1 = null;
+      MatchResult idResult2 = null;
       if (doIdAnalysis) {
         if (doIdAnalysis1) {
           matchId1.clear();
@@ -449,7 +454,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
       results.forEach(new PeakResultProcedure() {
         @Override
         public void execute(PeakResult p) {
-          final float x, y, z;
+          final float x;
+          final float y;
+          final float z;
           if (integerCoordinates) {
             x = (int) p.getXPosition();
             y = (int) p.getYPosition();

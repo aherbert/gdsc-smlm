@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -51,10 +52,10 @@ public class MultiPathFilter implements Cloneable {
   public class SelectedResult {
 
     /** The results. */
-    final public PreprocessedPeakResult[] results;
+    public final PreprocessedPeakResult[] results;
 
     /** The fit result. */
-    final public FitResult fitResult;
+    public final FitResult fitResult;
 
     /**
      * Instantiates a new selected result.
@@ -88,7 +89,9 @@ public class MultiPathFilter implements Cloneable {
     public boolean isFit(int candidateId);
 
     /**
-     * Checks if is valid. <p> Return true if this candidate should definitely be filtered.
+     * Checks if is valid.
+     *
+     * <p>Return true if this candidate should definitely be filtered.
      *
      * @param candidateId the candidate id
      * @return true, if is valid
@@ -270,8 +273,10 @@ public class MultiPathFilter implements Cloneable {
   final IDirectFilter filter;
 
   /**
-   * The minimal direct filter to apply to the results. <p> This is applied if the result fails the
-   * primary filter. It is used to indicate that the result achieves a minimum set of criteria.
+   * The minimal direct filter to apply to the results.
+   *
+   * <p>This is applied if the result fails the primary filter. It is used to indicate that the
+   * result achieves a minimum set of criteria.
    */
   final IDirectFilter minFilter;
 
@@ -281,7 +286,7 @@ public class MultiPathFilter implements Cloneable {
    * doublet fitting.
    */
   @XStreamAsAttribute
-  final public double residualsThreshold;
+  public final double residualsThreshold;
 
   private class FilterSetupState {
     /** Store the initial state of the filter flags. */
@@ -448,8 +453,9 @@ public class MultiPathFilter implements Cloneable {
   /**
    * Called before the accept method is called for PreprocessedPeakResult. This calls the setup()
    * method in the DirectFilter. It also saves the initial state of the filter so that it can be
-   * restored when the filter is updated, for example disabling <p> This should be called once to
-   * initialise the filter before processing a batch of results.
+   * restored when the filter is updated, for example disabling
+   *
+   * <p>This should be called once to initialise the filter before processing a batch of results.
    *
    * @see #accept(PreprocessedPeakResult)
    */
@@ -464,8 +470,9 @@ public class MultiPathFilter implements Cloneable {
   /**
    * Called before the accept method is called for PreprocessedPeakResult. The flags can control the
    * type of filtering requested. Filters are asked to respect the flags defined in this class. This
-   * calls the setup(int) method in the DirectFilter. <p> This should be called once to initialise
-   * the filter before processing a batch of results.
+   * calls the setup(int) method in the DirectFilter.
+   *
+   * <p>This should be called once to initialise the filter before processing a batch of results.
    *
    * @param flags Flags used to control the filter
    * @see #accept(PreprocessedPeakResult)
@@ -481,8 +488,9 @@ public class MultiPathFilter implements Cloneable {
   /**
    * Called before the accept method is called for PreprocessedPeakResult. The flags can control the
    * type of filtering requested. Filters are asked to respect the flags defined in this class. This
-   * calls the setup(int) method in the DirectFilter. <p> This should be called once to initialise
-   * the filter before processing a batch of results.
+   * calls the setup(int) method in the DirectFilter.
+   *
+   * <p>This should be called once to initialise the filter before processing a batch of results.
    *
    * @param flags Flags used to control the filter
    * @param data the data used to control the filter
@@ -517,34 +525,42 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Filter a multi-path set of peak results into a set that are accepted. <p> Any existing or new
-   * results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other results are
-   * assumed to be candidates that were fitted but will not be validated unless required. <p> Note
-   * that new results may not be for the candidate identified by the MultiPathFitResult. This can
-   * happen when multi-fitting has fit another candidate that previously did not have a result. The
-   * SelectedResultStore is used to determine if that result has been fit already. If not it is
-   * added to the output list. <p> The SelectedResultStore will be passed any result that passes the
-   * configured filters.
+   * Filter a multi-path set of peak results into a set that are accepted.
+   *
+   * <p>Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method.
+   * Any other results are assumed to be candidates that were fitted but will not be validated
+   * unless required.
+   *
+   * <p>Note that new results may not be for the candidate identified by the MultiPathFitResult.
+   * This can happen when multi-fitting has fit another candidate that previously did not have a
+   * result. The SelectedResultStore is used to determine if that result has been fit already. If
+   * not it is added to the output list.
+   *
+   * <p>The SelectedResultStore will be passed any result that passes the configured filters.
    *
    * @param multiPathResult the multi path result
    * @param validateCandidates Set to true to validate the candidates
    * @param store the store
    * @return The new peak results that are accepted (and any valid candidates if found); or null
    */
-  final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult,
+  public final PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult,
       boolean validateCandidates, SelectedResultStore store) {
     return accept(multiPathResult, validateCandidates, store, false);
   }
 
   /**
-   * Filter a multi-path set of peak results into a set that are accepted. <p> Any existing or new
-   * results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other results are
-   * assumed to be candidates that were fitted but will not be validated unless required. <p> Note
-   * that new results may not be for the candidate identified by the MultiPathFitResult. This can
-   * happen when multi-fitting has fit another candidate that previously did not have a result. The
-   * SelectedResultStore is used to determine if that result has been fit already. If not it is
-   * added to the output list. <p> The SelectedResultStore will be passed any result that passes the
-   * configured filters.
+   * Filter a multi-path set of peak results into a set that are accepted.
+   *
+   * <p>Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method.
+   * Any other results are assumed to be candidates that were fitted but will not be validated
+   * unless required.
+   *
+   * <p>Note that new results may not be for the candidate identified by the MultiPathFitResult.
+   * This can happen when multi-fitting has fit another candidate that previously did not have a
+   * result. The SelectedResultStore is used to determine if that result has been fit already. If
+   * not it is added to the output list.
+   *
+   * <p>The SelectedResultStore will be passed any result that passes the configured filters.
    *
    * @param multiPathResult the multi path result
    * @param validateCandidates Set to true to validate the candidates
@@ -747,26 +763,32 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Filter a multi-path set of peak results into a set that are accepted. <p> Any existing or new
-   * results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other results are
-   * assumed to be candidates that were fitted but will not be validated unless required. <p> Note
-   * that new results may not be for the candidate identified by the MultiPathFitResult. This can
-   * happen when multi-fitting has fit another candidate that previously did not have a result. The
-   * SelectedResultStore is used to determine if that result has been fit already. If not it is
-   * added to the output list. <p> The method returns the the same results as
+   * Filter a multi-path set of peak results into a set that are accepted.
+   *
+   * <p>Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method.
+   * Any other results are assumed to be candidates that were fitted but will not be validated
+   * unless required.
+   *
+   * <p>Note that new results may not be for the candidate identified by the MultiPathFitResult.
+   * This can happen when multi-fitting has fit another candidate that previously did not have a
+   * result. The SelectedResultStore is used to determine if that result has been fit already. If
+   * not it is added to the output list.
+   *
+   * <p>The method returns the the same results as
    * {@link #accept(MultiPathFitResult, boolean, SelectedResultStore)} but includes the FitResult
-   * that the data originated from. <p> The SelectedResultStore will be passed any result that
-   * passes the configured filters. It will not be passed the returned SelectedResult as the results
-   * will be duplicates of those passed to the store individually. They may also contain validated
-   * candidates. The returned results must thus be filtered for new results (e.g. not existing or
-   * candidate results).
+   * that the data originated from.
+   *
+   * <p>The SelectedResultStore will be passed any result that passes the configured filters. It
+   * will not be passed the returned SelectedResult as the results will be duplicates of those
+   * passed to the store individually. They may also contain validated candidates. The returned
+   * results must thus be filtered for new results (e.g. not existing or candidate results).
    *
    * @param multiPathResult the multi path result
    * @param validateCandidates Set to true to validate the candidates
    * @param store the store
    * @return The results that are accepted; or null
    */
-  final public SelectedResult select(final MultiPathFitResult multiPathResult,
+  public final SelectedResult select(final MultiPathFitResult multiPathResult,
       boolean validateCandidates, SelectedResultStore store) {
     final int candidateId = multiPathResult.candidateId;
 
@@ -972,13 +994,19 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Select a set of peak results. <p> The number of consecutive rejections are counted. When the
-   * configured number of failures is reached all remaining results are rejected. <p> A selected
-   * result will be stored for each MultiPathFitResult that is assessed, even if the fitting failed.
-   * In this case the list of accepted results will be null. <p> The SelectedResultStore can be used
-   * to track results that pass validation. If this is null then the default behaviour is to track
-   * fitted candidates that pass validation. These will be processed even if the fail count has been
-   * reached. <p> The coordinate store is used to check for duplicates.
+   * Select a set of peak results.
+   *
+   * <p>The number of consecutive rejections are counted. When the configured number of failures is
+   * reached all remaining results are rejected.
+   *
+   * <p>A selected result will be stored for each MultiPathFitResult that is assessed, even if the
+   * fitting failed. In this case the list of accepted results will be null.
+   *
+   * <p>The SelectedResultStore can be used to track results that pass validation. If this is null
+   * then the default behaviour is to track fitted candidates that pass validation. These will be
+   * processed even if the fail count has been reached.
+   *
+   * <p>The coordinate store is used to check for duplicates.
    *
    * @param multiPathResults the multi path results
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -1202,10 +1230,11 @@ public class MultiPathFilter implements Cloneable {
   private boolean failNew;
 
   /**
-   * Check all new and all existing results are valid. Returns the new results. <p> New results and
-   * validated candidates that fail the primary filter can be filtered using the minimal filter and
-   * sent to the store. The store can be used to determine if a fit for a different candidate has
-   * been performed already.
+   * Check all new and all existing results are valid. Returns the new results.
+   *
+   * <p>New results and validated candidates that fail the primary filter can be filtered using the
+   * minimal filter and sent to the store. The store can be used to determine if a fit for a
+   * different candidate has been performed already.
    *
    * @param candidateId the candidate id
    * @param fitResult the results
@@ -1219,10 +1248,11 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Check all new and all existing results are valid. Returns the new results. <p> New results and
-   * validated candidates that fail the primary filter can be filtered using the minimal filter and
-   * sent to the store. The store can be used to determine if a fit for a different candidate has
-   * been performed already.
+   * Check all new and all existing results are valid. Returns the new results.
+   *
+   * <p>New results and validated candidates that fail the primary filter can be filtered using the
+   * minimal filter and sent to the store. The store can be used to determine if a fit for a
+   * different candidate has been performed already.
    *
    * @param candidateId the candidate id
    * @param fitResult the results
@@ -1320,10 +1350,11 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Check any new and all existing results are valid. Returns the new results <p> New results and
-   * validated candidates that fail the primary filter can be filtered using the minimal filter and
-   * sent to the store. The store can be used to determine if a fit for a different candidate has
-   * been performed already.
+   * Check any new and all existing results are valid. Returns the new results.
+   *
+   * <p>New results and validated candidates that fail the primary filter can be filtered using the
+   * minimal filter and sent to the store. The store can be used to determine if a fit for a
+   * different candidate has been performed already.
    *
    * @param candidateId the candidate id
    * @param fitResult the results
@@ -1337,10 +1368,11 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Check any new and all existing results are valid. Returns the new results <p> New results and
-   * validated candidates that fail the primary filter can be filtered using the minimal filter and
-   * sent to the store. The store can be used to determine if a fit for a different candidate has
-   * been performed already.
+   * Check any new and all existing results are valid. Returns the new results.
+   *
+   * <p>New results and validated candidates that fail the primary filter can be filtered using the
+   * minimal filter and sent to the store. The store can be used to determine if a fit for a
+   * different candidate has been performed already.
    *
    * @param candidateId the candidate id
    * @param fitResult the results
@@ -1363,10 +1395,11 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Check any new and all existing results are valid. Returns the new results <p> New results and
-   * validated candidates that fail the primary filter can be filtered using the minimal filter and
-   * sent to the store. The store can be used to determine if a fit for a different candidate has
-   * been performed already.
+   * Check any new and all existing results are valid. Returns the new results.
+   *
+   * <p>New results and validated candidates that fail the primary filter can be filtered using the
+   * minimal filter and sent to the store. The store can be used to determine if a fit for a
+   * different candidate has been performed already.
    *
    * @param candidateId the candidate id
    * @param fitResult the results
@@ -1451,10 +1484,11 @@ public class MultiPathFilter implements Cloneable {
 
   /**
    * Check any new and all existing results within the multi-doublet fit results are valid. Returns
-   * the new results. Coordinate shift filter is disabled for the doublet results. <p> New results
-   * and validated candidates that fail the primary filter can be filtered using the minimal filter
-   * and sent to the store. The store can be used to determine if a fit for a different candidate
-   * has been performed already.
+   * the new results. Coordinate shift filter is disabled for the doublet results.
+   *
+   * <p>New results and validated candidates that fail the primary filter can be filtered using the
+   * minimal filter and sent to the store. The store can be used to determine if a fit for a
+   * different candidate has been performed already.
    *
    * @param multiPathResult the multi path result
    * @param validateCandidates Set to true to validate the candidates
@@ -1545,8 +1579,9 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Filter a set of multi-path results into a set of results. <p> The coordinate store is used to
-   * check for duplicates.
+   * Filter a set of multi-path results into a set of results.
+   *
+   * <p>The coordinate store is used to check for duplicates.
    *
    * @param results the results
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -1556,7 +1591,7 @@ public class MultiPathFilter implements Cloneable {
    * @param coordinateStore the coordinate store (can be null)
    * @return the filtered results
    */
-  final public PreprocessedPeakResult[] filter(final MultiPathFitResults[] results,
+  public final PreprocessedPeakResult[] filter(final MultiPathFitResults[] results,
       FailCounter failCounter, boolean subset, CoordinateStore coordinateStore) {
     setup();
     final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
@@ -1751,14 +1786,17 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Create a subset of multi-path results, i.e. all those that pass the filter. <p> The number of
-   * consecutive rejections are counted per frame. When the configured number of failures is reached
-   * all remaining results for the frame are rejected. <p> If the subset flag is set to true the
-   * candidate Id will be used to determine the number of failed fits before the current candidate,
-   * assuming candidates start at zero and increment. <p> All results are validated with the filter
-   * and the result set in the PreprocessedPeakResult. This can be reset using
-   * {@link #resetValidationFlag(MultiPathFitResults[])}. This result is used when scoring a subset
-   * allowing results to be ignored from duplicate validation.
+   * Create a subset of multi-path results, i.e. all those that pass the filter.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected.
+   *
+   * <p>If the subset flag is set to true the candidate Id will be used to determine the number of
+   * failed fits before the current candidate, assuming candidates start at zero and increment.
+   *
+   * <p>All results are validated with the filter and the result set in the PreprocessedPeakResult.
+   * This can be reset using {@link #resetValidationFlag(MultiPathFitResults[])}. This result is
+   * used when scoring a subset allowing results to be ignored from duplicate validation.
    *
    * @param results a set of results to analyse
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -1846,11 +1884,13 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Create a subset of multi-path results, i.e. all those that pass the filter. <p> The number of
-   * consecutive rejections are counted. When the configured number of failures is reached all
-   * remaining results for the frame are rejected. <p> If the subset flag is set to true the
-   * candidate Id will be used to determine the number of failed fits before the current candidate,
-   * assuming candidates start at zero and increment.
+   * Create a subset of multi-path results, i.e. all those that pass the filter.
+   *
+   * <p>The number of consecutive rejections are counted. When the configured number of failures is
+   * reached all remaining results for the frame are rejected.
+   *
+   * <p>If the subset flag is set to true the candidate Id will be used to determine the number of
+   * failed fits before the current candidate, assuming candidates start at zero and increment.
    *
    * @param multiPathResults the multi path results
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -1865,11 +1905,13 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Create a subset of multi-path results, i.e. all those that pass the filter. <p> The number of
-   * consecutive rejections are counted. When the configured number of failures is reached all
-   * remaining results for the frame are rejected. <p> If the subset flag is set to true the
-   * candidate Id will be used to determine the number of failed fits before the current candidate,
-   * assuming candidates start at zero and increment.
+   * Create a subset of multi-path results, i.e. all those that pass the filter.
+   *
+   * <p>The number of consecutive rejections are counted. When the configured number of failures is
+   * reached all remaining results for the frame are rejected.
+   *
+   * <p>If the subset flag is set to true the candidate Id will be used to determine the number of
+   * failed fits before the current candidate, assuming candidates start at zero and increment.
    *
    * @param multiPathResults the multi path results
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -1999,11 +2041,14 @@ public class MultiPathFilter implements Cloneable {
   /**
    * Score a set of multi-path results. Filter each multi-path result. Any output results that are
    * new results are assumed to be positives and their assignments used to score the results per
-   * frame. <p> The number of consecutive rejections are counted per frame. When the configured
-   * number of failures is reached all remaining results for the frame are rejected. This assumes
-   * the results are ordered by the frame. <p> Note: The fractional scores are totalled as well as
-   * the integer tp/fp scores. These are returned in the positives and negatives fields of the
-   * result.
+   * frame.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
+   * returned in the positives and negatives fields of the result.
    *
    * @param results a set of results to analyse
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -2018,13 +2063,17 @@ public class MultiPathFilter implements Cloneable {
 
   /**
    * Score a subset of multi-path results. The subset should be created with
-   * {@link #filterSubset(MultiPathFitResults[], FailCounter, boolean)}. <p> Filter each multi-path
-   * result. Any output results that are new results are assumed to be positives and their
-   * assignments used to score the results per frame. <p> The number of consecutive rejections are
-   * counted per frame. When the configured number of failures is reached all remaining results for
-   * the frame are rejected. This assumes the results are ordered by the frame. <p> Note: The
-   * fractional scores are totalled as well as the integer tp/fp scores. These are returned in the
-   * positives and negatives fields of the result.
+   * {@link #filterSubset(MultiPathFitResults[], FailCounter, boolean)}.
+   *
+   * <p>Filter each multi-path result. Any output results that are new results are assumed to be
+   * positives and their assignments used to score the results per frame.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
+   * returned in the positives and negatives fields of the result.
    *
    * @param results a set of results to analyse
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -2040,11 +2089,16 @@ public class MultiPathFilter implements Cloneable {
   /**
    * Score a set of multi-path results. Filter each multi-path result. Any output results that are
    * new results are assumed to be positives and their assignments used to score the results per
-   * frame. <p> The number of consecutive rejections are counted per frame. When the configured
-   * number of failures is reached all remaining results for the frame are rejected. This assumes
-   * the results are ordered by the frame. <p> Note: The fractional scores are totalled as well as
-   * the integer tp/fp scores. These are returned in the positives and negatives fields of the
-   * result. <p> The coordinate store is used to check for duplicates.
+   * frame.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
+   * returned in the positives and negatives fields of the result.
+   *
+   * <p>The coordinate store is used to check for duplicates.
    *
    * @param results a set of results to analyse
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -2064,14 +2118,19 @@ public class MultiPathFilter implements Cloneable {
 
   /**
    * Score a subset of multi-path results. The subset can be created with
-   * {@link #filterSubset(MultiPathFitResults[], FailCounter, boolean)}. <p> Filter each multi-path
-   * result. Any output results that are new results are assumed to be positives and their
-   * assignments used to score the results per frame. <p> The number of consecutive rejections are
-   * counted per frame. When the configured number of failures is reached all remaining results for
-   * the frame are rejected. This assumes the results are ordered by the frame. <p> Note: The
-   * fractional scores are totalled as well as the integer tp/fp scores. These are returned in the
-   * positives and negatives fields of the result. <p> The coordinate store is used to check for
-   * duplicates.
+   * {@link #filterSubset(MultiPathFitResults[], FailCounter, boolean)}.
+   *
+   * <p>Filter each multi-path result. Any output results that are new results are assumed to be
+   * positives and their assignments used to score the results per frame.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
+   * failures is reached all remaining results for the frame are rejected. This assumes the results
+   * are ordered by the frame.
+   *
+   * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
+   * returned in the positives and negatives fields of the result.
+   *
+   * <p>The coordinate store is used to check for duplicates.
    *
    * @param results a set of results to analyse
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -2111,17 +2170,24 @@ public class MultiPathFilter implements Cloneable {
   }
 
   /**
-   * Score a set of multi-path results. <p> If the subset flag is set to true the candidate Id will
-   * be used to determine the number of failed fits before the current candidate, assuming
-   * candidates start at zero and increment. The validationResult property of the
-   * PreprocessedPeakResult will be used; if non-zero then the peak will not be validated and will
-   * be counted as a fail. <p> Filter each multi-path result. Any output results that are new
-   * results are assumed to be positives and their assignments used to score the results per frame.
-   * <p> The number of consecutive rejections are counted per frame. When the configured number of
+   * Score a set of multi-path results.
+   *
+   * <p>If the subset flag is set to true the candidate Id will be used to determine the number of
+   * failed fits before the current candidate, assuming candidates start at zero and increment. The
+   * validationResult property of the PreprocessedPeakResult will be used; if non-zero then the peak
+   * will not be validated and will be counted as a fail.
+   *
+   * <p>Filter each multi-path result. Any output results that are new results are assumed to be
+   * positives and their assignments used to score the results per frame.
+   *
+   * <p>The number of consecutive rejections are counted per frame. When the configured number of
    * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame. <p> Note: The fractional scores are totalled as well as the integer
-   * tp/fp scores. These are returned in the positives and negatives fields of the result. <p> The
-   * coordinate store is used to check for duplicates.
+   * are ordered by the frame.
+   *
+   * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
+   * returned in the positives and negatives fields of the result.
+   *
+   * <p>The coordinate store is used to check for duplicates.
    *
    * @param results a set of results to analyse
    * @param failCounter the counter to track the failures to allow per frame before all peaks are

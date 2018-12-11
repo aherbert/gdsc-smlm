@@ -21,11 +21,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 /**
  * Computes a convolution in the spatial domain for each point within the array. Pixels outside the
- * array are assumed to be zero. <p> Adapted from {@link ij.plugin.filter.Convolver}
+ * array are assumed to be zero.
+ *
+ * <p>Adapted from {@link ij.plugin.filter.Convolver}
  */
 public class ZeroKernelFilter extends KernelFilter {
   /**

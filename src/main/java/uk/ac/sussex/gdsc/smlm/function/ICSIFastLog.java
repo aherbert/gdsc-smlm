@@ -21,13 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Implementation of the ICSILog algorithm as described in O. Vinyals, G. Friedland, N. Mirghafori
  * "Revisiting a basic function on current CPUs: A fast logarithm implementation with adjustable
- * accuracy" (2007). <p> This class is based on the original algorithm description. It can have
- * large errors when the unbiased exponent is zero.
+ * accuracy" (2007).
+ *
+ * <p>This class is based on the original algorithm description. It can have large errors when the
+ * unbiased exponent is zero.
  *
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf</a>
@@ -61,9 +64,10 @@ public class ICSIFastLog extends FastLog {
   private final float[] ddata;
 
   /**
-   * Create a new natural logarithm calculation instance using the default table size. <p> If the
-   * table is not initialised then a call to a log function with the particular data type will throw
-   * a null pointer exception.
+   * Create a new natural logarithm calculation instance using the default table size.
+   *
+   * <p>If the table is not initialised then a call to a log function with the particular data type
+   * will throw a null pointer exception.
    *
    * @param dataType the data type
    * @return the fast log instance
@@ -75,9 +79,10 @@ public class ICSIFastLog extends FastLog {
 
   /**
    * Create a new natural logarithm calculation instance. This will hold the pre-calculated log
-   * values for base 2 and a table size depending on a given mantissa precision. <p> If the table is
-   * not initialised then a call to a log function with the particular data type will throw a null
-   * pointer exception.
+   * values for base 2 and a table size depending on a given mantissa precision.
+   *
+   * <p>If the table is not initialised then a call to a log function with the particular data type
+   * will throw a null pointer exception.
    *
    * @param n The number of bits to keep from the mantissa. Table storage = 2^n * 4 bytes, e.g. 32Kb
    *        for n=13.
@@ -242,8 +247,9 @@ public class ICSIFastLog extends FastLog {
   }
 
   /**
-   * Calculate the logarithm using base 2. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the logarithm using base 2. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog2(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog2(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog2(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
@@ -286,8 +292,9 @@ public class ICSIFastLog extends FastLog {
   }
 
   /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
@@ -350,8 +357,9 @@ public class ICSIFastLog extends FastLog {
   }
 
   /**
-   * Calculate the logarithm using base 2. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the logarithm using base 2. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog2(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog2(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog2(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
@@ -393,8 +401,9 @@ public class ICSIFastLog extends FastLog {
   }
 
   /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative

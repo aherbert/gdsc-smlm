@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -54,8 +55,10 @@ import java.awt.event.MouseListener;
 import java.util.HashMap;
 
 /**
- * Saves the fit results to an ImageJ results table. <p> The table supports mouse click events to
- * draw the selected coordinates on the original source image using the ImageROIPainter.
+ * Saves the fit results to an ImageJ results table.
+ *
+ * <p>The table supports mouse click events to draw the selected coordinates on the original source
+ * image using the ImageROIPainter.
  */
 public class IJTablePeakResults extends IJAbstractPeakResults implements CoordinateProvider {
   /**
@@ -109,7 +112,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   private double repaintInterval = 0.1;
   private Rounder rounder;
 
-  private int indexT = -1, indexX = -1, indexY = -1;
+  private int indexT = -1;
+  private int indexX = -1;
+  private int indexY = -1;
 
   private int size = 0;
 

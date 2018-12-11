@@ -21,13 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Specifies a the result of fitting a position using different fitting methods. <p> The multi-path
- * result can be evaluated by the MultiPathFilter to determine which result from the different paths
- * should be accepted. <p> This class is used for benchmarking the fitting path options in the
- * PeakFit algorithm.
+ * Specifies a the result of fitting a position using different fitting methods.
+ *
+ * <p>The multi-path result can be evaluated by the MultiPathFilter to determine which result from
+ * the different paths should be accepted.
+ *
+ * <p>This class is used for benchmarking the fitting path options in the PeakFit algorithm.
  */
 public class MultiPathFitResult implements Cloneable {
   /**
@@ -37,7 +40,7 @@ public class MultiPathFitResult implements Cloneable {
     /**
      * Fitting status of the fit. Zero for OK.
      */
-    final public int status;
+    public final int status;
 
     /**
      * The results from the fit. It is expected that one or more results will be true for
@@ -48,7 +51,7 @@ public class MultiPathFitResult implements Cloneable {
     /**
      * Allows storing any data associated with the fit result.
      */
-    final public Object data;
+    public final Object data;
 
     /**
      * Instantiates a new fit result.
@@ -174,8 +177,9 @@ public class MultiPathFitResult implements Cloneable {
   }
 
   /**
-   * Copy the class level field values into a new object. Ignores the fail count fields. <p> To copy
-   * sub-class fields use {@link #clone()}.
+   * Copy the class level field values into a new object. Ignores the fail count fields.
+   *
+   * <p>To copy sub-class fields use {@link #clone()}.
    *
    * @param deep Set to true to do a clone of the FitResult objects. Their array objects will not be
    *        copied.

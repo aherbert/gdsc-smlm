@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -88,8 +89,12 @@ public class GridCoordinateStore implements CoordinateStore {
    * processing 2D coordinates.
    */
   private double zResolution;
-  private final int minx, miny, width, height;
-  private int xBlocks, yBlocks;
+  private final int minx;
+  private final int miny;
+  private final int width;
+  private final int height;
+  private int xBlocks;
+  private int yBlocks;
   /**
    * Flag to indicate that the store is active (i.e. storing coordinates). It is not active if the
    * XY resolution is negative.

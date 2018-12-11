@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
@@ -29,11 +30,15 @@ import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Implements the probability density function for a Poisson distribution. <p> This is a simple
- * implementation of the LikelihoodFunction interface. <p> The likelihood function is designed to
- * model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a Poisson process of
- * emitted light, converted to electrons on the camera chip, amplified by a gain and then read. <p>
- * This function allows any input value X to generate a probability, even if the value is between
+ * Implements the probability density function for a Poisson distribution.
+ *
+ * <p>This is a simple implementation of the LikelihoodFunction interface.
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
+ * amplified by a gain and then read.
+ *
+ * <p>This function allows any input value X to generate a probability, even if the value is between
  * steps of the scaled PMF of the poisson distribution, i.e. using a gain of 2 the integers 1, 3, 5,
  * etc should have no probability from the scaled Poisson PMF but this function portions the
  * probability accordingly.
@@ -145,9 +150,11 @@ public class InterpolatedPoissonFunction
   }
 
   /**
-   * {@inheritDoc} <p> When evaluating using non-integer values the gradient for
-   * {@code 0 < o/gain < 1} is incorrect. In this region there is no definition for the factorial
-   * required for the derivative {@code (o/gain - 1)!}.
+   * {@inheritDoc}
+   *
+   * <p>When evaluating using non-integer values the gradient for {@code 0 < o/gain < 1} is
+   * incorrect. In this region there is no definition for the factorial required for the derivative
+   * {@code (o/gain - 1)!}.
    *
    * @see uk.ac.sussex.gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double,
    *      double[])
@@ -167,7 +174,8 @@ public class InterpolatedPoissonFunction
     // = e^-l * l^(k-1) / (k-1)! - e^-l * l^k / k!
     // = PMF(l,k-1) - PMF(l,k)
 
-    double lk, lk_1;
+    double lk;
+    double lk_1;
 
     if (nonInteger) {
       final double loge = Math.log(e);

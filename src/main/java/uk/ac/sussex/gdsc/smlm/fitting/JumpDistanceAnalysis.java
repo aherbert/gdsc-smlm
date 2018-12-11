@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
@@ -62,10 +63,11 @@ import java.util.logging.Logger;
 /**
  * Perform curve fitting on a cumulative histogram of the mean-squared displacement (MSD) per second
  * to calculate the diffusion coefficient of molecules (in um^2/s). The MSD is also known as the
- * Jump Distance, i.e. how far a molecule moves when being tracked. <p> Based on the paper: Weimann,
- * L., Ganzinger, K.A., McColl, J., Irvine, K.L., Davis, S.J., Gay, N.J., Bryant, C.E., Klenerman,
- * D. (2013) A Quantitative Comparison of Single-Dye Tracking Analysis Tools Using Monte Carlo
- * Simulations. PLoS One 8, Issue 5, e64287
+ * Jump Distance, i.e. how far a molecule moves when being tracked.
+ *
+ * <p>Based on the paper: Weimann, L., Ganzinger, K.A., McColl, J., Irvine, K.L., Davis, S.J., Gay,
+ * N.J., Bryant, C.E., Klenerman, D. (2013) A Quantitative Comparison of Single-Dye Tracking
+ * Analysis Tools Using Monte Carlo Simulations. PLoS One 8, Issue 5, e64287
  */
 public class JumpDistanceAnalysis {
   private static final boolean DEBUG_OPTIMISER = false;
@@ -109,11 +111,14 @@ public class JumpDistanceAnalysis {
   private double minFraction = 0.1;
   private double minDifference = 2;
   private double minD = 0;
-  private int minN = 1, maxN = 10;
+  private int minN = 1;
+  private int maxN = 10;
   private double significanceLevel = 0.05;
 
   // Set by the last call to the doFit functions
-  private double ss, ll, fitValue;
+  private double ss;
+  private double ll;
+  private double fitValue;
   // Set by any public fit call
   private double lastFitValue;
 
@@ -139,13 +144,15 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Fit the jump distances using a fit to a cumulative histogram. <p> The histogram is fit
-   * repeatedly using a mixed population model with increasing number of different molecules.
-   * Results are sorted by the diffusion coefficient ascending. This process is stopped when: the
-   * Adjusted R^2 does not improve; the fraction of one of the populations is below the min
-   * fraction; the difference between two consecutive diffusion coefficients is below the min
-   * difference; more than one population is below min D. <p> The number of populations must be
-   * obtained from the size of the D/fractions arrays.
+   * Fit the jump distances using a fit to a cumulative histogram.
+   *
+   * <p>The histogram is fit repeatedly using a mixed population model with increasing number of
+   * different molecules. Results are sorted by the diffusion coefficient ascending. This process is
+   * stopped when: the Adjusted R^2 does not improve; the fraction of one of the populations is
+   * below the min fraction; the difference between two consecutive diffusion coefficients is below
+   * the min difference; more than one population is below min D.
+   *
+   * <p>The number of populations must be obtained from the size of the D/fractions arrays.
    *
    * @param jumpDistances The jump distances (in um^2)
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
@@ -164,13 +171,15 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Fit the jump distance histogram using a cumulative sum. <p> The histogram is fit repeatedly
-   * using a mixed population model with increasing number of different molecules. Results are
-   * sorted by the diffusion coefficient ascending. This process is stopped when: the Adjusted R^2
-   * does not improve; the fraction of one of the populations is below the min fraction; the
-   * difference between two consecutive diffusion coefficients is below the min difference; more
-   * than one population is below min D. <p> The number of populations must be obtained from the
-   * size of the D/fractions arrays.
+   * Fit the jump distance histogram using a cumulative sum.
+   *
+   * <p>The histogram is fit repeatedly using a mixed population model with increasing number of
+   * different molecules. Results are sorted by the diffusion coefficient ascending. This process is
+   * stopped when: the Adjusted R^2 does not improve; the fraction of one of the populations is
+   * below the min fraction; the difference between two consecutive diffusion coefficients is below
+   * the min difference; more than one population is below min D.
+   *
+   * <p>The number of populations must be obtained from the size of the D/fractions arrays.
    *
    * @param meanJumpDistance The mean jump distance (in um^2)
    * @param jdHistogram The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative
@@ -256,7 +265,8 @@ public class JumpDistanceAnalysis {
 
   /**
    * Fit the jump distances using a fit to a cumulative histogram with the given number of species.
-   * <p> Results are sorted by the diffusion coefficient ascending.
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param jumpDistances The jump distances (in um^2)
    * @param n The number of species in the mixed population
@@ -276,8 +286,9 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Fit the jump distance histogram using a cumulative sum with the given number of species. <p>
-   * Results are sorted by the diffusion coefficient ascending.
+   * Fit the jump distance histogram using a cumulative sum with the given number of species.
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param meanJumpDistance The mean jump distance (in um^2)
    * @param jdHistogram The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative
@@ -303,8 +314,9 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Fit the jump distance histogram using a cumulative sum with the given number of species. <p>
-   * Results are sorted by the diffusion coefficient ascending.
+   * Fit the jump distance histogram using a cumulative sum with the given number of species.
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param jdHistogram The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative
    *        probability. Must be monototic ascending.
@@ -617,13 +629,15 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Fit the jump distances using a maximum likelihood estimation. <p> The data is fit repeatedly
-   * using a mixed population model with increasing number of different molecules. Results are
-   * sorted by the diffusion coefficient ascending. This process is stopped when: the log-likelihood
-   * ratio does not improve; the fraction of one of the populations is below the min fraction; the
-   * difference between two consecutive diffusion coefficients is below the min difference; more
-   * than one population is below min D. <p> The number of populations must be obtained from the
-   * size of the D/fractions arrays.
+   * Fit the jump distances using a maximum likelihood estimation.
+   *
+   * <p>The data is fit repeatedly using a mixed population model with increasing number of
+   * different molecules. Results are sorted by the diffusion coefficient ascending. This process is
+   * stopped when: the log-likelihood ratio does not improve; the fraction of one of the populations
+   * is below the min fraction; the difference between two consecutive diffusion coefficients is
+   * below the min difference; more than one population is below min D.
+   *
+   * <p>The number of populations must be obtained from the size of the D/fractions arrays.
    *
    * @param jumpDistances The jump distances (in um^2)
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
@@ -633,13 +647,15 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Fit the jump distances using a maximum likelihood estimation. <p> The data is fit repeatedly
-   * using a mixed population model with increasing number of different molecules. Results are
-   * sorted by the diffusion coefficient ascending. This process is stopped when: the log-likelihood
-   * ratio does not improve; the fraction of one of the populations is below the min fraction; the
-   * difference between two consecutive diffusion coefficients is below the min difference; more
-   * than one population is below min D. <p> The number of populations must be obtained from the
-   * size of the D/fractions arrays.
+   * Fit the jump distances using a maximum likelihood estimation.
+   *
+   * <p>The data is fit repeatedly using a mixed population model with increasing number of
+   * different molecules. Results are sorted by the diffusion coefficient ascending. This process is
+   * stopped when: the log-likelihood ratio does not improve; the fraction of one of the populations
+   * is below the min fraction; the difference between two consecutive diffusion coefficients is
+   * below the min difference; more than one population is below min D.
+   *
+   * <p>The number of populations must be obtained from the size of the D/fractions arrays.
    *
    * @param jumpDistances The jump distances (in um^2)
    * @param jdHistogram The jump distance histogram for the given distances. If null will be
@@ -754,7 +770,8 @@ public class JumpDistanceAnalysis {
 
   /**
    * Fit the jump distances using a maximum likelihood estimation with the given number of species.
-   * <p> Results are sorted by the diffusion coefficient ascending.
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param jumpDistances The jump distances (in um^2)
    * @param n The number of species in the mixed population
@@ -766,7 +783,8 @@ public class JumpDistanceAnalysis {
 
   /**
    * Fit the jump distances using a maximum likelihood estimation with the given number of species.
-   * <p> Results are sorted by the diffusion coefficient ascending.
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param jumpDistances The jump distances (in um^2)
    * @param jdHistogram The jump distance histogram for the given distances. If null will be
@@ -803,7 +821,9 @@ public class JumpDistanceAnalysis {
 
   /**
    * Fit the jump distances using a maximum likelihood estimation with the given number of species.
-   * | * <p> Results are sorted by the diffusion coefficient ascending.
+   * | *
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param jumpDistances The jump distances (in um^2)
    * @param estimatedD The estimated diffusion coefficient
@@ -1118,8 +1138,8 @@ public class JumpDistanceAnalysis {
     if (curveLogger == null) {
       return;
     }
-    final int nPoints = curveLogger.getNumberOfCurvePoints();
-    if (nPoints <= 1) {
+    final int npoints = curveLogger.getNumberOfCurvePoints();
+    if (npoints <= 1) {
       return;
     }
     Function function;
@@ -1130,16 +1150,16 @@ public class JumpDistanceAnalysis {
     }
 
     final double max = jdHistogram[0][jdHistogram[0].length - 1];
-    final double interval = max / nPoints;
-    final double[] x = new double[nPoints + 1];
-    final double[] y = new double[nPoints + 1];
+    final double interval = max / npoints;
+    final double[] x = new double[npoints + 1];
+    final double[] y = new double[npoints + 1];
 
-    for (int i = 0; i < nPoints; i++) {
+    for (int i = 0; i < npoints; i++) {
       x[i] = i * interval;
       y[i] = function.evaluate(x[i], params);
     }
-    x[nPoints] = max;
-    y[nPoints] = function.evaluate(max, params);
+    x[npoints] = max;
+    y[npoints] = function.evaluate(max, params);
 
     if (params.length == 1) {
       curveLogger.saveSinglePopulationCurve(new double[][] {x, y});
@@ -1161,7 +1181,8 @@ public class JumpDistanceAnalysis {
    * Function used for least-squares fitting of cumulative histogram of jump distances.
    */
   private abstract static class Function {
-    double[] x, y;
+    double[] x;
+    double[] y;
     double estimatedD;
     int n;
 
@@ -1293,8 +1314,9 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Compute the probability of mean-squared distance x given a diffusion coefficient. <p> Function
-   * used for maximum likelihood fitting.
+   * Compute the probability of mean-squared distance x given a diffusion coefficient.
+   *
+   * <p>Function used for maximum likelihood fitting.
    */
   static class JumpDistanceFunction extends Function implements MultivariateFunction {
     /**
@@ -1401,7 +1423,8 @@ public class JumpDistanceAnalysis {
 
   /**
    * Compute the probability of mean-squared distance being within x given a diffusion coefficient.
-   * <p> Function used for least-squares fitting of cumulative histogram of jump distances.
+   *
+   * <p>Function used for least-squares fitting of cumulative histogram of jump distances.
    */
   static class JumpDistanceCumulFunction extends Function implements MultivariateVectorFunction {
     /**
@@ -1472,7 +1495,9 @@ public class JumpDistanceAnalysis {
 
   /**
    * Compute the probability of mean-squared distance x given a mixed population with set fractions
-   * and diffusion coefficients. <p> Function used for maximum likelihood fitting.
+   * and diffusion coefficients.
+   *
+   * <p>Function used for maximum likelihood fitting.
    */
   static class MixedJumpDistanceFunction extends Function implements MultivariateFunction {
     /**
@@ -1562,8 +1587,9 @@ public class JumpDistanceAnalysis {
 
   /**
    * Compute the probability of mean-squared distance being within x given a mixed population with
-   * set fractions and diffusion coefficients. <p> Function used for least-squares fitting of
-   * cumulative histogram of jump distances.
+   * set fractions and diffusion coefficients.
+   *
+   * <p>Function used for least-squares fitting of cumulative histogram of jump distances.
    */
   static class MixedJumpDistanceCumulFunction extends Function {
     /**
@@ -1623,8 +1649,9 @@ public class JumpDistanceAnalysis {
 
   /**
    * Compute the probability of mean-squared distance being within x given a mixed population with
-   * set fractions and diffusion coefficients. <p> Function used for least-squares fitting of
-   * cumulative histogram of jump distances.
+   * set fractions and diffusion coefficients.
+   *
+   * <p>Function used for least-squares fitting of cumulative histogram of jump distances.
    */
   static class MixedJumpDistanceCumulFunctionGradient extends MixedJumpDistanceCumulFunction
       implements MultivariateVectorFunction {
@@ -1741,8 +1768,9 @@ public class JumpDistanceAnalysis {
 
   /**
    * Compute the probability of mean-squared distance being within x given a mixed population with
-   * set fractions and diffusion coefficients. <p> Function used for least-squares fitting of
-   * cumulative histogram of jump distances.
+   * set fractions and diffusion coefficients.
+   *
+   * <p>Function used for least-squares fitting of cumulative histogram of jump distances.
    */
   static class MixedJumpDistanceCumulFunctionMultivariate extends MixedJumpDistanceCumulFunction
       implements MultivariateFunction {
@@ -1910,11 +1938,13 @@ public class JumpDistanceAnalysis {
 
   /**
    * Sets the minimum diffusion coefficient. Only one population is allowed to have a diffusion
-   * coefficient below this. <p> This value should be set using an understanding of the localisation
-   * precision of the results. Any population with a diffusion coefficient that creates average
-   * jumps below the localisation precision is effectively static since the system could not
-   * accurately measure the jumps. It is impossible to distinguish populations that move below the
-   * localisation precision and so only one population is allowed below this level.
+   * coefficient below this.
+   *
+   * <p>This value should be set using an understanding of the localisation precision of the
+   * results. Any population with a diffusion coefficient that creates average jumps below the
+   * localisation precision is effectively static since the system could not accurately measure the
+   * jumps. It is impossible to distinguish populations that move below the localisation precision
+   * and so only one population is allowed below this level.
    *
    * @param minD the minimum diffusion coefficient
    */
@@ -1924,12 +1954,14 @@ public class JumpDistanceAnalysis {
 
   /**
    * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames
-   * into the actual MSD. <p> Note that diffusion of a molecule within a frame means that the
-   * position of the molecule is an average within the frame. This leads to condensation of the
-   * observed distance traveled by the particle between two frames. The start and end frame
-   * locations have condensed diffusion within the frame to a single point. This condensation has
-   * the effect of reducing the effective time that diffusion occurred in the start and end frame.
-   * The observed MSD can be converted to the corrected MSD by applying a factor:
+   * into the actual MSD.
+   *
+   * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
+   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * the particle between two frames. The start and end frame locations have condensed diffusion
+   * within the frame to a single point. This condensation has the effect of reducing the effective
+   * time that diffusion occurred in the start and end frame. The observed MSD can be converted to
+   * the corrected MSD by applying a factor:
    *
    * <pre>
    * {@code
@@ -1949,19 +1981,24 @@ public class JumpDistanceAnalysis {
 
   /**
    * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames
-   * into the actual MSD. <p> Note that diffusion of a molecule within a frame means that the
-   * position of the molecule is an average within the frame. This leads to condensation of the
-   * observed distance traveled by the particle between two frames. The start and end frame
-   * locations have condensed diffusion within the frame to a single point. This condensation has
-   * the effect of reducing the effective time that diffusion occurred in the start and end frame
-   * and the total number of frames should be reduced by 1/3. <p> In the event that n is less than 1
-   * the two frames overlap. Consequently there is interference where some of the same molecule
-   * positions have been used to compute the average start and end location within the frames. This
-   * must be modelled using a different formula. <p> Simulations using multiple simulation steps
-   * within each frame were used to compute the MSD at different frame separation intervals. These
-   * curves were compared to the expected MSD for the simulated diffusion coefficient to produce a
-   * correction factor curve. This was fitted for {@code n>=1} and {@code n<1}. The observed MSD can
-   * be converted to the corrected MSD by applying a factor:
+   * into the actual MSD.
+   *
+   * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
+   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * the particle between two frames. The start and end frame locations have condensed diffusion
+   * within the frame to a single point. This condensation has the effect of reducing the effective
+   * time that diffusion occurred in the start and end frame and the total number of frames should
+   * be reduced by 1/3.
+   *
+   * <p>In the event that n is less than 1 the two frames overlap. Consequently there is
+   * interference where some of the same molecule positions have been used to compute the average
+   * start and end location within the frames. This must be modelled using a different formula.
+   *
+   * <p>Simulations using multiple simulation steps within each frame were used to compute the MSD
+   * at different frame separation intervals. These curves were compared to the expected MSD for the
+   * simulated diffusion coefficient to produce a correction factor curve. This was fitted for
+   * {@code n>=1} and {@code n<1}. The observed MSD can be converted to the corrected MSD by
+   * applying a factor:
    *
    * <pre>
    * {@code
@@ -1991,13 +2028,14 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Get the corrected time between n frames for an observed mean-squared distance (MSD). <p> Note
-   * that diffusion of a molecule within a frame means that the position of the molecule is an
-   * average within the frame. This leads to condensation of the observed distance traveled by the
-   * particle between two frames. The start and end frame locations have condensed diffusion within
-   * the frame to a single point. This condensation has the effect of reducing the effective time
-   * that diffusion occurred in the start and end frame and the total number of frames should be
-   * reduced by 1/3.
+   * Get the corrected time between n frames for an observed mean-squared distance (MSD).
+   *
+   * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
+   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * the particle between two frames. The start and end frame locations have condensed diffusion
+   * within the frame to a single point. This condensation has the effect of reducing the effective
+   * time that diffusion occurred in the start and end frame and the total number of frames should
+   * be reduced by 1/3.
    *
    * <pre>
    * {@code correctedFrames = n - 1/3}
@@ -2013,13 +2051,14 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Convert an observed mean-squared distance (MSD) between n frames into the actual MSD. <p> Note
-   * that diffusion of a molecule within a frame means that the position of the molecule is an
-   * average within the frame. This leads to condensation of the observed distance traveled by the
-   * particle between two frames. The start and end frame locations have condensed diffusion within
-   * the frame to a single point. This condensation has the effect of reducing the effective time
-   * that diffusion occurred in the start and end frame and the total number of frames should be
-   * reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
+   * Convert an observed mean-squared distance (MSD) between n frames into the actual MSD.
+   *
+   * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
+   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * the particle between two frames. The start and end frame locations have condensed diffusion
+   * within the frame to a single point. This condensation has the effect of reducing the effective
+   * time that diffusion occurred in the start and end frame and the total number of frames should
+   * be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
    *
    * <pre>
    * {@code
@@ -2039,13 +2078,14 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Convert an actual mean-squared distance (MSD) between n frames into the observed MSD. <p> Note
-   * that diffusion of a molecule within a frame means that the position of the molecule is an
-   * average within the frame. This leads to condensation of the observed distance traveled by the
-   * particle between two frames. The start and end frame locations have condensed diffusion within
-   * the frame to a single point. This condensation has the effect of reducing the effective time
-   * that diffusion occurred in the start and end frame and the total number of frames should be
-   * reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
+   * Convert an actual mean-squared distance (MSD) between n frames into the observed MSD.
+   *
+   * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
+   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * the particle between two frames. The start and end frame locations have condensed diffusion
+   * within the frame to a single point. This condensation has the effect of reducing the effective
+   * time that diffusion occurred in the start and end frame and the total number of frames should
+   * be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
    *
    * <pre>
    * {@code

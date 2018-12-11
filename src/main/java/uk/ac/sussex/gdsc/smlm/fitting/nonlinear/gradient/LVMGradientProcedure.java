@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -31,9 +32,11 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
  * Calculates the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
  * function) and the scaled gradient vector of the function's partial first derivatives with respect
  * to the parameters. This is used within the Levenberg-Marquardt method to fit a nonlinear model
- * with coefficients (a) for a set of data points (x, y). <p> Note that the Hessian matrix is scaled
- * by 1/2 and the gradient vector is scaled by -1/2 for convenience in solving the non-linear model.
- * See Numerical Recipes in C++, 2nd Ed. Equation 15.5.8 for Nonlinear Models.
+ * with coefficients (a) for a set of data points (x, y).
+ *
+ * <p>Note that the Hessian matrix is scaled by 1/2 and the gradient vector is scaled by -1/2 for
+ * convenience in solving the non-linear model. See Numerical Recipes in C++, 2nd Ed. Equation
+ * 15.5.8 for Nonlinear Models.
  */
 public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueProcedure {
   /** The y. */
@@ -92,8 +95,9 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
   }
 
   /**
-   * Evaluate the function and compute the sum-of-squares and the curvature matrix. <p> A call to
-   * {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   * Evaluate the function and compute the sum-of-squares and the curvature matrix.
+   *
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param a Set of coefficients for the function
    */

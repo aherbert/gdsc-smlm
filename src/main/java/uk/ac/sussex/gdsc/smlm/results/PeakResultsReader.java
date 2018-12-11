@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -64,7 +65,12 @@ import java.util.regex.Pattern;
  */
 public class PeakResultsReader {
   // Set up to read two-axis (and theta) Gaussian 2D data into the current format
-  private static final int isx, isy, ia, nTwoAxis, nTwoAxisAndTheta;
+  private static final int isx;
+  private static final int isy;
+  private static final int ia;
+  private static final int nTwoAxis;
+  private static final int nTwoAxisAndTheta;
+
   static {
     final PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
     final int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
@@ -81,13 +87,13 @@ public class PeakResultsReader {
   static final int LEGACY_FORMAT_SIGNAL = 1;
   /** Index of the angle in the parameters array in the legacy GDSC file format. */
   static final int LEGACY_FORMAT_ANGLE = 2;
-  /** Index of the x-position in the parameters array in the legacy GDSC file format */
+  /** Index of the x-position in the parameters array in the legacy GDSC file format. */
   static final int LEGACY_FORMAT_X_POSITION = 3;
-  /** Index of the y-position in the parameters array in the legacy GDSC file format */
+  /** Index of the y-position in the parameters array in the legacy GDSC file format. */
   static final int LEGACY_FORMAT_Y_POSITION = 4;
-  /** Index of the x-standard deviation in the parameters array in the legacy GDSC file format */
+  /** Index of the x-standard deviation in the parameters array in the legacy GDSC file format. */
   static final int LEGACY_FORMAT_X_SD = 5;
-  /** Index of the y-standard deviation in the parameters array in the legacy GDSC file format */
+  /** Index of the y-standard deviation in the parameters array in the legacy GDSC file format. */
   static final int LEGACY_FORMAT_Y_SD = 6;
 
   /**
@@ -119,7 +125,11 @@ public class PeakResultsReader {
   private TrackProgress tracker = null;
   private ResultOption[] options = null;
 
-  private boolean deviations, readEndFrame, readId, readPrecision, readSource;
+  private boolean deviations;
+  private boolean readEndFrame;
+  private boolean readId;
+  private boolean readPrecision;
+  private boolean readSource;
   private int smlmVersion = 4; // Assume the current
 
   /**
@@ -1159,7 +1169,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1230,7 +1241,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1306,7 +1318,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1372,7 +1385,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1443,7 +1457,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1515,7 +1530,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1587,7 +1603,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1661,7 +1678,8 @@ public class PeakResultsReader {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter(tabPattern);
           scanner.useLocale(Locale.US);
-          int id = 0, endPeak = 0;
+          int id = 0;
+          int endPeak = 0;
           if (readId) {
             id = scanner.nextInt();
           }
@@ -1940,7 +1958,8 @@ public class PeakResultsReader {
       try (Scanner scanner = new Scanner(line)) {
         scanner.useDelimiter(tabPattern);
         scanner.useLocale(Locale.US);
-        int id = 0, endPeak = 0;
+        int id = 0;
+        int endPeak = 0;
         if (readId) {
           id = scanner.nextInt();
         }
@@ -2027,7 +2046,8 @@ public class PeakResultsReader {
       try (Scanner scanner = new Scanner(line)) {
         scanner.useDelimiter(tabPattern);
         scanner.useLocale(Locale.US);
-        int id = 0, endPeak = 0;
+        int id = 0;
+        int endPeak = 0;
         if (readId) {
           id = scanner.nextInt();
         }
@@ -2106,7 +2126,8 @@ public class PeakResultsReader {
       try (Scanner scanner = new Scanner(line)) {
         scanner.useDelimiter(tabPattern);
         scanner.useLocale(Locale.US);
-        int id = 0, endPeak = 0;
+        int id = 0;
+        int endPeak = 0;
         if (readId) {
           id = scanner.nextInt();
         }

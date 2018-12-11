@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -32,8 +33,9 @@ import java.awt.Rectangle;
 import java.util.Collection;
 
 /**
- * Wraps peak results in memory and prevents modification of the results size. <p> Any method that
- * modifies the size of the results set will throw a data exception.
+ * Wraps peak results in memory and prevents modification of the results size.
+ *
+ * <p>Any method that modifies the size of the results set will throw a data exception.
  */
 public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   private boolean built = false;

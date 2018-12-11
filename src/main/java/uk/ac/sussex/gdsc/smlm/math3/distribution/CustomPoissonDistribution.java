@@ -35,6 +35,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
 import org.apache.commons.math3.distribution.AbstractIntegerDistribution;
@@ -50,10 +51,11 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathUtils;
 
 /**
- * Implementation of the Poisson distribution. <p> Copy of the
- * org.apache.commons.math3.distribution.PoissonDistribution but modified to allow the Poisson mean
- * to be set using a property. The Normal distribution used for the approximation is now created
- * only when necessary.
+ * Implementation of the Poisson distribution.
+ *
+ * <p>Copy of the org.apache.commons.math3.distribution.PoissonDistribution but modified to allow
+ * the Poisson mean to be set using a property. The Normal distribution used for the approximation
+ * is now created only when necessary.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution
  *      (Wikipedia)</a>
@@ -113,11 +115,13 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   private double c1;
 
   /**
-   * Creates a new Poisson distribution with specified mean. <p> <b>Note:</b> this constructor will
-   * implicitly create an instance of {@link Well19937c} as random generator to be used for sampling
-   * only (see {@link #sample()} and {@link #sample(int)}). In case no sampling is needed for the
-   * created distribution, it is advised to pass {@code null} as random generator via the
-   * appropriate constructors to avoid the additional initialisation overhead.
+   * Creates a new Poisson distribution with specified mean.
+   *
+   * <p><b>Note:</b> this constructor will implicitly create an instance of {@link Well19937c} as
+   * random generator to be used for sampling only (see {@link #sample()} and {@link #sample(int)}).
+   * In case no sampling is needed for the created distribution, it is advised to pass {@code null}
+   * as random generator via the appropriate constructors to avoid the additional initialisation
+   * overhead.
    *
    * @param p the Poisson mean
    * @throws NotStrictlyPositiveException if {@code p <= 0}.
@@ -128,11 +132,13 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
 
   /**
    * Creates a new Poisson distribution with specified mean, convergence criterion and maximum
-   * number of iterations. <p> <b>Note:</b> this constructor will implicitly create an instance of
-   * {@link Well19937c} as random generator to be used for sampling only (see {@link #sample()} and
-   * {@link #sample(int)}). In case no sampling is needed for the created distribution, it is
-   * advised to pass {@code null} as random generator via the appropriate constructors to avoid the
-   * additional initialisation overhead.
+   * number of iterations.
+   *
+   * <p><b>Note:</b> this constructor will implicitly create an instance of {@link Well19937c} as
+   * random generator to be used for sampling only (see {@link #sample()} and {@link #sample(int)}).
+   * In case no sampling is needed for the created distribution, it is advised to pass {@code null}
+   * as random generator via the appropriate constructors to avoid the additional initialisation
+   * overhead.
    *
    * @param p Poisson mean.
    * @param epsilon Convergence criterion for cumulative probabilities.
@@ -228,7 +234,9 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   }
 
   /**
-   * Sets the mean. <p> Does not throw an exception if mean is not strictly positive
+   * Sets the mean.
+   *
+   * <p>Does not throw an exception if mean is not strictly positive
    *
    * @param p Poisson mean.
    */
@@ -350,8 +358,10 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   }
 
   /**
-   * {@inheritDoc} <p> <strong>Algorithm Description</strong>: </p> <ul> <li>For small means, uses
-   * simulation of a Poisson process using Uniform deviates, as described <a
+   * {@inheritDoc}
+   *
+   * <p><strong>Algorithm Description</strong>: </p> <ul> <li>For small means, uses simulation of a
+   * Poisson process using Uniform deviates, as described <a
    * href="http://mathaa.epfl.ch/cours/PMMI2001/interactive/rng7.htm"> here</a>. The Poisson process
    * (and hence value returned) is bounded by 1000 * mean. </li> <li>For large means, uses the
    * rejection algorithm described in <blockquote> Devroye, Luc. (1981).<i>The Computer Generation

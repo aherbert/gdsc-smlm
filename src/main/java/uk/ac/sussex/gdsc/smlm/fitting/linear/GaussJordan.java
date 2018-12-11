@@ -21,13 +21,15 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 /**
  * Solves (one) linear equation, a x = b
  */
 public class GaussJordan {
-  private int max_row, max_col;
+  private int max_row;
+  private int max_col;
 
   /**
    * @return True if OK.
@@ -112,8 +114,9 @@ public class GaussJordan {
   }
 
   /**
-   * Solves (one) linear equation, a x = b, for x[n]. <p> On input have a[n][n], b[n]. On output
-   * these replaced by a_inverse[n][n], x[n].
+   * Solves (one) linear equation, a x = b, for x[n].
+   *
+   * <p>On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
    *
    * @param a the a
    * @param b the b
@@ -127,9 +130,11 @@ public class GaussJordan {
   }
 
   /**
-   * Solves (one) linear equation, a x = b, for x[n]. <p> On input have a[n][n], b[n]. On output
-   * these replaced by a_inverse[n][n], x[n]. <p> piv[n], row[n], col[n] (all ints) are used for
-   * storage
+   * Solves (one) linear equation, a x = b, for x[n].
+   *
+   * <p>On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
+   *
+   * <p>piv[n], row[n], col[n] (all ints) are used for storage
    *
    * @param a the a
    * @param b the b
@@ -250,8 +255,9 @@ public class GaussJordan {
   }
 
   /**
-   * Solves (one) linear equation, a x = b, for x[n]. <p> On input have a[n][n], b[n]. On output
-   * these replaced by a_inverse[n][n], x[n].
+   * Solves (one) linear equation, a x = b, for x[n].
+   *
+   * <p>On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
    *
    * @param a the a
    * @param b the b
@@ -265,9 +271,11 @@ public class GaussJordan {
   }
 
   /**
-   * Solves (one) linear equation, a x = b, for x[n]. <p> On input have a[n][n], b[n]. On output
-   * these replaced by a_inverse[n][n], x[n]. <p> piv[n], row[n], col[n] (all ints) are used for
-   * storage
+   * Solves (one) linear equation, a x = b, for x[n].
+   *
+   * <p>On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
+   *
+   * <p>piv[n], row[n], col[n] (all ints) are used for storage
    *
    * @param a the a
    * @param b the b

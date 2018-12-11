@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.filters.FilteredNonMaximumSuppression;
@@ -276,7 +277,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     smooth = gd.getNextNumber();
     boxSize = (int) gd.getNextNumber();
     background = (float) gd.getNextNumber();
@@ -689,8 +690,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   }
 
   /**
-   * Find the indices of the maxima using the currently configured parameters <p> Data must be
-   * arranged in yx block order, i.e. height rows of width.
+   * Find the indices of the maxima using the currently configured parameters.
+   *
+   * <p>Data must be arranged in yx block order, i.e. height rows of width.
    *
    * @param data the data
    * @param width the width
@@ -722,9 +724,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   }
 
   /**
-   * Fits a 2D Gaussian to the given data. Fits all the specified peaks. <p> Data must be arranged
-   * in yx block order, i.e. height rows of width. <p> Note: The fit coordinates should be offset by
-   * 0.5 if the input data represents pixels
+   * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
+   *
+   * <p>Data must be arranged in yx block order, i.e. height rows of width.
+   *
+   * <p>Note: The fit coordinates should be offset by 0.5 if the input data represents pixels
    *
    * @param data the data
    * @param width the width
@@ -733,16 +737,20 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return Array containing the fitted curve data: The first value is the Background. The
    *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak. If
    *         elliptical fitting is performed the values are Amplitude, Angle, PosX, PosY, StdDevX,
-   *         StdDevY for each fitted peak <p> Null if no fit is possible.
+   *         StdDevY for each fitted peak
+   *
+   *         <p>Null if no fit is possible.
    */
   public double[] fitMultiple(float[] data, int width, int height, int[] maxIndices) {
     return fitMultiple(data, width, height, maxIndices, null);
   }
 
   /**
-   * Fits a 2D Gaussian to the given data. Fits all the specified peaks. <p> Data must be arranged
-   * in yx block order, i.e. height rows of width. <p> Note: The fit coordinates should be offset by
-   * 0.5 if the input data represents pixels
+   * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
+   *
+   * <p>Data must be arranged in yx block order, i.e. height rows of width.
+   *
+   * <p>Note: The fit coordinates should be offset by 0.5 if the input data represents pixels
    *
    * @param data the data
    * @param width the width
@@ -752,7 +760,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return Array containing the fitted curve data: The first value is the Background. The
    *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak. If
    *         elliptical fitting is performed the values are Amplitude, Angle, PosX, PosY, StdDevX,
-   *         StdDevY for each fitted peak <p> Null if no fit is possible.
+   *         StdDevY for each fitted peak
+   *
+   *         <p>Null if no fit is possible.
    */
   private double[] fitMultiple(float[] data, int width, int height, int[] maxIndices,
       double[] estimatedHeights) {
@@ -814,8 +824,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   }
 
   /**
-   * Fits a 2D Gaussian to the given data. Fits all the specified peaks. <p> Data must be arranged
-   * in yx block order, i.e. height rows of width.
+   * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
+   *
+   * <p>Data must be arranged in yx block order, i.e. height rows of width.
    *
    * @param gf the gf
    * @param data the data
@@ -824,8 +835,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param index Index of the data to fit
    * @param estimatedHeight Estimated height for the peak (input from smoothed data)
    * @return Array containing the fitted curve data: The first value is the Background. The
-   *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak. <p>
-   *         Null if no fit is possible.
+   *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak.
+   *
+   *         <p> Null if no fit is possible.
    */
   private double[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height, int index,
       double estimatedHeight) {
@@ -894,9 +906,12 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
   /**
    * Fits a single 2D Gaussian to the image within the image processor. The fit is initialised at
-   * the highest pixel value and then optimised. <p> The angle parameter is only set if using
-   * elliptical Gaussian fitting. <p> Note: The fitted coordinates are offset by 0.5, i.e. using the
-   * middle of the pixel. This equates to input data 0,0 representing 0.5,0.5.
+   * the highest pixel value and then optimised.
+   *
+   * <p>The angle parameter is only set if using elliptical Gaussian fitting.
+   *
+   * <p>Note: The fitted coordinates are offset by 0.5, i.e. using the middle of the pixel. This
+   * equates to input data 0,0 representing 0.5,0.5.
    *
    * @param ip the ip
    * @return Array containing the fitted curve data: Background, Amplitude, PosX, PosY, StdDevX,
@@ -917,9 +932,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
   /**
    * Fits a single 2D Gaussian to the data. The fit is initialised at the highest value and then
-   * optimised. <p> Data must be arranged in yx block order, i.e. height rows of width. <p> The
-   * angle parameter is only set if using elliptical Gaussian fitting. <p> Note: The returned fit
-   * coordinates should be offset by 0.5 if the input data represents pixels
+   * optimised.
+   *
+   * <p>Data must be arranged in yx block order, i.e. height rows of width.
+   *
+   * <p>The angle parameter is only set if using elliptical Gaussian fitting.
+   *
+   * <p>Note: The returned fit coordinates should be offset by 0.5 if the input data represents
+   * pixels
    *
    * @param data the data
    * @param width the width
@@ -978,7 +998,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   }
 
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Nothing to do
   }
 

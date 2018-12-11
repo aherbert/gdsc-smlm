@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -75,6 +76,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn {
   // runtime libraries for Open GL. See the README in the eclipse project folder.
 
   private static String version = "";
+
   static {
     // Try setting -Dj3d.sortShape3DBounds for faster centroid computation
     // See MasterControl.sortShape3DBounds. This only works if The VirtualUniverse
@@ -154,7 +156,8 @@ public class ImageJ3DResultsViewerTest implements PlugIn {
       GUI.center(w);
 
       // Test how many vertices a primitive sphere has
-      float x = 0, y = 0;
+      float x = 0;
+      float y = 0;
       final float space = 2.5f;
 
       Appearance a = null;

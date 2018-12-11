@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import javax.swing.ListSelectionModel;
@@ -30,7 +31,9 @@ import javax.swing.ListSelectionModel;
  */
 public class ListSelectionModelHelper {
   /**
-   * Gets the selected indices from the selection model. <p> Copied from javax.swing.JList
+   * Gets the selected indices from the selection model.
+   *
+   * <p>Copied from javax.swing.JList
    *
    * @param sm the sm
    * @return the selected indices

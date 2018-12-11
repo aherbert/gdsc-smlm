@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
@@ -44,9 +45,10 @@ public interface FisherInformation {
   public double getFisherInformation(double t) throws IllegalArgumentException;
 
   /**
-   * Checks if the parameter θ is in a valid range to compute a representable value. <p> If not true
-   * then it would be expected that {@link #getFisherInformation(double)} will: throw an exception;
-   * compute zero; or compute infinity.
+   * Checks if the parameter θ is in a valid range to compute a representable value.
+   *
+   * <p>If not true then it would be expected that {@link #getFisherInformation(double)} will: throw
+   * an exception; compute zero; or compute infinity.
    *
    * @param t parameter θ of a distribution that models X
    * @return true, if a representable value can be computed

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -81,7 +82,7 @@ public class About implements PlugIn, MacroExtension {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   @SuppressWarnings("unused")

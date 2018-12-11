@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
@@ -74,12 +75,15 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   /** The unique id. */
   public int uniqueId;
   private int validationResult = 0;
-  private boolean ignore, notDuplicate;
+  private boolean ignore;
+  private boolean notDuplicate;
 
   //@formatter:off
   /**
    * Create a new BasePreprocessedPeakResult.
-   * <p>
+   *
+*
+* <p>
    * Note: The candidate Id is usually the spot that was used to initiate the fit process.
    * However if neighbour spots were present then the candidate Id should be that of the neighbour.
    *

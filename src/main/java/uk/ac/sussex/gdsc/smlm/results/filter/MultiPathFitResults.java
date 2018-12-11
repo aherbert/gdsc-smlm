@@ -21,32 +21,35 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Specifies a the result of fitting a frame using different fitting methods. <p> The multi-path
- * results can be evaluated by the MultiPathFilter to determine which result from the different
- * paths should be accepted. <p> This class is used for benchmarking the fitting path options in the
- * PeakFit algorithm.
+ * Specifies a the result of fitting a frame using different fitting methods.
+ *
+ * <p>The multi-path results can be evaluated by the MultiPathFilter to determine which result from
+ * the different paths should be accepted.
+ *
+ * <p>This class is used for benchmarking the fitting path options in the PeakFit algorithm.
  */
 public class MultiPathFitResults implements IMultiPathFitResults, Cloneable {
   /** The frame containing the results. */
-  final public int frame;
+  public final int frame;
 
   /** The multi-path results. */
-  final public MultiPathFitResult[] multiPathFitResults;
+  public final MultiPathFitResult[] multiPathFitResults;
 
   /**
    * The total number of candidates. This may be greater than the size of the
    * {@link #multiPathFitResults} array if this is a subset of the results, i.e. has been
    * prefiltered.
    */
-  final public int totalCandidates;
+  public final int totalCandidates;
 
   /**
    * The number of actual results in the frame. Used during filter scoring.
    */
-  final public int nActual;
+  public final int nActual;
 
   /**
    * Instantiates a new multi path fit results.

@@ -21,13 +21,15 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
  * Filter results using z-depth.
  */
 public class MultiFilterZComponent extends MultiFilterComponent {
-  private final float minZ, maxZ;
+  private final float minZ;
+  private final float maxZ;
 
   /**
    * Instantiates a new multi filter Z component.

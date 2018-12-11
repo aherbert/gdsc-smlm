@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -306,7 +307,7 @@ public class FilterResults implements PlugIn {
       if (maskFilter != null) {
         // Check the coordinates are inside the mask
         final double[] xy = new double[] {sp.x[i] - centreX, sp.y[i] - centreY};
-        if (!maskFilter.isWithinXY(xy)) {
+        if (!maskFilter.isWithinXy(xy)) {
           continue;
         }
       }

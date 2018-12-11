@@ -76,6 +76,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
   // private static ArrayList<double[]> yListMultiPeak = new ArrayList<>();
 
   private static int[] x;
+
   static {
     x = new int[blockWidth * blockWidth];
     for (int i = 0; i < x.length; i++) {

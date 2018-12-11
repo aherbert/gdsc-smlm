@@ -35,6 +35,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -62,7 +63,9 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.Arrays;
 
 /**
- * Powell's algorithm. <p> The class is based on the
+ * Powell's algorithm.
+ *
+ * <p>The class is based on the
  * org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer but updated to support:
  * (a) convergence on the position; (b) convergence when using the original basis vectors; (c)
  * support bounds checking on the current point within the optimisation space.
@@ -92,8 +95,10 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
   private double[] basis = null;
 
   /** Flags to indicate if bounds are present. */
-  private boolean isLower, isUpper;
-  private double[] lower, upper;
+  private boolean isLower;
+  private boolean isUpper;
+  private double[] lower;
+  private double[] upper;
 
   /**
    * The initial step is used to construct the basis vectors for the search direction. By default
@@ -431,6 +436,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
    * convergence check, so that the custom checker will always decide when to stop the line search.
    */
   private static final double REL_TOL_UNUSED;
+
   static {
     REL_TOL_UNUSED = 2 * FastMath.ulp(1d);
   }

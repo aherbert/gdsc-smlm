@@ -26,13 +26,15 @@
  * Provides generated code using <a
  * href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a> to read
  * the <a href="https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format">Tagged Spot File (TSF)
- * format</a>. <p> The goal of the TSF format is to provide an efficient data format for
- * super-resolution microscopy data that generate images by locating the position of single
- * fluorescent emitters.
+ * format</a>.
+ *
+ * <p>The goal of the TSF format is to provide an efficient data format for super-resolution
+ * microscopy data that generate images by locating the position of single fluorescent emitters.
  *
  * @since 1.0.0
  * @see <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a>
  * @see <a href="https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format">Tagged Spot File
  *      (TSF) format</a>
  */
+
 package uk.ac.sussex.gdsc.smlm.tsf;

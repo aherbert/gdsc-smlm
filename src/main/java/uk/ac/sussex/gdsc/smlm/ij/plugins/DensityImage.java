@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
@@ -86,8 +87,12 @@ public class DensityImage implements PlugIn {
   private static boolean confidenceIntervals = false;
 
   private Rectangle roiBounds;
-  private double scaledRoiMinX, scaledRoiMaxX, scaledRoiMinY, scaledRoiMaxY;
-  private int roiImageWidth, roiImageHeight;
+  private double scaledRoiMinX;
+  private double scaledRoiMaxX;
+  private double scaledRoiMinY;
+  private double scaledRoiMaxY;
+  private int roiImageWidth;
+  private int roiImageHeight;
 
   /** {@inheritDoc} */
   @Override
@@ -158,7 +163,7 @@ public class DensityImage implements PlugIn {
     }
 
     final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
-    sp.getXY();
+    sp.getXy();
     return new DensityManager(sp.x, sp.y, results.getBounds());
   }
 

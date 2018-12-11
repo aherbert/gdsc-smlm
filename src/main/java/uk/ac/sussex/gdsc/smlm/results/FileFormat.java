@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
@@ -60,7 +61,7 @@ public enum FileFormat {
    *
    * @return the name
    */
-  abstract public String getName();
+  public abstract String getName();
 
   /**
    * Checks if is a GDSC SMLM format.

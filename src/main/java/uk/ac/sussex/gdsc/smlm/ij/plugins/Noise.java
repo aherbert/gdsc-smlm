@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -190,7 +191,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     algorithm = gd.getNextChoiceIndex();
     algorithm2 = gd.getNextChoiceIndex();
     lowestPixelsRange = (int) gd.getNextNumber();
@@ -317,7 +318,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Do nothing
   }
 

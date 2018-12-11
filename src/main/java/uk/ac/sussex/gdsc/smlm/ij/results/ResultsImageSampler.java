@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -145,8 +146,10 @@ public class ResultsImageSampler {
   private final MemoryPeakResults results;
   private final ImageStack stack;
 
-  private final int lx, ly;
-  private final int xblocks, yblocks;
+  private final int lx;
+  private final int ly;
+  private final int xblocks;
+  private final int yblocks;
   private final int xy_blocks;
 
   /** The size for samples. */
@@ -161,7 +164,8 @@ public class ResultsImageSampler {
 
   private long[] no;
   private ResultsSample[] data;
-  private int lower, upper;
+  private int lower;
+  private int upper;
   private final TurboList<ResultsSample> list = new TurboList<>();
   private RandomGenerator r = new Well19937c();
 
@@ -222,7 +226,7 @@ public class ResultsImageSampler {
     // int[] xyz = new int[3];
     // for (long l = 0; l < max; l++)
     // {
-    // getXYZ(l, xyz);
+    // getXyz(l, xyz);
     // if (xyz[0] < 0 || xyz[0] > stack.getWidth() || xyz[1] < 0 || xyz[1] > stack.getHeight() ||
     //// xyz[2] < 1 ||
     // xyz[2] > stack.getSize())
@@ -362,7 +366,7 @@ public class ResultsImageSampler {
    * @param xyz the xyz
    * @return The xyz array
    */
-  private int[] getXYZ(long index, int[] xyz) {
+  private int[] getXyz(long index, int[] xyz) {
     xyz[2] = (int) (index / (xy_blocks));
     final int mod = (int) (index % (xy_blocks));
     xyz[1] = mod / xblocks;
@@ -471,7 +475,8 @@ public class ResultsImageSampler {
     final int[] xyz = new int[3];
     final Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
     final Overlay overlay = new Overlay();
-    final float[] ox = new float[10], oy = new float[10];
+    final float[] ox = new float[10];
+    final float[] oy = new float[10];
     final StringBuilder sb = new StringBuilder();
     if (nmPerPixel == 1) {
       sb.append("Sample X Y Z Signal\n");
@@ -480,7 +485,7 @@ public class ResultsImageSampler {
     }
 
     for (final ResultsSample s : sample) {
-      getXYZ(s.index, xyz);
+      getXyz(s.index, xyz);
 
       // Construct the region to extract
       Rectangle target = new Rectangle(xyz[0], xyz[1], size, size);

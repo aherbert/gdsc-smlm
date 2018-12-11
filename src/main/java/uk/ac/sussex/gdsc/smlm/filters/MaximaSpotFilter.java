@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import uk.ac.sussex.gdsc.core.filters.NonMaximumSuppression;
@@ -100,8 +101,9 @@ public abstract class MaximaSpotFilter extends SpotFilter {
   public abstract float[] preprocessData(final float[] data, final int width, final int height);
 
   /**
-   * Find the indices of the maxima using the currently configured parameters <p> Data must be
-   * arranged in yx block order, i.e. height rows of width.
+   * Find the indices of the maxima using the currently configured parameters.
+   *
+   * <p>Data must be arranged in yx block order, i.e. height rows of width.
    *
    * @param data the data
    * @param width the width

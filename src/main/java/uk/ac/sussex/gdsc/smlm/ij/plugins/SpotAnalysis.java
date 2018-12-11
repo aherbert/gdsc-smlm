@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
@@ -181,8 +182,10 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
    */
   private class BlurWorker implements Runnable {
     Ticker ticker;
-    ImageStack inputStack, outputStack;
-    int slice, slices;
+    ImageStack inputStack;
+    ImageStack outputStack;
+    int slice;
+    int slices;
     Rectangle bounds;
     double blur;
 
@@ -252,9 +255,12 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
   // private ImageJ ij;
   private int runMode = 0;
-  private ImagePlus imp, rawImp, blurImp;
+  private ImagePlus imp;
+  private ImagePlus rawImp;
+  private ImagePlus blurImp;
 
-  private double gain, msPerFrame;
+  private double gain;
+  private double msPerFrame;
   private double[] xValues;
   private double[] rawMean;
   private double[] smoothMean;
@@ -398,8 +404,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
   /** {@inheritDoc} */
   @Override
-  public synchronized void actionPerformed(ActionEvent e) {
-    final Object actioner = e.getSource();
+  public synchronized void actionPerformed(ActionEvent event) {
+    final Object actioner = event.getSource();
 
     if (actioner == null || runMode > 0) {
       return;
@@ -432,13 +438,13 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
   /** {@inheritDoc} */
   @Override
-  public void itemStateChanged(ItemEvent e) {
+  public void itemStateChanged(ItemEvent event) {
     // Ignore
   }
 
   /** {@inheritDoc} */
   @Override
-  public void windowClosing(WindowEvent e) {
+  public void windowClosing(WindowEvent event) {
     Prefs.saveLocation(OPT_LOCATION, getLocation());
     close();
   }
@@ -452,10 +458,10 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
   /** {@inheritDoc} */
   @Override
-  public void windowActivated(WindowEvent e) {
+  public void windowActivated(WindowEvent event) {
     fillImagesList();
 
-    super.windowActivated(e);
+    super.windowActivated(event);
     WindowManager.setWindow(this);
   }
 
@@ -496,7 +502,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       return;
     }
 
-    double psfWidth, blur;
+    double psfWidth;
+    double blur;
 
     // Read settings
     try {
@@ -617,7 +624,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     final double[][] profile = extractSpotProfile(imp, bounds, rawSpot);
 
     // Retain the existing display range
-    double min = 0, max = Double.POSITIVE_INFINITY;
+    double min = 0;
+    double max = Double.POSITIVE_INFINITY;
     if (rawImp != null) {
       min = rawImp.getDisplayRangeMin();
       max = rawImp.getDisplayRangeMax();
@@ -1245,7 +1253,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
   /** {@inheritDoc} */
   @Override
   public void imageUpdated(ImagePlus imp) {
-    ImagePlus from = null, to = null;
+    ImagePlus from = null;
+    ImagePlus to = null;
     if (imp == rawImp) {
       from = rawImp;
       to = blurImp;
@@ -1342,12 +1351,12 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
   }
 
   @Override
-  public void valueChanged(ListSelectionEvent e) {
-    if (!e.getValueIsAdjusting()) {
+  public void valueChanged(ListSelectionEvent event) {
+    if (!event.getValueIsAdjusting()) {
       final int index = onFramesList.getSelectedIndex();
-      // int index = e.getFirstIndex();
+      // int index = event.getFirstIndex();
       if (index >= 0 && index < listModel.size()) {
-        // Utils.log("index = %d, %b", index, e.getValueIsAdjusting());
+        // Utils.log("index = %d, %b", index, event.getValueIsAdjusting());
         final Spot spot = (Spot) listModel.get(index);
         rawImp.setSlice(spot.frame);
       }
@@ -1355,9 +1364,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
   }
 
   @Override
-  public void keyTyped(KeyEvent e) {
+  public void keyTyped(KeyEvent event) {
     System.out.println("keyTyped");
-    switch (e.getKeyChar()) {
+    switch (event.getKeyChar()) {
       case 'a':
         addFrame();
         break;
@@ -1371,12 +1380,12 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
   }
 
   @Override
-  public void keyPressed(KeyEvent e) {
+  public void keyPressed(KeyEvent event) {
     System.out.println("keyPressed");
   }
 
   @Override
-  public void keyReleased(KeyEvent e) {
+  public void keyReleased(KeyEvent event) {
     System.out.println("keyReleased");
   }
 }

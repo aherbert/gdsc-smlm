@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -75,9 +76,11 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 /**
- * Runs the Peak Fit plugin in a batch. <p> The batch specifies the set of images to process. For
- * each image the batch can specify a set of values for each of the fitting parameters. The Peak Fit
- * plugin is then run for each combination of parameters and the results of each run saved to file.
+ * Runs the Peak Fit plugin in a batch.
+ *
+ * <p>The batch specifies the set of images to process. For each image the batch can specify a set
+ * of values for each of the fitting parameters. The Peak Fit plugin is then run for each
+ * combination of parameters and the results of each run saved to file.
  *
  * @deprecated This should be updated to use JSON and methods from the Google Proto Buffers library
  */
@@ -348,7 +351,7 @@ public class BatchPeakFit implements PlugIn {
       // Add a button to create a configuration file
       gd.addAndGetButton("Create config file", new ActionListener() {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent event) {
           final Document doc = getDefaultSettingsXmlDocument();
           if (doc == null) {
             return;

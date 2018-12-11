@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
@@ -36,10 +37,11 @@ public interface SpatialIllumination {
   public double getPhotons(double[] xyz);
 
   /**
-   * Get the number of photons for the position at the specified time. <p> The return value is an
-   * array containing the number of photons that occurred before the time frame and then the number
-   * of photons during the time frame. This allows simulation of a pulsed illumination source where
-   * the pulse is modelled as a zero time event.
+   * Get the number of photons for the position at the specified time.
+   *
+   * <p>The return value is an array containing the number of photons that occurred before the time
+   * frame and then the number of photons during the time frame. This allows simulation of a pulsed
+   * illumination source where the pulse is modelled as a zero time event.
    *
    * @param xyz the xyz
    * @param t the t

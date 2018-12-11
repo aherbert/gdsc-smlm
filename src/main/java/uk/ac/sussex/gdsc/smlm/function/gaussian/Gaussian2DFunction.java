@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction;
@@ -35,12 +36,15 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
 import java.util.Arrays;
 
 /**
- * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks. <p>
- * The function will calculate the value of the Gaussian and evaluate the gradient of a set of
+ * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
+ *
+ * <p>The function will calculate the value of the Gaussian and evaluate the gradient of a set of
  * parameters. The class can specify which of the following parameters the function will
  * evaluate:<br> background, signal, position0, position1, sd0, sd1, angle. A parameter is provided
- * for position2 (z-depth) to support 3D function using astimatism. <p> The class provides an index
- * of the position in the parameter array where the parameter is expected.
+ * for position2 (z-depth) to support 3D function using astimatism.
+ *
+ * <p>The class provides an index of the position in the parameter array where the parameter is
+ * expected.
  */
 public abstract class Gaussian2DFunction
     implements ExtendedNonLinearFunction, Gradient1Function, NamedFunction {
@@ -63,15 +67,15 @@ public abstract class Gaussian2DFunction
   public static final int BACKGROUND = 0;
   /** Index of the signal intensity in the parameters array. */
   public static final int SIGNAL = 1;
-  /** Index of the x-position in the parameters array */
+  /** Index of the x-position in the parameters array. */
   public static final int X_POSITION = 2;
-  /** Index of the y-position in the parameters array */
+  /** Index of the y-position in the parameters array. */
   public static final int Y_POSITION = 3;
-  /** Index of the z-position in the parameters array */
+  /** Index of the z-position in the parameters array. */
   public static final int Z_POSITION = 4;
-  /** Index of the x-standard deviation in the parameters array */
+  /** Index of the x-standard deviation in the parameters array. */
   public static final int X_SD = 5;
-  /** Index of the y-standard deviation in the parameters array */
+  /** Index of the y-standard deviation in the parameters array. */
   public static final int Y_SD = 6;
   /** Index of the angle in the parameters array. */
   public static final int ANGLE = 7;
@@ -181,7 +185,7 @@ public abstract class Gaussian2DFunction
    *
    * @return a copy
    */
-  abstract public Gaussian2DFunction copy();
+  public abstract Gaussian2DFunction copy();
 
   /**
    * @return the number of peaks.
@@ -235,9 +239,11 @@ public abstract class Gaussian2DFunction
 
   /**
    * Produce an output predicted value for a given set of input predictors (x) and coefficients (a).
-   * <p> Evaluates an 2-dimensional elliptical Gaussian function for a single peak. <p> The first
-   * coefficient is the Gaussian background level. The coefficients are then packed for each peak
-   * using the indices specified in the Gaussian2DFunction class.
+   *
+   * <p>Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+   *
+   * <p>The first coefficient is the Gaussian background level. The coefficients are then packed for
+   * each peak using the indices specified in the Gaussian2DFunction class.
    *
    * @param x Input predictor
    * @return The predicted value
@@ -249,9 +255,11 @@ public abstract class Gaussian2DFunction
 
   /**
    * Produce an output predicted value for a given set of input predictors (x) and coefficients (a).
-   * <p> Evaluates an 2-dimensional elliptical Gaussian function for a single peak. <p> The first
-   * coefficient is the Gaussian background level. The coefficients are then packed for each peak
-   * using the indices specified in the Gaussian2DFunction class.
+   *
+   * <p>Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+   *
+   * <p>The first coefficient is the Gaussian background level. The coefficients are then packed for
+   * each peak using the indices specified in the Gaussian2DFunction class.
    *
    * @param x Input predictor
    * @param dyda Partial gradient of function with respect to each coefficient
@@ -279,7 +287,7 @@ public abstract class Gaussian2DFunction
   }
 
   /**
-   * Execute the {@link #eval(int)} method and set the expected variance using the noise model
+   * Execute the {@link #eval(int)} method and set the expected variance using the noise model.
    *
    * @throws NullPointerException if the noise model is null
    * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#evalw(int, double[])

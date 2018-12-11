@@ -21,18 +21,23 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a single peak. <p> The single parameter x in the
- * {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional data.
- * The dimensions of the data must be specified to allow unpacking to coordinates. <p> Data should
- * be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
+ * Evaluates an 2-dimensional Gaussian function for a single peak.
+ *
+ * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
+ * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
+ * coordinates.
+ *
+ * <p>Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
  */
 public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
   private static final int[] gradientIndices;
+
   static {
     gradientIndices = createGradientIndices(1, new SingleCircularGaussian2DFunction(1, 1));
   }
@@ -48,11 +53,11 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
   protected double n;
   /** The amplitude./height. */
   protected double height;
-  /** x0 position pre-factor */
+  /** x0 position pre-factor. */
   protected double aa;
-  /** x0 position gradient pre-factor */
+  /** x0 position gradient pre-factor. */
   protected double aa2;
-  /** x width gradient pre-factor */
+  /** x width gradient pre-factor. */
   protected double ax;
 
   /**
@@ -97,7 +102,9 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional circular Gaussian function for a single peak. <p> {@inheritDoc}
+   * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+   *
+   * <p>{@inheritDoc}
    *
    * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */
@@ -133,7 +140,9 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional circular Gaussian function for a single peak. <p> {@inheritDoc}
+   * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+   *
+   * <p>{@inheritDoc}
    *
    * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
    */

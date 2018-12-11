@@ -50,7 +50,7 @@ public class Gaussian2DPeakResultHelperTest {
   double[] test_s = {80, 100, 140};
   double[] test_N = {1, 10, 30, 100, 1000};
   double[] test_b2 = {0, 1, 2, 4, 8};
-  int minPoints = 3, maxPoints = 20;
+  int minpoints = 3, maxpoints = 20;
 
   @Test
   public void canCalculateMaximumLikelihoodVariance() {
@@ -74,11 +74,11 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @Test
-  public void lowerIntegrationPointsApproximateMaximumLikelihoodVariance() {
+  public void lowerIntegrationpointsApproximateMaximumLikelihoodVariance() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-    final double[] sum = new double[maxPoints + 1];
+    final double[] sum = new double[maxpoints + 1];
     int count = 0;
     for (final double a : test_a) {
       for (final double s : test_s) {
@@ -86,7 +86,7 @@ public class Gaussian2DPeakResultHelperTest {
           for (final double b2 : test_b2) {
             count++;
             final double e = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, 30);
-            for (int points = minPoints; points <= maxPoints; points++) {
+            for (int points = minpoints; points <= maxpoints; points++) {
               final double o = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
               final double error = DoubleEquality.relativeError(e, o);
               sum[points] += error;
@@ -100,7 +100,7 @@ public class Gaussian2DPeakResultHelperTest {
       }
     }
 
-    for (int points = minPoints; points <= maxPoints; points++) {
+    for (int points = minpoints; points <= maxpoints; points++) {
       logger.info(
           FunctionUtils.getSupplier("Points = %d, Av error = %f", points, sum[points] / count));
     }
@@ -127,7 +127,7 @@ public class Gaussian2DPeakResultHelperTest {
     }
 
     // Get average performance
-    final double[] sum = new double[maxPoints + 1];
+    final double[] sum = new double[maxpoints + 1];
     final double[] sum2 = new double[sum.length];
     final long[] time = new long[sum.length];
     long count = 0, count2 = 0;
@@ -162,7 +162,7 @@ public class Gaussian2DPeakResultHelperTest {
       }
     }
 
-    for (int points = minPoints; points <= maxPoints; points++) {
+    for (int points = minpoints; points <= maxpoints; points++) {
       logger.info(
           FunctionUtils.getSupplier("Points = %d, Av relative time = %f, Slow down factor = %f",
               points, sum[points] / count, sum2[points] / count2));

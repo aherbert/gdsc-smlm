@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
@@ -33,10 +34,11 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision.
- * Calculates the precision using the true fitted background if a bias is provided. <p> Any results
- * with the strict limits are included. Any results outside the weak limits are excluded. Any
- * results between the strict and weak limits are included only if they can be traced through time,
- * optionally via other candidates, to a valid result.
+ * Calculates the precision using the true fitted background if a bias is provided.
+ *
+ * <p>Any results with the strict limits are included. Any results outside the weak limits are
+ * excluded. Any results between the strict and weak limits are included only if they can be traced
+ * through time, optionally via other candidates, to a valid result.
  */
 public class MultiHysteresisFilter2 extends MultiHysteresisFilter {
   @XStreamOmitField

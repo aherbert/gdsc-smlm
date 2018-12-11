@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.text.TextPanel;
@@ -67,9 +68,9 @@ public abstract class TextPanelMouseListener implements MouseListener {
 
   /** {@inheritDoc} */
   @Override
-  public void mouseClicked(MouseEvent e) {
+  public void mouseClicked(MouseEvent event) {
     // Show the result that was double clicked in the result table
-    if (e.getClickCount() > 1) {
+    if (event.getClickCount() > 1) {
       selected(textPanel.getSelectionStart());
     }
   }
@@ -83,7 +84,7 @@ public abstract class TextPanelMouseListener implements MouseListener {
 
   /** {@inheritDoc} */
   @Override
-  public void mousePressed(MouseEvent e) {
+  public void mousePressed(MouseEvent event) {
     final int index = textPanel.getSelectionStart();
     final int index2 = textPanel.getSelectionEnd();
     if (index == index2) {
@@ -102,19 +103,19 @@ public abstract class TextPanelMouseListener implements MouseListener {
 
   /** {@inheritDoc} */
   @Override
-  public void mouseReleased(MouseEvent e) {
+  public void mouseReleased(MouseEvent event) {
     // Ignore
   }
 
   /** {@inheritDoc} */
   @Override
-  public void mouseEntered(MouseEvent e) {
+  public void mouseEntered(MouseEvent event) {
     // Ignore
   }
 
   /** {@inheritDoc} */
   @Override
-  public void mouseExited(MouseEvent e) {
+  public void mouseExited(MouseEvent event) {
     // Ignore
   }
 }

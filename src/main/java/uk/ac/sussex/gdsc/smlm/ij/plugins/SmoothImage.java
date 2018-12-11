@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
@@ -51,6 +52,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Smooth Image";
   private static final String[] filterNames;
   private static final DataFilterMethod[] filters;
+
   static {
     filters = SettingsManager.getDataFilterMethodValues();
     filterNames = SettingsManager.getDataFilterMethodNames();
@@ -120,7 +122,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     filter1 = gd.getNextChoiceIndex();
     smooth1 = gd.getNextNumber();
     differenceFilter = gd.getNextBoolean();
@@ -169,7 +171,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
 
   /** {@inheritDoc} */
   @Override
-  public void setNPasses(int nPasses) {
+  public void setNPasses(int passes) {
     // Nothing to do
   }
 }

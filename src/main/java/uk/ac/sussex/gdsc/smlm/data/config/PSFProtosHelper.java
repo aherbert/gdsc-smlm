@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -38,11 +39,11 @@ import java.util.List;
  * Contains helper functions for the PSFProtos class.
  */
 public class PSFProtosHelper {
-  /** The default one-axis Gaussian 2D PSF */
+  /** The default one-axis Gaussian 2D PSF. */
   public static final PSF defaultOneAxisGaussian2DPSF;
-  /** The default two-axis Gaussian 2D PSF */
+  /** The default two-axis Gaussian 2D PSF. */
   public static final PSF defaultTwoAxisGaussian2DPSF;
-  /** The default two-axis and theta Gaussian 2D PSF */
+  /** The default two-axis and theta Gaussian 2D PSF. */
   public static final PSF defaultTwoAxisAndThetaGaussian2DPSF;
 
   static {
@@ -165,8 +166,9 @@ public class PSFProtosHelper {
   }
 
   /**
-   * Creates the astigmatic Gaussian 2D PSF from an astigmatism model. <p> Note that the nm/pixel or
-   * the units are not contained within the PSF parameters.
+   * Creates the astigmatic Gaussian 2D PSF from an astigmatism model.
+   *
+   * <p>Note that the nm/pixel or the units are not contained within the PSF parameters.
    *
    * @param model the model
    * @param zDistanceUnit the desired input z distance unit
@@ -205,8 +207,10 @@ public class PSFProtosHelper {
   }
 
   /**
-   * Creates the astigmatism model from the astigmatic Gaussian 2D PSF. <p> Note that the nm/pixel
-   * and the units are not contained within the PSF parameters so these must be input as parameters.
+   * Creates the astigmatism model from the astigmatic Gaussian 2D PSF.
+   *
+   * <p>Note that the nm/pixel and the units are not contained within the PSF parameters so these
+   * must be input as parameters.
    *
    * @param psf the psf
    * @param zDistanceUnit the input z distance unit

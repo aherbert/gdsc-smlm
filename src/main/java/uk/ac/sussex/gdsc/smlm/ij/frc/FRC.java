@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.frc;
 
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
@@ -40,10 +41,11 @@ import org.jtransforms.fft.FloatFFT_2D;
 import java.util.Arrays;
 
 /**
- * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image. <p>
- * Adapted by Alex Herbert from the FIRE (Fourier Image REsolution) plugin produced as part of the
- * paper:<br> Niewenhuizen, et al (2013). Measuring image resolution in optical nanoscopy. Nature
- * Methods, 10, 557<br> http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
+ * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
+ *
+ * <p>Adapted by Alex Herbert from the FIRE (Fourier Image REsolution) plugin produced as part of
+ * the paper:<br> Niewenhuizen, et al (2013). Measuring image resolution in optical nanoscopy.
+ * Nature Methods, 10, 557<br> http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
  *
  * @author Alex Herbert
  * @author Bernd Rieger, b.rieger@tudelft.nl
@@ -51,6 +53,7 @@ import java.util.Arrays;
 public class FRC {
   /** Flag indicating if the JTransforms library is available. */
   private static boolean JTRANSFORMS;
+
   static {
     try {
       final int size = 8;
@@ -113,7 +116,7 @@ public class FRC {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   /**
@@ -147,7 +150,7 @@ public class FRC {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   /**
@@ -175,7 +178,7 @@ public class FRC {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   /**
@@ -190,7 +193,10 @@ public class FRC {
     private final int nSamples;
 
     /** The denominator. */
-    private final double numerator, sum1, sum2, denominator;
+    private final double numerator;
+    private final double sum1;
+    private final double sum2;
+    private final double denominator;
 
     /** The correlation. */
     private double correlation;
@@ -262,7 +268,9 @@ public class FRC {
     }
 
     /**
-     * Gets the denominator of the correlation. <p> Note: the denominator is Math.sqrt(sum1*sum2)
+     * Gets the denominator of the correlation.
+     *
+     * <p>Note: the denominator is Math.sqrt(sum1*sum2)
      *
      * @return the denominator
      */
@@ -305,15 +313,15 @@ public class FRC {
    */
   public static class FRCCurve implements Cloneable {
     /** The nm per pixel for the super-resolution images. */
-    final public double nmPerPixel;
+    public final double nmPerPixel;
 
     /** The size of the field of view in the Fourier image (named L). */
-    final public int fieldOfView;
+    public final int fieldOfView;
 
     /** The mean of the first input image after application of the Tukey window taper. */
-    final public double mean1;
+    public final double mean1;
     /** The mean of the second input image after application of the Tukey window taper. */
-    final public double mean2;
+    public final double mean2;
 
     /** The results. */
     private FRCCurveResult[] results;
@@ -414,10 +422,10 @@ public class FRC {
    */
   public static class FIREResult {
     /** The fire number (in nm). */
-    final public double fireNumber;
+    public final double fireNumber;
 
     /** The correlation. */
-    final public double correlation;
+    public final double correlation;
 
     /**
      * Instantiates a new FIRE result.
@@ -450,9 +458,11 @@ public class FRC {
   }
 
   /**
-   * Sets the perimeter sampling factor. <p> Depending on the sampling method, the correlation is
-   * computed using interpolated values from intervals around the circle circumference. The number
-   * of samples for half the circle is computed as: Pi * radius * sampling factor.
+   * Sets the perimeter sampling factor.
+   *
+   * <p>Depending on the sampling method, the correlation is computed using interpolated values from
+   * intervals around the circle circumference. The number of samples for half the circle is
+   * computed as: Pi * radius * sampling factor.
    *
    * @param perimeterSamplingFactor the new perimeter sampling factor
    */
@@ -464,10 +474,13 @@ public class FRC {
   }
 
   /**
-   * Control the method for generating the Fourier circle. <p> The correlation is computed using
-   * intervals around the circle circumference of the Fourier transform. <p> Note in the case of
-   * using interpolated pixels on the perimeter the Fourier image is 2-fold radially symmetric and
-   * so the calculation can use only half the circle for speed.
+   * Control the method for generating the Fourier circle.
+   *
+   * <p>The correlation is computed using intervals around the circle circumference of the Fourier
+   * transform.
+   *
+   * <p>Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold
+   * radially symmetric and so the calculation can use only half the circle for speed.
    */
   private SamplingMethod samplingMethod = SamplingMethod.RADIAL_SUM;
 
@@ -481,12 +494,14 @@ public class FRC {
   }
 
   /**
-   * Control the method for generating the Fourier circle. <p> The correlation is computed using
-   * intervals around the circle circumference of the Fourier transform. The radial sum does not use
-   * interpolation but instead assigns all pixels at radius r to the interval {@code n<=r<n+1} for
-   * all n from 0 to the max radius. <p> Note in the case of using interpolated pixels on the
-   * perimeter the Fourier image is 2-fold radially symmetric and so the calculation can use only
-   * half the circle for speed.
+   * Control the method for generating the Fourier circle.
+   *
+   * <p>The correlation is computed using intervals around the circle circumference of the Fourier
+   * transform. The radial sum does not use interpolation but instead assigns all pixels at radius r
+   * to the interval {@code n<=r<n+1} for all n from 0 to the max radius.
+   *
+   * <p>Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold
+   * radially symmetric and so the calculation can use only half the circle for speed.
    *
    * @param samplingMethod the new sampling method
    */
@@ -525,7 +540,9 @@ public class FRC {
   private TrackProgress progress = null;
 
   /**
-   * Sets the track progress. <p> Used to track the progress within
+   * Sets the track progress.
+   *
+   * <p>Used to track the progress within
    * {@link #calculateFrcCurve(ImageProcessor, ImageProcessor, double)}.
    *
    * @param progress the new track progress
@@ -579,10 +596,14 @@ public class FRC {
     ip2 = pad(ip2, maxWidth, maxHeight);
 
     // The mean of each image after applying the taper
-    double mean1, mean2;
+    double mean1;
+    double mean2;
 
     // Real and imaginary components
-    float[] re1 = null, im1, re2, im2;
+    float[] re1 = null;
+    float[] im1;
+    float[] re2;
+    float[] im2;
 
     // Do the first image
     ip1 = getSquareTaperedImage(ip1);
@@ -912,7 +933,8 @@ public class FRC {
     // Symmetry is around the centre
     final int centre = size / 2;
 
-    final float maxRelativeError = 1e-10f, maxAbsoluteError = 1e-16f;
+    final float maxRelativeError = 1e-10f;
+    final float maxAbsoluteError = 1e-16f;
     int error = 0;
 
     for (int y = centre, y2 = centre; y >= 0 && y2 < size; y--, y2++) {
@@ -983,8 +1005,9 @@ public class FRC {
   private static final int MAX_SIZE = 32768;
 
   /**
-   * Returns the closest power-of-two number greater than or equal to x. <p> Copied from the
-   * JTransforms library class edu.emory.mathcs.utils.ConcurrencyUtils.
+   * Returns the closest power-of-two number greater than or equal to x.
+   *
+   * <p>Copied from the JTransforms library class edu.emory.mathcs.utils.ConcurrencyUtils.
    *
    * @param x the x
    * @return the closest power-of-two number greater than or equal to x
@@ -1055,7 +1078,8 @@ public class FRC {
   // Using methods to check the length should make it thread safe since we create an instance
   // reference
   // to an array of the correct length.
-  private static float[] taperX = new float[0], taperY = new float[0];
+  private static float[] taperX = new float[0];
+  private static float[] taperY = new float[0];
 
   /**
    * Gets the window function X.
@@ -1145,7 +1169,8 @@ public class FRC {
     final int middle = size / 2;
     final double FOUR_PI_OVER_SIZE = 12.566370614359172D / (size - 1);
     {
-      int i = 1, j = size - 2;
+      int i = 1;
+      int j = size - 2;
       while (i <= boundary) {
         final double d = Math.sin(FOUR_PI_OVER_SIZE * i);
         taper[i++] = taper[j--] = (float) (d * d);
@@ -1168,8 +1193,9 @@ public class FRC {
   }
 
   /**
-   * Adapted from ij.process.ImageProcessor.getInterpolatedValue(int,int). <p> Removed bounds
-   * checking and compute multiple values at the same time for multiple images.
+   * Adapted from ij.process.ImageProcessor.getInterpolatedValue(int,int).
+   *
+   * <p>Removed bounds checking and compute multiple values at the same time for multiple images.
    *
    * @param x the x
    * @param y the y
@@ -1212,10 +1238,11 @@ public class FRC {
   }
 
   /**
-   * Perform LOESS smoothing on the FRC curve. <p> The correlation values are smoothed using a LOESS
-   * interpolation with the given parameters. If smoothing fails the original curve values are
-   * returned. If successful then the input curve is optionally copied and updated with the smoothed
-   * correlation.
+   * Perform LOESS smoothing on the FRC curve.
+   *
+   * <p>The correlation values are smoothed using a LOESS interpolation with the given parameters.
+   * If smoothing fails the original curve values are returned. If successful then the input curve
+   * is optionally copied and updated with the smoothed correlation.
    *
    * @param frcCurve the FRC curve
    * @param bandwidth the bandwidth
@@ -1254,10 +1281,11 @@ public class FRC {
   }
 
   /**
-   * Perform LOESS smoothing on the FRC curve <p> | * The correlation values are smoothed using a
-   * LOESS interpolation with bandwidth of 0.0707 and robustness of 0. If smoothing fails the
-   * original curve values are returned. If successful then the input curve is optionally copied and
-   * updated with the smoothed correlation.
+   * Perform LOESS smoothing on the FRC curve.
+   *
+   * <p>| * The correlation values are smoothed using a LOESS interpolation with bandwidth of 0.0707
+   * and robustness of 0. If smoothing fails the original curve values are returned. If successful
+   * then the input curve is optionally copied and updated with the smoothed correlation.
    *
    * @param frcCurve the FRC curve
    * @param inPlace Set to true to modify the correlation in place (do not create a copy)
@@ -1475,8 +1503,10 @@ public class FRC {
   /**
    * Get the correction intersection representing the image resolution. The intersection chosen
    * depends on the method used to calculate the threshold curve using
-   * {@link #calculateThresholdCurve(FRCCurve, ThresholdMethod)} <p> The intersection corresponds
-   * the lowest spatial frequency at which there is no significant correlation between the images.
+   * {@link #calculateThresholdCurve(FRCCurve, ThresholdMethod)}
+   *
+   * <p>The intersection corresponds the lowest spatial frequency at which there is no significant
+   * correlation between the images.
    *
    * @param intersections the intersections
    * @param thresholdMethod the threshold method
@@ -1611,15 +1641,19 @@ public class FRC {
    * Niewenhuizen, et al (2013), on-line methods. This method computes a value that is subtracted
    * from the numerator of the FRC and added to the denominator of the FRC before computing the
    * correlation. The correlation in the FRC curve will be updated. The sums of the FRC curve are
-   * unchanged. <p> The localisation precision is input in units of nm. This is converted using the
-   * nmPerPixel stored in the FRC curve object into units of super-resolution pixels. <p> The
-   * correlation can be reset by calling this method with a Q-value of zero. <p> Note: Spurious
-   * correlation correction is only useful when computing the resolution of a single set of
-   * localisations split into two images. In this case the same emitter can be present in both
-   * images leading to spurious contribution to the correlation. Correction can be omitted providing
-   * the number of emitters is sufficiently high and the sample has spectral signal content at the
-   * computed resolution for the uncorrected curve (see Niewenhuizen, et al (2013), Nature Methods,
-   * 10, 557, Supplementary Material p.22).
+   * unchanged.
+   *
+   * <p>The localisation precision is input in units of nm. This is converted using the nmPerPixel
+   * stored in the FRC curve object into units of super-resolution pixels.
+   *
+   * <p>The correlation can be reset by calling this method with a Q-value of zero.
+   *
+   * <p>Note: Spurious correlation correction is only useful when computing the resolution of a
+   * single set of localisations split into two images. In this case the same emitter can be present
+   * in both images leading to spurious contribution to the correlation. Correction can be omitted
+   * providing the number of emitters is sufficiently high and the sample has spectral signal
+   * content at the computed resolution for the uncorrected curve (see Niewenhuizen, et al (2013),
+   * Nature Methods, 10, 557, Supplementary Material p.22).
    *
    * @param frcCurve the FRC curve
    * @param qValue the q value

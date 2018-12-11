@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
@@ -41,7 +42,7 @@ public class ParameterisedFitJob extends FitJob {
   private MultiPathFitResult[] multiPathResults = null;
 
   /**
-   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed.
    *
    * @param id the id
    * @param parameters the parameters
@@ -56,7 +57,7 @@ public class ParameterisedFitJob extends FitJob {
   }
 
   /**
-   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed.
    *
    * @param parameters the parameters
    * @param slice the slice
@@ -81,6 +82,8 @@ public class ParameterisedFitJob extends FitJob {
   }
 
   /**
+   * Gets the results.
+   *
    * @return The results.
    */
   public List<PeakResult> getResults() {
@@ -93,6 +96,7 @@ public class ParameterisedFitJob extends FitJob {
     this.indices = indices;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void setFitResult(int n, FitResult fitResult) {
     if (fitResults == null) {
@@ -114,6 +118,8 @@ public class ParameterisedFitJob extends FitJob {
   }
 
   /**
+   * Gets the indices of the data that were fitted.
+   *
    * @return The indices of the data that were fitted.
    */
   public int[] getIndices() {

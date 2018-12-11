@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
@@ -131,11 +132,12 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
   }
 
   /**
-   * {@inheritDoc} <p> Gets the approximate Poisson-Gaussian Fisher information. Approximate the
-   * Poisson as a Gaussian (u=t, var=t) and convolve with a Gaussian (u=0,var=s*s).
-   * Gaussian-Gaussian convolution: {@code var1 * var2 => var = var1+var2}. The Fisher information
-   * of Gaussian mean is 1/variance. The Poisson-Gaussian Fisher information is therefore 1 / (t +
-   * s*s).
+   * {@inheritDoc}
+   *
+   * <p>Gets the approximate Poisson-Gaussian Fisher information. Approximate the Poisson as a
+   * Gaussian (u=t, var=t) and convolve with a Gaussian (u=0,var=s*s). Gaussian-Gaussian
+   * convolution: {@code var1 * var2 => var = var1+var2}. The Fisher information of Gaussian mean is
+   * 1/variance. The Poisson-Gaussian Fisher information is therefore 1 / (t + s*s).
    *
    * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
    */

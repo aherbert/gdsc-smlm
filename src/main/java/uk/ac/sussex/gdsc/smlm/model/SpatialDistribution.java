@@ -21,16 +21,20 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 /**
- * Contains methods for sampling the spatial position of a molecule. <p> The centre of the
- * distribution is [0,0,0]. Therefore the coordinates can be negative or positive.
+ * Contains methods for sampling the spatial position of a molecule.
+ *
+ * <p>The centre of the distribution is [0,0,0]. Therefore the coordinates can be negative or
+ * positive.
  */
 public interface SpatialDistribution {
   /**
-   * Get the next position. Note the centre of the distribution is [0,0,0]. <p> Note: May return
-   * null if no more positions are available.
+   * Get the next position. Note the centre of the distribution is [0,0,0].
+   *
+   * <p>Note: May return null if no more positions are available.
    *
    * @return The next position [x,y,z]
    */
@@ -52,11 +56,11 @@ public interface SpatialDistribution {
    * @param xyz the xyz
    * @return True if the coordinates are within the distribution bounds in the XY dimensions
    */
-  public boolean isWithinXY(double[] xyz);
+  public boolean isWithinXy(double[] xyz);
 
   /**
    * Initialise the distribution with a set of coordinates. This can be used before calls to
-   * {@link #isWithin(double[])} or {@link #isWithinXY(double[])} if the implementation depends on
+   * {@link #isWithin(double[])} or {@link #isWithinXy(double[])} if the implementation depends on
    * knowing the original coordinate location.
    *
    * @param xyz the xyz

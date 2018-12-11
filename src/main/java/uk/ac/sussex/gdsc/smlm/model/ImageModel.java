@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -38,16 +39,17 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Contains a model for an image of blinking fluorophores. <p> Based on the work of Coltharp et al
- * (2012) Accurate Construction of photoactivated localization microscopy images for quantitative
- * measurements. PLOS One 7, Issue 12, pp 1-15
+ * Contains a model for an image of blinking fluorophores.
+ *
+ * <p>Based on the work of Coltharp et al (2012) Accurate Construction of photoactivated
+ * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
 public abstract class ImageModel {
-  /** Average on-state time */
+  /** Average on-state time. */
   protected double tOn;
-  /** Average off-state time for the first dark state */
+  /** Average off-state time for the first dark state. */
   protected double tOff;
-  /** Average off-state time for the second dark state */
+  /** Average off-state time for the second dark state. */
   protected double tOff2;
   /**
    * Average number of blinks int the first dark state (used for each burst between second dark
@@ -161,8 +163,10 @@ public abstract class ImageModel {
 
   /**
    * Creates N particles by sampling from the distribution. If the distribution returns null (no
-   * coordinates) then no more attempts to generate particles is made. <p> The compound's molecule
-   * coordinates will be updated by calling {@link CompoundMoleculeModel#centre()}.
+   * coordinates) then no more attempts to generate particles is made.
+   *
+   * <p>The compound's molecule coordinates will be updated by calling
+   * {@link CompoundMoleculeModel#centre()}.
    *
    * @param compounds the compounds
    * @param particles the particles
@@ -261,12 +265,15 @@ public abstract class ImageModel {
 
   /**
    * Generates fluorophores for the molecules spatial positions. Only simulate up to the given
-   * maximum number of frames. <p> Replace the CompoundMoleculeModel objects in the list with new
-   * compounds containing the generated FluorophoreSequenceModel objects. If no fluorophores can be
-   * generated for a compound then it is removed. Since the fluorophores are part of a compound
-   * their coordinates are relative to the compound centre of mass. <p> Note that the activation
-   * energy is sampled at the spatial position without movement. This is therefore an approximation
-   * of the energy the molecule would receive if it were moving.
+   * maximum number of frames.
+   *
+   * <p>Replace the CompoundMoleculeModel objects in the list with new compounds containing the
+   * generated FluorophoreSequenceModel objects. If no fluorophores can be generated for a compound
+   * then it is removed. Since the fluorophores are part of a compound their coordinates are
+   * relative to the compound centre of mass.
+   *
+   * <p>Note that the activation energy is sampled at the spatial position without movement. This is
+   * therefore an approximation of the energy the molecule would receive if it were moving.
    *
    * @param molecules the molecules
    * @param frames the frames
@@ -447,8 +454,9 @@ public abstract class ImageModel {
 
   /**
    * Simulate an image of fluorophores. The total amount of time a fluorophore is on (i.e. sum of
-   * tOn) is used to create the signal strength using the specified correlation. <p> A second set of
-   * fluorophores, independent of the first, are generated using
+   * tOn) is used to create the signal strength using the specified correlation.
+   *
+   * <p>A second set of fluorophores, independent of the first, are generated using
    * {@link #createFluorophores(List, int)}. The correlated on-times will be created by combining
    * the times using the provided correlation (r):
    *
@@ -461,11 +469,16 @@ public abstract class ImageModel {
    * </pre>
    *
    * The signal is proportional to newly generated on-times (newX) with an average of the specified
-   * photon budget. <p> The photon budget can either be distributed evenly over the fluorophore
-   * lifetime or per frame (see {@link #isPhotonBudgetPerFrame()}). Each frame signal output will be
-   * subject to Poisson sampling. <p> If the input correlation is zero then the number of photons
-   * will be sampled from the configured photon distribution or, if this is null, will be uniform.
-   * <p> A random fraction of the fluorophores will move using a random walk with the diffusion
+   * photon budget.
+   *
+   * <p>The photon budget can either be distributed evenly over the fluorophore lifetime or per
+   * frame (see {@link #isPhotonBudgetPerFrame()}). Each frame signal output will be subject to
+   * Poisson sampling.
+   *
+   * <p>If the input correlation is zero then the number of photons will be sampled from the
+   * configured photon distribution or, if this is null, will be uniform.
+   *
+   * <p>A random fraction of the fluorophores will move using a random walk with the diffusion
    * coefficient defined in the compound.
    *
    * @param compoundFluorophores The compounds containing the fluorophores

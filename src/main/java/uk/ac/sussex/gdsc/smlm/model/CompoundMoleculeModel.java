@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -31,14 +32,16 @@ import java.util.List;
 
 /**
  * Contains a model for a compound moving molecule (contains multiple molecules held in a fixed
- * configuration). <p> The coordinates of the object represent the current centre of mass. The
- * coordinates of each molecule can be retrieved using the {@link #getCoordinates(int)} method;
+ * configuration).
+ *
+ * <p>The coordinates of the object represent the current centre of mass. The coordinates of each
+ * molecule can be retrieved using the {@link #getCoordinates(int)} method;
  */
 public class CompoundMoleculeModel extends MoleculeModel {
   /** The constant to convert degrees to radians: <code>180.0 / Math.PI</code>. */
   static final double DEGREES_TO_RADIANS = 180.0 / Math.PI;
 
-  /** Define the Z-axis */
+  /** Define the Z-axis. */
   public static final double[] Z_AXIS = new double[] {0, 0, 1};
 
   private int label;
@@ -51,9 +54,10 @@ public class CompoundMoleculeModel extends MoleculeModel {
   private List<? extends MoleculeModel> molecules;
 
   /**
-   * The fraction of a population that this molecule represents. <p> This is used when creating a
-   * particle distribution of different types of molecules. This is included so that the population
-   * description can be serialised.
+   * The fraction of a population that this molecule represents.
+   *
+   * <p>This is used when creating a particle distribution of different types of molecules. This is
+   * included so that the population description can be serialised.
    */
   private double fraction = 1;
 
@@ -67,7 +71,9 @@ public class CompoundMoleculeModel extends MoleculeModel {
   private DiffusionType diffusionType = DiffusionType.RANDOM_WALK;
 
   /**
-   * Create a new molecule <p> Note: molecules mass may be updated, see {@link #getMass()}.
+   * Create a new molecule.
+   *
+   * <p>Note: molecules mass may be updated, see {@link #getMass()}.
    *
    * @param id the id
    * @param xyz [x,y,z]
@@ -80,7 +86,9 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
-   * Create a new molecule <p> Note: molecules mass may be updated, see {@link #getMass()}.
+   * Create a new molecule.
+   *
+   * <p>Note: molecules mass may be updated, see {@link #getMass()}.
    *
    * @param id the id
    * @param x the x
@@ -95,7 +103,9 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
-   * Create a new molecule <p> Note: molecules mass may be updated, see {@link #getMass()}.
+   * Create a new molecule.
+   *
+   * <p>Note: molecules mass may be updated, see {@link #getMass()}.
    *
    * @param id the id
    * @param xyz [x,y,z]
@@ -110,7 +120,9 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
-   * Create a new molecule <p> Note: molecules mass may be updated, see {@link #getMass()}.
+   * Create a new molecule.
+   *
+   * <p>Note: molecules mass may be updated, see {@link #getMass()}.
    *
    * @param id the id
    * @param x the x
@@ -395,7 +407,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
-   * Get the current coordinates of the n<sup>th</sup> molecule in the compound molecule
+   * Get the current coordinates of the n<sup>th</sup> molecule in the compound molecule.
    *
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The xyz coordinates
@@ -426,8 +438,9 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
-   * Get the n<sup>th</sup> molecule molecule in the compound molecule <p> Note that the molecule
-   * coordinates are relative the centre-of-mass of the compound
+   * Get the n<sup>th</sup> molecule molecule in the compound molecule.
+   *
+   * <p>Note that the molecule coordinates are relative the centre-of-mass of the compound
    *
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The molecule
@@ -455,11 +468,13 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
-   * Return the of all the molecules. <p> The mass is calculated once during initialisation. If any
-   * molecule has a mass less than zero it will be set to zero. If all molecules have a mass of zero
-   * then the mass for each will be reset to one. This allows the centre-of-mass calculation to
-   * function correctly. If a molecule is part of the compound and has no mass it will be rotated
-   * and moved but will not contribute to the COM.
+   * Return the of all the molecules.
+   *
+   * <p>The mass is calculated once during initialisation. If any molecule has a mass less than zero
+   * it will be set to zero. If all molecules have a mass of zero then the mass for each will be
+   * reset to one. This allows the centre-of-mass calculation to function correctly. If a molecule
+   * is part of the compound and has no mass it will be rotated and moved but will not contribute to
+   * the COM.
    *
    * @return The mass of all the molecules
    */

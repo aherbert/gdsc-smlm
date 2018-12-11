@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -36,9 +37,10 @@ import ij.process.ImageProcessor;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Produces a background intensity image and a mask from a sample image. <p> The input image should
- * be representative of the super-resolution imaging conditions and so will produce suitable input
- * for the Create Data plugin to create realistic images.
+ * Produces a background intensity image and a mask from a sample image.
+ *
+ * <p>The input image should be representative of the super-resolution imaging conditions and so
+ * will produce suitable input for the Create Data plugin to create realistic images.
  */
 public class ImageBackground implements PlugInFilter {
   private static final String TITLE = "Image Background";

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import org.apache.commons.math3.util.FastMath;
@@ -41,13 +42,6 @@ public class FitTypeCounter {
     for (int i = 0; i < count.length; i++) {
       count[i] = new AtomicInteger();
     }
-  }
-
-  /**
-   * @return the total number of flags for the type of fit.
-   */
-  public int size() {
-    return count.length;
   }
 
   /**
@@ -89,7 +83,6 @@ public class FitTypeCounter {
     if (flags == 0) {
       return count[0].get();
     }
-
     int total = 0;
     for (int i = 1; i < count.length; i++) {
       if ((i & flags) == flags) {

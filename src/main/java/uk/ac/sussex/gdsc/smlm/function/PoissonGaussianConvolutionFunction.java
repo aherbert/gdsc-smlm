@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -30,14 +31,17 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is
  * assumed to have mean of zero. If no mean (zero or below) is provided for the Poisson distribution
- * then the probability density function matches that of the Gaussian. <p> The implementation uses
- * full convolution described from Huang, et al (2013), Supplementary Notes Eq 1.1:<br> P(D) = A
- * Sum_q e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)<br> Where:<br> A =
- * normalisation constant var = the variance of the pixel <br> g = the gain of the pixel <br> u =
- * the function value (expected number of photons) <br> D = the observed value at the pixel <p> The
- * likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera which
- * captures a Poisson process of emitted light, converted to electrons on the camera chip, amplified
- * by a gain and then read with Gaussian noise.
+ * then the probability density function matches that of the Gaussian.
+ *
+ * <p>The implementation uses full convolution described from Huang, et al (2013), Supplementary
+ * Notes Eq 1.1:<br> P(D) = A Sum_q e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)<br>
+ * Where:<br> A = normalisation constant var = the variance of the pixel <br> g = the gain of the
+ * pixel <br> u = the function value (expected number of photons) <br> D = the observed value at the
+ * pixel
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
+ * amplified by a gain and then read with Gaussian noise.
  */
 public class PoissonGaussianConvolutionFunction
     implements LikelihoodFunction, LogLikelihoodFunction {
@@ -114,8 +118,10 @@ public class PoissonGaussianConvolutionFunction
   }
 
   /**
-   * {@inheritDoc} <p> The output is a PDF or PMF depending on the value of {@link #isComputePMF()}.
-   * If set to true the function does not error if the input x is non-integer.
+   * {@inheritDoc}
+   *
+   * <p>The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true
+   * the function does not error if the input x is non-integer.
    *
    * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
    * @see #isComputePMF()
@@ -214,8 +220,10 @@ public class PoissonGaussianConvolutionFunction
   }
 
   /**
-   * {@inheritDoc} <p> The output is a PDF or PMF depending on the value of {@link #isComputePMF()}.
-   * If set to true the function does not error if the input x is non-integer.
+   * {@inheritDoc}
+   *
+   * <p>The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true
+   * the function does not error if the input x is non-integer.
    *
    * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
    * @see #isComputePMF()
@@ -272,8 +280,10 @@ public class PoissonGaussianConvolutionFunction
 
   /**
    * Checks if computing a PMF(X=x) (for integer x) using the Gaussian CDF to convolve with the
-   * Poisson PMF. <p> The default is a PDF(X=x). If set to true the function
-   * {@link #likelihood(double, double)} does not error if the input x is non-integer.
+   * Poisson PMF.
+   *
+   * <p>The default is a PDF(X=x). If set to true the function {@link #likelihood(double, double)}
+   * does not error if the input x is non-integer.
    *
    * @return true, if computing a PMF(X=x).
    */
@@ -283,8 +293,10 @@ public class PoissonGaussianConvolutionFunction
 
   /**
    * Set to true if computing a PMF(X=x) (for integer x) using the Gaussian CDF to convolve with the
-   * Poisson PMF. <p> The default is a PDF(X=x). If set to true the function
-   * {@link #likelihood(double, double)} does not error if the input x is non-integer.
+   * Poisson PMF.
+   *
+   * <p>The default is a PDF(X=x). If set to true the function {@link #likelihood(double, double)}
+   * does not error if the input x is non-integer.
    *
    * @param computePMF the new use CDF flag
    */

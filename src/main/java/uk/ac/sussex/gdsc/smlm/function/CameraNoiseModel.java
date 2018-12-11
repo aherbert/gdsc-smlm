@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
@@ -69,20 +70,24 @@ public abstract class CameraNoiseModel implements NoiseModel {
   }
 
   /**
-   * Compute the expected variance of the signal from a CCD camera. <p> The noise model assumes that
-   * the camera may have a bias offset. The signal is computed as the input value minus the bias.
-   * The variance is computed using:
+   * Compute the expected variance of the signal from a CCD camera.
+   *
+   * <p>The noise model assumes that the camera may have a bias offset. The signal is computed as
+   * the input value minus the bias. The variance is computed using:
    *
    * <pre>
    * variance = read_noise^2 + shot_noise^2 x em-ccd noise factor
    *          = read_noise^2 + signal x (emCCD) ? 2 : 1
    * </pre>
    *
-   * The read noise is Gaussian read noise of the CCD camera. <p> The shot noise is Poisson noise of
-   * the signal. Since the variance of the Poisson distribution is the mean so we can use the signal
-   * directly. <p> The em-ccd noise factor is sqrt(2) for EM CCD cameras, otherwise it is 1. This is
-   * only applied to the signal noise standard deviation. Applying it directly to the signal
-   * variance uses a factor of sqrt(2)^2 = 2.
+   * The read noise is Gaussian read noise of the CCD camera.
+   *
+   * <p>The shot noise is Poisson noise of the signal. Since the variance of the Poisson
+   * distribution is the mean so we can use the signal directly.
+   *
+   * <p>The em-ccd noise factor is sqrt(2) for EM CCD cameras, otherwise it is 1. This is only
+   * applied to the signal noise standard deviation. Applying it directly to the signal variance
+   * uses a factor of sqrt(2)^2 = 2.
    *
    * @see uk.ac.sussex.gdsc.smlm.function.NoiseModel#variance(double)
    */

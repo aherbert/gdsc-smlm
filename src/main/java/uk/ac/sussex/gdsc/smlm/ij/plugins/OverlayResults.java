@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -176,7 +177,9 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
     }
 
     /**
-     * Draw the overlay. <p> This is only called when index > 0.
+     * Draw the overlay.
+     *
+     * <p>This is only called when index > 0.
      */
     private void drawOverlay() {
       final ImagePlus imp = WindowManager.getImage(ids[currentIndex]);
@@ -413,7 +416,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
   }
 
   @Override
-  public void itemStateChanged(ItemEvent e) {
+  public void itemStateChanged(ItemEvent event) {
     show();
   }
 

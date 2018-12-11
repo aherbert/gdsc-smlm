@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -82,6 +83,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   /** The fit config. */
   static FitConfiguration fitConfig;
   private static FitEngineConfiguration config;
+
   static {
     config = new FitEngineConfiguration();
     fitConfig = config.getFitConfiguration();
@@ -91,6 +93,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private static double[] snrLevels;
   private static boolean[] thresholdMethodOptions;
   private static String[] thresholdMethodNames;
+
   static {
     snrLevels = new double[100];
     int i = 0;
@@ -144,8 +147,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
   private static TIntObjectHashMap<FilterCandidates> filterCandidates;
-  private static double fP, fN;
-  private static int nP, nN;
+  private static double fP;
+  private static double fN;
+  private static int nP;
+  private static int nN;
 
   /** The last id. */
   static int lastId = -1;
@@ -174,9 +179,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   private class FilterCandidates {
     // Integer counts of positives (matches) and negatives
-    final int p, n;
+    final int p;
+    final int n;
     // Double sums of the fractions match score and antiscore
-    final double np, nn;
+    final double np;
+    final double nn;
     final ScoredSpot[] spots;
 
     public FilterCandidates(int p, int n, double np, double nn, ScoredSpot[] spots) {
@@ -589,7 +596,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     methodNames = thresholdMethodNames.clone();
     if (selectMethods) {
-      int count = 0, count1 = 0, count2 = 0;
+      int count = 0;
+      int count1 = 0;
+      int count2 = 0;
       methods = new AutoThreshold.Method[thresholdMethods.length];
       levels = new double[snrLevels.length];
 
@@ -634,7 +643,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     return true;
   }
 
-  private int progress, stepProgress, totalProgress;
+  private int progress;
+  private int stepProgress;
+  private int totalProgress;
 
   /**
    * Show progress.
@@ -797,8 +808,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
         }
 
         // Count the number of positive & negatives
-        int p = 0, n = 0;
-        double np = 0, nn = 0;
+        int p = 0;
+        int n = 0;
+        double np = 0;
+        double nn = 0;
 
         boolean reachedTarget = false;
         int nAfter = 0;

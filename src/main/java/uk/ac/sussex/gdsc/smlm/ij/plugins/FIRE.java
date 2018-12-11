@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -132,14 +133,17 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Computes the Fourier Image Resolution of an image <p> Implements the FIRE (Fourier Image
- * REsolution) method described in:<br> Niewenhuizen, et al (2013). Measuring image resolution in
- * optical nanoscopy. Nature Methods, 10, 557<br>
- * http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html <p> A second plugin allows
- * estimation of the spurious correlation component contributed by the same molecule being present
- * in both super-resolution images due to splitting of repeat localisations. The correction Q factor
- * is the number of times a molecule is repeat localised (i.e. average blinks per molecule). This
- * code was developed using the Matlab examples provided by Bernd Reiger.
+ * Computes the Fourier Image Resolution of an image
+ *
+ * <p>Implements the FIRE (Fourier Image REsolution) method described in:<br> Niewenhuizen, et al
+ * (2013). Measuring image resolution in optical nanoscopy. Nature Methods, 10, 557<br>
+ * http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
+ *
+ * <p>A second plugin allows estimation of the spurious correlation component contributed by the
+ * same molecule being present in both super-resolution images due to splitting of repeat
+ * localisations. The correction Q factor is the number of times a molecule is repeat localised
+ * (i.e. average blinks per molecule). This code was developed using the Matlab examples provided by
+ * Bernd Reiger.
  */
 public class FIRE implements PlugIn {
   private String TITLE = "Fourier Image REsolution (FIRE)";
@@ -161,7 +165,9 @@ public class FIRE implements PlugIn {
 
   // The Q value and the mean and sigma for spurious correlation correction
   private static boolean spuriousCorrelationCorrection = false;
-  private static double qValue, mean, sigma;
+  private static double qValue;
+  private static double mean;
+  private static double sigma;
 
   static {
     SCALE_ITEMS = new String[SCALE_VALUES.length];
@@ -228,7 +234,7 @@ public class FIRE implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   private static double perimeterSamplingFactor = 1;
@@ -254,16 +260,20 @@ public class FIRE implements PlugIn {
 
   private boolean extraOptions;
   private Rectangle roiBounds;
-  private int roiImageWidth, roiImageHeight;
+  private int roiImageWidth;
+  private int roiImageHeight;
 
   // Stored in initialisation
-  private MemoryPeakResults results, results2;
+  private MemoryPeakResults results;
+  private MemoryPeakResults results2;
   private Rectangle2D dataBounds;
   private String units;
   private double nmPerUnit = 1;
 
   // Stored in setCorrectionParameters
-  private double correctionQValue, correctionMean, correctionSigma;
+  private double correctionQValue;
+  private double correctionMean;
+  private double correctionSigma;
 
   /**
    * Store images for FIRE analysis.
@@ -273,7 +283,7 @@ public class FIRE implements PlugIn {
     final ImageProcessor ip1;
     /** The second super-resolution image. */
     final ImageProcessor ip2;
-    /** The nm per pixel in the super-resolution images */
+    /** The nm per pixel in the super-resolution images. */
     final double nmPerPixel;
 
     /**
@@ -1131,7 +1141,8 @@ public class FIRE implements PlugIn {
         if (x < xValues[i]) {
           double correlation;
           // Interpolate
-          final double upper = xValues[i], lower = xValues[i - 1];
+          final double upper = xValues[i];
+          final double lower = xValues[i - 1];
           final double xx = (x - lower) / (upper - lower);
           correlation = threshold[i - 1] + xx * (threshold[i] - threshold[i - 1]);
           addResolution(resolution, correlation);
@@ -1469,7 +1480,8 @@ public class FIRE implements PlugIn {
 
     // Compute the spatial frequency and the region for curve fitting
     final double[] q = FRC.computeQ(frcCurve, false);
-    int low = 0, high = q.length;
+    int low = 0;
+    int high = q.length;
     while (high > 0 && q[high - 1] > maxQ) {
       high--;
     }
@@ -1852,7 +1864,8 @@ public class FIRE implements PlugIn {
 
   private class MultiPlateauness implements MultivariateFunction {
     final double frcnum_noisevar = 0.1;
-    final double[] pre, q2;
+    final double[] pre;
+    final double[] q2;
     final double n2;
     final double four_pi2 = 4 * Math.PI * Math.PI;
 
@@ -2056,15 +2069,23 @@ public class FIRE implements PlugIn {
    */
   private class QPlot {
     final FRCCurve frcCurve;
-    final double nmPerPixel, qNorm;
-    final double[] vq, sinc2, q, qScaled;
-    final int low, high;
-    String title, title2;
+    final double nmPerPixel;
+    final double qNorm;
+    final double[] vq;
+    final double[] sinc2;
+    final double[] q;
+    final double[] qScaled;
+    final int low;
+    final int high;
+    String title;
+    String title2;
     FireResult originalFireResult;
     double originalFireNumber = Double.NaN;
 
     // Store the last plotted value
-    double mean, sigma, qValue;
+    double mean;
+    double sigma;
+    double qValue;
 
     QPlot(FRCCurve frcCurve, double qValue, int low, int high) {
       this.nmPerPixel = frcCurve.nmPerPixel;
@@ -2247,7 +2268,8 @@ public class FIRE implements PlugIn {
    * Represent the precision histogram.
    */
   private class PrecisionHistogram {
-    final float[] x, y;
+    final float[] x;
+    final float[] y;
     final String title;
     final double standardAmplitude;
     final float[] x2;
@@ -2425,7 +2447,8 @@ public class FIRE implements PlugIn {
       precision.add(pp.precision);
     }
 
-    double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
+    double yMin = Double.NEGATIVE_INFINITY;
+    double yMax = 0;
 
     // Set the min and max y-values using 1.5 x IQR
     final DescriptiveStatistics stats = precision.getStatistics();
@@ -2641,7 +2664,9 @@ public class FIRE implements PlugIn {
   }
 
   private class WorkSettings implements Cloneable {
-    double mean, sigma, qValue = 0;
+    double mean;
+    double sigma;
+    double qValue = 0;
 
     WorkSettings(double mean, double sigma, double qValue) {
       this.mean = mean;
@@ -2839,10 +2864,18 @@ public class FIRE implements PlugIn {
     boolean notActive = true;
     volatile int ignore = 0;
     Workflow<WorkSettings, Object> workflow;
-    double defaultMean, defaultSigma, defaultQValue;
-    String m, s, q;
-    TextField tf1, tf2, tf3;
-    Scrollbar sl1, sl2, sl3;
+    double defaultMean;
+    double defaultSigma;
+    double defaultQValue;
+    String m;
+    String s;
+    String q;
+    TextField tf1;
+    TextField tf2;
+    TextField tf3;
+    Scrollbar sl1;
+    Scrollbar sl2;
+    Scrollbar sl3;
     Checkbox cb;
     final boolean isMacro;
 
@@ -2881,7 +2914,7 @@ public class FIRE implements PlugIn {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       // Delay reading the dialog when in interactive mode. This is a workaround for a bug
       // where the dialog has not yet been drawn.
       if (notActive && !isMacro && System.currentTimeMillis() < time) {
@@ -2930,15 +2963,15 @@ public class FIRE implements PlugIn {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent event) {
       // Reset the slider on double-click
-      if (e.getClickCount() < 2) {
+      if (event.getClickCount() < 2) {
         return;
       }
-      if (e.getSource() == null || !(e.getSource() instanceof Scrollbar)) {
+      if (event.getSource() == null || !(event.getSource() instanceof Scrollbar)) {
         return;
       }
-      final Scrollbar sl = (Scrollbar) e.getSource();
+      final Scrollbar sl = (Scrollbar) event.getSource();
       if (sl == sl1) {
         tf1.setText(m);
       }
@@ -2951,22 +2984,22 @@ public class FIRE implements PlugIn {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent event) {
       // Ignore
     }
   }

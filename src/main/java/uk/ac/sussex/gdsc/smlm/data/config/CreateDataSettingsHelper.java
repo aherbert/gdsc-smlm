@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -34,8 +35,10 @@ public class CreateDataSettingsHelper {
   /** The create data settings. */
   CreateDataSettingsOrBuilder createDataSettings;
 
-  /** Set to true if the camera type is {@link CameraType#EMCCD} */
-  final public boolean isEMCCD;
+  /**
+   * Set to true if the camera type is {@link CameraType#EMCCD}.
+   */
+  public final boolean isEmCcd;
   private double totalGain = 0;
 
   /**
@@ -51,7 +54,7 @@ public class CreateDataSettingsHelper {
       throw new IllegalArgumentException("Helper instance must be used for a CCD-type camera");
     }
     this.createDataSettings = createDataSettings;
-    isEMCCD = createDataSettings.getCameraTypeValue() == CameraType.EMCCD_VALUE;
+    isEmCcd = createDataSettings.getCameraTypeValue() == CameraType.EMCCD_VALUE;
     updateTotalGain();
   }
 
@@ -67,13 +70,14 @@ public class CreateDataSettingsHelper {
   }
 
   /**
-   * EM-gain cannot be below 1. If so it is set to zero and disabled. <p> This is also zero for a
-   * non EM-CCD camera.
+   * EM-gain cannot be below 1. If so it is set to zero and disabled.
+   *
+   * <p>This is also zero for a non EM-CCD camera.
    *
    * @return the emGain
    */
   public double getEmGain() {
-    if (isEMCCD) {
+    if (isEmCcd) {
       double emGain = createDataSettings.getEmGain();
       if (emGain < 1) {
         emGain = 0;

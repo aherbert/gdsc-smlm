@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
@@ -31,8 +32,9 @@ import java.util.logging.Level;
 
 /**
  * Defines the stopping criteria for the
- * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class. <p> Stop when N successive
- * iterations reduce error by a negligible amount.
+ * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
+ *
+ * <p>Stop when N successive iterations reduce error by a negligible amount.
  */
 public class ErrorStoppingCriteria extends StoppingCriteria {
   private int iterationCount;
@@ -253,13 +255,14 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
    * convergence. This can be avoided by setting the avoid plateau flag to true. In this case an
    * additional check will be made for slowly improving error when more than half-way towards the
    * maximum number of iterations. If 3 consecutive improvements in error are at the same level of
-   * floating point accuracy then convergence is achieved. <p> Note that no check is made that the
-   * amount of improvement in error is small (as is done using the standard significant digits
-   * check). Thus it is possible that a plateau will be detected when the error value is still
-   * significantly improving (but by the same amount each step). Chances of this will be minimised
-   * by using a maximum number of iterations approximately twice that which allows reasonable fits
-   * to converge. E.g. If typical fitted data converges within 10 iterations to 6 significant digits
-   * then the maximum iterations should be set to 20.
+   * floating point accuracy then convergence is achieved.
+   *
+   * <p>Note that no check is made that the amount of improvement in error is small (as is done
+   * using the standard significant digits check). Thus it is possible that a plateau will be
+   * detected when the error value is still significantly improving (but by the same amount each
+   * step). Chances of this will be minimised by using a maximum number of iterations approximately
+   * twice that which allows reasonable fits to converge. E.g. If typical fitted data converges
+   * within 10 iterations to 6 significant digits then the maximum iterations should be set to 20.
    *
    * @param avoidPlateau Set to true to avoid plateaus
    */

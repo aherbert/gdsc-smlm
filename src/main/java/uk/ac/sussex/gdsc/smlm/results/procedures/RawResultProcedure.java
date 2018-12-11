@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -125,7 +126,7 @@ public class RawResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getXYZ() throws DataException {
+  public void getXyz() throws DataException {
     i = 0;
     this.x = allocate(this.x);
     this.y = allocate(this.y);

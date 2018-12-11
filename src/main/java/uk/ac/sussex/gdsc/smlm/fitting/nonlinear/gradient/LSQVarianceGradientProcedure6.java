@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -30,8 +31,9 @@ import java.util.Arrays;
 
 /**
  * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson
- * process. <p> Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383),
- * equation 25.
+ * process.
+ *
+ * <p>Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
  */
 public class LSQVarianceGradientProcedure6 extends LSQVarianceGradientProcedure {
   /**

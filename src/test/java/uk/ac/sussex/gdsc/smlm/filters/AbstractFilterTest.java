@@ -55,6 +55,7 @@ public class AbstractFilterTest {
 
   /** The box sizes used during filter testing for filters that can use non-integer sizes. */
   static float[] fBoxSizes;
+
   static {
     fBoxSizes = new float[boxSizes.length];
     for (int i = 0; i < boxSizes.length; i++) {

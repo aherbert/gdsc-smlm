@@ -21,14 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Support direct filtering of PreprocessedPeakResult objects. <p> The decision to support for
- * filtering as both a DirectFilter and Filter at the same time is left to the implementing class.
- * It is not a requirement.
+ * Support direct filtering of PreprocessedPeakResult objects.
+ *
+ * <p>The decision to support for filtering as both a DirectFilter and Filter at the same time is
+ * left to the implementing class. It is not a requirement.
  */
 public abstract class DirectFilter extends Filter implements IDirectFilter {
   @XStreamOmitField
@@ -100,7 +102,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
 
   /** {@inheritDoc} */
   @Override
-  final public boolean accept(final PreprocessedPeakResult peak) {
+  public final boolean accept(final PreprocessedPeakResult peak) {
     return (result = validate(peak)) == 0;
   }
 
@@ -318,9 +320,11 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
   /**
    * Compute strength using the limits on the parameters. Strength is computed using the distance
    * from the lower/upper bounds inside the range for each parameter. The bounds to choose is
-   * determined by the method {@link #lowerBoundOrientation(int)}. <p> Warning: No checks are made
-   * for the input arrays to be null or incorrect length. <p> If lower is equal or above upper then
-   * this index is ignored.
+   * determined by the method {@link #lowerBoundOrientation(int)}.
+   *
+   * <p>Warning: No checks are made for the input arrays to be null or incorrect length.
+   *
+   * <p>If lower is equal or above upper then this index is ignored.
    *
    * @param lower the lower limit
    * @param upper the upper limit
@@ -359,8 +363,10 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
 
   /**
    * Compare to the other filter using the strength property and return the weakest. If equal (or
-   * the strength is not set) then default to the {@link #weakest(Filter)} method. <p> This method
-   * does not check for null or if the other filter has a different number of parameters.
+   * the strength is not set) then default to the {@link #weakest(Filter)} method.
+   *
+   * <p>This method does not check for null or if the other filter has a different number of
+   * parameters.
    *
    * @param o The other filter
    * @return the count difference

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -52,9 +53,11 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
   }
 
   /**
-   * Gets the precision for the results. <p> If the results contain stored precision values then
-   * these are used. Otherwise an attempt is made to compute the precision using
-   * {@link #getLSEPrecision()}. If no exception is thrown then the precision has been computed.
+   * Gets the precision for the results.
+   *
+   * <p>If the results contain stored precision values then these are used. Otherwise an attempt is
+   * made to compute the precision using {@link #getLSEPrecision()}. If no exception is thrown then
+   * the precision has been computed.
    *
    * @return the precision method
    * @throws DataException if conversion to the required units for precision is not possible
@@ -65,10 +68,11 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
   /**
    * Gets the precision for the results, either using stored or calculated values, i.e. this allows
-   * calculated precision to be collected from results even if they have stored precision. <p> If
-   * the stored flag is passed then the stored precision results are used. Otherwise an attempt is
-   * made to compute the precision using {@link #getLSEPrecision()}. If no exception is thrown then
-   * the precision has been computed.
+   * calculated precision to be collected from results even if they have stored precision.
+   *
+   * <p>If the stored flag is passed then the stored precision results are used. Otherwise an
+   * attempt is made to compute the precision using {@link #getLSEPrecision()}. If no exception is
+   * thrown then the precision has been computed.
    *
    * @param stored the stored flag
    * @return the precision method

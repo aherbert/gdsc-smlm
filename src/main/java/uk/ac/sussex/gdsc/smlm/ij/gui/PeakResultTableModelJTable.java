@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -66,17 +67,17 @@ public class PeakResultTableModelJTable extends JTable {
   }
 
   @Override
-  public void tableChanged(final TableModelEvent e) {
-    if (e.getType() == PeakResultTableModel.RENDERER) {
+  public void tableChanged(final TableModelEvent event) {
+    if (event.getType() == PeakResultTableModel.RENDERER) {
       // Special event when the rendering has changed,
-      // e.g. the rounding precision has changed
+      // event.g. the rounding precision has changed
       updateRenderer();
       return;
     }
 
-    super.tableChanged(e);
+    super.tableChanged(event);
 
-    if (e.getFirstRow() == TableModelEvent.HEADER_ROW) {
+    if (event.getFirstRow() == TableModelEvent.HEADER_ROW) {
       // The whole thing changed so resize the columns
       SwingUtilities.invokeLater(new Runnable() {
         @Override

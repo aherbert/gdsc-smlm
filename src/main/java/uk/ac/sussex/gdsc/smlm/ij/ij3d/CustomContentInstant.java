@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -203,7 +204,8 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   public static int getDefaultResamplingFactor(final ImagePlus imp, final int type) {
-    final int w = imp.getWidth(), h = imp.getHeight();
+    final int w = imp.getWidth();
+    final int h = imp.getHeight();
     final int d = imp.getStackSize();
     final int max = Math.max(w, Math.max(h, d));
     switch (type) {
@@ -275,8 +277,9 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   /**
-   * Adds a custom switchable item to the content. The content can be optionally displayed. <p> The
-   * before flag species if the switch should be inserted into the group before the standard
+   * Adds a custom switchable item to the content. The content can be optionally displayed.
+   *
+   * <p>The before flag species if the switch should be inserted into the group before the standard
    * content, or added after. This is relevant if using an ordered group and transparent objects.
    * Any transparent object must be drawn after non-transparent objects.
    *

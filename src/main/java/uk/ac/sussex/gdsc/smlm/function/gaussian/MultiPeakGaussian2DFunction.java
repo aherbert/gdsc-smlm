@@ -21,14 +21,17 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 /**
- * Abstract base class for an N-dimensional Gaussian function for a configured number of peaks. <p>
- * The function will calculate the value of the Gaussian and evaluate the gradient of a set of
+ * Abstract base class for an N-dimensional Gaussian function for a configured number of peaks.
+ *
+ * <p>The function will calculate the value of the Gaussian and evaluate the gradient of a set of
  * parameters. The class can specify which of the following parameters the function will
- * evaluate:<br> background, amplitude, angle[N-1], position[N], sd[N] <p> The class provides the
- * number of peaks and the gradient indices.
+ * evaluate:<br> background, amplitude, angle[N-1], position[N], sd[N]
+ *
+ * <p>The class provides the number of peaks and the gradient indices.
  */
 public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction {
   /** The number of peaks. */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import java.util.Arrays;
@@ -34,7 +35,8 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
   private int time;
   private double intensity;
   private int state;
-  private LocalisationModel previous, next;
+  private LocalisationModel previous;
+  private LocalisationModel next;
   private double[] data = null;
   private int label;
 

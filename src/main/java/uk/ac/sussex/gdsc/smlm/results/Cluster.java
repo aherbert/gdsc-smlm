@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -188,9 +189,13 @@ public class Cluster implements Comparable<Cluster> {
 
   /**
    * Calculate the weighted localisation precision using the PC-PALM formula of Sengupta, et al
-   * (2013) Nature Protocols 8, 345. <p> Also sets the centroid if it has not been calculated using
-   * the signal weighted centre-of-mass <p> Note that the PeakResult must have valid values in the
-   * precision field, otherwise a value of 1 is used.
+   * (2013) Nature Protocols 8, 345.
+   *
+   * <p>Also sets the centroid if it has not been calculated using the signal weighted
+   * centre-of-mass
+   *
+   * <p>Note that the PeakResult must have valid values in the precision field, otherwise a value of
+   * 1 is used.
    *
    * @param converter the converter to convert the distances to nm
    * @return The weighted localisation precision of the group peak (in nm)
@@ -221,7 +226,8 @@ public class Cluster implements Comparable<Cluster> {
     }
 
     double sumNi = 0;
-    double xm = 0, ym = 0;
+    double xm = 0;
+    double ym = 0;
     for (int i = 0; i < results.size(); i++) {
       final PeakResult result = results.get(i);
       final float Ni = photons[i++];
@@ -236,7 +242,9 @@ public class Cluster implements Comparable<Cluster> {
       centroid = new float[] {(float) xm, (float) ym};
     }
 
-    double sumXi2Ni = 0, sumYi2Ni = 0, sumS2 = 0;
+    double sumXi2Ni = 0;
+    double sumYi2Ni = 0;
+    double sumS2 = 0;
     for (int i = 0; i < results.size(); i++) {
       final PeakResult result = results.get(i);
       final float Ni = photons[i++];
@@ -346,9 +354,11 @@ public class Cluster implements Comparable<Cluster> {
 
   /**
    * Expand any localisations that have a different start and end frame into a series. Note that
-   * this will increase the size of the cluster. <p> The results are copies save for the end frame.
-   * This makes analysis of the signal invalid as it will have been increased n-fold for each
-   * localisation that spans n frames. The original multi-frame result is removed.
+   * this will increase the size of the cluster.
+   *
+   * <p>The results are copies save for the end frame. This makes analysis of the signal invalid as
+   * it will have been increased n-fold for each localisation that spans n frames. The original
+   * multi-frame result is removed.
    */
   public void expandToSingles() {
     // Check for expansion

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.math3.util.FastMath;
@@ -37,8 +38,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -58,8 +60,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -143,8 +146,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 3x3 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -198,8 +202,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -284,8 +289,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -302,8 +308,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -347,8 +354,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 3x3 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -387,8 +395,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -405,8 +414,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -457,8 +467,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 3x3 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -498,8 +509,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -515,8 +527,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -584,8 +597,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -646,8 +660,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -663,9 +678,11 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2w+1 size block around each point. <p> Uses a [[w*w, w, ..., w,
-   * w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2w+1 size block around each point.
+   *
+   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -681,8 +698,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -747,9 +765,11 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2w+1 size block around each point. <p> Uses a [[w*w, w, ..., w,
-   * w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2w+1 size block around each point.
+   *
+   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -830,8 +850,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -885,8 +906,11 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 3x3 size block around each point. <p> Uses a [[w*w, w, w*w], [w,
-   * 1, w], [w*w, w, w*w]] convolution kernel. <p> Note: the input data is destructively modified.
+   * Compute the block sum within a 3x3 size block around each point.
+   *
+   * <p>Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   *
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -977,8 +1001,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -994,8 +1019,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1032,10 +1058,10 @@ public class SumFilter extends BaseFilter {
         float sum = data[index];
 
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           for (d = offset.length; d-- > 0;) {
             sum += data[index + offset[d]];
           }
@@ -1066,8 +1092,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1104,10 +1131,10 @@ public class SumFilter extends BaseFilter {
       int index2 = (y + 1) * maxx;
       for (int x = 0; x < maxx; x++) {
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           final float sum =
               data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1]
                   + data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];
@@ -1154,8 +1181,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1175,8 +1203,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1259,8 +1288,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 3x3 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1314,8 +1344,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1400,8 +1431,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1418,8 +1450,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1462,8 +1495,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 3x3 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1502,8 +1536,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1520,8 +1555,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1572,8 +1608,9 @@ public class SumFilter extends BaseFilter {
 
   /**
    * Compute the block sum within a 3x3 size block around each point. Only pixels with a full block
-   * are processed. Pixels within border regions are unchanged. <p> Note: the input data is
-   * destructively modified
+   * are processed. Pixels within border regions are unchanged.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1613,8 +1650,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1630,8 +1668,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1699,8 +1738,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1761,8 +1801,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1778,8 +1819,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1844,8 +1886,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1934,8 +1977,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1951,8 +1995,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 2n+1 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 2n+1 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -1989,10 +2034,10 @@ public class SumFilter extends BaseFilter {
         int sum = data[index];
 
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           for (d = offset.length; d-- > 0;) {
             sum += data[index + offset[d]];
           }
@@ -2023,8 +2068,9 @@ public class SumFilter extends BaseFilter {
   }
 
   /**
-   * Compute the block sum within a 3x3 size block around each point. <p> Note: the input data is
-   * destructively modified
+   * Compute the block sum within a 3x3 size block around each point.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -2061,10 +2107,10 @@ public class SumFilter extends BaseFilter {
       int index2 = (y + 1) * maxx;
       for (int x = 0; x < maxx; x++) {
         // Flag to indicate this pixels has a complete (2n+1) neighbourhood
-        final boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+        final boolean isInnerXy = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
         // Sweep neighbourhood
-        if (isInnerXY) {
+        if (isInnerXy) {
           final int sum =
               data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1]
                   + data[index1 + 1] + data[index2 - 1] + data[index2] + data[index2 + 1];

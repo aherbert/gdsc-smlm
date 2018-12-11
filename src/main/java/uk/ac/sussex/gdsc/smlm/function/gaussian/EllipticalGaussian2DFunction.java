@@ -21,16 +21,19 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks. <p> The
- * single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index
- * into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
- * coordinates. <p> Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y]
- * = MaxX*y + x.
+ * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks.
+ *
+ * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
+ * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
+ * coordinates.
+ *
+ * <p>Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
  */
 public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   /** The number of gradient parameters for each Gaussian. */
@@ -68,33 +71,33 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   protected static final int N = 0;
   /** The index for the The amplitude./height. */
   protected static final int HEIGHT = 1;
-  /** The index for the x0 position pre-factor */
+  /** The index for the x0 position pre-factor. */
   protected static final int AA = 2;
   /** The index for the x0*x1 position pre-factor (for rotation) */
   protected static final int BB = 3;
-  /** The index for the x1 position pre-factor */
+  /** The index for the x1 position pre-factor. */
   protected static final int CC = 4;
-  /** The index for the x0 position gradient pre-factor */
+  /** The index for the x0 position gradient pre-factor. */
   protected static final int AA2 = 5;
-  /** The index for the x0*x1 position gradient pre-factor */
+  /** The index for the x0*x1 position gradient pre-factor. */
   protected static final int BB2 = 6;
-  /** The index for the x1 position gradient pre-factor */
+  /** The index for the x1 position gradient pre-factor. */
   protected static final int CC2 = 7;
-  /** The index for the x width gradient pre-factor */
+  /** The index for the x width gradient pre-factor. */
   protected static final int NX = 8;
-  /** The index for the x width gradient pre-factor */
+  /** The index for the x width gradient pre-factor. */
   protected static final int AX = 9;
-  /** The index for the x width gradient pre-factor */
+  /** The index for the x width gradient pre-factor. */
   protected static final int BX = 10;
-  /** The index for the x width gradient pre-factor */
+  /** The index for the x width gradient pre-factor. */
   protected static final int CX = 11;
-  /** The index for the y width gradient pre-factor */
+  /** The index for the y width gradient pre-factor. */
   protected static final int NY = 12;
-  /** The index for the y width gradient pre-factor */
+  /** The index for the y width gradient pre-factor. */
   protected static final int AY = 13;
-  /** The index for the y width gradient pre-factor */
+  /** The index for the y width gradient pre-factor. */
   protected static final int BY = 14;
-  /** The index for the y width gradient pre-factor */
+  /** The index for the y width gradient pre-factor. */
   protected static final int CY = 15;
 
   /** {@inheritDoc} */
@@ -180,7 +183,9 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks. <p> {@inheritDoc}
+   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+   *
+   * <p>{@inheritDoc}
    *
    * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */
@@ -266,7 +271,9 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks. <p> {@inheritDoc}
+   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+   *
+   * <p>{@inheritDoc}
    *
    * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
    */

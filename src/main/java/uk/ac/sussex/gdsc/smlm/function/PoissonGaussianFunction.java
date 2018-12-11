@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
@@ -28,12 +29,15 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is
  * assumed to have mean of zero. If no mean (zero or below) is provided for the Poisson distribution
- * then the probability density function matches that of the Gaussian. <p> The implementation uses
- * the saddle-point approximation described in Snyder, et al (1995) Compensation for readout noise
- * in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted from the C source code provided
- * in the appendix. <p> The likelihood function is designed to model on-chip amplification of a
- * EMCCD/CCD/sCMOS camera which captures a Poisson process of emitted light, converted to electrons
- * on the camera chip, amplified by a gain and then read with Gaussian noise.
+ * then the probability density function matches that of the Gaussian.
+ *
+ * <p>The implementation uses the saddle-point approximation described in Snyder, et al (1995)
+ * Compensation for readout noise in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted
+ * from the C source code provided in the appendix.
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
+ * amplified by a gain and then read with Gaussian noise.
  */
 public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoodFunction {
   /**
@@ -138,9 +142,10 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
   }
 
   /**
-   * Get the probability of observation x <p> Note the normalisation will be based on the mu used in
-   * the constructor of the function. So it may be wrong if the mu was below zero on construction
-   * and is above zero now, or vice-versa.
+   * Get the probability of observation x.
+   *
+   * <p>Note the normalisation will be based on the mu used in the constructor of the function. So
+   * it may be wrong if the mu was below zero on construction and is above zero now, or vice-versa.
    *
    * @param x The observation value (after gain)
    * @param mu The mean of the Poisson distribution (before gain)
@@ -165,9 +170,10 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
   }
 
   /**
-   * Get the log(p) of observation x <p> Note the normalisation will be based on the mu used in the
-   * constructor of the function. So it may be wrong if the mu was below zero on construction and is
-   * above zero now, or vice-versa.
+   * Get the log(p) of observation x.
+   *
+   * <p>Note the normalisation will be based on the mu used in the constructor of the function. So
+   * it may be wrong if the mu was below zero on construction and is above zero now, or vice-versa.
    *
    * @param x The observation value
    * @param mu The mean of the Poisson distribution
@@ -263,11 +269,12 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
   }
 
   /**
-   * Get a pseudo-likelihood of observation x. <p> This is equivalent to the
-   * {@link #logProbability(double)} without the normalisation of the probability density function
-   * to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for
-   * use as the likelihood function in maximum likelihood estimation since all values will differ by
-   * the same constant but will evaluate faster.
+   * Get a pseudo-likelihood of observation x.
+   *
+   * <p>This is equivalent to the {@link #logProbability(double)} without the normalisation of the
+   * probability density function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)).
+   * This function is suitable for use as the likelihood function in maximum likelihood estimation
+   * since all values will differ by the same constant but will evaluate faster.
    *
    * @param x The observation value
    * @param mu The mean of the Poisson distribution (if zero or below the probability is that of the
@@ -288,11 +295,12 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
   }
 
   /**
-   * Get a pseudo-likelihood of observation x. <p> This is equivalent to the
-   * {@link #logProbability(double)} without the normalisation of the probability density function
-   * to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for
-   * use as the likelihood function in maximum likelihood estimation since all values will differ by
-   * the same constant but will evaluate faster.
+   * Get a pseudo-likelihood of observation x.
+   *
+   * <p>This is equivalent to the {@link #logProbability(double)} without the normalisation of the
+   * probability density function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)).
+   * This function is suitable for use as the likelihood function in maximum likelihood estimation
+   * since all values will differ by the same constant but will evaluate faster.
    *
    * @param x The observation value
    * @param mu The mean of the Poisson distribution (must be positive)

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -28,14 +29,18 @@ import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a single peak. <p> The single parameter x in the
- * {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional data.
- * The dimensions of the data must be specified to allow unpacking to coordinates. <p> Data should
- * be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x. <p> This
- * function uses the signal, position and x-sd parameters. It ignores the background parameter, y-sd
- * and angle parameter. It can be used for fast evaluation of the sum of a Gaussian within a region
- * defined by maxx. maxy is defined by the number of calls to the eval() functions. It does not
- * support gradient evaluation.
+ * Evaluates an 2-dimensional Gaussian function for a single peak.
+ *
+ * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
+ * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
+ * coordinates.
+ *
+ * <p>Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
+ *
+ * <p>This function uses the signal, position and x-sd parameters. It ignores the background
+ * parameter, y-sd and angle parameter. It can be used for fast evaluation of the sum of a Gaussian
+ * within a region defined by maxx. maxy is defined by the number of calls to the eval() functions.
+ * It does not support gradient evaluation.
  */
 public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
   private static final int[] gradientIndices = new int[0];
@@ -47,7 +52,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
 
   /** The amplitude./height. */
   protected double height;
-  /** position pre-factor */
+  /** position pre-factor. */
   protected double aa;
 
   /**
@@ -87,7 +92,9 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Not implemented. <p> {@inheritDoc}
+   * Not implemented.
+   *
+   * <p>{@inheritDoc}
    *
    * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */
@@ -97,7 +104,9 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional circular Gaussian function for a single peak. <p> {@inheritDoc}
+   * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+   *
+   * <p>{@inheritDoc}
    *
    * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */

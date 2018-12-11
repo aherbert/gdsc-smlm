@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -182,7 +183,9 @@ public class MoleculeModel {
 
   /**
    * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion
-   * rate. <p> Note: The array provided by {@link #getCoordinates()} is updated and returned.
+   * rate.
+   *
+   * <p>Note: The array provided by {@link #getCoordinates()} is updated and returned.
    *
    * @param diffusionRate Diffusion rate for each dimension
    * @param random Random generator
@@ -207,7 +210,9 @@ public class MoleculeModel {
 
   /**
    * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion
-   * rate. <p> Note: The array provided by {@link #getCoordinates()} is updated and returned.
+   * rate.
+   *
+   * <p>Note: The array provided by {@link #getCoordinates()} is updated and returned.
    *
    * @param diffusionRate Diffusion rate for each dimension
    * @param random Random generator (one per dimension)
@@ -231,8 +236,9 @@ public class MoleculeModel {
   }
 
   /**
-   * Move the molecule using a random walk with the given step size <p> Note: The array provided by
-   * {@link #getCoordinates()} is updated and returned.
+   * Move the molecule using a random walk with the given step size.
+   *
+   * <p>Note: The array provided by {@link #getCoordinates()} is updated and returned.
    *
    * @param stepSize Step size for each dimension
    * @param random Random generator
@@ -253,8 +259,9 @@ public class MoleculeModel {
   }
 
   /**
-   * Move the molecule using a random walk with the given step size <p> Note: The array provided by
-   * {@link #getCoordinates()} is updated and returned.
+   * Move the molecule using a random walk with the given step size.
+   *
+   * <p>Note: The array provided by {@link #getCoordinates()} is updated and returned.
    *
    * @param stepSize Step size for each dimension
    * @param random Random generator (one per dimension)
@@ -276,8 +283,9 @@ public class MoleculeModel {
 
   /**
    * Slide the molecule along a unit vector using a random Gaussian shift with standard deviation of
-   * the given diffusion rate. <p> Note: The array provided by {@link #getCoordinates()} is updated
-   * and returned.
+   * the given diffusion rate.
+   *
+   * <p>Note: The array provided by {@link #getCoordinates()} is updated and returned.
    *
    * @param diffusionRate Diffusion rate for 3D diffusion
    * @param axis The linear axis to move along (must be a unit vector)

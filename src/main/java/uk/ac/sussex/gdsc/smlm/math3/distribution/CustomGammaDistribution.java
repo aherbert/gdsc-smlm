@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
@@ -32,9 +33,10 @@ import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Implementation of the Gamma distribution. <p> Copy of the
- * org.apache.commons.math3.distribution.GammaDistribution but modified to allow the shape parameter
- * to be set using a property.
+ * Implementation of the Gamma distribution.
+ *
+ * <p>Copy of the org.apache.commons.math3.distribution.GammaDistribution but modified to allow the
+ * shape parameter to be set using a property.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Gamma_distribution">Gamma distribution (Wikipedia)</a>
  * @see <a href="http://mathworld.wolfram.com/GammaDistribution.html">Gamma distribution
@@ -189,7 +191,9 @@ public class CustomGammaDistribution extends AbstractRealDistribution {
   }
 
   /**
-   * Set the shape parameter <p> Does not throw an exception if shape is not strictly positive.
+   * Set the shape parameter.
+   *
+   * <p>Does not throw an exception if shape is not strictly positive.
    *
    * @param shape the new shape unsafe
    */
@@ -234,7 +238,9 @@ public class CustomGammaDistribution extends AbstractRealDistribution {
   }
 
   /**
-   * Set the scale parameter <p> Does not throw an exception if scale is not strictly positive.
+   * Set the scale parameter.
+   *
+   * <p>Does not throw an exception if scale is not strictly positive.
    *
    * @param scale the new scale unsafe
    */
@@ -404,13 +410,14 @@ public class CustomGammaDistribution extends AbstractRealDistribution {
   }
 
   /**
-   * <p> This implementation uses the following algorithms: </p>
    *
-   * <p> For {@code 0 < shape < 1}: <br> Ahrens, J. H. and Dieter, U., <i>Computer methods for
+   * <p>This implementation uses the following algorithms: </p>
+   *
+   * <p>For {@code 0 < shape < 1}: <br> Ahrens, J. H. and Dieter, U., <i>Computer methods for
    * sampling from gamma, beta, Poisson and binomial distributions.</i> Computing, 12, 223-246,
    * 1974. </p>
    *
-   * <p> For {@code shape >= 1}: <br> Marsaglia and Tsang, <i>A Simple Method for Generating Gamma
+   * <p>For {@code shape >= 1}: <br> Marsaglia and Tsang, <i>A Simple Method for Generating Gamma
    * Variables.</i> ACM Transactions on Mathematical Software, Volume 26 Issue 3, September, 2000.
    * </p>
    *

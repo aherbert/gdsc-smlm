@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
@@ -28,17 +29,23 @@ import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
 import java.util.Arrays;
 
 /**
- * Allow restricting parameter steps. <p> Support bounded parameters using a hard-stop limit. <p>
- * Support parameter clamping to prevent large parameter shifts. Optionally update the clamping when
- * the search direction changes.
+ * Allow restricting parameter steps.
+ *
+ * <p>Support bounded parameters using a hard-stop limit.
+ *
+ * <p>Support parameter clamping to prevent large parameter shifts. Optionally update the clamping
+ * when the search direction changes.
  */
 public class ParameterBounds {
   private GradientFunction f;
   private int[] gradientIndices;
-  private boolean isLower = false, isUpper = false;
-  private double[] lower, upper;
+  private boolean isLower = false;
+  private boolean isUpper = false;
+  private double[] lower;
+  private double[] upper;
   private boolean isClamped = false;
-  private double[] clampInitial, clamp;
+  private double[] clampInitial;
+  private double[] clamp;
   private int[] dir;
   private boolean dynamicClamp = false;
 
@@ -53,10 +60,11 @@ public class ParameterBounds {
 
   /**
    * Apply the step to the parameters a to generate new parameters. The step may be clamped and the
-   * new parameters may be bounded depending on settings. <p> Note that the step is the length
-   * defined by the gradient indices of the function. The length of a and newA are the full set of
-   * parameters to initialise the function. newA should be a clone of a such that the only
-   * difference is the step for each of the gradient indices.
+   * new parameters may be bounded depending on settings.
+   *
+   * <p>Note that the step is the length defined by the gradient indices of the function. The length
+   * of a and newA are the full set of parameters to initialise the function. newA should be a clone
+   * of a such that the only difference is the step for each of the gradient indices.
    *
    * @param a the a
    * @param step the step for each of the gradient indices
@@ -106,8 +114,10 @@ public class ParameterBounds {
   }
 
   /**
-   * Produce the clamping value. <p> See Stetson PB (1987) DAOPHOT: A compute program for
-   * crowded-field stellar photometry. Publ Astrom Soc Pac 99:191-222. pp207-208
+   * Produce the clamping value.
+   *
+   * <p>See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ
+   * Astrom Soc Pac 99:191-222. pp207-208
    *
    * @param u the update parameter
    * @param k the parameter index
@@ -190,8 +200,9 @@ public class ParameterBounds {
 
   /**
    * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the
-   * bounds can be ignored for the fixed parameters. <p> The bounds can be used to set the expected
-   * range for a parameter.
+   * bounds can be ignored for the fixed parameters.
+   *
+   * <p>The bounds can be used to set the expected range for a parameter.
    *
    * @param lowerBounds the lower bounds
    * @param upperBounds the upper bounds
@@ -273,11 +284,14 @@ public class ParameterBounds {
 
   /**
    * Sets the parameter specific clamp values. This is the maximum permissible update to the
-   * parameter. Note that an update equal to the clamp value will clamped to half its magnitude. <p>
-   * See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ
-   * Astrom Soc Pac 99:191-222. <p> Warning: If the function is changed then the clamp values may
-   * require updating. However setting a new function does not set the clamp values to null to allow
-   * caching when the clamp values are unchanged.
+   * parameter. Note that an update equal to the clamp value will clamped to half its magnitude.
+   *
+   * <p>See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ
+   * Astrom Soc Pac 99:191-222.
+   *
+   * <p>Warning: If the function is changed then the clamp values may require updating. However
+   * setting a new function does not set the clamp values to null to allow caching when the clamp
+   * values are unchanged.
    *
    * @param clampValues the new clamp values
    */
@@ -310,8 +324,10 @@ public class ParameterBounds {
 
   /**
    * Checks if is dynamic clamping. The clamping factor will be reduced by a factor of 2 when the
-   * direction changes. <p> Note: Dynamic clamping only applies if {@link #isClamped()} is true,
-   * i.e. clamp values have been set.
+   * direction changes.
+   *
+   * <p>Note: Dynamic clamping only applies if {@link #isClamped()} is true, i.e. clamp values have
+   * been set.
    *
    * @return true, if is dynamic clamping
    */
@@ -320,8 +336,10 @@ public class ParameterBounds {
   }
 
   /**
-   * Set to true to reduce the clamp factor by a factor of when the direction changes. <p> Note:
-   * Dynamic clamping only applies if {@link #isClamped()} is true, i.e. clamp values have been set.
+   * Set to true to reduce the clamp factor by a factor of when the direction changes.
+   *
+   * <p>Note: Dynamic clamping only applies if {@link #isClamped()} is true, i.e. clamp values have
+   * been set.
    *
    * @param dynamicClamp the new dynamic clamp
    */
@@ -332,8 +350,9 @@ public class ParameterBounds {
   /**
    * Warning: If the function is changed then the clamp values may require updating. However setting
    * a new function does not set the clamp values to null to allow caching when the clamp values are
-   * unchanged, e.g. evaluation of a different function in the same parameter space. <p> Setting a
-   * new function removes the current bounds.
+   * unchanged, e.g. evaluation of a different function in the same parameter space.
+   *
+   * <p>Setting a new function removes the current bounds.
    *
    * @param f the new gradient function
    */

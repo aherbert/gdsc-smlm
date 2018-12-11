@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import org.apache.commons.math3.util.FastMath;
@@ -65,10 +66,13 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The solution is obtained via straightforward computation of the convolution sum
-   * (and not via FFT). Whenever the computation needs an element that would be located at an index
-   * outside the input arrays, the value is assumed to be zero. <p> This has been taken from Apache
-   * Commons Math v3.3: org.apache.commons.math3.util.MathArrays
+   * sequences.
+   *
+   * <p>The solution is obtained via straightforward computation of the convolution sum (and not via
+   * FFT). Whenever the computation needs an element that would be located at an index outside the
+   * input arrays, the value is assumed to be zero.
+   *
+   * <p>This has been taken from Apache Commons Math v3.3: org.apache.commons.math3.util.MathArrays
    *
    * @param x First sequence. Typically, this sequence will represent an input signal to a system.
    * @param h Second sequence. Typically, this sequence will represent the impulse response of the
@@ -104,10 +108,13 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The solution is obtained via straightforward computation of the convolution sum
-   * (and not via FFT). Whenever the computation needs an element that would be located at an index
-   * outside the input arrays, the value is assumed to be zero. <p> The convolution is computed
-   * dynamically and can be stopped.
+   * sequences.
+   *
+   * <p>The solution is obtained via straightforward computation of the convolution sum (and not via
+   * FFT). Whenever the computation needs an element that would be located at an index outside the
+   * input arrays, the value is assumed to be zero.
+   *
+   * <p>The convolution is computed dynamically and can be stopped.
    *
    * @param x First sequence. Typically, this sequence will represent an input signal to a system.
    * @param h Second sequence. Typically, this sequence will represent the impulse response of the
@@ -150,8 +157,10 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The solution is obtained via multiplication in the frequency domain. To reduce
-   * edge wrap artifacts the input signals should be windowed to zero at the ends.
+   * sequences.
+   *
+   * <p>The solution is obtained via multiplication in the frequency domain. To reduce edge wrap
+   * artifacts the input signals should be windowed to zero at the ends.
    *
    * @param x First sequence. Typically, this sequence will represent an input signal to a system.
    * @param h Second sequence. Typically, this sequence will represent the impulse response of the
@@ -214,11 +223,12 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The solution is obtained using either the spatial or frequency domain depending
-   * on the size. The switch is made when the min array length is above 127 and the product of the
-   * lengths is above 40000. Speed tests have been performed for single threaded FFT computation.
-   * The FFT library begins multi-threaded computation when the size of the array is above length
-   * 8192.
+   * sequences.
+   *
+   * <p>The solution is obtained using either the spatial or frequency domain depending on the size.
+   * The switch is made when the min array length is above 127 and the product of the lengths is
+   * above 40000. Speed tests have been performed for single threaded FFT computation. The FFT
+   * library begins multi-threaded computation when the size of the array is above length 8192.
    *
    * @param x First sequence. Typically, this sequence will represent an input signal to a system.
    * @param h Second sequence. Typically, this sequence will represent the impulse response of the
@@ -233,7 +243,8 @@ public class Convolution {
     // See Junit class ConvolveTest to determine when to switch to the FFT method.
     // This is not perfect for all length combinations but the switch will happen
     // when the two methods are roughly the same speed.
-    int min, max;
+    int min;
+    int max;
     if (x.length < h.length) {
       min = x.length;
       max = h.length;
@@ -255,7 +266,8 @@ public class Convolution {
    * @return true, if using the FFT method
    */
   public static boolean isFFT(int length1, int length2) {
-    int min, max;
+    int min;
+    int max;
     if (length1 < length2) {
       min = length1;
       max = length2;
@@ -284,10 +296,14 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between one
-   * sequence and two other sequences. <p> The solution is obtained via straightforward computation
-   * of the convolution sum (and not via FFT). Whenever the computation needs an element that would
-   * be located at an index outside the input arrays, the value is assumed to be zero. <p> This has
-   * been adapted from Apache Commons Math v3.3: org.apache.commons.math3.util.MathArrays
+   * sequence and two other sequences.
+   *
+   * <p>The solution is obtained via straightforward computation of the convolution sum (and not via
+   * FFT). Whenever the computation needs an element that would be located at an index outside the
+   * input arrays, the value is assumed to be zero.
+   *
+   * <p>This has been adapted from Apache Commons Math v3.3:
+   * org.apache.commons.math3.util.MathArrays
    *
    * @param x First sequence.
    * @param h1 Second sequence 1.
@@ -310,7 +326,8 @@ public class Convolution {
 
     // Straightforward implementation of the convolution sum
     for (int n = 0; n < totalLength; n++) {
-      double yn1 = 0, yn2 = 0;
+      double yn1 = 0;
+      double yn2 = 0;
       int k = FastMath.max(0, n + 1 - xLen);
       int j = n - k;
       while (k < hLen && j >= 0) {
@@ -328,10 +345,14 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between one
-   * sequence and two other sequences. <p> The solution is obtained via straightforward computation
-   * of the convolution sum (and not via FFT). Whenever the computation needs an element that would
-   * be located at an index outside the input arrays, the value is assumed to be zero. <p> This has
-   * been adapted from Apache Commons Math v3.3: org.apache.commons.math3.util.MathArrays
+   * sequence and two other sequences.
+   *
+   * <p>The solution is obtained via straightforward computation of the convolution sum (and not via
+   * FFT). Whenever the computation needs an element that would be located at an index outside the
+   * input arrays, the value is assumed to be zero.
+   *
+   * <p>This has been adapted from Apache Commons Math v3.3:
+   * org.apache.commons.math3.util.MathArrays
    *
    * @param x First sequence.
    * @param h1 Second sequence 1.
@@ -360,7 +381,8 @@ public class Convolution {
 
     // Straightforward implementation of the convolution sum
     for (int n = 0; n < totalLength; n++) {
-      double yn1 = 0, yn2 = 0;
+      double yn1 = 0;
+      double yn2 = 0;
       int k = FastMath.max(0, n + 1 - xLen);
       int j = n - k;
       while (k < hLen && j >= 0) {
@@ -377,9 +399,10 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between one
-   * sequence and two other sequences. <p> The solution is obtained via multiplication in the
-   * frequency domain. To reduce edge wrap artifacts the input signals should be windowed to zero at
-   * the ends.
+   * sequence and two other sequences.
+   *
+   * <p>The solution is obtained via multiplication in the frequency domain. To reduce edge wrap
+   * artifacts the input signals should be windowed to zero at the ends.
    *
    * @param x First sequence.
    * @param h1 Second sequence 1.
@@ -442,11 +465,12 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between one
-   * sequence and two other sequences. <p> The solution is obtained using either the spatial or
-   * frequency domain depending on the size. The switch is made when the min array length is above
-   * 127 and the product of the lengths is above 40000. Speed tests have been performed for single
-   * threaded FFT computation. The FFT library begins multi-threaded computation when the size of
-   * the array is above length 8192.
+   * sequence and two other sequences.
+   *
+   * <p>The solution is obtained using either the spatial or frequency domain depending on the size.
+   * The switch is made when the min array length is above 127 and the product of the lengths is
+   * above 40000. Speed tests have been performed for single threaded FFT computation. The FFT
+   * library begins multi-threaded computation when the size of the array is above length 8192.
    *
    * @param x First sequence.
    * @param h1 Second sequence 1.
@@ -462,7 +486,8 @@ public class Convolution {
     // See Junit class ConvolveTest to determine when to switch to the FFT method.
     // This is not perfect for all length combinations but the switch will happen
     // when the two methods are roughly the same speed.
-    int min, max;
+    int min;
+    int max;
     if (x.length < h1.length) {
       min = x.length;
       max = h1.length;
@@ -497,8 +522,10 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The scale is used to increase the size of h dynamically to H with zero fill. The
-   * length of H is thus ((h.length-1) * scale + 1);
+   * sequences.
+   *
+   * <p>The scale is used to increase the size of h dynamically to H with zero fill. The length of H
+   * is thus ((h.length-1) * scale + 1);
    *
    * @param x First sequence.
    * @param h Second sequence.
@@ -572,9 +599,12 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The scale is used to increase the size of h dynamically to H with zero fill. The
-   * length of H is thus ((h.length-1) * scale + 1); <p> The convolution is computed dynamically and
-   * can be stopped.
+   * sequences.
+   *
+   * <p>The scale is used to increase the size of h dynamically to H with zero fill. The length of H
+   * is thus ((h.length-1) * scale + 1);
+   *
+   * <p>The convolution is computed dynamically and can be stopped.
    *
    * @param x First sequence.
    * @param h Second sequence.
@@ -633,8 +663,10 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The scale is used to increase the size of h dynamically to H with zero fill. The
-   * length of H is thus ((h.length-1) * scale + 1);
+   * sequences.
+   *
+   * <p>The scale is used to increase the size of h dynamically to H with zero fill. The length of H
+   * is thus ((h.length-1) * scale + 1);
    *
    * @param x First sequence.
    * @param h1 Second sequence 1.
@@ -676,7 +708,8 @@ public class Convolution {
     // h is scaled up with zeros.
     // This is equivalent to using x every interval of scale.
     for (int n = 0; n < iTotalLength; n++) {
-      double yn1 = 0, yn2 = 0;
+      double yn1 = 0;
+      double yn2 = 0;
       // k is the index in the scaled up distribution H
       final int k = FastMath.max(0, n + 1 - xLen);
       // j is the index in the input distribution x
@@ -712,9 +745,12 @@ public class Convolution {
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
-   * sequences. <p> The scale is used to increase the size of h dynamically to H with zero fill. The
-   * length of H is thus ((h1.length-1) * scale + 1); <p> The convolution is computed dynamically
-   * and can be stopped.
+   * sequences.
+   *
+   * <p>The scale is used to increase the size of h dynamically to H with zero fill. The length of H
+   * is thus ((h1.length-1) * scale + 1);
+   *
+   * <p>The convolution is computed dynamically and can be stopped.
    *
    * @param x First sequence.
    * @param h1 Second sequence 1.
@@ -752,7 +788,8 @@ public class Convolution {
     final int iTotalLength = (int) totalLength;
 
     for (int n = 0; n < iTotalLength; n++) {
-      double yn1 = 0, yn2 = 0;
+      double yn1 = 0;
+      double yn2 = 0;
       final int k = FastMath.max(0, n + 1 - xLen);
       int j = n - k;
       final int mod = k % scale;

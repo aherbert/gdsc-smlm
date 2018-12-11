@@ -21,14 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Class for computing the error function using approximations. <p> Methods in this class are
- * ordered by speed, not accuracy. The default call to {@link #erf(double)} is a good compromise
- * between both.
+ * Class for computing the error function using approximations.
+ *
+ * <p>Methods in this class are ordered by speed, not accuracy. The default call to
+ * {@link #erf(double)} is a good compromise between both.
  *
  * @see <a href=
  *      "https://en.wikipedia.org/wiki/Error_function#Approximation_with_elementary_functions">https://en.wikipedia.org/wiki/Error_function#Approximation_with_elementary_functions</a>
@@ -40,12 +42,12 @@ public class Erf {
   /**
    * Returns the error function.
    *
-   * <p> erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
+   * <p>erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
    *
-   * <p> This implementation computes erf(x) using the approximation by Abramowitz and Stegun. The
+   * <p>This implementation computes erf(x) using the approximation by Abramowitz and Stegun. The
    * maximum absolute error is about 5e-4 for all x. </p>
    *
-   * <p> The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
+   * <p>The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
    * {@code erf(x)} is indistinguishable from either 1 or -1 as a double, so the appropriate extreme
    * value is returned. </p>
    *
@@ -95,12 +97,12 @@ public class Erf {
   /**
    * Returns the error function.
    *
-   * <p> erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
+   * <p>erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
    *
-   * <p> This implementation computes erf(x) using the approximation by Abramowitz and Stegun. The
+   * <p>This implementation computes erf(x) using the approximation by Abramowitz and Stegun. The
    * maximum absolute error is about 3e-7 for all x. </p>
    *
-   * <p> The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
+   * <p>The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
    * {@code erf(x)} is indistinguishable from either 1 or -1 as a double, so the appropriate extreme
    * value is returned. </p>
    *
@@ -157,13 +159,13 @@ public class Erf {
   /**
    * Returns the error function.
    *
-   * <p> erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
+   * <p>erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
    *
-   * <p> This implementation computes erf(x) using the approximation by Sergei Winitzki. This
+   * <p>This implementation computes erf(x) using the approximation by Sergei Winitzki. This
    * involves a sqrt() and exp() function call and so is slower than {@link #erf(double)} and
    * {@link #erf0(double)}. The maximum absolute error is about 0.00012 for all x. </p>
    *
-   * <p> The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
+   * <p>The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
    * {@code erf(x)} is indistinguishable from either 1 or -1 as a double, so the appropriate extreme
    * value is returned. </p>
    *

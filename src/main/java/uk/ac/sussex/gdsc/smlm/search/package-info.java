@@ -24,9 +24,12 @@
 
 /**
  * Provides classes to search an N-dimensional space to find an optimum for a parameterised
- * function. <p> The search is typically provided using a range for each dimension that is
- * enumerated and the combinations evaluated to find the optimum.
+ * function.
+ *
+ * <p>The search is typically provided using a range for each dimension that is enumerated and the
+ * combinations evaluated to find the optimum.
  *
  * @since 1.0.0
  */
+
 package uk.ac.sussex.gdsc.smlm.search;

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
@@ -33,7 +34,7 @@ public abstract class MultiFilterComponentSet implements Cloneable {
    *
    * @return the validation flags
    */
-  abstract public int getValidationFlags();
+  public abstract int getValidationFlags();
 
   /**
    * Validate the peak.

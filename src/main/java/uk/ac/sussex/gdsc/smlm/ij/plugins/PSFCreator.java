@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.FloatStackTrivalueProvider;
@@ -149,8 +150,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * Produces an average PSF image using selected diffraction limited spots from a sample image. <p>
- * The input image must be a z-stack of diffraction limited spots for example quantum dots or
+ * Produces an average PSF image using selected diffraction limited spots from a sample image.
+ *
+ * <p>The input image must be a z-stack of diffraction limited spots for example quantum dots or
  * fluorescent beads. Spots will be used only when there are no spots within a specified distance to
  * ensure a clean signal is extracted.
  */
@@ -186,7 +188,8 @@ public class PSFCreator implements PlugInFilter {
   private PSFCreatorSettings.Builder settings;
 
   private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-  private ImagePlus imp, psfImp;
+  private ImagePlus imp;
+  private ImagePlus psfImp;
 
   private static Rounder rounder = RounderUtils.create(4);
   private PSFCentreSelector zSelector;
@@ -194,7 +197,8 @@ public class PSFCreator implements PlugInFilter {
   private final FitEngineConfiguration config = null;
   private FitConfiguration fitConfig;
   private double nmPerPixel;
-  private int boxRadius, zRadius;
+  private int boxRadius;
+  private int zRadius;
   private static Point yesNoPosition = null;
 
   private ExecutorService threadPool = null;
@@ -350,7 +354,7 @@ public class PSFCreator implements PlugInFilter {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       settings.setMode(gd.getNextChoiceIndex());
       settings.setRadius(gd.getNextNumber());
       settings.setInteractiveMode(gd.getNextBoolean());
@@ -586,7 +590,8 @@ public class PSFCreator implements PlugInFilter {
       int maximumIndex = findMaximumIndex(smoothA);
 
       // Find the range at a fraction of the max. This is smoothed to find the X/Y centre
-      int start = 0, stop = smoothA.length - 1;
+      int start = 0;
+      int stop = smoothA.length - 1;
       final double limit = smoothA[maximumIndex] * settings.getAmplitudeFraction();
       for (int j = 0; j < smoothA.length; j++) {
         if (smoothA[j] > limit) {
@@ -801,7 +806,7 @@ public class PSFCreator implements PlugInFilter {
   }
 
   /**
-   * Get the limits of the array ignoring outliers more than 1.5x the inter quartile range
+   * Get the limits of the array ignoring outliers more than 1.5x the inter quartile range.
    *
    * @param data the data
    * @return the limits
@@ -824,7 +829,8 @@ public class PSFCreator implements PlugInFilter {
     }
     final double[] sd = averageSd.getValues();
     final double[] w = averageA.getValues();
-    double sum = 0, sumW = 0;
+    double sum = 0;
+    double sumW = 0;
 
     if (averageMethod == 1) {
       // Weighted average using Amplitude
@@ -971,7 +977,7 @@ public class PSFCreator implements PlugInFilter {
 
   private class SimpleInteractivePlotListener implements DialogListener {
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       slice = (int) gd.getNextNumber();
       drawPlots(false);
       return true;
@@ -1120,7 +1126,10 @@ public class PSFCreator implements PlugInFilter {
   private boolean[] dmap = null;
   private int lastWidth = 0;
   private int lastHeight = 0;
-  private int minx, maxx, miny, maxy;
+  private int minx;
+  private int maxx;
+  private int miny;
+  private int maxy;
 
   /**
    * Subtract the background from the spot, compute the intensity within half the box region
@@ -1261,7 +1270,8 @@ public class PSFCreator implements PlugInFilter {
     int insertZ = maxz - z + 1;
 
     // Enlargement size
-    final int w = regionBounds.width, h = regionBounds.height;
+    final int w = regionBounds.width;
+    final int h = regionBounds.height;
     final int dstWidth = w * magnification;
     final int dstHeight = h * magnification;
 
@@ -1286,7 +1296,8 @@ public class PSFCreator implements PlugInFilter {
 
           incrementProgress(increment);
 
-          double insertX, insertY;
+          double insertX;
+          double insertY;
 
           // Enlarge
           FloatProcessor fp = new FloatProcessor(w, h, originalSpotData, null);
@@ -1369,7 +1380,9 @@ public class PSFCreator implements PlugInFilter {
     final int w = fp.getWidth();
     final float[] data = (float[]) fp.getPixels();
     final double threshold = MathUtils.max(data) * settings.getComCutOff();
-    double sx = 0, sy = 0, s = 0;
+    double sx = 0;
+    double sy = 0;
+    double s = 0;
     for (int y = 0, i = 0; y < h; y++) {
       for (int x = 0; x < w; x++, i++) {
         final float v = data[i];
@@ -1452,9 +1465,10 @@ public class PSFCreator implements PlugInFilter {
   }
 
   /**
-   * Normalise the PSF so the sum of the specified frame foreground pixels is 1. <p> Assumes the PSF
-   * can be approximated by a Gaussian in the central frame. All pixels within 3 sigma of the centre
-   * are foreground pixels.
+   * Normalise the PSF so the sum of the specified frame foreground pixels is 1.
+   *
+   * <p>Assumes the PSF can be approximated by a Gaussian in the central frame. All pixels within 3
+   * sigma of the centre are foreground pixels.
    *
    * @param psf the psf
    * @param n The frame number
@@ -1923,7 +1937,8 @@ public class PSFCreator implements PlugInFilter {
 
     // Extract the average smoothed range from the individual fits
     final int r = (int) Math.ceil(averageRange / 2);
-    int start = 0, stop = z2.length - 1;
+    int start = 0;
+    int stop = z2.length - 1;
     for (int j = 0; j < z2.length; j++) {
       if (z2[j] > cz - r) {
         start = j;
@@ -2057,7 +2072,7 @@ public class PSFCreator implements PlugInFilter {
 
   private class InteractivePlotListener implements DialogListener {
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       slice = (int) gd.getNextNumber();
 
       final double myDistanceThreshold = gd.getNextNumber();
@@ -2451,7 +2466,8 @@ public class PSFCreator implements PlugInFilter {
     // possibly due to the small values in the y-data array)
 
     // Find points defining the half-max
-    double p1 = 0, p2 = y.length;
+    double p1 = 0;
+    double p2 = y.length;
 
     for (int i = position; i < y.length; i++) {
       if (y[i] < max) {
@@ -2486,7 +2502,8 @@ public class PSFCreator implements PlugInFilter {
 
   private class Smoother {
     LoessInterpolator loess;
-    double[] xval, yval;
+    double[] xval;
+    double[] yval;
 
     double[] dsmooth;
     float[] fsmooth;
@@ -2715,7 +2732,7 @@ public class PSFCreator implements PlugInFilter {
           final int spotIndex = j;
           gd.addAndGetButton("Exclude spot", new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent event) {
               if (excluded[spotIndex]) {
                 ImageJUtils.log("Included spot %d", spotIndex + 1);
                 excluded[spotIndex] = false;
@@ -3163,12 +3180,22 @@ public class PSFCreator implements PlugInFilter {
     float[] bdata;
     float[] fdata;
     float[] sdata;
-    double[] w0, w1, w01;
-    double[] adata, asdata;
-    int bIndex, fIndex, sIndex, wIndex, aIndex;
+    double[] w0;
+    double[] w1;
+    double[] w01;
+    double[] adata;
+    double[] asdata;
+    int bIndex;
+    int fIndex;
+    int sIndex;
+    int wIndex;
+    int aIndex;
     float background;
     private Label backgroundLabel = null;
-    boolean hasId, plotBackground, plotEdgeWindow, cropOption;
+    boolean hasId;
+    boolean plotBackground;
+    boolean plotEdgeWindow;
+    boolean cropOption;
 
     // We choose the angle with the first spot
     double targetAngle = NO_ANGLE;
@@ -3305,7 +3332,8 @@ public class PSFCreator implements PlugInFilter {
             final double min_by_x = min * maxx;
             final double min_by_y = min * maxy;
             // rolling sums for each column/row
-            double sr = 0, sc = 0;
+            double sr = 0;
+            double sc = 0;
             for (int x = 0; x < maxx; x++) {
               for (int y = 0, i = x; y < maxy; y++, i += maxx) {
                 sc += data[i];
@@ -3450,7 +3478,7 @@ public class PSFCreator implements PlugInFilter {
       final String defaultZ = tf.getText();
       gd.addAndGetButton("Reset", new ActionListener() {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent event) {
           tf.setText(defaultZ);
         }
       });
@@ -3527,7 +3555,7 @@ public class PSFCreator implements PlugInFilter {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       zCentre = gd.getNextNumber() - 1;
       if (hasId) {
         settings.setAlignmentZRadius(gd.getNextNumber());
@@ -3608,8 +3636,16 @@ public class PSFCreator implements PlugInFilter {
     }
 
     private int plotBackgroundWindow = -1;
-    private PlotWindow pwBackground, pwForeground, pwSignal, pwWidth, pwAngle;
-    private float[] rangeB, rangeF, rangeS, rangeW, rangeA;
+    private PlotWindow pwBackground;
+    private PlotWindow pwForeground;
+    private PlotWindow pwSignal;
+    private PlotWindow pwWidth;
+    private PlotWindow pwAngle;
+    private float[] rangeB;
+    private float[] rangeF;
+    private float[] rangeS;
+    private float[] rangeW;
+    private float[] rangeA;
 
     private void drawIntensityPlot(boolean newData, WindowOrganiser wo) {
       plotBackgroundWindow = getAnalysisWindow();
@@ -3778,7 +3814,8 @@ public class PSFCreator implements PlugInFilter {
       }
     }
 
-    private int psfZCentre = -1, zRadius = 0;
+    private int psfZCentre = -1;
+    private int zRadius = 0;
 
     private int getZRadius() {
       if (hasId) {
@@ -3949,7 +3986,7 @@ public class PSFCreator implements PlugInFilter {
       if (ImageJUtils.isShowGenericDialog()) {
         gd.addOptionCollectedListener(new OptionCollectedListener() {
           @Override
-          public void optionCollected(OptionCollectedEvent e) {
+          public void optionCollected(OptionCollectedEvent event) {
             update();
           }
         });
@@ -4009,7 +4046,7 @@ public class PSFCreator implements PlugInFilter {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       slice = (int) gd.getNextNumber();
       settings.setCropBorder((int) gd.getNextNumber());
       settings.setCropStart((int) gd.getNextNumber());
@@ -4252,7 +4289,7 @@ plotLock1 = false;
       gd.addAndGetButton("Reset", new ActionListener()
       {
         @Override
-        public void actionPerformed(ActionEvent e)
+        public void actionPerformed(ActionEvent event)
         {
           final boolean interactive = PSFCreator.this.settings.getInteractiveMode();
           final PSFCreatorSettings defaults = GUIProtosHelper.defaultPSFCreatorSettings;
@@ -4410,7 +4447,7 @@ plotLock1 = false;
   }
 
   /**
-   * Find min/max value. This must put the entire region within the image
+   * Find min/max value. This must put the entire region within the image.
    *
    * @param data
    *            the data
@@ -4429,7 +4466,7 @@ plotLock1 = false;
   }
 
   /**
-   * Find min/max index. This must put the entire region within the image
+   * Find min/max index. This must put the entire region within the image.
    *
    * @param data
    *            the data
@@ -4485,7 +4522,7 @@ plotLock1 = false;
     for (int z = 0; z < psf.length; z++)
     {
       final float[] data = psf[z];
-      double sumXY = 0;
+      double sumXy = 0;
       for (int y = 0, j = 0; y < h; y++)
       {
         double sumX = 0;
@@ -4495,11 +4532,11 @@ plotLock1 = false;
           sumX += f;
           cx += f * x;
         }
-        sumXY += sumX;
+        sumXy += sumX;
         cy += sumX * y;
       }
-      cz += sumXY * z;
-      sumXYZ += sumXY;
+      cz += sumXy * z;
+      sumXYZ += sumXy;
     }
     // Find centre with 0.5 as the centre of the pixel
     cx = 0.5 + cx / sumXYZ;
@@ -4523,7 +4560,7 @@ plotLock1 = false;
 
       final float[] data = psf[z];
 
-      double sumXY = 0;
+      double sumXy = 0;
       for (int y = border; y < h - border; y++)
       {
         double sumX = 0;
@@ -4533,10 +4570,10 @@ plotLock1 = false;
           sumX += f;
           cx += f * x;
         }
-        sumXY += sumX;
+        sumXy += sumX;
         cy += sumX * y;
       }
-      sumXYZ += sumXY;
+      sumXYZ += sumXy;
     }
     // Find centre with 0.5 as the centre of the pixel
     cx = 0.5 + cx / sumXYZ;
@@ -4770,7 +4807,9 @@ plotLock1 = false;
     /**
      * The centre of the stack. Used to crop the image around the centre for alignment.
      * (Note that the centre in XY is the middle pixel).
-     * <p>
+     *
+*
+* <p>
      * Also used as a relative position when combining PSFs.
      */
     int stackZCentre;
@@ -5405,7 +5444,7 @@ plotLock1 = false;
   }
 
   /**
-   * Align the PSFs with the combined PSF using the uk.ac.sussex.gdsc.core.ij.AlignImagesFFT class
+   * Align the PSFs with the combined PSF using the uk.ac.sussex.gdsc.core.ij.AlignImagesFFT class.
    *
    * @param combined the combined
    * @param psfs the psfs

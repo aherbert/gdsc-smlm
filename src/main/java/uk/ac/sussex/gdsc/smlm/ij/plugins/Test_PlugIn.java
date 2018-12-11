@@ -37,7 +37,7 @@ import java.awt.event.ActionListener;
 /**
  * A simple class used to test plugin functionality.
  */
-public class Test_Plugin implements PlugIn {
+public class Test_PlugIn implements PlugIn {
   /** {@inheritDoc} */
   @Override
   public void run(String arg) {
@@ -52,7 +52,7 @@ public class Test_Plugin implements PlugIn {
         gd.addAndGetChoice("Select2", new String[] {"Three", "Four"}, optionFields[1]);
     gd.addAndGetButton("Options", new ActionListener() {
       @Override
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent event) {
         final ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null); // This makes it
                                                                                     // model
         gd2.addMessage(c2.getSelectedItem());

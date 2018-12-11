@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
@@ -44,9 +45,12 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Calculate the Fisher information for a Poisson-Gamma-Gaussian distribution. <p> Uses a modified
- * form of the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq S8. <p> Performs a
- * convolution with a finite Gaussian kernel.
+ * Calculate the Fisher information for a Poisson-Gamma-Gaussian distribution.
+ *
+ * <p>Uses a modified form of the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq
+ * S8.
+ *
+ * <p>Performs a convolution with a finite Gaussian kernel.
  */
 public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInformation {
   /**
@@ -228,9 +232,12 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   /**
-   * {@inheritDoc} <p> The input parameter refers to the mean of the Poisson distribution. <p> The
-   * Fisher information is computed using the equation of Chao, et al (2013) Nature Methods, 10,
-   * 335-338, SI Eq S8. Note that that equation computes the noise coefficient relative to a
+   * {@inheritDoc}
+   *
+   * <p>The input parameter refers to the mean of the Poisson distribution.
+   *
+   * <p>The Fisher information is computed using the equation of Chao, et al (2013) Nature Methods,
+   * 10, 335-338, SI Eq S8. Note that that equation computes the noise coefficient relative to a
    * Poisson, this computes the Fisher information. To get the noise coefficient multiply by the
    * input parameter.
    *
@@ -268,12 +275,17 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   /**
-   * Gets the Poisson-Gamma-Gaussian Fisher information. <p> The input parameter refers to the mean
-   * of the Poisson distribution. <p> The Fisher information is computed using the equation of Chao,
-   * et al (2013) Nature Methods, 10, 335-338, SI Eq S8. Note that that equation computes the noise
-   * coefficient relative to a Poisson, this computes the Fisher information. To get the noise
-   * coefficient multiply by the input parameter. <p> Note: This uses a convolution of an infinite
-   * integral over a finite range. It may under-estimate the information when the mean is large.
+   * Gets the Poisson-Gamma-Gaussian Fisher information.
+   *
+   * <p>The input parameter refers to the mean of the Poisson distribution.
+   *
+   * <p>The Fisher information is computed using the equation of Chao, et al (2013) Nature Methods,
+   * 10, 335-338, SI Eq S8. Note that that equation computes the noise coefficient relative to a
+   * Poisson, this computes the Fisher information. To get the noise coefficient multiply by the
+   * input parameter.
+   *
+   * <p>Note: This uses a convolution of an infinite integral over a finite range. It may
+   * under-estimate the information when the mean is large.
    *
    * @param t the Poisson mean
    * @return the Poisson Gaussian Fisher information
@@ -586,8 +598,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   /**
-   * Return the extreme limit for the given mean. <p> This can be called when an infinite sum has
-   * occurred on the unscaled A^2/P integral.
+   * Return the extreme limit for the given mean.
+   *
+   * <p>This can be called when an infinite sum has occurred on the unscaled A^2/P integral.
    *
    * @param t the t
    * @return the double
@@ -734,7 +747,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   private static class SimpsonIntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0, sum4 = 0;
+    double sum2 = 0;
+    double sum4 = 0;
 
     @Override
     public boolean execute(double pz, double az) {
@@ -764,7 +778,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   private static class Simpson38IntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0, sum3 = 0;
+    double sum2 = 0;
+    double sum3 = 0;
 
     @Override
     public boolean execute(double pz, double az) {
@@ -880,8 +895,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
    * Gets the fisher information function. This is the function that is integrated to get the Fisher
    * information. This can be called after a called to {@link #getFisherInformation(double)}. It
    * will return the last value of the function that was computed (before/after convolution with the
-   * Gaussian kernel). <p> The function should be smooth with zero at the upper end. The lower end
-   * may not be smooth due to the Dirac delta function at c=0.
+   * Gaussian kernel).
+   *
+   * <p>The function should be smooth with zero at the upper end. The lower end may not be smooth
+   * due to the Dirac delta function at c=0.
    *
    * @param withGaussian Set to true to return the function after convolution with the gaussian.
    *        This re-performs the convolution.
@@ -895,8 +912,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     final double[] p = listP.toArray();
     final double[] a = listA.toArray();
 
-    double[] A, P;
-    double h, offset, scaleFactor;
+    double[] A;
+    double[] P;
+    double h;
+    double offset;
+    double scaleFactor;
     if (withGaussian && g != null) {
       // Do the convolution
       final double[][] result = Convolution.convolve(g, p, a, lastScale);
@@ -975,10 +995,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   /**
-   * Gets the mean threshold for the switch to half the Poisson Fisher information. <p> When the
-   * mean is high then there is no Dirac delta contribution to the probability function. This occurs
-   * when exp(-mean) is zero, which is approximately 746. In practice there is not much difference
-   * when the mean is above 100.
+   * Gets the mean threshold for the switch to half the Poisson Fisher information.
+   *
+   * <p>When the mean is high then there is no Dirac delta contribution to the probability function.
+   * This occurs when exp(-mean) is zero, which is approximately 746. In practice there is not much
+   * difference when the mean is above 100.
    *
    * @return the mean threshold
    */
@@ -987,10 +1008,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   /**
-   * Sets the mean threshold for the switch to half the Poisson Fisher information. <p> When the
-   * mean is high then there is no Dirac delta contribution to the probability function. This occurs
-   * when exp(-mean) is zero, which is approximately 746. In practice there is not much difference
-   * when the mean is above 100.
+   * Sets the mean threshold for the switch to half the Poisson Fisher information.
+   *
+   * <p>When the mean is high then there is no Dirac delta contribution to the probability function.
+   * This occurs when exp(-mean) is zero, which is approximately 746. In practice there is not much
+   * difference when the mean is above 100.
    *
    * @param meanThreshold the new mean threshold
    */
@@ -1012,7 +1034,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   /**
    * Sets the relative probability threshold of the Poisson-Gamma distribution that is used. Any
    * probability less than this is ignored. This prevents using values that do not contribute to the
-   * sum. <p> This must be in the range 0 to 0.5. Larger values would prevent using any slope of the
+   * sum.
+   *
+   * <p>This must be in the range 0 to 0.5. Larger values would prevent using any slope of the
    * Poisson-Gamma distribution. A value of zero requires all probability values to be used and may
    * result in long computation times.
    *
@@ -1055,8 +1079,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   /**
-   * Sets the relative accuracy for convergence during iteration. <p> Set to below zero to prevent
-   * convergence check. This results in a fixed number of iterations.
+   * Sets the relative accuracy for convergence during iteration.
+   *
+   * <p>Set to below zero to prevent convergence check. This results in a fixed number of
+   * iterations.
    *
    * @param relativeAccuracy the new relative accuracy
    */
@@ -1094,7 +1120,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   private static class QuickConvergenceChecker
       extends AbstractConvergenceChecker<UnivariatePointValuePair> {
     int fixedIterations;
-    UnivariatePointValuePair previous, current;
+    UnivariatePointValuePair previous;
+    UnivariatePointValuePair current;
 
     public QuickConvergenceChecker(int fixedIterations) {
       super(0, 0);
@@ -1119,10 +1146,14 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
   /**
    * Find the maximum of the integrated function A^2/P. P is the Poisson-Gamma convolution, A is the
-   * partial gradient. <p> When both A and P are convolved with a Gaussian kernel, the integral of
-   * this function - 1 is the Fisher information. <p> This method is used to determine the maximum
-   * of the function. The integral of A should equal 1. The range can be determined using a fraction
-   * of the maximum, or integrating until the sum is 1.
+   * partial gradient.
+   *
+   * <p>When both A and P are convolved with a Gaussian kernel, the integral of this function - 1 is
+   * the Fisher information.
+   *
+   * <p>This method is used to determine the maximum of the function. The integral of A should equal
+   * 1. The range can be determined using a fraction of the maximum, or integrating until the sum is
+   * 1.
    *
    * @param t the Poisson mean
    * @param rel Relative threshold
@@ -1190,9 +1221,12 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
   /**
    * Find the upper limit of the integrated function A^2/P. P is the Poisson-Gamma convolution, A is
-   * the partial gradient. <p> When both A and P are convolved with a Gaussian kernel, the integral
-   * of this function - 1 is the Fisher information. <p> This method is used to determine the upper
-   * limit of the function using a binary search.
+   * the partial gradient.
+   *
+   * <p>When both A and P are convolved with a Gaussian kernel, the integral of this function - 1 is
+   * the Fisher information.
+   *
+   * <p>This method is used to determine the upper limit of the function using a binary search.
    *
    * @param t the Poisson mean
    * @param max the max of the function (returned from {@link #findMaximum(double, double)})

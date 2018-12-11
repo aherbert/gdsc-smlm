@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -59,7 +60,8 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
    * @return the total sum of squares
    */
   public static double getTotalSumOfSquares(double[] y) {
-    double sx = 0, ssx = 0;
+    double sx = 0;
+    double ssx = 0;
     for (int i = y.length; i-- > 0;) {
       sx += y[i];
       ssx += y[i] * y[i];
@@ -136,8 +138,11 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
 
   /**
    * Compute the covariance matrix of the parameters of the function assuming a least squares fit of
-   * a Poisson process. <p> Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7,
-   * 377-383), equation 25. <p> The method involves inversion of a matrix and may fail.
+   * a Poisson process.
+   *
+   * <p>Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+   *
+   * <p>The method involves inversion of a matrix and may fail.
    *
    * <pre>
    * I = sum_i { Ei,a * Ei,b }
@@ -183,8 +188,11 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
 
   /**
    * Compute the variance of the parameters of the function assuming a least squares fit of a
-   * Poisson process. <p> Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7,
-   * 377-383), equation 25. <p> The method involves inversion of a matrix and may fail.
+   * Poisson process.
+   *
+   * <p>Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+   *
+   * <p>The method involves inversion of a matrix and may fail.
    *
    * <pre>
    * I = sum_i { Ei,a * Ei,b }

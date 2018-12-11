@@ -21,15 +21,19 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Implementation of the ICSILog algorithm as described in O. Vinyals, G. Friedland, N. Mirghafori
  * "Revisiting a basic function on current CPUs: A fast logarithm implementation with adjustable
- * accuracy" (2007). <p> This class is based on the original algorithm description and a Java
- * implementation by Hanns Holger Rutz. It has been adapted for use with double-precision data. <p>
- * Note: log(float) is not provided as it is dynamically cast up to a double and float values can be
- * represented as a double. If your computation generates a float value to be logged then use
+ * accuracy" (2007).
+ *
+ * <p>This class is based on the original algorithm description and a Java implementation by Hanns
+ * Holger Rutz. It has been adapted for use with double-precision data.
+ *
+ * <p>Note: log(float) is not provided as it is dynamically cast up to a double and float values can
+ * be represented as a double. If your computation generates a float value to be logged then use
  * {@link FFastLog}.
  *
  * @see <a href=
@@ -174,11 +178,12 @@ public class DFastLog extends FastLog {
   }
 
   /**
-   * Calculate the logarithm to base 2. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the argument is
-   * negative, then the result is incorrect (log(-x)). <li>If the argument is positive infinity,
-   * then the result is incorrect (Math.log(Double.MAX_VALUE)). <li>If the argument is positive zero
-   * or negative zero, then the result is negative infinity. </ul>
+   * Calculate the logarithm to base 2. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * argument is negative, then the result is incorrect (log(-x)). <li>If the argument is positive
+   * infinity, then the result is incorrect (Math.log(Double.MAX_VALUE)). <li>If the argument is
+   * positive zero or negative zero, then the result is negative infinity. </ul>
    *
    * @param x the argument (must be strictly positive)
    * @return log( x )
@@ -212,10 +217,12 @@ public class DFastLog extends FastLog {
 
   /**
    * Calculate the logarithm to the base given in the constructor. Requires the argument be finite
-   * and positive. <p> Special cases: <ul> <li>If the argument is NaN, then the result is incorrect.
-   * <li>If the argument is negative, then the result is incorrect (log(-x)). <li>If the argument is
-   * positive infinity, then the result is incorrect (Math.log(Double.MAX_VALUE)). <li>If the
-   * argument is positive zero or negative zero, then the result is negative infinity. </ul>
+   * and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * argument is negative, then the result is incorrect (log(-x)). <li>If the argument is positive
+   * infinity, then the result is incorrect (Math.log(Double.MAX_VALUE)). <li>If the argument is
+   * positive zero or negative zero, then the result is negative infinity. </ul>
    *
    * @param x the argument (must be strictly positive)
    * @return log( x )

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine.filter;
 
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
@@ -30,7 +31,9 @@ import java.util.List;
 
 /**
  * Provides a system for filtering the fitted results using distance to a set of target coordinates.
- * <p> Note that the target coordinates should be relative to the fitting region bounds, not the
+ *
+ *
+ * <p>Note that the target coordinates should be relative to the fitting region bounds, not the
  * bounds of the data frame.
  *
  * @deprecated Filtering of the results is no longer supported
@@ -80,7 +83,7 @@ public abstract class ResultFilter {
   }
 
   /**
-   * Pass in a list of fitted peaks to be filtered. Called when fitting was successful
+   * Pass in a list of fitted peaks to be filtered. Called when fitting was successful.
    *
    * @param fitResult The output from the fitting routine
    * @param maxIndex The source index that was fitted

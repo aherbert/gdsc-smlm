@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
@@ -114,10 +115,13 @@ import java.util.List;
 
 /**
  * Use the PC-PALM protocol to prepare a set of localisations into molecules. This can be used for
- * for clustering analysis. <p> See Sengupta, et al (2013). Quantifying spatial resolution in
- * point-localisation superresolution images using pair correlation analysis. Nature Protocols 8,
- * pp345-354. <p> See also Veatch, et al (2012). Correlation Functions Quantify Super-Resolution
- * Images and Estimate Apparent Clustering Due to Over-Counting. PLoS One 7, Issue 2, e31457
+ * for clustering analysis.
+ *
+ * <p>See Sengupta, et al (2013). Quantifying spatial resolution in point-localisation
+ * superresolution images using pair correlation analysis. Nature Protocols 8, pp345-354.
+ *
+ * <p>See also Veatch, et al (2012). Correlation Functions Quantify Super-Resolution Images and
+ * Estimate Apparent Clustering Due to Over-Counting. PLoS One 7, Issue 2, e31457
  */
 public class PCPALMMolecules implements PlugIn {
   /** The title. */
@@ -173,7 +177,8 @@ public class PCPALMMolecules implements PlugIn {
   private static boolean showHighResolutionImage = false;
 
   private Rectangle roiBounds;
-  private int roiImageWidth, roiImageHeight;
+  private int roiImageWidth;
+  private int roiImageHeight;
   private long start;
 
   // These package level variables are used by the PCPALMAnalysis plugin.
@@ -562,9 +567,11 @@ public class PCPALMMolecules implements PlugIn {
   }
 
   /**
-   * Extract molecules for the PC-PALM analysis. <p> Estimate the localisation uncertainty
-   * (precision) of each molecule using the formula of Mortensen, et al (2010), Nature Methods 7,
-   * 377-381. Store distance in nm and signal in photons using the calibration
+   * Extract molecules for the PC-PALM analysis.
+   *
+   * <p>Estimate the localisation uncertainty (precision) of each molecule using the formula of
+   * Mortensen, et al (2010), Nature Methods 7, 377-381. Store distance in nm and signal in photons
+   * using the calibration
    *
    * @param results the results
    * @return the array list
@@ -576,7 +583,7 @@ public class PCPALMMolecules implements PlugIn {
     // Access calibrated data
     final StandardResultProcedure sp =
         new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
-    sp.getXY();
+    sp.getXy();
     final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
     pp.getPrecision();
 
@@ -601,8 +608,10 @@ public class PCPALMMolecules implements PlugIn {
 
   /**
    * Calculate the average precision by fitting a skewed Gaussian to the histogram of the precision
-   * distribution. <p> A simple mean and SD of the histogram is computed. If the mean of the Skewed
-   * Gaussian does not fit within 3 SDs of the simple mean then the simple mean is returned.
+   * distribution.
+   *
+   * <p>A simple mean and SD of the histogram is computed. If the mean of the Skewed Gaussian does
+   * not fit within 3 SDs of the simple mean then the simple mean is returned.
    *
    * @param molecules the molecules
    * @param title the plot title (null if no plot should be displayed)
@@ -617,7 +626,8 @@ public class PCPALMMolecules implements PlugIn {
     // Plot histogram of the precision
     final float[] data = new float[molecules.size()];
     final DescriptiveStatistics stats = new DescriptiveStatistics();
-    double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
+    double yMin = Double.NEGATIVE_INFINITY;
+    double yMax = 0;
     for (int i = 0; i < data.length; i++) {
       data[i] = (float) molecules.get(i).precision;
       stats.addValue(data[i]);
@@ -1330,7 +1340,7 @@ public class PCPALMMolecules implements PlugIn {
           final double dy = dataGenerator.nextGaussian(0, sigma1D);
           localisationXy[0] += dx;
           localisationXy[1] += dy;
-          if (!dist.isWithinXY(localisationXy)) {
+          if (!dist.isWithinXy(localisationXy)) {
             continue;
           }
           // Calculate mean-squared displacement
@@ -1674,7 +1684,8 @@ public class PCPALMMolecules implements PlugIn {
   }
 
   private class FrameProcedure implements PeakResultProcedure {
-    int start, end;
+    int start;
+    int end;
 
     public FrameProcedure(int start, int end) {
       this.start = start;
@@ -1701,7 +1712,8 @@ public class PCPALMMolecules implements PlugIn {
       seconds = 0;
       return;
     }
-    int start = results.getFirstFrame(), end = start;
+    int start = results.getFirstFrame();
+    int end = start;
     final FrameProcedure p = new FrameProcedure(start, end);
     results.forEach(p);
     start = p.start;
@@ -1753,14 +1765,14 @@ public class PCPALMMolecules implements PlugIn {
     final double xBinSize = (maxx - minx) / gridSize;
     final double yBinSize = (maxy - miny) / gridSize;
     final int nXBins = 1 + (int) ((maxx - minx) / xBinSize);
-    final int nYBins = 1 + (int) ((maxy - miny) / yBinSize);
-    final Molecule[][] grid = new Molecule[nXBins][nYBins];
+    final int nybins = 1 + (int) ((maxy - miny) / yBinSize);
+    final Molecule[][] grid = new Molecule[nXBins][nybins];
     for (final Molecule m : molecules) {
-      final int xBin = (int) ((m.x - minx) / xBinSize);
-      final int yBin = (int) ((m.y - miny) / yBinSize);
+      final int xbin = (int) ((m.x - minx) / xBinSize);
+      final int ybin = (int) ((m.y - miny) / yBinSize);
       // Build a single linked list
-      m.next = grid[xBin][yBin];
-      grid[xBin][yBin] = m;
+      m.next = grid[xbin][ybin];
+      grid[xbin][ybin] = m;
     }
 
     // Find the minimum distance between molecules.
@@ -1769,11 +1781,11 @@ public class PCPALMMolecules implements PlugIn {
     IJ.showStatus("Computing minimum distance ...");
     IJ.showProgress(0);
     final Molecule[] neighbours = new Molecule[5];
-    for (int yBin = 0, currentIndex = 0, finalIndex = nXBins * nYBins; yBin < nYBins; yBin++) {
-      for (int xBin = 0; xBin < nXBins; xBin++) {
+    for (int ybin = 0, currentIndex = 0, finalIndex = nXBins * nybins; ybin < nybins; ybin++) {
+      for (int xbin = 0; xbin < nXBins; xbin++) {
         IJ.showProgress(currentIndex, finalIndex);
 
-        for (Molecule m1 = grid[xBin][yBin]; m1 != null; m1 = m1.next) {
+        for (Molecule m1 = grid[xbin][ybin]; m1 != null; m1 = m1.next) {
           // Build a list of which cells to compare up to a maximum of 4
           // | 0,0 | 1,0
           // ------------+-----
@@ -1782,16 +1794,16 @@ public class PCPALMMolecules implements PlugIn {
           int count = 0;
           neighbours[count++] = m1.next;
 
-          if (yBin < nYBins - 1) {
-            neighbours[count++] = grid[xBin][yBin + 1];
-            if (xBin > 0) {
-              neighbours[count++] = grid[xBin - 1][yBin + 1];
+          if (ybin < nybins - 1) {
+            neighbours[count++] = grid[xbin][ybin + 1];
+            if (xbin > 0) {
+              neighbours[count++] = grid[xbin - 1][ybin + 1];
             }
           }
-          if (xBin < nXBins - 1) {
-            neighbours[count++] = grid[xBin + 1][yBin];
-            if (yBin < nYBins - 1) {
-              neighbours[count++] = grid[xBin + 1][yBin + 1];
+          if (xbin < nXBins - 1) {
+            neighbours[count++] = grid[xbin + 1][ybin];
+            if (ybin < nybins - 1) {
+              neighbours[count++] = grid[xbin + 1][ybin + 1];
             }
           }
 

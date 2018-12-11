@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -31,7 +32,9 @@ import java.util.Arrays;
 
 /**
  * Fits a 2-dimensional Gaussian function for the specified peak. Can optionally fit an elliptical
- * Gaussian function. <p> Performs fitting using the configured algorithm.
+ * Gaussian function.
+ *
+ * <p>Performs fitting using the configured algorithm.
  */
 public class Gaussian2DFitter {
   /** The fit configuration. */
@@ -62,10 +65,14 @@ public class Gaussian2DFitter {
 
   private static double half_max_position(double[] data, int index, int[] point, int[] dim,
       int dimension, int[] cumul_region, int dirn, double background) {
-    int i, i_start, i_end, i_step;
+    int i;
+    int i_start;
+    int i_end;
+    int i_step;
     final double v = data[index];
     final double v_half = 0.5f * (v + background);
-    double v_prev = v, v_this;
+    double v_prev = v;
+    double v_this;
     int jump;
 
     if (dirn == 1) {
@@ -112,7 +119,9 @@ public class Gaussian2DFitter {
    */
   public static double half_max_linewidth(double[] data, int index, int[] point, int[] dim,
       int dimension, int[] cumul_region, double background) {
-    double linewidth, a, b;
+    double linewidth;
+    double a;
+    double b;
 
     a = half_max_position(data, index, point, dim, dimension, cumul_region, 1, background);
     b = half_max_position(data, index, point, dim, dimension, cumul_region, -1, background);
@@ -124,9 +133,11 @@ public class Gaussian2DFitter {
 
   /**
    * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
-   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x. <p>
-   * Performs fitting using the specified method with a Levenberg-Marquardt algorithm. <p> Adapted
-   * from the CCPN fit_peaks routine for Python.
+   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
+   *
+   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
+   *
+   * <p>Adapted from the CCPN fit_peaks routine for Python.
    *
    * @param data The data to fit
    * @param maxx The data size in the x dimension
@@ -140,8 +151,9 @@ public class Gaussian2DFitter {
 
   /**
    * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
-   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x. <p>
-   * Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
+   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
+   *
+   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
    *
    * @param data The data to fit
    * @param maxx The data size in the x dimension
@@ -196,10 +208,13 @@ public class Gaussian2DFitter {
   }
 
   /**
-   * Guess the background from the data given the estimated peak heights. <p> For a single peak the
-   * method assumes the peak is in the centre. In this case the minimum average value of the four
-   * edges in used. <p> If multiple peaks heights are provided then always use the minimum value in
-   * the data since it cannot be assumed that all peaks are away from the edge of the data.
+   * Guess the background from the data given the estimated peak heights.
+   *
+   * <p>For a single peak the method assumes the peak is in the centre. In this case the minimum
+   * average value of the four edges in used.
+   *
+   * <p>If multiple peaks heights are provided then always use the minimum value in the data since
+   * it cannot be assumed that all peaks are away from the edge of the data.
    *
    * @param data the data
    * @param maxx the maxx
@@ -240,7 +255,10 @@ public class Gaussian2DFitter {
       // Liu, et al (2013), Optics Express 21, 29462-87:
       // Get background using the lowest mean of the four edges.
       final int corner2 = (maxy - 1) * maxx;
-      double b1 = 0, b2 = 0, b3 = 0, b4 = 0;
+      double b1 = 0;
+      double b2 = 0;
+      double b3 = 0;
+      double b4 = 0;
       for (int xi = 0, xi2 = corner2; xi < maxx; xi++, xi2++) {
         b1 += data[xi];
         b2 += data[xi2];
@@ -279,17 +297,21 @@ public class Gaussian2DFitter {
 
   /**
    * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
-   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x. <p>
-   * Performs fitting using the specified method with a Levenberg-Marquardt algorithm. <p> The input
-   * parameter can estimate the signal (the total volume of the Gaussian) or the amplitude (the
-   * height of the Gaussian). The signal = amplitude * 2 * pi * sd0 * sd1. The amplitude is the
-   * recommended method to estimate parameters for multiple peaks. The signal can be estimated for a
-   * single peak by summing all the pixels (minus the background). <p> Note that if the background
-   * parameter is zero it will be assumed that the input amplitude is the total height of the peak.
-   * A new background will be estimated and the heights lowered by this estimated background to
-   * create the amplitude estimate. <p> If a peak location is outside the region bounds and has no
-   * input width parameters set or from the fit configuration then fitting will fail (this is
-   * because they cannot be estimated).
+   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
+   *
+   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
+   *
+   * <p>The input parameter can estimate the signal (the total volume of the Gaussian) or the
+   * amplitude (the height of the Gaussian). The signal = amplitude * 2 * pi * sd0 * sd1. The
+   * amplitude is the recommended method to estimate parameters for multiple peaks. The signal can
+   * be estimated for a single peak by summing all the pixels (minus the background).
+   *
+   * <p>Note that if the background parameter is zero it will be assumed that the input amplitude is
+   * the total height of the peak. A new background will be estimated and the heights lowered by
+   * this estimated background to create the amplitude estimate.
+   *
+   * <p>If a peak location is outside the region bounds and has no input width parameters set or
+   * from the fit configuration then fitting will fail (this is because they cannot be estimated).
    *
    * @param data The data to fit
    * @param maxx The data size in the x dimension
@@ -308,17 +330,21 @@ public class Gaussian2DFitter {
 
   /**
    * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
-   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x. <p>
-   * Performs fitting using the specified method with a Levenberg-Marquardt algorithm. <p> The input
-   * parameter can estimate the signal (the total volume of the Gaussian) or the amplitude (the
-   * height of the Gaussian). The signal = amplitude * 2 * pi * sd0 * sd1. The amplitude is the
-   * recommended method to estimate parameters for multiple peaks. The signal can be estimated for a
-   * single peak by summing all the pixels (minus the background). <p> Note that if the background
-   * parameter is zero it will be assumed that the input signal/amplitude is the total volume/height
-   * of the peak. A new background will be estimated and the volume/heights lowered by this
-   * estimated background to create the new parameters. <p> If a peak location is outside the region
-   * bounds and has no input width parameters set or from the fit configuration then fitting will
-   * fail (this is because they cannot be estimated).
+   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
+   *
+   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
+   *
+   * <p>The input parameter can estimate the signal (the total volume of the Gaussian) or the
+   * amplitude (the height of the Gaussian). The signal = amplitude * 2 * pi * sd0 * sd1. The
+   * amplitude is the recommended method to estimate parameters for multiple peaks. The signal can
+   * be estimated for a single peak by summing all the pixels (minus the background).
+   *
+   * <p>Note that if the background parameter is zero it will be assumed that the input
+   * signal/amplitude is the total volume/height of the peak. A new background will be estimated and
+   * the volume/heights lowered by this estimated background to create the new parameters.
+   *
+   * <p>If a peak location is outside the region bounds and has no input width parameters set or
+   * from the fit configuration then fitting will fail (this is because they cannot be estimated).
    *
    * @param data The data to fit
    * @param maxx The data size in the x dimension
@@ -568,7 +594,9 @@ public class Gaussian2DFitter {
       position[1] = (int) Math.round(ypos);
       final int index = position[1] * maxx + position[0];
 
-      double sx, sy, angle;
+      double sx;
+      double sy;
+      double angle;
       if (fitConfiguration.isZFitting()) {
         // Use the widths at z=0.
         // These are used to determine the centre-of-mass range search.
@@ -757,7 +785,8 @@ public class Gaussian2DFitter {
     // Configure the bounds for the width.
     // The factors are less strict than the fit configuration to allow some search space when
     // fitting close to the limits.
-    final double min_wf, max_wf;
+    final double min_wf;
+    final double max_wf;
     final boolean isZFitting = fitConfiguration.isZFitting();
     if (isZFitting) {
       min_wf = 0;
@@ -1091,8 +1120,9 @@ public class Gaussian2DFitter {
 
   /**
    * Set the maximum width factor to use to set the bounds for width parameter fitting. If the fit
-   * configuration has a smaller width factor then that will be used instead. <p> The bounds are set
-   * using the initial estimate w in the range w*min to w*max.
+   * configuration has a smaller width factor then that will be used instead.
+   *
+   * <p>The bounds are set using the initial estimate w in the range w*min to w*max.
    *
    * @param maximumWidthFactor the maximum width factor to use to set the bounds for width parameter
    *        fitting (must be above 1)
@@ -1120,9 +1150,10 @@ public class Gaussian2DFitter {
   }
 
   /**
-   * Sets the bounds on the parameter array in the next call to the fit() method. <p> Bounds must be
-   * the same length as the parameter array otherwise they are ignored. Bounds should be cleared
-   * when finished by passing in null.
+   * Sets the bounds on the parameter array in the next call to the fit() method.
+   *
+   * <p>Bounds must be the same length as the parameter array otherwise they are ignored. Bounds
+   * should be cleared when finished by passing in null.
    *
    * @param lower the lower bounds
    * @param upper the upper bounds

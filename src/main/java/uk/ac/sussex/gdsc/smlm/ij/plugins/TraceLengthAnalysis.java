@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -82,9 +83,14 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
   private double[] d; // MSD of trace
   private int[] length; // Length of trace
   private int[] id; // trace id
-  private double minX, maxX;
-  private int[] h1, h2;
-  private float[] x1, x2, y1, y2;
+  private double minX;
+  private double maxX;
+  private int[] h1;
+  private int[] h2;
+  private float[] x1;
+  private float[] x2;
+  private float[] y1;
+  private float[] y2;
 
   /** {@inheritDoc} */
   @Override
@@ -251,7 +257,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     dThreshold = gd.getNextNumber();
     normalise = gd.getNextBoolean();
     update();

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
@@ -38,17 +39,21 @@ public class FitJob {
    * Thefit job status.
    */
   public enum Status {
-    //@formatter:off
-        /** Pending (waiting to run). */
-        PENDING{ @Override
-        public String getName() { return "Pending"; }},
-        /** In-progress (running) */
-        IN_PROGRESS{ @Override
-        public String getName() { return "In-progress"; }},
-        /** Finished. */
-        FINISHED{ @Override
-        public String getName() { return "Finished"; }};
-        //@formatter:on
+    /** Pending (waiting to run). */
+    PENDING("Pending"),
+
+    /** In-progress (running). */
+    IN_PROGRESS("In-progress"),
+    /** Finished. */
+    FINISHED("Finished");
+    //@formatter:on
+
+    /** The nice name. */
+    private final String niceName;
+
+    Status(String name) {
+      niceName = name;
+    }
 
     @Override
     public String toString() {
@@ -60,9 +65,12 @@ public class FitJob {
      *
      * @return the name
      */
-    abstract public String getName();
+    public String getName() {
+      return niceName;
+    }
   }
 
+  /** The id. */
   private int id = 0;
 
   /** The slice. */
@@ -78,7 +86,7 @@ public class FitJob {
   Status status = Status.PENDING;
 
   /**
-   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed.
    *
    * @param id the id
    * @param slice the slice
@@ -107,7 +115,7 @@ public class FitJob {
   }
 
   /**
-   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed.
    *
    * @param slice the slice
    * @param data the data
@@ -118,7 +126,7 @@ public class FitJob {
   }
 
   /**
-   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed.
    *
    * @param id the id
    * @param slice the slice
@@ -131,7 +139,7 @@ public class FitJob {
   }
 
   /**
-   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
+   * Constructor with data. Exceptions are thrown if invalid bounds or data are passed.
    *
    * @param slice the slice
    * @param data the data
@@ -153,6 +161,8 @@ public class FitJob {
   }
 
   /**
+   * Gets the id.
+   *
    * @return the id.
    */
   public int getId() {
@@ -160,6 +170,8 @@ public class FitJob {
   }
 
   /**
+   * Gets the slice.
+   *
    * @return the slice.
    */
   public int getSlice() {
@@ -167,6 +179,8 @@ public class FitJob {
   }
 
   /**
+   * Gets the data.
+   *
    * @return the data.
    */
   public float[] getData() {
@@ -174,6 +188,8 @@ public class FitJob {
   }
 
   /**
+   * Gets the bounds.
+   *
    * @return the bounds.
    */
   public Rectangle getBounds() {
@@ -195,6 +211,8 @@ public class FitJob {
   }
 
   /**
+   * Gets the fit parameters.
+   *
    * @return The additional parameters for the job (or null).
    */
   public FitParameters getFitParameters() {
@@ -202,6 +220,8 @@ public class FitJob {
   }
 
   /**
+   * Gets the job status.
+   *
    * @return The job status.
    */
   public Status getStatus() {
@@ -209,9 +229,10 @@ public class FitJob {
   }
 
   /**
-   * Set the indices of the the data that were fitted <p> This method is not implemented within this
-   * class but can be overridden if necessary to allow access to the results from the
-   * {@link FitWorker}.
+   * Set the indices of the the data that were fitted.
+   *
+   * <p>This method is not implemented within this class but can be overridden if necessary to allow
+   * access to the results from the {@link FitWorker}.
    *
    * @param indices the new indices
    */
@@ -220,9 +241,10 @@ public class FitJob {
   }
 
   /**
-   * Set the fitting result for the specified fitted index <p> This method is not implemented within
-   * this class but can be overridden if necessary to allow access to the results from the
-   * {@link FitWorker}.
+   * Set the fitting result for the specified fitted index.
+   *
+   * <p>This method is not implemented within this class but can be overridden if necessary to allow
+   * access to the results from the {@link FitWorker}.
    *
    * @param n the index
    * @param fitResult the fit result
@@ -232,9 +254,10 @@ public class FitJob {
   }
 
   /**
-   * Used to store the results of the fitting job. <p> This method is not implemented within this
-   * class but can be overridden if necessary to allow access to the results from the
-   * {@link FitWorker}.
+   * Used to store the results of the fitting job.
+   *
+   * <p>This method is not implemented within this class but can be overridden if necessary to allow
+   * access to the results from the {@link FitWorker}.
    *
    * @param results the new results
    */
@@ -243,9 +266,10 @@ public class FitJob {
   }
 
   /**
-   * Set the multi-path fitting result for the specified fitted index <p> This method is not
-   * implemented within this class but can be overridden if necessary to allow access to the
-   * benchmarking results from the {@link FitWorker}.
+   * Set the multi-path fitting result for the specified fitted index.
+   *
+   * <p>This method is not implemented within this class but can be overridden if necessary to allow
+   * access to the benchmarking results from the {@link FitWorker}.
    *
    * @param n the index
    * @param fitResult the fit result

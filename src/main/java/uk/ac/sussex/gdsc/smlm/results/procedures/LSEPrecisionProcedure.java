@@ -21,12 +21,14 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 /**
  * Interface for accessing the localisation precision of Gaussian 2D fitting computed using the
- * Mortensen formula for Least Squares Estimation using a local noise estimate. <p> See Mortensen,
- * et al (2010) Nature Methods 7, 377-383, equation 6.
+ * Mortensen formula for Least Squares Estimation using a local noise estimate.
+ *
+ * <p>See Mortensen, et al (2010) Nature Methods 7, 377-383, equation 6.
  */
 public interface LSEPrecisionProcedure {
   /**

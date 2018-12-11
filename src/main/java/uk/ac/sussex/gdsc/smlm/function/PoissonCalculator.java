@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
@@ -201,10 +202,13 @@ public class PoissonCalculator {
 
   /**
    * Get the pseudo Poisson log likelihood of value x given the mean. The mean must be strictly
-   * positive. <p> The pseudo log-likelihood is equivalent to the log-likelihood without subtracting
-   * the log(x!) term. It can be converted to the log-likelihood by subtracting
-   * {@link #getLogXFactorialTerm()}. <p> This term is suitable for use in maximum likelihood
-   * routines.
+   * positive.
+   *
+   * <p>The pseudo log-likelihood is equivalent to the log-likelihood without subtracting the
+   * log(x!) term. It can be converted to the log-likelihood by subtracting
+   * {@link #getLogXFactorialTerm()}.
+   *
+   * <p>This term is suitable for use in maximum likelihood routines.
    *
    * <pre>
    * pseudo ll = x * log(u) - u
@@ -338,10 +342,13 @@ public class PoissonCalculator {
   }
 
   /**
-   * Copied from Apache Commons FastMath. Removed support for NaN and x < 0.5. <p> Returns the value
-   * of log&nbsp;&Gamma;(x) for x&nbsp;&gt;&nbsp;0. </p> <p> For x &le; 8, the implementation is
-   * based on the double precision implementation in the <em>NSWC Library of Mathematics
-   * Subroutines</em>, {@code DGAMLN}. For x &gt; 8, the implementation is based on </p> <ul> <li><a
+   * Copied from Apache Commons FastMath. Removed support for NaN and x < 0.5.
+   *
+   * <p>Returns the value of log&nbsp;&Gamma;(x) for x&nbsp;&gt;&nbsp;0. </p>
+   *
+   * <p>For x &le; 8, the implementation is based on the double precision implementation in the
+   * <em>NSWC Library of Mathematics Subroutines</em>, {@code DGAMLN}. For x &gt; 8, the
+   * implementation is based on </p> <ul> <li><a
    * href="http://mathworld.wolfram.com/GammaFunction.html">Gamma Function</a>, equation (28).</li>
    * <li><a href="http://mathworld.wolfram.com/LanczosApproximation.html"> Lanczos
    * Approximation</a>, equations (1) through (5).</li> <li><a
@@ -396,8 +403,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson log likelihood of value x given the mean. The mean and x must be strictly
-   * positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param u the mean
    * @param x the x
@@ -445,8 +454,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * must be positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param u the mean
    * @param x the x
@@ -484,8 +495,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson log likelihood of value x given the mean. The mean and x must be strictly
-   * positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param u the mean
    * @param x the x
@@ -534,8 +547,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * must be positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param u the mean
    * @param x the x
@@ -594,8 +609,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * must be positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param u the mean
    * @param x the x
@@ -620,8 +637,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * must be positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param u the mean
    * @param x the x
@@ -634,8 +653,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be
-   * positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @return the maximum log likelihood
@@ -661,8 +682,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be
-   * positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @return the maximum log likelihood
@@ -673,8 +696,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be
-   * positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @return the maximum log likelihood
@@ -691,8 +716,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be
-   * positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @param fastLog the fast log function
@@ -704,8 +731,10 @@ public class PoissonCalculator {
 
   /**
    * Get the Poisson maximum log likelihood of value x given the mean is value x. x must be
-   * positive. <p> Computation is done using an approximation to x! when x is above
-   * {@link #APPROXIMATION_X}. The number of calls to Math.log() is 2 for all x over 1.
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @param fastLog the fast log function

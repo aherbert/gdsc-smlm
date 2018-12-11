@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -30,11 +31,12 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
- * Filter results using a signal-to-background ratio (SBR) threshold. <p> Requires the bias to be
- * configured at or above zero. If the background is below the configured bias or there is no bias
- * then the filter resorts to a signal-to-noise filter. If there is a background level above the
- * bias then this is assumed to be the variance of the photon shot noise and the noise is taken at
- * the square root of the background level.
+ * Filter results using a signal-to-background ratio (SBR) threshold.
+ *
+ * <p>Requires the bias to be configured at or above zero. If the background is below the configured
+ * bias or there is no bias then the filter resorts to a signal-to-noise filter. If there is a
+ * background level above the bias then this is assumed to be the variance of the photon shot noise
+ * and the noise is taken at the square root of the background level.
  */
 public class SBRFilter extends DirectFilter {
   /**

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
@@ -28,9 +29,10 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public interface GradientLikelihoodFunction extends LikelihoodFunction {
   /**
-   * Compute the likelihood of an observation x given a parameter value theta. <p> This is the
-   * probability mass function P(X=x|θ) or the probability density function f(x|θ) depending on
-   * parameter θ.
+   * Compute the likelihood of an observation x given a parameter value theta.
+   *
+   * <p>This is the probability mass function P(X=x|θ) or the probability density function f(x|θ)
+   * depending on parameter θ.
    *
    * @param o The observed value (x)
    * @param t The parameter value (θ)

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
@@ -31,10 +32,10 @@ import uk.ac.sussex.gdsc.smlm.filters.Spot;
 class Candidate extends Spot {
 
   /** The index. */
-  final public int index;
+  public final int index;
 
   /** Flag to indicate if the candidate has been fit. */
-  public boolean fit = false;
+  public boolean fit;
 
   // Results of fitting
 

@@ -24,6 +24,7 @@
 /*
  *
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -73,8 +74,9 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets a distance converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets a distance converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param toDistanceUnit the distance unit
    * @return the distance converter
@@ -86,8 +88,9 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an intensity converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets an intensity converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param toIntensityUnit the intensity unit
    * @return the intensity converter
@@ -99,8 +102,9 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an time converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets an time converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param toTimeUnit the time unit
    * @return the time converter
@@ -111,8 +115,9 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an angle converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets an angle converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param toAngleUnit the angle unit
    * @return the angle converter
@@ -124,8 +129,10 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets a distance converter to update values. <p> If the calibration is already in the given
-   * units or conversion is not possible then an identity converter will be returned.
+   * Gets a distance converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param toDistanceUnit the distance unit
    * @return CalibrationHelper.the distance converter
@@ -135,8 +142,10 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an intensity converter to update values. <p> If the calibration is already in the given
-   * units or conversion is not possible then an identity converter will be returned.
+   * Gets an intensity converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param toIntensityUnit the intensity unit
    * @return CalibrationHelper.the intensity converter
@@ -146,8 +155,10 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an time converter to update values. <p> If the calibration is already in the given units
-   * or conversion is not possible then an identity converter will be returned.
+   * Gets an time converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param toTimeUnit the time unit
    * @return CalibrationHelper.the time converter
@@ -157,8 +168,10 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an angle converter to update values. <p> If the calibration is already in the given units
-   * or conversion is not possible then an identity converter will be returned.
+   * Gets an angle converter to update values.
+   *
+   * <p>If the calibration is already in the given units or conversion is not possible then an
+   * identity converter will be returned.
    *
    * @param toAngleUnit the angle unit
    * @return CalibrationHelper.the angle converter
@@ -345,13 +358,14 @@ public class CalibrationReader {
   }
 
   /**
-   * Get the camera quantum efficiency (e-/photon) used when modelling a microscope camera. <p> Note
-   * that the camera noise model assumes that photons are converted to counts by a process that is
-   * not perfect (i.e. it has noise). The underlying process is photons converted to electrons in
-   * the camera chip and then amplification (count/electron) occurring in the camera hardware.
-   * Ideally this should be recorded by storing the QE and the amplification. However the total gain
-   * (Count/photon) is already stored with the results. Thus the amplification can be inferred by
-   * dividing the total gain by the quantum efficiency which should be in the range 0-1.
+   * Get the camera quantum efficiency (e-/photon) used when modelling a microscope camera.
+   *
+   * <p>Note that the camera noise model assumes that photons are converted to counts by a process
+   * that is not perfect (i.e. it has noise). The underlying process is photons converted to
+   * electrons in the camera chip and then amplification (count/electron) occurring in the camera
+   * hardware. Ideally this should be recorded by storing the QE and the amplification. However the
+   * total gain (Count/photon) is already stored with the results. Thus the amplification can be
+   * inferred by dividing the total gain by the quantum efficiency which should be in the range 0-1.
    *
    * @return the quantum efficiency
    */
@@ -373,11 +387,13 @@ public class CalibrationReader {
   }
 
   /**
-   * Get the camera amplification (Count/e-) used when modelling a microscope camera. <p> Note that
-   * the camera noise model assumes that electrons are converted to Count units by amplification
-   * that is not perfect (i.e. it has noise). The amplification is equal to the gain (Count/photon)
-   * divided by the quantum efficiency [QE] (e-/photon). <p> If the QE is not set then it is assumed
-   * to be 1.
+   * Get the camera amplification (Count/e-) used when modelling a microscope camera.
+   *
+   * <p>Note that the camera noise model assumes that electrons are converted to Count units by
+   * amplification that is not perfect (i.e. it has noise). The amplification is equal to the gain
+   * (Count/photon) divided by the quantum efficiency [QE] (e-/photon).
+   *
+   * <p>If the QE is not set then it is assumed to be 1.
    *
    * @return the amplification
    */

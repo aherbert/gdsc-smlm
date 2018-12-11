@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator.Method;
@@ -44,9 +45,14 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 /**
  * Contains helper functions for the FitProtos class.
  */
-public class FitProtosHelper {
+public final class FitProtosHelper {
+  private static final String UNKNOWN = "Unknown";
+  private static final String UNKNOWN_NAME = "Unknown name: ";
+  private static final String UNKNOWN_METHOD = "Unknown method: ";
+
   /** The default FitSolverSettings. */
   public static final FitSolverSettings defaultFitSolverSettings;
+
   static {
     final FitSolverSettings.Builder builder = FitSolverSettings.newBuilder();
     builder.setFixedPsf(false);
@@ -72,8 +78,9 @@ public class FitProtosHelper {
     builder.setUseDynamicClamping(false);
     // Add defaults for a two-axis and theta Gaussian 2D function.
     // The units are photons and pixels.
-    builder.addClampValues(10); // B (3D DAOSTORM uses 100 which is high compared to the expected
-                                // background of a 'clean' image)
+    // B (3D DAOSTORM uses 100 which is high compared to the expected
+    // background of a 'clean' image)
+    builder.addClampValues(10);
     builder.addClampValues(1000); // I
     builder.addClampValues(1); // X
     builder.addClampValues(1); // Y
@@ -90,6 +97,7 @@ public class FitProtosHelper {
 
   /** The default FilterSettings. */
   public static final FilterSettings defaultFilterSettings;
+
   static {
     final FilterSettings.Builder builder = FilterSettings.newBuilder();
     builder.setShiftFactor(1);
@@ -107,6 +115,7 @@ public class FitProtosHelper {
 
   /** The default FitSettings. */
   public static final FitSettings defaultFitSettings;
+
   static {
     final FitSettings.Builder builder = FitSettings.newBuilder();
     builder.setFitSolverSettings(defaultFitSolverSettings);
@@ -116,6 +125,7 @@ public class FitProtosHelper {
 
   /** The default FitEngineSettings. */
   public static final FitEngineSettings defaultFitEngineSettings;
+
   static {
     // Analysis* shows the best area-under-precision-recall curve (AUC) using a mean filter or
     // a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width
@@ -171,6 +181,11 @@ public class FitProtosHelper {
   }
 
   /**
+   * No public constructor.
+   */
+  private FitProtosHelper() {}
+
+  /**
    * Gets the name.
    *
    * @param value the value
@@ -191,9 +206,9 @@ public class FitProtosHelper {
       case MLE:
         return "MLE";
       case UNRECOGNIZED:
-        return "Unknown";
+        return UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalStateException(UNKNOWN_NAME + value);
     }
   }
 
@@ -222,9 +237,9 @@ public class FitProtosHelper {
       case POWELL_BOUNDED:
         return "Powell (bounded)";
       case UNRECOGNIZED:
-        return "Unknown";
+        return UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalStateException(UNKNOWN_NAME + value);
     }
   }
 
@@ -243,9 +258,9 @@ public class FitProtosHelper {
       case SINGLE:
         return "Single";
       case UNRECOGNIZED:
-        return "Unknown";
+        return UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalStateException(UNKNOWN_NAME + value);
     }
   }
 
@@ -268,9 +283,9 @@ public class FitProtosHelper {
       case MEDIAN:
         return "Median";
       case UNRECOGNIZED:
-        return "Unknown";
+        return UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalStateException(UNKNOWN_NAME + value);
     }
   }
 
@@ -299,9 +314,9 @@ public class FitProtosHelper {
       case RESIDUALS_LEAST_TRIMMED_OF_SQUARES:
         return "Residuals least trimmed of squares";
       case UNRECOGNIZED:
-        return "Unknown";
+        return UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalStateException(UNKNOWN_NAME + value);
     }
   }
 
@@ -322,9 +337,9 @@ public class FitProtosHelper {
       case POISSON_CRLB:
         return "Poisson CRLB";
       case UNRECOGNIZED:
-        return "Unknown";
+        return UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalStateException(UNKNOWN_NAME + value);
     }
   }
 
@@ -358,7 +373,7 @@ public class FitProtosHelper {
       default:
         break;
     }
-    throw new IllegalStateException("Unknown method: " + method);
+    throw new IllegalStateException(UNKNOWN_METHOD + method);
   }
 
   /**
@@ -389,7 +404,7 @@ public class FitProtosHelper {
         return MaximumLikelihoodFitter.SearchMethod.POWELL_BOUNDED;
       case UNRECOGNIZED:
       default:
-        throw new IllegalStateException("Unknown method: " + searchMethod);
+        throw new IllegalStateException(UNKNOWN_METHOD + searchMethod);
     }
   }
 
@@ -411,7 +426,7 @@ public class FitProtosHelper {
         return FastMLESteppingFunctionSolver.LineSearchMethod.PARTIAL_IGNORE;
       case UNRECOGNIZED:
       default:
-        throw new IllegalStateException("Unknown method: " + lineSearchMethod);
+        throw new IllegalStateException(UNKNOWN_METHOD + lineSearchMethod);
     }
   }
 }

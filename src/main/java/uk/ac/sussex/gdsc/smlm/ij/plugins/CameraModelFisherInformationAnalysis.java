@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
@@ -253,7 +254,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       final AlphaSample[] list1 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
       // AlphaSample[] list2 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
       final TurboList<AlphaSample> list = new TurboList<>(list1.length + log10photons.length);
-      int i = 0, j = 0;
+      int i = 0;
+      int j = 0;
       final AlphaSample.Builder a2 = AlphaSample.newBuilder();
       while (i < list1.length && j < log10photons.length) {
         final AlphaSample a1 = list1[i];

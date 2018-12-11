@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.ImageStack;
@@ -148,10 +149,10 @@ public abstract class Image3DTest {
 
       final Image3D croppedData = image.crop(x, y, z, w, h, d);
       final int i = findMinIndex(croppedData);
-      final int[] xyz = croppedData.getXYZ(i);
+      final int[] xyz = croppedData.getXyz(i);
 
       final int j = image.findMinIndex(x, y, z, w, h, d);
-      final int[] xyz2 = image.getXYZ(j);
+      final int[] xyz2 = image.getXyz(j);
 
       Assertions.assertEquals(xyz[0] + x, xyz2[0]);
       Assertions.assertEquals(xyz[1] + y, xyz2[1]);
@@ -184,10 +185,10 @@ public abstract class Image3DTest {
 
       final Image3D croppedData = image.crop(x, y, z, w, h, d);
       final int i = findMaxIndex(croppedData);
-      final int[] xyz = croppedData.getXYZ(i);
+      final int[] xyz = croppedData.getXyz(i);
 
       final int j = image.findMaxIndex(x, y, z, w, h, d);
-      final int[] xyz2 = image.getXYZ(j);
+      final int[] xyz2 = image.getXyz(j);
 
       Assertions.assertEquals(xyz[0] + x, xyz2[0]);
       Assertions.assertEquals(xyz[1] + y, xyz2[1]);

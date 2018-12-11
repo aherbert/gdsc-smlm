@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -40,8 +41,9 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
   /**
    * Add a result format to the output. If a PeakResultsList is passed then it will be separated
    * into the child PeakResults instances. This will break the size() function of any input
-   * PeakResultsList since only the children will remain within this list. <p> Sets the settings
-   * (source and configuration) of the child to the same as this list
+   * PeakResultsList since only the children will remain within this list.
+   *
+   * <p>Sets the settings (source and configuration) of the child to the same as this list
    *
    * @param peakResults the peak results
    */

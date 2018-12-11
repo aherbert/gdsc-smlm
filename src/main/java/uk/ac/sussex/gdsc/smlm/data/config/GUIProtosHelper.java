@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
@@ -72,6 +73,7 @@ public class GUIProtosHelper {
 
   /** The default PSFCalculatorSettings. */
   public static final PSFCalculatorSettings defaultPSFCalculatorSettings;
+
   static {
     final PSFCalculatorSettings.Builder builder = PSFCalculatorSettings.newBuilder();
     builder.setPixelPitch(6.45);
@@ -86,6 +88,7 @@ public class GUIProtosHelper {
 
   /** The default PSFEstimatorSettings. */
   public static final PSFEstimatorSettings defaultPSFEstimatorSettings;
+
   static {
     final PSFEstimatorSettings.Builder builder = PSFEstimatorSettings.newBuilder();
     builder.setNumberOfPeaks(1000);
@@ -100,6 +103,7 @@ public class GUIProtosHelper {
 
   /** The default CreateDataSettings. */
   public static final CreateDataSettings defaultCreateDataSettings;
+
   static {
     final CreateDataSettings.Builder builder = CreateDataSettings.newBuilder();
     builder.setSize(512);
@@ -147,6 +151,7 @@ public class GUIProtosHelper {
 
   /** The default LoadLocalisationsSettings. */
   public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings;
+
   static {
     final LoadLocalisationsSettings.Builder builder = LoadLocalisationsSettings.newBuilder();
     builder.setFieldT(0);
@@ -167,6 +172,7 @@ public class GUIProtosHelper {
 
   /** The default ClusteringSettings. */
   public static final ClusteringSettings defaultClusteringSettings;
+
   static {
     final ClusteringSettings.Builder builder = ClusteringSettings.newBuilder();
     builder.setDistanceThreshold(50);
@@ -194,11 +200,12 @@ public class GUIProtosHelper {
 
   /** The default OpticsSettings. */
   public static final OpticsSettings defaultOpticsSettings;
+
   static {
     final OpticsSettings.Builder builder = OpticsSettings.newBuilder();
     builder.setOpticsMode(OpticsMode.FAST_OPTICS.ordinal());
     builder.setSampleMode(SampleMode.RANDOM.ordinal());
-    builder.setMinPoints(4);
+    builder.setMinpoints(4);
     builder.setClusteringMode(ClusteringMode.XI.ordinal());
     builder.setXi(0.03);
     builder.setSamples(100);
@@ -225,6 +232,7 @@ public class GUIProtosHelper {
 
   /** The default ConfigurationTemplateSettings. */
   public static final ConfigurationTemplateSettings defaultConfigurationTemplateSettings;
+
   static {
     final ConfigurationTemplateSettings.Builder builder =
         ConfigurationTemplateSettings.newBuilder();
@@ -237,6 +245,7 @@ public class GUIProtosHelper {
 
   /** The default NucleusMaskSettings. */
   public static final NucleusMaskSettings defaultNucleusMaskSettings;
+
   static {
     final NucleusMaskSettings.Builder builder = NucleusMaskSettings.newBuilder();
     builder.setMode(1);
@@ -251,6 +260,7 @@ public class GUIProtosHelper {
 
   /** The default PSFCreatorSettings. */
   public static final PSFCreatorSettings defaultPSFCreatorSettings;
+
   static {
     final PSFCreatorSettings.Builder builder = PSFCreatorSettings.newBuilder();
     builder.setRadius(10);
@@ -285,12 +295,14 @@ public class GUIProtosHelper {
 
   /** The default CameraModelManagerSettings. */
   public static final CameraModelManagerSettings defaultCameraModelManagerSettings;
+
   static {
     defaultCameraModelManagerSettings = CameraModelManagerSettings.getDefaultInstance();
   }
 
   /** The default CameraModelAnalysisSettings. */
   public static final CameraModelAnalysisSettings defaultCameraModelAnalysisSettings;
+
   static {
     final CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
     builder.setPhotons(10);
@@ -318,6 +330,7 @@ public class GUIProtosHelper {
   }
   /** The default CameraModelFisherInformationAnalysisSettings. */
   public static final CameraModelFisherInformationAnalysisSettings defaultCameraModelFisherInformationAnalysisSettings;
+
   static {
     final CameraModelFisherInformationAnalysisSettings.Builder builder =
         CameraModelFisherInformationAnalysisSettings.newBuilder();
@@ -335,6 +348,7 @@ public class GUIProtosHelper {
 
   /** The default CubicSplineManagerSettings. */
   public static final CubicSplineManagerSettings defaultCubicSplineManagerSettings;
+
   static {
     final CubicSplineManagerSettings.Builder builder = CubicSplineManagerSettings.newBuilder();
     builder.setMagnification(3);
@@ -344,6 +358,7 @@ public class GUIProtosHelper {
 
   /** The default FailCountManagerSettings. */
   public static final FailCountManagerSettings defaultFailCountManagerSettings;
+
   static {
     final FailCountManagerSettings.Builder builder = FailCountManagerSettings.newBuilder();
     builder.setMaxFrames(100);
@@ -378,6 +393,7 @@ public class GUIProtosHelper {
 
   /** The default AstigmatismModelManagerSettings. */
   public static final AstigmatismModelManagerSettings defaultAstigmatismModelManagerSettings;
+
   static {
     final AstigmatismModelManagerSettings.Builder builder =
         AstigmatismModelManagerSettings.newBuilder();
@@ -410,6 +426,7 @@ public class GUIProtosHelper {
 
   /** The default ImageJ3DResultsViewerSettings. */
   public static final ImageJ3DResultsViewerSettings defaultImageJ3DResultsViewerSettings;
+
   static {
     final ImageJ3DResultsViewerSettings.Builder builder =
         ImageJ3DResultsViewerSettings.newBuilder();
@@ -439,6 +456,7 @@ public class GUIProtosHelper {
 
   /** The default SpotFitSettings. */
   public static final SpotFitSettings defaultSpotFitSettings;
+
   static {
     final SpotFitSettings.Builder builder = SpotFitSettings.newBuilder();
     builder.setChannel(1);

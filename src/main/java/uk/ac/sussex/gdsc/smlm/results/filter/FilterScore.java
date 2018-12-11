@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
@@ -28,19 +29,19 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  */
 public class FilterScore implements Comparable<FilterScore> {
   /** The filter. */
-  final public Filter filter;
+  public final Filter filter;
 
   /** The score. */
-  final public double score;
+  public final double score;
 
   /** The criteria. */
-  final public double criteria;
+  public final double criteria;
 
   /** Flag to indicate if the criteria passed. */
-  final public boolean criteriaPassed;
+  public final boolean criteriaPassed;
 
   /** Flag to indicate if the filters are all same type. */
-  final public boolean allSameType;
+  public final boolean allSameType;
 
   /**
    * Instantiates a new filter score.

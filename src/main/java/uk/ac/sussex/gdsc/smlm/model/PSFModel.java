@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
@@ -145,7 +146,7 @@ public abstract class PSFModel {
   }
 
   /**
-   * Gets the minimum position in dimension 0 for the last drawn/sampled PSF
+   * Gets the minimum position in dimension 0 for the last drawn/sampled PSF.
    *
    * @return The minimum position in dimension 0 for the last drawn/sampled PSF
    */
@@ -154,7 +155,7 @@ public abstract class PSFModel {
   }
 
   /**
-   * Gets the maximum position in dimension 0 for the last drawn/sampled PSF
+   * Gets the maximum position in dimension 0 for the last drawn/sampled PSF.
    *
    * @return The maximum position in dimension 0 for the last drawn/sampled PSF
    */
@@ -163,7 +164,7 @@ public abstract class PSFModel {
   }
 
   /**
-   * Gets the minimum position in dimension 1 for the last drawn/sampled PSF
+   * Gets the minimum position in dimension 1 for the last drawn/sampled PSF.
    *
    * @return The minimum position in dimension 1 for the last drawn/sampled PSF
    */
@@ -172,7 +173,7 @@ public abstract class PSFModel {
   }
 
   /**
-   * Gets the maximum position in dimension 1 for the last drawn/sampled PSF
+   * Gets the maximum position in dimension 1 for the last drawn/sampled PSF.
    *
    * @return The maximum position in dimension 1 for the last drawn/sampled PSF
    */
@@ -717,9 +718,11 @@ public abstract class PSFModel {
   }
 
   /**
-   * Compute the value of the PSF function. <p> This can be over-ridden if the result is different
-   * from {@link #create3D(double[], int, int, double, double, double, double, boolean)} using a sum
-   * of 1 and no Poisson noise.
+   * Compute the value of the PSF function.
+   *
+   * <p>This can be over-ridden if the result is different from
+   * {@link #create3D(double[], int, int, double, double, double, double, boolean)} using a sum of 1
+   * and no Poisson noise.
    *
    * @param width The data width
    * @param height The data height
@@ -736,9 +739,10 @@ public abstract class PSFModel {
   }
 
   /**
-   * Get the value and partial gradient of the PSF function. <p> If gradient[i].length is not 3 then
-   * the correct array size will be created. Allows the function to be called using <code>double[][]
-   * gradient = new double[width*height][]</code>.
+   * Get the value and partial gradient of the PSF function.
+   *
+   * <p>If gradient[i].length is not 3 then the correct array size will be created. Allows the
+   * function to be called using <code>double[][] gradient = new double[width*height][]</code>.
    *
    * @param width The data width
    * @param height The data height
@@ -789,8 +793,9 @@ public abstract class PSFModel {
       double x1, double x2, double[] value, double[][] jacobian);
 
   /**
-   * Compute the value and partial gradient of the PSF function using numerical gradients. <p> This
-   * is a helper function for sub-classes and arguments are unchecked.
+   * Compute the value and partial gradient of the PSF function using numerical gradients.
+   *
+   * <p>This is a helper function for sub-classes and arguments are unchecked.
    *
    * @param width The data width
    * @param height The data height

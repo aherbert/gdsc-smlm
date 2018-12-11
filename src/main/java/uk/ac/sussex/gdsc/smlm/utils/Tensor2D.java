@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -50,7 +51,7 @@ public class Tensor2D {
     // Compute centre-of-mass
     double cx = 0;
     double cy = 0;
-    double sumXY = 0;
+    double sumXy = 0;
     for (int y = 0, j = 0; y < h; y++) {
       double sumX = 0;
       for (int x = 0; x < w; x++) {
@@ -58,11 +59,11 @@ public class Tensor2D {
         sumX += f;
         cx += f * x;
       }
-      sumXY += sumX;
+      sumXy += sumX;
       cy += sumX * y;
     }
-    cx = cx / sumXY;
-    cy = cy / sumXY;
+    cx = cx / sumXy;
+    cy = cy / sumXy;
     com = new double[] {cx, cy};
 
     // Compute tensor
@@ -201,8 +202,9 @@ public class Tensor2D {
   }
 
   /**
-   * Gets the eigen values. These are sorted from large to small. <p> Note: The minor moment of
-   * inertia will be around the longest axis of the object
+   * Gets the eigen values. These are sorted from large to small.
+   *
+   * <p>Note: The minor moment of inertia will be around the longest axis of the object
    *
    * @return the eigen values
    */

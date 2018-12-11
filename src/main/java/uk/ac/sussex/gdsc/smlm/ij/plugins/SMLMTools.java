@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
@@ -67,6 +68,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
 
   // Store the screen dimension
   private static Dimension screenDimension;
+
   static {
     screenDimension = IJ.getScreenSize();
   }
@@ -75,7 +77,9 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
   private boolean addSpacer = false;
 
   /**
-   * Constructor. <p> Create a frame showing all the available plugins within the user
+   * Constructor.
+   *
+   * <p>Create a frame showing all the available plugins within the user
    * [ImageJ]/plugins/smlm.config file or the default /uk/ac/sussex/gdsc/smlm/plugins.config file.
    */
   public SMLMTools() {
@@ -113,7 +117,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
 
   /** {@inheritDoc} */
   @Override
-  public void windowClosing(WindowEvent e) {
+  public void windowClosing(WindowEvent event) {
     Prefs.saveLocation(OPT_LOCATION, getLocation());
     instance = null;
     close();
@@ -200,7 +204,8 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
     mainPanel.setLayout(grid);
 
     addSpacer = false;
-    int col = 0, row = 0;
+    int col = 0;
+    int row = 0;
     for (final String[] plugin : plugins) {
       if (plugin[0].equals("next")) {
         col++;
@@ -359,9 +364,9 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
 
   @SuppressWarnings("unused")
   @Override
-  public void actionPerformed(ActionEvent e) {
+  public void actionPerformed(ActionEvent event) {
     // Get the plugin from the button label and run it
-    final Button button = (Button) e.getSource();
+    final Button button = (Button) event.getSource();
     final String commandName = button.getLabel();
 
     // String[] args = plugins.get(commandName);

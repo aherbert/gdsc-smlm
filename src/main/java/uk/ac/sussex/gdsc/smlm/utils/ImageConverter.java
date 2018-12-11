@@ -21,16 +21,22 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import java.awt.Rectangle;
 
 /**
- * Contains methods for converting an image to float data. <p> Handles unsigned byte, unsigned
- * short, float, double and RGB int array data.
+ * Contains methods for converting an image to float data.
+ *
+ * <p>Handles unsigned byte, unsigned short, float, double and RGB int array data.
  */
 public class ImageConverter {
-  private double rWeight = 1d / 3d, gWeight = 1d / 3d, bWeight = 1d / 3d;
+  private static final double ONE_THIRD = 1.0 / 3;
+
+  private double rWeight = ONE_THIRD;
+  private double gWeight = ONE_THIRD;
+  private double bWeight = ONE_THIRD;
 
   /**
    * Sets the weighting factors used to do colour conversions. The default values are 1/3, 1/3 and
@@ -87,10 +93,13 @@ public class ImageConverter {
 
   /**
    * Get the data from the image as a float array (include cropping to the ROI). Data is duplicated
-   * if the input is already a float array. <p> Allows reuse of an existing buffer if provided. This
-   * will not be truncated if it is larger than the ImageProcessor ROI bounds. If smaller then a new
-   * buffer will be created. <p> If the object pixels array is incorrect size (it should be
-   * width*height) then null will be returned.
+   * if the input is already a float array.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the ImageProcessor ROI bounds. If smaller then a new buffer will be created.
+   *
+   * <p>If the object pixels array is incorrect size (it should be width*height) then null will be
+   * returned.
    *
    * @param oPixels the pixels object
    * @param width the width
@@ -223,10 +232,13 @@ public class ImageConverter {
 
   /**
    * Get the data from the image as a double array (include cropping to the ROI). Data is duplicated
-   * if the input is already a double array. <p> Allows reuse of an existing buffer if provided.
-   * This will not be truncated if it is larger than the ImageProcessor ROI bounds. If smaller then
-   * a new buffer will be created. <p> If the object pixels array is incorrect size (it should be
-   * width*height) then null will be returned.
+   * if the input is already a double array.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the ImageProcessor ROI bounds. If smaller then a new buffer will be created.
+   *
+   * <p>If the object pixels array is incorrect size (it should be width*height) then null will be
+   * returned.
    *
    * @param oPixels the pixels object
    * @param width the width
@@ -356,9 +368,10 @@ public class ImageConverter {
 
   /**
    * Get the data from the image pixels as a float array. Data is not duplicated if the input is
-   * already a float array unless a buffer is provided. <p> Allows reuse of an existing buffer if
-   * provided. This will not be truncated if it is larger than the pixels array. If smaller then a
-   * new buffer will be created.
+   * already a float array unless a buffer is provided.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the pixels array. If smaller then a new buffer will be created.
    *
    * @param oPixels the pixels
    * @param buffer the buffer

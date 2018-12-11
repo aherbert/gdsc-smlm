@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -41,16 +42,21 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
   private final ImageConverter ic = new ImageConverter();
   private final GaussianFunctionFactory factory;
   private final Object data;
-  private final int ox, oy, maxx, maxy;
+  private final int ox;
+  private final int oy;
+  private final int maxx;
+  private final int maxy;
 
-  private int n;
+  private int peakNumber;
   private double[] params;
-  private double b, noise = -1;
+  private double localBackground;
+  private double noise = -1;
 
   /**
    * Instantiates a new simple peak result validation data using function (for 1 peak) that is being
-   * used to fit the data (may be multiple peaks). <p> Input data is any array type supported by the
-   * ImageConverter class.
+   * used to fit the data (may be multiple peaks).
+   *
+   * <p>Input data is any array type supported by the ImageConverter class.
    *
    * @param factory the function factory
    * @param ox the x-origin of the fit region within the data
@@ -77,16 +83,17 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
   }
 
   @Override
-  public void setResult(int n, double[] initialParams, double[] params, double[] paramDevs) {
+  public void setResult(int peakNumber, double[] initialParams, double[] params,
+      double[] paramDevs) {
     noise = -1;
-    this.n = n;
+    this.peakNumber = peakNumber;
     this.params = params;
   }
 
   @Override
   public double getLocalBackground() {
     compute();
-    return b;
+    return localBackground;
   }
 
   @Override
@@ -100,7 +107,7 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
       return;
     }
 
-    final double[] spotParams = extractSpotParams(params, n);
+    final double[] spotParams = extractSpotParams(params, peakNumber);
 
     // Adjust to the data frame
     spotParams[Gaussian2DFunction.X_POSITION] += ox;
@@ -118,8 +125,8 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
     final Rectangle r2 = r1.intersection(new Rectangle(0, 0, maxx, maxy));
 
     if (r2.width * r2.height <= 1) {
-      b = params[Gaussian2DFunction.BACKGROUND];
-      noise = Math.sqrt(b); // Assume photon shot noise.
+      localBackground = params[Gaussian2DFunction.BACKGROUND];
+      noise = Math.sqrt(localBackground); // Assume photon shot noise.
       return;
     }
 
@@ -142,7 +149,7 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
       stats.add(region[i] - v[i]);
     }
 
-    b = stats.getMean();
+    localBackground = stats.getMean();
     noise = stats.getStandardDeviation();
   }
 
@@ -161,8 +168,9 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
   }
 
   /**
-   * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation. <p>
-   * The range is clipped to 1 to max.
+   * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation.
+   *
+   * <p>The range is clipped to 1 to max.
    *
    * @param range the range factor
    * @param max the max value to return

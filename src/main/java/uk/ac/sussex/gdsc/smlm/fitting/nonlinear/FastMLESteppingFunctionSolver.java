@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -41,11 +42,15 @@ import uk.ac.sussex.gdsc.smlm.function.OffsetGradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.OffsetGradient2Function;
 
 /**
- * Uses the Fast MLE method to fit a gradient function with coefficients (a). <p> Calculates the
- * Newton-Raphson update vector for a Poisson process using the first and second partial
- * derivatives. <p> Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves
- * theoretically minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12. <p>
- * Ref: Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule
+ * Uses the Fast MLE method to fit a gradient function with coefficients (a).
+ *
+ * <p>Calculates the Newton-Raphson update vector for a Poisson process using the first and second
+ * partial derivatives.
+ *
+ * <p>Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+ * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12.
+ *
+ * <p>Ref: Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule
  * localization algorithms. Nature Methods 10, 653–658.
  */
 public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver

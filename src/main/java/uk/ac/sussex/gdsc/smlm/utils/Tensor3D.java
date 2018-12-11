@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import org.ejml.data.DenseMatrix64F;
@@ -54,7 +55,7 @@ public class Tensor3D {
     double sumXYZ = 0;
     for (int z = 0; z < data.length; z++) {
       final float[] d = data[z];
-      double sumXY = 0;
+      double sumXy = 0;
       for (int y = 0, j = 0; y < h; y++) {
         double sumX = 0;
         for (int x = 0; x < w; x++) {
@@ -62,11 +63,11 @@ public class Tensor3D {
           sumX += f;
           cx += f * x;
         }
-        sumXY += sumX;
+        sumXy += sumX;
         cy += sumX * y;
       }
-      cz += sumXY * z;
-      sumXYZ += sumXY;
+      cz += sumXy * z;
+      sumXYZ += sumXy;
     }
     cx = cx / sumXYZ;
     cy = cy / sumXYZ;
@@ -152,7 +153,9 @@ public class Tensor3D {
    * @param v Vectors
    */
   private static void sort3xN(double[] w, double[][] v) {
-    int k, j, i;
+    int k;
+    int j;
+    int i;
     double p;
 
     for (i = 3; i-- > 0;) {
@@ -200,8 +203,9 @@ public class Tensor3D {
   }
 
   /**
-   * Gets the eigen values. These are sorted from large to small. <p> Note: The minor moment of
-   * inertia will be around the longest axis of the object
+   * Gets the eigen values. These are sorted from large to small.
+   *
+   * <p>Note: The minor moment of inertia will be around the longest axis of the object
    *
    * @return the eigen values
    */

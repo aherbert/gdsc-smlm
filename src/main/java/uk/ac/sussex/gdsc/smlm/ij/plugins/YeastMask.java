@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -40,7 +41,8 @@ import ij.process.ImageProcessor;
 public class YeastMask implements PlugIn {
   private static final String TITLE = "Yeast Mask";
 
-  private static double length = 8, radius = 1.5;
+  private static double length = 8;
+  private static double radius = 1.5;
   private static double nucleus = 0.9;
   private static double nmPerPixel = 107;
   private static double nmPerSlice = 20;

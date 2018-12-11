@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
@@ -115,7 +116,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults {
   }
 
   /**
-   * Check size of the parameter arrays. The array size must match the number of parameters
+   * Check size of the parameter arrays. The array size must match the number of parameters.
    *
    * @param numberOfParams the number of params
    * @param params the params
@@ -129,7 +130,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults {
   }
 
   /**
-   * Check size of the parameter arrays. The array size must match the number of parameters
+   * Check size of the parameter arrays. The array size must match the number of parameters.
    *
    * @param numberOfParams the number of params
    * @param a the a

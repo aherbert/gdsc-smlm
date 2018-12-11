@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
@@ -39,9 +40,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Fits local maxima using a 2D Gaussian. <p> Multi-threaded for speed. Uses a BlockingQueue to hold
- * the ImageProcessor work which is then processed sequentially by worker threads. The queue
- * behaviour when the size is much greater than the number of worker threads can be configured.
+ * Fits local maxima using a 2D Gaussian.
+ *
+ * <p>Multi-threaded for speed. Uses a BlockingQueue to hold the ImageProcessor work which is then
+ * processed sequentially by worker threads. The queue behaviour when the size is much greater than
+ * the number of worker threads can be configured.
  */
 public class FitEngine {
   private final BlockingQueue<FitJob> jobs;
@@ -213,8 +216,9 @@ public class FitEngine {
   }
 
   /**
-   * Signal that no more fitting work will be added to the queue. <p> Ask all threads to end and
-   * wait. Returns when all threads have stopped running.
+   * Signal that no more fitting work will be added to the queue.
+   *
+   * <p>Ask all threads to end and wait. Returns when all threads have stopped running.
    *
    * @param now Stop the work immediately, otherwise finish all work in the queue
    */

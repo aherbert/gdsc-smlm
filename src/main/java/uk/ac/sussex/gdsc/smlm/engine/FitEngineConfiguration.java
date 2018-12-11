@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -433,8 +434,10 @@ public class FitEngineConfiguration implements Cloneable {
   }
 
   /**
-   * Include neighbour maxima in the fitting. <p> Use this option when the fitting search region is
-   * large relative the the smoothing, thus other peaks may be within the region used for fitting.
+   * Include neighbour maxima in the fitting.
+   *
+   * <p>Use this option when the fitting search region is large relative the the smoothing, thus
+   * other peaks may be within the region used for fitting.
    *
    * @param includeNeighbours the new include neighbours
    */
@@ -940,8 +943,10 @@ public class FitEngineConfiguration implements Cloneable {
   }
 
   /**
-   * Gets the minimum SD using the initial standard deviations <p> Note: This uses initial peak SD0
-   * and optionally initial peak SD1 if width fitting is enabled for the second dimension.
+   * Gets the minimum SD using the initial standard deviations.
+   *
+   * <p>Note: This uses initial peak SD0 and optionally initial peak SD1 if width fitting is enabled
+   * for the second dimension.
    *
    * @return the SD min
    */
@@ -964,8 +969,10 @@ public class FitEngineConfiguration implements Cloneable {
   }
 
   /**
-   * Gets the minimum HWHM using the initial standard deviations <p> Note: This uses initial peak
-   * SD0 and optionally initial peak SD1 if width fitting is enabled for the second dimension.
+   * Gets the minimum HWHM using the initial standard deviations.
+   *
+   * <p>Note: This uses initial peak SD0 and optionally initial peak SD1 if width fitting is enabled
+   * for the second dimension.
    *
    * @return the HWHM min
    */
@@ -975,8 +982,10 @@ public class FitEngineConfiguration implements Cloneable {
   }
 
   /**
-   * Gets the maximum SD using the initial standard deviations <p> Note: This uses initial peak SD0
-   * and optionally initial peak SD1 if width fitting is enabled for the second dimension.
+   * Gets the maximum SD using the initial standard deviations.
+   *
+   * <p>Note: This uses initial peak SD0 and optionally initial peak SD1 if width fitting is enabled
+   * for the second dimension.
    *
    * @return the SD max
    */
@@ -999,8 +1008,10 @@ public class FitEngineConfiguration implements Cloneable {
   }
 
   /**
-   * Gets the maximum HWHM using the initial standard deviations <p> Note: This uses initial peak
-   * SD0 and optionally initial peak SD1 if width fitting is enabled for the second dimension.
+   * Gets the maximum HWHM using the initial standard deviations.
+   *
+   * <p>Note: This uses initial peak SD0 and optionally initial peak SD1 if width fitting is enabled
+   * for the second dimension.
    *
    * @return the HWHM max
    */
@@ -1146,9 +1157,12 @@ public class FitEngineConfiguration implements Cloneable {
 
   /**
    * Configure the output units from fitting using the current calibration and fit solver settings.
-   * <p> This method should be called before the calibration is passed to any object that will
-   * handle the fitting output. <p> It will update the calibration units and the precision method to
-   * match that used by precision filter.
+   *
+   * <p>This method should be called before the calibration is passed to any object that will handle
+   * the fitting output.
+   *
+   * <p>It will update the calibration units and the precision method to match that used by
+   * precision filter.
    */
   public void configureOutputUnits() {
     final FitConfiguration fitConfig = getFitConfiguration();

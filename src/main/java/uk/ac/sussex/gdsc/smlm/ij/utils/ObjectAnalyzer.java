@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.process.ByteProcessor;
@@ -165,20 +166,20 @@ public class ObjectAnalyzer {
     final int neighbours = (eightConnected) ? 8 : 4;
 
     // we create a list of connected points and start the list at the current point
-    int[] pList = ppList[0];
-    pList[listI] = index0;
+    int[] pointList = ppList[0];
+    pointList[listI] = index0;
 
     final int v0 = image[index0];
 
     do {
-      final int index1 = pList[listI];
+      final int index1 = pointList[listI];
       final int x1 = index1 % maxx;
       final int y1 = index1 / maxx;
 
-      final boolean isInnerXY = (y1 != 0 && y1 != ylimit) && (x1 != 0 && x1 != xlimit);
+      final boolean isInnerXy = (y1 != 0 && y1 != ylimit) && (x1 != 0 && x1 != xlimit);
 
       for (int d = neighbours; d-- > 0;) {
-        if (isInnerXY || isWithinXY(x1, y1, d)) {
+        if (isInnerXy || isWithinXy(x1, y1, d)) {
           final int index2 = index1 + offset[d];
           if (objectMask[index2] != 0) {
             // This has been done already, ignore this point
@@ -189,10 +190,10 @@ public class ObjectAnalyzer {
 
           if (v2 == v0) {
             // Add this to the search
-            pList[listLen++] = index2;
+            pointList[listLen++] = index2;
             objectMask[index2] = id;
-            if (pList.length == listLen) {
-              pList = Arrays.copyOf(pList, (int) (listLen * 1.5));
+            if (pointList.length == listLen) {
+              pointList = Arrays.copyOf(pointList, (int) (listLen * 1.5));
             }
           }
         }
@@ -203,13 +204,15 @@ public class ObjectAnalyzer {
     }
     while (listI < listLen);
 
-    ppList[0] = pList;
+    ppList[0] = pointList;
 
     return listLen;
   }
 
-  private int maxx, maxy;
-  private int xlimit, ylimit;
+  private int maxx;
+  private int maxy;
+  private int xlimit;
+  private int ylimit;
   private int[] offset;
   private final int[] DIR_X_OFFSET = new int[] {0, 1, 0, -1, 1, 1, -1, -1};
   private final int[] DIR_Y_OFFSET = new int[] {-1, 0, 1, 0, -1, 1, 1, -1};
@@ -241,7 +244,7 @@ public class ObjectAnalyzer {
    * @param direction the direction from the pixel towards the neighbour
    * @return true if the neighbour is within the image (provided that x, y is within)
    */
-  private boolean isWithinXY(int x, int y, int direction) {
+  private boolean isWithinXy(int x, int y, int direction) {
     switch (direction) {
       // 4-connected directions
       case 0:

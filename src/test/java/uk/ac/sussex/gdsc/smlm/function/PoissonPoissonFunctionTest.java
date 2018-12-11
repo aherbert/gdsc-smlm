@@ -34,6 +34,7 @@ public class PoissonPoissonFunctionTest {
 
   static double[] gain = PoissonGaussianFunctionTest.gain;
   static double[] photons = PoissonGaussianFunctionTest.photons;
+
   static {
     int c = 0;
 

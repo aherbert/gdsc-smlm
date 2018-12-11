@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -252,7 +253,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   private String TITLE;
   private ImagePlus imp;
   private int currentSlice = 0;
-  private TextWindow resultsWindow, infoWindow;
+  private TextWindow resultsWindow;
+  private TextWindow infoWindow;
   private int templateId;
   private String headings;
   private TIntObjectHashMap<String> text;
@@ -350,9 +352,10 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   }
 
   /**
-   * Restore the templates that were loaded. <p> Given the list of standard templates is manipulated
-   * only by this plugin this should be the same set of templates as that used last time by the
-   * user.
+   * Restore the templates that were loaded.
+   *
+   * <p>Given the list of standard templates is manipulated only by this plugin this should be the
+   * same set of templates as that used last time by the user.
    */
   private static void restoreLoadedTemplates() {
     // Allow this to fail silently
@@ -682,7 +685,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   }
 
   /**
-   * Check if this is a custom template, i.e. not a standard GDSC SMLM template
+   * Check if this is a custom template, i.e. not a standard GDSC SMLM template.
    *
    * @param name The name of the template
    * @return True if a custom template
@@ -1185,9 +1188,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
   /** {@inheritDoc} */
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
-    if (e != null && e.getSource() instanceof Choice) {
-      final String template = ((Choice) (e.getSource())).getSelectedItem();
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
+    if (event != null && event.getSource() instanceof Choice) {
+      final String template = ((Choice) (event.getSource())).getSelectedItem();
       if (templateImage) {
         showTemplateImage(template);
       } else {

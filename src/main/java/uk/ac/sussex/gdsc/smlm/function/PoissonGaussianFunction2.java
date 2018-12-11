@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
@@ -28,12 +29,16 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is
  * assumed to have mean of zero. If no mean (zero or below) is provided for the Poisson distribution
- * then the probability density function matches that of the Gaussian. <p> The implementation uses
- * the saddle-point approximation described in Snyder, et al (1995) Compensation for readout noise
- * in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted from the C source code provided
- * in the appendix. <p> This is just a wrapper for the PoissonGaussianFunction that handles smart
- * switching between a Gaussian likelihood function and a Poisson-Gaussian likelihood function. <p>
- * The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * then the probability density function matches that of the Gaussian.
+ *
+ * <p>The implementation uses the saddle-point approximation described in Snyder, et al (1995)
+ * Compensation for readout noise in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted
+ * from the C source code provided in the appendix.
+ *
+ * <p>This is just a wrapper for the PoissonGaussianFunction that handles smart switching between a
+ * Gaussian likelihood function and a Poisson-Gaussian likelihood function.
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
  * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
  * amplified by a gain and then read with Gaussian noise.
  */

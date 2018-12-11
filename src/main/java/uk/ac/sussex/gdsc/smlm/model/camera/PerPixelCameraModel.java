@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -35,7 +36,9 @@ import java.awt.Rectangle;
 public class PerPixelCameraModel extends BaseCameraModel {
   private final Rectangle cameraBounds;
 
-  private final float[] bias, gain, variance;
+  private final float[] bias;
+  private final float[] gain;
+  private final float[] variance;
   // This is computed when required
   private float[] var_g2;
 
@@ -145,8 +148,9 @@ public class PerPixelCameraModel extends BaseCameraModel {
   }
 
   /**
-   * Instantiates a new per pixel camera model, copying all input fields. <p> This is an internally
-   * used copy constructor.
+   * Instantiates a new per pixel camera model, copying all input fields.
+   *
+   * <p>This is an internally used copy constructor.
    *
    * @param duplicate a flag to indicate the data should be duplicated
    * @param bounds the bounds

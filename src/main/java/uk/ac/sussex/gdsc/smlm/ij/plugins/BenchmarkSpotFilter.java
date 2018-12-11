@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
@@ -117,6 +118,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static String[] batchPlotNames;
   private static String[] SELECTION;
   private static int selection = 2;
+
   static {
     config = new FitEngineConfiguration();
     fitConfig = config.getFitConfiguration();
@@ -165,7 +167,9 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static boolean batchCircular = false;
   private static boolean batchMedian = false;
 
-  private boolean extraOptions, debug = false, batchMode = false;
+  private boolean extraOptions;
+  private boolean debug = false;
+  private boolean batchMode = false;
   private long time = 0;
 
   // Cache batch results
@@ -174,7 +178,8 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private static int id = 1;
 
-  private static BufferedTextWindow summaryTable = null, batchSummaryTable = null;
+  private static BufferedTextWindow summaryTable = null;
+  private static BufferedTextWindow batchSummaryTable = null;
 
   private ImagePlus imp;
   private MemoryPeakResults results;
@@ -293,7 +298,10 @@ public class BenchmarkSpotFilter implements PlugIn {
   }
 
   private static class BatchResult {
-    public double auc, j, p, r;
+    public double auc;
+    public double j;
+    public double p;
+    public double r;
     public long time;
     public DataFilterMethod dataFilter;
     public double param;
@@ -1075,7 +1083,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     private double getWeight(float x, float y, int analysisBorder, int xlimit, int ylimit,
         RampedScore weighting) {
       // Distance outside the border
-      double dx = 0, dy = 0;
+      double dx = 0;
+      double dy = 0;
       if (x < analysisBorder) {
         dx = analysisBorder - x;
       } else if (x > xlimit) {
@@ -1728,7 +1737,9 @@ public class BenchmarkSpotFilter implements PlugIn {
   }
 
   /** The total progress. */
-  private int progress, stepProgress, totalProgress;
+  private int progress;
+  private int stepProgress;
+  private int totalProgress;
   private String progressPrefix;
 
   private void setupProgress(int total, String prefix) {
@@ -2058,7 +2069,8 @@ public class BenchmarkSpotFilter implements PlugIn {
         return true;
       }
     });
-    double tp = total[0], fp = total[1];
+    double tp = total[0];
+    double fp = total[1];
     final double fn = total[2];
     final FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
     // The number of actual results
@@ -2269,7 +2281,10 @@ public class BenchmarkSpotFilter implements PlugIn {
       public boolean execute(FilterResult result) {
         final int size = result.spots.length;
 
-        float[] tx = null, ty = null, fx = null, fy = null;
+        float[] tx = null;
+        float[] ty = null;
+        float[] fx = null;
+        float[] fy = null;
         if (showTP) {
           tx = new float[size];
           ty = new float[size];
@@ -2278,7 +2293,8 @@ public class BenchmarkSpotFilter implements PlugIn {
           fx = new float[size];
           fy = new float[size];
         }
-        int t = 0, f = 0;
+        int t = 0;
+        int f = 0;
         for (final ScoredSpot s : result.spots) {
           if (s.match) {
             if (showTP) {

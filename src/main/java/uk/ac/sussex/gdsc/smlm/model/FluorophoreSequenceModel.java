@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import java.util.ArrayList;
@@ -28,9 +29,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Contains a model for a blinking fluorophore. <p> Based on the work of Coltharp et al (2012)
- * Accurate Construction of photoactivated localization microscopy images for quantitative
- * measurements. PLOS One 7, Issue 12, pp 1-15
+ * Contains a model for a blinking fluorophore.
+ *
+ * <p>Based on the work of Coltharp et al (2012) Accurate Construction of photoactivated
+ * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
 public abstract class FluorophoreSequenceModel extends MoleculeModel
     implements Comparable<FluorophoreSequenceModel> {
@@ -95,9 +97,10 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel
   }
 
   /**
-   * Get the start time, i.e. when the molecule activated. <p> Note that a molecule will always have
-   * a start time even if it has no blinks. This models a molecule that turns on and then bleaches
-   * immediately.
+   * Get the start time, i.e. when the molecule activated.
+   *
+   * <p>Note that a molecule will always have a start time even if it has no blinks. This models a
+   * molecule that turns on and then bleaches immediately.
    *
    * @return The start time
    */

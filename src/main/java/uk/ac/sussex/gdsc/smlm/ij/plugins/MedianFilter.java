@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -62,7 +63,8 @@ public class MedianFilter implements PlugInFilter {
   private static float bias = 500;
 
   private ImagePlus imp;
-  private int counter, size;
+  private int counter;
+  private int size;
 
   /** {@inheritDoc} */
   @Override
@@ -198,8 +200,9 @@ public class MedianFilter implements PlugInFilter {
   }
 
   /**
-   * Extract the data for a specified slice, calculate the mean and then normalise by the mean. <p>
-   * Use a runnable for the image generation to allow multi-threaded operation. Input parameters
+   * Extract the data for a specified slice, calculate the mean and then normalise by the mean.
+   *
+   * <p>Use a runnable for the image generation to allow multi-threaded operation. Input parameters
    * that are manipulated should have synchronized methods.
    */
   private class ImageNormaliser implements Runnable {
@@ -235,13 +238,16 @@ public class MedianFilter implements PlugInFilter {
   /**
    * Compute the rolling median window on a set of pixels in the image stack, interpolating at
    * intervals if necessary. Convert back into the final image pixel value by multiplying by the
-   * mean for the slice. <p> Use a runnable for the image generation to allow multi-threaded
-   * operation. Input parameters that are manipulated should have synchronized methods.
+   * mean for the slice.
+   *
+   * <p>Use a runnable for the image generation to allow multi-threaded operation. Input parameters
+   * that are manipulated should have synchronized methods.
    */
   private class ImageGenerator implements Runnable {
     final float[][] imageStack;
     final float[] mean;
-    final int start, end;
+    final int start;
+    final int end;
 
     public ImageGenerator(float[][] imageStack, float[] mean, int start, int end) {
       this.imageStack = imageStack;
@@ -423,7 +429,8 @@ public class MedianFilter implements PlugInFilter {
 
   /**
    * Extract the data for a specified slice, subtract the background median filter and add the bias.
-   * <p> Use a runnable for the image generation to allow multi-threaded operation. Input parameters
+   *
+   * <p>Use a runnable for the image generation to allow multi-threaded operation. Input parameters
    * that are manipulated should have synchronized methods.
    */
   private class ImageFilter implements Runnable {

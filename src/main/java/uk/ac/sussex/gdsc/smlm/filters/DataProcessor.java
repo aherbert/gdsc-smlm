@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
@@ -49,8 +50,9 @@ public abstract class DataProcessor implements Cloneable {
 
   /**
    * Sets the weights of the data. This should be called before {@link #process (float[], int, int)}
-   * is called with data samples. <p> Calling this in advance allows efficient caching of
-   * pre-computed weightings.
+   * is called with data samples.
+   *
+   * <p>Calling this in advance allows efficient caching of pre-computed weightings.
    *
    * @param weights the weights of the data (can be null)
    * @param width The width of the data

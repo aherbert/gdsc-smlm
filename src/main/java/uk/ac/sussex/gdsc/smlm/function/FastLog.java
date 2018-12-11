@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
@@ -96,10 +97,11 @@ public abstract class FastLog {
   public abstract int getN();
 
   /**
-   * Calculate the logarithm to base 2, handling special cases. <p> Special cases: <ul> <li>If the
-   * argument is NaN or less than zero, then the result is NaN. <li>If the argument is positive
-   * infinity, then the result is positive infinity. <li>If the argument is positive zero or
-   * negative zero, then the result is negative infinity. </ul>
+   * Calculate the logarithm to base 2, handling special cases.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN or less than zero, then the result is NaN.
+   * <li>If the argument is positive infinity, then the result is positive infinity. <li>If the
+   * argument is positive zero or negative zero, then the result is negative infinity. </ul>
    *
    * @param x the argument
    * @return log(x)
@@ -107,11 +109,14 @@ public abstract class FastLog {
   public abstract float log2(float x);
 
   /**
-   * Calculate the logarithm to base 2. Requires the argument be finite and strictly positive. <p>
-   * Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * Calculate the logarithm to base 2. Requires the argument be finite and strictly positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
    * argument is negative, then the result is incorrect. <li>If the argument is positive infinity,
    * then the result is incorrect. <li>If the argument is positive zero or negative zero, then the
-   * result is incorrect. </ul> <p> Sub-classes may handle some of the special cases.
+   * result is incorrect. </ul>
+   *
+   * <p>Sub-classes may handle some of the special cases.
    *
    * @param x the argument (must be strictly positive)
    * @return log(x)
@@ -119,10 +124,11 @@ public abstract class FastLog {
   public abstract float fastLog2(float x);
 
   /**
-   * Calculate the logarithm to the configured base, handling special cases. <p> Special cases: <ul>
-   * <li>If the argument is NaN or less than zero, then the result is NaN. <li>If the argument is
-   * positive infinity, then the result is positive infinity. <li>If the argument is positive zero
-   * or negative zero, then the result is negative infinity. </ul>
+   * Calculate the logarithm to the configured base, handling special cases.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN or less than zero, then the result is NaN.
+   * <li>If the argument is positive infinity, then the result is positive infinity. <li>If the
+   * argument is positive zero or negative zero, then the result is negative infinity. </ul>
    *
    * @param x the argument
    * @return log(x)
@@ -132,10 +138,14 @@ public abstract class FastLog {
 
   /**
    * Calculate the logarithm to the configured base. Requires the argument be finite and strictly
-   * positive. <p> Special cases: <ul> <li>If the argument is NaN, then the result is incorrect.
-   * <li>If the argument is negative, then the result is incorrect. <li>If the argument is positive
-   * infinity, then the result is incorrect. <li>If the argument is positive zero or negative zero,
-   * then the result is incorrect. </ul> <p> Sub-classes may handle some of the special cases.
+   * positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * argument is negative, then the result is incorrect. <li>If the argument is positive infinity,
+   * then the result is incorrect. <li>If the argument is positive zero or negative zero, then the
+   * result is incorrect. </ul>
+   *
+   * <p>Sub-classes may handle some of the special cases.
    *
    * @param x the argument (must be strictly positive)
    * @return log(x)
@@ -144,10 +154,11 @@ public abstract class FastLog {
   public abstract float fastLog(float x);
 
   /**
-   * Calculate the logarithm to base 2, handling special cases. <p> Special cases: <ul> <li>If the
-   * argument is NaN or less than zero, then the result is NaN. <li>If the argument is positive
-   * infinity, then the result is positive infinity. <li>If the argument is positive zero or
-   * negative zero, then the result is negative infinity. </ul>
+   * Calculate the logarithm to base 2, handling special cases.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN or less than zero, then the result is NaN.
+   * <li>If the argument is positive infinity, then the result is positive infinity. <li>If the
+   * argument is positive zero or negative zero, then the result is negative infinity. </ul>
    *
    * @param x the argument
    * @return log(x)
@@ -155,11 +166,14 @@ public abstract class FastLog {
   public abstract float log2(double x);
 
   /**
-   * Calculate the logarithm to base 2. Requires the argument be finite and strictly positive. <p>
-   * Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * Calculate the logarithm to base 2. Requires the argument be finite and strictly positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
    * argument is negative, then the result is incorrect. <li>If the argument is positive infinity,
    * then the result is incorrect. <li>If the argument is positive zero or negative zero, then the
-   * result is incorrect. </ul> <p> Sub-classes may handle some of the special cases.
+   * result is incorrect. </ul>
+   *
+   * <p>Sub-classes may handle some of the special cases.
    *
    * @param x the argument (must be strictly positive)
    * @return log(x)
@@ -167,11 +181,13 @@ public abstract class FastLog {
   public abstract float fastLog2(double x);
 
   /**
-   * Calculate the logarithm to base 2, handling special cases. <p> Special cases: <ul> <li>If the
-   * argument is NaN or less than zero, then the result is NaN. <li>If the argument is positive
-   * infinity, then the result is positive infinity. <li>If the argument is positive zero or
-   * negative zero, then the result is negative infinity. </ul> <p> This can be re-implemented if
-   * {@link #fastLog(double)} can be returned in double precision.
+   * Calculate the logarithm to base 2, handling special cases.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN or less than zero, then the result is NaN.
+   * <li>If the argument is positive infinity, then the result is positive infinity. <li>If the
+   * argument is positive zero or negative zero, then the result is negative infinity. </ul>
+   *
+   * <p>This can be re-implemented if {@link #fastLog(double)} can be returned in double precision.
    *
    * @param x the argument
    * @return log(x)
@@ -181,12 +197,16 @@ public abstract class FastLog {
   }
 
   /**
-   * Calculate the logarithm to base 2. Requires the argument be finite and strictly positive. <p>
-   * Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * Calculate the logarithm to base 2. Requires the argument be finite and strictly positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
    * argument is negative, then the result is incorrect. <li>If the argument is positive infinity,
    * then the result is incorrect. <li>If the argument is positive zero or negative zero, then the
-   * result is incorrect. </ul> <p> Sub-classes may handle some of the special cases. <p> This can
-   * be re-implemented if {@link #fastLog(double)} can be returned in double precision.
+   * result is incorrect. </ul>
+   *
+   * <p>Sub-classes may handle some of the special cases.
+   *
+   * <p>This can be re-implemented if {@link #fastLog(double)} can be returned in double precision.
    *
    * @param x the argument (must be strictly positive)
    * @return log(x)
@@ -196,10 +216,11 @@ public abstract class FastLog {
   }
 
   /**
-   * Calculate the logarithm to the configured base, handling special cases. <p> Special cases: <ul>
-   * <li>If the argument is NaN or less than zero, then the result is NaN. <li>If the argument is
-   * positive infinity, then the result is positive infinity. <li>If the argument is positive zero
-   * or negative zero, then the result is negative infinity. </ul>
+   * Calculate the logarithm to the configured base, handling special cases.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN or less than zero, then the result is NaN.
+   * <li>If the argument is positive infinity, then the result is positive infinity. <li>If the
+   * argument is positive zero or negative zero, then the result is negative infinity. </ul>
    *
    * @param x the argument
    * @return log(x)
@@ -209,10 +230,14 @@ public abstract class FastLog {
 
   /**
    * Calculate the logarithm to the configured base. Requires the argument be finite and strictly
-   * positive. <p> Special cases: <ul> <li>If the argument is NaN, then the result is incorrect.
-   * <li>If the argument is negative, then the result is incorrect. <li>If the argument is positive
-   * infinity, then the result is incorrect. <li>If the argument is positive zero or negative zero,
-   * then the result is incorrect. </ul> <p> Sub-classes may handle some of the special cases.
+   * positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * argument is negative, then the result is incorrect. <li>If the argument is positive infinity,
+   * then the result is incorrect. <li>If the argument is positive zero or negative zero, then the
+   * result is incorrect. </ul>
+   *
+   * <p>Sub-classes may handle some of the special cases.
    *
    * @param x the argument (must be strictly positive)
    * @return log(x)
@@ -221,11 +246,13 @@ public abstract class FastLog {
   public abstract float fastLog(double x);
 
   /**
-   * Calculate the logarithm to the configured base, handling special cases. <p> Special cases: <ul>
-   * <li>If the argument is NaN or less than zero, then the result is NaN. <li>If the argument is
-   * positive infinity, then the result is positive infinity. <li>If the argument is positive zero
-   * or negative zero, then the result is negative infinity. </ul> <p> This can be re-implemented if
-   * {@link #log(double)} can be returned in double precision.
+   * Calculate the logarithm to the configured base, handling special cases.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN or less than zero, then the result is NaN.
+   * <li>If the argument is positive infinity, then the result is positive infinity. <li>If the
+   * argument is positive zero or negative zero, then the result is negative infinity. </ul>
+   *
+   * <p>This can be re-implemented if {@link #log(double)} can be returned in double precision.
    *
    * @param x the argument
    * @return log(x)
@@ -237,11 +264,16 @@ public abstract class FastLog {
 
   /**
    * Calculate the logarithm to the configured base. Requires the argument be finite and strictly
-   * positive. <p> Special cases: <ul> <li>If the argument is NaN, then the result is incorrect.
-   * <li>If the argument is negative, then the result is incorrect. <li>If the argument is positive
-   * infinity, then the result is incorrect. <li>If the argument is positive zero or negative zero,
-   * then the result is incorrect. </ul> <p> Sub-classes may handle some of the special cases. <p>
-   * This can be re-implemented if {@link #fastLog(double)} can be returned in double precision.
+   * positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect. <li>If the
+   * argument is negative, then the result is incorrect. <li>If the argument is positive infinity,
+   * then the result is incorrect. <li>If the argument is positive zero or negative zero, then the
+   * result is incorrect. </ul>
+   *
+   * <p>Sub-classes may handle some of the special cases.
+   *
+   * <p>This can be re-implemented if {@link #fastLog(double)} can be returned in double precision.
    *
    * @param x the argument (must be strictly positive)
    * @return log(x)

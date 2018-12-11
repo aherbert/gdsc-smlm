@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.clustering.optics.ClusteringResult;
@@ -123,9 +124,11 @@ import java.util.Queue;
 import java.util.TreeSet;
 
 /**
- * Run the OPTICS algorithm on the peak results. <p> This is an implementation of the OPTICS method.
- * Mihael Ankerst, Markus M Breunig, Hans-Peter Kriegel, and Jorg Sander. Optics: ordering points to
- * identify the clustering structure. In ACM Sigmod Record, volume 28, pages 49–60. ACM, 1999.
+ * Run the OPTICS algorithm on the peak results.
+ *
+ * <p>This is an implementation of the OPTICS method. Mihael Ankerst, Markus M Breunig, Hans-Peter
+ * Kriegel, and Jorg Sander. Optics: ordering points to identify the clustering structure. In ACM
+ * Sigmod Record, volume 28, pages 49–60. ACM, 1999.
  */
 public class OPTICS implements PlugIn {
   /**
@@ -207,7 +210,7 @@ public class OPTICS implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     /**
      * Return the value to draw.
@@ -217,7 +220,7 @@ public class OPTICS implements PlugIn {
      * @param order the order of the cluster point
      * @return The value
      */
-    abstract public float getValue(float value, int clusterId, int order);
+    public abstract float getValue(float value, int clusterId, int order);
 
     /**
      * Return true if the value can be weighted amongst neighbour pixels int the output image.
@@ -287,7 +290,7 @@ public class OPTICS implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     @Override
     public String toString() {
@@ -330,7 +333,7 @@ public class OPTICS implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     @Override
     public String toString() {
@@ -444,7 +447,7 @@ public class OPTICS implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     /**
      * @return True if the profile should be highlighted for top-cluster regions.
@@ -545,7 +548,7 @@ public class OPTICS implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     /**
      * @return True if the outline should be displayed.
@@ -619,7 +622,7 @@ public class OPTICS implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     /**
      * @return True if the spanning tree should be displayed.
@@ -684,7 +687,7 @@ public class OPTICS implements PlugIn {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
 
     @Override
     public String toString() {
@@ -713,6 +716,7 @@ public class OPTICS implements PlugIn {
   private static LUT clusterDepthLut;
   private static LUT clusterOrderLut;
   private static LUT loopLut;
+
   static {
     valueLut = LutHelper.createLut(LutColour.FIRE);
 
@@ -773,7 +777,7 @@ public class OPTICS implements PlugIn {
    * Interface for any class that can respond to cluster selected events.
    */
   private interface ClusterSelectedHandler {
-    void clusterSelected(ClusterSelectedEvent e);
+    void clusterSelected(ClusterSelectedEvent event);
   }
 
   /**
@@ -841,7 +845,9 @@ public class OPTICS implements PlugIn {
 
   private OpticsSettings.Builder inputSettings;
 
-  private boolean extraOptions, preview, debug;
+  private boolean extraOptions;
+  private boolean preview;
+  private boolean debug;
 
   // Stack to which the work is first added
   private final Workflow<OpticsSettings, Settings> workflow = new Workflow<>();
@@ -884,7 +890,7 @@ public class OPTICS implements PlugIn {
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       // Convert results to coordinates
       final StandardResultProcedure p = new StandardResultProcedure(results, DistanceUnit.PIXEL);
-      p.getXY();
+      p.getXy();
       final Rectangle bounds = results.getBounds(true);
       final OpticsManager opticsManager = new OpticsManager(p.x, p.y, bounds);
       opticsManager.setTracker(new ImageJTrackProgress());
@@ -931,10 +937,11 @@ public class OPTICS implements PlugIn {
 
     /**
      * Checks if this is the current clustering result. If new results have been created then the
-     * cached results are effectively stale and should not be trusted. <p> This should be used by
-     * any worker that keeps a copy of the cached results, e.g. when responding to
-     * ClusterSelectedEvents there is no point responding when the represented results are not
-     * current so avoiding cluster ID mismatches.
+     * cached results are effectively stale and should not be trusted.
+     *
+     * <p>This should be used by any worker that keeps a copy of the cached results, e.g. when
+     * responding to ClusterSelectedEvents there is no point responding when the represented results
+     * are not current so avoiding cluster ID mismatches.
      *
      * @return true, if is current
      */
@@ -1133,7 +1140,7 @@ public class OPTICS implements PlugIn {
   private class OpticsWorker extends BaseWorker {
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      if (current.getMinPoints() != previous.getMinPoints()) {
+      if (current.getMinpoints() != previous.getMinpoints()) {
         return false;
       }
       if (current.getOpticsMode() != previous.getOpticsMode()) {
@@ -1172,7 +1179,7 @@ public class OPTICS implements PlugIn {
       // The second item should be the OPTICS manager
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
 
-      final int minPts = settings.getMinPoints();
+      final int minPts = settings.getMinpoints();
 
       OpticsResult opticsResult;
       if (settings.getOpticsMode() == OpticsMode.FAST_OPTICS.ordinal()) {
@@ -1280,7 +1287,7 @@ public class OPTICS implements PlugIn {
                 distance = settings.getClusteringDistance();
               } else {
                 distance =
-                    opticsManager.computeGeneratingDistance(settings.getMinPoints()) * nmPerPixel;
+                    opticsManager.computeGeneratingDistance(settings.getMinpoints()) * nmPerPixel;
                 if (nmPerPixel != 1) {
                   ImageJUtils.log(TITLE + ": Default clustering distance %s nm",
                       MathUtils.rounded(distance));
@@ -1682,7 +1689,8 @@ public class OPTICS implements PlugIn {
         }
 
         // Add the clustering distance limits
-        double distance = -1, distance2 = -1;
+        double distance = -1;
+        double distance2 = -1;
         if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN.ordinal()) {
           if (settings.getOpticsMode() == OpticsMode.FAST_OPTICS.ordinal()) {
             if (settings.getClusteringDistance() > 0) {
@@ -1690,7 +1698,7 @@ public class OPTICS implements PlugIn {
             } else {
               final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
               distance =
-                  opticsManager.computeGeneratingDistance(settings.getMinPoints()) * nmPerPixel;
+                  opticsManager.computeGeneratingDistance(settings.getMinpoints()) * nmPerPixel;
             }
           } else {
             // Ensure that the distance is valid
@@ -1746,14 +1754,14 @@ public class OPTICS implements PlugIn {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent event) {
       // Ignore
     }
 
     double startX;
 
     @Override
-    public void mousePressed(final MouseEvent e) {
+    public void mousePressed(final MouseEvent event) {
       if (!eventWorkflow.isRunning()) {
         if (lastCanvas != null) {
           lastCanvas.removeMouseListener(this);
@@ -1762,24 +1770,24 @@ public class OPTICS implements PlugIn {
         return;
       }
 
-      startX = getX(e);
+      startX = getX(event);
     }
 
-    private double getX(MouseEvent e) {
+    private double getX(MouseEvent event) {
       final PlotCanvas pc = lastCanvas;
       if (pc == null) {
         return Double.NaN;
       }
       final Plot plot = pc.getPlot();
-      return plot.descaleX(e.getX());
+      return plot.descaleX(event.getX());
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent event) {
       if (!inputSettings.getOpticsEventSettingsOrBuilder().getPlotCreateSelection()) {
         return;
       }
-      final double endX = getX(e);
+      final double endX = getX(event);
       if (Double.isNaN(startX) || Double.isNaN(endX)) {
         return;
       }
@@ -1793,7 +1801,8 @@ public class OPTICS implements PlugIn {
             return null;
           }
           // Allow drag both ways
-          int start, end;
+          int start;
+          int end;
           if (endX < startX) {
             start = (int) endX;
             end = (int) startX;
@@ -1808,19 +1817,19 @@ public class OPTICS implements PlugIn {
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void clusterSelected(ClusterSelectedEvent e) {
+    public void clusterSelected(ClusterSelectedEvent event) {
       // Ignore events generated by the plot
-      if (e.getSource() == id) {
+      if (event.getSource() == id) {
         return;
       }
       if (!inputSettings.getOpticsEventSettingsOrBuilder().getPlotShowSelection()) {
@@ -1832,7 +1841,7 @@ public class OPTICS implements PlugIn {
         return;
       }
 
-      final int[] selectedClusters = e.getClusters();
+      final int[] selectedClusters = event.getClusters();
       final int[] parents = clusteringResult.getParents(selectedClusters);
       if (parents == null || parents.length == 0) {
         return;
@@ -1854,7 +1863,8 @@ public class OPTICS implements PlugIn {
       }
 
       // Find the range of the profile
-      double minR = Double.POSITIVE_INFINITY, maxR = 0;
+      double minR = Double.POSITIVE_INFINITY;
+      double maxR = 0;
 
       // The scale should not matter as the result is cached
       final double[] profile = clusteringResult.getProfile(Double.NaN);
@@ -1940,7 +1950,7 @@ public class OPTICS implements PlugIn {
     int lastSpanningTreeMode = -1;
     Overlay spanningTree = null;
     double lastLambda = 0;
-    int lastMinPoints;
+    int lastMinpoints;
     float[] loop = null;
 
     // For detecting the cluster from mouse click
@@ -1980,7 +1990,7 @@ public class OPTICS implements PlugIn {
         image = null;
         result = false;
       }
-      if (requiresLoop(current) && (current.getMinPoints() != lastMinPoints
+      if (requiresLoop(current) && (current.getMinpoints() != lastMinpoints
           || (extraOptions && current.getLambda() != lastLambda))) {
         // We can only cache the loop values if the minPts is the same
         loop = null;
@@ -2232,7 +2242,7 @@ throw new NotImplementedException();
 
             // Get the coordinates
             if (sp.x == null) {
-              sp.getXY();
+              sp.getXy();
             }
 
             spanningTree = new Overlay();
@@ -2242,7 +2252,8 @@ throw new NotImplementedException();
             // Create a colour to match the LUT of the image
             LutMapper mapper;
 
-            boolean useMap = false, useLoop = false;
+            boolean useMap = false;
+            boolean useLoop = false;
             int[] order = null;
             if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal()) {
               // We will use the order for the colour
@@ -2352,8 +2363,8 @@ throw new NotImplementedException();
       if (requiresLoop(settings) && loop == null) {
         synchronized (opticsManager) {
           lastLambda = (extraOptions) ? settings.getLambda() : 3;
-          lastMinPoints = settings.getMinPoints();
-          loop = opticsManager.loop(lastMinPoints, lastLambda, true);
+          lastMinpoints = settings.getMinpoints();
+          loop = opticsManager.loop(lastMinpoints, lastLambda, true);
         }
         final float[] limits = MathUtils.limits(loop);
         ImageJUtils.log("LoOP range: %s - %s", MathUtils.rounded(limits[0]),
@@ -2388,7 +2399,7 @@ throw new NotImplementedException();
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent event) {
       if (!eventWorkflow.isRunning()) {
         if (image != null) {
           final ImagePlus imp = image.getImagePlus();
@@ -2408,8 +2419,8 @@ throw new NotImplementedException();
       }
       final ImagePlus imp = image.getImagePlus();
       final ImageCanvas ic = imp.getCanvas();
-      final double cx = ic.offScreenXD(e.getX());
-      final double cy = ic.offScreenYD(e.getY());
+      final double cx = ic.offScreenXD(event.getX());
+      final double cy = ic.offScreenYD(event.getY());
 
       // Convert to pixel coordinates using the scale
       final float x = (float) (cx / image.getScale());
@@ -2476,27 +2487,27 @@ throw new NotImplementedException();
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void clusterSelected(ClusterSelectedEvent e) {
+    public void clusterSelected(ClusterSelectedEvent event) {
       if (image == null) {
         return;
       }
@@ -2513,7 +2524,7 @@ throw new NotImplementedException();
         return;
       }
 
-      final int[] clusters = e.getClusters();
+      final int[] clusters = event.getClusters();
       Roi roi = null;
       final ConvexHull[] hulls = clusteringResult.getHulls();
 
@@ -2630,7 +2641,8 @@ throw new NotImplementedException();
     int id;
     int size;
     int level;
-    double area, density;
+    double area;
+    double density;
     // ConvexHull hull;
     Rectangle2D bounds;
     String text;
@@ -2912,12 +2924,12 @@ throw new NotImplementedException();
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent event) {
       if (!eventWorkflow.isRunning()) {
         if (tw != null) {
           final TextPanel tp = tw.getTextPanel();
@@ -2959,31 +2971,32 @@ throw new NotImplementedException();
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent event) {
       // Ignore
     }
 
     @Override
-    public void clusterSelected(ClusterSelectedEvent e) {
-      if (tw == null || e.getSource() == id) {
+    public void clusterSelected(ClusterSelectedEvent event) {
+      if (tw == null || event.getSource() == id) {
         return;
       }
       if (!inputSettings.getOpticsEventSettingsOrBuilder().getTableShowSelection()) {
         return;
       }
       final TextPanel textPanel = tw.getTextPanel();
-      int startLine = -1, endLine = -1;
-      final int[] clusters = e.getClusters();
+      int startLine = -1;
+      int endLine = -1;
+      final int[] clusters = event.getClusters();
       if (clusters == null || clusters.length == 0) {
         textPanel.resetSelection();
       } else {
@@ -3073,7 +3086,7 @@ throw new NotImplementedException();
     }
 
     @Override
-    public void clusterSelected(ClusterSelectedEvent e) {
+    public void clusterSelected(ClusterSelectedEvent event) {
       saveOldLocation();
       if (!display) {
         return;
@@ -3082,7 +3095,7 @@ throw new NotImplementedException();
         return;
       }
 
-      final int[] selectedClusters = e.getClusters();
+      final int[] selectedClusters = event.getClusters();
       final int[] parents = clusteringResult.getParents(selectedClusters);
       if (parents == null || parents.length == 0) {
         if (table != null) {
@@ -3142,7 +3155,7 @@ throw new NotImplementedException();
 
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      if (current.getMinPoints() != previous.getMinPoints()) {
+      if (current.getMinpoints() != previous.getMinpoints()) {
         newResults();
         return false;
       }
@@ -3177,7 +3190,7 @@ throw new NotImplementedException();
       // The second item should be the OPTICS manager
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
 
-      final int minPts = settings.getMinPoints();
+      final int minPts = settings.getMinpoints();
       final int k = minPts - 1; // Since min points includes the actual point
       final double fractionNoise = settings.getFractionNoise();
 
@@ -3283,7 +3296,7 @@ throw new NotImplementedException();
   private class DBSCANWorker extends BaseWorker {
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      if (current.getMinPoints() != previous.getMinPoints()) {
+      if (current.getMinpoints() != previous.getMinpoints()) {
         return false;
       }
       if (clusteringDistanceChange(current.getClusteringDistance(),
@@ -3303,7 +3316,7 @@ throw new NotImplementedException();
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
 
       double clusteringDistance = Math.abs(settings.getClusteringDistance());
-      final int minPts = settings.getMinPoints();
+      final int minPts = settings.getMinpoints();
       if (clusteringDistance > 0) {
         // Convert clustering distance to pixels
         final double nmPerPixel = getNmPerPixel(results);
@@ -3489,7 +3502,7 @@ throw new NotImplementedException();
     } else {
       gd.addMessage("--- " + TITLE + " ---");
     }
-    gd.addNumericField("Min_points", inputSettings.getMinPoints(), 0);
+    gd.addNumericField("Min_points", inputSettings.getMinpoints(), 0);
     if (isDBSCAN) {
       // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
       // profile
@@ -3757,7 +3770,7 @@ throw new NotImplementedException();
 
     // Record the options for macros since the NonBlocking dialog does not
     if (Recorder.record) {
-      Recorder.recordOption("Min_points", Integer.toString(inputSettings.getMinPoints()));
+      Recorder.recordOption("Min_points", Integer.toString(inputSettings.getMinpoints()));
       if (isDBSCAN) {
         // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
         // profile
@@ -3889,7 +3902,7 @@ throw new NotImplementedException();
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       // if (e == null)
       // {
       // // This happens when the dialog is first shown and can be ignored.
@@ -3899,7 +3912,7 @@ throw new NotImplementedException();
       // }
 
       if (debug) {
-        System.out.println("dialogItemChanged: " + e);
+        System.out.println("dialogItemChanged: " + event);
       }
 
       // A previous run may have been cancelled so we have to handle this.
@@ -3932,8 +3945,8 @@ throw new NotImplementedException();
 
       // If the change was from a checkbox or selection box then we do not have to delay
       boolean delay = true;
-      if (e != null && e.getSource() != null) {
-        final Object source = e.getSource();
+      if (event != null && event.getSource() != null) {
+        final Object source = event.getSource();
         if (source instanceof Checkbox || source instanceof Choice) {
           delay = false;
         }
@@ -3967,7 +3980,7 @@ throw new NotImplementedException();
 
     /** {@inheritDoc} */
     @Override
-    public void optionCollected(OptionCollectedEvent e) {
+    public void optionCollected(OptionCollectedEvent event) {
       // This occurs when any of the additional options have changed.
       // We just add the work with no delay.
       createWork(false);
@@ -4021,7 +4034,7 @@ throw new NotImplementedException();
 
     @Override
     boolean readSettings(GenericDialog gd) {
-      inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
+      inputSettings.setMinpoints((int) Math.abs(gd.getNextNumber()));
       inputSettings.setOpticsMode(gd.getNextChoiceIndex());
       inputSettings.setClusteringMode(gd.getNextChoiceIndex());
       inputSettings.setShowTable(gd.getNextBoolean());
@@ -4066,7 +4079,7 @@ throw new NotImplementedException();
 
     @Override
     boolean readSettings(GenericDialog gd) {
-      inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
+      inputSettings.setMinpoints((int) Math.abs(gd.getNextNumber()));
       inputSettings.setFractionNoise(Math.abs(gd.getNextNumber() / 100));
       inputSettings.setSamples((int) Math.abs(gd.getNextNumber()));
       inputSettings.setSampleFraction(Math.abs(gd.getNextNumber() / 100));

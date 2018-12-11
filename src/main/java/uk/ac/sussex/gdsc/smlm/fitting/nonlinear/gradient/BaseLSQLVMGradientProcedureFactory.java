@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -30,7 +31,9 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  */
 abstract class BaseLSQLVMGradientProcedureFactory {
   /**
-   * Create a LSQ LVM procedure. <p> Instance methods for testing.
+   * Create a LSQ LVM procedure.
+   *
+   * <p>Instance methods for testing.
    *
    * @param y the y
    * @param func the function
@@ -41,7 +44,9 @@ abstract class BaseLSQLVMGradientProcedureFactory {
   }
 
   /**
-   * Create a LSQ LVM procedure. <p> Instance methods for testing.
+   * Create a LSQ LVM procedure.
+   *
+   * <p>Instance methods for testing.
    *
    * @param y the y
    * @param b the pre-computed background (can be null)

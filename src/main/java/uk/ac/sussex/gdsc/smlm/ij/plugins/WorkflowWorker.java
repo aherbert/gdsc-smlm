@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
@@ -34,8 +35,9 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
  */
 public abstract class WorkflowWorker<S, R> {
   /**
-   * Compare the settings and return false if any settings that the work depends on have changed <p>
-   * Both objects will not be null.
+   * Compare the settings and return false if any settings that the work depends on have changed.
+   *
+   * <p>Both objects will not be null.
    *
    * @param current the current
    * @param previous the previous
@@ -44,8 +46,9 @@ public abstract class WorkflowWorker<S, R> {
   public abstract boolean equalSettings(S current, S previous);
 
   /**
-   * Compare the results and return false if any results that the work depends on have changed <p>
-   * Either object could be null (if no results have yet been generated for this work).
+   * Compare the results and return false if any results that the work depends on have changed.
+   *
+   * <p>Either object could be null (if no results have yet been generated for this work).
    *
    * @param current the current
    * @param previous the previous

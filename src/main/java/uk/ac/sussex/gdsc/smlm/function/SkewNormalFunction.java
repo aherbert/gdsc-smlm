@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -29,7 +30,9 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Calculate the value of the Skew Normal distribution <p>
+ * Calculate the value of the Skew Normal distribution
+ *
+ * <p>
  *
  * @see <a href=
  *      "http://en.wikipedia.org/wiki/Skew_normal_distribution">http://en.wikipedia.org/wiki/Skew_normal_distribution</a>

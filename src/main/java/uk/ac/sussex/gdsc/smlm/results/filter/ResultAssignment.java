@@ -21,15 +21,18 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 
 /**
  * Stores a base assignment between two identified points, the distance between them and the score
- * for the match. <p> This class is used to store the data for a fractional assignment between a
- * single predicted point and many actual target points. It can be converted to a fractional
- * assignment by specifying a predicted Id.
+ * for the match.
+ *
+ * <p>This class is used to store the data for a fractional assignment between a single predicted
+ * point and many actual target points. It can be converted to a fractional assignment by specifying
+ * a predicted Id.
  */
 public class ResultAssignment implements Comparable<ResultAssignment> {
   /**

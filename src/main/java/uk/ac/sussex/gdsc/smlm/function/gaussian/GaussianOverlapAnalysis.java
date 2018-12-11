@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -29,10 +30,11 @@ import uk.ac.sussex.gdsc.smlm.function.Erf;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Compute the overlap between 2D Gaussian functions. <p> Given an input 2D Gaussian a region is
- * created that covers a range of the function. The square region is masked using a fraction of the
- * expected sum of the function within the range. The overlap of other functions within this region
- * can be computed.
+ * Compute the overlap between 2D Gaussian functions.
+ *
+ * <p>Given an input 2D Gaussian a region is created that covers a range of the function. The square
+ * region is masked using a fraction of the expected sum of the function within the range. The
+ * overlap of other functions within this region can be computed.
  */
 public class GaussianOverlapAnalysis {
   /**
@@ -45,10 +47,14 @@ public class GaussianOverlapAnalysis {
   private final AstigmatismZModel zModel;
   private final double[] params0;
 
-  private final int maxx, maxy, size;
-  private final double centrex, centrey;
+  private final int maxx;
+  private final int maxy;
+  private final int size;
+  private final double centrex;
+  private final double centrey;
 
-  private double[] data = null, overlap = null;
+  private double[] data = null;
+  private double[] overlap = null;
   private boolean[] mask = null;
 
   private double fraction = 0.95;
@@ -83,8 +89,9 @@ public class GaussianOverlapAnalysis {
   }
 
   /**
-   * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation. <p>
-   * The range is clipped to 1 to Integer.MAX_VALUE.
+   * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation.
+   *
+   * <p>The range is clipped to 1 to Integer.MAX_VALUE.
    *
    * @param s the standard deviation
    * @param range the range factor
@@ -102,8 +109,9 @@ public class GaussianOverlapAnalysis {
   }
 
   /**
-   * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation. <p>
-   * The range is clipped to 1 to max.
+   * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation.
+   *
+   * <p>The range is clipped to 1 to max.
    *
    * @param s the standard deviation
    * @param range the range factor
@@ -133,9 +141,11 @@ public class GaussianOverlapAnalysis {
 
   /**
    * Add the Gaussian function data to the overlap region. This is the region that contains the
-   * input function within the range defined in the constructor. <p> The square region is masked
-   * using the expected sum of the function within the range. The overlap of other functions within
-   * this masked region can be computed, or within the square region.
+   * input function within the range defined in the constructor.
+   *
+   * <p>The square region is masked using the expected sum of the function within the range. The
+   * overlap of other functions within this masked region can be computed, or within the square
+   * region.
    *
    * @param params The parameters for the Gaussian (can be multiple peaks)
    * @param withinMask Set to true to only compute the overlap within the mask. This effects the
@@ -236,7 +246,9 @@ public class GaussianOverlapAnalysis {
   }
 
   /**
-   * Get the overlap data. <p> Computes the sum of the central function, and the sum of the overlap
+   * Get the overlap data.
+   *
+   * <p>Computes the sum of the central function, and the sum of the overlap
    *
    * @return The data [sum f1, sum overlap]
    */
@@ -266,11 +278,14 @@ public class GaussianOverlapAnalysis {
   }
 
   /**
-   * Get the weighted background <p> Computes the convolution of the central function and the
-   * overlap for the central pixel of the region. This is an estimate of the background contributed
-   * to the region by overlapping functions. <p> The result of this function is effected by how the
-   * overlap was computed, either within the mask or within the entire square region (see
-   * {@link #add(double[], boolean)})
+   * Get the weighted background.
+   *
+   * <p>Computes the convolution of the central function and the overlap for the central pixel of
+   * the region. This is an estimate of the background contributed to the region by overlapping
+   * functions.
+   *
+   * <p>The result of this function is effected by how the overlap was computed, either within the
+   * mask or within the entire square region (see {@link #add(double[], boolean)})
    *
    * @return The weighted background
    */

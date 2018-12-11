@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
@@ -41,13 +42,16 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
 
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using
- * maximum likelihood estimation. <p> This solver computes a modified Chi-squared expression to
- * perform Maximum Likelihood Estimation assuming Poisson model. See Laurence &amp; Chromy (2010)
- * Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data must be Poisson
- * distributed for this to be relevant. <p> Per observation variances can be added to both the
- * target x data and the function value to optimise the LLR sCMOS function for Poisson data. See
- * Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule
- * localization algorithms. Nature Methods 10, 653–658.
+ * maximum likelihood estimation.
+ *
+ * <p>This solver computes a modified Chi-squared expression to perform Maximum Likelihood
+ * Estimation assuming Poisson model. See Laurence &amp; Chromy (2010) Efficient maximum likelihood
+ * estimator. Nature Methods 7, 338-339. The input data must be Poisson distributed for this to be
+ * relevant.
+ *
+ * <p>Per observation variances can be added to both the target x data and the function value to
+ * optimise the LLR sCMOS function for Poisson data. See Huang et al, (2015). Video-rate nanoscopy
+ * using sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
  */
 public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     implements MLEFunctionSolver {

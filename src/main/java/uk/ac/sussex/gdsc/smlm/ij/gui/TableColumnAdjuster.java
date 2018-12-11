@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import java.awt.Component;
@@ -338,15 +339,15 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
   // Implement the PropertyChangeListener
   //
   @Override
-  public void propertyChange(PropertyChangeEvent e) {
+  public void propertyChange(PropertyChangeEvent event) {
     // When the TableModel changes we need to update the listeners
     // and column widths
 
-    if ("model".equals(e.getPropertyName())) {
-      TableModel model = (TableModel) e.getOldValue();
+    if ("model".equals(event.getPropertyName())) {
+      TableModel model = (TableModel) event.getOldValue();
       model.removeTableModelListener(this);
 
-      model = (TableModel) e.getNewValue();
+      model = (TableModel) event.getNewValue();
       model.addTableModelListener(this);
       adjustColumns();
     }
@@ -356,7 +357,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
   // Implement the TableModelListener
   //
   @Override
-  public void tableChanged(final TableModelEvent e) {
+  public void tableChanged(final TableModelEvent event) {
     if (!isColumnDataIncluded) {
       return;
     }
@@ -368,13 +369,13 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
       public void run() {
         // A cell has been updated
 
-        final int column = table.convertColumnIndexToView(e.getColumn());
+        final int column = table.convertColumnIndexToView(event.getColumn());
 
-        if (e.getType() == TableModelEvent.UPDATE && column != -1) {
+        if (event.getType() == TableModelEvent.UPDATE && column != -1) {
           // Only need to worry about an increase in width for this cell
 
           if (isOnlyAdjustLarger) {
-            final int row = e.getFirstRow();
+            final int row = event.getFirstRow();
             final TableColumn tableColumn = table.getColumnModel().getColumn(column);
 
             if (tableColumn.getResizable()) {
@@ -440,7 +441,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent event) {
       // Handle selected column(s) width change actions
 
       if (isSelectedColumn) {
@@ -476,7 +477,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent event) {
       if (isToggleDynamic) {
         setDynamicAdjustment(!isDynamicAdjustment);
         return;

@@ -21,14 +21,17 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Class for computing various Bessel functions <p> The implementation is based upon that presented
- * in: Numerical Recipes in C++, The Art of Scientific Computing, Second Edition, W.H. Press, S.A.
- * Teukolsky, W.T. Vetterling, B.P. Flannery (Cambridge University Press, Cambridge, 2002).
+ * Class for computing various Bessel functions
+ *
+ * <p>The implementation is based upon that presented in: Numerical Recipes in C++, The Art of
+ * Scientific Computing, Second Edition, W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
+ * (Cambridge University Press, Cambridge, 2002).
  */
 public class Bessel {
   /**
@@ -93,8 +96,9 @@ public class Bessel {
   }
 
   /**
-   * Compute the second order Bessel function of the first kind. <p> This is stable when
-   * {@code abs(x) > n}.
+   * Compute the second order Bessel function of the first kind.
+   *
+   * <p>This is stable when {@code abs(x) > n}.
    *
    * @param x the x value
    * @return the Bessel function J2
@@ -115,7 +119,9 @@ public class Bessel {
    * @return the modified Bessel function I0
    */
   public static double I0(final double x) {
-    double ax, ans, y;
+    double ax;
+    double ans;
+    double y;
     if ((ax = Math.abs(x)) < 3.75) {
       y = x / 3.75;
       y *= y;
@@ -137,7 +143,9 @@ public class Bessel {
    * @return the modified Bessel function I1
    */
   public static double I1(final double x) {
-    double ax, ans, y;
+    double ax;
+    double ans;
+    double y;
 
     if ((ax = Math.abs(x)) < 3.75) {
       y = x / 3.75;

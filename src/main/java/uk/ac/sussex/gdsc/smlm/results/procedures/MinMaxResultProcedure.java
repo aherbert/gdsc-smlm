@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -31,7 +32,8 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
  * Class to get min/max value in a set of results
  */
 public class MinMaxResultProcedure implements PeakResultProcedure {
-  private float min, max;
+  private float min;
+  private float max;
   private final PeakResultValue value;
 
   /**

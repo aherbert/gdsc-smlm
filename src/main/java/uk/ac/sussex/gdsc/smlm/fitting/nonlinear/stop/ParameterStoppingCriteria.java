@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -30,10 +31,14 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * Defines the stopping criteria for the
- * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class. <p> Stop when successive
- * iterations with a reduced error move the fitted coordinates by less than a specified distance.
- * <p> The criteria also ensure that signal, coordinates and peak-widths are held positive,
- * otherwise fitting is stopped.
+ * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
+ *
+ * <p>Stop when successive iterations with a reduced error move the fitted coordinates by less than
+ * a specified distance.
+ *
+ *
+ * <p>The criteria also ensure that signal, coordinates and peak-widths are held positive, otherwise
+ * fitting is stopped.
  */
 public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
   private int significantDigits = 3;

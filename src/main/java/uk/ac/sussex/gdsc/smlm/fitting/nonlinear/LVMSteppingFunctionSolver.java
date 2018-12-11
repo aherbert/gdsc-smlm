@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -251,8 +252,10 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver {
   }
 
   /**
-   * {@inheritDoc} <p> Note: In contrast to {@link #prepareFunctionValue(double[], double[])} this
-   * does not create the gradient procedure.
+   * {@inheritDoc}
+   *
+   * <p>Note: In contrast to {@link #prepareFunctionValue(double[], double[])} this does not create
+   * the gradient procedure.
    */
   @Override
   protected double[] prepareFunctionFisherInformationMatrix(double[] y, double[] a) {

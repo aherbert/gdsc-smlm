@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -33,9 +34,12 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 /**
- * Contain the calibration settings for the microscope <p> The calibration has flags to indicate
- * that a valid value has been set for each property. If these are false then the property get
- * method can optionally throw an exception. <p>
+ * Contain the calibration settings for the microscope
+ *
+ * <p>The calibration has flags to indicate that a valid value has been set for each property. If
+ * these are false then the property get method can optionally throw an exception.
+ *
+ * <p>
  *
  * @deprecated This class has been replaced with generated objects using Google protocol buffers. It
  *             is left to support deserialisation of legacy files.
@@ -379,10 +383,11 @@ class Calibration implements Cloneable {
   @Deprecated
   boolean emCCD;
   /**
-   * The camera amplification (ADUs/e-) used when modelling a microscope camera. <p> Note that the
-   * camera noise model assumes that electrons are converted to ADUs by amplification that is not
-   * perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided by
-   * the quantum efficiency (e-/photon).
+   * The camera amplification (ADUs/e-) used when modelling a microscope camera.
+   *
+   * <p>Note that the camera noise model assumes that electrons are converted to ADUs by
+   * amplification that is not perfect (i.e. it has noise). The amplification is equal to the gain
+   * (ADUs/photon) divided by the quantum efficiency (e-/photon).
    */
   private double amplification = 0;
 
@@ -683,10 +688,11 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Get the camera amplification (ADUs/e-) used when modelling a microscope camera. <p> Note that
-   * the camera noise model assumes that electrons are converted to ADUs by amplification that is
-   * not perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided
-   * by the quantum efficiency (e-/photon).
+   * Get the camera amplification (ADUs/e-) used when modelling a microscope camera.
+   *
+   * <p>Note that the camera noise model assumes that electrons are converted to ADUs by
+   * amplification that is not perfect (i.e. it has noise). The amplification is equal to the gain
+   * (ADUs/photon) divided by the quantum efficiency (e-/photon).
    *
    * @return the amplification
    * @throws IllegalStateException if the missing field exceptions is enabled and the field has not
@@ -700,10 +706,11 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Set the camera amplification (ADUs/e-) used when modelling a microscope camera. <p> Note that
-   * the camera noise model assumes that electrons are converted to ADUs by amplification that is
-   * not perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided
-   * by the quantum efficiency (e-/photon).
+   * Set the camera amplification (ADUs/e-) used when modelling a microscope camera.
+   *
+   * <p>Note that the camera noise model assumes that electrons are converted to ADUs by
+   * amplification that is not perfect (i.e. it has noise). The amplification is equal to the gain
+   * (ADUs/photon) divided by the quantum efficiency (e-/photon).
    *
    * @param amplification the new amplification
    */
@@ -801,8 +808,9 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Gets a distance converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets a distance converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param toDistanceUnit the distance unit
    * @return the distance converter
@@ -816,8 +824,9 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Gets intensity converters to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets intensity converters to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param toIntensityUnit the intensity unit
    * @return the intensity converters (gain, gain + bias)
@@ -831,8 +840,9 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Gets a angle converter to update values. <p> If the conversion is not possible then an
-   * exception is thrown.
+   * Gets a angle converter to update values.
+   *
+   * <p>If the conversion is not possible then an exception is thrown.
    *
    * @param toAngleUnit the angle unit
    * @return the angle converter
@@ -846,8 +856,10 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Gets a distance converter to update values. <p> If the conversion is not possible then an
-   * identity converter will be returned with the current units.
+   * Gets a distance converter to update values.
+   *
+   * <p>If the conversion is not possible then an identity converter will be returned with the
+   * current units.
    *
    * @param toDistanceUnit the distance unit
    * @return the distance converter
@@ -861,8 +873,10 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Gets a intensity converter to update values. <p> If the conversion is not possible then an
-   * identity converter will be returned with the current units.
+   * Gets a intensity converter to update values.
+   *
+   * <p>If the conversion is not possible then an identity converter will be returned with the
+   * current units.
    *
    * @param toIntensityUnit the intensity unit
    * @return the intensity converter
@@ -876,8 +890,10 @@ class Calibration implements Cloneable {
   }
 
   /**
-   * Gets a angle converter to update values. <p> If the conversion is not possible then an identity
-   * converter will be returned with the current units.
+   * Gets a angle converter to update values.
+   *
+   * <p>If the conversion is not possible then an identity converter will be returned with the
+   * current units.
    *
    * @param toAngleUnit the angle unit
    * @return the angle converter

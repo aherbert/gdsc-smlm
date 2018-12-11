@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -29,7 +30,9 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Wraps an image source and allows data to be interlaced within regular blocks.
  */
 public class InterlacedImageSource extends ImageSource {
-  private final int start, size, skip;
+  private final int start;
+  private final int size;
+  private final int skip;
   private final ImageSource imageSource;
 
   // Record the number of frames returned from the current block
@@ -37,8 +40,10 @@ public class InterlacedImageSource extends ImageSource {
   private int counter;
 
   /**
-   * Create a new interlaced image source using the given image source <p> Note: The input source
-   * cannot be aggregated as the data to interlace is assumed to be contiguous from frame 1.
+   * Create a new interlaced image source using the given image source.
+   *
+   * <p>Note: The input source cannot be aggregated as the data to interlace is assumed to be
+   * contiguous from frame 1.
    *
    * @param imageSource The image source of interlaced data (must not be null or an
    *        AggregatedImageSource)

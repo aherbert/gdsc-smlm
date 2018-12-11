@@ -21,13 +21,15 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
  * Filter results using Width. Assume XY width are different.
  */
 public class MultiFilterXYWidthComponent extends MultiFilterComponent {
-  private final float lowerSigmaThreshold, upperSigmaThreshold;
+  private final float lowerSigmaThreshold;
+  private final float upperSigmaThreshold;
 
   /**
    * Instantiates a new multi filter XY width component.

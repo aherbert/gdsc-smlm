@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -138,7 +139,8 @@ public class DrawClusters implements PlugIn {
     if (imp == null) {
       // Create a default image using 100 pixels as the longest edge
       final double maxD = (bounds.width > bounds.height) ? bounds.width : bounds.height;
-      int w, h;
+      int w;
+      int h;
       if (maxD == 0) {
         // Note that imageSize can be zero (for auto sizing)
         w = h = (imageSize == 0) ? 20 : imageSize;
@@ -181,17 +183,17 @@ public class DrawClusters implements PlugIn {
     final double[] values = new double[count];
     for (int i = 0; i < count; i++) {
       final Trace trace = traces[i];
-      final int nPoints = trace.size();
-      final float[] xPoints = new float[nPoints];
-      final float[] yPoints = new float[nPoints];
+      final int npoints = trace.size();
+      final float[] xpoints = new float[npoints];
+      final float[] ypoints = new float[npoints];
       int j = 0;
       if (frames != null) {
-        frames[i] = new int[nPoints];
+        frames[i] = new int[npoints];
       }
       for (int k = 0; k < trace.size(); k++) {
         final PeakResult result = trace.get(k);
-        xPoints[j] = (result.getXPosition() - bounds.x) * xScale;
-        yPoints[j] = (result.getYPosition() - bounds.y) * yScale;
+        xpoints[j] = (result.getXPosition() - bounds.x) * xScale;
+        ypoints[j] = (result.getYPosition() - bounds.y) * yScale;
         if (frames != null) {
           frames[i][j] = result.getFrame();
         }
@@ -199,12 +201,12 @@ public class DrawClusters implements PlugIn {
       }
       Roi roi;
       if (myDrawLines) {
-        roi = new PolygonRoi(xPoints, yPoints, nPoints, Roi.POLYLINE);
+        roi = new PolygonRoi(xpoints, ypoints, npoints, Roi.POLYLINE);
         if (splineFit) {
           ((PolygonRoi) roi).fitSpline();
         }
       } else {
-        roi = new PointRoi(xPoints, yPoints, nPoints);
+        roi = new PointRoi(xpoints, ypoints, npoints);
         ((PointRoi) roi).setShowLabels(false);
       }
 

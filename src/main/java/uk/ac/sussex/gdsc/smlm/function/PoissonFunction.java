@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
@@ -28,11 +29,15 @@ import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.special.Gamma;
 
 /**
- * Implements the probability density function for a Poisson distribution. <p> This is a simple
- * implementation of the LikelihoodFunction interface. <p> The likelihood function is designed to
- * model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a Poisson process of
- * emitted light, converted to electrons on the camera chip, amplified by a gain and then read. <p>
- * This function is a scaled Poisson PMF, i.e. using a gain of 2 the integers 1, 3, 5, etc should
+ * Implements the probability density function for a Poisson distribution.
+ *
+ * <p>This is a simple implementation of the LikelihoodFunction interface.
+ *
+ * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
+ * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
+ * amplified by a gain and then read.
+ *
+ * <p>This function is a scaled Poisson PMF, i.e. using a gain of 2 the integers 1, 3, 5, etc should
  * have no probability from the scaled Poisson PMF.
  */
 public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunction {
@@ -61,7 +66,9 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
   }
 
   /**
-   * {@inheritDoc} <p> This is a PMF.
+   * {@inheritDoc}
+   *
+   * <p>This is a PMF.
    *
    * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
    */

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ga;
 
 /**
@@ -86,8 +87,10 @@ public interface Chromosome<T extends Comparable<T>> {
   public void setFitness(T fitness);
 
   /**
-   * Get the fitness <p> This should be null for an uninitialised score. The comparable should rank
-   * in ascending order with the first item the fittest individual.
+   * Get the fitness.
+   *
+   * <p>This should be null for an uninitialised score. The comparable should rank in ascending
+   * order with the first item the fittest individual.
    *
    * @return The fitness of the sequence
    */

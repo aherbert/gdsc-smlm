@@ -21,14 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
- * Calculates the Fisher information matrix for a Poisson process. <p> Ref: Smith et al, (2010).
- * Fast, single-molecule localisation that achieves theoretically minimum uncertainty. Nature
- * Methods 7, 373-375 (supplementary note), Eq. 12.
+ * Calculates the Fisher information matrix for a Poisson process.
+ *
+ * <p>Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+ * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class PoissonGradientProcedure5 extends PoissonGradientProcedure {
   /**

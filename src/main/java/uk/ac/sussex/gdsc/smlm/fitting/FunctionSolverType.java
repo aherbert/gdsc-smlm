@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
@@ -46,5 +47,5 @@ public enum FunctionSolverType {
    *
    * @return the name
    */
-  abstract public String getName();
+  public abstract String getName();
 }

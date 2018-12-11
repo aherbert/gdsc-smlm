@@ -21,14 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import ij.process.FloatProcessor;
 
 /**
  * Computes a convolution in the spatial domain for each point within the array. Pixels outside the
- * array are set to the value of the appropriate edge pixel. <p> Adapted from
- * {@link ij.plugin.filter.Convolver}
+ * array are set to the value of the appropriate edge pixel.
+ *
+ * <p>Adapted from {@link ij.plugin.filter.Convolver}
  */
 public class KernelFilter extends BaseWeightedFilter {
   /** The kernel. */
@@ -118,7 +120,9 @@ public class KernelFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the convolution. <p> Note: the input data is destructively modified
+   * Compute the convolution.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -129,7 +133,9 @@ public class KernelFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the convolution. <p> Note: the input data is destructively modified
+   * Compute the convolution.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data the data
    * @param maxx the maxx
@@ -149,7 +155,9 @@ public class KernelFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Compute the convolution. <p> Note: the input data is destructively modified
+   * Compute the convolution.
+   *
+   * <p>Note: the input data is destructively modified
    *
    * @param data the data
    * @param maxx the maxx

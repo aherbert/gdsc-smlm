@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.search;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -52,9 +53,11 @@ public class SearchSpace {
   private TrackProgress tracker = null;
 
   /**
-   * The refinement mode for the range search. <p> At each stage the refinement search enumerates a
-   * range for each dimension using the current interval. The optimum from this search space can be
-   * refined before the dimension range is reduced.
+   * The refinement mode for the range search.
+   *
+   * <p>At each stage the refinement search enumerates a range for each dimension using the current
+   * interval. The optimum from this search space can be refined before the dimension range is
+   * reduced.
    */
   public enum RefinementMode {
     /**
@@ -93,15 +96,19 @@ public class SearchSpace {
   }
 
   /**
-   * Search the configured search space until convergence of the optimum. <p> At each iteration the
-   * search will enumerate all points in the configured search space and find the optimum. If at the
-   * bounds of the range in any dimension then the range is re-centred and the process repeated.
-   * During repeats only those points that have not yet been evaluated will be passed to the score
-   * function. If not at the bounds then the range is re-centred and the width of the range reduced.
-   * <p> If a seed population was provided then the first step is to re-centre to the optimum of the
-   * seed population and the range refined/reduced as per the refinement mode parameter. <p> The
-   * process iterates until the range cannot be reduced in size, or convergence is reached. The
-   * input dimensions are modified during the search. Use the clone(SearchDimension[]) method to
+   * Search the configured search space until convergence of the optimum.
+   *
+   * <p>At each iteration the search will enumerate all points in the configured search space and
+   * find the optimum. If at the bounds of the range in any dimension then the range is re-centred
+   * and the process repeated. During repeats only those points that have not yet been evaluated
+   * will be passed to the score function. If not at the bounds then the range is re-centred and the
+   * width of the range reduced.
+   *
+   * <p>If a seed population was provided then the first step is to re-centre to the optimum of the
+   * seed population and the range refined/reduced as per the refinement mode parameter.
+   *
+   * <p>The process iterates until the range cannot be reduced in size, or convergence is reached.
+   * The input dimensions are modified during the search. Use the clone(SearchDimension[]) method to
    * create a copy.
    *
    * @param <T> the type of comparable score
@@ -783,13 +790,15 @@ public class SearchSpace {
   }
 
   /**
-   * Search the configured search space until convergence of the optimum. <p> At each iteration the
-   * search will randomly sample points in the configured search space and score them. The top
-   * fraction of the results is used to redefine the search space (with padding). Note: The range
-   * cannot fall below the settings defined by the min increment and nIntervals for each of the
-   * input dimensions. <p> The process iterates until convergence is reached. The input dimensions
-   * are used to define the min/max and the current lower/upper bounds of the range. The dimensions
-   * are not modified.
+   * Search the configured search space until convergence of the optimum.
+   *
+   * <p>At each iteration the search will randomly sample points in the configured search space and
+   * score them. The top fraction of the results is used to redefine the search space (with
+   * padding). Note: The range cannot fall below the settings defined by the min increment and
+   * nIntervals for each of the input dimensions.
+   *
+   * <p>The process iterates until convergence is reached. The input dimensions are used to define
+   * the min/max and the current lower/upper bounds of the range. The dimensions are not modified.
    *
    * @param <T> the type of comparable score
    * @param dimensions the dimensions
@@ -931,9 +940,10 @@ public class SearchSpace {
 
   /**
    * Sample uniformly from the given dimensions. The lower and upper bounds of active dimensions are
-   * used to define the search space. The min interval of each dimension is respected. <p> If the
-   * input generator array is null, the first element is null, or the vector length is the wrong
-   * size then a new HaltonSequenceGenerator is used. Input an array of length 1 to obtain the
+   * used to define the search space. The min interval of each dimension is respected.
+   *
+   * <p>If the input generator array is null, the first element is null, or the vector length is the
+   * wrong size then a new HaltonSequenceGenerator is used. Input an array of length 1 to obtain the
    * default generator allowing calling the function again to generate a different search space.
    *
    * @param dimensions the dimensions
@@ -1027,10 +1037,11 @@ public class SearchSpace {
   /**
    * Sample uniformly from the given dimensions. The lower and upper bounds of active dimensions are
    * used to define the search space. The min interval of each dimension is not respected, i.e the
-   * coordinates are not rounded. <p> If the input generator array is null, the first element is
-   * null, or the vector length is the wrong size then a new HaltonSequenceGenerator is used. Input
-   * an array of length 1 to obtain the default generator allowing calling the function again to
-   * generate a different search space.
+   * coordinates are not rounded.
+   *
+   * <p>If the input generator array is null, the first element is null, or the vector length is the
+   * wrong size then a new HaltonSequenceGenerator is used. Input an array of length 1 to obtain the
+   * default generator allowing calling the function again to generate a different search space.
    *
    * @param dimensions the dimensions
    * @param samples the samples
@@ -1127,8 +1138,10 @@ public class SearchSpace {
 
   /**
    * Seed the search with an initial population. This is used to determine the initial optimum and
-   * centre the search in the search space. <p> Note that the parameters in the seed are mapped to
-   * the min interval of the configured dimensions by rounding.
+   * centre the search in the search space.
+   *
+   * <p>Note that the parameters in the seed are mapped to the min interval of the configured
+   * dimensions by rounding.
    *
    * @param seed the seed
    */

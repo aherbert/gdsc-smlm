@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -70,7 +71,9 @@ public class PSFCalculator implements PlugIn, DialogListener {
   private TextField fwhmPixelsText;
 
   // Used for the PSF profile plot
-  private double[] x = null, y, y2;
+  private double[] x = null;
+  private double[] y;
+  private double[] y2;
 
   @Override
   public void run(String arg) {
@@ -222,7 +225,9 @@ public class PSFCalculator implements PlugIn, DialogListener {
 
   /**
    * Calculates the expected PSF standard deviation (nm) for a Gaussian approximation to the Airy
-   * disk. <p> <a
+   * disk.
+   *
+   * <p><a
    * href="http://en.wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile">http://en.
    * wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile</a>
    *
@@ -236,12 +241,15 @@ public class PSFCalculator implements PlugIn, DialogListener {
 
   /**
    * Calculates the expected PSF standard deviation (nm) for a Gaussian approximation to the Airy
-   * disk. <p> <a
+   * disk.
+   *
+   * <p><a
    * href="http://en.wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile">http://en.
-   * wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile</a> <p> Using a scale
-   * factor of 1 results in the best match of the Gaussian to the Airy profile. A value above 1
-   * should be used to increase the width to account for deviation of the optical system from the
-   * theoretical limit and out-of-focus objects.
+   * wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile</a>
+   *
+   * <p>Using a scale factor of 1 results in the best match of the Gaussian to the Airy profile. A
+   * value above 1 should be used to increase the width to account for deviation of the optical
+   * system from the theoretical limit and out-of-focus objects.
    *
    * @param wavelength Wavelength of light in nanometers (nm)
    * @param numericalAperture Microscope numerical aperture (NA)
@@ -302,8 +310,9 @@ public class PSFCalculator implements PlugIn, DialogListener {
   }
 
   /**
-   * Calculates the PSF peak width for the Airy disk at the first dark ring (zero intersection). <p>
-   * Width is the lambda / (2*pi*NA).
+   * Calculates the PSF peak width for the Airy disk at the first dark ring (zero intersection).
+   *
+   * <p>Width is the lambda / (2*pi*NA).
    *
    * @param wavelength Wavelength of light in nanometers (nm)
    * @param numericalAperture Microscope numerical aperture (NA)
@@ -340,11 +349,11 @@ public class PSFCalculator implements PlugIn, DialogListener {
   }
 
   @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
-    if (e == null) {
+  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
+    if (event == null) {
       return true;
     }
-    final Object o = e.getSource();
+    final Object o = event.getSource();
     if (o == sdNmText || o == sdPixelsText || o == fwhmPixelsText || o == abbeLimitLabel) {
       return true;
     }

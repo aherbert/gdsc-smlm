@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ags.utils.data.trees.gen2.IntResultHeap;
@@ -811,7 +812,7 @@ public class FailCountManager implements PlugIn {
     gd.addSlider("Reset_fraction", 0.05, 0.95, settings.getPlotResetFraction());
     gd.addDialogListener(new DialogListener() {
       @Override
-      public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+      public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
         final int item = (int) gd.getNextNumber();
         final boolean fixedXAxis = gd.getNextBoolean();
         final int rollingWindow = (int) gd.getNextNumber();

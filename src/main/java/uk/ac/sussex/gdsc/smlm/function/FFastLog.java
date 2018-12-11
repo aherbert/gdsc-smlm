@@ -21,13 +21,16 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Implementation of the ICSILog algorithm as described in O. Vinyals, G. Friedland, N. Mirghafori
  * "Revisiting a basic function on current CPUs: A fast logarithm implementation with adjustable
- * accuracy" (2007). <p> This class is based on the original algorithm description and a Java
- * implementation by Hanns Holger Rutz.
+ * accuracy" (2007).
+ *
+ * <p>This class is based on the original algorithm description and a Java implementation by Hanns
+ * Holger Rutz.
  *
  * @see <a href=
  *      "https://www.javatips.net/api/Eisenkraut-master/src/main/java/de/sciss/eisenkraut/math/FastLog.java">https://www.javatips.net/api/Eisenkraut-master/src/main/java/de/sciss/eisenkraut/math/FastLog.java</a>
@@ -165,8 +168,9 @@ public class FFastLog extends FastLog {
   }
 
   /**
-   * Calculate the logarithm using base 2. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the logarithm using base 2. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog2(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog2(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog2(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
@@ -203,7 +207,9 @@ public class FFastLog extends FastLog {
 
   /**
    * Calculate the logarithm to the base given in the constructor. Requires the argument be finite
-   * and positive. <p> Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
@@ -264,8 +270,9 @@ public class FFastLog extends FastLog {
   }
 
   /**
-   * Calculate the logarithm using base 2. Requires the argument be finite and positive. <p> Special
-   * cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * Calculate the logarithm using base 2. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog2(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog2(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog2(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
@@ -328,7 +335,9 @@ public class FFastLog extends FastLog {
 
   /**
    * Calculate the logarithm to the base given in the constructor. Requires the argument be finite
-   * and positive. <p> Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
    * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
    * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
    * incorrect ({@code fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative

@@ -24,9 +24,12 @@
 
 /**
  * Provides code to be used by plugins executing within <a
- * href="https://imagej.nih.gov/ij/">ImageJ</a>. <p> All code under this package is expected to
- * depend on the ImageJ library (i.e. {@code import ij.*;}).
+ * href="https://imagej.nih.gov/ij/">ImageJ</a>.
+ *
+ * <p>All code under this package is expected to depend on the ImageJ library (i.e.
+ * {@code import ij.*;}).
  *
  * @since 1.0.0
  */
+
 package uk.ac.sussex.gdsc.smlm.ij;

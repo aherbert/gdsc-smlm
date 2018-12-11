@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -109,9 +110,10 @@ public interface PeakResults {
 
   /**
    * Set the bounds of the results. All fitting results are expected to be within the bounds, i.e.
-   * results were created by fitting a rectangle taken from the image source. <p> Note that the
-   * bounds are relative to the width and height of the image source. They do not include the (x,y)
-   * origin of the image source.
+   * results were created by fitting a rectangle taken from the image source.
+   *
+   * <p>Note that the bounds are relative to the width and height of the image source. They do not
+   * include the (x,y) origin of the image source.
    *
    * @param bounds The bounds of the image source used to create the results
    */
@@ -119,8 +121,10 @@ public interface PeakResults {
 
   /**
    * Get the bounds of the rectangle taken from the image source that encapsulates all the fitting
-   * results. <p> Note that the bounds are relative to the width and height of the image source.
-   * They do not include the (x,y) origin of the image source.
+   * results.
+   *
+   * <p>Note that the bounds are relative to the width and height of the image source. They do not
+   * include the (x,y) origin of the image source.
    *
    * @return The bounds used to create the results
    */

@@ -84,15 +84,17 @@
       <message key="name.invalidPattern" value="Package name ''{0}'' must match pattern ''{1}''." />
     </module>
     <module name="TypeName">
+      <property name="format" value="^[A-Z][a-zA-Z0-9]*(_PlugIn)?$" />
       <message key="name.invalidPattern" value="Type name ''{0}'' must match pattern ''{1}''." />
     </module>
     <module name="MemberName">
-      <property name="format" value="^([a-z][a-z0-9][a-zA-Z0-9]*)|([xyz])$" />
+      <!-- Allow single characters x,y,z for numerical functions, e.g. xPosition -->
+      <property name="format" value="^(([a-z][a-z0-9])|([xyz]))[a-zA-Z0-9]*$" />
       <message key="name.invalidPattern" value="Member name ''{0}'' must match pattern ''{1}''." />
     </module>
     <module name="ParameterName">
-      <!-- Allow single characters x,y,z,n for numerical functions -->
-      <property name="format" value="^([a-z][a-z0-9][a-zA-Z0-9]*)|([xyzn])$" />
+      <!-- Allow single characters x,y,z for numerical functions, e.g. xPosition -->
+      <property name="format" value="^(([a-z][a-z0-9])|([xyz]))[a-zA-Z0-9]*$" />
       <message key="name.invalidPattern" value="Parameter name ''{0}'' must match pattern ''{1}''." />
     </module>
     <module name="CatchParameterName">

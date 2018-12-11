@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -392,7 +393,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
   }
 
   /**
-   * Output a cluster to the results file. <p> Note: This is not synchronised
+   * Output a cluster to the results file.
+   *
+   * <p>Note: This is not synchronised
    *
    * @param cluster the cluster
    */
@@ -441,7 +444,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
   }
 
   /**
-   * Output a trace to the results file. <p> Note: This is not synchronised
+   * Output a trace to the results file.
+   *
+   * <p>Note: This is not synchronised
    *
    * @param trace the trace
    */
@@ -463,7 +468,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
   }
 
   /**
-   * Output a comment to the results file. <p> Note: This is not synchronised
+   * Output a comment to the results file.
+   *
+   * <p>Note: This is not synchronised
    *
    * @param text the text
    */

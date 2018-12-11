@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.data.TrivalueProvider;
@@ -39,6 +40,7 @@ public class CubicSplineCalculator {
   // https://github.com/ZhuangLab/storm-analysis/blob/master/storm_analysis/spliner/spline3D.py
 
   private static final DenseMatrix64F A;
+
   static {
     A = new DenseMatrix64F(64, 64);
     final CubicSplinePosition[] s = new CubicSplinePosition[4];

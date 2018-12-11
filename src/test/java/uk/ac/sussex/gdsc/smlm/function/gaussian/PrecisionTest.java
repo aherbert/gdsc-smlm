@@ -19,11 +19,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Contains tests for the Gaussian functions in single or double precision <p> The tests show that
- * there is very little (if any) time penalty when using double precision for the calculations.
- * However the precision of the single-precision functions is 1e-4 when using reasonable Gaussian
- * parameters. This could effect the convergence of optimisers/fitters if using single precision
- * math.
+ * Contains tests for the Gaussian functions in single or double precision
+ *
+ * <p>The tests show that there is very little (if any) time penalty when using double precision for
+ * the calculations. However the precision of the single-precision functions is 1e-4 when using
+ * reasonable Gaussian parameters. This could effect the convergence of optimisers/fitters if using
+ * single precision math.
  */
 @SuppressWarnings({"javadoc"})
 public class PrecisionTest {

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
@@ -28,9 +29,10 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public interface LogLikelihoodFunction {
   /**
-   * Compute the log-likelihood of an observation x given a parameter value theta. <p> This is the
-   * log of the probability mass function P(X=x|θ) or the probability density function f(x|θ) for
-   * random variable X depending on parameter θ.
+   * Compute the log-likelihood of an observation x given a parameter value theta.
+   *
+   * <p>This is the log of the probability mass function P(X=x|θ) or the probability density
+   * function f(x|θ) for random variable X depending on parameter θ.
    *
    * @param o The observed value (x)
    * @param t The parameter value (θ)

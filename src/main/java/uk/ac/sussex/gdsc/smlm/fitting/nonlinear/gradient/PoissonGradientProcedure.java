@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -29,9 +30,10 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import java.util.Arrays;
 
 /**
- * Calculates the Fisher information matrix for a Poisson process. <p> Ref: Smith et al, (2010).
- * Fast, single-molecule localisation that achieves theoretically minimum uncertainty. Nature
- * Methods 7, 373-375 (supplementary note), Eq. 9.
+ * Calculates the Fisher information matrix for a Poisson process.
+ *
+ * <p>Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+ * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
  */
 public class PoissonGradientProcedure implements Gradient1Procedure {
   /** The function. */
@@ -81,10 +83,13 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * </pre>
    *
    * Thus per-observation noise can be handled by wrapping the input function with a pre-computed
-   * gradient function and pre-computed noise values. <p> See Smith et al, (2010). Fast,
-   * single-molecule localisation that achieves theoretically minimum uncertainty. Nature Methods 7,
-   * 373-375 (supplementary note), Eq. 9. <p> See: Huang et al, (2015). Video-rate nanoscopy using
-   * sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
+   * gradient function and pre-computed noise values.
+   *
+   * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
+   *
+   * <p>See: Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule
+   * localization algorithms. Nature Methods 10, 653–658.
    *
    * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *

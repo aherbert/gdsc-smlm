@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
@@ -74,10 +75,12 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
   }
 
   /**
-   * {@inheritDoc} <p> Note: This is an EM-CCD camera model. The normalised variance represents the
-   * effective read noise in incident photons (i.e. before EM-gain). This can be combined with the
-   * expected shot variance of a Poisson distribution (mean) scaled by the EM-amplification noise
-   * factor (2) to obtain the total variance in photon units:
+   * {@inheritDoc}
+   *
+   * <p>Note: This is an EM-CCD camera model. The normalised variance represents the effective read
+   * noise in incident photons (i.e. before EM-gain). This can be combined with the expected shot
+   * variance of a Poisson distribution (mean) scaled by the EM-amplification noise factor (2) to
+   * obtain the total variance in photon units:
    *
    * <pre>
    * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]
@@ -93,10 +96,12 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
   }
 
   /**
-   * {@inheritDoc} <p> Note: This is an EM-CCD camera model. The normalised variance represents the
-   * effective read noise in incident photons (i.e. before EM-gain). This can be combined with the
-   * expected shot variance of a Poisson distribution (mean) scaled by the EM-amplification noise
-   * factor (2) to obtain the total variance in photon units:
+   * {@inheritDoc}
+   *
+   * <p>Note: This is an EM-CCD camera model. The normalised variance represents the effective read
+   * noise in incident photons (i.e. before EM-gain). This can be combined with the expected shot
+   * variance of a Poisson distribution (mean) scaled by the EM-amplification noise factor (2) to
+   * obtain the total variance in photon units:
    *
    * <pre>
    * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]

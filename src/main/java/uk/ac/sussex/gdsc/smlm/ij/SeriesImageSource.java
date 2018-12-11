@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -60,9 +61,11 @@ import java.util.Arrays;
 
 /**
  * Represent a series of TIFF image files as a results source. Supports all greyscale images. Only
- * processes channel 0 of 32-bit colour images. <p> Assumes that the width,height,depth dimensions
- * of each file are the same. The depth for the last image can be less (i.e. the last of the series)
- * but the {@link #getFrames()} method will return an incorrect value.
+ * processes channel 0 of 32-bit colour images.
+ *
+ * <p>Assumes that the width,height,depth dimensions of each file are the same. The depth for the
+ * last image can be less (i.e. the last of the series) but the {@link #getFrames()} method will
+ * return an incorrect value.
  */
 public class SeriesImageSource extends ImageSource {
   /** The buffer limit for reading TIFF images into memory. Default = 30MB */
@@ -156,8 +159,10 @@ public class SeriesImageSource extends ImageSource {
 
   /**
    * Special class adapted from ij.io.Opener.openTiffStack(...) and ij.io.FileOpener to handle large
-   * contiguous TIFF images. <p> The methods that manipulate the internal state are synchronized to
-   * prevent multiple threads causing read errors.
+   * contiguous TIFF images.
+   *
+   * <p>The methods that manipulate the internal state are synchronized to prevent multiple threads
+   * causing read errors.
    */
   private class TiffImage extends Image {
     final IndexMap indexMap;
@@ -488,7 +493,7 @@ public class SeriesImageSource extends ImageSource {
       } catch (final IOException ex) {
         // The reader now throws exceptions. We could set the canRead flag to prevent further IO.
         // However do not do this so that an image can be scrolled up to the point at which
-        // it cannot be read (ex.g. in the case of TIFF file truncation during sequential writing).
+        // it cannot be read (e.g. in the case of TIFF file truncation during sequential writing).
         // canRead = false;
         throw ex;
       }
@@ -1263,8 +1268,9 @@ public class SeriesImageSource extends ImageSource {
   }
 
   /**
-   * Create a new image source using the directory containing the images. <p> The directory is
-   * opened using {@link uk.ac.sussex.gdsc.core.ij.SeriesOpener }
+   * Create a new image source using the directory containing the images.
+   *
+   * <p>The directory is opened using {@link uk.ac.sussex.gdsc.core.ij.SeriesOpener }
    *
    * @param name the name
    * @param directory the directory
@@ -1306,7 +1312,9 @@ public class SeriesImageSource extends ImageSource {
 
   /**
    * Attempts to determine the image file type by looking for 'magic numbers' and the file name
-   * extension. <p> Copied from ij.io.Opener and removed all but the TIFF identification.
+   * extension.
+   *
+   * <p>Copied from ij.io.Opener and removed all but the TIFF identification.
    */
   private static int getFileType(String filename) {
     final File file = new File(filename);
@@ -1321,7 +1329,10 @@ public class SeriesImageSource extends ImageSource {
       return Opener.UNKNOWN;
     }
 
-    final int b0 = buf[0] & 255, b1 = buf[1] & 255, b2 = buf[2] & 255, b3 = buf[3] & 255;
+    final int b0 = buf[0] & 255;
+    final int b1 = buf[1] & 255;
+    final int b2 = buf[2] & 255;
+    final int b3 = buf[3] & 255;
 
     // First check it is a possible TIFF:
     // Little-endian = II + 42 magic number
@@ -1651,10 +1662,13 @@ public class SeriesImageSource extends ImageSource {
   // }
 
   /**
-   * Creates a background thread to open the images sequentially. <p> If all the images are smaller
-   * than the buffer limit then a single thread is created to read the raw bytes, one to decode the
-   * TIFF info and one to read the frames. <p> Otherwise a single thread is created to read each
-   * image in turn, decode the TIFF info and read the frames.
+   * Creates a background thread to open the images sequentially.
+   *
+   * <p>If all the images are smaller than the buffer limit then a single thread is created to read
+   * the raw bytes, one to decode the TIFF info and one to read the frames.
+   *
+   * <p>Otherwise a single thread is created to read each image in turn, decode the TIFF info and
+   * read the frames.
    */
   private synchronized void createQueue() {
     // Q. What size is optimal?

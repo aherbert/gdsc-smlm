@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -29,8 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Contains a population of individuals that may crossover and mutate to evolve. <p> For simplicity
- * the individuals have one chromosome sequence.
+ * Contains a population of individuals that may crossover and mutate to evolve.
+ *
+ * <p>For simplicity the individuals have one chromosome sequence.
  *
  * @param <T> the generic type
  */
@@ -75,13 +77,17 @@ public class Population<T extends Comparable<T>> {
 
   /**
    * Evolve the population of individuals until convergence of the most fit individual in the
-   * population. <p> The population will grow until the desired population size by recombination of
-   * individual pairs chosen from the population by the selection strategy. Child sequences will be
-   * subject to mutation. The fitness of all the individuals in the new population is evaluated and
-   * convergence checked for the fittest individual. If the initial <p> The process of grow,
-   * evaluate, select is repeated until convergence. <p> Note: the subset of individuals selected
-   * for the next generation by the selection strategy will be unchanged (i.e. no mutation). This
-   * allows the fittest individuals to remain unchanged.
+   * population.
+   *
+   * <p>The population will grow until the desired population size by recombination of individual
+   * pairs chosen from the population by the selection strategy. Child sequences will be subject to
+   * mutation. The fitness of all the individuals in the new population is evaluated and convergence
+   * checked for the fittest individual. If the initial
+   *
+   * <p>The process of grow, evaluate, select is repeated until convergence.
+   *
+   * <p>Note: the subset of individuals selected for the next generation by the selection strategy
+   * will be unchanged (i.e. no mutation). This allows the fittest individuals to remain unchanged.
    *
    * @param mutator the mutator
    * @param recombiner the recombiner

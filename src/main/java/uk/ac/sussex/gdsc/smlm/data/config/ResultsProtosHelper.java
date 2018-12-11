@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
@@ -34,6 +35,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
 public class ResultsProtosHelper {
   /** The default ResultsSettings. */
   public static final ResultsSettings defaultResultsSettings;
+
   static {
     final ResultsSettings.Builder builder = ResultsSettings.newBuilder();
     builder.getResultsImageSettingsBuilder().setWeighted(true);

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
@@ -36,10 +37,12 @@ import org.apache.commons.math3.util.FastMath;
  *
  * Where: <ul> <li>l(x) is the function (expected) value <li>k is the observed value </ul> The
  * negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or
- * for a chosen observed value. <p> To allow a likelihood to be computed when the function predicts
- * negative count data, the function prediction is set to {@link Double#MIN_VALUE}. This can be
- * disabled. <p> The class can handle non-integer observed data. In this case the PMF is
- * approximated as:
+ * for a chosen observed value.
+ *
+ * <p>To allow a likelihood to be computed when the function predicts negative count data, the
+ * function prediction is set to {@link Double#MIN_VALUE}. This can be disabled.
+ *
+ * <p>The class can handle non-integer observed data. In this case the PMF is approximated as:
  *
  * <pre>
  * PMF(l, k) = C * e ^ -l * l ^ x / gamma(k + 1)
@@ -54,7 +57,8 @@ import org.apache.commons.math3.util.FastMath;
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
   private final boolean integerData;
   private final double sumLogFactorialK;
-  private final double alpha, logAlpha;
+  private final double alpha;
+  private final double logAlpha;
 
   private boolean allowNegativeExpectedValues = true;
 
@@ -75,9 +79,11 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
   }
 
   /**
-   * Initialise the function. <p> The input parameters must be the full parameters for the
-   * non-linear function. Only those parameters with gradient indices should be passed in to the
-   * functions to obtain the value (and gradient).
+   * Initialise the function.
+   *
+   * <p>The input parameters must be the full parameters for the non-linear function. Only those
+   * parameters with gradient indices should be passed in to the functions to obtain the value (and
+   * gradient).
    *
    * @param f The function to be used to calculated the expected values
    * @param a The initial parameters for the function

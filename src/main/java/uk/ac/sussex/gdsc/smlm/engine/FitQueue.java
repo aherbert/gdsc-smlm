@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 /**
@@ -55,5 +56,5 @@ public enum FitQueue {
    *
    * @return the name
    */
-  abstract public String getName();
+  public abstract String getName();
 }

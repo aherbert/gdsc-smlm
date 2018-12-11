@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 /**
@@ -53,8 +54,9 @@ public class FixedPeakResultList {
   }
 
   /**
-   * Get the result. <p> Note: This does not check against the current size so can return stale
-   * data.
+   * Get the result.
+   *
+   * <p>Note: This does not check against the current size so can return stale data.
    *
    * @param index the index
    * @return the peak result
@@ -91,8 +93,10 @@ public class FixedPeakResultList {
   }
 
   /**
-   * Clear the list <p> Note: This does not remove the references to the underlying data or
-   * reallocate storage thus {@link #get(int)} can return stale data.
+   * Clear the list.
+   *
+   * <p>Note: This does not remove the references to the underlying data or reallocate storage thus
+   * {@link #get(int)} can return stale data.
    */
   public void clear() {
     size = 0;

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -41,7 +42,7 @@ public class GaussianKernel implements Cloneable {
   private static final double ONE_OVER_ROOT_2_PI = 1.0 / Math.sqrt(2 * Math.PI);
 
   /** The standard deviation. */
-  final public double s;
+  public final double s;
 
   private final double var2;
 
@@ -74,18 +75,18 @@ public class GaussianKernel implements Cloneable {
    * <pre>
    * 1 / sqrt(2 * pi * s ^ 2)
    * </pre>
-   * 
-   * <p> This is the normalisation component that should be applied to the Gaussian exponential
+   *
+   * <p>This is the normalisation component that should be applied to the Gaussian exponential
    * component:
    *
    * <pre>
    *  exp^(-x^2 / 2s^2).
    * </pre>
-   * 
-   * <p> Note that the kernel computed is normalised to 1 irrespective of the number of samples.
-   * This is so that convolution using the kernel does not alter the total signal in the input
-   * function. However the raw Gaussian can be deduced using the difference in the magnitude at the
-   * centre of the kernel and this normalisation factor.
+   *
+   * <p>Note that the kernel computed is normalised to 1 irrespective of the number of samples. This
+   * is so that convolution using the kernel does not alter the total signal in the input function.
+   * However the raw Gaussian can be deduced using the difference in the magnitude at the centre of
+   * the kernel and this normalisation factor.
    *
    * @return the normalisation
    */
@@ -172,12 +173,14 @@ public class GaussianKernel implements Cloneable {
    * Create a 1-dimensional normalized Gaussian kernel with standard deviation s/scale. To avoid a
    * step due to the cutoff at a finite value, the near-edge values are replaced by a 2nd-order
    * polynomial with its minimum=0 at the first out-of-kernel pixel. Thus, the kernel function has a
-   * smooth 1st derivative in spite of finite length. <p> Note: This can lead to inefficiency if the
-   * kernel has been upscaled (i.e. the current scale is above 1) and the cached range is below the
-   * input range since the current kernel must be expanded. It is recommended to only call this
-   * method with the same range that has been used for
+   * smooth 1st derivative in spite of finite length.
+   *
+   * <p>Note: This can lead to inefficiency if the kernel has been upscaled (i.e. the current scale
+   * is above 1) and the cached range is below the input range since the current kernel must be
+   * expanded. It is recommended to only call this method with the same range that has been used for
    * {@link #getGaussianKernel(int, double, boolean)}. The result is just a sparsely sampled kernel.
-   * <p> This method is not recommended when the scale is above the standard deviation as the kernel
+   *
+   * <p>This method is not recommended when the scale is above the standard deviation as the kernel
    * will be too sparsely sampled.
    *
    * @param scale the scale

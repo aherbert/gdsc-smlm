@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
@@ -42,7 +43,8 @@ import java.util.Arrays;
  */
 public class OverlayImage implements PlugIn {
   private static int opacity = 100;
-  private static boolean transparent = true, replace = true;
+  private static boolean transparent = true;
+  private static boolean replace = true;
   private static String title = "";
 
   @Override
@@ -78,7 +80,8 @@ public class OverlayImage implements PlugIn {
     }
     titles = Arrays.copyOf(titles, count);
 
-    int x = 0, y = 0;
+    int x = 0;
+    int y = 0;
     final Roi roi = imp.getRoi();
     if (roi != null && roi.isArea()) {
       final Rectangle r = roi.getBounds();

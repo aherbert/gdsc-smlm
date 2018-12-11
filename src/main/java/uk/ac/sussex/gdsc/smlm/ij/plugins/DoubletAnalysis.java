@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
@@ -105,10 +106,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Fits spots created by CreateData plugin. <p> Assigns results to filter candidates to determine if
- * spots are either single or doublets or larger clusters. Outputs a table of the single and double
- * fit for each spot with metrics. This can be used to determine the best settings for optimum
- * doublet fitting and filtering.
+ * Fits spots created by CreateData plugin.
+ *
+ * <p>Assigns results to filter candidates to determine if spots are either single or doublets or
+ * larger clusters. Outputs a table of the single and double fit for each spot with metrics. This
+ * can be used to determine the best settings for optimum doublet fitting and filtering.
  */
 public class DoubletAnalysis implements PlugIn, ItemListener {
   /*
@@ -121,9 +123,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    */
 
   private static final String TITLE = "Doublet Analysis";
-  private static FitConfiguration fitConfig, filterFitConfig;
+  private static FitConfiguration fitConfig;
+  private static FitConfiguration filterFitConfig;
   private static FitEngineConfiguration config;
   private static int lastId = 0;
+
   static {
     config = new FitEngineConfiguration();
     fitConfig = config.getFitConfiguration();
@@ -192,7 +196,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static String[] SELECTION_CRITERIA = {"R2", "AIC", "BIC", "ML AIC", "ML BIC"};
   private static int selectionCriteria = 4;
 
-  private static TextWindow summaryTable = null, resultsTable = null, analysisTable = null;
+  private static TextWindow summaryTable = null;
+  private static TextWindow resultsTable = null;
+  private static TextWindow analysisTable = null;
   private static ArrayList<DoubletResult> doubletResults;
   private ResidualsScore residualsScore;
   private static ResidualsScore _residualsScoreMax;
@@ -235,6 +241,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       {"Score n=1", "Score n=2", "Score n=N", "Iter n=1", "Eval n=1", "Iter n>1", "Eval n>1"};
 
   private static boolean[] displayHistograms = new boolean[NAMES.length + NAMES2.length];
+
   static {
     for (int i = 0; i < displayHistograms.length; i++) {
       displayHistograms[i] = true;
@@ -244,7 +251,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
   private class ResidualsScore {
-    final double[] residuals, jaccard, recall, precision;
+    final double[] residuals;
+    final double[] jaccard;
+    final double[] recall;
+    final double[] precision;
     final int maxJaccardIndex;
     double[] bestResiduals = new double[3];
 
@@ -262,8 +272,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Allows plotting the bonus from fitting all spots at a given residuals threshold.
    */
   private class DoubletBonus implements Comparable<DoubletBonus> {
-    final double rMax, rAv;
-    final double tp, fp;
+    final double rMax;
+    final double rAv;
+    final double tp;
+    final double fp;
     public double residuals;
 
     /**
@@ -323,25 +335,50 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int frame;
     final float noise;
     final Spot spot;
-    final int n, c, neighbours, almostNeighbours, spotIndex;
+    final int n;
+    final int c;
+    final int neighbours;
+    final int almostNeighbours;
+    final int spotIndex;
     FitResult fitResult1 = null;
     FitResult fitResult2 = null;
-    double sumOfSquares1, sumOfSquares2;
-    double ll1, ll2;
-    double r1, r2;
-    double value1, value2;
-    double score1, score2;
-    double aic1, aic2, bic1, bic2;
-    double maic1, maic2, mbic1, mbic2;
+    double sumOfSquares1;
+    double sumOfSquares2;
+    double ll1;
+    double ll2;
+    double r1;
+    double r2;
+    double value1;
+    double value2;
+    double score1;
+    double score2;
+    double aic1;
+    double aic2;
+    double bic1;
+    double bic2;
+    double maic1;
+    double maic2;
+    double mbic1;
+    double mbic2;
     double[] xshift = new double[2];
     double[] yshift = new double[2];
     double[] a = new double[2];
     double gap;
-    int iter1, iter2, eval1, eval2;
-    boolean good1, good2, valid;
+    int iter1;
+    int iter2;
+    int eval1;
+    int eval2;
+    boolean good1;
+    boolean good2;
+    boolean valid;
     @SuppressWarnings("unused")
     boolean valid2;
-    double tp1, fp1, tp2a, fp2a, tp2b, fp2b;
+    double tp1;
+    double fp1;
+    double tp2a;
+    double fp2a;
+    double tp2b;
+    double fp2b;
 
     public DoubletResult(int frame, float noise, Spot spot, int n, int neighbours,
         int almostNeighbours, int spotIndex) {
@@ -426,15 +463,19 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final Gaussian2DFitter gf;
     final boolean relativeIntensity;
     final double limit;
-    final int[] spotHistogram, resultHistogram;
+    final int[] spotHistogram;
+    final int[] resultHistogram;
     final int[][] neighbourHistogram;
     final int[][] almostNeighbourHistogram;
     final Overlay o;
     double[] region = null;
     float[] data = null;
     ArrayList<DoubletResult> results = new ArrayList<>();
-    int daic = 0, dbic = 0, cic = 0;
-    RampedScore rampedScore, signalScore = null;
+    int daic = 0;
+    int dbic = 0;
+    int cic = 0;
+    RampedScore rampedScore;
+    RampedScore signalScore = null;
 
     /**
      * Instantiates a new worker.
@@ -540,7 +581,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       float noise = 0;
 
       // Identify single and doublets (and other)
-      int singles = 0, doublets = 0, multiples = 0, total = 0, ignored = 0;
+      int singles = 0;
+      int doublets = 0;
+      int multiples = 0;
+      int total = 0;
+      int ignored = 0;
       final int[] spotMatchCount = new int[spots.length];
       final int[] neighbourIndices = new int[spots.length];
       for (int i = 0; i < actual.length; i++) {
@@ -1724,7 +1769,9 @@ default: multiples++;
     return sa;
   }
 
-  private int progress, stepProgress, totalProgress;
+  private int progress;
+  private int stepProgress;
+  private int totalProgress;
 
   /**
    * Show progress.
@@ -1809,9 +1856,13 @@ default: multiples++;
     runTime = System.nanoTime() - runTime;
 
     // Collect the results
-    int cic = 0, daic = 0, dbic = 0;
+    int cic = 0;
+    int daic = 0;
+    int dbic = 0;
     ArrayList<DoubletResult> results = null;
-    int maxH = 0, maxH2 = 0, maxH3 = 0;
+    int maxH = 0;
+    int maxH2 = 0;
+    int maxH3 = 0;
     for (final Worker worker : workers) {
       if (results == null) {
         results = worker.results;
@@ -2014,7 +2065,8 @@ default: multiples++;
     double tp = 0;
     double fp = 0;
 
-    double bestTp = 0, bestFp = 0;
+    double bestTp = 0;
+    double bestFp = 0;
 
     final ArrayList<DoubletBonus> data = new ArrayList<>(results.size());
     for (final DoubletResult result : results) {
@@ -2487,7 +2539,8 @@ default: multiples++;
             filterFitConfig.validatePeak(0, result.fitResult1.getInitialParameters(),
                 result.fitResult1.getParameters(), result.fitResult1.getParameterDeviations());
 
-        double tp1 = 0, fp1 = 0;
+        double tp1 = 0;
+        double fp1 = 0;
         if (fitStatus0 == FitStatus.OK) {
           tp1 = result.tp1;
           fp1 = result.fp1;
@@ -2500,7 +2553,8 @@ default: multiples++;
         // width diverged spots as OK for a doublet fit
         if ((fitStatus0 == FitStatus.OK || fitStatus0 == FitStatus.WIDTH_DIVERGED)
             && selectFit(result) && result.good2) {
-          double tp2 = 0, fp2 = 0;
+          double tp2 = 0;
+          double fp2 = 0;
 
           // Basic spot criteria (SNR, Photons, width)
           filterFitConfig2.setNoise(result.noise);
@@ -2551,7 +2605,8 @@ default: multiples++;
             }
 
             // Set an upper limit on the shift that is not too far outside the fit window
-            final double maxShiftX, maxShiftY;
+            final double maxShiftX;
+            final double maxShiftY;
             final double factor = Gaussian2DFunction.SD_TO_HWHM_FACTOR;
             if (fitConfig.isXSDFitting()) {
               // Add the fitted standard deviation to the allowed shift
@@ -3023,10 +3078,10 @@ default: multiples++;
 
   /** {@inheritDoc} */
   @Override
-  public void itemStateChanged(ItemEvent e) {
-    if (e.getSource() instanceof Choice) {
+  public void itemStateChanged(ItemEvent event) {
+    if (event.getSource() instanceof Choice) {
       // Update the settings from the template
-      final Choice choice = (Choice) e.getSource();
+      final Choice choice = (Choice) event.getSource();
       final String templateName = choice.getSelectedItem();
 
       // Get the configuration template
@@ -3075,8 +3130,8 @@ default: multiples++;
       } else {
         // Ignore
       }
-    } else if (e.getSource() instanceof Checkbox) {
-      final Checkbox checkbox = (Checkbox) e.getSource();
+    } else if (event.getSource() instanceof Checkbox) {
+      final Checkbox checkbox = (Checkbox) event.getSource();
       if (!checkbox.getState()) {
         return;
       }

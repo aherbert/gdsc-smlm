@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import org.scijava.java3d.Appearance;
@@ -48,9 +49,10 @@ import java.util.Arrays;
  * This class represents a list as a number of repeated shapes in the universe. Each item has its
  * own Java 3D Shape3D Shape3D * object added to the group. The shape is defined using a geometry
  * array. Colouring is assumed to be done using the material diffuse colour. If the geometry has per
- * vertex colours then this class will not work. <p> A special exception is made for a PointArray as
- * that has no surface to colour. In this case it must be created using the GeometryArray.COLOR_4
- * flag.
+ * vertex colours then this class will not work.
+ *
+ * <p>A special exception is made for a PointArray as that has no surface to colour. In this case it
+ * must be created using the GeometryArray.COLOR_4 flag.
  *
  * @author Alex Herbert
  */

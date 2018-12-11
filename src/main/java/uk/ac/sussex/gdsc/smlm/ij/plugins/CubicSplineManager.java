@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
@@ -518,7 +519,8 @@ public class CubicSplineManager implements PlugIn {
     CubicSplinePSF psfModel;
     ImagePSF imagePSF;
     CubicSplineData function;
-    double padx, pady;
+    double padx;
+    double pady;
     Label label;
 
     public CSplineRenderer(CubicSplinePSF psfModel) {
@@ -552,7 +554,7 @@ public class CubicSplineManager implements PlugIn {
       if (ImageJUtils.isShowGenericDialog()) {
         gd.addAndGetButton("Reset", new ActionListener() {
           @Override
-          public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent event) {
             pluginSettings.setXShift(0);
             pluginSettings.setYShift(0);
             pluginSettings.setZShift(0);
@@ -571,7 +573,7 @@ public class CubicSplineManager implements PlugIn {
     }
 
     @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       pluginSettings.setScale((int) gd.getNextNumber());
       pluginSettings.setXShift(gd.getNextNumber());
       pluginSettings.setYShift(gd.getNextNumber());

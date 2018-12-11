@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.search;
 
 import java.util.Arrays;
@@ -35,8 +36,10 @@ public class ScoreFunctionHelper<T extends Comparable<T>> {
   /**
    * Cut the list of scores down to the given size by selecting only the best results. The input
    * list may not be sorted. The results should contain the best result at position 0 in the output
-   * array. <p> Helper implementation of the FullScoreFunction.cut(...) method. Uses a full sort
-   * then truncation to the given size.
+   * array.
+   *
+   * <p>Helper implementation of the FullScoreFunction.cut(...) method. Uses a full sort then
+   * truncation to the given size.
    *
    * @param <T> the generic type
    * @param scores The scores

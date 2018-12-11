@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -123,7 +124,9 @@ public class SummariseResults implements PlugIn, MouseListener {
     clearSummaryTable();
   }
 
-  private static int NO = -1, UNKNOWN = 0, YES = 1;
+  private static int NO = -1;
+  private static int UNKNOWN = 0;
+  private static int YES = 1;
   private int removeNullResults = UNKNOWN;
 
   private void addSummary(StringBuilder sb, MemoryPeakResults result) {
@@ -253,10 +256,10 @@ public class SummariseResults implements PlugIn, MouseListener {
   }
 
   @Override
-  public void mouseClicked(MouseEvent e) {
-    if (e.getClickCount() > 1) {
+  public void mouseClicked(MouseEvent event) {
+    if (event.getClickCount() > 1) {
       showStatistics();
-      e.consume();
+      event.consume();
     }
   }
 
@@ -398,22 +401,22 @@ public class SummariseResults implements PlugIn, MouseListener {
   }
 
   @Override
-  public void mousePressed(MouseEvent e) {
+  public void mousePressed(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseReleased(MouseEvent e) {
+  public void mouseReleased(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseEntered(MouseEvent e) {
+  public void mouseEntered(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseExited(MouseEvent e) {
+  public void mouseExited(MouseEvent event) {
     // Ignore
   }
 }

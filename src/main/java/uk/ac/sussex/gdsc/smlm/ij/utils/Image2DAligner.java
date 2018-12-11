@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CachedBicubicInterpolator;
@@ -34,7 +35,9 @@ import ij.process.ImageProcessor;
 import java.util.Arrays;
 
 /**
- * Perform 2D image alignment using normalised cross-correlation. <p> Uses the following formula:
+ * Perform 2D image alignment using normalised cross-correlation.
+ *
+ * <p>Uses the following formula:
  *
  * <pre>
  *  ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
@@ -62,9 +65,12 @@ public class Image2DAligner implements Cloneable {
     double[] s_;
     double[] ss;
     // Original dimensions and 2D size
-    int w, h, size;
+    int w;
+    int h;
+    int size;
     // Insert position
-    int ix, iy;
+    int ix;
+    int iy;
 
     DHTData(DoubleDHT2D dht, int w, int h) {
       setDHT(dht, w, h);
@@ -111,7 +117,8 @@ public class Image2DAligner implements Cloneable {
 
   // Not thread safe as they are used for the target image
   private DHTData target;
-  private double[] buffer, region;
+  private double[] buffer;
+  private double[] region;
   private double frequencyDomainCorrelationError;
   private int[] crop;
 
@@ -136,9 +143,10 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and assumes the target image will be the same size. <p> The dimension
-   * are converted to the next power of 2 for speed. The combined size must fit within the maximum
-   * size of a single array.
+   * Sets the reference image and assumes the target image will be the same size.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (destructively modified)
    * @throws IllegalArgumentException If any dimension is less than 2
@@ -148,9 +156,10 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and the size of the target image. <p> The dimension are converted to
-   * the next power of 2 for speed. The combined size must fit within the maximum size of a single
-   * array.
+   * Sets the reference image and the size of the target image.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (may be destructively modified)
    * @param w the width of the target image
@@ -213,7 +222,8 @@ public class Image2DAligner implements Cloneable {
     }
 
     // Shift mean to 0 with optional window
-    final int w = image.getWidth(), h = image.getHeight();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
     final double[] wx = createXWindow(w);
     final double[] wy = createYWindow(h);
 
@@ -317,10 +327,14 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * Prepare the DHT. <p> Converts the data to quantised data. Any zero value (from padding or
-   * weighting) remains zero. <p> This may reduce the precision slightly but allows the computation
-   * of a rolling sum table have minimal errors. The rolling sum and sum-of-squares table is
-   * computed and the DHT is transformed to the frequency domain.
+   * Prepare the DHT.
+   *
+   * <p>Converts the data to quantised data. Any zero value (from padding or weighting) remains
+   * zero.
+   *
+   * <p>This may reduce the precision slightly but allows the computation of a rolling sum table
+   * have minimal errors. The rolling sum and sum-of-squares table is computed and the DHT is
+   * transformed to the frequency domain.
    *
    * @param dhtData the dht data
    * @return the DHT data
@@ -355,7 +369,8 @@ public class Image2DAligner implements Cloneable {
 
     // This has been adapted from Image2D to compute two rolling sum table at once
 
-    double sum_ = 0, sum2 = 0;
+    double sum_ = 0;
+    double sum2 = 0;
     int i = 0;
     // Initialise first row sum
     // sum = rolling sum of (0 - colomn)
@@ -394,9 +409,12 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * The limit for the range of the data as an integer. <p> When this it too high the sumXY from the
-   * DHT conjugate multiplication does not match the sum from correlation in the spatial domain. <p>
-   * In theory the largest sumXY should be 2^bits * 2^bits * max integer (the size of the largest
+   * The limit for the range of the data as an integer.
+   *
+   * <p>When this it too high the sumXy from the DHT conjugate multiplication does not match the sum
+   * from correlation in the spatial domain.
+   *
+   * <p>In theory the largest sumXy should be 2^bits * 2^bits * max integer (the size of the largest
    * array). 10-bit integer: 2^10 * 2^10 * 2^31 = 2^51. This is smaller than the mantissa of a
    * double (2^52) so should be represented correctly.
    */
@@ -414,9 +432,10 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and assumes the target image will be the same size. <p> The dimension
-   * are converted to the next power of 2 for speed. The combined size must fit within the maximum
-   * size of a single array.
+   * Sets the reference image and assumes the target image will be the same size.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (destructively modified)
    * @throws IllegalArgumentException If any dimension is less than 2
@@ -426,9 +445,10 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * Sets the reference image and the size of the target image. <p> The dimension are converted to
-   * the next power of 2 for speed. The combined size must fit within the maximum size of a single
-   * array.
+   * Sets the reference image and the size of the target image.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
    *
    * @param image the image (may be destructively modified)
    * @param w the width of the target image
@@ -467,7 +487,8 @@ public class Image2DAligner implements Cloneable {
 
   private DHTData createDHT(Image2D image, DHTData dhtData) {
     // Shift mean to 0 with optional window
-    final int w = image.getWidth(), h = image.getHeight();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
     final double[] wx = createXWindow(w);
     final double[] wy = createYWindow(h);
 
@@ -533,7 +554,8 @@ public class Image2DAligner implements Cloneable {
    */
   public double[] align(ImageProcessor image, int refinements) {
     check2D(image);
-    final int w = image.getWidth(), h = image.getHeight();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
     if (w > nc || h > nr) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
@@ -567,7 +589,8 @@ public class Image2DAligner implements Cloneable {
    */
   public double[] align(Image2D image, int refinements) {
     check2D(image);
-    final int w = image.getWidth(), h = image.getHeight();
+    final int w = image.getWidth();
+    final int h = image.getHeight();
     if (w > nc || h > nr) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
@@ -596,7 +619,7 @@ public class Image2DAligner implements Cloneable {
     // Normalise:
     // ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
     //
-    // (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
+    // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )
 
     // Only do this over the range where at least half the original images overlap,
     // i.e. the insert point of one will be the middle of the other when shifted.
@@ -622,7 +645,7 @@ public class Image2DAligner implements Cloneable {
     // to restrict the bounds for finding the maximum of the normalised correlation
     // which should be close to this.
     int maxi = correlation.findMaxIndex(ix, iy, crop[2], crop[3]);
-    int[] xy = correlation.getXY(maxi);
+    int[] xy = correlation.getXy(maxi);
 
     // Check in the spatial domain
     checkCorrelation(target, correlation, maxi);
@@ -696,23 +719,23 @@ public class Image2DAligner implements Cloneable {
 
       final int base = r * nc;
       for (int c = ix, i = 0; c < ixw; c++, i++) {
-        final double sumXY = buffer[base + c];
+        final double sumXy = buffer[base + c];
 
         compute(rx_1[i], ry_1, rx_w_1[i], ry_h_1, w[i], h, rs_, rss, rsum);
         compute(tx_1[i], ty_1, tx_w_1[i], ty_h_1, w[i], h, ts_, tss, tsum);
 
         // Compute the correlation
-        // (sumXY - sumX*sumY/n) / sqrt( (sumXX - sumX^2 / n) * (sumYY - sumY^2 / n) )
+        // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )
 
         final int n = w[i] * h;
-        final double numerator = sumXY - (rsum[X] * tsum[Y] / n);
+        final double numerator = sumXy - (rsum[X] * tsum[Y] / n);
         final double denominator1 = rsum[XX] - (rsum[X] * rsum[X] / n);
         final double denominator2 = tsum[YY] - (tsum[Y] * tsum[Y] / n);
 
         double R;
         if (denominator1 == 0 || denominator2 == 0) {
           // If there is data and all the variances are the same then correlation is perfect
-          if (rsum[XX] == tsum[YY] && rsum[XX] == sumXY && rsum[XX] > 0) {
+          if (rsum[XX] == tsum[YY] && rsum[XX] == sumXy && rsum[XX] > 0) {
             R = 1;
           } else {
             R = 0;
@@ -746,9 +769,10 @@ public class Image2DAligner implements Cloneable {
           maxj = base + c;
         } else if (R == max) {
           // Get shift from centre
-          final int[] xyz1 = correlation.getXY(maxj);
-          final int[] xyz2 = correlation.getXY(base + c);
-          int d1 = 0, d2 = 0;
+          final int[] xyz1 = correlation.getXy(maxj);
+          final int[] xyz2 = correlation.getXy(base + c);
+          int d1 = 0;
+          int d2 = 0;
           for (int k = 0; k < 3; k++) {
             d1 += MathUtils.pow2(xyz1[k] - centre[k]);
             d2 += MathUtils.pow2(xyz2[k] - centre[k]);
@@ -763,7 +787,7 @@ public class Image2DAligner implements Cloneable {
 
     // The maximum correlation with normalisation
     maxi = maxj; // correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
-    xy = correlation.getXY(maxi);
+    xy = correlation.getXy(maxi);
 
     // Report the shift required to move from the centre of the target image to the reference
     // @formatter:off
@@ -818,7 +842,7 @@ public class Image2DAligner implements Cloneable {
     }
 
     // The maximum correlation without normalisation
-    final int[] xy = correlation.getXY(maxi);
+    final int[] xy = correlation.getXy(maxi);
 
     // Find the range for the target and reference
     final int nc_2 = nc / 2;
@@ -907,8 +931,9 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * Iteratively search the cubic spline surface around the given pixel to maximise the value. <p>
-   * At each round each of 8 points around the current maximum (+/- range) are evaluated. The
+   * Iteratively search the cubic spline surface around the given pixel to maximise the value.
+   *
+   * <p>At each round each of 8 points around the current maximum (+/- range) are evaluated. The
    * optimum is picked and the range is halved. The initial range is 0.5 so the maximum distance
    * that can be walked in any direction is 1 pixel when the number of refinements is unlimited.
    * With refinements = 3 the distance is 0.5 + 0.25 + 0.125 = 0.875.
@@ -972,11 +997,12 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
-   * Iteratively search the cubic spline surface around the centre to maximise the value. <p> At
-   * each round each of 8 points around the current maximum (+/- range) are evaluated. The optimum
-   * is picked and the range is halved. The initial range is 0.5 so the maximum distance that can be
-   * walked in any direction is 1 pixel when the number of refinements is unlimited. With
-   * refinements = 3 the distance is 0.5 + 0.25 + 0.125 = 0.875.
+   * Iteratively search the cubic spline surface around the centre to maximise the value.
+   *
+   * <p>At each round each of 8 points around the current maximum (+/- range) are evaluated. The
+   * optimum is picked and the range is halved. The initial range is 0.5 so the maximum distance
+   * that can be walked in any direction is 1 pixel when the number of refinements is unlimited.
+   * With refinements = 3 the distance is 0.5 + 0.25 + 0.125 = 0.875.
    *
    * @param surface A peak surface (must be 5x5)
    * @param refinements the maximum number of refinements

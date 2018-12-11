@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -218,8 +219,10 @@ public class SpotInspector implements PlugIn, MouseListener {
 
     if (plotScore || plotHistogram) {
       // Get values for the plots
-      float[] xValues = null, yValues = null;
-      double yMin, yMax;
+      float[] xValues = null;
+      float[] yValues = null;
+      double yMin;
+      double yMax;
 
       int spotNumber = 0;
       xValues = new float[rankedResults.size()];
@@ -291,7 +294,8 @@ public class SpotInspector implements PlugIn, MouseListener {
       final int maxX = FastMath.min(x + radius + 1, w);
       final int maxY = FastMath.min(y + radius + 1, h);
 
-      int padX = 0, padY = 0;
+      int padX = 0;
+      int padY = 0;
       if (minX < 0) {
         padX = -minX;
         minX = 0;
@@ -454,7 +458,8 @@ public class SpotInspector implements PlugIn, MouseListener {
   private class PeakResultRank implements Comparable<PeakResultRank> {
     int rank;
     PeakResult peakResult;
-    float score, originalScore;
+    float score;
+    float originalScore;
 
     public PeakResultRank(PeakResult r, float s, float original) {
       peakResult = r;
@@ -511,12 +516,12 @@ public class SpotInspector implements PlugIn, MouseListener {
   }
 
   @Override
-  public void mouseClicked(MouseEvent e) {
+  public void mouseClicked(MouseEvent event) {
     if (id != currentId) {
       return;
     }
     // Show the result that was double clicked in the result table
-    if (e.getClickCount() > 1) {
+    if (event.getClickCount() > 1) {
       final int rank = textPanel.getSelectionStart() + 1;
 
       // Show the spot that was double clicked
@@ -577,22 +582,22 @@ public class SpotInspector implements PlugIn, MouseListener {
   }
 
   @Override
-  public void mousePressed(MouseEvent e) {
+  public void mousePressed(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseReleased(MouseEvent e) {
+  public void mouseReleased(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseEntered(MouseEvent e) {
+  public void mouseEntered(MouseEvent event) {
     // Ignore
   }
 
   @Override
-  public void mouseExited(MouseEvent e) {
+  public void mouseExited(MouseEvent event) {
     // Ignore
   }
 }

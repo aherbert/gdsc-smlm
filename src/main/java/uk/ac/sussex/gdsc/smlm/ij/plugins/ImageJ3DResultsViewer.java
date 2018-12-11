@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -322,6 +323,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
   // runtime libraries for Open GL. See the README in the eclipse project folder.
 
   private static String version = "";
+
   static {
     // Try setting -Dj3d.sortShape3DBounds for faster centroid computation
     // See org.scijava.java3d.MasterControl.sortShape3DBounds.
@@ -568,8 +570,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     }
 
     @Override
-    public void valueChanged(ListSelectionEvent e) {
-      if (e.getValueIsAdjusting()) {
+    public void valueChanged(ListSelectionEvent event) {
+      if (event.getValueIsAdjusting()) {
         return;
       }
       updateSelection();
@@ -1588,7 +1590,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
   }
 
   private class CustomSortObject implements Comparable<CustomSortObject> {
-    final float f1, f2, f3;
+    final float f1;
+    final float f2;
+    final float f3;
     final int index;
 
     CustomSortObject(int i, float f1, float f2, float f3) {
@@ -1713,6 +1717,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
   }
 
   private static HashMap<String, Color3f> colours;
+
   static {
     colours = new HashMap<>();
     final Field[] fields = Color.class.getFields();
@@ -1856,18 +1861,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     final MouseListener mouseListener = new MouseAdapter() {
       @Override
-      public void mouseClicked(final MouseEvent e) {
+      public void mouseClicked(final MouseEvent event) {
         // System.out.println("plugin mouseClicked");
-        if (!consumeEvent(e)) {
+        if (!consumeEvent(event)) {
           return;
         }
 
         // Consume the event
-        e.consume();
+        event.consume();
 
         // This finds the vertex indices of the rendered object.
         final Pair<Content, IntersectionInfo> pair =
-            getPickedContent(canvas, scene, e.getX(), e.getY());
+            getPickedContent(canvas, scene, event.getX(), event.getY());
         if (pair == null) {
           univ.select(null); // Do the same as the mouseClicked in Image3DUniverse
           return;
@@ -1921,7 +1926,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
         final PeakResult p = results.get(index);
 
-        if (e.getClickCount() > 1) {
+        if (event.getClickCount() > 1) {
           // Centre on the localisation
           final Point3d coordinate = new Point3d();
           // ga.getCoordinate(vertexIndex, coordinate);
@@ -1933,7 +1938,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
           vWorldToLocal.transform(coordinate);
 
           univ.centerAt(coordinate);
-        } else if (e.isShiftDown()) {
+        } else if (event.isShiftDown()) {
           // Ctrl+Shift held down to remove selected
           data.removeFromSelectionModel(p);
         } else {
@@ -1943,28 +1948,29 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       }
 
       @Override
-      public void mousePressed(final MouseEvent e) {
+      public void mousePressed(final MouseEvent event) {
         // Ignore
       }
 
       @Override
-      public void mouseReleased(final MouseEvent e) {
+      public void mouseReleased(final MouseEvent event) {
         // Ignore
       }
 
-      private boolean consumeEvent(final MouseEvent e) {
+      private boolean consumeEvent(final MouseEvent event) {
         // Consume left-mouse clicks with the Ctrl or Alt key down.
         // Single clicks only if showing the results table.
         // Double clicks for centring the universe.
 
-        if (e.isConsumed() || e.getButton() != MouseEvent.BUTTON1 || !(e.isControlDown())) {
+        if (event.isConsumed() || event.getButton() != MouseEvent.BUTTON1
+            || !(event.isControlDown())) {
           return false;
         }
         if ( // resultsTableSettings.getShowTable() &&
-        e.getClickCount() == 1) {
+        event.getClickCount() == 1) {
           return true;
         }
-        if (e.getClickCount() == 2) {
+        if (event.getClickCount() == 2) {
           return true;
         }
         return false;
@@ -2010,7 +2016,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     WindowManager.addWindow(w);
     w.addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosed(WindowEvent e) {
+      public void windowClosed(WindowEvent event) {
         WindowManager.removeWindow(w);
       }
     });
@@ -2063,7 +2069,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     final PeakResultTableModelFrame finalTable = table;
     table.addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosed(WindowEvent e) {
+      public void windowClosed(WindowEvent event) {
         // We must unmap the selection since we use the selection model
         // across all active views of the same dataset.
         final int[] indices = ListSelectionModelHelper.getSelectedIndices(t.b);
@@ -2093,42 +2099,42 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       this.flags = flags;
     }
 
-    private boolean run(MouseEvent e, int flag) {
-      return (flags & flag) != 0 && !e.isConsumed();
+    private boolean run(MouseEvent event, int flag) {
+      return (flags & flag) != 0 && !event.isConsumed();
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-      if (run(e, MOUSE_CLICKED)) {
-        l.mouseClicked(e);
+    public void mouseClicked(MouseEvent event) {
+      if (run(event, MOUSE_CLICKED)) {
+        l.mouseClicked(event);
       }
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
-      if (run(e, MOUSE_PRESSED)) {
-        l.mousePressed(e);
+    public void mousePressed(MouseEvent event) {
+      if (run(event, MOUSE_PRESSED)) {
+        l.mousePressed(event);
       }
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-      if (run(e, MOUSE_RELEASED)) {
-        l.mouseReleased(e);
+    public void mouseReleased(MouseEvent event) {
+      if (run(event, MOUSE_RELEASED)) {
+        l.mouseReleased(event);
       }
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-      if (run(e, MOUSE_ENTERED)) {
-        l.mouseEntered(e);
+    public void mouseEntered(MouseEvent event) {
+      if (run(event, MOUSE_ENTERED)) {
+        l.mouseEntered(event);
       }
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
-      if (run(e, MOUSE_EXITED)) {
-        l.mouseExited(e);
+    public void mouseExited(MouseEvent event) {
+      if (run(event, MOUSE_EXITED)) {
+        l.mouseExited(event);
       }
     }
   }
@@ -2151,16 +2157,16 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
-      if (run(e, MOUSE_DRAGGED)) {
-        l.mouseDragged(e);
+    public void mouseDragged(MouseEvent event) {
+      if (run(event, MOUSE_DRAGGED)) {
+        l.mouseDragged(event);
       }
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {
-      if (run(e, MOUSE_MOVED)) {
-        l.mouseMoved(e);
+    public void mouseMoved(MouseEvent event) {
+      if (run(event, MOUSE_MOVED)) {
+        l.mouseMoved(event);
       }
     }
   }
@@ -2236,8 +2242,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
   }
 
   /**
-   * Get the Content and closest intersection point at the specified canvas position <p> Adapted
-   * from Picker.getPickedContent(...).
+   * Get the Content and closest intersection point at the specified canvas position.
+   *
+   * <p>Adapted from Picker.getPickedContent(...).
    *
    * @param canvas the canvas
    * @param scene the scene
@@ -3048,8 +3055,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
   /** {@inheritDoc} */
   @Override
-  public void actionPerformed(ActionEvent e) {
-    final Object src = e.getSource();
+  public void actionPerformed(ActionEvent event) {
+    final Object src = event.getSource();
 
     ContentAction action = null;
 
@@ -3105,7 +3112,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             @Override
             public boolean collectOptions(String value) {
               createHighlightColour(value);
-              int r, g, b;
+              int r;
+              int g;
+              int b;
               if (highlightColor == null) {
                 r = b = 0;
                 g = 255;

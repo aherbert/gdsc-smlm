@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
@@ -67,9 +68,11 @@ public interface PreprocessedPeakResult {
   public float getSignal();
 
   /**
-   * Get the mean signal. <p> This requires a knowledge of the PSF used to create the result. It
-   * could be the peak signal in the PSF or the average signal over a range of the PSF, e.g. the
-   * area covered from the maxima to half-maxima for spots.
+   * Get the mean signal.
+   *
+   * <p>This requires a knowledge of the PSF used to create the result. It could be the peak signal
+   * in the PSF or the average signal over a range of the PSF, e.g. the area covered from the maxima
+   * to half-maxima for spots.
    *
    * @return The mean signal (in photons)
    */
@@ -78,8 +81,9 @@ public interface PreprocessedPeakResult {
   /**
    * Get the signal-to-noise ratio (SNR). This is ratio of the average signal value to the standard
    * deviation of the background. Ideally the standard deviation of the background is computed in
-   * the region around the centre. <p> The default implementation is {@link #getMeanSignal()} /
-   * {@link #getNoise()}.
+   * the region around the centre.
+   *
+   * <p>The default implementation is {@link #getMeanSignal()} / {@link #getNoise()}.
    *
    * @return The SNR
    */
@@ -213,9 +217,10 @@ public interface PreprocessedPeakResult {
   public boolean isNewResult();
 
   /**
-   * Get the assignments between this result and the true data. <p> The assignments should all have
-   * the same predicted Id. The actual Id should be a value starting from 0 and incrementing for
-   * each actual result in the frame that is scored.
+   * Get the assignments between this result and the true data.
+   *
+   * <p>The assignments should all have the same predicted Id. The actual Id should be a value
+   * starting from 0 and incrementing for each actual result in the frame that is scored.
    *
    * @param predictedId The predicted Id
    * @return The assignments
@@ -252,8 +257,9 @@ public interface PreprocessedPeakResult {
   public int getValidationResult();
 
   /**
-   * Returns true if this result is not a duplicate. The default value should be false. <p>
-   * Implementations can preprocess a results set to check if this is close to any preceeding
+   * Returns true if this result is not a duplicate. The default value should be false.
+   *
+   * <p>Implementations can preprocess a results set to check if this is close to any preceeding
    * results. If it is impossible to be a duplicate then the return value is true.
    *
    * @return true, if is not duplicate.

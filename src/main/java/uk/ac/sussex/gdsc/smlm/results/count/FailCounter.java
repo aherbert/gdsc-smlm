@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
@@ -40,8 +41,9 @@ public interface FailCounter {
   public void pass();
 
   /**
-   * Called when the n most recent events passed. <p> This method can be used when a series of
-   * events are known to pass.
+   * Called when the n most recent events passed.
+   *
+   * <p>This method can be used when a series of events are known to pass.
    *
    * @param n the n
    */
@@ -55,8 +57,9 @@ public interface FailCounter {
 
   /**
    * Called when the n most recent event failed. It is expected that the result of {@link #isOK()}
-   * may change after calling this method. <p> This method can be used when a series of events are
-   * known to fail.
+   * may change after calling this method.
+   *
+   * <p>This method can be used when a series of events are known to fail.
    *
    * @param n the n
    */

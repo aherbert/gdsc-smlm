@@ -24,6 +24,7 @@
 /*
  *
  */
+
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
@@ -40,11 +41,15 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.Arrays;
 
 /**
- * Calculate the Fisher information for a Poisson-Gaussian distribution. <p> Uses the equation of
- * Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq S7. <p> Performs a convolution with a
- * finite Gaussian kernel. <p> An optimisation is used when the mean of the Poisson is above a
- * threshold. In this case the Poisson can be approximated as a Gaussian and the Fisher information
- * is returned for the Gaussian-Gaussian convolution.
+ * Calculate the Fisher information for a Poisson-Gaussian distribution.
+ *
+ * <p>Uses the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq S7.
+ *
+ * <p>Performs a convolution with a finite Gaussian kernel.
+ *
+ * <p>An optimisation is used when the mean of the Poisson is above a threshold. In this case the
+ * Poisson can be approximated as a Gaussian and the Fisher information is returned for the
+ * Gaussian-Gaussian convolution.
  */
 public class PoissonGaussianFisherInformation extends BasePoissonFisherInformation {
   /** The default minimum range for the Gaussian kernel (in units of SD). */
@@ -111,9 +116,10 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   /**
-   * Compute the limit of a usable probability above 0. <p> Find the point where probability will
-   * return above 0. Using FastMath.exp this is -746. However sub-normal output occurs at -709. This
-   * is a good limit for computation.
+   * Compute the limit of a usable probability above 0.
+   *
+   * <p>Find the point where probability will return above 0. Using FastMath.exp this is -746.
+   * However sub-normal output occurs at -709. This is a good limit for computation.
    *
    * @param mean the mean
    * @return the limit
@@ -267,9 +273,12 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   /**
-   * {@inheritDoc} <p> The input parameter refers to the mean of the Poisson distribution. <p> The
-   * Fisher information is computed using the equation of Chao, et al (2013) Nature Methods, 10,
-   * 335-338, SI Eq S7. Note that that equation computes the noise coefficient relative to a
+   * {@inheritDoc}
+   *
+   * <p>The input parameter refers to the mean of the Poisson distribution.
+   *
+   * <p>The Fisher information is computed using the equation of Chao, et al (2013) Nature Methods,
+   * 10, 335-338, SI Eq S7. Note that that equation computes the noise coefficient relative to a
    * Poisson, this computes the Fisher information. To get the noise coefficient multiply by the
    * input parameter.
    *
@@ -297,12 +306,17 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   /**
-   * Gets the Poisson-Gaussian Fisher information. <p> The input parameter refers to the mean of the
-   * Poisson distribution. <p> The Fisher information is computed using the equation of Chao, et al
-   * (2013) Nature Methods, 10, 335-338, SI Eq S7. Note that that equation computes the noise
-   * coefficient relative to a Poisson, this computes the Fisher information. To get the noise
-   * coefficient multiply by the input parameter. <p> Note: This uses a convolution of an infinite
-   * integral over a finite range. It may under-estimate the information when the mean is large. Use
+   * Gets the Poisson-Gaussian Fisher information.
+   *
+   * <p>The input parameter refers to the mean of the Poisson distribution.
+   *
+   * <p>The Fisher information is computed using the equation of Chao, et al (2013) Nature Methods,
+   * 10, 335-338, SI Eq S7. Note that that equation computes the noise coefficient relative to a
+   * Poisson, this computes the Fisher information. To get the noise coefficient multiply by the
+   * input parameter.
+   *
+   * <p>Note: This uses a convolution of an infinite integral over a finite range. It may
+   * under-estimate the information when the mean is large. Use
    * {@link #getFisherInformation(double)} for a checked return value, clipped to the expected range
    * for a Poisson and the Poisson-Gaussian approximation.
    *
@@ -538,7 +552,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   private static class SimpsonIntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0, sum4 = 0;
+    double sum2 = 0;
+    double sum4 = 0;
 
     SimpsonIntegrationProcedure(int scale) {
       super(scale);
@@ -568,7 +583,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   private static class Simpson38IntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0, sum3 = 0;
+    double sum2 = 0;
+    double sum3 = 0;
 
     Simpson38IntegrationProcedure(int scale) {
       super(scale);
@@ -619,12 +635,15 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   /**
-   * Gets the approximate Poisson-Gaussian Fisher information. <p> Approximate the Poisson as a
-   * Gaussian with {@code u=t} and {@code var=t}. Gaussian-Gaussian convolution: s<sub>a</sub> *
-   * s<sub>b</sub> =&gt; s<sub>c</sub> = sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>).
-   * Fisher information of Gaussian mean is 1/variance. <p> The returned value is:
-   * {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and {@code s} the Gaussian standard
-   * deviation.
+   * Gets the approximate Poisson-Gaussian Fisher information.
+   *
+   * <p>Approximate the Poisson as a Gaussian with {@code u=t} and {@code var=t}. Gaussian-Gaussian
+   * convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> =
+   * sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>). Fisher information of Gaussian mean
+   * is 1/variance.
+   *
+   * <p>The returned value is: {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and
+   * {@code s} the Gaussian standard deviation.
    *
    * @param t the poisson mean
    * @return the Poisson Gaussian Fisher information
@@ -637,12 +656,15 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   /**
-   * Gets the approximate Poisson-Gaussian Fisher information. <p> Approximate the Poisson as a
-   * Gaussian with {@code u=t} and {@code var=t}. Gaussian-Gaussian convolution: s<sub>a</sub> *
-   * s<sub>b</sub> =&gt; s<sub>c</sub> = sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>).
-   * Fisher information of Gaussian mean is 1/variance. <p> The returned value is:
-   * {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and {@code s} the Gaussian standard
-   * deviation.
+   * Gets the approximate Poisson-Gaussian Fisher information.
+   *
+   * <p>Approximate the Poisson as a Gaussian with {@code u=t} and {@code var=t}. Gaussian-Gaussian
+   * convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> =
+   * sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>). Fisher information of Gaussian mean
+   * is 1/variance.
+   *
+   * <p>The returned value is: {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and
+   * {@code s} the Gaussian standard deviation.
    *
    * @param t the poisson mean
    * @param s the Gaussian standard deviation (no check made for negatives as this is squared)
@@ -802,8 +824,10 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   /**
-   * Sets the relative accuracy for convergence during iteration. <p> Set to below zero to prevent
-   * convergence check. This results in a fixed number of iterations.
+   * Sets the relative accuracy for convergence during iteration.
+   *
+   * <p>Set to below zero to prevent convergence check. This results in a fixed number of
+   * iterations.
    *
    * @param relativeAccuracy the new relative accuracy
    */

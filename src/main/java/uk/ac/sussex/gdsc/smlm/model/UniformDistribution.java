@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
@@ -28,16 +29,20 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
 
 /**
- * Samples uniformly from the specified volume. <p> Uses a Halton sequence generator by default.
- * This can be overriden by passing in a vector sequence generator or by providing a factory for a
- * random generator (which should produce uniform equi-distributed numbers in the domain [0,1]).
+ * Samples uniformly from the specified volume.
+ *
+ * <p>Uses a Halton sequence generator by default. This can be overriden by passing in a vector
+ * sequence generator or by providing a factory for a random generator (which should produce uniform
+ * equi-distributed numbers in the domain [0,1]).
  */
 public class UniformDistribution implements SpatialDistribution {
   /**
    * Wrap a standard random generator to create a vector generator for 3 dimensions.
    */
   private class VectorGeneratorWrapper implements RandomVectorGenerator {
-    private final RandomGenerator rng1, rng2, rng3;
+    private final RandomGenerator rng1;
+    private final RandomGenerator rng2;
+    private final RandomGenerator rng3;
 
     public VectorGeneratorWrapper(RandomGeneratorFactory randomGeneratorFactory) {
       rng1 = create(randomGeneratorFactory);
@@ -60,7 +65,9 @@ public class UniformDistribution implements SpatialDistribution {
     }
   }
 
-  private double[] min, max, range;
+  private double[] min;
+  private double[] max;
+  private double[] range;
   private RandomVectorGenerator vectorGenerator;
 
   /**
@@ -192,7 +199,7 @@ public class UniformDistribution implements SpatialDistribution {
 
   /** {@inheritDoc} */
   @Override
-  public boolean isWithinXY(double[] xyz) {
+  public boolean isWithinXy(double[] xyz) {
     for (int i = 0; i < 2; i++) {
       if (xyz[i] < min[i] || xyz[i] > max[i]) {
         return false;

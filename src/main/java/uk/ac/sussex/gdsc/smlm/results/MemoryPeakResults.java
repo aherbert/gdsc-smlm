@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -73,8 +74,10 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 /**
- * Stores peak results in memory. <p> The PeakResults interface add methods are not-thread safe. The
- * results should be wrapped in a SynchronizedPeakResults object if using on multiple threads.
+ * Stores peak results in memory.
+ *
+ * <p>The PeakResults interface add methods are not-thread safe. The results should be wrapped in a
+ * SynchronizedPeakResults object if using on multiple threads.
  */
 public class MemoryPeakResults extends AbstractPeakResults implements Cloneable {
   private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<>();
@@ -150,8 +153,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * {@inheritDoc} <p> Not synchronized. Use SynchronizedPeakResults to wrap this instance for use
-   * across threads.
+   * {@inheritDoc}
+   *
+   * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
    */
   @Override
   public void addAll(Collection<PeakResult> results) {
@@ -159,8 +163,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Add all results. <p> Not synchronized. Use SynchronizedPeakResults to wrap this instance for
-   * use across threads.
+   * Add all results.
+   *
+   * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
    *
    * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
    */
@@ -170,8 +175,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Add all results. <p> Not synchronized. Use SynchronizedPeakResults to wrap this instance for
-   * use across threads.
+   * Add all results.
+   *
+   * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
    *
    * @see uk.ac.sussex.gdsc.smlm.results.AbstractPeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
    */
@@ -431,8 +437,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Return an estimate of the memory size taken by PeakResult objects. <p> Note: This is just a
-   * guess based on measured sizes for the objects in memory.
+   * Return an estimate of the memory size taken by PeakResult objects.
+   *
+   * <p>Note: This is just a guess based on measured sizes for the objects in memory.
    *
    * @param r the r
    * @return The memory size
@@ -447,8 +454,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Return an estimate of the memory size taken by PeakResult objects. <p> Note: This is just a
-   * guess based on measured sizes for the objects in memory.
+   * Return an estimate of the memory size taken by PeakResult objects.
+   *
+   * <p>Note: This is just a guess based on measured sizes for the objects in memory.
    *
    * @param size the size
    * @param includeDeviations the include deviations
@@ -541,7 +549,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * Run GC.
    */
   private static void _runGC() {
-    long usedMem1 = usedMemory(), usedMem2 = Long.MAX_VALUE;
+    long usedMem1 = usedMemory();
+    long usedMem2 = Long.MAX_VALUE;
     for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++i) {
       runGCOnce();
       Thread.currentThread();
@@ -598,8 +607,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   /////////////////////////////////////////////////////////////////
 
   /**
-   * {@inheritDoc} <p> This clears the current results but does not reduce storage allocation. This
-   * can be done with {@link #trimToSize()}.
+   * {@inheritDoc}
+   *
+   * <p>This clears the current results but does not reduce storage allocation. This can be done
+   * with {@link #trimToSize()}.
    *
    * @see #trimToSize()
    */
@@ -609,8 +620,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Add a result. <p> Not synchronized. Use SynchronizedPeakResults to wrap this instance for use
-   * across threads.
+   * Add a result.
+   *
+   * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
    *
    * {@inheritDoc}
    *
@@ -694,8 +706,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
     }
 
     // Get the native bounds
-    float minX = getf(0).getXPosition(), maxX = minX;
-    float minY = getf(0).getYPosition(), maxY = minY;
+    float minX = getf(0).getXPosition();
+    float maxX = minX;
+    float minY = getf(0).getYPosition();
+    float maxY = minY;
     for (int i = 1, size = size(); i < size; i++) {
       final PeakResult p = getf(i);
       final float x = p.getXPosition();
@@ -990,8 +1004,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Gets the first frame. <p> This may be different from {@link #getMinFrame()} if the results are
-   * not sorted by frame.
+   * Gets the first frame.
+   *
+   * <p>This may be different from {@link #getMinFrame()} if the results are not sorted by frame.
    *
    * @return the first frame
    * @throws IllegalStateException If the size is zero
@@ -1004,8 +1019,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Gets the last frame. <p> This may be different from {@link #getMaxFrame()} if the results are
-   * not sorted by frame.
+   * Gets the last frame.
+   *
+   * <p>This may be different from {@link #getMaxFrame()} if the results are not sorted by frame.
    *
    * @return the last frame
    * @throws IllegalStateException If the size is zero
@@ -1173,8 +1189,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   /////////////////////////////////////////////////////////////////
 
   /**
-   * For each result execute the procedure. <p> Warning: Results with be in their native units since
-   * no unit conversion is performed.
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1212,8 +1229,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure. <p> Warning: Results with be in their native units since
-   * no unit conversion is performed.
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1226,8 +1244,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For the first result execute the procedure. <p> Warning: Results with be in their native units
-   * since no unit conversion is performed.
+   * For the first result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1241,8 +1260,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure. <p> Warning: Results with be in their native units since
-   * no unit conversion is performed.
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1254,8 +1274,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For the first result execute the procedure. <p> Warning: Results with be in their native units
-   * since no unit conversion is performed.
+   * For the first result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1268,8 +1289,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure. <p> Warning: Results with be in their native units since
-   * no unit conversion is performed.
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1281,8 +1303,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For the first result execute the procedure. <p> Warning: Results with be in their native units
-   * since no unit conversion is performed.
+   * For the first result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1295,8 +1318,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure. <p> Warning: Results with be in their native units since
-   * no unit conversion is performed.
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1308,8 +1332,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For the first result execute the procedure. <p> Warning: Results with be in their native units
-   * since no unit conversion is performed.
+   * For the first result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
    *
    * @param procedure the procedure
    */
@@ -1322,8 +1347,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param procedure the procedure
@@ -1340,8 +1366,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param procedure the procedure
@@ -1364,8 +1391,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param distanceUnit the distance unit
@@ -1392,8 +1420,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param distanceUnit the distance unit
@@ -1421,10 +1450,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This procedure is
-   * exclusive to data fit with a Gaussian2D PSF as it computes the height of the Gaussian from the
-   * integral (Intensity) and the widths. <p> This will fail if the calibration is missing
-   * information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This procedure is exclusive to data fit with a Gaussian2D PSF as it computes the height of
+   * the Gaussian from the integral (Intensity) and the widths.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param procedure the procedure
@@ -1461,8 +1492,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param procedure the procedure
@@ -1483,8 +1515,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param distanceUnit the distance unit
@@ -1510,8 +1543,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param distanceUnit the distance unit
@@ -1538,8 +1572,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param distanceUnit the distance unit
@@ -1566,8 +1601,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param distanceUnit the distance unit
@@ -1595,8 +1631,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param procedure the procedure
    * @throws ConversionException if the conversion is not possible
@@ -1615,8 +1652,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1639,8 +1677,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1685,8 +1724,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1719,8 +1759,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1742,9 +1783,11 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units. <p> Warning: The peak result with be
-   * in native units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
+   *
+   * <p>Warning: The peak result with be in native units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1767,8 +1810,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1791,8 +1835,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1816,8 +1861,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure using the specified units. <p> This will fail if the
-   * calibration is missing information to convert the units.
+   * For each result execute the procedure using the specified units.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param distanceUnit the distance unit
    * @param procedure the procedure
@@ -1835,8 +1881,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure <p> Note the precision may not be stored in the results.
-   * The default precision for a result is NaN.
+   * For each result execute the procedure.
+   *
+   * <p>Note the precision may not be stored in the results. The default precision for a result is
+   * NaN.
    *
    * @param procedure the procedure
    */
@@ -1848,8 +1896,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure <p> This will fail if the calibration is missing
-   * information to convert the units.
+   * For each result execute the procedure.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param procedure the procedure
    * @throws ConversionException if the conversion is not possible
@@ -1869,8 +1918,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure <p> This will fail if the calibration is missing
-   * information to convert the units.
+   * For each result execute the procedure.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param procedure the procedure
    * @throws ConversionException if the conversion is not possible
@@ -1889,8 +1939,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure <p> This will fail if the calibration is missing
-   * information to convert the units.
+   * For each result execute the procedure.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param procedure the procedure
    * @throws ConversionException if the conversion is not possible
@@ -1910,8 +1961,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure <p> This will fail if the calibration is missing
-   * information to convert the units.
+   * For each result execute the procedure.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param procedure the procedure
    * @throws ConversionException if the conversion is not possible
@@ -2069,8 +2121,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Fix zero background to the given background. <p> This will fail if the calibration is missing
-   * information to convert the units.
+   * Fix zero background to the given background.
+   *
+   * <p>This will fail if the calibration is missing information to convert the units.
    *
    * @param intensityUnit the intensity unit
    * @param newBackground the new background

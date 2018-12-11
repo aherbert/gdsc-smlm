@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -79,17 +80,19 @@ public class TraceManager {
      *
      * @return the name
      */
-    abstract public String getName();
+    public abstract String getName();
   }
 
   private MemoryPeakResults results;
   private Localisation[] localisations;
   private Localisation[] endLocalisations;
-  private int[] index, endIndex;
+  private int[] index;
+  private int[] endIndex;
   private int[] maxT;
   private int totalTraces;
   private int totalFiltered;
-  private float dThresh2, dExclusion2;
+  private float dThresh2;
+  private float dExclusion2;
   private TrackProgress tracker = null;
   private int activationFrameInterval = 0;
   private int activationFrameWindow = 0;
@@ -99,15 +102,20 @@ public class TraceManager {
   private int pulseInterval = 0;
 
   /**
-   * The distance between the localisation and its assigned forerunner. <p> Set in
-   * {@link #findForerunner(int, int, int)} and
+   * The distance between the localisation and its assigned forerunner.
+   *
+   * <p>Set in {@link #findForerunner(int, int, int)} and
    * {@link #findAlternativeForerunner(int, int, int, int, int[])}.
    */
   private float minD;
 
   private class Localisation {
-    int t, endT, id, trace;
-    float x, y;
+    int t;
+    int endT;
+    int id;
+    int trace;
+    float x;
+    float y;
 
     public Localisation(int id, int t, int endT, float x, float y) {
       if (endT < t) {
@@ -226,13 +234,18 @@ public class TraceManager {
   }
 
   /**
-   * Trace localisations across frames that are the same molecule. <p> Any spot that occurred within
-   * time threshold and distance threshold of a previous spot is grouped into the same trace as that
-   * previous spot. The resulting trace is assigned a spatial position equal to the centroid
-   * position of all the spots included in the trace. <p> See Coltharp, et al. Accurate Construction
-   * of Photoactivated Localization Microscopy (PALM) Images for Quantitative Measurements (2012).
-   * PLoS One. 7(12): e51725. DOI: http://dx.doi.org/10.1371%2Fjournal.pone.0051725 <p> Note: The
-   * actual traces representing molecules can be obtained by calling {@link #getTraces()}
+   * Trace localisations across frames that are the same molecule.
+   *
+   * <p>Any spot that occurred within time threshold and distance threshold of a previous spot is
+   * grouped into the same trace as that previous spot. The resulting trace is assigned a spatial
+   * position equal to the centroid position of all the spots included in the trace.
+   *
+   * <p>See Coltharp, et al. Accurate Construction of Photoactivated Localization Microscopy (PALM)
+   * Images for Quantitative Measurements (2012). PLoS One. 7(12): e51725. DOI:
+   * http://dx.doi.org/10.1371%2Fjournal.pone.0051725
+   *
+   * <p>Note: The actual traces representing molecules can be obtained by calling
+   * {@link #getTraces()}
    *
    * @param distanceThreshold The distance threshold in the native units of the results
    * @param timeThreshold The time threshold in frames
@@ -560,7 +573,9 @@ public class TraceManager {
   /**
    * Convert a list of traces into peak results. The signal weighted centroid of each trace is used
    * as the coordinates. The weighted localisation precision is used as the precision. The signal is
-   * the sum from all the peaks in the trace. <p> If the trace is empty it is ignored.
+   * the sum from all the peaks in the trace.
+   *
+   * <p>If the trace is empty it is ignored.
    *
    * @param traces the traces
    * @param calibration the calibration
@@ -636,8 +651,9 @@ public class TraceManager {
   }
 
   /**
-   * Convert a list of traces into peak results setting the trace ID into the results. <p> If the
-   * trace is empty it is ignored.
+   * Convert a list of traces into peak results setting the trace ID into the results.
+   *
+   * <p>If the trace is empty it is ignored.
    *
    * @param traces the traces
    * @param calibration the calibration
@@ -649,8 +665,9 @@ public class TraceManager {
   }
 
   /**
-   * Convert a list of traces into peak results setting the trace ID into the results. <p> If the
-   * trace is empty it is ignored.
+   * Convert a list of traces into peak results setting the trace ID into the results.
+   *
+   * <p>If the trace is empty it is ignored.
    *
    * @param traces the traces
    * @param calibration the calibration
@@ -688,8 +705,10 @@ public class TraceManager {
   /**
    * Convert a list of traces into peak results. The signal weighted centroid of each trace is used
    * as the coordinates. The weighted localisation precision is used as the width. The amplitude is
-   * the average from all the peaks in the trace. <p> Uses the title and bounds from the constructor
-   * peak results. The title has the word 'Traced Centroids' appended.
+   * the average from all the peaks in the trace.
+   *
+   * <p>Uses the title and bounds from the constructor peak results. The title has the word 'Traced
+   * Centroids' appended.
    *
    * @param traces the traces
    * @return the peak results
@@ -701,8 +720,10 @@ public class TraceManager {
   /**
    * Convert a list of traces into peak results. The signal weighted centroid of each trace is used
    * as the coordinates. The weighted localisation precision is used as the width. The amplitude is
-   * the average from all the peaks in the trace. <p> Uses the title and bounds from the provided
-   * peak results. The title has the word 'Traced Centroids' appended.
+   * the average from all the peaks in the trace.
+   *
+   * <p>Uses the title and bounds from the provided peak results. The title has the word 'Traced
+   * Centroids' appended.
    *
    * @param source the source
    * @param traces the traces
@@ -719,8 +740,10 @@ public class TraceManager {
   }
 
   /**
-   * Convert a list of traces into peak results. <p> Uses the title and bounds from the constructor
-   * peak results. The title has the word 'Traced' appended.
+   * Convert a list of traces into peak results.
+   *
+   * <p>Uses the title and bounds from the constructor peak results. The title has the word 'Traced'
+   * appended.
    *
    * @param traces the traces
    * @return the peak results
@@ -730,8 +753,10 @@ public class TraceManager {
   }
 
   /**
-   * Convert a list of traces into peak results. <p> Uses the title and bounds from the provided
-   * peak results. The title has the word 'Traced' appended.
+   * Convert a list of traces into peak results.
+   *
+   * <p>Uses the title and bounds from the provided peak results. The title has the word 'Traced'
+   * appended.
    *
    * @param source the source
    * @param traces the traces
@@ -909,8 +934,10 @@ public class TraceManager {
   /**
    * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance
    * threshold of the given spot. In the event that multiple forerunner spots from the same frame
-   * are within the distance, assign the closest spot. <p> This method respects the exclusion
-   * distance. No spot can be assigned if a the next closest spot is within the exclusion distance.
+   * are within the distance, assign the closest spot.
+   *
+   * <p>This method respects the exclusion distance. No spot can be assigned if a the next closest
+   * spot is within the exclusion distance.
    *
    * @param index The index of the spot
    * @param pastIndex The index of the earliest forerunner spot
@@ -1042,8 +1069,9 @@ public class TraceManager {
   /**
    * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance
    * threshold of the given spot. In the event that multiple forerunner spots from the same frame
-   * are within the distance, assign the closest spot. <p> Do not assigned to the specified trace to
-   * ignore.
+   * are within the distance, assign the closest spot.
+   *
+   * <p>Do not assigned to the specified trace to ignore.
    *
    * @param index The index of the spot
    * @param pastIndex The index of the earliest forerunner spot
@@ -1066,8 +1094,9 @@ public class TraceManager {
   /**
    * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance
    * threshold of the given spot. In the event that multiple forerunner spots from the same frame
-   * are within the distance, assign the closest spot. <p> Do not assigned to the specified trace to
-   * ignore.
+   * are within the distance, assign the closest spot.
+   *
+   * <p>Do not assigned to the specified trace to ignore.
    *
    * @param index The index of the spot
    * @param pastIndex The index of the earliest forerunner spot
@@ -1185,9 +1214,12 @@ public class TraceManager {
   /**
    * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance
    * threshold of the given spot. In the event that multiple forerunner spots from the same frame
-   * are within the distance, assign the closest spot. <p> This method respects the exclusion
-   * distance. No spot can be assigned if a the next closest spot is within the exclusion distance.
-   * <p> Do not assigned to the specified trace to ignore.
+   * are within the distance, assign the closest spot.
+   *
+   * <p>This method respects the exclusion distance. No spot can be assigned if a the next closest
+   * spot is within the exclusion distance.
+   *
+   * <p>Do not assigned to the specified trace to ignore.
    *
    * @param index The index of the spot
    * @param pastIndex The index of the earliest forerunner spot
@@ -1479,7 +1511,9 @@ public class TraceManager {
   /**
    * Set the minimum distance the next candidate spot must be in the same frame, i.e. choose
    * localisations closer than the distance threshold but no other spots are closer than this
-   * distance exclusion <p> If less that the tracing distance threshold this value is ignored.
+   * distance exclusion
+   *
+   * <p>If less that the tracing distance threshold this value is ignored.
    *
    * @param distanceExclusion the distance exclusion
    */

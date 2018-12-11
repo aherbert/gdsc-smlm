@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.Arrays;
@@ -39,8 +40,9 @@ public abstract class SpotFilter implements Cloneable {
 
   /**
    * Sets the weights of the data. This should be called before {@link #list(float[], int, int)} or
-   * {@link #rank(float[], int, int)} is called with data samples. <p> Calling this in advance
-   * allows efficient caching of pre-computed weightings.
+   * {@link #rank(float[], int, int)} is called with data samples.
+   *
+   * <p>Calling this in advance allows efficient caching of pre-computed weightings.
    *
    * @param weights the weights of the data (can be null)
    * @param width The width of the data
@@ -87,7 +89,7 @@ public abstract class SpotFilter implements Cloneable {
 
   /**
    * List and then rank the candidate spots in the data.
-   * 
+   *
    * <p>The list will be in the order defined by sorting the candidates using the score in
    * descending order.
    *

@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.engine;
 
 /**
@@ -30,10 +31,13 @@ package uk.ac.sussex.gdsc.smlm.engine;
 class CandidateGridManager {
   private CandidateList[][] candidateGrid;
   private CandidateList[][] fittedCandidateGrid;
-  private final int resolution, xBlocks, yBlocks;
+  private final int resolution;
+  private final int xBlocks;
+  private final int yBlocks;
 
   private CandidateList fittedCandidateCache = null;
-  private int fittedCandidateCacheX = -1, fittedCandidateCacheY = -1;
+  private int fittedCandidateCacheX = -1;
+  private int fittedCandidateCacheY = -1;
   private CandidateList neighbourCache = null;
   private Candidate neighbourCacheCandidate = null;
 
@@ -95,8 +99,9 @@ class CandidateGridManager {
 
   /**
    * Add a fittedCandidate to the grid. Does not assume that the coordinates are within the size of
-   * the grid. <p> This method does not clear the cache and should be called only when initialising
    * the grid.
+   *
+   * <p>This method does not clear the cache and should be called only when initialising the grid.
    *
    * @param candidate the candidate
    */
@@ -147,8 +152,9 @@ class CandidateGridManager {
   }
 
   /**
-   * Add a candidate to the grid. Assumes that the coordinates are within the size of the grid. <p>
-   * This method does not clear the cache and should be called only when initialising the grid.
+   * Add a candidate to the grid. Assumes that the coordinates are within the size of the grid.
+   *
+   * <p>This method does not clear the cache and should be called only when initialising the grid.
    *
    * @param candidate the candidate
    */
@@ -188,7 +194,9 @@ class CandidateGridManager {
   /**
    * Get the neighbours in the local region (defined by the input resolution). All neighbours within
    * the resolution distance will be returned, plus there may be others and so distances should be
-   * checked. <p> Note: Assumes candidate indices are unique.
+   * checked.
+   *
+   * <p>Note: Assumes candidate indices are unique.
    *
    * @param candidate the candidate
    * @return the neighbours

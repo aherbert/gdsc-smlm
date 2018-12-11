@@ -191,13 +191,13 @@ public class PoissonCalculatorTest {
       PoissonFunction f) {
     double p = 0;
 
-    final int integrationPoints = 10;
+    final int integrationpoints = 10;
     final double relativeAccuracy = 1e-4;
     final double absoluteAccuracy = 1e-8;
     final int minimalIterationCount = 3;
     final int maximalIterationCount = 32;
 
-    final UnivariateIntegrator in = new IterativeLegendreGaussIntegrator(integrationPoints,
+    final UnivariateIntegrator in = new IterativeLegendreGaussIntegrator(integrationpoints,
         relativeAccuracy, absoluteAccuracy, minimalIterationCount, maximalIterationCount);
 
     // new SimpsonIntegrator();

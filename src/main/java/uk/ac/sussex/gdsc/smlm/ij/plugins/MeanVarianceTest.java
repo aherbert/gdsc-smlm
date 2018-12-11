@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -58,25 +59,32 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Opens a folder of images and computes a Mean-Variance Test. <p> Each image must contain a 2-slice
- * stack of white light images. The image filename must contain the exposure time separated by
- * whitespace, e.g. 'MVT 30.tif' for 30 milliseconds. <p> Gain calculations for standard CCD and
- * EM-CCD cameras are based on the paper: Hirsch M, Wareham RJ, Martin-Fernandez ML, Hobson MP,
- * Rolfe DJ (2013) A Stochastic Model for Electron Multiplication Charge-Coupled Devices – From
- * Theory to Practice. PLoS ONE 8(1): e53671. doi:10.1371/journal.pone.0053671
+ * Opens a folder of images and computes a Mean-Variance Test.
+ *
+ * <p>Each image must contain a 2-slice stack of white light images. The image filename must contain
+ * the exposure time separated by whitespace, e.g. 'MVT 30.tif' for 30 milliseconds.
+ *
+ * <p>Gain calculations for standard CCD and EM-CCD cameras are based on the paper: Hirsch M,
+ * Wareham RJ, Martin-Fernandez ML, Hobson MP, Rolfe DJ (2013) A Stochastic Model for Electron
+ * Multiplication Charge-Coupled Devices – From Theory to Practice. PLoS ONE 8(1): e53671.
+ * doi:10.1371/journal.pone.0053671
  */
 public class MeanVarianceTest implements PlugIn {
   private static final String TITLE = "Mean Variance Test";
   private static double cameraGain = 0;
   private static double _bias = 500;
-  private static boolean showTable = true, showCharts = true;
+  private static boolean showTable = true;
+  private static boolean showCharts = true;
 
   private int exposureCounter = 0;
   private boolean singleImage;
 
   private class PairSample {
-    int slice1, slice2;
-    double mean1, mean2, variance;
+    int slice1;
+    int slice2;
+    double mean1;
+    double mean2;
+    double variance;
 
     public PairSample(int slice1, int slice2, double mean1, double mean2, double variance) {
       this.slice1 = slice1;

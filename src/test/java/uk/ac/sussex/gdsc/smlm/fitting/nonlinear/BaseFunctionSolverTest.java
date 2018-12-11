@@ -72,6 +72,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
   static double[] shift = {-0.5, 0, 0.5}; // Applied (+/-) to the x/y position
   static double[] factor = {0.9, 1, 1.1}; // Applied (*) to the width
   static int size = 11;
+
   static {
     // Keep SNR reasonable. This should be an "easy" test since the bounds
     // for a correct answer are strict.
@@ -85,6 +86,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     params[Gaussian2DFunction.X_SD] = sd;
   }
   static double[] defaultClampValues;
+
   static {
     defaultClampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
     // Taken from the 3D-DAO-STORM paper:
@@ -599,6 +601,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
   static double[] p1, p12;
   static double[] p2v;
+
   static {
     p1 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
     final double[] p2 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];

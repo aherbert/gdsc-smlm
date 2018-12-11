@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
@@ -36,7 +37,8 @@ public interface WLSEFunctionSolver extends FunctionSolver {
 
   /**
    * Gets the probability Q that a value of chi-square as poor as the value should occur by chance.
-   * <p> A low value indicates greater statistical significance, i.e. greater confidence that the
+   *
+   * <p>A low value indicates greater statistical significance, i.e. greater confidence that the
    * observed deviation from the null hypothesis is significant, with the null model being that the
    * fit is good. The confidence in rejecting the null hypothesis is 100 * (1 - q) percent.
    *

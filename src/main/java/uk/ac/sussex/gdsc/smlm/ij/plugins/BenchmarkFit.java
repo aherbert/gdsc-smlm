@@ -21,6 +21,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -104,7 +105,8 @@ public class BenchmarkFit implements PlugIn {
   private static String rawDataDirectory = "";
   private static int histogramBins = 100;
 
-  private static TextWindow summaryTable = null, analysisTable = null;
+  private static TextWindow summaryTable = null;
+  private static TextWindow analysisTable = null;
 
   //@formatter:off
   // These are assuming a Gaussian 2D PSF
@@ -127,6 +129,7 @@ public class BenchmarkFit implements PlugIn {
   private static final int ADJUSTED_X_SD = 10;
   private static final int ADJUSTED_Y_SD = 11;
   private static boolean[] displayHistograms = new boolean[NAMES.length];
+
   static {
     for (int i = 0; i < displayHistograms.length; i++) {
       displayHistograms[i] = true;
@@ -217,8 +220,10 @@ public class BenchmarkFit implements PlugIn {
     final double[] origin;
 
     float[] data = null;
-    private double[] lb, ub = null;
-    private double[] lc, uc = null;
+    private double[] lb;
+    private double[] ub = null;
+    private double[] lc;
+    private double[] uc = null;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region,
         FitConfiguration fitConfig, CameraModel cameraModel) {
@@ -850,7 +855,9 @@ public class BenchmarkFit implements PlugIn {
     return sa;
   }
 
-  private int progress, stepProgress, totalProgress;
+  private int progress;
+  private int stepProgress;
+  private int totalProgress;
 
   /**
    * Show progress.
