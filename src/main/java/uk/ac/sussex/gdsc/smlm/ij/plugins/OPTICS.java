@@ -1140,7 +1140,7 @@ public class OPTICS implements PlugIn {
   private class OpticsWorker extends BaseWorker {
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      if (current.getMinpoints() != previous.getMinpoints()) {
+      if (current.getMinPoints() != previous.getMinPoints()) {
         return false;
       }
       if (current.getOpticsMode() != previous.getOpticsMode()) {
@@ -1179,7 +1179,7 @@ public class OPTICS implements PlugIn {
       // The second item should be the OPTICS manager
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
 
-      final int minPts = settings.getMinpoints();
+      final int minPts = settings.getMinPoints();
 
       OpticsResult opticsResult;
       if (settings.getOpticsMode() == OpticsMode.FAST_OPTICS.ordinal()) {
@@ -1287,7 +1287,7 @@ public class OPTICS implements PlugIn {
                 distance = settings.getClusteringDistance();
               } else {
                 distance =
-                    opticsManager.computeGeneratingDistance(settings.getMinpoints()) * nmPerPixel;
+                    opticsManager.computeGeneratingDistance(settings.getMinPoints()) * nmPerPixel;
                 if (nmPerPixel != 1) {
                   ImageJUtils.log(TITLE + ": Default clustering distance %s nm",
                       MathUtils.rounded(distance));
@@ -1698,7 +1698,7 @@ public class OPTICS implements PlugIn {
             } else {
               final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
               distance =
-                  opticsManager.computeGeneratingDistance(settings.getMinpoints()) * nmPerPixel;
+                  opticsManager.computeGeneratingDistance(settings.getMinPoints()) * nmPerPixel;
             }
           } else {
             // Ensure that the distance is valid
@@ -1990,7 +1990,7 @@ public class OPTICS implements PlugIn {
         image = null;
         result = false;
       }
-      if (requiresLoop(current) && (current.getMinpoints() != lastMinpoints
+      if (requiresLoop(current) && (current.getMinPoints() != lastMinpoints
           || (extraOptions && current.getLambda() != lastLambda))) {
         // We can only cache the loop values if the minPts is the same
         loop = null;
@@ -2363,7 +2363,7 @@ throw new NotImplementedException();
       if (requiresLoop(settings) && loop == null) {
         synchronized (opticsManager) {
           lastLambda = (extraOptions) ? settings.getLambda() : 3;
-          lastMinpoints = settings.getMinpoints();
+          lastMinpoints = settings.getMinPoints();
           loop = opticsManager.loop(lastMinpoints, lastLambda, true);
         }
         final float[] limits = MathUtils.limits(loop);
@@ -3155,7 +3155,7 @@ throw new NotImplementedException();
 
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      if (current.getMinpoints() != previous.getMinpoints()) {
+      if (current.getMinPoints() != previous.getMinPoints()) {
         newResults();
         return false;
       }
@@ -3190,7 +3190,7 @@ throw new NotImplementedException();
       // The second item should be the OPTICS manager
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
 
-      final int minPts = settings.getMinpoints();
+      final int minPts = settings.getMinPoints();
       final int k = minPts - 1; // Since min points includes the actual point
       final double fractionNoise = settings.getFractionNoise();
 
@@ -3296,7 +3296,7 @@ throw new NotImplementedException();
   private class DBSCANWorker extends BaseWorker {
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      if (current.getMinpoints() != previous.getMinpoints()) {
+      if (current.getMinPoints() != previous.getMinPoints()) {
         return false;
       }
       if (clusteringDistanceChange(current.getClusteringDistance(),
@@ -3316,7 +3316,7 @@ throw new NotImplementedException();
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
 
       double clusteringDistance = Math.abs(settings.getClusteringDistance());
-      final int minPts = settings.getMinpoints();
+      final int minPts = settings.getMinPoints();
       if (clusteringDistance > 0) {
         // Convert clustering distance to pixels
         final double nmPerPixel = getNmPerPixel(results);
@@ -3502,7 +3502,7 @@ throw new NotImplementedException();
     } else {
       gd.addMessage("--- " + TITLE + " ---");
     }
-    gd.addNumericField("Min_points", inputSettings.getMinpoints(), 0);
+    gd.addNumericField("Min_points", inputSettings.getMinPoints(), 0);
     if (isDBSCAN) {
       // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
       // profile
@@ -3770,7 +3770,7 @@ throw new NotImplementedException();
 
     // Record the options for macros since the NonBlocking dialog does not
     if (Recorder.record) {
-      Recorder.recordOption("Min_points", Integer.toString(inputSettings.getMinpoints()));
+      Recorder.recordOption("Min_points", Integer.toString(inputSettings.getMinPoints()));
       if (isDBSCAN) {
         // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
         // profile
@@ -4034,7 +4034,7 @@ throw new NotImplementedException();
 
     @Override
     boolean readSettings(GenericDialog gd) {
-      inputSettings.setMinpoints((int) Math.abs(gd.getNextNumber()));
+      inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
       inputSettings.setOpticsMode(gd.getNextChoiceIndex());
       inputSettings.setClusteringMode(gd.getNextChoiceIndex());
       inputSettings.setShowTable(gd.getNextBoolean());
@@ -4079,7 +4079,7 @@ throw new NotImplementedException();
 
     @Override
     boolean readSettings(GenericDialog gd) {
-      inputSettings.setMinpoints((int) Math.abs(gd.getNextNumber()));
+      inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
       inputSettings.setFractionNoise(Math.abs(gd.getNextNumber() / 100));
       inputSettings.setSamples((int) Math.abs(gd.getNextNumber()));
       inputSettings.setSampleFraction(Math.abs(gd.getNextNumber() / 100));

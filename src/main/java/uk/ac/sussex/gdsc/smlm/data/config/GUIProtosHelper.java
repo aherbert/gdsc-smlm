@@ -205,7 +205,7 @@ public class GUIProtosHelper {
     final OpticsSettings.Builder builder = OpticsSettings.newBuilder();
     builder.setOpticsMode(OpticsMode.FAST_OPTICS.ordinal());
     builder.setSampleMode(SampleMode.RANDOM.ordinal());
-    builder.setMinpoints(4);
+    builder.setMinPoints(4);
     builder.setClusteringMode(ClusteringMode.XI.ordinal());
     builder.setXi(0.03);
     builder.setSamples(100);
