@@ -30,5 +30,4 @@
  * @since 1.0.0
  * @see <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a>
  */
-
 package uk.ac.sussex.gdsc.smlm.data.config;

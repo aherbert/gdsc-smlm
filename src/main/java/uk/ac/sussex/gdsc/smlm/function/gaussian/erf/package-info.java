@@ -41,5 +41,4 @@
  *
  * @since 1.0.0
  */
-
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;

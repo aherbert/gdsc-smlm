@@ -36,5 +36,4 @@
  * @see <a href="https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format">Tagged Spot File
  *      (TSF) format</a>
  */
-
 package uk.ac.sussex.gdsc.smlm.tsf;

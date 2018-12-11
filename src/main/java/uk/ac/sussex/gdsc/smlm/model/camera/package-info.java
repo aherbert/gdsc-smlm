@@ -28,5 +28,4 @@
  * @author Alex Herbert
  * @since 1.0.0
  */
-
 package uk.ac.sussex.gdsc.smlm.model.camera;
