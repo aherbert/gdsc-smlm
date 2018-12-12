@@ -109,55 +109,55 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   private FilterSettings.Builder filterSettings;
   private FitSolverSettings.Builder fitSolverSettings;
 
-  private Logger log = null;
+  private Logger log;
 
-  private boolean computeDeviations = false;
+  private boolean computeDeviations;
   private int flags;
-  private AstigmatismZModel astigmatismZModel = null;
+  private AstigmatismZModel astigmatismZModel;
   private double coordinateShift = 1;
-  private int fitRegionWidth = 0;
-  private int fitRegionHeight = 0;
+  private int fitRegionWidth;
+  private int fitRegionHeight;
   private double coordinateOffset = 0.5;
-  private double minSignal = 0;
-  private double precisionThreshold = 0;
+  private double minSignal;
+  private double precisionThreshold;
   private boolean isTwoAxisGaussian2D;
-  private double nmPerPixel = 0;
-  private double gain = 0;
+  private double nmPerPixel;
+  private double gain;
   private double signalToPhotons;
-  private boolean emCCD = false;
-  private boolean isMLE = false;
-  private double noise = 0;
+  private boolean emCCD;
+  private boolean isMLE;
+  private double noise;
   private double minWidthFactor = 0.5;
   /**
    * The width factor. This is the squared width if a 2 axis PSF
    */
   private double widthFactor = 2;
   private boolean computeResiduals = true;
-  private boolean zEnabled = false;
+  private boolean zEnabled;
 
   // Options for clamping
   private double[] clampValues;
   private int nClampPeaks;
-  private ParameterBounds bounds = null;
+  private ParameterBounds bounds;
 
-  private ToleranceChecker toleranceChecker = null;
-  private Gaussian2DFunction gaussianFunction = null;
-  private BaseFunctionSolver functionSolver = null;
+  private ToleranceChecker toleranceChecker;
+  private Gaussian2DFunction gaussianFunction;
+  private BaseFunctionSolver functionSolver;
 
   private DynamicPeakResult dynamicPeakResult = new DynamicPeakResult();
 
   // Support using a smart filter and disabling the simple filtering
-  private DirectFilter directFilter = null;
-  private int filterResult = 0;
+  private DirectFilter directFilter;
+  private int filterResult;
   private boolean widthEnabled;
   private float offset;
   private double varianceThreshold;
   private int filterSetupFlags;
   private FilterSetupData[] filterSetupData;
 
-  private double[] precomputedFunctionValues = null;
-  private double[] observationWeights = null;
-  private CameraModel cameraModel = null;
+  private double[] precomputedFunctionValues;
+  private double[] observationWeights;
+  private CameraModel cameraModel;
 
   private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
 
@@ -2037,7 +2037,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   private FitStatus result;
   private Object statusData;
-  private PeakResultValidationData peakResultValidationData = null;
+  private PeakResultValidationData peakResultValidationData;
 
   /**
    * @return the result.

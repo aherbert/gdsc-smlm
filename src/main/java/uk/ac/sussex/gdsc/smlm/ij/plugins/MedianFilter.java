@@ -59,7 +59,7 @@ public class MedianFilter implements PlugInFilter {
   private static int radius = 50;
   private static int interval = 12;
   private static int blockSize = 32;
-  private static boolean subtract = false;
+  private static boolean subtract;
   private static float bias = 500;
 
   private ImagePlus imp;

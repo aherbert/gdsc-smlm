@@ -63,21 +63,21 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     FILTERS = SettingsManager.getNames((Object[]) Operation.values());
   }
 
-  private static String title = "";
+  private static String imageTitle = "";
   private static int method = METHOD_FHT;
   private static int filter = Operation.CORRELATION.ordinal();
-  private static int border = 0;
-  private static boolean zero = false;
+  private static int border;
+  private static boolean zero;
 
   // Ensure not null
   private Ticker ticker = Ticker.getDefaultInstance();
 
-  private int lastId = 0;
+  private int lastId;
   private int lastMethod = -1;
   private int lastFilter = -1;
   private boolean lastZero;
-  private KernelFilter kf = null;
-  private FHTFilter ff = null;
+  private KernelFilter kf;
+  private FHTFilter ff;
   private ImagePlus dataImp;
   private ImagePlus kernelImp;
 
@@ -133,7 +133,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
 
     gd.addMessage("Convolve an image using another image as the convolution kernel");
 
-    gd.addChoice("Kernel_image", names, title);
+    gd.addChoice("Kernel_image", names, imageTitle);
     gd.addChoice("Method", METHODS, method);
     gd.addChoice("Filter", FILTERS, filter);
     gd.addSlider("Border", 0, 10, border);
@@ -154,13 +154,13 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-    title = gd.getNextChoice();
+    imageTitle = gd.getNextChoice();
     method = gd.getNextChoiceIndex();
     filter = gd.getNextChoiceIndex();
     border = (int) gd.getNextNumber();
     zero = gd.getNextBoolean();
 
-    kernelImp = WindowManager.getImage(title);
+    kernelImp = WindowManager.getImage(imageTitle);
     if (kernelImp == null) {
       return false;
     }

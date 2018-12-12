@@ -73,7 +73,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   protected Gradient1Function f1;
 
   /** The fast log instance for the fast log version of the procedure. */
-  private FastLog fastLog = null;
+  private FastLog fastLog;
 
   /**
    * Create a new stepping function solver.

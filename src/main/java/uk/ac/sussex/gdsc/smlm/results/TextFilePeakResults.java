@@ -56,11 +56,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
   private PeakResultConversionHelper helper;
   private Converter[] converters;
 
-  private DistanceUnit distanceUnit = null;
-  private IntensityUnit intensityUnit = null;
-  private AngleUnit angleUnit = null;
-  private boolean computePrecision = false;
-  private boolean canComputePrecision = false;
+  private DistanceUnit distanceUnit;
+  private IntensityUnit intensityUnit;
+  private AngleUnit angleUnit;
+  private boolean computePrecision;
+  private boolean canComputePrecision;
 
   private OutputStreamWriter out;
 
@@ -543,7 +543,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
 
   private class Result implements Comparable<Result> {
     String line;
-    int slice = 0;
+    int slice;
 
     public Result(String line) {
       this.line = line;

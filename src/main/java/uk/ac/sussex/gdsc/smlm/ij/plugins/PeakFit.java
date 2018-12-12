@@ -154,44 +154,44 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private static int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private int plugin_flags;
-  private int singleFrame = 0;
+  private int singleFrame;
   private ImagePlus imp;
 
   // Used within the run(ImageProcessor) method
   private Rectangle bounds;
   private static boolean optionIgnoreBoundsForNoise = true;
-  private boolean ignoreBoundsForNoise = false;
-  private Logger logger = null;
+  private boolean ignoreBoundsForNoise;
+  private Logger logger;
 
-  private ImageSource source = null;
-  private String resultsSuffix = null;
+  private ImageSource source;
+  private String resultsSuffix;
   private PeakResultsList results;
   private long time;
   private long runTime;
-  private FitEngineConfiguration config = null;
+  private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
   private ResultsSettings.Builder resultsSettings;
-  private boolean silent = false;
+  private boolean silent;
 
   private static int numberOfThreads = 1;
 
   // Flag for extra options in the dialog (shift-key down)
-  private boolean extraOptions = false;
-  private boolean maximaIdentification = false;
-  private boolean fitMaxima = false;
-  private boolean simpleFit = false;
+  private boolean extraOptions;
+  private boolean maximaIdentification;
+  private boolean fitMaxima;
+  private boolean simpleFit;
   private static int optionIntegrateFrames = 1;
   private int integrateFrames = 1;
-  private static boolean optionInterlacedData = false;
+  private static boolean optionInterlacedData;
   private static int optionDataStart = 1;
   private static int optionDataBlock = 1;
-  private static int optionDataSkip = 0;
-  private boolean interlacedData = false;
+  private static int optionDataSkip;
+  private boolean interlacedData;
   private int dataStart = 1;
   private int dataBlock = 1;
-  private int dataSkip = 0;
-  private static boolean optionShowProcessedFrames = false;
-  private boolean showProcessedFrames = false;
+  private int dataSkip;
+  private static boolean optionShowProcessedFrames;
+  private boolean showProcessedFrames;
   // Testing has shown that we should use ~85% of the total number of cores the system has
   // available.
   // Extra cores then do not make a difference.

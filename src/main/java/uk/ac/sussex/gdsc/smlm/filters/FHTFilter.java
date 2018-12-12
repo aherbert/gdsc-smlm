@@ -48,6 +48,8 @@ public class FHTFilter {
     /** Deconvolution. */
     DECONVOLUTION("Deconvolution");
 
+    private static Operation[] values = Operation.values();
+
     private final String niceName;
 
     Operation(String name) {
@@ -71,7 +73,6 @@ public class FHTFilter {
      * @return the operation
      */
     public static Operation forOrdinal(int ordinal) {
-      final Operation[] values = Operation.values();
       if (ordinal < 0 || ordinal >= values.length) {
         return Operation.CORRELATION;
       }
@@ -84,13 +85,13 @@ public class FHTFilter {
   private final int kh;
   private final int kN; // Next power of 2 for the kernel
 
-  private FloatDHT_2D dht = null;
-  private Fht kernelFht = null;
+  private FloatDHT_2D dht;
+  private Fht kernelFht;
   private float[] tmp;
   private Operation operation = Operation.CORRELATION;
 
   // Cache the window function
-  private double[] w = null;
+  private double[] w;
   private int edge = -1;
 
   /**

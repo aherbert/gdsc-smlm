@@ -123,8 +123,8 @@ public class Image2DAligner implements Cloneable {
   private int[] crop;
 
   // Allow cached window weights
-  private double[] wx = null;
-  private double[] wy = null;
+  private double[] wx;
+  private double[] wy;
 
   /**
    * Instantiates a new image aligner with a default edge window of 0.25

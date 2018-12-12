@@ -88,11 +88,11 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
    */
   private final LineSearch line;
   /** Convergence tolerance on position. */
-  private PositionChecker positionChecker = null;
+  private PositionChecker positionChecker;
   /** Only allow convergence when using initial basis vectors. */
   private final boolean basisConvergence;
   /** Allow custom basis search direction. */
-  private double[] basis = null;
+  private double[] basis;
 
   /** Flags to indicate if bounds are present. */
   private boolean isLower;

@@ -71,7 +71,7 @@ public class PSFCalculator implements PlugIn, DialogListener {
   private TextField fwhmPixelsText;
 
   // Used for the PSF profile plot
-  private double[] x = null;
+  private double[] x;
   private double[] y;
   private double[] y2;
 
@@ -339,7 +339,7 @@ public class PSFCalculator implements PlugIn, DialogListener {
     return width / pixelPitchInNm;
   }
 
-  private boolean lock = false;
+  private boolean lock;
 
   private synchronized boolean aquireLock() {
     if (lock) {

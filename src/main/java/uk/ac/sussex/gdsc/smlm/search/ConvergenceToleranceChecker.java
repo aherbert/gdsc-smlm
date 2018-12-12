@@ -44,7 +44,7 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
   /** The max iterations. */
   public final int maxIterations;
 
-  private int iterations = 0;
+  private int iterations;
 
   /**
    * Build an instance with specified thresholds. This only check convergence using the score.

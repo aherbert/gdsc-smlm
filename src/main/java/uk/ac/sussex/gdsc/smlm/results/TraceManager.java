@@ -93,13 +93,13 @@ public class TraceManager {
   private int totalFiltered;
   private float dThresh2;
   private float dExclusion2;
-  private TrackProgress tracker = null;
-  private int activationFrameInterval = 0;
-  private int activationFrameWindow = 0;
-  private double distanceExclusion = 0;
-  private boolean filterActivationFrames = false;
+  private TrackProgress tracker;
+  private int activationFrameInterval;
+  private int activationFrameWindow;
+  private double distanceExclusion;
+  private boolean filterActivationFrames;
   private TraceMode traceMode = TraceMode.LATEST_FORERUNNER;
-  private int pulseInterval = 0;
+  private int pulseInterval;
 
   /**
    * The distance between the localisation and its assigned forerunner.
@@ -160,7 +160,7 @@ public class TraceManager {
   }
 
   private class LocalisationProcedure implements PeakResultProcedure {
-    int id = 0;
+    int id;
 
     @Override
     public void execute(PeakResult result) {

@@ -53,7 +53,7 @@ public class DataEstimator {
   private float fraction = 0.25f;
   private int histogramSize = 2048;
   private AutoThreshold.Method thresholdMethod = Method.DEFAULT;
-  private float[] estimate = null;
+  private float[] estimate;
 
   /**
    * Create a new DataEstimator.

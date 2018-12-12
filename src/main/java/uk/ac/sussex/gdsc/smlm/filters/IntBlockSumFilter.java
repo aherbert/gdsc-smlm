@@ -38,8 +38,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
  * <p>This algorithm does not mirror edge pixels in contrast to the BlockSumFilter.
  */
 public class IntBlockSumFilter {
-  private int[] buffer = null;
-  private int[] intRowBuffer = null;
+  private int[] buffer;
+  private int[] intRowBuffer;
 
   /**
    * Create a copy.

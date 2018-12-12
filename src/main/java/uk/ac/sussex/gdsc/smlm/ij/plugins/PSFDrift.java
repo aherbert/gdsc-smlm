@@ -94,17 +94,17 @@ public class PSFDrift implements PlugIn {
   private static final String TITLE = "PSF Drift";
 
   private static String title = "";
-  private static boolean useOffset = false;
+  private static boolean useOffset;
   private static double scale = 10;
   private static double zDepth = 1000;
   private static int gridSize = 10;
   private static double recallLimit = 0.25;
   private static int regionSize = 5;
-  private static boolean backgroundFitting = false;
+  private static boolean backgroundFitting;
   private static boolean offsetFitting = true;
   private static double startOffset = 0.5;
   private static boolean comFitting = true;
-  private static boolean useSampling = false;
+  private static boolean useSampling;
   private static double photons = 1000;
   private static double photonLimit = 0.25;
   private static int positionsToAverage = 5;
@@ -155,7 +155,7 @@ public class PSFDrift implements PlugIn {
    * Used to allow multi-threading of the fitting method.
    */
   private class Worker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final ImagePSFModel psf;
     final BlockingQueue<Job> jobs;
     final FitConfiguration fitConfig2;
@@ -168,9 +168,9 @@ public class PSFDrift implements PlugIn {
     final RandomDataGenerator random;
 
     private double[] lb;
-    private double[] ub = null;
+    private double[] ub;
     private double[] lc;
-    private double[] uc = null;
+    private double[] uc;
 
     public Worker(BlockingQueue<Job> jobs, ImagePSFModel psf, int width,
         FitConfiguration fitConfig) {

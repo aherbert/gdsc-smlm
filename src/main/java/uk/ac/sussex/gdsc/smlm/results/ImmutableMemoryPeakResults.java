@@ -38,7 +38,7 @@ import java.util.Collection;
  * <p>Any method that modifies the size of the results set will throw a data exception.
  */
 public class ImmutableMemoryPeakResults extends MemoryPeakResults {
-  private boolean built = false;
+  private boolean built;
 
   /**
    * Instantiates a new immutable memory peak results with the original results store.

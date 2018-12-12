@@ -37,7 +37,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class MultiFilter2 extends MultiFilter implements IMultiFilter {
   @XStreamOmitField
-  private boolean useBackground = false;
+  private boolean useBackground;
 
   /**
    * Instantiates a new multi filter 2.

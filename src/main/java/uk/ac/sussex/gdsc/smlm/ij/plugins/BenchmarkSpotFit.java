@@ -211,7 +211,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
-  private static FilterCriteria[] filterCriteria = null;
+  private static FilterCriteria[] filterCriteria;
   private static final int FILTER_SIGNAL = 0;
   private static final int FILTER_SNR = 1;
   private static final int FILTER_MIN_WIDTH = 2;
@@ -365,13 +365,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /** The lower signal factor. */
   static double lowerSignalFactor = 1;
 
-  private static boolean useBenchmarkSettings = false;
+  private static boolean useBenchmarkSettings;
   /** The compute doublets option. */
   static boolean computeDoublets = true; // config.getResidualsThreshold() < 1;
-  private static boolean showFilterScoreHistograms = false;
+  private static boolean showFilterScoreHistograms;
   private static boolean saveFilterRange = true;
-  private static boolean showCorrelation = false;
-  private static boolean rankByIntensity = false;
+  private static boolean showCorrelation;
+  private static boolean rankByIntensity;
 
   private TextArea taFilterXml;
   private TextField textFailLimit;
@@ -379,20 +379,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private TextField textNeighbourHeight;
   private Checkbox cbComputeDoublets;
 
-  private boolean extraOptions = false;
+  private boolean extraOptions;
   // Flag used when being called by another plugin to suppress dialogs
-  private boolean silent = false;
+  private boolean silent;
   /** Flag used when being called by another plugin to indicate success. */
   boolean finished;
 
-  private static TextWindow summaryTable = null;
+  private static TextWindow summaryTable;
 
   private ImagePlus imp;
   private MemoryPeakResults results;
   private CreateData.SimulationParameters simulationParameters;
   private MaximaSpotFilter spotFilter;
 
-  private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
+  private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
   private static TIntObjectHashMap<FilterCandidates> filterCandidates;
   private static double fP;
   private static double fN;
@@ -404,12 +404,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /** The last filter id. */
   static int lastFilterId = -1;
 
-  private static Settings lastSettings = null;
+  private static Settings lastSettings;
 
   // Allow other plugins to access the results
 
   /** The fit results id. */
-  static int fitResultsId = 0;
+  static int fitResultsId;
 
   /** The fit results. */
   static TIntObjectHashMap<FilterCandidates> fitResults;
@@ -706,7 +706,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * Used to allow multi-threading of the fitting method.
    */
   private class Worker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
     final FitWorker fitWorker;
@@ -716,7 +716,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final Rectangle bounds;
     final MultiPathFilter multiFilter;
 
-    float[] data = null;
+    float[] data;
     List<PointPair> matches = new ArrayList<>();
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,

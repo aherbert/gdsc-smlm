@@ -80,18 +80,18 @@ public class BenchmarkFit implements PlugIn {
   private static final String TITLE = "Benchmark Fit";
 
   private static int regionSize = 4;
-  private static double lastId = 0;
+  private static double lastId;
 
   private static final String[] ORIGIN_XY = {"Origin", "Centre-of-Mass", "Offset"};
   private static final String[] ORIGIN_Z = {"Origin", "0", "Offset"};
-  private static int originXY = 0;
-  private static int originZ = 0;
-  private static double offsetX = 0;
-  private static double offsetY = 0;
-  private static double offsetZ = 0;
+  private static int originXY;
+  private static int originZ;
+  private static double offsetX;
+  private static double offsetY;
+  private static double offsetZ;
 
   private static boolean zeroOffset = true;
-  private static double offsetPoints = 0;
+  private static double offsetPoints;
   private static double offsetRangeX = 0.5;
   private static double offsetRangeY = 0.5;
   private static double offsetRangeZ = 0.5;
@@ -100,13 +100,13 @@ public class BenchmarkFit implements PlugIn {
   private static boolean estimateBackground = true;
   private static boolean signalFitting = true;
   private static boolean estimateSignal = true;
-  private static boolean showHistograms = false;
-  private static boolean saveRawData = false;
+  private static boolean showHistograms;
+  private static boolean saveRawData;
   private static String rawDataDirectory = "";
   private static int histogramBins = 100;
 
-  private static TextWindow summaryTable = null;
-  private static TextWindow analysisTable = null;
+  private static TextWindow summaryTable;
+  private static TextWindow analysisTable;
 
   //@formatter:off
   // These are assuming a Gaussian 2D PSF
@@ -140,7 +140,7 @@ public class BenchmarkFit implements PlugIn {
   private ImagePlus imp;
   private CreateData.BenchmarkParameters benchmarkParameters;
   private final double[] answer = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-  private Rectangle region = null;
+  private Rectangle region;
   private final AtomicInteger comValid = new AtomicInteger();
 
   // Used to store all the results for cross-method comparison
@@ -206,7 +206,7 @@ public class BenchmarkFit implements PlugIn {
    * Used to allow multi-threading of the fitting method.
    */
   private class Worker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final Statistics[] stats = new Statistics[NAMES.length];
     final ImageStack stack;
@@ -219,11 +219,11 @@ public class BenchmarkFit implements PlugIn {
     final int totalFrames;
     final double[] origin;
 
-    float[] data = null;
+    float[] data;
     private double[] lb;
-    private double[] ub = null;
+    private double[] ub;
     private double[] lc;
-    private double[] uc = null;
+    private double[] uc;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region,
         FitConfiguration fitConfig, CameraModel cameraModel) {
@@ -1056,7 +1056,7 @@ public class BenchmarkFit implements PlugIn {
     }
   }
 
-  private double[][] startPoints = null;
+  private double[][] startPoints;
 
   /**
    * Gets the start points.

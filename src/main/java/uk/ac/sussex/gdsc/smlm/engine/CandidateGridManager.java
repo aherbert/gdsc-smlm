@@ -35,11 +35,11 @@ class CandidateGridManager {
   private final int xBlocks;
   private final int yBlocks;
 
-  private CandidateList fittedCandidateCache = null;
+  private CandidateList fittedCandidateCache;
   private int fittedCandidateCacheX = -1;
   private int fittedCandidateCacheY = -1;
-  private CandidateList neighbourCache = null;
-  private Candidate neighbourCacheCandidate = null;
+  private CandidateList neighbourCache;
+  private Candidate neighbourCacheCandidate;
 
   private final CandidateList fitted = new CandidateList();
 

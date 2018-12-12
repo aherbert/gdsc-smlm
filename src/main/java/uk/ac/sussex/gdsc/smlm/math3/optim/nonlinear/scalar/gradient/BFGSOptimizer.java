@@ -60,19 +60,19 @@ import java.util.Locale;
  */
 public class BFGSOptimizer extends GradientMultivariateOptimizer {
   /** Maximum step length used in line search. */
-  private double[] maximumStepLength = null;
+  private double[] maximumStepLength;
 
   /** Convergence tolerance on gradient. */
   private double gradientTolerance;
 
   /** Maximum number of restarts on the convergence point. */
-  private int restarts = 0;
+  private int restarts;
 
   /** Maximum number of restarts in the event of roundoff error. */
   private int roundoffRestarts = 3;
 
   /** Convergence tolerance on position. */
-  private PositionChecker positionChecker = null;
+  private PositionChecker positionChecker;
 
   /** Flags to indicate if bounds are present. */
   private boolean isLower;
@@ -80,7 +80,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
   private double[] lower;
   private double[] upper;
 
-  private double sign = 0;
+  private double sign;
 
   /**
    * Specify the maximum step length in each dimension.

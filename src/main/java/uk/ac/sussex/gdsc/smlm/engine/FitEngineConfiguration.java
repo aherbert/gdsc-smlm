@@ -66,7 +66,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class FitEngineConfiguration implements Cloneable {
   private FitEngineSettings.Builder fitEngineSettings;
-  private FitConfiguration fitConfiguration = null;
+  private FitConfiguration fitConfiguration;
 
   /**
    * Instantiates a new fit engine configuration.

@@ -42,7 +42,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * Simple class to allow the values to be computed.
    */
   private static class SimpleValueProcedure implements ValueProcedure {
-    int i = 0;
+    int i;
     double[] yFit;
 
     SimpleValueProcedure(double[] yFit) {
@@ -61,7 +61,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   protected final ToleranceChecker tc;
   /** The bounds. */
   protected final ParameterBounds bounds;
-  private double[] weights = null;
+  private double[] weights;
 
   /**
    * Create a new stepping function solver.

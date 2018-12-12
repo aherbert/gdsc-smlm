@@ -72,11 +72,11 @@ import java.util.logging.Logger;
 public class JumpDistanceAnalysis {
   private static final boolean DEBUG_OPTIMISER = false;
   private static final double THIRD = 1.0 / 3.0;
-  private double s2 = 0;
-  private boolean msdCorrection = false;
-  private int n = 0;
-  private double deltaT = 0;
-  private boolean calibrated = false;
+  private double s2;
+  private boolean msdCorrection;
+  private int n;
+  private double deltaT;
+  private boolean calibrated;
 
   /**
    * Interface to logger to record a jump distance curve.
@@ -110,7 +110,7 @@ public class JumpDistanceAnalysis {
   private int fitRestarts = 3;
   private double minFraction = 0.1;
   private double minDifference = 2;
-  private double minD = 0;
+  private double minD;
   private int minN = 1;
   private int maxN = 10;
   private double significanceLevel = 0.05;

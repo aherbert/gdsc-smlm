@@ -35,7 +35,7 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
   /** The fraction of the sequence positions to mutate on average. */
   final double fraction;
 
-  private boolean override = false;
+  private boolean override;
   private double[] stepSize;
   private double[] lower;
   private double[] upper;

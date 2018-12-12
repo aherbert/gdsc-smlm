@@ -73,7 +73,7 @@ public class Workflow<S, R> {
    */
   private class WorkStack {
     // We only support a stack size of 1
-    private Work work = null;
+    private Work work;
 
     synchronized void setWork(Work work) {
       this.work = work;
@@ -107,7 +107,7 @@ public class Workflow<S, R> {
   public class RunnableWorker implements Runnable {
     private final WorkflowWorker<S, R> worker;
     private boolean running = true;
-    private Work lastWork = null;
+    private Work lastWork;
     private Work result;
     private WorkStack inbox;
     private Object[] outbox;
@@ -237,10 +237,10 @@ public class Workflow<S, R> {
   private final WorkStack inputStack = new WorkStack();
   private ArrayList<Thread> threads;
   private final ArrayList<RunnableWorker> workers = new ArrayList<>();
-  private long delay = 0;
+  private long delay;
 
   /** The debug flag. Set to true to allow print statements during operation. */
-  public boolean debug = false;
+  public boolean debug;
 
   /**
    * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input if the

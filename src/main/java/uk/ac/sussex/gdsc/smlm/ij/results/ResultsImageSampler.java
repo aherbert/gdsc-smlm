@@ -53,7 +53,7 @@ import java.util.Comparator;
  */
 public class ResultsImageSampler {
   private static class PeakResultList {
-    int size = 0;
+    int size;
     PeakResult[] data;
 
     PeakResultList() {

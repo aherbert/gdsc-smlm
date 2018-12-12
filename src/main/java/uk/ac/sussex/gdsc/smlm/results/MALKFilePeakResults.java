@@ -313,7 +313,7 @@ public class MALKFilePeakResults extends FilePeakResults {
 
   private class Result implements Comparable<Result> {
     String line;
-    int slice = 0;
+    int slice;
 
     public Result(String line) {
       this.line = line;

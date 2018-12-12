@@ -37,7 +37,7 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
   private int state;
   private LocalisationModel previous;
   private LocalisationModel next;
-  private double[] data = null;
+  private double[] data;
   private int label;
 
   /** A single localisation. */

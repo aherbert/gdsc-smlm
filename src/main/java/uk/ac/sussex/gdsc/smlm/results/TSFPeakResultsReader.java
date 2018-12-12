@@ -59,15 +59,15 @@ import java.util.Arrays;
  * @author Alex Herbert
  */
 public class TSFPeakResultsReader {
-  private String filename = null;
-  private SpotList spotList = null;
-  private boolean readHeader = false;
-  private boolean isGDSC = false;
-  private boolean isMulti = false;
+  private String filename;
+  private SpotList spotList;
+  private boolean readHeader;
+  private boolean isGDSC;
+  private boolean isMulti;
 
   private int channel = 1;
-  private int slice = 0;
-  private int position = 0;
+  private int slice;
+  private int position;
   private int fluorophoreType = 1;
 
   /**

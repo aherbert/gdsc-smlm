@@ -78,11 +78,11 @@ public class SpotFit implements PlugIn {
    * an image.
    */
   private static class SpotFitPluginTool extends PlugInTool {
-    private static TextWindow resultsWindow = null;
+    private static TextWindow resultsWindow;
 
     private final SpotFitSettings.Builder settings;
     private boolean active = true;
-    private boolean logging = false;
+    private boolean logging;
 
     private final BlockMeanFilter f = new BlockMeanFilter();
     private final FitConfiguration config;
@@ -505,7 +505,7 @@ public class SpotFit implements PlugIn {
     }
   }
 
-  private static SpotFitPluginTool toolInstance = null;
+  private static SpotFitPluginTool toolInstance;
 
   /**
    * Initialise the spot fit tool. This is to allow support for calling within macro toolsets.

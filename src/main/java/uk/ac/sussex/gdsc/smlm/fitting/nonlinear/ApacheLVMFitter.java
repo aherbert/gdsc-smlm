@@ -161,7 +161,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
         final Gaussian2DFunction f = (Gaussian2DFunction) this.f;
         f.initialise0(a);
         f.forEach(new ValueProcedure() {
-          int i = 0;
+          int i;
 
           @Override
           public void execute(double value) {

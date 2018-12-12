@@ -41,7 +41,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   private int iterationLimit = 1;
   private int significantDigits;
   private double maxRelativeError;
-  private boolean avoidPlateau = false;
+  private boolean avoidPlateau;
 
   private int insignificantImprovmentIteration;
   private int improvementExponent;

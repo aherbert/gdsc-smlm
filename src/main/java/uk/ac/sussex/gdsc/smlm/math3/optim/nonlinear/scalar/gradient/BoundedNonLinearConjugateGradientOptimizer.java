@@ -92,8 +92,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   private double[] upper;
 
   private boolean useGradientLineSearch = true;
-  private boolean noBracket = false;
-  private double sign = 0;
+  private boolean noBracket;
+  private double sign;
 
   /**
    * Constructor with default {@link BrentSolver line search solver} and

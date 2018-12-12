@@ -127,12 +127,12 @@ public class PCPALMMolecules implements PlugIn {
   /** The title. */
   static String TITLE = "PC-PALM Molecules";
   private static String inputOption = "";
-  private static boolean chooseRoi = false;
-  private static double nmPerPixelLimit = 0;
+  private static boolean chooseRoi;
+  private static double nmPerPixelLimit;
 
   private static String[] RUN_MODE =
       {"PC-PALM", "Manual Tracing", "In-memory results", "Simulation"};
-  private static int runMode = 0;
+  private static int runMode;
 
   // Mode 0: PC-PALM protocol for estimating localisation precision and then tracing molecules
   private static String roiImage = "";
@@ -140,7 +140,7 @@ public class PCPALMMolecules implements PlugIn {
   private static String[] singlesMode =
       new String[] {"Ignore", "Include in molecules histogram", "Include in final filtering"};
   private static int singlesModeIndex = 1;
-  private static boolean simplexFitting = false;
+  private static boolean simplexFitting;
   private static boolean showHistograms = true;
   private static boolean binaryImage = true;
   /** The blinking rate. */
@@ -148,8 +148,8 @@ public class PCPALMMolecules implements PlugIn {
   private static double p = 0.6;
   private static String[] BLINKING_DISTRIBUTION =
       new String[] {"Poisson", "Geometric", "None", "Binomial"};
-  private static int blinkingDistribution = 0;
-  private static boolean clearResults = false;
+  private static int blinkingDistribution;
+  private static boolean clearResults;
 
   // Mode 1. Manual tracing of molecules
   private static double dThreshold = 150;
@@ -161,20 +161,20 @@ public class PCPALMMolecules implements PlugIn {
   // Mode 3. Random simulation of molecules
   private static int nMolecules = 2000;
   private static double simulationSize = 16;
-  private static boolean distanceAnalysis = false;
+  private static boolean distanceAnalysis;
 
   private static String[] CLUSTER_SIMULATION =
       new String[] {"None", "Circles", "Non-overlapping circles", "Circles Mask"};
-  private static int clusterSimulation = 0;
+  private static int clusterSimulation;
   private static double clusterNumber = 3;
-  private static double clusterNumberSD = 0;
+  private static double clusterNumberSD;
   private static double clusterRadius = 50;
-  private static boolean showClusterMask = false;
+  private static boolean showClusterMask;
 
   // Low resolution image construction
   private static int lowResolutionImageSize = 1024;
   private static double roiSizeInUm = 4;
-  private static boolean showHighResolutionImage = false;
+  private static boolean showHighResolutionImage;
 
   private Rectangle roiBounds;
   private int roiImageWidth;
@@ -196,7 +196,7 @@ public class PCPALMMolecules implements PlugIn {
   /** The nm per pixel. */
   static double nmPerPixel;
   /** The molecules. */
-  static ArrayList<Molecule> molecules = null;
+  static ArrayList<Molecule> molecules;
   /** The sigma S. */
   static double sigmaS = 20;
   /** The peak density. */
@@ -1993,8 +1993,8 @@ public class PCPALMMolecules implements PlugIn {
       super(parameters);
     }
 
-    protected TDoubleArrayList x = null;
-    protected TDoubleArrayList y = null;
+    protected TDoubleArrayList x;
+    protected TDoubleArrayList y;
 
     public void addData(float[] x, float[] y) {
       this.x = new TDoubleArrayList();

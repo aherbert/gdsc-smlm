@@ -68,7 +68,7 @@ public class CameraModelManager implements PlugIn {
   private static String directory = "";
   private static String filename = "";
 
-  private static CameraModelSettings.Builder settings = null;
+  private static CameraModelSettings.Builder settings;
   // Cache camera models for speed
   private static LinkedHashMap<String, PerPixelCameraModel> map = new LinkedHashMap<>();
 

@@ -199,29 +199,29 @@ public class PSFCreator implements PlugInFilter {
   private double nmPerPixel;
   private int boxRadius;
   private int zRadius;
-  private static Point yesNoPosition = null;
+  private static Point yesNoPosition;
 
-  private ExecutorService threadPool = null;
-  private double progress = 0;
+  private ExecutorService threadPool;
+  private double progress;
 
   // Private variables that are used during background threaded plotting of the cumulative signal
-  private ImageStack psf = null;
-  private ImagePlus[] psfOut = null;
-  private int zCentre = 0;
-  private double psfWidth = 0;
+  private ImageStack psf;
+  private ImagePlus[] psfOut;
+  private int zCentre;
+  private double psfWidth;
 
   // Cache settings for convenience
-  private double psfNmPerPixel = 0;
-  private boolean checkAlignments = false;
+  private double psfNmPerPixel;
+  private boolean checkAlignments;
 
   // Amplitude plot
-  private double[] z = null;
+  private double[] z;
   private double[] a;
   private double[] smoothAz;
   private double[] smoothA;
 
   // PSF plot
-  private double[] xCoord = null;
+  private double[] xCoord;
   private double[] yCoord;
   private double[] sd;
   private double[] newZ;
@@ -230,24 +230,24 @@ public class PSFCreator implements PlugInFilter {
   private double[] smoothSd;
 
   // % PSF Signal plot
-  private double[] signalZ = null;
-  private double[] signal = null;
-  private String signalTitle = null;
-  private double[] signalLimits = null;
+  private double[] signalZ;
+  private double[] signal;
+  private String signalTitle;
+  private double[] signalLimits;
 
   // Cumulative signal plot
-  private int[] indexLookup = null;
-  private double[] distances = null;
+  private int[] indexLookup;
+  private double[] distances;
   private double maxCumulativeSignal = 1;
-  private int slice = 0;
-  private double distanceThreshold = 0;
-  private boolean normalise = false;
+  private int slice;
+  private double distanceThreshold;
+  private boolean normalise;
   private boolean resetScale = true;
 
-  private boolean plotLock1 = false;
-  private boolean plotLock2 = false;
-  private boolean plotLock3 = false;
-  private boolean plotLock4 = false;
+  private boolean plotLock1;
+  private boolean plotLock2;
+  private boolean plotLock3;
+  private boolean plotLock4;
 
   /** {@inheritDoc} */
   @Override
@@ -1123,9 +1123,9 @@ public class PSFCreator implements PlugInFilter {
     return min;
   }
 
-  private boolean[] dmap = null;
-  private int lastWidth = 0;
-  private int lastHeight = 0;
+  private boolean[] dmap;
+  private int lastWidth;
+  private int lastHeight;
   private int minx;
   private int maxx;
   private int miny;
@@ -3167,7 +3167,7 @@ public class PSFCreator implements PlugInFilter {
 
     ExtractedPSF psf;
     double zCentre;
-    Point location = null;
+    Point location;
 
     Smoother bsmoother = new Smoother();
     Smoother fsmoother = new Smoother();
@@ -3191,7 +3191,7 @@ public class PSFCreator implements PlugInFilter {
     int wIndex;
     int aIndex;
     float background;
-    private Label backgroundLabel = null;
+    private Label backgroundLabel;
     boolean hasId;
     boolean plotBackground;
     boolean plotEdgeWindow;
@@ -3815,7 +3815,7 @@ public class PSFCreator implements PlugInFilter {
     }
 
     private int psfZCentre = -1;
-    private int zRadius = 0;
+    private int zRadius;
 
     private int getZRadius() {
       if (hasId) {
@@ -4073,7 +4073,7 @@ public class PSFCreator implements PlugInFilter {
     int cropEnd = -1;
     int outputType = -1;
     int psfMagnification;
-    boolean singlePrecision = false;
+    boolean singlePrecision;
 
     private void drawLabel() {
       cropBorder = settings.getCropBorder();

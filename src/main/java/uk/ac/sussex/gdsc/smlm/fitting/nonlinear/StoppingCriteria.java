@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  */
 public abstract class StoppingCriteria {
   /** The logger. */
-  protected Logger log = null;
+  protected Logger log;
   private int iteration;
   /** Set to true if iteration should continue (no reason to stop). */
   protected boolean notSatisfied;
@@ -66,7 +66,7 @@ public abstract class StoppingCriteria {
   protected boolean areAchieved;
   /** The best parameters. */
   protected double[] bestA;
-  private int minimumIterations = 0;
+  private int minimumIterations;
   private int maximumIterations = 20;
 
   /**

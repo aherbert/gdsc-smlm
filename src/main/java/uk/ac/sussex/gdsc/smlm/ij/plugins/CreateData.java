@@ -213,7 +213,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   private static int CONFINEMENT_WITHIN_IMAGE = 3;
   private static String[] PHOTON_DISTRIBUTION =
       {"Uniform", "Gamma", "Custom", "Fixed", "Correlated"};
-  private static int PHOTON_UNIFORM = 0;
+  private static int PHOTON_UNIFORM;
   private static int PHOTON_GAMMA = 1;
   private static int PHOTON_CUSTOM = 2;
   private static int PHOTON_FIXED = 3;
@@ -229,13 +229,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
    * The PSF model type. This is set when validating the PSF settings.
    */
   private int psfModelType = -1;
-  private AstigmatismModel astigmatismModel = null;
+  private AstigmatismModel astigmatismModel;
   private PSFModel psfModelCache;
 
-  private static TextWindow summaryTable = null;
-  private static int datasetNumber = 0;
-  private static double areaInUm = 0;
-  private static String header = null;
+  private static TextWindow summaryTable;
+  private static int datasetNumber;
+  private static double areaInUm;
+  private static String header;
 
   private CreateDataSettings.Builder settings;
 
@@ -294,14 +294,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     alwaysRemoveOutliers[PRECISION_IN_FOCUS] = true;
   }
 
-  private String resultsFileHeader = null;
+  private String resultsFileHeader;
   private AtomicInteger photonsRemoved;
   private AtomicInteger t1Removed;
   private AtomicInteger tNRemoved;
   private SummaryStatistics photonStats;
   // private boolean imagePSF;
-  private double hwhm = 0;
-  private PSF psf = null;
+  private double hwhm;
+  private PSF psf;
 
   private TIntHashSet movingMolecules;
   private TIntIntHashMap idToCompound;
@@ -309,27 +309,27 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   private boolean maskListContainsStacks;
 
   // Created by drawImage(...)
-  private MemoryPeakResults results = null;
+  private MemoryPeakResults results;
 
   // Used by the ImageGenerator to show progress when the thread starts
   private int frame;
   private int maxT;
   private int totalFrames;
 
-  private boolean simpleMode = false;
-  private boolean benchmarkMode = false;
-  private boolean spotMode = false;
-  private boolean trackMode = false;
-  private boolean extraOptions = false;
+  private boolean simpleMode;
+  private boolean benchmarkMode;
+  private boolean spotMode;
+  private boolean trackMode;
+  private boolean extraOptions;
 
   // Hold private variables for settings that are ignored in simple/benchmark mode
   private boolean poissonNoise = true;
-  private double minPhotons = 0;
-  private double minSNRt1 = 0;
-  private double minSNRtN = 0;
+  private double minPhotons;
+  private double minSNRt1;
+  private double minSNRtN;
 
   // Compute the CRLB for the PSF using the fisher information
-  private BasePoissonFisherInformation[] fiFunction = null;
+  private BasePoissonFisherInformation[] fiFunction;
 
   /** Store the parameters. */
   public static class BaseParameters {
@@ -664,16 +664,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   }
 
   /** The last benchmark parameters. */
-  static BenchmarkParameters benchmarkParameters = null;
+  static BenchmarkParameters benchmarkParameters;
 
   /** The last simulation parameters. */
-  static SimulationParameters simulationParameters = null;
+  static SimulationParameters simulationParameters;
 
   private static String benchmarkFile = "";
-  private static LoadLocalisationsSettings.Builder loadSettings = null;
+  private static LoadLocalisationsSettings.Builder loadSettings;
   private static String benchmarkImage = "";
-  private static boolean benchmarkAuto = false;
-  private static int benchmarkImageId = 0;
+  private static boolean benchmarkAuto;
+  private static int benchmarkImageId;
   private static String benchmarkResultsName = "";
 
   /** {@inheritDoc} */
@@ -3126,8 +3126,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return 0;
   }
 
-  private float[] backgroundPixels = null;
-  private boolean uniformBackground = false;
+  private float[] backgroundPixels;
+  private boolean uniformBackground;
 
   private float[] createBackground(RandomDataGenerator random) {
     float[] pixels2 = null;
@@ -5330,7 +5330,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return compounds;
   }
 
-  private static int seedAddition = 0;
+  private static int seedAddition;
   private boolean resetSeed = true;
 
   private enum SeedMode {

@@ -143,9 +143,9 @@ public class CubicSplineManager implements PlugIn {
   private static String directory = "";
   private static String filename = "";
   private static String cacheName = "";
-  private static CubicSplinePSF cache = null;
+  private static CubicSplinePSF cache;
 
-  private static CubicSplineSettings.Builder settings = null;
+  private static CubicSplineSettings.Builder settings;
 
   private static CubicSplineSettings.Builder getSettings() {
     return getSettings(0);
@@ -581,10 +581,10 @@ public class CubicSplineManager implements PlugIn {
     }
 
     private int _scale = -1;
-    private double _xshift = 0;
-    private double _yshift = 0;
-    private double _zshift = 0;
-    CubicSplineFunction f = null;
+    private double _xshift;
+    private double _yshift;
+    private double _zshift;
+    CubicSplineFunction f;
     double[] a = new double[] {0, 1, 0, 0, 0}; // Intensity 1
 
     private void draw() {

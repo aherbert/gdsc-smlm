@@ -54,10 +54,10 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
   /** The Jacobian gradient procedure. */
   protected FastMLEJacobianGradient2Procedure jacobianGradientProcedure;
   /** The jacobian. */
-  protected double[] jacobian = null;
+  protected double[] jacobian;
 
   /** The solver. */
-  protected EJMLLinearSolver solver = null;
+  protected EJMLLinearSolver solver;
 
   /** The default max relative error. */
   public static final double DEFAULT_MAX_RELATIVE_ERROR =

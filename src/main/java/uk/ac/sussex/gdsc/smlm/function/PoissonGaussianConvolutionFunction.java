@@ -59,7 +59,7 @@ public class PoissonGaussianConvolutionFunction
 
   private final double logNormalisationGaussian;
 
-  private boolean computePMF = false;
+  private boolean computePMF;
 
   /**
    * Instantiates a new poisson gaussian convolution function.

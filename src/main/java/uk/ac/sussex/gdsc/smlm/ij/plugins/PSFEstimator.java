@@ -73,23 +73,23 @@ import java.util.Collection;
  */
 public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   private static final String TITLE = "PSF Estimator";
-  private static TextWindow resultsWindow = null;
+  private static TextWindow resultsWindow;
 
   private double initialPeakStdDev0 = 1;
   private double initialPeakStdDev1 = 1;
-  private double initialPeakAngle = 0;
+  private double initialPeakAngle;
 
   private boolean extraOptions;
   private static int optionIntegrateFrames = 1;
   private int integrateFrames = 1;
-  private static boolean optionInterlacedData = false;
+  private static boolean optionInterlacedData;
   private static int optionDataStart = 1;
   private static int optionDataBlock = 1;
-  private static int optionDataSkip = 0;
-  private boolean interlacedData = false;
+  private static int optionDataSkip;
+  private boolean interlacedData;
   private int dataStart = 1;
   private int dataBlock = 1;
-  private int dataSkip = 0;
+  private int dataSkip;
 
   private FitEngineConfiguration config;
   private PSFEstimatorSettings.Builder settings;

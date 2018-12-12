@@ -282,11 +282,11 @@ public class PulseActivationAnalysis
   private static int minNeighbours = 5;
   private static int specificCorrectionIndex = Correction.SUBTRACTION.ordinal();
   private static double[] specificCorrectionCutoff = {50, 50, 50};
-  private static int nonSpecificCorrectionIndex = 0;
+  private static int nonSpecificCorrectionIndex;
   private static double nonSpecificCorrectionCutoff = 50;
 
   // Simulation settings
-  private RandomDataGenerator rdg = null;
+  private RandomDataGenerator rdg;
 
   private RandomDataGenerator getRandomDataGenerator() {
     if (rdg == null) {
@@ -311,7 +311,7 @@ public class PulseActivationAnalysis
   private Trace[] traces;
 
   // The output. Used for the loop functionality
-  private PeakResultsList[] output = null;
+  private PeakResultsList[] output;
   private static Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
   private static String[] MAGNIFICATION;
 
@@ -1267,12 +1267,12 @@ public class PulseActivationAnalysis
     Parameters.isEqualOrBelow(name, d, 100);
   }
 
-  private DensityCounter dc = null;
-  private int[][] density = null;
+  private DensityCounter dc;
+  private int[][] density;
   private int nThreads;
-  private ExecutorService executor = null;
-  private TurboList<Future<?>> futures = null;
-  private RunSettings lastRunSettings = null;
+  private ExecutorService executor;
+  private TurboList<Future<?>> futures;
+  private RunSettings lastRunSettings;
 
   private synchronized void run(RunSettings runSettings) {
     // This is synchronized since it updates the class results.
@@ -2111,7 +2111,7 @@ public class PulseActivationAnalysis
     return sample.length;
   }
 
-  private int id = 0;
+  private int id;
 
   private IdPeakResult createResult(int t, float x, float y) {
     // We add them as if tracing is perfect. So each peak result has a new ID.

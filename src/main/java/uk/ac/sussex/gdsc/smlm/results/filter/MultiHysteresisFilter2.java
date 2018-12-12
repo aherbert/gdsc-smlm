@@ -42,7 +42,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class MultiHysteresisFilter2 extends MultiHysteresisFilter {
   @XStreamOmitField
-  private boolean useBackground = false;
+  private boolean useBackground;
 
   /**
    * Instantiates a new multi hysteresis filter 2.

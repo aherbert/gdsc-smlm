@@ -64,16 +64,16 @@ public class FilterResults implements PlugIn {
 
   // Used to pass data from analyseResults() to checkLimits()
   private float minDrift = Float.MAX_VALUE;
-  private float maxDrift = 0;
+  private float maxDrift;
   private float minSignal = Float.MAX_VALUE;
-  private float maxSignal = 0;
+  private float maxSignal;
   private float minSNR = Float.MAX_VALUE;
-  private float maxSNR = 0;
+  private float maxSNR;
   private double minPrecision = Float.MAX_VALUE;
-  private double maxPrecision = 0;
-  private double averageWidth = 0;
+  private double maxPrecision;
+  private double averageWidth;
   private float minWidth = Float.MAX_VALUE;
-  private float maxWidth = 0;
+  private float maxWidth;
 
   private StandardResultProcedure sp;
   private PrecisionResultProcedure pp;

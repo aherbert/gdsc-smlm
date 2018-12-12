@@ -58,10 +58,10 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     filterNames = SettingsManager.getDataFilterMethodNames();
   }
 
-  private static int filter1 = 0;
+  private static int filter1;
   private static double smooth1 = 1;
-  private static boolean differenceFilter = false;
-  private static int filter2 = 0;
+  private static boolean differenceFilter;
+  private static int filter2;
   private static double smooth2 = 3;
 
   private final int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;

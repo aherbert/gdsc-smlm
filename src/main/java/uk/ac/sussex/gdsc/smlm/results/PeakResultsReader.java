@@ -109,21 +109,21 @@ public class PeakResultsReader {
   /** Simple whitespace pattern for tabs of spaces. */
   private static Pattern whitespacePattern = Pattern.compile("[\t ]");
 
-  private boolean useScanner = false;
-  private boolean rawResults = false;
+  private boolean useScanner;
+  private boolean rawResults;
 
   private final String filename;
-  private String header = null;
+  private String header;
   private FileFormat format;
   private String version;
-  private String name = null;
-  private ImageSource source = null;
-  private Rectangle bounds = null;
-  private CalibrationWriter calibration = null;
-  private PSF psf = null;
-  private String configuration = null;
-  private TrackProgress tracker = null;
-  private ResultOption[] options = null;
+  private String name;
+  private ImageSource source;
+  private Rectangle bounds;
+  private CalibrationWriter calibration;
+  private PSF psf;
+  private String configuration;
+  private TrackProgress tracker;
+  private ResultOption[] options;
 
   private boolean deviations;
   private boolean readEndFrame;

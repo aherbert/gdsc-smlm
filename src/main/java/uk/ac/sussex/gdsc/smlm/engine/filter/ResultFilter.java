@@ -50,7 +50,7 @@ public abstract class ResultFilter {
   protected int nMaxima;
 
   /** The filtered count. */
-  protected int filteredCount = 0;
+  protected int filteredCount;
 
   /** The filtered fit results. */
   protected FitResult[] filteredFitResults;

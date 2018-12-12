@@ -32,7 +32,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
  * Provide XML utilities using XStream.
  */
 public class XStreamUtils {
-  private static XStream xs = null;
+  private static XStream xs;
 
   /**
    * Convert an object to XML.

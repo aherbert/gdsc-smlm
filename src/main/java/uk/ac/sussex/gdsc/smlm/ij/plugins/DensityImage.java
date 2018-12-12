@@ -65,26 +65,26 @@ public class DensityImage implements PlugIn {
   private static String TITLE = "Density Image";
   private static String inputOption = "";
   private static float radius = 1.5f;
-  private static boolean chooseRoi = false;
+  private static boolean chooseRoi;
   private static String roiImage = "";
   private static boolean adjustForBorder = true;
   private static int imageScale = 2;
-  private static boolean cumulativeImage = false;
-  private static boolean useSquareApproximation = false;
+  private static boolean cumulativeImage;
+  private static boolean useSquareApproximation;
   private static int resolution = 10;
 
   private static String[] ScoreMethods = new String[] {"Density", "Ripley's K", "Ripley's K / Area",
       "Ripley's L", "Ripley's L - r", "Ripley's L / r", "Ripley's (L - r) / r"};
-  private static int scoreMethodIndex = 0;
+  private static int scoreMethodIndex;
 
   private static boolean filterLocalisations = true;
-  private static double filterThreshold = 0;
-  private static boolean computeRipleysPlot = false;
+  private static double filterThreshold;
+  private static boolean computeRipleysPlot;
 
   private static double minR = 0.2;
   private static double maxR = 3;
   private static double incrementR = 0.2;
-  private static boolean confidenceIntervals = false;
+  private static boolean confidenceIntervals;
 
   private Rectangle roiBounds;
   private double scaledRoiMinX;

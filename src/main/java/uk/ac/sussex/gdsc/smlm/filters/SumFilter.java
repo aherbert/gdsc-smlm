@@ -1185,8 +1185,8 @@ public class SumFilter {
   // The following code is copied directly from above.
   // All 'float' have been replaced with 'int'.
   // ----------------------------------------------------
-  private int[] intDataBuffer = null;
-  private int[] intRowBuffer = null;
+  private int[] intDataBuffer;
+  private int[] intRowBuffer;
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block

@@ -43,7 +43,7 @@ public class FilterSet {
   @XStreamOmitField
   private boolean initialisedWeakest;
   @XStreamOmitField
-  private int allSameType = 0;
+  private int allSameType;
 
   /**
    * Instantiates a new filter set.

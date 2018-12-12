@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  * Fit a binomial distribution to a histogram.
  */
 public class BinomialFitter {
-  private Logger logger = null;
+  private Logger logger;
   private boolean maximumLikelihood = true;
   private int fitRestarts = 5;
 

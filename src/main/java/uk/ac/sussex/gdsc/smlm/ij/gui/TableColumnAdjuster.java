@@ -69,7 +69,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
   private boolean isDynamicAdjustment;
   private final Map<TableColumn, Integer> columnSizes = new HashMap<>();
 
-  private int maxRows = 0;
+  private int maxRows;
 
   /**
    * Instantiates a new table column adjuster and use default spacing.

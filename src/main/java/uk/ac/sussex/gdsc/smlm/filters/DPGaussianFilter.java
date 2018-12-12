@@ -37,12 +37,12 @@ public class DPGaussianFilter extends BaseWeightedFilter {
 
   private double lastSigma;
   private int lastMaxRadius;
-  private double[][] kernel = null;
-  private double[] downscaleKernel = null;
-  private double[] upscaleKernel = null;
+  private double[][] kernel;
+  private double[] downscaleKernel;
+  private double[] upscaleKernel;
   private int lastUnitLength;
 
-  private Normaliser normaliser = null;
+  private Normaliser normaliser;
   private double sx;
   private double sy;
 

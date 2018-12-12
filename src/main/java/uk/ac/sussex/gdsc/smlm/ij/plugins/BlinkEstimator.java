@@ -72,7 +72,7 @@ public class BlinkEstimator implements PlugIn {
   private static boolean showHistogram = true;
   private static double s_searchDistance = 2.5;
   private static int s_nFittedPoints = 5;
-  private static int rangeFittedPoints = 0;
+  private static int rangeFittedPoints;
   private static boolean fitIntercept = true;
   private static boolean s_timeAtLowerBound = true;
 
@@ -93,10 +93,10 @@ public class BlinkEstimator implements PlugIn {
   /** The time at lower bound flag. */
   public boolean timeAtLowerBound = s_timeAtLowerBound;
   /** The show plots flag. */
-  public boolean showPlots = false;
+  public boolean showPlots;
 
-  private double[] parameters = null;
-  private boolean increaseNFittedPoints = false;
+  private double[] parameters;
+  private boolean increaseNFittedPoints;
 
   /** {@inheritDoc} */
   @Override

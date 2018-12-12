@@ -170,13 +170,13 @@ public class SeriesImageSource extends ImageSource {
     final ExtendedFileInfo fi; // Pointer to the file info used by the FastImageReader
     final long bytesPerFrame;
     boolean contiguous;
-    FastImageReader reader = null;
+    FastImageReader reader;
     /**
      * A reference to a seekable stream which may be buffered in memory.
      */
-    SeekableStream ss = null;
-    FastTiffDecoder td = null;
-    boolean inMemory = false;
+    SeekableStream ss;
+    FastTiffDecoder td;
+    boolean inMemory;
     /**
      * Flag indicating that no errors reading the image have occurred.
      */
@@ -184,9 +184,9 @@ public class SeriesImageSource extends ImageSource {
     /**
      * The number of frames that have been read from the input stream.
      */
-    int frameCount = 0;
+    int frameCount;
     /** Flag indicating that the Tiff info is complete. Relevant when opened using an index map */
-    boolean complete = false;
+    boolean complete;
 
     TiffImage(ExtendedFileInfo[] info, SeekableStream ss) {
       super(info[0].width, info[0].height, 0);
@@ -1212,7 +1212,7 @@ public class SeriesImageSource extends ImageSource {
 
   // Used for frame-based read
   @XStreamOmitField
-  private Image lastImage = null;
+  private Image lastImage;
   @XStreamOmitField
   private int lastImageId;
 
@@ -1226,9 +1226,9 @@ public class SeriesImageSource extends ImageSource {
 
   // Used to process the files into images
   @XStreamOmitField
-  private ArrayList<BaseWorker> workers = null;
+  private ArrayList<BaseWorker> workers;
   @XStreamOmitField
-  private ArrayList<Thread> threads = null;
+  private ArrayList<Thread> threads;
 
   /** The queue for in-memory buffered images awaiting TIFF decoding. */
   @XStreamOmitField
@@ -1239,14 +1239,14 @@ public class SeriesImageSource extends ImageSource {
 
   /** Used for sequential reading to queue the raw frames. */
   @XStreamOmitField
-  private CloseableBlockingQueue<Object> rawFramesQueue = null;
+  private CloseableBlockingQueue<Object> rawFramesQueue;
 
   /**
    * The first error that occurred during sequential reading. This is stored, the queue is shutdown
    * and then this can be thrown in the next() method.
    */
   @XStreamOmitField
-  private DataException error = null;
+  private DataException error;
 
   /**
    * Create a new image source using the given image series.

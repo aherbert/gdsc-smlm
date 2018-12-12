@@ -38,8 +38,8 @@ public class GridCoordinateStore implements CoordinateStore {
   public static final double MINIMUM_BLOCK_SIZE = 0.5;
 
   private class CoordinateList {
-    int timestamp = 0;
-    int size = 0;
+    int timestamp;
+    int size;
     double[] list = new double[3];
 
     // Not needed as we only create lists in the constructor when the timestamp is zero
@@ -73,7 +73,7 @@ public class GridCoordinateStore implements CoordinateStore {
     }
   }
 
-  private int timestamp = 0;
+  private int timestamp;
 
   private CoordinateList[][] grid;
   private final CoordinateList queue = new CoordinateList();

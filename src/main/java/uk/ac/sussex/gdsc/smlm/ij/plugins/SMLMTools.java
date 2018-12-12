@@ -74,7 +74,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
   }
 
   private final HashMap<String, String[]> plugins = new HashMap<>();
-  private boolean addSpacer = false;
+  private boolean addSpacer;
 
   /**
    * Constructor.

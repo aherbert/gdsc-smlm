@@ -51,7 +51,7 @@ public class MaskDistribution implements SpatialDistribution {
   private final double halfHeight;
   private final double minDepth;
   private final double depth;
-  private int particle = 0;
+  private int particle;
   private final double scaleX;
   private final double scaleY;
 
@@ -288,7 +288,7 @@ public class MaskDistribution implements SpatialDistribution {
   private static final int[] DIR_Y_OFFSET = new int[] {-1, -1, 0, 1, 1, 1, 0, -1};
   private int xlimit = -1;
   private int ylimit;
-  private int[] offset = null;
+  private int[] offset;
 
   /**
    * Convert the mask to connected particles, each with a unique number. This allows the within

@@ -43,8 +43,8 @@ public class ResequenceResults implements PlugIn {
   private static String inputOption = "";
   private static int start = 1;
   private static int block = 1;
-  private static int skip = 0;
-  private static boolean logMapping = false;
+  private static int skip;
+  private static boolean logMapping;
 
   /*
    * (non-)

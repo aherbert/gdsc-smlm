@@ -71,11 +71,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
    */
   public static final int APPLICATION_ID = 4;
 
-  private FileOutputStream out = null;
+  private FileOutputStream out;
 
-  private String filename = null;
+  private String filename;
 
-  private int size = 0;
+  private int size;
   private AtomicInteger id;
 
   private int isx;
@@ -83,7 +83,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
   private int ia;
   private FitMode fitMode;
 
-  private int boxSize = 0;
+  private int boxSize;
 
   /**
    * Instantiates a new TSF peak results writer.

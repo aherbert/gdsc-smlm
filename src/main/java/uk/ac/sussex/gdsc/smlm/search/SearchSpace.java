@@ -40,7 +40,7 @@ public class SearchSpace {
   /** Used to ignore rounding values. */
   private static NonRoundingDimension nonRoundingDimension = new NonRoundingDimension();
 
-  private int iteration = 0;
+  private int iteration;
   private double[][] searchSpace;
   private double[][] seed;
 
@@ -50,7 +50,7 @@ public class SearchSpace {
   private final StringBuilder sb = new StringBuilder();
 
   // This introduces a dependency on another uk.ac.sussex.gdsc.smlm package
-  private TrackProgress tracker = null;
+  private TrackProgress tracker;
 
   /**
    * The refinement mode for the range search.

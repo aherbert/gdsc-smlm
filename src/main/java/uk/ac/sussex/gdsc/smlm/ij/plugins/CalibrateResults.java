@@ -41,7 +41,7 @@ public class CalibrateResults implements PlugIn {
   private static final String TITLE = "Calibrate Results";
 
   private static String inputOption = "";
-  private static boolean updateAll = false;
+  private static boolean updateAll;
 
   /*
    * (non-)

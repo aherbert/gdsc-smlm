@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  */
 public class ConsecutiveFailCounter extends BaseFailCounter {
   /** The fail count. */
-  private int failCount = 0;
+  private int failCount;
 
   /** The number of allowed failures. */
   private final int allowedFailures;

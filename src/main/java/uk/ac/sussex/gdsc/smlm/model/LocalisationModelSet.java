@@ -36,7 +36,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   private int id;
   private final int time;
   private final List<LocalisationModel> localisations = new ArrayList<>();
-  private double[] data = null;
+  private double[] data;
   private LocalisationModelSet previous;
   private LocalisationModelSet next;
 

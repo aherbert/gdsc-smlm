@@ -252,13 +252,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   private static LinkedHashMap<String, Template> map;
   private String TITLE;
   private ImagePlus imp;
-  private int currentSlice = 0;
+  private int currentSlice;
   private TextWindow resultsWindow;
   private TextWindow infoWindow;
   private int templateId;
   private String headings;
   private TIntObjectHashMap<String> text;
-  private boolean templateImage = false;
+  private boolean templateImage;
 
   static {
     // Maintain the names in the order they are added

@@ -40,14 +40,14 @@ import java.io.IOException;
  */
 public abstract class FilePeakResults extends AbstractPeakResults implements ThreadSafePeakResults {
   /** Only write to a single results file. */
-  protected FileOutputStream fos = null;
+  protected FileOutputStream fos;
 
   /** The filename. */
   protected String filename;
-  private boolean sortAfterEnd = false;
+  private boolean sortAfterEnd;
 
   /** The size of the results. */
-  protected int size = 0;
+  protected int size;
 
   /**
    * Instantiates a new file peak results.

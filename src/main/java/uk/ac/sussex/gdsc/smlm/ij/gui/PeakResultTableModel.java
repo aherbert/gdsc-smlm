@@ -89,15 +89,15 @@ public class PeakResultTableModel extends AbstractTableModel {
   private final Calibration calibration;
   private final PSF psf;
   private ResultsTableSettings tableSettings;
-  private boolean checkForDuplicates = false;
+  private boolean checkForDuplicates;
 
   // These depend on the source results
   private ImageSource source;
   private String configuration = "";
-  private boolean showDeviations = false;
-  private boolean showEndFrame = false;
-  private boolean showId = false;
-  private boolean showZ = false;
+  private boolean showDeviations;
+  private boolean showEndFrame;
+  private boolean showId;
+  private boolean showZ;
 
   // Used for the columns
   private Rounder rounder;

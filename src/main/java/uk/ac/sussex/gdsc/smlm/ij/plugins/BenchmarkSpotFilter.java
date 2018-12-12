@@ -108,7 +108,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static FitConfiguration fitConfig;
   private static FitEngineConfiguration config;
   private static double search = 1;
-  private static boolean differenceFilter = false;
+  private static boolean differenceFilter;
   private static double differenceSmooth = 3;
   private static int minSearch = 1;
   private static int maxSearch = 1;
@@ -155,31 +155,31 @@ public class BenchmarkSpotFilter implements PlugIn {
   private double lowerMatchDistance;
   private static double recallFraction = 100;
   private static boolean showPlot = true;
-  private static boolean rankByIntensity = false;
-  private static boolean showFailuresPlot = false;
-  private static boolean showTP = false;
-  private static boolean showFP = false;
-  private static boolean showFN = false;
-  private static boolean sDebug = false;
+  private static boolean rankByIntensity;
+  private static boolean showFailuresPlot;
+  private static boolean showTP;
+  private static boolean showFP;
+  private static boolean showFN;
+  private static boolean sDebug;
 
   private static boolean batchMean = true;
   private static boolean batchGaussian = true;
-  private static boolean batchCircular = false;
-  private static boolean batchMedian = false;
+  private static boolean batchCircular;
+  private static boolean batchMedian;
 
   private boolean extraOptions;
-  private boolean debug = false;
-  private boolean batchMode = false;
-  private long time = 0;
+  private boolean debug;
+  private boolean batchMode;
+  private long time;
 
   // Cache batch results
-  private static Settings batchSettings = null;
+  private static Settings batchSettings;
   private static ArrayList<BatchResult[]> cachedBatchResults = new ArrayList<>();
 
   private static int id = 1;
 
-  private static BufferedTextWindow summaryTable = null;
-  private static BufferedTextWindow batchSummaryTable = null;
+  private static BufferedTextWindow summaryTable;
+  private static BufferedTextWindow batchSummaryTable;
 
   private ImagePlus imp;
   private MemoryPeakResults results;
@@ -190,7 +190,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private Rectangle bounds;
   private CreateData.SimulationParameters simulationParameters;
 
-  private static TIntObjectHashMap<PSFSpot[]> actualCoordinates = null;
+  private static TIntObjectHashMap<PSFSpot[]> actualCoordinates;
   private static int lastId = -1;
   // private static boolean lastRelativeDistances = false;
 
@@ -209,10 +209,10 @@ public class BenchmarkSpotFilter implements PlugIn {
   public static String resultPrefix;
 
   // Used by the Benchmark Spot Fit plugin
-  private static int filterResultsId = 0;
+  private static int filterResultsId;
 
   /** The filter result. */
-  static BenchmarkFilterResult filterResult = null;
+  static BenchmarkFilterResult filterResult;
 
   /**
    * Store the benchmark filter result.
@@ -552,7 +552,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    * Used to allow multi-threading of the PSF overlap computation.
    */
   private class OverlapWorker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates;
     final TIntObjectHashMap<PSFSpot[]> coordinates;
@@ -705,15 +705,15 @@ public class BenchmarkSpotFilter implements PlugIn {
    * Used to allow multi-threading of the fitting method.
    */
   private class Worker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
     final MaximaSpotFilter spotFilter;
     final float background;
     final TIntObjectHashMap<FilterResult> results;
 
-    float[] data = null;
-    long time = 0;
+    float[] data;
+    long time;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack, MaximaSpotFilter spotFilter,
         float background) {

@@ -64,7 +64,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
   /**
    * The diffusion rate for the molecule.
    */
-  private double diffusionRate = 0;
+  private double diffusionRate;
   /**
    * The diffusion type for the molecule.
    */

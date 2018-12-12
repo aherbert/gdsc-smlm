@@ -71,12 +71,12 @@ import java.util.List;
  */
 public class MeanVarianceTest implements PlugIn {
   private static final String TITLE = "Mean Variance Test";
-  private static double cameraGain = 0;
+  private static double cameraGain;
   private static double _bias = 500;
   private static boolean showTable = true;
   private static boolean showCharts = true;
 
-  private int exposureCounter = 0;
+  private int exposureCounter;
   private boolean singleImage;
 
   private class PairSample {

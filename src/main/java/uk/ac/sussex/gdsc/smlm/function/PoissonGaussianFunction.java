@@ -60,7 +60,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    */
   private static final int NUM_PICARD = 3;
 
-  private boolean usePicardApproximation = false;
+  private boolean usePicardApproximation;
   private final double mu;
   private final double sigmasquared;
   private final boolean noPoisson;

@@ -44,7 +44,7 @@ public class AggregatedImageSource extends ImageSource {
   @XStreamOmitField
   private int lastEndFrame;
   @XStreamOmitField
-  private float[] lastImage = null;
+  private float[] lastImage;
 
   /**
    * Create a new aggregated image source using the given image source.

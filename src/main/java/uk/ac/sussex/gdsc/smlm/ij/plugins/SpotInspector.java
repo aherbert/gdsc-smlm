@@ -90,7 +90,7 @@ public class SpotInspector implements PlugIn, MouseListener {
   private TextPanel textPanel;
   private List<PeakResultRank> rankedResults;
 
-  private static int currentId = 0;
+  private static int currentId;
   private int id;
 
   /** {@inheritDoc} */

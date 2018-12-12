@@ -107,7 +107,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
   }
 
   private class PGGFunction implements UnivariateFunction {
-    int i = 0;
+    int i;
     final double o;
     final double e;
 
@@ -153,10 +153,10 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
   private double minimumProbability = Double.MIN_VALUE;
 
   /** The integrator. */
-  private UnivariateIntegrator integrator = null;
+  private UnivariateIntegrator integrator;
 
   /** The kernel. */
-  private double[] kernel = null;
+  private double[] kernel;
 
   /**
    * Instantiates a new poisson gamma gaussian function.

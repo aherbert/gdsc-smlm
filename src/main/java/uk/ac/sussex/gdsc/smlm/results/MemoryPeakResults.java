@@ -82,8 +82,8 @@ import java.util.Set;
 public class MemoryPeakResults extends AbstractPeakResults implements Cloneable {
   private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<>();
   private static final Runtime s_runtime = Runtime.getRuntime();
-  private static int byteSize = 0;
-  private static int byteSizeWithDeviations = 0;
+  private static int byteSize;
+  private static int byteSizeWithDeviations;
 
   private static final int DEFAULT_SIZE = 104;
   private static final int DEFAULT_SIZE_WITH_DEVIATIONS = 152;

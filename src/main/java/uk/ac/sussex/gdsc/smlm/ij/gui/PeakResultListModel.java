@@ -41,7 +41,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult> {
   /** The store to delegate all model changes. */
   final PeakResultStoreList delegate;
 
-  private boolean checkForDuplicates = false;
+  private boolean checkForDuplicates;
 
   /**
    * Instantiates a new peak result model.

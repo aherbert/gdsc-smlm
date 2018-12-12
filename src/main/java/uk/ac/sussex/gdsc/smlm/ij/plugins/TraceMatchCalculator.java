@@ -65,16 +65,16 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   private static String inputOption3 = "";
   private static double dThreshold = 1;
   private static double beta = 4;
-  private static boolean showPairs = false;
+  private static boolean showPairs;
   private static String[] SORT_OPTIONS = new String[] {"Score", "Time"};
   private static int sortIndex = 1;
 
   private static boolean writeHeader = true;
-  private static TextWindow resultsWindow = null;
-  private static TextWindow pairsWindow = null;
-  private static TextWindow triplesWindow = null;
-  private static ImageROIPainter pairPainter = null;
-  private static ImageROIPainter triplePainter = null;
+  private static TextWindow resultsWindow;
+  private static TextWindow pairsWindow;
+  private static TextWindow triplesWindow;
+  private static ImageROIPainter pairPainter;
+  private static ImageROIPainter triplePainter;
 
   /** {@inheritDoc} */
   @Override
@@ -698,7 +698,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   }
 
   private class ScoreComparableTriple extends Triple implements Comparable<ScoreComparableTriple> {
-    double score = 0;
+    double score;
 
     public ScoreComparableTriple(Triple t) {
       super(t);

@@ -81,14 +81,14 @@ import java.util.List;
  */
 public class FilterAnalysis implements PlugIn {
   private static final String TITLE = "Filter Analysis";
-  private static TextWindow resultsWindow = null;
-  private static TextWindow sensitivityWindow = null;
+  private static TextWindow resultsWindow;
+  private static TextWindow sensitivityWindow;
 
-  private static boolean saveFilterSets = false;
+  private static boolean saveFilterSets;
   private static boolean showResultsTable = true;
-  private static int plotTopN = 0;
+  private static int plotTopN;
   private ArrayList<NamedPlot> plots;
-  private static boolean calculateSensitivity = false;
+  private static boolean calculateSensitivity;
   private static double delta = 0.1;
   private HashMap<String, FilterScore> bestFilter;
   private LinkedList<String> bestFilterOrder;
@@ -104,7 +104,7 @@ public class FilterAnalysis implements PlugIn {
   private static int minPrecision = 20;
   private static int maxPrecision = 80;
 
-  private static boolean traceFilter = false;
+  private static boolean traceFilter;
   private static double minDistance = 0.3;
   private static double maxDistance = 1.2;
   private static double incDistance = 0.3;
@@ -122,7 +122,7 @@ public class FilterAnalysis implements PlugIn {
   private static int maxPrecisionGap = 40;
   private static int incPrecisionGap = 10;
 
-  private static List<MemoryPeakResults> resultsList = null;
+  private static List<MemoryPeakResults> resultsList;
   private String inputDirectory;
   private static String lastInputDirectory = "";
 

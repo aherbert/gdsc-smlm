@@ -43,7 +43,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter {
   @XStreamOmitField
   private double variance;
   @XStreamOmitField
-  private boolean useBackground = false;
+  private boolean useBackground;
   @XStreamOmitField
   private Gaussian2DPeakResultCalculator calculator;
 

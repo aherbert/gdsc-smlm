@@ -38,8 +38,8 @@ public class ParameterisedFitJob extends FitJob {
   private final FitParameters parameters;
   private List<PeakResult> peakResults;
   private int[] indices = new int[0];
-  private FitResult[] fitResults = null;
-  private MultiPathFitResult[] multiPathResults = null;
+  private FitResult[] fitResults;
+  private MultiPathFitResult[] multiPathResults;
 
   /**
    * Constructor with data. Exceptions are thrown if invalid bounds or data are passed.

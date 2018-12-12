@@ -74,7 +74,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
   /** The unique id. */
   public int uniqueId;
-  private int validationResult = 0;
+  private int validationResult;
   private boolean ignore;
   private boolean notDuplicate;
 

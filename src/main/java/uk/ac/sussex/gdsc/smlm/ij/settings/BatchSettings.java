@@ -39,12 +39,12 @@ public class BatchSettings {
   public ArrayList<ParameterSettings> parameters = new ArrayList<>();
 
   /** The results directory. */
-  public String resultsDirectory = null;
+  public String resultsDirectory;
 
   /** Set to true to run the peak fit plugin. */
   public boolean runPeakFit = true;
 
-  private Calibration calibration = null;
+  private Calibration calibration;
 
   /**
    * Gets the calibration.

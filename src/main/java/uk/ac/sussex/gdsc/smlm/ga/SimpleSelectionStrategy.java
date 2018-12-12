@@ -43,10 +43,10 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
   /** The maximum number of individuals to select. */
   final int max;
 
-  private List<? extends Chromosome<T>> individuals = null;
+  private List<? extends Chromosome<T>> individuals;
 
   /** The tracker. */
-  TrackProgress tracker = null;
+  TrackProgress tracker;
 
   /**
    * Instantiates a new simple selection strategy.

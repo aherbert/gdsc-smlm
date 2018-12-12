@@ -142,15 +142,15 @@ public class TraceMolecules implements PlugIn {
   private static double MIN_BLINKING_RATE = 1; // Should never be <= 0
   private static String inputOption = "";
   private static boolean inputDebugMode = true;
-  private static boolean inputOptimiseBlinkingRate = false;
+  private static boolean inputOptimiseBlinkingRate;
 
   // private static boolean fitOnlyCentroid = false;
   // private static float distanceThreshold = 1;
   // private static float expansionFactor = 2;
   // private static boolean debugFailures = false;
 
-  private static String header = null;
-  private static TextWindow summaryTable = null;
+  private static String header;
+  private static TextWindow summaryTable;
 
   private static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "Blinks",
       "t-On (s)", "t-Off (s)", "Total t-On (s)", "Total t-Off (s)"};
@@ -194,7 +194,7 @@ public class TraceMolecules implements PlugIn {
   private ClusteringSettings.Builder settings;
   private MemoryPeakResults results;
   // Store exposure time in seconds
-  private double exposureTime = 0;
+  private double exposureTime;
 
   // Used for the plotting
   private double[] dThresholds;
@@ -205,9 +205,9 @@ public class TraceMolecules implements PlugIn {
   // Store the pixel value for the first plotted result
   private int origX;
   private int origY;
-  private boolean debugMode = false;
+  private boolean debugMode;
   private boolean altKeyDown;
-  private boolean optimiseBlinkingRate = false;
+  private boolean optimiseBlinkingRate;
 
   /** {@inheritDoc} */
   @Override

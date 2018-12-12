@@ -514,7 +514,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   private abstract static class IntegrationProcedure implements ConvolutionValueProcedure {
     final int scale;
     final double[] pz_1;
-    int i = 0;
+    int i;
 
     IntegrationProcedure(int scale) {
       this.scale = scale;
@@ -551,8 +551,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   private static class SimpsonIntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0;
-    double sum4 = 0;
+    double sum2;
+    double sum4;
 
     SimpsonIntegrationProcedure(int scale) {
       super(scale);
@@ -582,8 +582,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   }
 
   private static class Simpson38IntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0;
-    double sum3 = 0;
+    double sum2;
+    double sum3;
 
     Simpson38IntegrationProcedure(int scale) {
       super(scale);

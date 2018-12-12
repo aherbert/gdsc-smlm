@@ -42,9 +42,9 @@ import java.awt.Rectangle;
  * Draws the fit results using the Gaussian PSF to an ImageJ image.
  */
 public class PSFImagePeakResults extends IJImagePeakResults {
-  private boolean fixedWidth = false;
-  private float psfWidth = 0f;
-  private boolean calculatedPrecision = false;
+  private boolean fixedWidth;
+  private float psfWidth;
+  private boolean calculatedPrecision;
 
   private Gaussian2DPeakResultCalculator calculator;
   private TypeConverter<DistanceUnit> dc;
@@ -55,7 +55,7 @@ public class PSFImagePeakResults extends IJImagePeakResults {
   private boolean requirePSFParameters;
 
   // Multiplication factors and variables for plotting the fixed Gaussian
-  private double[] fixedParams = null;
+  private double[] fixedParams;
 
   /**
    * Instantiates a new PSF image peak results.

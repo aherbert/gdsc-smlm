@@ -39,7 +39,7 @@ public class CreateDataSettingsHelper {
    * Set to true if the camera type is {@link CameraType#EMCCD}.
    */
   public final boolean isEmCcd;
-  private double totalGain = 0;
+  private double totalGain;
 
   /**
    * Instantiates a new creates the data createDataSettings helper.

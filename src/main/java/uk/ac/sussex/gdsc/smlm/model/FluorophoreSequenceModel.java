@@ -61,7 +61,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel
   /**
    * The number of times the molecule went into the dark state.
    */
-  private int blinks = 0;
+  private int blinks;
   /**
    * A sequence of fluorescent bursts in pairs of {on,off} times. The burst sequence will be length
    * = 2 * (blinks+1)

@@ -44,9 +44,9 @@ public class FisherInformationMatrix {
   private static final byte NO = -1;
 
   private final DenseMatrix64F m;
-  private double[] crlb = null;
+  private double[] crlb;
   private byte inverted = UNKNOWN;
-  private double inversionTolerance = 0;
+  private double inversionTolerance;
 
   /**
    * Instantiates a new fisher information matrix.

@@ -42,7 +42,7 @@ public class Gaussian2DFitter {
   /** The solver. */
   protected FunctionSolver solver;
   /** The last successful fit. Used to compute the residuals. */
-  protected double[] residuals = null;
+  protected double[] residuals;
   /** Allow calculation of residuals to be turned off (overwrite constructor fit configuration). */
   protected boolean computeResiduals = true;
   /** The lower bounds for function solvers. */

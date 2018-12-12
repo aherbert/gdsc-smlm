@@ -48,7 +48,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
    */
   final double alpha;
 
-  private boolean usePicardApproximation = false;
+  private boolean usePicardApproximation;
   private final double sigmasquared;
 
   private final double probabilityNormalisation;

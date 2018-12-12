@@ -84,26 +84,26 @@ public class EMGainAnalysis implements PlugInFilter {
   private static double bias = 500;
   private static double gain = 40;
   private static double noise = 3;
-  private static boolean _simulate = false;
-  private static boolean showApproximation = false;
-  private static boolean relativeDelta = false;
+  private static boolean _simulate;
+  private static boolean showApproximation;
+  private static boolean relativeDelta;
   private static String[] APPROXIMATION =
       {"PoissonGammaGaussian", "PoissonGamma", "PoissonGaussian", "Poisson"};
-  private static int approximation = 0;
-  private boolean simulate = false;
-  private boolean extraOptions = false;
+  private static int approximation;
+  private boolean simulate;
+  private boolean extraOptions;
   private static double _photons = 1;
   private static double _bias = 500;
   private static double _gain = 40;
   private static double _noise = 3;
   private static double head = 0.01;
   private static double tail = 0.025;
-  private static double _offset = 0;
+  private static double _offset;
   private static int simulationSize = 20000;
-  private static boolean usePDF = false;
+  private static boolean usePDF;
 
   private ImagePlus imp;
-  private double offset = 0;
+  private double offset;
 
   /** {@inheritDoc} */
   @Override
@@ -517,7 +517,7 @@ public class EMGainAnalysis implements PlugInFilter {
   private static MultivariateFunction getFunction(final int[] limits, final double[] y,
       final int max, final int maxEval) {
     final MultivariateFunction fun = new MultivariateFunction() {
-      int eval = 0;
+      int eval;
 
       @Override
       public double value(double[] point) {

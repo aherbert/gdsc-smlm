@@ -58,8 +58,8 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
 
   private NucleusMaskSettings.Builder settings;
 
-  private ImagePlus imp = null;
-  private ImageStack sphere = null;
+  private ImagePlus imp;
+  private ImageStack sphere;
 
   /** {@inheritDoc} */
   @Override

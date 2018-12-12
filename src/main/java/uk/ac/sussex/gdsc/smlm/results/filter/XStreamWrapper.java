@@ -35,7 +35,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
  */
 public abstract class XStreamWrapper {
   @XStreamOmitField
-  private static XStream xs = null;
+  private static XStream xs;
 
   static {
     xs = new XStream(new DomDriver());

@@ -34,7 +34,7 @@ public class BatchRun {
   public String image;
 
   /** The fit engine configuration. */
-  public FitEngineConfiguration fitEngineConfiguration = null;
+  public FitEngineConfiguration fitEngineConfiguration;
 
   /**
    * Instantiates a new batch run.

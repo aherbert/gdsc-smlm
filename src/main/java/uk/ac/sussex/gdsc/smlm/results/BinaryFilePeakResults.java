@@ -450,7 +450,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
 
   private class Result implements Comparable<Result> {
     byte[] line;
-    int slice = 0;
+    int slice;
 
     public Result(byte[] line) {
       this.line = Arrays.copyOf(line, line.length);

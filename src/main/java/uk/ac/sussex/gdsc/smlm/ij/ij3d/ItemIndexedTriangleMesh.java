@@ -52,7 +52,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
 
   /** The sizes. */
   protected Point3f[] sizes;
-  private boolean dirty = false;
+  private boolean dirty;
 
   /**
    * Instantiates a new item indexed triangle mesh.

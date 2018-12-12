@@ -79,8 +79,8 @@ public class ToleranceChecker {
    */
   public final int maxIterations;
 
-  private int iterations = 0;
-  private boolean manualConvergence = false;
+  private int iterations;
+  private boolean manualConvergence;
 
   /**
    * Build an instance with specified thresholds. This only checks convergence using the parameters.

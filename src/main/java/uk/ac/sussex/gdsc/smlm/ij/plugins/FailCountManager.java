@@ -138,10 +138,10 @@ public class FailCountManager implements PlugIn {
     private int maxConsFailCount = -1;
 
     // These are for plotting so we use float not int
-    private float[] candidate = null;
-    private float[] consFailCount = null;
-    private float[] passCount = null;
-    private float[] passRate = null;
+    private float[] candidate;
+    private float[] consFailCount;
+    private float[] passCount;
+    private float[] passRate;
 
     /**
      * The number of results to process before a fail counter is not OK. Used to score a fail
@@ -324,7 +324,7 @@ public class FailCountManager implements PlugIn {
   }
 
   private static TurboList<FailCountData> failCountData = new TurboList<>(1);
-  private static TextWindow resultsWindow = null;
+  private static TextWindow resultsWindow;
 
   private FailCountManagerSettings.Builder settings;
 
@@ -702,8 +702,8 @@ public class FailCountManager implements PlugIn {
   private class PlotWorker implements Runnable {
     final ConcurrentMonoStack<PlotData> stack;
     final TurboList<FailCountData> failCountData;
-    PlotData lastPlotData = null;
-    int maxSize = 0;
+    PlotData lastPlotData;
+    int maxSize;
 
     PlotWorker(ConcurrentMonoStack<PlotData> stack, TurboList<FailCountData> failCountData) {
       this.stack = stack;

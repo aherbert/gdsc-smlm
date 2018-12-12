@@ -227,7 +227,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       new String[] {rawMeanTitle, rawSDTitle, rawSpotTitle, blurSpotTitle, avgSpotTitle};
 
   private static Frame instance;
-  private static TextWindow resultsWindow = null;
+  private static TextWindow resultsWindow;
 
   private Choice inputChoice;
   private TextField widthTextField;
@@ -254,7 +254,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
   private final String OPT_LOCATION = "CT.location";
 
   // private ImageJ ij;
-  private int runMode = 0;
+  private int runMode;
   private ImagePlus imp;
   private ImagePlus rawImp;
   private ImagePlus blurImp;
@@ -274,9 +274,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
   private final TIntArrayList candidateFrames = new TIntArrayList();
 
   private final TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<>();
-  private int id = 0;
-  private boolean updated = false;
-  private int blurCount = 0;
+  private int id;
+  private boolean updated;
+  private int blurCount;
 
   private final Object runLock = new Object();
 

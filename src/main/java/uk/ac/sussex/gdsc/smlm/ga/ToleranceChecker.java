@@ -45,7 +45,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
   final int maxIterations;
 
   /** The iterations. */
-  private int iterations = 0;
+  private int iterations;
 
   /**
    * Build an instance with specified thresholds. This only check convergence using the sequence.

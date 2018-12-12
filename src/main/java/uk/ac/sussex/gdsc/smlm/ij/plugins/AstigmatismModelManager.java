@@ -114,8 +114,8 @@ import java.util.Map;
 public class AstigmatismModelManager implements PlugIn {
   private static final String TITLE = "Astigmatism Model Manager";
 
-  private static AstigmatismModelSettings.Builder settings = null;
-  private static TextWindow resultsWindow = null;
+  private static AstigmatismModelSettings.Builder settings;
+  private static TextWindow resultsWindow;
 
   private AstigmatismModelManagerSettings.Builder pluginSettings;
   private ImagePlus imp;
@@ -1508,7 +1508,7 @@ public class AstigmatismModelManager implements PlugIn {
     String name;
     AstigmatismModel model;
     double range;
-    double z = 0;
+    double z;
     int width;
     double cx;
     GaussianPSFModel psf;

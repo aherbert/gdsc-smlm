@@ -58,7 +58,7 @@ public abstract class Gaussian2DFunction
    */
   public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
 
-  private NoiseModel noiseModel = null;
+  private NoiseModel noiseModel;
 
   /** Constant for 1./2*pi */
   public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
@@ -408,7 +408,7 @@ public abstract class Gaussian2DFunction
     initialise0(variables);
     final double[] values = new double[size()];
     forEach(new ValueProcedure() {
-      int i = 0;
+      int i;
 
       @Override
       public void execute(double value) {
@@ -448,7 +448,7 @@ public abstract class Gaussian2DFunction
     final double[][] jacobian = new double[n][];
     final double[] values = new double[n];
     forEach(new Gradient1Procedure() {
-      int i = 0;
+      int i;
 
       @Override
       public void execute(double value, double[] dy_da) {

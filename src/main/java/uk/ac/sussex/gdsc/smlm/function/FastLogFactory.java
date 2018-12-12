@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Factory class for creating a fast log instance.
  */
 public class FastLogFactory {
-  private static FastLog fastLog = null;
+  private static FastLog fastLog;
 
   /**
    * Gets the global fast log instance.

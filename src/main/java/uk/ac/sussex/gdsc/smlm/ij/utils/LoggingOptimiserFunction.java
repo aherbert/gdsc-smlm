@@ -32,8 +32,8 @@ import ij.IJ;
  * Allow progress tracking of the Apache Commons Math 3 Optimiser in ImageJ.
  */
 public abstract class LoggingOptimiserFunction extends OptimiserFunction {
-  private boolean logging = false;
-  private int evalCount = 0;
+  private boolean logging;
+  private int evalCount;
 
   /** The name. */
   protected String name = "Optimiser";

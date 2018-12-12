@@ -103,15 +103,15 @@ public class PCPALMFitting implements PlugIn {
   private static double copiedEstimatedPrecision = -1;
   private static double blinkingRate = -1;
   private static double copiedBlinkingRate = -1;
-  private static boolean showErrorBars = false;
-  private static boolean fitClusteredModels = false;
-  private static boolean saveCorrelationCurve = false;
+  private static boolean showErrorBars;
+  private static boolean fitClusteredModels;
+  private static boolean saveCorrelationCurve;
   private static String inputFilename = "";
   private static String outputFilename = "";
   private static int fitRestarts = 3;
-  private static boolean useLSE = false;
-  private static double fitAboveEstimatedPrecision = 0;
-  private static double fittingTolerance = 0; // Zero to ignore
+  private static boolean useLSE;
+  private static double fitAboveEstimatedPrecision;
+  private static double fittingTolerance; // Zero to ignore
   private static double gr_protein_threshold = 1.5;
 
   private RandomModelFunction randomModel;
@@ -128,11 +128,11 @@ public class PCPALMFitting implements PlugIn {
   private boolean valid2;
 
   // Used for the results table
-  private static TextWindow resultsTable = null;
+  private static TextWindow resultsTable;
 
-  private boolean doneHeader = false;
+  private boolean doneHeader;
 
-  private int offset = 0;
+  private int offset;
   private double[][] gr;
   private double peakDensity;
   private boolean spatialDomain;
@@ -1474,7 +1474,7 @@ public class PCPALMFitting implements PlugIn {
    */
   private class RandomModelFunction extends BaseModelFunction
       implements MultivariateVectorFunction {
-    double[] lastValue = null;
+    double[] lastValue;
 
     public RandomModelFunction() {
       super("Random Model");
@@ -1619,7 +1619,7 @@ public class PCPALMFitting implements PlugIn {
    * exponential directly, i.e. there is no convolution !!!
    */
   private abstract class ClusteredModelFunction extends BaseModelFunction {
-    double[] lastValue = null;
+    double[] lastValue;
 
     public ClusteredModelFunction() {
       super("Clustered Model");
@@ -1922,7 +1922,7 @@ public class PCPALMFitting implements PlugIn {
    * <p>Note: Described in figure 3 of Veatch, et al (2012) Plos One, e31457
    */
   private abstract class EmulsionModelFunction extends BaseModelFunction {
-    double[] lastValue = null;
+    double[] lastValue;
 
     public EmulsionModelFunction() {
       super("Emulsion Clustered Model");

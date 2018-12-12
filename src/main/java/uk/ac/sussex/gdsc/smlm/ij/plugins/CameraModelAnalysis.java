@@ -100,11 +100,11 @@ public class CameraModelAnalysis
 
   private boolean extraOptions;
   private boolean dirty = true;
-  private CameraModelAnalysisSettings lastSettings = null;
+  private CameraModelAnalysisSettings lastSettings;
   private ExtendedGenericDialog gd;
-  private IntHistogram lastHistogram = null;
-  private double[][] floatHistogram = null;
-  private CameraModelAnalysisSettings lastSimulationSettings = null;
+  private IntHistogram lastHistogram;
+  private double[][] floatHistogram;
+  private CameraModelAnalysisSettings lastSimulationSettings;
 
   private static String[] MODE = {"CCD", "EM-CCD", "sCMOS"};
   private static final int MODE_CCD = 0;
@@ -218,8 +218,8 @@ public class CameraModelAnalysis
   }
   //@formatter:on
 
-  private static CachedRandomGenerator random = null;
-  private static int currentSeed = 0;
+  private static CachedRandomGenerator random;
+  private static int currentSeed;
 
   private CachedRandomGenerator getRandomGenerator() {
     if (random == null || currentSeed != settings.getSeed()) {

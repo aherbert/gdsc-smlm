@@ -71,7 +71,7 @@ public class FitParameters {
   /**
    * The spots to fit within the data.
    */
-  public Spot[] spots = null;
+  public Spot[] spots;
   /**
    * The maximum candidate spot to fit. This should be equal to spots.length or less. It is used
    * when additional candidates have been added to the spots list that are neighbours of the primary
@@ -81,7 +81,7 @@ public class FitParameters {
   /**
    * The maxima to fit within the data.
    */
-  public int[] maxIndices = null;
+  public int[] maxIndices;
   /**
    * The background for the image data. This is no longer used as the background is estimated using
    * the local fit region.
@@ -94,7 +94,7 @@ public class FitParameters {
    * @deprecated Filtering is no longer supported
    */
   @Deprecated
-  public List<float[]> filter = null;
+  public List<float[]> filter;
   /**
    * The distance threshold to use when checking if fitted peaks match the desired results.
    *
@@ -119,12 +119,12 @@ public class FitParameters {
    * is then built by validating the results with this filter (in addition to the fit configuration
    * used to construct the FitWorker).
    */
-  public MultiPathFilter benchmarkFilter = null;
+  public MultiPathFilter benchmarkFilter;
 
   /**
    * The distance to an existing result to be declared a duplicate.
    */
-  public double duplicateDistance = 0;
+  public double duplicateDistance;
 
   /**
    * The pass array.
@@ -132,5 +132,5 @@ public class FitParameters {
    * <p>If this is not null then it will be initialised to the length of the candidate list and used
    * to store the pass/fail flag for each candidate up to the point that fitting was halted.
    */
-  public boolean[] pass = null;
+  public boolean[] pass;
 }

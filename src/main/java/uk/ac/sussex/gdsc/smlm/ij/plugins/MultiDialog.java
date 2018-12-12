@@ -68,7 +68,7 @@ public class MultiDialog extends Dialog
   private static final long serialVersionUID = -881270633231897572L;
 
   private java.util.List<String> selected;
-  private boolean selectAll = false;
+  private boolean selectAll;
 
   private Button cancel;
   private Button okay;

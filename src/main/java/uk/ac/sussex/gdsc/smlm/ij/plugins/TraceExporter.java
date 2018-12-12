@@ -84,10 +84,10 @@ public class TraceExporter implements PlugIn {
   private static String directory = "";
   private static int minLength = 2;
   private static int maxJump = 1;
-  private static double wobble = 0;
+  private static double wobble;
 
   private static String[] FORMAT_NAMES;
-  private static int format = 0;
+  private static int format;
 
   private ExportFormat exportFormat;
 

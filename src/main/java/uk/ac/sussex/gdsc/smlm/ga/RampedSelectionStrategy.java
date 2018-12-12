@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSelectionStrategy<T>
     implements SelectionStrategy<T> {
-  private List<? extends Chromosome<T>> sorted = null;
+  private List<? extends Chromosome<T>> sorted;
   private int n;
   private long[] sum;
   private long upper;

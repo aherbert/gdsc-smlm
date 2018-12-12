@@ -537,7 +537,7 @@ public class FRC {
    * Used to track the progress within
    * {@link #calculateFrcCurve(ImageProcessor, ImageProcessor, double)}.
    */
-  private TrackProgress progress = null;
+  private TrackProgress progress;
 
   /**
    * Sets the track progress.

@@ -70,15 +70,15 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
   private static double delta = 0.1;
   private static double beta = 4;
   private static boolean showTable = true;
-  private static boolean showPairs = false;
-  private static boolean saveClassifications = false;
+  private static boolean showPairs;
+  private static boolean saveClassifications;
   private static String classificationsFile = "";
-  private static boolean idAnalysis = false;
+  private static boolean idAnalysis;
 
   private static boolean writeHeader = true;
-  private static TextWindow resultsWindow = null;
-  private static TextWindow pairsWindow = null;
-  private static ImageROIPainter pairPainter = null;
+  private static TextWindow resultsWindow;
+  private static TextWindow pairsWindow;
+  private static ImageROIPainter pairPainter;
 
   private final Rounder rounder = RounderUtils.create(4);
 

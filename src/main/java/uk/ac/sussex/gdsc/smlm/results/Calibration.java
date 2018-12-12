@@ -81,7 +81,7 @@ class Calibration implements Cloneable {
   private static int FIELD_ANGLE_UNIT = 0x00000400;
 
   /** The fields. */
-  private int fields = 0;
+  private int fields;
 
   /**
    * Checks if an exception will be thrown when accessing a field that is missing.
@@ -355,15 +355,15 @@ class Calibration implements Cloneable {
   }
 
   /** The image pixel size in nanometers. */
-  private double nmPerPixel = 0;
+  private double nmPerPixel;
   /**
    * The gain (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units (ADUs)
    * to photons.
    */
-  private double gain = 0;
+  private double gain;
 
   /** The exposure time in milliseconds per frame. */
-  private double exposureTime = 0;
+  private double exposureTime;
 
   /** The camera Gaussian read noise (in ADUs). */
   private double readNoise = -1;
@@ -372,7 +372,7 @@ class Calibration implements Cloneable {
   private double bias = -1;
 
   /** The camera type. */
-  private CameraType cameraType = null;
+  private CameraType cameraType;
 
   /**
    * True if the camera was run in Electron Multiplying (EM) mode.
@@ -389,16 +389,16 @@ class Calibration implements Cloneable {
    * amplification that is not perfect (i.e. it has noise). The amplification is equal to the gain
    * (ADUs/photon) divided by the quantum efficiency (e-/photon).
    */
-  private double amplification = 0;
+  private double amplification;
 
   /** The distance unit. */
-  private DistanceUnit distanceUnit = null;
+  private DistanceUnit distanceUnit;
 
   /** The intensity unit. */
-  private IntensityUnit intensityUnit = null;
+  private IntensityUnit intensityUnit;
 
   /** The angle unit. */
-  private AngleUnit angleUnit = null;
+  private AngleUnit angleUnit;
 
   /**
    * Default constructor. All properties are set to be invalid but field missing exceptions are

@@ -172,13 +172,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterScore>, TrackProgress,
     FractionScoreStore, FullScoreFunction<FilterScore> {
   private static final String TITLE = "Benchmark Filter Analysis";
-  private static TextWindow resultsWindow = null;
-  private static TextWindow summaryWindow = null;
-  private static TextWindow sensitivityWindow = null;
-  private static TextWindow gaWindow = null;
-  private static TextWindow componentAnalysisWindow = null;
+  private static TextWindow resultsWindow;
+  private static TextWindow summaryWindow;
+  private static TextWindow sensitivityWindow;
+  private static TextWindow gaWindow;
+  private static TextWindow componentAnalysisWindow;
   private static int failCount = 1;
-  private static int minFailCount = 0;
+  private static int minFailCount;
   private static int maxFailCount = 10;
 
   // This can be used during filtering.
@@ -190,35 +190,35 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private static double minResidualsThreshold = 0.1;
   private static double maxResidualsThreshold = 0.6;
   private double residualsThreshold = 1; // Disabled
-  private static double duplicateDistance = 0;
+  private static double duplicateDistance;
   // This is a flag that is passed around but is only set once, i.e.
   // analysis is done using either absolute or relative distances.
   private static boolean duplicateDistanceAbsolute = true;
-  private static double minDuplicateDistance = 0;
+  private static double minDuplicateDistance;
   private static double maxDuplicateDistance = 5;
   private static boolean reset = true;
-  private static boolean showResultsTable = false;
+  private static boolean showResultsTable;
   private static boolean showSummaryTable = true;
-  private static boolean clearTables = false;
+  private static boolean clearTables;
   private static final String KEY_FILTER_FILENAME = "gdsc.filteranalysis.filterfilename";
   private static final String KEY_FILTERSET_FILENAME = "gdsc.filteranalysis.filtersetfilename";
   private static final String KEY_TEMPLATE_FILENAME = "gdsc.filteranalysis.templatefilename";
   private static String filterFilename = Prefs.get(KEY_FILTER_FILENAME, "");
   private static String filterSetFilename = Prefs.get(KEY_FILTERSET_FILENAME, "");
   private static String templateFilename = Prefs.get(KEY_TEMPLATE_FILENAME, "");
-  private static int summaryTopN = 0;
+  private static int summaryTopN;
   private static double summaryDepth = 500;
-  private static int plotTopN = 0;
-  private static boolean saveBestFilter = false;
-  private static boolean saveTemplate = false;
-  private static boolean calculateSensitivity = false;
+  private static int plotTopN;
+  private static boolean saveBestFilter;
+  private static boolean saveTemplate;
+  private static boolean calculateSensitivity;
   private static double delta = 0.1;
   private static int criteriaIndex;
   private static double criteriaLimit = 0.95;
-  private double minCriteria = 0;
-  private boolean invertCriteria = false;
+  private double minCriteria;
+  private boolean invertCriteria;
   private static int scoreIndex;
-  private boolean invertScore = false;
+  private boolean invertScore;
   private static double upperMatchDistance = 100;
   private static double partialMatchDistance = 33;
   /** The distance in pixels. */
@@ -239,8 +239,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
   private static final String[] EVOLVE =
       {"None", "Genetic Algorithm", "Range Search", "Enrichment Search", "Step Search"};
-  private static int evolve = 0;
-  private static boolean repeatEvolve = false;
+  private static int evolve;
+  private static boolean repeatEvolve;
   private static int rangeSearchWidth = 2;
   private static double rangeSearchReduce = 0.3;
   private static int maxIterations = 30;
@@ -253,7 +253,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private static final String[] SEARCH =
       {"Range Search", "Enrichment Search", "Step Search", "Enumerate"};
   private static int searchParam = 3;
-  private static boolean repeatSearch = false;
+  private static boolean repeatSearch;
   private static int pRangeSearchWidth = 2;
   private static double pRangeSearchReduce = 0.3;
   private static int pMaxIterations = 30;
@@ -267,9 +267,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private static TIntObjectHashMap<boolean[]> searchRangeMap = new TIntObjectHashMap<>();
   private static TIntObjectHashMap<double[]> stepSizeMap = new TIntObjectHashMap<>();
 
-  private static boolean showTP = false;
-  private static boolean showFP = false;
-  private static boolean showFN = false;
+  private static boolean showTP;
+  private static boolean showFP;
+  private static boolean showFN;
 
   private static int populationSize = 5000;
   private static int failureLimit = 5;
@@ -280,15 +280,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private static double mutationRate = 1;
   private static double selectionFraction = 0.2;
   private static boolean rampedSelection = true;
-  private static boolean saveOption = false;
+  private static boolean saveOption;
   private static double iterationScoreTolerance = 1e-4;
   private static double iterationFilterTolerance = 1e-3;
-  private static boolean iterationCompareResults = false;
+  private static boolean iterationCompareResults;
   private static double iterationCompareDistance = 0.1;
   private static int iterationMaxIterations = 10;
   private static double iterationMinRangeReduction = 0.2;
   private static int iterationMinRangeReductionIteration = 5;
-  private static boolean iterationConvergeBeforeRefit = false;
+  private static boolean iterationConvergeBeforeRefit;
 
   // For the template example
   private static int nNo = 2;
@@ -306,24 +306,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private static HashMap<String, ComplexFilterScore> bestFilter = new HashMap<>();
   private static LinkedList<String> bestFilterOrder = new LinkedList<>();
 
-  private static HashMap<String, ComplexFilterScore> iterBestFilter = null;
+  private static HashMap<String, ComplexFilterScore> iterBestFilter;
 
   private static boolean reUseFilters = true;
-  private static boolean expandFilters = false;
+  private static boolean expandFilters;
   private static String oldFilename = "";
-  private static long lastModified = 0;
-  private static List<FilterSet> filterList = null;
+  private static long lastModified;
+  private static List<FilterSet> filterList;
   /** The last id. */
-  static int lastId = 0;
-  private static TIntObjectHashMap<IdPeakResult[]> actualCoordinates = null;
-  private static MultiPathFitResults[] resultsList = null;
+  static int lastId;
+  private static TIntObjectHashMap<IdPeakResult[]> actualCoordinates;
+  private static MultiPathFitResults[] resultsList;
   // private static MultiPathFitResults[] clonedResultsList = null;
   private static int matches;
   private static int fittedResults;
   private static int totalResults;
   private static int notDuplicateCount;
   private static int newResultCount;
-  private static int maxUniqueId = 0;
+  private static int maxUniqueId;
   private static int nActual;
   private static StoredData depthStats;
   private static StoredData depthFitStats;
@@ -332,7 +332,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
   private final boolean isHeadless;
   private boolean debug;
-  private CoordinateStore coordinateStore = null;
+  private CoordinateStore coordinateStore;
 
   // Used to tile plot windows
   private final WindowOrganiser wo = new WindowOrganiser();
@@ -398,19 +398,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * Used to allow multi-threading of the scoring the fit results.
    */
   private class FitResultsWorker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Job> jobs;
     final List<MultiPathFitResults> results;
     final double matchDistance;
     final RampedScore distanceScore;
     final RampedScore signalScore;
     final AtomicInteger uniqueId;
-    int matches = 0;
-    int total = 0;
-    int included = 0;
-    int includedActual = 0;
-    int notDuplicateCount = 0;
-    int newResultCount = 0;
+    int matches;
+    int total;
+    int included;
+    int includedActual;
+    int notDuplicateCount;
+    int newResultCount;
     StoredData depthStats;
     StoredData depthFitStats;
     StoredDataStatistics signalFactorStats;
@@ -993,9 +993,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     reportResults(false);
   }
 
-  private static DirectFilter scoreFilter = null;
-  private static int scoreFailCount = 0;
-  private static double scoreResidualsThreshold = 0;
+  private static DirectFilter scoreFilter;
+  private static int scoreFailCount;
+  private static double scoreResidualsThreshold;
   private static double scoreDuplicateDistance = -1;
 
   /**
@@ -1468,7 +1468,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
   private static Settings lastReadResultsSettings;
   private static double lastDuplicateDistance = -1;
-  private static boolean lastDuplicateDistanceAbsolute = false;
+  private static boolean lastDuplicateDistanceAbsolute;
 
   private MultiPathFitResults[] readResults() {
     boolean update = resultsList == null; // XXX set to true when debugging
@@ -2274,8 +2274,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return true;
   }
 
-  private static Settings lastAnalyseSettings = null;
-  private static Settings lastAnalyseParametersSettings = null;
+  private static Settings lastAnalyseSettings;
+  private static Settings lastAnalyseParametersSettings;
 
   /**
    * Run different filtering methods on a set of labelled peak results outputting performance
@@ -4591,7 +4591,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return scoreFilter(filter, minFilter, resultsList, null, coordinateStore);
   }
 
-  private FractionScoreStore scoreStore = null;
+  private FractionScoreStore scoreStore;
 
   /**
    * Score the filter using the results list and the configured fail count.
@@ -5599,8 +5599,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     // return total;
   }
 
-  private int[] uniqueIds = null;
-  private int uniqueIdCount = 0;
+  private int[] uniqueIds;
+  private int uniqueIdCount;
 
   private void setupFractionScoreStore() {
     scoreStore = this;
@@ -5725,7 +5725,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    */
   private class InterruptChecker extends ToleranceChecker<FilterScore> {
     final int convergedCount;
-    int count = 0;
+    int count;
 
     public InterruptChecker(double relative, double absolute, int convergedCount) {
       super(relative, absolute);
@@ -5777,7 +5777,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
      * The number of times it must have already converged before convergence is achieved.
      */
     final int convergedCount;
-    int count = 0;
+    int count;
 
     public InterruptConvergenceChecker(double relative, double absolute, int maxIterations) {
       super(relative, absolute, false, false, maxIterations);
@@ -5853,9 +5853,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * Configure the convergence for iterative optimisation.
    */
   private class IterationConvergenceChecker {
-    InterruptChecker scoreChecker = null;
-    InterruptConvergenceChecker filterChecker = null;
-    TIntObjectHashMap<ArrayList<Coordinate>> previousResults = null;
+    InterruptChecker scoreChecker;
+    InterruptConvergenceChecker filterChecker;
+    TIntObjectHashMap<ArrayList<Coordinate>> previousResults;
     boolean canContinue = true;
 
     public IterationConvergenceChecker(FilterScore current) {
@@ -5988,13 +5988,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   }
 
   // Used for the scoring of filter sets
-  private MultiPathFitResults[] ga_resultsList = null;
-  private MultiPathFitResults[] ga_resultsListToScore = null;
+  private MultiPathFitResults[] ga_resultsList;
+  private MultiPathFitResults[] ga_resultsListToScore;
   private boolean ga_subset;
   private int ga_iteration;
   private DirectFilter ss_filter;
-  private FilterScoreResult[] ga_scoreResults = null;
-  private int ga_scoreIndex = 0;
+  private FilterScoreResult[] ga_scoreResults;
+  private int ga_scoreIndex;
 
   private class ScoreJob {
     final DirectFilter filter;
@@ -6020,7 +6020,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * Used to allow multi-threading of the scoring the filters.
    */
   private class ScoreWorker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<ScoreJob> jobs;
     final FilterScoreResult[] scoreResults;
     final boolean createTextResult;
@@ -6074,7 +6074,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * Used to allow multi-threading of the scoring the filters.
    */
   private class ParameterScoreWorker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<ParameterScoreJob> jobs;
     final ParameterScoreResult[] scoreResults;
     final boolean createTextResult;
@@ -6578,8 +6578,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     gaWindow.append(text.toString());
   }
 
-  private SimpleFilterScore es_optimum = null;
-  private SimpleParameterScore p_optimum = null;
+  private SimpleFilterScore es_optimum;
+  private SimpleParameterScore p_optimum;
 
   private class ParameterScoreFunction implements FullScoreFunction<FilterScore> {
     @Override
@@ -6865,7 +6865,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return Arrays.copyOf(passList, size);
   }
 
-  private double limit = 0;
+  private double limit;
 
   /** {@inheritDoc} */
   @Override
@@ -7416,7 +7416,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   }
 
   private Rectangle bounds;
-  private double distanceScallingFactor = 0;
+  private double distanceScallingFactor;
 
   private Rectangle getBounds() {
     if (bounds == null) {

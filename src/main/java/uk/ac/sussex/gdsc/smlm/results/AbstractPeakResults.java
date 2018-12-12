@@ -45,15 +45,15 @@ public abstract class AbstractPeakResults implements PeakResults {
   /** The default for emCCD. */
   public static final boolean DEFAULT_EMCCD = true;
 
-  private ImageSource source = null;
-  private Rectangle bounds = null;
-  private Calibration calibration = null;
-  private PSF psf = null;
+  private ImageSource source;
+  private Rectangle bounds;
+  private Calibration calibration;
+  private PSF psf;
   private String configuration = "";
   private String name = "";
 
   /** The calibration reader. This is encapsulated */
-  private CalibrationReader calibrationReader = null;
+  private CalibrationReader calibrationReader;
 
   /** {@inheritDoc} */
   @Override

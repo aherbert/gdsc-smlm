@@ -30,7 +30,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  */
 public class WeightedFailCounter extends BaseFailCounter {
   /** The fail count. Use a long to avoid overflow errors. */
-  private long failCount = 0L;
+  private long failCount;
 
   /** The number of allowed failures. */
   private final int allowedFailures;

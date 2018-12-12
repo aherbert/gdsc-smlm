@@ -837,7 +837,7 @@ public class OPTICS implements PlugIn {
   }
 
   // Stack to handle events that selected certain clusters
-  private Workflow<ClusterSelectedEvent, int[]> eventWorkflow = null;
+  private Workflow<ClusterSelectedEvent, int[]> eventWorkflow;
   // The worker that will relay all the selected clusters
   private ClusterSelectedWorker clusterSelectedWorker;
 
@@ -852,7 +852,7 @@ public class OPTICS implements PlugIn {
   // Stack to which the work is first added
   private final Workflow<OpticsSettings, Settings> workflow = new Workflow<>();
 
-  private static int WORKER_ID = 0;
+  private static int WORKER_ID;
 
   private abstract class BaseWorker extends WorkflowWorker<OpticsSettings, Settings> {
     final int id;
@@ -1475,7 +1475,7 @@ public class OPTICS implements PlugIn {
   private class ReachabilityResultsWorker extends BaseWorker
       implements MouseListener, ClusterSelectedHandler {
     PlotCanvas lastCanvas;
-    CachedClusteringResult clusteringResult = null;
+    CachedClusteringResult clusteringResult;
 
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
@@ -1944,19 +1944,19 @@ public class OPTICS implements PlugIn {
 
   private class ImageResultsWorker extends BaseWorker
       implements MouseListener, ClusterSelectedHandler {
-    IJImagePeakResults image = null;
+    IJImagePeakResults image;
     int lastOutlineMode = -1;
-    Overlay outline = null;
+    Overlay outline;
     int lastSpanningTreeMode = -1;
-    Overlay spanningTree = null;
-    double lastLambda = 0;
+    Overlay spanningTree;
+    double lastLambda;
     int lastMinpoints;
-    float[] loop = null;
+    float[] loop;
 
     // For detecting the cluster from mouse click
-    DetectionGrid grid = null;
-    double[] area = null;
-    CachedClusteringResult clusteringResult = null;
+    DetectionGrid grid;
+    double[] area;
+    CachedClusteringResult clusteringResult;
 
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
@@ -2648,7 +2648,7 @@ public class OPTICS implements PlugIn {
     // ConvexHull hull;
     Rectangle2D bounds;
     String text;
-    double toUnit = 0;
+    double toUnit;
 
     TableResult(int id, int size, int level, ConvexHull hull, Rectangle2D bounds) {
       this.id = id;
@@ -2802,7 +2802,7 @@ public class OPTICS implements PlugIn {
     TurboList<TableResult> tableResults;
     TextWindow2 tw;
     Rectangle location;
-    BaseTableResultComparator previous = null;
+    BaseTableResultComparator previous;
 
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
@@ -3153,7 +3153,7 @@ public class OPTICS implements PlugIn {
   }
 
   private class KNNWorker extends BaseWorker {
-    double[] profile = null;
+    double[] profile;
 
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
@@ -3856,7 +3856,7 @@ public class OPTICS implements PlugIn {
     return true;
   }
 
-  private static byte logged = 0;
+  private static byte logged;
   private static final byte LOG_DBSCAN = 0x01;
   private static final byte LOG_OPTICS = 0x02;
   private static final byte LOG_LOOP = 0x04;
@@ -3896,8 +3896,8 @@ public class OPTICS implements PlugIn {
   private abstract class BaseDialogListener
       implements DialogListener, OptionCollectedListener, OptionListener<Boolean> {
     final GenericDialog gd;
-    MemoryPeakResults results = null;
-    String input = null;
+    MemoryPeakResults results;
+    String input;
 
     BaseDialogListener(GenericDialog gd) {
       this.gd = gd;

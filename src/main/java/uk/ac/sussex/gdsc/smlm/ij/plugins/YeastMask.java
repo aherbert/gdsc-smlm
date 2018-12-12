@@ -49,7 +49,7 @@ public class YeastMask implements PlugIn {
   private static boolean excludeNucleus = true;
   private static boolean squareOutput = true;
   private static int border = 3;
-  private static boolean is2D = false;
+  private static boolean is2D;
 
   /** {@inheritDoc} */
   @Override

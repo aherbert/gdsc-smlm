@@ -75,12 +75,12 @@ public class DarkTimeAnalysis implements PlugIn {
   }
 
   private static String inputOption = "";
-  private static int method = 0;
+  private static int method;
   private double msPerFrame;
   private static double searchDistance = 100;
-  private static double maxDarkTime = 0;
+  private static double maxDarkTime;
   private static double percentile = 99;
-  private static int nBins = 0;
+  private static int nBins;
 
   /** {@inheritDoc} */
   @Override

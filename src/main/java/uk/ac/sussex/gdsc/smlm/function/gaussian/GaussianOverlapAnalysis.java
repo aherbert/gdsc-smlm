@@ -53,9 +53,9 @@ public class GaussianOverlapAnalysis {
   private final double centrex;
   private final double centrey;
 
-  private double[] data = null;
-  private double[] overlap = null;
-  private boolean[] mask = null;
+  private double[] data;
+  private double[] overlap;
+  private boolean[] mask;
 
   private double fraction = 0.95;
 

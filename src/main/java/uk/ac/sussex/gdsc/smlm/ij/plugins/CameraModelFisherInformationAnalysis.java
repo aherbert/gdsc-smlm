@@ -454,7 +454,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
   private CameraModelFisherInformationAnalysisSettings.Builder settings;
 
-  private ExecutorService es = null;
+  private ExecutorService es;
 
   /** {@inheritDoc} */
   @Override
@@ -956,7 +956,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   }
 
   private static String cachePlot = "";
-  private static int pointOption = 0;
+  private static int pointOption;
 
   private static void plotFromCache() {
     // Build a list of curve stored in the cache

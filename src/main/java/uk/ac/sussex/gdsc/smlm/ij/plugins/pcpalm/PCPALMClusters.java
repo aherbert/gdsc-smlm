@@ -117,34 +117,34 @@ public class PCPALMClusters implements PlugIn {
   /** The title. */
   static String TITLE = "PC-PALM Clusters";
 
-  private static int runMode = 0;
+  private static int runMode;
   private static double distance = 50;
   private static ClusteringAlgorithm sClusteringAlgorithm =
       ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
   private static int minN = 1;
-  private static int maxN = 0;
-  private static boolean maximumLikelihood = false;
-  private static boolean showCumulativeHistogram = false;
+  private static int maxN;
+  private static boolean maximumLikelihood;
+  private static boolean showCumulativeHistogram;
   private static boolean multiThread = true;
-  private static boolean sWeightedClustering = false;
-  private static boolean saveHistogram = false;
+  private static boolean sWeightedClustering;
+  private static boolean saveHistogram;
   private static String histogramFile = "";
   private static String noiseFile = "";
   private static boolean sAutoSave = true;
   private boolean autoSave = true;
-  private static boolean calibrateHistogram = false;
+  private static boolean calibrateHistogram;
   private static int frames = 1;
   private static double area = 1;
   private static String[] UNITS = {"pixels^2", "um^2"};
   private static String units = UNITS[0];
 
   private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
-  private boolean weightedClustering = false;
+  private boolean weightedClustering;
 
-  private boolean fileInput = false;
+  private boolean fileInput;
 
-  private int nMolecules = 0;
-  private double count = 0;
+  private int nMolecules;
+  private double count;
 
   /** {@inheritDoc} */
   @Override

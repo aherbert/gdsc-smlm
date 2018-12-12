@@ -302,7 +302,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
 
   // The function to use for the Powell optimiser (which may have parameters mapped using the sqrt
   // function)
-  private MultivariateLikelihood powellFunction = null;
+  private MultivariateLikelihood powellFunction;
 
   /**
    * Default constructor.

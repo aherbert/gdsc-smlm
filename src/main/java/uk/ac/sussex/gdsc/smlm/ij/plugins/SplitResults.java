@@ -50,8 +50,8 @@ public class SplitResults implements PlugIn {
   private static final String TITLE = "Split Results";
   private static String inputOption = "";
   private static String objectMask = "";
-  private static boolean showObjectMask = false;
-  private static boolean nonMaskDataset = false;
+  private static boolean showObjectMask;
+  private static boolean nonMaskDataset;
 
   /** {@inheritDoc} */
   @Override

@@ -124,7 +124,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static FitConfiguration fitConfig;
   private static FitConfiguration filterFitConfig;
   private static FitEngineConfiguration config;
-  private static int lastId = 0;
+  private static int lastId;
 
   static {
     config = new FitEngineConfiguration();
@@ -161,12 +161,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     filterFitConfig.setPrecisionMethod(PrecisionMethod.MORTENSEN);
   }
 
-  private static boolean useBenchmarkSettings = false;
+  private static boolean useBenchmarkSettings;
   private static double iterationIncrease = 1;
-  private static boolean ignoreWithNeighbours = false;
-  private static boolean showOverlay = false;
-  private static boolean showHistograms = false;
-  private static boolean showResults = false;
+  private static boolean ignoreWithNeighbours;
+  private static boolean showOverlay;
+  private static boolean showHistograms;
+  private static boolean showResults;
   private static boolean showJaccardPlot = true;
   private static boolean useMaxResiduals = true;
   private static double lowerDistance = 1;
@@ -174,15 +174,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static double signalFactor = 2;
   private static double lowerSignalFactor = 1;
   private static String[] MATCHING = {"Simple", "By residuals", "By candidate"};
-  private static int matching = 0;
+  private static int matching;
 
-  private static boolean analysisUseBenchmarkSettings = false;
+  private static boolean analysisUseBenchmarkSettings;
   private static double analysisDriftAngle = 45;
-  private static double minGap = 0;
-  private static boolean analysisShowResults = false;
-  private static boolean analysisLogging = false;
+  private static double minGap;
+  private static boolean analysisShowResults;
+  private static boolean analysisLogging;
   private static String analysisTitle = "";
-  private static boolean saveTemplate = false;
+  private static boolean saveTemplate;
   private static String templateFilename = "";
 
   static {
@@ -194,9 +194,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static String[] SELECTION_CRITERIA = {"R2", "AIC", "BIC", "ML AIC", "ML BIC"};
   private static int selectionCriteria = 4;
 
-  private static TextWindow summaryTable = null;
-  private static TextWindow resultsTable = null;
-  private static TextWindow analysisTable = null;
+  private static TextWindow summaryTable;
+  private static TextWindow resultsTable;
+  private static TextWindow analysisTable;
   private static ArrayList<DoubletResult> doubletResults;
   private ResidualsScore residualsScore;
   private static ResidualsScore _residualsScoreMax;
@@ -338,8 +338,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int neighbours;
     final int almostNeighbours;
     final int spotIndex;
-    FitResult fitResult1 = null;
-    FitResult fitResult2 = null;
+    FitResult fitResult1;
+    FitResult fitResult2;
     double sumOfSquares1;
     double sumOfSquares2;
     double ll1;
@@ -451,7 +451,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Used to allow multi-threading of the fitting method.
    */
   private class Worker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
     final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
@@ -466,14 +466,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int[][] neighbourHistogram;
     final int[][] almostNeighbourHistogram;
     final Overlay o;
-    double[] region = null;
-    float[] data = null;
+    double[] region;
+    float[] data;
     ArrayList<DoubletResult> results = new ArrayList<>();
-    int daic = 0;
-    int dbic = 0;
-    int cic = 0;
+    int daic;
+    int dbic;
+    int cic;
     RampedScore rampedScore;
-    RampedScore signalScore = null;
+    RampedScore signalScore;
 
     /**
      * Instantiates a new worker.

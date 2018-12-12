@@ -1289,7 +1289,7 @@ public class SettingsManager {
     return null;
   }
 
-  private static Printer printer = null;
+  private static Printer printer;
 
   /**
    * Write the message to a JSON string.
@@ -1381,7 +1381,7 @@ public class SettingsManager {
     return false;
   }
 
-  private static com.google.protobuf.util.JsonFormat.Parser parser = null;
+  private static com.google.protobuf.util.JsonFormat.Parser parser;
 
   /**
    * Read the message from a JSON string.

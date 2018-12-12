@@ -117,7 +117,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   public static final int DISPLAY_Z_POSITION = 0x0400;
 
   /** The empty value. */
-  private double EMPTY = 0.0;
+  private double EMPTY;
 
   /** The title. */
   protected final String title;
@@ -145,7 +145,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   protected final float scale;
 
   /** The number of results. */
-  protected int size = 0;
+  protected int size;
 
   /** The image data. */
   protected double[] data;
@@ -157,23 +157,23 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   protected final float ylimit;
 
   /** The image. */
-  protected ImagePlus imp = null;
+  protected ImagePlus imp;
 
   /** Set to true is the image is active. */
-  protected boolean imageActive = false;
+  protected boolean imageActive;
 
   /** The display flags controlling the rendering. */
-  protected int displayFlags = 0;
+  protected int displayFlags;
 
-  private int rollingWindowSize = 0;
+  private int rollingWindowSize;
   private boolean displayImage = true;
   private boolean liveImage = true;
-  private boolean uncalibrated = false;
+  private boolean uncalibrated;
 
   // Used to draw the image
-  private int lastPaintSize = 0;
-  private int nextRepaintSize = 0;
-  private long nextPaintTime = 0;
+  private int lastPaintSize;
+  private int nextRepaintSize;
+  private long nextPaintTime;
   private Object pixels;
   private final SoftLock imageLock = new SoftLock();
   private double repaintInterval = 0.1;

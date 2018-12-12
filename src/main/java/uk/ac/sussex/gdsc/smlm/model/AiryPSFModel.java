@@ -50,9 +50,9 @@ public class AiryPSFModel extends PSFModel {
   private double zeroW1;
   private double w0;
   private double w1;
-  private double zDepth = 0;
+  private double zDepth;
   private int ring = 2;
-  private boolean singlePixelApproximation = false;
+  private boolean singlePixelApproximation;
   private int minSamplesPerDimension = 2;
   private int maxSamplesPerDimension = 50;
 

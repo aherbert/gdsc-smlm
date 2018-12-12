@@ -58,9 +58,9 @@ public class FitEngine {
   // Used by the FitWorkers
   private final int fitting;
   private final MaximaSpotFilter spotFilter;
-  private Logger logger = null;
+  private Logger logger;
   private final Logger debugLogger = null;
-  private FitTypeCounter counter = null;
+  private FitTypeCounter counter;
 
   /**
    * Return the fitting window size calculated using the fitting parameter and the configured peak

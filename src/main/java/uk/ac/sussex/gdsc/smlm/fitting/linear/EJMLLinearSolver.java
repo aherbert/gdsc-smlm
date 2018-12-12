@@ -131,7 +131,7 @@ public class EJMLLinearSolver {
   private LinearSolver<DenseMatrix64F> inversionSolver;
 
   /** The last successful solver. */
-  private LinearSolver<DenseMatrix64F> lastSuccessfulSolver = null;
+  private LinearSolver<DenseMatrix64F> lastSuccessfulSolver;
 
   /** The vector X. */
   private DenseMatrix64F X;
@@ -140,16 +140,16 @@ public class EJMLLinearSolver {
   private DenseMatrix64F A_inv;
 
   /** The solver size. */
-  private int solverSize = 0;
+  private int solverSize;
 
   /** The error checking flag. Set to true to check the solution X to linear equations A x = b. */
-  private boolean errorChecking = false;
+  private boolean errorChecking;
 
   /** The class used to check equality (with zero). */
-  private DoubleEquality equal = null;
+  private DoubleEquality equal;
 
   /** The inversion tolerance. */
-  private double inversionTolerance = 0;
+  private double inversionTolerance;
 
   /**
    * Instantiates a new EJML linear solver.

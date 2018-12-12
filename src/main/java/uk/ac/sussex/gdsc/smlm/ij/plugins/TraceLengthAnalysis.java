@@ -70,16 +70,16 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
   private static final float WIDTH = 0.3f;
 
   private static String inputOption = "";
-  private static double dThreshold = 0;
-  private static boolean normalise = false;
+  private static double dThreshold;
+  private static boolean normalise;
 
   private TypeConverter<DistanceUnit> distanceConverter;
   private TypeConverter<TimeUnit> timeConverter;
   private final SoftLock lock = new SoftLock();
   private double _msdThreshold = -1;
-  private boolean _normalise = false;
+  private boolean _normalise;
   private int _index;
-  private double error = 0;
+  private double error;
   private double[] d; // MSD of trace
   private int[] length; // Length of trace
   private int[] id; // trace id

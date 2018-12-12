@@ -30,10 +30,10 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  */
 public class PassRateFailCounter extends BaseFailCounter {
   /** The pass count. */
-  private int passCount = 0;
+  private int passCount;
 
   /** The fail count. */
-  private int failCount = 0;
+  private int failCount;
 
   /** The number of allowed counts. */
   private final int allowedCounts;

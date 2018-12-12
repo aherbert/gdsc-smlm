@@ -49,10 +49,10 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   protected Gaussian2DFunction func;
 
   private double minimumSignal = Float.NEGATIVE_INFINITY;
-  private double[] minimumPosition = null;
-  private double[] maximumPosition = null;
-  private double[] minimumSD = null;
-  private double[] maximumSD = null;
+  private double[] minimumPosition;
+  private double[] maximumPosition;
+  private double[] minimumSD;
+  private double[] maximumSD;
 
   /**
    * Instantiates a new gaussian stopping criteria.

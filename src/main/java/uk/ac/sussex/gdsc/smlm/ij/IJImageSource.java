@@ -47,8 +47,8 @@ import java.awt.Rectangle;
 public class IJImageSource extends ImageSource {
   @XStreamOmitField
   private int slice;
-  private int singleFrame = 0;
-  private int extraFrames = 0;
+  private int singleFrame;
+  private int extraFrames;
   @XStreamOmitField
   private Object[] imageArray;
   @XStreamOmitField

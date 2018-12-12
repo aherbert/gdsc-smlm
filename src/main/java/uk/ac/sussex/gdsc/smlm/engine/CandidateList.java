@@ -55,8 +55,8 @@ class CandidateList {
   /** The candidate comparator. */
   private static final CandidateComparator comp = new CandidateComparator();
 
-  private int size = 0;
-  private Candidate[] list = null;
+  private int size;
+  private Candidate[] list;
 
   /**
    * Instantiates a new candidate list.

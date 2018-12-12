@@ -41,15 +41,15 @@ public class PSFSpot extends BasePoint {
    * The amount of total intensity contributed within the region of this spot from overlapping PSFs,
    * i.e. how much more signal is in the area of this spot due to other PSFs.
    */
-  public float intensityOffset = 0;
+  public float intensityOffset;
   /**
    * The amount of total background contributed within the region of this spot from overlapping
    * PSFs, i.e. how much higher is this spot due to other PSFs.
    */
-  public float backgroundOffset = 0;
+  public float backgroundOffset;
 
   /** The amplitude. */
-  public double amplitude = 0;
+  public double amplitude;
 
   /**
    * Instantiates a new PSF spot.

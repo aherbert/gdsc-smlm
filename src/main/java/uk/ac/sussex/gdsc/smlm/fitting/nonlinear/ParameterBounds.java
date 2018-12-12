@@ -39,15 +39,15 @@ import java.util.Arrays;
 public class ParameterBounds {
   private GradientFunction f;
   private int[] gradientIndices;
-  private boolean isLower = false;
-  private boolean isUpper = false;
+  private boolean isLower;
+  private boolean isUpper;
   private double[] lower;
   private double[] upper;
-  private boolean isClamped = false;
+  private boolean isClamped;
   private double[] clampInitial;
   private double[] clamp;
   private int[] dir;
-  private boolean dynamicClamp = false;
+  private boolean dynamicClamp;
 
   /**
    * Instantiates a new parameter bounds.

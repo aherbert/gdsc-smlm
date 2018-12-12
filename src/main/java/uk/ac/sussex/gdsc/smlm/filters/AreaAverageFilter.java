@@ -48,7 +48,7 @@ public class AreaAverageFilter extends BaseWeightedFilter {
   private final BlockMeanFilter blockMeanFilter1;
   private final BlockMeanFilter blockMeanFilter2;
 
-  private boolean simpleInterpolation = false;
+  private boolean simpleInterpolation;
 
   /**
    * Instantiates a new area average filter.

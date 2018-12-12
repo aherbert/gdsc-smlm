@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.core.data.DataException;
  * <p>Any method that modifies the result will throw a data exception.
  */
 public class ImmutablePeakResult extends AttributePeakResult {
-  private boolean built = false;
+  private boolean built;
 
   /**
    * Instantiates a new peak result.

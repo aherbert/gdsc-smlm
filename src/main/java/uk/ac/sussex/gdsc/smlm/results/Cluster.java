@@ -46,7 +46,7 @@ public class Cluster implements Comparable<Cluster> {
 
   /** The results. */
   protected PeakResultStoreList results = new ArrayPeakResultStore(2);
-  private float[] centroid = null;
+  private float[] centroid;
   private int id;
 
   /**

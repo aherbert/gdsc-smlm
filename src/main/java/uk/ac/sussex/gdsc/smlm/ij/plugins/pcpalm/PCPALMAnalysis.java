@@ -83,17 +83,17 @@ public class PCPALMAnalysis implements PlugInFilter {
   private static String resultsDirectory = "";
   private static double correlationDistance = 800; // nm
   private static double correlationInterval = 20; // nm
-  private static boolean binaryImage = false;
+  private static boolean binaryImage;
 
   /** The blinking rate. */
   static double blinkingRate = -1;
   private static double copiedBlinkingRate = -1;
   private static double nmPerPixel = -1;
   private static double copiedNmPerPixel = -1;
-  private static boolean showErrorBars = false;
-  private static boolean applyWindow = false;
-  private static boolean showHighResolutionImage = false;
-  private static boolean showCorrelationImages = false;
+  private static boolean showErrorBars;
+  private static boolean applyWindow;
+  private static boolean showHighResolutionImage;
+  private static boolean showCorrelationImages;
   private static boolean useBorder = true;
 
   // Limits for the molecules constructed from the input ROI
@@ -113,7 +113,7 @@ public class PCPALMAnalysis implements PlugInFilter {
   private static ImageWindow imageWindow = new ImageWindow();
 
   // Used for the results table
-  private static TextWindow resultsTable = null;
+  private static TextWindow resultsTable;
 
   /** The results. */
   static ArrayList<CorrelationResult> results = new ArrayList<>();
@@ -121,7 +121,7 @@ public class PCPALMAnalysis implements PlugInFilter {
   private boolean spatialDomain;
 
   /** Area of the region cropped from the PCPALM Molecules list. */
-  double croppedArea = 0;
+  double croppedArea;
 
   /** {@inheritDoc} */
   @Override

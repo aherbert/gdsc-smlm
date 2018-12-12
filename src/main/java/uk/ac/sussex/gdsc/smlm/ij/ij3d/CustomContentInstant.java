@@ -80,19 +80,19 @@ public class CustomContentInstant extends ContentInstant {
   // Duplicate anything private in the super class
 
   // visibility flags
-  private boolean locked = false;
+  private boolean locked;
   private boolean visible = true;
-  private boolean bbVisible = false;
+  private boolean bbVisible;
   private boolean coordVisible = UniverseSettings.showLocalCoordinateSystemsByDefault;
-  private boolean showPL = false;
+  private boolean showPL;
 
   // entries
-  private ContentNode contentNode = null;
+  private ContentNode contentNode;
 
   // point list
-  private PointListShape plShape = null;
-  private PointListDialog plDialog = null;
-  private PointListPanel plPanel = null;
+  private PointListShape plShape;
+  private PointListDialog plDialog;
+  private PointListPanel plPanel;
   private PointList points;
 
   // scene graph entries
@@ -101,7 +101,7 @@ public class CustomContentInstant extends ContentInstant {
 
   private boolean available = true;
 
-  private int customBefore = 0;
+  private int customBefore;
   private TIntObjectHashMap<Switch> switchMap;
 
   // Copy the entire contents of the super class
@@ -377,7 +377,7 @@ public class CustomContentInstant extends ContentInstant {
     return available;
   }
 
-  private String displayedDataSwapfile = null;
+  private String displayedDataSwapfile;
 
   private String getDisplayedDataSwapfile() {
     if (displayedDataSwapfile != null) {

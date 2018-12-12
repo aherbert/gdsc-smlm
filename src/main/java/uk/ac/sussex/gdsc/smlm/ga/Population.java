@@ -44,9 +44,9 @@ public class Population<T extends Comparable<T>> {
   private List<? extends Chromosome<T>> individuals;
   private int populationSize = 500;
   private int failureLimit = 3;
-  private int iteration = 0;
+  private int iteration;
   // This introduces a dependency on another uk.ac.sussex.gdsc.smlm package
-  private TrackProgress tracker = null;
+  private TrackProgress tracker;
 
   /**
    * Create a population of individuals.

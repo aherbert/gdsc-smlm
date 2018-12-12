@@ -155,9 +155,9 @@ public class Image3DAligner implements Cloneable {
   private int[] crop;
 
   // Allow cached window weights
-  private double[] wx = null;
-  private double[] wy = null;
-  private double[] wz = null;
+  private double[] wx;
+  private double[] wy;
+  private double[] wz;
 
   private CubicSplineCalculator calc;
 

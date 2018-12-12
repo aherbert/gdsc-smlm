@@ -724,7 +724,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   private abstract static class IntegrationProcedure implements DoubleConvolutionValueProcedure {
-    int i = 0;
+    int i;
 
     protected double getF(double pz, double az) {
       // Compute with respect to the ultimate limit
@@ -746,8 +746,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   private static class SimpsonIntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0;
-    double sum4 = 0;
+    double sum2;
+    double sum4;
 
     @Override
     public boolean execute(double pz, double az) {
@@ -777,8 +777,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   }
 
   private static class Simpson38IntegrationProcedure extends IntegrationProcedure {
-    double sum2 = 0;
-    double sum3 = 0;
+    double sum2;
+    double sum3;
 
     @Override
     public boolean execute(double pz, double az) {

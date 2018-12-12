@@ -57,7 +57,7 @@ import java.util.List;
 public class PSFCombiner implements PlugIn {
   private static final String TITLE = "PSF Combiner";
 
-  private static List<String> selected = null;
+  private static List<String> selected;
   private final List<PSF> input = new LinkedList<>();
 
   /** {@inheritDoc} */

@@ -62,7 +62,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
   protected Point3f[] sizes;
 
   /** Flag set to true when modified after construction. */
-  protected boolean dirty = false;
+  protected boolean dirty;
 
   /**
    * Instantiates a new item triangle mesh.

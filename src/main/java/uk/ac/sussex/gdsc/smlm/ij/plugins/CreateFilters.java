@@ -347,7 +347,7 @@ public class CreateFilters implements PlugIn, ItemListener {
   private class AttributeSubstitutionHandler extends DefaultHandler {
     StringBuilder sb;
     String[] attributeSubstitutions;
-    int substitutionCount = 0;
+    int substitutionCount;
 
     public AttributeSubstitutionHandler(StringBuilder sb, String[] attributeSubstitutions) {
       this.sb = sb;

@@ -30,7 +30,7 @@ package uk.ac.sussex.gdsc.smlm.model;
  * fluorophores.
  */
 public class FixedLifetimeImageModel extends ImageModel {
-  private double next = 0;
+  private double next;
 
   /**
    * Construct a new image model.

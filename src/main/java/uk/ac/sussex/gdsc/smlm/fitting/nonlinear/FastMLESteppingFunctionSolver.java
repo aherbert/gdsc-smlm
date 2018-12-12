@@ -106,7 +106,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
   /** The log-likelihood. */
   protected double ll = Double.NaN;
   /** Flag if the log-likelihood is the pseudo log-likelihood. */
-  protected boolean isPseudoLogLikelihood = false;
+  protected boolean isPseudoLogLikelihood;
   /** The log-likelihood ratio. */
   protected double llr = Double.NaN;
 

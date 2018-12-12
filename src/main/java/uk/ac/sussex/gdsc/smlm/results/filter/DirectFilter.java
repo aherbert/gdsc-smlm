@@ -34,7 +34,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public abstract class DirectFilter extends Filter implements IDirectFilter {
   @XStreamOmitField
-  private int result = 0;
+  private int result;
   @XStreamOmitField
   private float strength = Float.NaN;
 

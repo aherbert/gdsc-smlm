@@ -45,7 +45,7 @@ public class FastGaussianOverlapAnalysis {
   private final double centrex;
   private final double centrey;
 
-  private double overlap = 0;
+  private double overlap;
 
   /**
    * Create a new overlap analysis object.

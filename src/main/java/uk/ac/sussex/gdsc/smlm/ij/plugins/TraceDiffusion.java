@@ -86,8 +86,8 @@ import java.util.logging.Logger;
 public class TraceDiffusion implements PlugIn, CurveLogger {
   private static final String TITLE = "Trace Diffusion";
   private static String inputOption = "";
-  private static String header = null;
-  private static TextWindow summaryTable = null;
+  private static String header;
+  private static TextWindow summaryTable;
 
   private static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "t-On (s)"};
   private static final boolean[] ROUNDED = new boolean[] {false, false, true};
@@ -112,20 +112,20 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   private static boolean displayMSDHistogram = true;
   private static boolean displayDHistogram = true;
-  private static boolean displayTraceLength = false;
-  private static boolean displayTraceSize = false;
+  private static boolean displayTraceLength;
+  private static boolean displayTraceSize;
 
-  private static boolean saveTraceDistances = false;
-  private static boolean saveRawData = false;
+  private static boolean saveTraceDistances;
+  private static boolean saveRawData;
   private static String rawDataDirectory = "";
-  private boolean directoryChosen = false;
+  private boolean directoryChosen;
   private static String distancesFilename = "";
   private static double significanceLevel = 0.05;
   private static double minFraction = 0.1;
   private static double minDifference = 2;
   private static int minN = 1;
   private static int maxN = 5;
-  private static boolean debugFitting = false;
+  private static boolean debugFitting;
   private static String tracesFilename = "";
   private static String title = "";
 
@@ -136,10 +136,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   private int myMinN = 1;
 
   // The number of additional datasets
-  private int additionalDatasets = 0;
+  private int additionalDatasets;
 
   // Store exposure time in seconds
-  private double exposureTime = 0;
+  private double exposureTime;
   private double precision;
   private double beta;
   private double fitValue = Double.NaN;
@@ -151,7 +151,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   private Plot2 jdPlot;
 
   // Used for the macro extensions
-  private static double[][] jumpDistanceParameters = null;
+  private static double[][] jumpDistanceParameters;
 
   // Used for the multiMode option
   private static ArrayList<String> selected;

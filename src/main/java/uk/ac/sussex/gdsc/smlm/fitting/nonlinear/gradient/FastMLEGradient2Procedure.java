@@ -46,7 +46,7 @@ public class FastMLEGradient2Procedure
   /** The function. */
   protected final Gradient2Function func;
   /** The poisson calculator. */
-  protected PoissonCalculator poissonCalculator = null;
+  protected PoissonCalculator poissonCalculator;
 
   /**
    * The number of gradients.

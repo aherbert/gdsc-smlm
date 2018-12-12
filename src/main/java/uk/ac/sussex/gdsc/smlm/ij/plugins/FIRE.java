@@ -150,20 +150,20 @@ public class FIRE implements PlugIn {
   private static String inputOption2 = "";
 
   private static int repeats = 1;
-  private static boolean useSignal = false;
-  private boolean myUseSignal = false;
-  private static int maxPerBin = 0; // 5 in the Niewenhuizen paper
+  private static boolean useSignal;
+  private boolean myUseSignal;
+  private static int maxPerBin; // 5 in the Niewenhuizen paper
   private static boolean randomSplit = true;
   private static int blockSize = 50;
   private static String[] SCALE_ITEMS;
   private static int[] SCALE_VALUES = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
   private static String[] IMAGE_SIZE_ITEMS;
   private static int[] IMAGE_SIZE_VALUES;
-  private static int imageScaleIndex = 0;
+  private static int imageScaleIndex;
   private static int imageSizeIndex;
 
   // The Q value and the mean and sigma for spurious correlation correction
-  private static boolean spuriousCorrelationCorrection = false;
+  private static boolean spuriousCorrelationCorrection;
   private static double qValue;
   private static double mean;
   private static double sigma;
@@ -244,17 +244,17 @@ public class FIRE implements PlugIn {
   private static int thresholdMethodIndex = ThresholdMethod.FIXED_1_OVER_7.ordinal();
   private ThresholdMethod thresholdMethod;
   private static boolean showFRCCurve = true;
-  private static boolean showFRCCurveRepeats = false;
-  private static boolean showFRCTimeEvolution = false;
+  private static boolean showFRCCurveRepeats;
+  private static boolean showFRCTimeEvolution;
   private static int precisionMethodIndex = PrecisionMethod.CALCULATE.ordinal();
   private PrecisionMethod precisionMethod;
-  private static boolean sampleDecay = false;
-  private static boolean loessSmoothing = false;
-  private static boolean fitPrecision = false;
+  private static boolean sampleDecay;
+  private static boolean loessSmoothing;
+  private static boolean fitPrecision;
   private static double minQ = 0.2;
   private static double maxQ = 0.45;
 
-  private static boolean chooseRoi = false;
+  private static boolean chooseRoi;
   private static String roiImage = "";
 
   private boolean extraOptions;
@@ -352,7 +352,7 @@ public class FIRE implements PlugIn {
      * Flag to denote that an out-of-memory error occurred. This is probably due to using too many
      * threads to compute large Fourier transforms.
      */
-    boolean oom = false;
+    boolean oom;
 
     public FIREWorker(int id, double fourierImageScale, int imageSize) {
       this.fourierImageScale = fourierImageScale;
@@ -1088,9 +1088,9 @@ public class FIRE implements PlugIn {
    * Encapsulate plotting the FRC curve to allow multiple curves to be plotted together.
    */
   private class FrcCurve {
-    double[] xValues = null;
-    double[] threshold = null;
-    Plot2 plot = null;
+    double[] xValues;
+    double[] threshold;
+    Plot2 plot;
 
     void add(String name, FireResult result, ThresholdMethod thresholdMethod, Color colorValues,
         Color colorThreshold, Color colorNoSmooth) {
@@ -1302,7 +1302,7 @@ public class FIRE implements PlugIn {
    * synchronisation to increment total progress.
    */
   private static class ParallelTrackProgress extends NullTrackProgress {
-    double done = 0;
+    double done;
     final int total;
 
     ParallelTrackProgress(int repeats) {
@@ -2656,7 +2656,7 @@ public class FIRE implements PlugIn {
   private class WorkSettings implements Cloneable {
     double mean;
     double sigma;
-    double qValue = 0;
+    double qValue;
 
     WorkSettings(double mean, double sigma, double qValue) {
       this.mean = mean;
@@ -2852,7 +2852,7 @@ public class FIRE implements PlugIn {
 
     long time;
     boolean notActive = true;
-    volatile int ignore = 0;
+    volatile int ignore;
     Workflow<WorkSettings, Object> workflow;
     double defaultMean;
     double defaultSigma;
@@ -2997,7 +2997,7 @@ public class FIRE implements PlugIn {
   private static int imagejNThreads = Prefs.getThreads();
   private static int lastNThreads = imagejNThreads;
 
-  private int nThreads = 0;
+  private int nThreads;
 
   /**
    * Gets the last N threads used in the input dialog.

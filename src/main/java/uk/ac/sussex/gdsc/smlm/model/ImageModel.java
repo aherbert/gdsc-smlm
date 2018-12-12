@@ -70,12 +70,12 @@ public abstract class ImageModel {
   private RandomGenerator random;
   private RandomDataGenerator randomGenerator;
   private RealDistribution photonDistribution;
-  private SpatialDistribution confinementDistribution = null;
+  private SpatialDistribution confinementDistribution;
   private int confinementAttempts = 5;
-  private boolean useGeometricDistribution = false;
+  private boolean useGeometricDistribution;
   private boolean photonBudgetPerFrame = true;
-  private boolean diffusion2D = false;
-  private boolean rotation2D = false;
+  private boolean diffusion2D;
+  private boolean rotation2D;
 
   /**
    * Construct a new image model.

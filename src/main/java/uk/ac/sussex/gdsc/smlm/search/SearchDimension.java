@@ -51,7 +51,7 @@ public class SearchDimension implements Cloneable, Dimension {
   private double increment;
   private double reduceFactor = 0.5;
   private double[] values;
-  private boolean pad = false;
+  private boolean pad;
 
   /**
    * Instantiates a new inactive search dimension. The centre can be set to any value, the default

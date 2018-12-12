@@ -56,12 +56,12 @@ public class MaskDistribution3D implements SpatialDistribution {
   private final double halfHeight;
   private final double minDepth;
   private final double depth;
-  private int particle = 0;
+  private int particle;
   private final double scaleX;
   private final double scaleY;
 
   private final double sliceDepth;
-  private MaskDistribution projection = null;
+  private MaskDistribution projection;
 
   /**
    * Create a distribution from the stack of mask images (packed in YX order).
@@ -258,7 +258,7 @@ public class MaskDistribution3D implements SpatialDistribution {
   private int xlimit = -1;
   private int ylimit;
   private int zlimit;
-  private int[] offset = null;
+  private int[] offset;
 
   /**
    * Convert the mask to connected particles, each with a unique number. This allows the within

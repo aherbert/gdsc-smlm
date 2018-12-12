@@ -63,7 +63,7 @@ public class PeakResultConversionHelper {
   private IntensityUnit intensityUnit;
 
   /** The intensity converter. */
-  private TypeConverter<IntensityUnit> intensityConverter = null;
+  private TypeConverter<IntensityUnit> intensityConverter;
 
   /**
    * Gets the intensity unit.
@@ -120,7 +120,7 @@ public class PeakResultConversionHelper {
   private DistanceUnit distanceUnit;
 
   /** The distance converter. */
-  private TypeConverter<DistanceUnit> distanceConverter = null;
+  private TypeConverter<DistanceUnit> distanceConverter;
 
   /**
    * Gets the distance unit.
@@ -177,7 +177,7 @@ public class PeakResultConversionHelper {
   private AngleUnit angleUnit;
 
   /** The angle converter. */
-  private TypeConverter<AngleUnit> angleConverter = null;
+  private TypeConverter<AngleUnit> angleConverter;
 
   /**
    * Gets the angle unit.

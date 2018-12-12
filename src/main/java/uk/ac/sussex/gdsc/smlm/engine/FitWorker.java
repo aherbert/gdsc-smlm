@@ -94,6 +94,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,13 +127,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   /** The number of additional evaluations to use for doublets. */
   public static final int EVALUATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
-  private Logger logger = null;
-  private Logger debugLogger = null;
-  private FitTypeCounter counter = null;
-  private long time = 0;
+  private Logger logger;
+  private Logger debugLogger;
+  private FitTypeCounter counter;
+  private long time;
 
-  private MaximaSpotFilter spotFilter = null;
-  private Rectangle lastBounds = null;
+  private MaximaSpotFilter spotFilter;
+  private Rectangle lastBounds;
   private int fitting = 1;
 
   // Used for fitting
@@ -149,12 +150,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
   // Used for fitting methods
   private TurboList<PeakResult> sliceResults;
-  private boolean useFittedBackground = false;
+  private boolean useFittedBackground;
   private Statistics fittedBackground;
   private int slice;
   private int endT;
   private CoordinateConverter cc;
-  private boolean newBounds = false;
+  private boolean newBounds;
   private final BlockAverageDataProcessor backgroundSmoothing = new BlockAverageDataProcessor(0, 1);
   // private Rectangle regionBounds;
   private int border;
@@ -164,31 +165,31 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   private boolean benchmarking;
   private boolean localBackground;
   private float[] data;
-  private DataEstimator dataEstimator = null;
+  private DataEstimator dataEstimator;
   // private float[] filteredData;
   private boolean relativeIntensity;
   private float noise;
   private final boolean calculateNoise;
   private boolean estimateSignal;
-  private CandidateGridManager gridManager = null;
+  private CandidateGridManager gridManager;
   // Contains the index in the list of maxima for any neighbours
-  private int candidateNeighbourCount = 0;
-  private Candidate[] candidateNeighbours = null;
+  private int candidateNeighbourCount;
+  private Candidate[] candidateNeighbours;
   // Contains the index in the list of fitted results for any neighbours
-  private int fittedNeighbourCount = 0;
+  private int fittedNeighbourCount;
   // The fitted neighbours use the same parameters and result
   // as output from fitting the function. They should be converted to PeakResults
   // at the end of fitting. This allows using different representations of the PSF.
-  private Candidate[] fittedNeighbours = null;
+  private Candidate[] fittedNeighbours;
   private CoordinateStore coordinateStore;
 
-  private volatile boolean finished = false;
+  private volatile boolean finished;
 
-  private static int WORKER_ID = 0;
+  private static AtomicInteger nextWorkerId = new AtomicInteger();
   private final int workerId;
 
-  private static byte FILTER_RANK_MINIMAL = (byte) 0;
-  private static byte FILTER_RANK_PRIMARY = (byte) 1;
+  private static final byte FILTER_RANK_MINIMAL = (byte) 0;
+  private static final byte FILTER_RANK_PRIMARY = (byte) 1;
 
   /** Flag to indicate that the data is in raw count units (not photon-eletcrons). */
   private final boolean isFitCameraCounts;
@@ -393,12 +394,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   }
 
   private Estimate[] estimates = new Estimate[0];
-  private Estimate[] estimates2 = null;
-  private boolean[] isValid = null;
+  private Estimate[] estimates2;
+  private boolean[] isValid;
 
-  private CandidateList candidates = null;
-  private CandidateList allNeighbours = null;
-  private CandidateList allFittedNeighbours = null;
+  private CandidateList candidates;
+  private CandidateList allNeighbours;
+  private CandidateList allFittedNeighbours;
 
   /**
    * Instantiates a new fit worker.
@@ -448,7 +449,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     // of the IDirectFilter interface. This may involve the DirectFilter object.
     fitConfig.setSmartFilter(false);
 
-    workerId = WORKER_ID++;
+    workerId = nextWorkerId.getAndIncrement();
 
     // Store this flag so we know how to process the data
     isFitCameraCounts = fitConfig.isFitCameraCounts();
@@ -870,7 +871,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   // This prevents filtering duplicates within the current fit results,
   // only with all that has been fit before.
   private Candidate[] queue = new Candidate[5];
-  private int queueSize = 0;
+  private int queueSize;
 
   /**
    * Queue to grid.
@@ -1193,29 +1194,29 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
     // Flag each neighbour peak that is pre-computed for the multi-fit.
     // These are fitted peaks outside the fit region.
-    private boolean[] precomputed = null;
+    private boolean[] precomputed;
     private int precomputedFittedNeighbourCount = -1;
 
-    double[] precomputedFunctionParamsMulti = null;
-    double[] precomputedFittedNeighboursMulti = null;
-    MultiPathFitResult.FitResult resultMulti = null;
-    boolean computedMulti = false;
-    double[] residualsMulti = null;
-    double valueMulti = 0;
-    double localBackgroundMulti = 0;
-    MultiPathFitResult.FitResult resultDoubletMulti = null;
-    boolean computedDoubletMulti = false;
-    QuadrantAnalysis qaMulti = null;
+    double[] precomputedFunctionParamsMulti;
+    double[] precomputedFittedNeighboursMulti;
+    MultiPathFitResult.FitResult resultMulti;
+    boolean computedMulti;
+    double[] residualsMulti;
+    double valueMulti;
+    double localBackgroundMulti;
+    MultiPathFitResult.FitResult resultDoubletMulti;
+    boolean computedDoubletMulti;
+    QuadrantAnalysis qaMulti;
 
-    double[] functionParamsSingle = null;
-    double[] precomputedFittedNeighboursSingle = null;
-    MultiPathFitResult.FitResult resultSingle = null;
-    double[] residualsSingle = null;
-    double valueSingle = 0;
-    double localBackgroundSingle = 0;
-    MultiPathFitResult.FitResult resultDoubletSingle = null;
-    boolean computedDoubletSingle = false;
-    QuadrantAnalysis qaSingle = null;
+    double[] functionParamsSingle;
+    double[] precomputedFittedNeighboursSingle;
+    MultiPathFitResult.FitResult resultSingle;
+    double[] residualsSingle;
+    double valueSingle;
+    double localBackgroundSingle;
+    MultiPathFitResult.FitResult resultDoubletSingle;
+    boolean computedDoubletSingle;
+    QuadrantAnalysis qaSingle;
 
     public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region,
         double[] region2, double[] var_g2, Rectangle regionBounds, int candidateId,
@@ -4126,7 +4127,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     FitType fitType;
     boolean isValid;
     @SuppressWarnings("unused")
-    int extra = 0;
+    int extra;
     final FloatAreaSum area;
 
     public DynamicMultiPathFitResult(ImageExtractor ie, ImageExtractor ie2, boolean dynamic) {
@@ -4347,7 +4348,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   /**
    * Count the number of successful fits.
    */
-  private int success = 0;
+  private int success;
 
   /** {@inheritDoc} */
   @Override

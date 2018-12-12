@@ -34,12 +34,12 @@ import java.awt.Rectangle;
  * <p>Adapted from ij.plugin.filter.RankFilters
  */
 public abstract class CircularFilter extends BaseWeightedFilter {
-  private int[] kernel = null;
-  private double lastRadius = 0;
+  private int[] kernel;
+  private double lastRadius;
 
   private Normaliser normaliser;
-  private Normaliser weightedNormaliser = null;
-  private double weightedNormaliserRadius = 0;
+  private Normaliser weightedNormaliser;
+  private double weightedNormaliserRadius;
 
   /**
    * Instantiates a new circular filter.

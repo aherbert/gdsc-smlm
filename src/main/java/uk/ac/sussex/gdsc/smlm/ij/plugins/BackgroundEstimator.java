@@ -74,7 +74,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
   private static double percentile;
   private static NoiseEstimatorMethod noiseMethod =
       NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
-  private NoiseEstimator.Method myNoiseMethod = null;
+  private NoiseEstimator.Method myNoiseMethod;
   private static AutoThreshold.Method thresholdMethod = AutoThreshold.Method.DEFAULT;
   private static float fraction;
   private static int histogramSize;

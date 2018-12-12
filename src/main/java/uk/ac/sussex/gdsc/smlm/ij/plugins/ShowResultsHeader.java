@@ -43,7 +43,7 @@ public class ShowResultsHeader implements PlugIn {
   private static String TITLE = "Show Results Header";
 
   private static String inputFilename = Prefs.get(Constants.inputFilename, "");
-  private static boolean raw = false;
+  private static boolean raw;
 
   /** {@inheritDoc} */
   @Override

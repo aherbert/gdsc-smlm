@@ -30,10 +30,10 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public abstract class CameraNoiseModel implements NoiseModel {
   /** The bias. */
-  protected double bias = 0;
+  protected double bias;
 
   /** The read noise squared (read variance). */
-  protected double readNoise2 = 0;
+  protected double readNoise2;
 
   /**
    * Instantiates a new camera noise model.

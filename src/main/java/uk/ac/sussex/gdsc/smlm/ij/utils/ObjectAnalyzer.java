@@ -37,7 +37,7 @@ public class ObjectAnalyzer {
   private boolean eightConnected;
   private int[] objectMask;
   private int maxObject;
-  private int minObjectSize = 0;
+  private int minObjectSize;
 
   /**
    * Instantiates a new object analyzer using 4N connected neighbours.

@@ -123,9 +123,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     thresholdMethodOptions[AutoThreshold.Method.SHANBHAG.ordinal()] = false;
     thresholdMethodOptions[AutoThreshold.Method.RENYI_ENTROPY.ordinal()] = false;
   }
-  private AutoThreshold.Method[] methods = null;
-  private double[] levels = null;
-  private String[] methodNames = null;
+  private AutoThreshold.Method[] methods;
+  private double[] levels;
+  private String[] methodNames;
 
   private static double fractionPositives = 100;
   private static double fractionNegativesAfterAllPositives = 50;
@@ -136,16 +136,16 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       "Recall", "F0.5", "F1", "F2", "Jaccard", "MCC"};
   private static int sortIndex = SORT.length - 3; // F2 to favour recall
   private static boolean useFractionScores = true;
-  private static boolean showOverlay = false;
+  private static boolean showOverlay;
 
-  private boolean extraOptions = false;
+  private boolean extraOptions;
 
-  private static TextWindow summaryTable = null;
+  private static TextWindow summaryTable;
 
   private MemoryPeakResults results;
   private CreateData.SimulationParameters simulationParameters;
 
-  private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
+  private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
   private static TIntObjectHashMap<FilterCandidates> filterCandidates;
   private static double fP;
   private static double fN;
@@ -165,7 +165,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   // Allow other plugins to access the results
 
   /** The rank results id. */
-  static int rankResultsId = 0;
+  static int rankResultsId;
   /** The rank results. */
   static TIntObjectHashMap<RankResults> rankResults;
   /** The distance in pixels. */
@@ -240,7 +240,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * Used to allow multi-threading of the fitting method.
    */
   private class Worker implements Runnable {
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
     final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
@@ -249,8 +249,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final int fitting;
     final boolean requireSNR;
 
-    float[] data = null;
-    double[] region = null;
+    float[] data;
+    double[] region;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
         TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,

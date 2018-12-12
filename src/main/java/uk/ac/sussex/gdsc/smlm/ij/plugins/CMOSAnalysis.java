@@ -237,10 +237,10 @@ public class CMOSAnalysis implements PlugIn {
    */
   private class ImageWorker implements Runnable {
     final Ticker ticker;
-    volatile boolean finished = false;
+    volatile boolean finished;
     final BlockingQueue<Object> jobs;
     final ArrayMoment moment;
-    int bitDepth = 0;
+    int bitDepth;
 
     public ImageWorker(Ticker ticker, BlockingQueue<Object> jobs, ArrayMoment moment) {
       this.ticker = ticker;
@@ -299,9 +299,9 @@ public class CMOSAnalysis implements PlugIn {
   private static final String TITLE = "sCMOS Analysis";
 
   private static String directory = Prefs.get(Constants.sCMOSAnalysisDirectory, "");
-  private static String modelDirectory = null;
-  private static String modelName = null;
-  private static boolean rollingAlgorithm = false;
+  private static String modelDirectory;
+  private static String modelName;
+  private static boolean rollingAlgorithm;
   private static boolean reuseProcessedData = true;
 
   // The simulation can default roughly to the values displayed
@@ -329,12 +329,12 @@ public class CMOSAnalysis implements PlugIn {
   private static int size = 512;
   private static int frames = 512;
 
-  private boolean extraOptions = false;
+  private boolean extraOptions;
 
   private static int imagejNThreads = Prefs.getThreads();
   private static int lastNThreads = imagejNThreads;
 
-  private int nThreads = 0;
+  private int nThreads;
   // The simulated offset, variance and gain
   private ImagePlus simulationImp;
   // The measured offset, variance and gain

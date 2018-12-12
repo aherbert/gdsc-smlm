@@ -49,7 +49,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
   @XStreamOmitField
   private double upperVariance;
   @XStreamOmitField
-  private boolean useBackground = false;
+  private boolean useBackground;
   @XStreamOmitField
   private Gaussian2DPeakResultCalculator calculator;
 

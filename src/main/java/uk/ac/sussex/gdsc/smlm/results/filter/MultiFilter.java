@@ -123,26 +123,26 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
 
   /** The components. */
   @XStreamOmitField
-  MultiFilterComponentSet components = null;
+  MultiFilterComponentSet components;
 
   /** The components for no width and shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_NoWidth_Shift = null;
+  MultiFilterComponentSet components_NoWidth_Shift;
   /** The components for width and shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_Width_Shift = null;
+  MultiFilterComponentSet components_Width_Shift;
   /** The components for no width and no shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_NoWidth_NoShift = null;
+  MultiFilterComponentSet components_NoWidth_NoShift;
   /** The components for width and no shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_Width_NoShift = null;
+  MultiFilterComponentSet components_Width_NoShift;
   /**
    * The components for width and no shift copied into a larger array so that the shift component
    * can be set at position 0
    */
   @XStreamOmitField
-  MultiFilterComponentSet components_Shift0 = null;
+  MultiFilterComponentSet components_Shift0;
   @XStreamOmitField
   private int filterSetupFlags;
   @XStreamOmitField

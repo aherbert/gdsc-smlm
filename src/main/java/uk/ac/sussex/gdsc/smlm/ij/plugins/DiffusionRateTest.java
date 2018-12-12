@@ -83,12 +83,12 @@ import java.util.Arrays;
  */
 public class DiffusionRateTest implements PlugIn {
   private static final String TITLE = "Diffusion Rate Test";
-  private static TextWindow msdTable = null;
+  private static TextWindow msdTable;
 
   // Used to allow other plugins to detect if a dataset is simulated
 
   /** The last simulated precision. */
-  static double lastSimulatedPrecision = 0;
+  static double lastSimulatedPrecision;
 
   /** The last simulated dataset. */
   static String[] lastSimulatedDataset = new String[2];
@@ -170,19 +170,19 @@ public class DiffusionRateTest implements PlugIn {
   }
 
   private CreateDataSettings.Builder settings;
-  private static boolean useConfinement = false;
+  private static boolean useConfinement;
   private static int confinementAttempts = 5;
   private static int fitN = 20;
-  private static boolean showDiffusionExample = false;
+  private static boolean showDiffusionExample;
   private static double magnification = 5;
   private static int aggregateSteps = 10;
-  private static int msdAnalysisSteps = 0;
-  private static double precision = 0;
-  private int myAggregateSteps = 0;
-  private int myMsdAnalysisSteps = 0;
-  private boolean extraOptions = false;
+  private static int msdAnalysisSteps;
+  private static double precision;
+  private int myAggregateSteps;
+  private int myMsdAnalysisSteps;
+  private boolean extraOptions;
   private double conversionFactor;
-  private double myPrecision = 0;
+  private double myPrecision;
 
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
@@ -783,7 +783,7 @@ public class DiffusionRateTest implements PlugIn {
     return true;
   }
 
-  private RandomGenerator rg = null;
+  private RandomGenerator rg;
 
   private double[] nextVector() {
     if (rg == null) {
@@ -1152,8 +1152,8 @@ public class DiffusionRateTest implements PlugIn {
   private static double simpleD = 0.5;
   private static int simpleSteps = 1;
   private static int simpleParticles = 10000;
-  private static boolean linearDiffusion = false;
-  private static String simpleDir = null;
+  private static boolean linearDiffusion;
+  private static String simpleDir;
 
   /**
    * Perform a simple diffusion test. This can be used to understand the distributions that are

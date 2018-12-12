@@ -30,8 +30,8 @@ import java.util.Arrays;
  * Helper for the spot filter.
  */
 public class SpotFilterHelper {
-  private IntBlockSumFilter sumFilter = null;
-  private int[] data = null;
+  private IntBlockSumFilter sumFilter;
+  private int[] data;
 
   /**
    * Count neighbours within a 2n+1 region around each spot.

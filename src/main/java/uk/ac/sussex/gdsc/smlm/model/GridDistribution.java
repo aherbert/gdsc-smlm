@@ -52,7 +52,7 @@ public class GridDistribution implements SpatialDistribution {
   private int cell = -1;
   private final int nCellsPerRow;
   private final int nCells;
-  private double[] previous = null;
+  private double[] previous;
 
   /**
    * Create a distribution with the binary spots placed from 0 - distance.

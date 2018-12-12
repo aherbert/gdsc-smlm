@@ -32,8 +32,8 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
  */
 public class PeakResultGridManager {
   private class PeakList {
-    int size = 0;
-    PeakResult[] list = null;
+    int size;
+    PeakResult[] list;
 
     void add(PeakResult peak) {
       if (list == null) {
@@ -52,7 +52,7 @@ public class PeakResultGridManager {
   private final int xBlocks;
   private final int yBlocks;
 
-  private PeakResult[] peakCache = null;
+  private PeakResult[] peakCache;
   private int peakCacheX = -1;
   private int peakCacheY = -1;
 

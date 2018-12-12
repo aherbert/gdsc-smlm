@@ -64,7 +64,7 @@ public class SummariseResults implements PlugIn, MouseListener {
   private static final String TITLE = "Summarise Results";
   private static final String[] REMOVE_OUTLIERS = {"None", "1.5x IQR", "Top 2%"};
 
-  private static TextWindow summary = null;
+  private static TextWindow summary;
   private int histgramBins;
   private int removeOutliers;
 
@@ -125,7 +125,7 @@ public class SummariseResults implements PlugIn, MouseListener {
   }
 
   private static int NO = -1;
-  private static int UNKNOWN = 0;
+  private static int UNKNOWN;
   private static int YES = 1;
   private int removeNullResults = UNKNOWN;
 

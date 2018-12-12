@@ -70,45 +70,45 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   /** The calculator used to compute precision. */
   private Gaussian2DPeakResultCalculator calculator;
 
-  private boolean canComputePrecision = false;
+  private boolean canComputePrecision;
 
   private PeakResultConversionHelper helper;
   private Converter[] converters;
   private Converter ic;
   private int[] outIndices;
 
-  private DistanceUnit distanceUnit = null;
-  private IntensityUnit intensityUnit = null;
-  private AngleUnit angleUnit = null;
-  private boolean showPrecision = false;
-  private boolean computePrecision = false;
-  private int roundingPrecision = 0;
+  private DistanceUnit distanceUnit;
+  private IntensityUnit intensityUnit;
+  private AngleUnit angleUnit;
+  private boolean showPrecision;
+  private boolean computePrecision;
+  private int roundingPrecision;
 
   // Store the ROI painters that have been attached to TextPanels so they can be updated
   // with a new image source
   private static HashMap<TextPanel, ImageROIPainter> map = new HashMap<>();
 
-  private boolean showDeviations = false;
-  private boolean showEndFrame = false;
-  private boolean showId = false;
-  private boolean showFittingData = false;
-  private boolean showNoiseData = false;
-  private boolean showZ = false;
-  private boolean clearAtStart = false;
-  private boolean hideSourceText = false;
+  private boolean showDeviations;
+  private boolean showEndFrame;
+  private boolean showId;
+  private boolean showFittingData;
+  private boolean showNoiseData;
+  private boolean showZ;
+  private boolean clearAtStart;
+  private boolean hideSourceText;
   private String frameColumnName = "T";
-  private String source = null;
-  private String sourceText = null;
+  private String source;
+  private String sourceText;
   private String tableTitle = "Fit Results";
   private boolean newWindow;
   private TextWindow resultsWindow;
   private TextPanel tp;
   private ImageROIPainter roiPainter;
-  private boolean addCounter = false;
+  private boolean addCounter;
 
   /** Set to true if the table is active. */
-  protected boolean tableActive = false;
-  private int nextRepaintSize = 0;
+  protected boolean tableActive;
+  private int nextRepaintSize;
   private double repaintInterval = 0.1;
   private Rounder rounder;
 
@@ -116,7 +116,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   private int indexX = -1;
   private int indexY = -1;
 
-  private int size = 0;
+  private int size;
 
   /**
    * Instantiates a new IJ table peak results.

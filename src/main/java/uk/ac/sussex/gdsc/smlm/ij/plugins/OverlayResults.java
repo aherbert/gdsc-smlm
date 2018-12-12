@@ -64,7 +64,7 @@ import java.util.Arrays;
 public class OverlayResults implements PlugIn, ItemListener, ImageListener {
   private static final String TITLE = "Overlay Results";
   private static String name = "";
-  private static boolean showTable = false;
+  private static boolean showTable;
 
   private String[] names;
   private int[] ids;
@@ -72,7 +72,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
   private Checkbox checkbox;
   private Label label;
 
-  private int currentIndex = 0;
+  private int currentIndex;
   private int currentSlice = -1;
 
   private class Job {
@@ -84,7 +84,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
   }
 
   private class InBox {
-    private Job job = null;
+    private Job job;
 
     synchronized void add(int index) {
       this.job = new Job(index);
@@ -113,12 +113,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
     private boolean running = true;
     private final boolean[] error = new boolean[ids.length];
     // The results text window (so we can close it)
-    private TextWindow tw = null;
-    private Rectangle windowBounds = null;
+    private TextWindow tw;
+    private Rectangle windowBounds;
 
     TFloatArrayList ox = new TFloatArrayList(100);
     TFloatArrayList oy = new TFloatArrayList(100);
-    PeakResultView view = null;
+    PeakResultView view;
     TypeConverter<DistanceUnit> converter;
 
     @Override

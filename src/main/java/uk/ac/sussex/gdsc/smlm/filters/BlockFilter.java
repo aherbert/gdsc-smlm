@@ -46,12 +46,12 @@ import org.apache.commons.math3.util.FastMath;
  * than 2. All routines are OK for 3x3 images and larger.
  */
 public abstract class BlockFilter extends BaseWeightedFilter {
-  private float[] buffer = null;
-  private float[] floatRowBuffer = null;
+  private float[] buffer;
+  private float[] floatRowBuffer;
 
   private Normaliser normaliser;
-  private Normaliser weightedNormaliser = null;
-  private float weightedNormaliserN = 0;
+  private Normaliser weightedNormaliser;
+  private float weightedNormaliserN;
 
   /**
    * Instantiates a new block filter.

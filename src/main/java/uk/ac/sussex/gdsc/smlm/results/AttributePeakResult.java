@@ -35,7 +35,7 @@ public class AttributePeakResult extends PeakResult {
   private static final int FIELD_ID = 0x00000001;
   private static final int FIELD_END_FRAME = 0x00000002;
   private static final int FIELD_PRECISION = 0x00000004;
-  private int fields = 0;
+  private int fields;
 
   private int id;
   private int endFrame;

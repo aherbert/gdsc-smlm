@@ -84,7 +84,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
   }
 
   /** Used to store all the values and gradients for the NonLinearFunction interface. */
-  protected FunctionStore store = null;
+  protected FunctionStore store;
 
   /** All the values for the NonLinearFunction interface. */
   protected double[] all_values;

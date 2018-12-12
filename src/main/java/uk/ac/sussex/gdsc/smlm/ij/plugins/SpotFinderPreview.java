@@ -115,24 +115,24 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
   }
 
   private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-  private FitEngineConfiguration config = null;
-  private FitConfiguration fitConfig = null;
-  private Overlay o = null;
-  private ImagePlus imp = null;
-  private boolean preview = false;
-  private Label label = null;
-  private TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
+  private FitEngineConfiguration config;
+  private FitConfiguration fitConfig;
+  private Overlay o;
+  private ImagePlus imp;
+  private boolean preview;
+  private Label label;
+  private TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
   private static double distance = 1.5;
   private static double lowerDistance = 50;
-  private static boolean multipleMatches = false;
+  private static boolean multipleMatches;
   private static boolean showTP = true;
   private static boolean showFP = true;
   private static int topN = 100;
   private static int select = 1;
   private static int neighbourRadius = 4;
 
-  private int currentSlice = 0;
-  private MaximaSpotFilter filter = null;
+  private int currentSlice;
+  private MaximaSpotFilter filter;
 
   // All the fields that will be updated when reloading the configuration file
   private Choice textCameraModelName;
@@ -149,7 +149,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
   private Scrollbar topNScrollBar;
   private Scrollbar selectScrollBar;
 
-  private boolean refreshing = false;
+  private boolean refreshing;
   private NonBlockingExtendedGenericDialog gd;
 
   private final SpotFilterHelper spotFilterHelper = new SpotFilterHelper();
@@ -363,9 +363,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     label.setText(message);
   }
 
-  private Calibration lastCalibration = null;
-  private FitEngineSettings lastFitEngineSettings = null;
-  private PSF lastPSF = null;
+  private Calibration lastCalibration;
+  private FitEngineSettings lastFitEngineSettings;
+  private PSF lastPSF;
 
   /** {@inheritDoc} */
   @Override

@@ -33,9 +33,9 @@ import java.util.Arrays;
  */
 public abstract class OptimiserFunction {
   /** The x. */
-  protected TDoubleArrayList x = null;
+  protected TDoubleArrayList x;
   /** The y. */
-  protected TDoubleArrayList y = null;
+  protected TDoubleArrayList y;
 
   /**
    * Adds the point.

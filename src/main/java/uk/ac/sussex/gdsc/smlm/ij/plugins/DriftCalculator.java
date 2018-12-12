@@ -109,7 +109,7 @@ public class DriftCalculator implements PlugIn {
   private static String method = "";
   private static String[] UPDATE_METHODS =
       new String[] {"None", "Update", "New dataset", "New truncated dataset"};
-  private static int updateMethod = 0;
+  private static int updateMethod;
 
   private static String inputOption = "";
   private static int maxIterations = 50;
@@ -120,7 +120,7 @@ public class DriftCalculator implements PlugIn {
   private static int maxSmoothingPoints = 50;
   private static int iterations = 1;
   private static boolean plotDrift = true;
-  private static boolean saveDrift = false;
+  private static boolean saveDrift;
 
   // Parameters to control the image alignment algorithm
   private static int frames = 2000;
@@ -133,8 +133,8 @@ public class DriftCalculator implements PlugIn {
   private static int interpolationMethod = ImageProcessor.BILINEAR;
   private static SubPixelMethod subPixelMethod = AlignImagesFft.SubPixelMethod.CUBIC;
 
-  private static PlotWindow plotx = null;
-  private static PlotWindow ploty = null;
+  private static PlotWindow plotx;
+  private static PlotWindow ploty;
 
   private int interpolationStart;
   private int interpolationEnd;
@@ -145,9 +145,9 @@ public class DriftCalculator implements PlugIn {
   private final TrackProgress tracker = new ImageJTrackProgress();
 
   // Used to multi-thread the image alignment
-  private ExecutorService threadPool = null;
-  private int progressCounter = 0;
-  private int totalCounter = 0;
+  private ExecutorService threadPool;
+  private int progressCounter;
+  private int totalCounter;
 
   private synchronized void incrementProgress() {
     tracker.progress(++progressCounter, totalCounter);
@@ -1199,7 +1199,7 @@ public class DriftCalculator implements PlugIn {
 
   private class BlockPeakResultProcedure implements PeakResultProcedure {
     final ArrayList<ArrayList<Localisation>> blocks = new ArrayList<>();
-    ArrayList<Localisation> nextBlock = null;
+    ArrayList<Localisation> nextBlock;
     final Counter counter = new Counter();
 
     @Override

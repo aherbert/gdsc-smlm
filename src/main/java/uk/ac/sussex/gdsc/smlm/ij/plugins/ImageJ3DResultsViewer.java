@@ -713,7 +713,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       new HashMap<>();
   private static ResultsTableSettings.Builder resultsTableSettings;
   private static boolean addToSelection;
-  private static Color3f highlightColor = null;
+  private static Color3f highlightColor;
 
   private Image3DUniverse univ;
   private JMenuItem resetRotation;
@@ -1224,7 +1224,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     final Point3f[] size = new Point3f[results.size()];
     final boolean failed = results.forEach(new PeakResultProcedureX() {
-      int i = 0;
+      int i;
 
       @Override
       public boolean execute(PeakResult peakResult) {
@@ -2400,7 +2400,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
   }
 
   private static class ChangeColourContentAction extends BaseContentAction {
-    ImageJ3DResultsViewerSettings.Builder settings = null;
+    ImageJ3DResultsViewerSettings.Builder settings;
 
     @Override
     public int run(Content c) {
@@ -2859,7 +2859,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
   private static class ColourSurfaceContentAction extends BaseContentAction {
     static String title = "";
     static boolean resetTransparency = true;
-    ImagePlus imp = null;
+    ImagePlus imp;
 
     @Override
     public int run(Content c) {
@@ -2913,9 +2913,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
   }
 
   private class CropResultsAction extends BaseContentAction {
-    CoordinatePredicate shape = null;
+    CoordinatePredicate shape;
     private final Point2d p2d = new Point2d();
-    ImageJ3DResultsViewerSettings.Builder settings = null;
+    ImageJ3DResultsViewerSettings.Builder settings;
 
     @Override
     public int run(Content c) {

@@ -38,7 +38,7 @@ public class Molecule {
   public double photons;
 
   /** Used to construct a single linked list of molecules. */
-  public Molecule next = null;
+  public Molecule next;
 
   /**
    * Instantiates a new molecule.

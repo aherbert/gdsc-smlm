@@ -86,7 +86,7 @@ public class CropResults implements PlugIn {
   private String outputName;
   private MinMaxResultProcedure minMax;
   private TypeConverter<DistanceUnit> c;
-  private boolean myLimitZ = false;
+  private boolean myLimitZ;
 
   /** {@inheritDoc} */
   @Override

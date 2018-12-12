@@ -44,8 +44,8 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFunctionSolver {
   private final LineStepSearch lineSearch = new LineStepSearch();
   /** Maximum step length used in line search. */
-  private double[] maximumStepLength = null;
-  private double maximumStepSize = 0;
+  private double[] maximumStepLength;
+  private double maximumStepSize;
 
   /**
    * The minimum value between two doubles. ISO standard is 2^-52 = 2.220446049e-16. This computes

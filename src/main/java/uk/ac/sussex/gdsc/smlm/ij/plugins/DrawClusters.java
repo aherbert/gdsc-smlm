@@ -66,14 +66,14 @@ public class DrawClusters implements PlugIn {
   private static String inputOption = "";
   private static String title = "";
   private static int imageSize = 20;
-  private static boolean expandToSingles = false;
+  private static boolean expandToSingles;
   private static int minSize = 2;
-  private static int maxSize = 0;
+  private static int maxSize;
   private static boolean drawLines = true;
-  private static int sort = 0;
-  private static boolean splineFit = false;
-  private static boolean useStackPosition = false;
-  private static int lut = 0;
+  private static int sort;
+  private static boolean splineFit;
+  private static boolean useStackPosition;
+  private static int lut;
 
   /** {@inheritDoc} */
   @Override

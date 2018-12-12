@@ -76,13 +76,13 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
   protected final boolean isPointArray;
 
   /** The per-item transparency attributes. */
-  protected TransparencyAttributes[] transparencyAttributes = null;
+  protected TransparencyAttributes[] transparencyAttributes;
 
   /** The per-item material. Used for polygons. PointArrays use color4 coordinates. */
-  protected Material[] material = null;
+  protected Material[] material;
 
   /** The per-item material. Used for polygons. PointArrays use color4 coordinates. */
-  protected GeometryArray[] geometryArray = null;
+  protected GeometryArray[] geometryArray;
 
   /** The point array color updater. */
   protected final ArrayColorUpdater pointArrayColorUpdater;

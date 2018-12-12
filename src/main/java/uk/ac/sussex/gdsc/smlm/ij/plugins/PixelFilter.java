@@ -49,11 +49,11 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
   private static int radius = 1;
   private static double error = 3;
 
-  private PlugInFilterRunner pfr = null;
-  private double[] cachedS = null;
-  private double[] cachedSS = null;
-  private boolean preview = false;
-  private Label label = null;
+  private PlugInFilterRunner pfr;
+  private double[] cachedS;
+  private double[] cachedSS;
+  private boolean preview;
+  private Label label;
 
   /** {@inheritDoc} */
   @Override

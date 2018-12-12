@@ -160,7 +160,7 @@ public class ResultsManager implements PlugIn {
   private ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
   private boolean extraOptions;
 
-  private boolean fileInput = false;
+  private boolean fileInput;
 
   private static double input_nmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
   private static double input_gain = Prefs.get(Constants.inputGain, 1);
