@@ -250,6 +250,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       displayHistograms[i] = true;
     }
   }
+
   private static final int SAMPLES = 0;
   private static final int SIGNAL = 1;
   private static final int SIGNAL_CONTINUOUS = 2;
@@ -286,6 +287,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     integerDisplay[SAMPLED_T_OFF] = false;
     integerDisplay[DENSITY] = true;
   }
+
   private static boolean[] alwaysRemoveOutliers;
 
   static {

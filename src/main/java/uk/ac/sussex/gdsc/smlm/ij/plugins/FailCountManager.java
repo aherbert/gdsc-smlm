@@ -122,8 +122,10 @@ public class FailCountManager implements PlugIn {
       return values[ordinal];
     }
   }
+
   //@formatter:on
-  private static String[] OPTIONS = SettingsManager.getNames((Object[]) FailCountOption.values());
+  private static final String[] OPTIONS =
+      SettingsManager.getNames((Object[]) FailCountOption.values());
 
   /**
    * Hold the fail count data for a single sequential analysis routine.

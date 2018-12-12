@@ -48,6 +48,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
@@ -95,24 +96,28 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private static String[] thresholdMethodNames;
 
   static {
-    snrLevels = new double[100];
-    int i = 0;
+    final TDoubleArrayList list = new TDoubleArrayList();
     for (int snr = 20; snr <= 70; snr += 5) {
-      snrLevels[i++] = snr;
+      list.add(snr);
     }
-    snrLevels = Arrays.copyOf(snrLevels, i);
+    snrLevels = list.toArray();
 
     thresholdMethods = AutoThreshold.Method.values();
     thresholdMethodOptions = new boolean[thresholdMethods.length + snrLevels.length];
     thresholdMethodNames = new String[thresholdMethodOptions.length];
-    thresholdMethodOptions[AutoThreshold.Method.NONE.ordinal()] = true;
-    for (i = 0; i < thresholdMethods.length; i++) {
-      thresholdMethodNames[i] = thresholdMethods[i].toString();
-      thresholdMethodOptions[i] = true;
+
+    // Enable all methods
+    int count = 0;
+    while (count < thresholdMethods.length) {
+      thresholdMethodNames[count] = thresholdMethods[count].toString();
+      thresholdMethodOptions[count] = true;
+      count++;
     }
-    for (int j = 0; i < thresholdMethodNames.length; i++, j++) {
-      thresholdMethodNames[i] = "SNR" + snrLevels[j];
-      thresholdMethodOptions[i] = true;
+    // Add signal-to-noise threshold methods
+    for (int j = 0; j < snrLevels.length; j++) {
+      thresholdMethodNames[count] = "SNR" + snrLevels[j];
+      thresholdMethodOptions[count] = true;
+      count++;
     }
 
     // Turn some off
@@ -123,6 +128,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     thresholdMethodOptions[AutoThreshold.Method.SHANBHAG.ordinal()] = false;
     thresholdMethodOptions[AutoThreshold.Method.RENYI_ENTROPY.ordinal()] = false;
   }
+
   private AutoThreshold.Method[] methods;
   private double[] levels;
   private String[] methodNames;

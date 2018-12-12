@@ -145,6 +145,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       return values[0];
     }
   }
+
   //@formatter:on
   private static CameraType[] cameraTypeValues = CameraType.values();
 

@@ -110,7 +110,7 @@ import java.util.concurrent.Future;
  */
 public class PulseActivationAnalysis
     implements PlugIn, DialogListener, ActionListener, OptionCollectedListener {
-  private String TITLE = "Activation Analysis";
+  private String title = "Activation Analysis";
 
   private enum Correction {
     //@formatter:off
@@ -322,6 +322,7 @@ public class PulseActivationAnalysis
     }
     MAGNIFICATION = list.toArray(new String[list.size()]);
   }
+
   private static String magnification = MAGNIFICATION[1];
   private Choice magnificationChoice;
   private Checkbox previewCheckBox;
@@ -402,7 +403,7 @@ public class PulseActivationAnalysis
     }
 
     if (MemoryPeakResults.isMemoryEmpty()) {
-      IJ.error(TITLE, "No localisations in memory");
+      IJ.error(title, "No localisations in memory");
       return;
     }
 
@@ -415,19 +416,19 @@ public class PulseActivationAnalysis
     // Load the results
     results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
     if (results == null || results.size() == 0) {
-      IJ.error(TITLE, "No results could be loaded");
+      IJ.error(title, "No results could be loaded");
       return;
     }
 
     if (!results.isCalibrated()) {
-      IJ.error(TITLE, "Results must have basic calibration (pixel pitch and gain)");
+      IJ.error(title, "Results must have basic calibration (pixel pitch and gain)");
       return;
     }
 
     // Get the traces
     traces = TraceManager.convert(results);
     if (traces == null || traces.length == 0) {
-      IJ.error(TITLE, "No traces could be loaded");
+      IJ.error(title, "No traces could be loaded");
       return;
     }
 
@@ -445,9 +446,9 @@ public class PulseActivationAnalysis
   }
 
   private boolean showDialog(boolean crosstalkMode) {
-    TITLE = ((crosstalkMode) ? "Crosstalk " : "Pulse ") + TITLE;
+    title = ((crosstalkMode) ? "Crosstalk " : "Pulse ") + title;
 
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(title);
 
     if (crosstalkMode) {
       gd.addMessage("Analyse crosstalk activation rate");
@@ -468,7 +469,7 @@ public class PulseActivationAnalysis
     inputOption = ResultsManager.getInputSource(gd);
     channels = (int) gd.getNextNumber();
     if (channels < min || channels > MAX_CHANNELS) {
-      IJ.error(TITLE, "Channels must be between " + min + " and " + MAX_CHANNELS);
+      IJ.error(title, "Channels must be between " + min + " and " + MAX_CHANNELS);
       return false;
     }
 
@@ -476,7 +477,7 @@ public class PulseActivationAnalysis
   }
 
   private boolean showPulseCycleDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(title);
 
     gd.addMessage("Specify the pulse cycle");
 
@@ -494,14 +495,14 @@ public class PulseActivationAnalysis
 
     repeatInterval = (int) gd.getNextNumber();
     if (repeatInterval < channels) {
-      IJ.error(TITLE, "Repeat interval must be greater than the number of channels: " + channels);
+      IJ.error(title, "Repeat interval must be greater than the number of channels: " + channels);
       return false;
     }
     darkFramesForNewActivation = Math.max(1, (int) gd.getNextNumber());
     for (int c = 1; c <= channels; c++) {
       final int frame = (int) gd.getNextNumber();
       if (frame < 1 || frame > repeatInterval) {
-        IJ.error(TITLE, "Channel " + c + " activation frame must within the repeat interval");
+        IJ.error(title, "Channel " + c + " activation frame must within the repeat interval");
         return false;
       }
       startFrame[c - 1] = frame;
@@ -511,7 +512,7 @@ public class PulseActivationAnalysis
     for (int i = 0; i < channels; i++) {
       for (int j = i + 1; j < channels; j++) {
         if (startFrame[i] == startFrame[j]) {
-          IJ.error(TITLE, "Start frames must be unique for each channel");
+          IJ.error(title, "Start frames must be unique for each channel");
           return false;
         }
       }
@@ -710,7 +711,7 @@ public class PulseActivationAnalysis
     // Plot a histogram
     final double[] x = SimpleArrayUtils.newArray(channels, 0.5, 1);
     final double[] y = crosstalk;
-    final Plot2 plot = new Plot2(TITLE, "Channel", "Fraction activations");
+    final Plot2 plot = new Plot2(title, "Channel", "Fraction activations");
     plot.setLimits(0, channels + 1, 0, 1);
     plot.setXMinorTicks(false);
     plot.addPoints(x, y, Plot2.BAR);
@@ -719,7 +720,7 @@ public class PulseActivationAnalysis
       label += String.format(", %s = %s", ctNames[index2], MathUtils.round(ct[index2]));
     }
     plot.addLabel(0, 0, label);
-    ImageJUtils.display(TITLE, plot);
+    ImageJUtils.display(title, plot);
   }
 
   /**
@@ -746,7 +747,7 @@ public class PulseActivationAnalysis
   }
 
   private boolean showCrossTalkAnalysisDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(title);
 
     gd.addMessage(TextUtils.wrap(
         "Crosstalk analysis requires a sample singly labelled with only one photo-switchable probe and imaged with the full pulse lifecycle. The probe should be activated by the pulse in the target channel. Activations from the pulse in other channels is crosstalk.",
@@ -1033,7 +1034,7 @@ public class PulseActivationAnalysis
   }
 
   private boolean showPulseAnalysisDialog() {
-    final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+    final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(title);
 
     gd.addMessage("Plot molecules activated after a pulse");
     String[] correctionNames = null;
@@ -1190,7 +1191,7 @@ public class PulseActivationAnalysis
         validatePercentage("Nonspecific_assignment_cutoff", nonSpecificCorrectionCutoff);
       }
     } catch (final IllegalArgumentException ex) {
-      IJ.error(TITLE, ex.getMessage());
+      IJ.error(title, ex.getMessage());
       return false;
     }
 
@@ -1398,7 +1399,7 @@ public class PulseActivationAnalysis
       for (int c = 0; c < channels; c++) {
         images[c] = getImage(output[c]);
       }
-      displayComposite(images, results.getName() + " " + TITLE);
+      displayComposite(images, results.getName() + " " + title);
     }
 
     lastRunSettings = runSettings;
@@ -1769,9 +1770,9 @@ public class PulseActivationAnalysis
     final PeakResultsList output = new PeakResultsList();
     output.copySettings(results);
     if (channels > 1) {
-      output.setName(results.getName() + " " + TITLE + " C" + c);
+      output.setName(results.getName() + " " + title + " C" + c);
     } else {
-      output.setName(results.getName() + " " + TITLE);
+      output.setName(results.getName() + " " + title);
     }
 
     // Store the set in memory
@@ -1820,7 +1821,7 @@ public class PulseActivationAnalysis
 
   private int isSimulation() {
     if (ImageJUtils.isExtraOptions()) {
-      final GenericDialog gd = new GenericDialog(TITLE);
+      final GenericDialog gd = new GenericDialog(title);
       gd.addMessage("Perform a crosstalk simulation?");
       gd.enableYesNoCancel();
       gd.showDialog();
@@ -1835,7 +1836,7 @@ public class PulseActivationAnalysis
   }
 
   private void runSimulation() {
-    TITLE += " Simulation";
+    title += " Simulation";
 
     if (!showSimulationDialog()) {
       return;
@@ -1857,7 +1858,7 @@ public class PulseActivationAnalysis
       final MemoryPeakResults r = new MemoryPeakResults();
       r.setCalibration(calibration);
       r.setBounds(bounds);
-      r.setName(TITLE + " C" + (c + 1));
+      r.setName(title + " C" + (c + 1));
       results[c] = r;
     }
 
@@ -1872,7 +1873,7 @@ public class PulseActivationAnalysis
     final MemoryPeakResults r = new MemoryPeakResults();
     r.setCalibration(calibration);
     r.setBounds((Rectangle) bounds.clone());
-    r.setName(TITLE);
+    r.setName(title);
 
     final ImageProcessor[] images = new ImageProcessor[3];
     for (int c = 0; c < 3; c++) {
@@ -1881,7 +1882,7 @@ public class PulseActivationAnalysis
 
       // Draw the unmixed activations
       final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-          ResultsImageType.DRAW_LOCALISATIONS, true, true, TITLE, bounds, sim_nmPerPixel, 1,
+          ResultsImageType.DRAW_LOCALISATIONS, true, true, title, bounds, sim_nmPerPixel, 1,
           1024.0 / sim_size, 0, ResultsImageMode.IMAGE_ADD);
       image.setCalibration(calibration);
       image.setLiveImage(false);
@@ -1891,7 +1892,7 @@ public class PulseActivationAnalysis
       image.end();
       images[c] = image.getImagePlus().getProcessor();
     }
-    displayComposite(images, TITLE);
+    displayComposite(images, title);
 
     // Add to memory. Set the composite dataset first.
     MemoryPeakResults.addResults(r);
@@ -2122,7 +2123,7 @@ public class PulseActivationAnalysis
   }
 
   private boolean showSimulationDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(title);
 
     final SimulationDistribution[] distributionValues = SimulationDistribution.values();
     final String[] distribution = SettingsManager.getNames((Object[]) distributionValues);
@@ -2166,7 +2167,7 @@ public class PulseActivationAnalysis
       return false;
     }
     if (count < 2) {
-      IJ.error(TITLE, "Simulation requires at least 2 channels");
+      IJ.error(title, "Simulation requires at least 2 channels");
       return false;
     }
 
@@ -2177,7 +2178,7 @@ public class PulseActivationAnalysis
         }
       }
     } catch (final IllegalArgumentException ex) {
-      IJ.error(TITLE, ex.getMessage());
+      IJ.error(title, ex.getMessage());
       return false;
     }
 
@@ -2186,7 +2187,7 @@ public class PulseActivationAnalysis
 
   @Override
   public void actionPerformed(ActionEvent event) {
-    final ImagePlus imp = WindowManager.getImage(results.getName() + " " + TITLE);
+    final ImagePlus imp = WindowManager.getImage(results.getName() + " " + title);
     if (imp == null || output == null) {
       return;
     }

@@ -163,6 +163,7 @@ public class TraceMolecules implements PlugIn {
       displayHistograms[i] = true;
     }
   }
+
   private static final int TOTAL_SIGNAL = 0;
   private static final int SIGNAL_PER_FRAME = 1;
   private static final int BLINKS = 2;
@@ -182,6 +183,7 @@ public class TraceMolecules implements PlugIn {
     // integerDisplay[TOTAL_T_ON] = true;
     // integerDisplay[TOTAL_T_OFF] = true;
   }
+
   private static boolean[] alwaysRemoveOutliers;
 
   static {

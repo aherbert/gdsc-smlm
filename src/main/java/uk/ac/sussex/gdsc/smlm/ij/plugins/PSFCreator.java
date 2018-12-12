@@ -4274,7 +4274,8 @@ public class PSFCreator implements PlugInFilter {
         public void actionPerformed(ActionEvent event) {
           final boolean interactive = PSFCreator.this.settings.getInteractiveMode();
           final PSFCreatorSettings defaults = GUIProtosHelper.defaultPSFCreatorSettings;
-          int t = 0, c = 0;
+          int t = 0;
+          int c = 0;
           tf.get(t++).setText(Double.toString(defaults.getAnalysisWindow()));
           tf.get(t++).setText(Double.toString(defaults.getSmoothing()));
           tf.get(t++).setText(Integer.toString(defaults.getComWindow()));
@@ -4534,8 +4535,12 @@ public class PSFCreator implements PlugInFilter {
     static final int Y = 1;
     static final int Z = 2;
 
-    int x, y, z;
-    float[] xp, yp, zp;
+    int x;
+    int y;
+    int z;
+    float[] xp;
+    float[] yp;
+    float[] zp;
 
     Projection(float[][] psf, int x, int y) {
       // Maximum project each PSF: X, Y, Z projections
@@ -4739,7 +4744,8 @@ public class PSFCreator implements PlugInFilter {
      */
     int stackZCentre;
     final float[][] psf;
-    final int maxx, maxy;
+    final int maxx;
+    final int maxy;
     float background;
     Projection projection;
     final int magnification;
@@ -4835,7 +4841,8 @@ public class PSFCreator implements PlugInFilter {
       final int ly = (int) cy - boxRadius;
       final int uy = (int) cy + boxRadius + 1;
       // Note: we use the full range of the stack.
-      int lz, uz;
+      int lz;
+      int uz;
       if (zRadius == 0) {
         lz = 0;
         uz = image.length - 1;
@@ -5076,7 +5083,8 @@ public class PSFCreator implements PlugInFilter {
     }
 
     public ImageStack getImageStack(boolean crop) {
-      int min, max;
+      int min;
+      int max;
       if (crop) {
         final int pad = getZPadding();
         min = stackZCentre - pad;
