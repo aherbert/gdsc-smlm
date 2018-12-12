@@ -35,19 +35,19 @@ import java.util.Arrays;
  */
 public abstract class LikelihoodWrapper {
   /** The function. */
-  final protected NonLinearFunction f;
+  protected final NonLinearFunction f;
 
   /** The parameters. */
-  final protected double[] a;
+  protected final double[] a;
 
   /** The observed values. */
-  final protected double[] data;
+  protected final double[] data;
 
   /** The number of observed values. */
-  final protected int n;
+  protected final int n;
 
   /** The number of variables. */
-  final protected int nVariables;
+  protected final int nVariables;
 
   private double lastScore;
   private double[] lastVariables;

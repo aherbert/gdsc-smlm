@@ -60,13 +60,13 @@ import java.util.Arrays;
  */
 public class ItemMesh extends CustomMesh implements UpdateableItemShape, TransparentItemShape {
   /** The vertex count of the original geometry array. */
-  final protected int vertexCount;
+  protected final int vertexCount;
 
   /** The vertex format of the original geometry array. */
-  final protected int vertexFormat;
+  protected final int vertexFormat;
 
   /** The index count of the original geometry array. */
-  final protected int indexCount;
+  protected final int indexCount;
 
   /** The points. */
   protected Point3f[] points;
@@ -75,10 +75,10 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   protected Point3f[] sizes;
 
   /** Set to true if this is a point array. */
-  final protected boolean isPointArray;
+  protected final boolean isPointArray;
 
   /** Set to true if this is a strip geometry array. */
-  final protected boolean isStripGeometryArray;
+  protected final boolean isStripGeometryArray;
 
   /**
    * If there are no per-vertex colours this is set to true to colour the object using the material,
