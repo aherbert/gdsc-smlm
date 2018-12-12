@@ -384,5 +384,4 @@ public abstract class Image3DTest {
     }
     return sum;
   }
-
 }

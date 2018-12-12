@@ -37,7 +37,7 @@ import java.util.Arrays;
  */
 public class LSQVarianceGradientProcedure5 extends LSQVarianceGradientProcedure {
   /**
-   * Instantiates a new LSQ variance gradient procedure.
+   * Instantiates a new procedure.
    *
    * @param func Gradient function
    */
@@ -49,15 +49,14 @@ public class LSQVarianceGradientProcedure5 extends LSQVarianceGradientProcedure 
   }
 
   /**
-   * Instantiates a new LSQ variance gradient procedure.
+   * Instantiates a new procedure.
    *
    * @param func Gradient function
    * @param solver The solver used to invert the Fisher information matrix to find the Cramér–Rao
    *        lower bound (CRLB).
    * @throws IllegalArgumentException if the solver is null
    */
-  public LSQVarianceGradientProcedure5(final Gradient1Function func, EJMLLinearSolver solver)
-      throws IllegalArgumentException {
+  public LSQVarianceGradientProcedure5(final Gradient1Function func, EJMLLinearSolver solver) {
     super(func, solver);
     if (n != 5) {
       throw new IllegalArgumentException("Function must compute 5 gradients");

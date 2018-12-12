@@ -33,9 +33,9 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 //@formatter:off
 public class SNRResultProcedure extends AbstractResultProcedure implements
-  PeakResultProcedure
-//@formatter:on
-{
+    PeakResultProcedure {
+  //@formatter:on
+
   /** The Signal-to-Noise Ratio (SNR). */
   public float[] snr;
 
@@ -45,7 +45,7 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
    * @param results the results
    * @throws DataException if the results have no noise
    */
-  public SNRResultProcedure(MemoryPeakResults results) throws DataException {
+  public SNRResultProcedure(MemoryPeakResults results) {
     super(results);
     if (!results.hasNoise()) {
       throw new DataException("Results do not have noise");
@@ -63,7 +63,7 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
    * @return the snr
    */
   public float[] getSNR() {
-    i = 0;
+    counter = 0;
     snr = allocate(snr);
     results.forEach(this);
     return snr;
@@ -71,6 +71,6 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
 
   @Override
   public void execute(PeakResult peakResult) {
-    this.snr[i++] = peakResult.getSNR();
+    this.snr[counter++] = peakResult.getSNR();
   }
 }

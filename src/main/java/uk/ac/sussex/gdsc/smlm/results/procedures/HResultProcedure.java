@@ -31,7 +31,7 @@ public interface HResultProcedure {
   /**
    * Executes this procedure.
    *
-   * @param h the height
+   * @param height the height
    */
-  public void executeH(float h);
+  public void executeH(float height);
 }

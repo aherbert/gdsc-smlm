@@ -141,7 +141,7 @@ public class FilterResults implements PlugIn {
       pp = new PrecisionResultProcedure(results);
       pp.getPrecision();
 
-      final double[] limits = MathUtils.limits(pp.precision);
+      final double[] limits = MathUtils.limits(pp.precisions);
       maxPrecision = limits[1];
       minPrecision = limits[0];
     } catch (final DataException ex) {
@@ -313,7 +313,7 @@ public class FilterResults implements PlugIn {
       }
 
       if (pp != null) {
-        if (pp.precision[i] > maxPrecision) {
+        if (pp.precisions[i] > maxPrecision) {
           continue;
         }
       }

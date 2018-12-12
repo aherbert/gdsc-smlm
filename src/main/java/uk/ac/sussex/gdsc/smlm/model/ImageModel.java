@@ -468,8 +468,8 @@ public abstract class ImageModel {
    * newX = (r * X1 + a * X2) / (r + a)
    * </pre>
    *
-   * The signal is proportional to newly generated on-times (newX) with an average of the specified
-   * photon budget.
+   * <p>The signal is proportional to newly generated on-times (newX) with an average of the
+   * specified photon budget.
    *
    * <p>The photon budget can either be distributed evenly over the fluorophore lifetime or per
    * frame (see {@link #isPhotonBudgetPerFrame()}). Each frame signal output will be subject to
@@ -591,10 +591,11 @@ public abstract class ImageModel {
 
       // System.out.printf("t = %f, p = %f, R = %f\n", averageTotalTOn, allPhotons.getMean(),
       // c.correlation(onTime.getValues(), allPhotons.getValues()));
-    } else // Sample from the provided distribution. Do not over-write the class level distribution
-           // to allow
-    // running again with a different shape parameter / photon budget.
-    if (photonDistribution != null) {
+
+    } else if (photonDistribution != null) {
+      // Sample from the provided distribution. Do not over-write the class level distribution
+      // to allow running again with a different shape parameter / photon budget.
+
       // Ensure the custom distribution is scaled to the correct photon budget
       final double photonScale = photonBudget / photonDistribution.getNumericalMean();
 

@@ -41,6 +41,28 @@ public abstract class CircularFilter extends BaseWeightedFilter {
   private Normaliser weightedNormaliser = null;
   private double weightedNormaliserRadius = 0;
 
+  /**
+   * Instantiates a new circular filter.
+   */
+  protected CircularFilter() {
+    super();
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected CircularFilter(CircularFilter source) {
+    super(source);
+    // These should be thread safe
+    kernel = source.kernel;
+    lastRadius = source.lastRadius;
+    normaliser = source.normaliser;
+    weightedNormaliser = source.weightedNormaliser;
+    weightedNormaliserRadius = source.weightedNormaliserRadius;
+  }
+
   /** {@inheritDoc} */
   @Override
   protected void newWeights() {
@@ -213,25 +235,11 @@ public abstract class CircularFilter extends BaseWeightedFilter {
       Rectangle roi, int y, double[] sums) {
     int valuesP = roi.x + y * width;
 
-    // NOTE:
-    // The incremental algorithm does not work.
-    // The full calculation is always true in the original source code.
-    // boolean fullCalculation = true;// smallKernel; //for small kernel, always use the full area,
-    // not incremental algorithm
-
-    for (int x = 0; x < roi.width; x++, valuesP++) { // x is with respect to roi.x
-                                                     // if (fullCalculation)
-                                                     // {
+    // x is with respect to roi.x
+    for (int x = 0; x < roi.width; x++, valuesP++) {
       getAreaSums(cache, x, cachePointers, sums);
-      // }
-      // else
-      // {
-      // addSideSums(cache, x, cachePointers, sums);
-      // if (Double.isNaN(sums[0])) //avoid perpetuating NaNs into remaining line
-      // fullCalculation = true;
-      // }
       values[valuesP] = normaliser.normalise(sums[0], valuesP);
-    } // for x
+    }
   }
 
   /**
@@ -247,8 +255,8 @@ public abstract class CircularFilter extends BaseWeightedFilter {
       readLineToCache(pixels, y * width, xminInside, widthInside, cache, lineInCache * cacheWidth,
           padLeft, padRight);
       if (y == 0) {
-        for (int prevY = roiY - kHeight / 2; prevY < 0; prevY++) { // for y<0, pad with y=0 border
-                                                                   // pixels
+        // for y<0, pad with y=0 border pixels
+        for (int prevY = roiY - kHeight / 2; prevY < 0; prevY++) {
           final int prevLineInCache = cacheHeight + prevY;
           System.arraycopy(cache, 0, cache, prevLineInCache * cacheWidth, cacheWidth);
         }
@@ -270,8 +278,8 @@ public abstract class CircularFilter extends BaseWeightedFilter {
     for (int cp = cacheLineP; cp < cacheLineP + padLeft; cp++) {
       cache[cp] = cache[cacheLineP + padLeft];
     }
-    for (int cp = cacheLineP + padLeft + widthInside; cp < cacheLineP + padLeft + widthInside
-        + padRight; cp++) {
+    for (int cp = cacheLineP + padLeft + widthInside;
+        cp < cacheLineP + padLeft + widthInside + padRight; cp++) {
       cache[cp] = cache[cacheLineP + padLeft + widthInside - 1];
     }
   }

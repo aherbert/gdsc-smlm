@@ -86,6 +86,37 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   }
 
   /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected DoubleGaussianFilter(DoubleGaussianFilter source) {
+    super(source);
+    // These are thread safe
+    accuracy = source.accuracy;
+
+    lastSigma = source.lastSigma;
+    lastMaxRadius = source.lastMaxRadius;
+    kernel = source.kernel;
+    downscaleKernel = source.downscaleKernel;
+    upscaleKernel = source.upscaleKernel;
+    lastUnitLength = source.lastUnitLength;
+
+    normaliser = source.normaliser;
+    sx = source.sx;
+    sy = source.sy;
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public DoubleGaussianFilter copy() {
+    return new DoubleGaussianFilter(this);
+  }
+
+  /**
    * Compute the Gaussian convolution. Pixels within border regions (defined by 3 sigma) are
    * unchanged.
    *
@@ -212,71 +243,67 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
       final int height, final double sigma, final boolean xDirection, final int extraLines) {
     final int UPSCALE_K_RADIUS = 2; // number of pixels to add for upscaling
     final double MIN_DOWNSCALED_SIGMA = 4.; // minimum standard deviation in the downscaled image
-    final int length = xDirection ? width : height; // number of points per line (line can be a row
-                                                    // or column)
-    final int pointInc = xDirection ? 1 : width; // increment of the pixels array index to the next
-                                                 // point in a line
-    final int lineInc = xDirection ? width : 1; // increment of the pixels array index to the next
-                                                // line
-    final int lineFromA = (xDirection ? roi.y : roi.x) - extraLines; // the first line to process
+    // number of points per line (line can be a row or column)
+    final int length = xDirection ? width : height;
+    // increment of the pixels array index to the next point in a line
+    final int pointInc = xDirection ? 1 : width;
+    // increment of the pixels array index to the next line
+    final int lineInc = xDirection ? width : 1;
+    // the first line to process
+    final int lineFromA = (xDirection ? roi.y : roi.x) - extraLines;
     final int lineFrom;
     if (lineFromA < 0) {
       lineFrom = 0;
     } else {
       lineFrom = lineFromA;
     }
-    final int lineToA = (xDirection ? roi.y + roi.height : roi.x + roi.width) + extraLines; // the
-                                                                                            // last
-                                                                                            // line+1
-                                                                                            // to
-                                                                                            // process
+    // the last line+1 to process
+    final int lineToA = (xDirection ? roi.y + roi.height : roi.x + roi.width) + extraLines;
     final int lineTo;
     if (lineToA > (xDirection ? height : width)) {
       lineTo = (xDirection ? height : width);
     } else {
       lineTo = lineToA;
     }
-    final int writeFrom = xDirection ? roi.x : roi.y; // first point of a line that needs to be
-                                                      // written
+    // first point of a line that needs to be written
+    final int writeFrom = xDirection ? roi.x : roi.y;
     final int writeTo = xDirection ? roi.x + roi.width : roi.y + roi.height;
 
-    /* large radius (sigma): scale down, then convolve, then scale up */
+    // large radius (sigma): scale down, then convolve, then scale up
     final boolean doDownscaling = sigma > 2 * MIN_DOWNSCALED_SIGMA + 0.5;
-    final int reduceBy = doDownscaling ? // downscale by this factor
-        Math.min((int) Math.floor(sigma / MIN_DOWNSCALED_SIGMA), length) : 1;
-    /*
-     * Downscaling and upscaling blur the image a bit - we have to correct the standard deviation
-     * for this: Downscaling gives std devation sigma = 1/sqrt(3); upscale gives sigma = 1/2 (in
-     * downscaled pixels). All sigma^2 values add to full sigma^2, which should be the desired value
-     */
+    final int reduceBy = doDownscaling
+        // downscale by this factor
+        ? Math.min((int) Math.floor(sigma / MIN_DOWNSCALED_SIGMA), length)
+        : 1;
+    // Downscaling and upscaling blur the image a bit - we have to correct the standard deviation
+    // for this: Downscaling gives std devation sigma = 1/sqrt(3); upscale gives sigma = 1/2 (in
+    // downscaled pixels). All sigma^2 values add to full sigma^2, which should be the desired value
     final double sigmaGauss =
         doDownscaling ? Math.sqrt(sigma * sigma / (reduceBy * reduceBy) - 1. / 3. - 1. / 4.)
             : sigma;
-    final int maxLength =
-        doDownscaling ? (length + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1) // downscaled
-                                                                                        // line
-                                                                                        // can't be
-                                                                                        // longer
-            : length;
+    final int maxLength = doDownscaling
+        // downscaled line can't be longer
+        ? (length + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1)
+        : length;
     final double[][] gaussKernel = makeGaussianKernel(sigmaGauss, maxLength);
-    final int kRadius = gaussKernel[0].length * reduceBy; // Gaussian kernel radius after upscaling
-    final int readFrom = (writeFrom - kRadius < 0) ? 0 : writeFrom - kRadius; // not including
-                                                                              // broadening by
-                                                                              // downscale&upscale
+    // Gaussian kernel radius after upscaling
+    final int kRadius = gaussKernel[0].length * reduceBy;
+    // not including broadening by downscale & upscale
+    final int readFrom = (writeFrom - kRadius < 0) ? 0 : writeFrom - kRadius;
     final int readTo = (writeTo + kRadius > length) ? length : writeTo + kRadius;
     final int newLength = doDownscaling ? // line length for convolution
         (readTo - readFrom + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1) : length;
-    final int unscaled0 = readFrom - (UPSCALE_K_RADIUS + 1) * reduceBy; // input point corresponding
-                                                                        // to cache index 0
+    // input point corresponding to cache index 0
+    final int unscaled0 = readFrom - (UPSCALE_K_RADIUS + 1) * reduceBy;
     // the following is relevant for upscaling only
     if (doDownscaling) {
       createScalingKernels(reduceBy);
     }
 
-    final double[] cache1 = new double[newLength]; // holds data before convolution (after
-                                                   // downscaling, if any)
-    final double[] cache2 = doDownscaling ? new double[newLength] : null; // holds data after
-                                                                          // convolution
+    // holds data before convolution (after downscaling, if any)
+    final double[] cache1 = new double[newLength];
+    // holds data after convolution
+    final double[] cache2 = doDownscaling ? new double[newLength] : null;
 
     int pixel0 = lineFrom * lineInc;
     for (int line = lineFrom; line < lineTo; line += 1, pixel0 += lineInc) {
@@ -321,7 +348,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    * @param pointInc spacing of values in input array (1 for lines, image width for columns)
    * @param newLength length of downscaled data
    */
-  static private final void downscaleLine(final double[] pixels, final double[] cache,
+  private static final void downscaleLine(final double[] pixels, final double[] cache,
       final double[] kernel, final int reduceBy, final int pixel0, final int unscaled0,
       final int length, final int pointInc, final int newLength) {
     int p = pixel0 + pointInc * (unscaled0 - reduceBy * 3 / 2); // pointer in pixels array
@@ -354,7 +381,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    * length of the kernel runs from -1.5 to +1.5, and the standard deviation is 1/2. Array index
    * corresponding to the kernel center is unitLength*3/2
    */
-  static private final double[] makeDownscaleKernel(final int unitLength) {
+  private static final double[] makeDownscaleKernel(final int unitLength) {
     final int mid = unitLength * 3 / 2;
     final double[] kernel = new double[3 * unitLength];
     for (int i = 0; i <= unitLength / 2; i++) {
@@ -376,14 +403,13 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    * Scale a line up by factor <code>reduceBy</code> and write as a row or column (or part thereof)
    * to the pixels array of a FloatProcessor.
    */
-  static private final void upscaleLine(final double[] cache, final double[] pixels,
+  private static final void upscaleLine(final double[] cache, final double[] pixels,
       final double[] kernel, final int reduceBy, final int pixel0, final int unscaled0,
       final int writeFrom, final int writeTo, final int pointInc) {
     int p = pixel0 + pointInc * writeFrom;
     for (int xout = writeFrom; xout < writeTo; xout++, p += pointInc) {
-      final int xin = (xout - unscaled0 + reduceBy - 1) / reduceBy; // the corresponding point in
-                                                                    // the cache (if exact) or the
-                                                                    // one above
+      // the corresponding point in the cache (if exact) or the one above
+      final int xin = (xout - unscaled0 + reduceBy - 1) / reduceBy;
       final int x = reduceBy - 1 - (xout - unscaled0 + reduceBy - 1) % reduceBy;
       pixels[p] = cache[xin - 2] * kernel[x] + cache[xin - 1] * kernel[x + reduceBy]
           + cache[xin] * kernel[x + 2 * reduceBy] + cache[xin + 1] * kernel[x + 3 * reduceBy];
@@ -397,7 +423,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    * downscaled cordinates. The kernel runs from [-2 to +2[, corresponding to array index 0 ...
    * 4*unitLength (whereby the last point is not in the array any more).
    */
-  static private final double[] makeUpscaleKernel(final int unitLength) {
+  private static final double[] makeUpscaleKernel(final int unitLength) {
     final double[] kernel = new double[4 * unitLength];
     final int mid = 2 * unitLength;
     kernel[0] = 0;
@@ -437,7 +463,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    * @param pointInc Increment of the pixels array index to the next point (for an ImageProcessor,
    *        it should be <code>1</code> for a row, <code>width</code> for a column)
    */
-  static private final void convolveLine(final double[] input, final double[] pixels,
+  private static final void convolveLine(final double[] input, final double[] pixels,
       final double[][] kernel, final int readFrom, final int readTo, final int writeFrom,
       final int writeTo, final int point0, final int pointInc) {
     final int length = input.length;
@@ -450,7 +476,8 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
     final int firstPart = kRadius < length ? kRadius : length;
     int p = point0 + writeFrom * pointInc;
     int i = writeFrom;
-    for (; i < firstPart; i++, p += pointInc) { // while the sum would include pixels < 0
+    // while the sum would include pixels < 0
+    for (; i < firstPart; i++, p += pointInc) {
       double result = input[i] * kern0;
       result += kernSum[i] * first;
       if (i + kRadius > length) {
@@ -469,15 +496,16 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
       pixels[p] = result;
     }
     final int iEndInside = length - kRadius < writeTo ? length - kRadius : writeTo;
-    for (; i < iEndInside; i++, p += pointInc) { // while only pixels within the line are be
-                                                 // addressed (the easy case)
+    // while only pixels within the line are be addressed (the easy case)
+    for (; i < iEndInside; i++, p += pointInc) {
       double result = input[i] * kern0;
       for (int k = 1; k < kRadius; k++) {
         result += kern[k] * (input[i - k] + input[i + k]);
       }
       pixels[p] = result;
     }
-    for (; i < writeTo; i++, p += pointInc) { // while the sum would include pixels >= length
+    // while the sum would include pixels >= length
+    for (; i < writeTo; i++, p += pointInc) {
       double result = input[i] * kern0;
       if (i < kRadius) {
         result += kernSum[i] * first;
@@ -574,13 +602,6 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
       kernel[1][i] = rsum;
     }
     return kernel;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public DoubleGaussianFilter clone() {
-    final DoubleGaussianFilter o = (DoubleGaussianFilter) super.clone();
-    return o;
   }
 
   /**

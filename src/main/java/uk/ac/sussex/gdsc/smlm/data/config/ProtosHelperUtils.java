@@ -22,19 +22,39 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.results.predicates;
-
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+package uk.ac.sussex.gdsc.smlm.data.config;
 
 /**
- * Represents a predicate (boolean-valued function) of one argument.
+ * Contains helper functions for the ResultsProtos class.
  */
-public interface PeakResultPredicate {
+final class ProtosHelperUtils {
+
+  private static final String UNKNOWN_NAME = "Unknown name: ";
+  private static final String UNKNOWN_METHOD = "Unknown method: ";
+
+  /** The constant "Unknown". */
+  public static final String UNKNOWN = "Unknown";
+
+  /** No public constructor. */
+  private ProtosHelperUtils() {}
+
   /**
-   * Evaluates this predicate on the given argument.
+   * Create a message when the name of the object cannot be determined.
    *
-   * @param peakResult the input argument
-   * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+   * @param object the object
+   * @return the message
    */
-  public boolean test(PeakResult peakResult);
+  public static String unknownNameMessage(Object object) {
+    return UNKNOWN_NAME + object;
+  }
+
+  /**
+   * Create a message when the method of the object cannot be determined.
+   *
+   * @param object the object
+   * @return the message
+   */
+  public static String unknownMethodMessage(Object object) {
+    return UNKNOWN_METHOD + object;
+  }
 }

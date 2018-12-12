@@ -39,7 +39,10 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * 25, Issue 10, pp 11701-11716.
  */
 public class WPoissonGradientProcedure4 extends WPoissonGradientProcedure {
+
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param var the base variance of each observation (must be positive)
    * @param func Gradient function

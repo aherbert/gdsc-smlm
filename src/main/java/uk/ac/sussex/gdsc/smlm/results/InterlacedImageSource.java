@@ -53,8 +53,7 @@ public class InterlacedImageSource extends ImageSource {
    * @throws IllegalArgumentException If the image is null or aggregated, or the interlace arguments
    *         are invalid
    */
-  public InterlacedImageSource(ImageSource imageSource, int start, int size, int skip)
-      throws IllegalArgumentException {
+  public InterlacedImageSource(ImageSource imageSource, int start, int size, int skip) {
     super("");
     if (imageSource == null) {
       throw new IllegalArgumentException("Image source must not be null");

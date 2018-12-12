@@ -36,23 +36,32 @@ import org.jtransforms.utils.CommonUtils;
  * Computes a convolution/correlation in the frequency domain using a Fast Hartley Tranform. An
  * option edge window function can be applied.
  */
-public class FHTFilter extends BaseFilter {
+public class FHTFilter {
   /**
    * The filter operation.
    */
   public enum Operation implements NamedObject {
-    //@formatter:off
-        /** Correlation. */
-        CORRELATION { @Override public String getName() { return "Correlation"; } },
-        /** Convolution. */
-        CONVOLUTION { @Override public String getName() { return "Convolution"; } },
-        /** Deconvolution. */
-        DECONVOLUTION { @Override public String getName() { return "Deconvolution"; } };
-    //@formatter:on
+    /** Correlation. */
+    CORRELATION("Correlation"),
+    /** Convolution. */
+    CONVOLUTION("Convolution"),
+    /** Deconvolution. */
+    DECONVOLUTION("Deconvolution");
+
+    private final String niceName;
+
+    Operation(String name) {
+      niceName = name;
+    }
+
+    @Override
+    public String getName() {
+      return niceName;
+    }
 
     @Override
     public String getShortName() {
-      return getName();
+      return niceName;
     }
 
     /**
@@ -93,7 +102,7 @@ public class FHTFilter extends BaseFilter {
    * @param kh the kernel height
    * @throws IllegalArgumentException if the kernel width or height does not match the kernel size
    */
-  public FHTFilter(float[] kernel, int kw, int kh) throws IllegalArgumentException {
+  public FHTFilter(float[] kernel, int kw, int kh) {
     checkKernel(kernel, kw, kh);
     this.kernel = kernel.clone();
     this.kw = kw;
@@ -106,6 +115,32 @@ public class FHTFilter extends BaseFilter {
         kernel[i] *= scale;
       }
     }
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected FHTFilter(FHTFilter source) {
+    // These are thread safe
+    kernel = source.kernel;
+    kw = source.kw;
+    kh = source.kh;
+    kN = source.kN;
+    kernelFht = source.kernelFht;
+    operation = source.operation;
+    w = source.w;
+    edge = source.edge;
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public FHTFilter copy() {
+    return new FHTFilter(this);
   }
 
   private static void checkKernel(float[] kernel, int kw, int kh) {
@@ -187,8 +222,6 @@ public class FHTFilter extends BaseFilter {
     // Do the transform using JTransforms as it is faster
     dht.inverse(result.getData(), true);
 
-    // result.inverseTransform();
-
     result.swapQuadrants();
     if (maxx < maxN || maxy < maxN) {
       final int x = getInsert(maxN, maxx);
@@ -251,9 +284,6 @@ public class FHTFilter extends BaseFilter {
     dht.forward(data);
     kernelFht = new Fht(data, maxN, true);
 
-    // kernelFht = new FHT2(data, maxN, false);
-    // kernelFht.transform();
-
     if (operation == Operation.DECONVOLUTION) {
       kernelFht.initialiseFastOperations();
     } else {
@@ -305,14 +335,7 @@ public class FHTFilter extends BaseFilter {
 
     // Do the transform using JTransforms as it is faster
     dht.forward(data);
-    final Fht result = new Fht(data, maxN, true);
-
-    // FHT2 result = new FHT2(data, maxN, false);
-    // Copy the initialised tables
-    // result.copyTables(kernelFht);
-    // result.transform();
-
-    return result;
+    return new Fht(data, maxN, true);
   }
 
   /**
@@ -365,14 +388,6 @@ public class FHTFilter extends BaseFilter {
         kernel[cj] *= weight;
       }
     }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public FHTFilter clone() {
-    final FHTFilter fht = (FHTFilter) super.clone();
-    fht.tmp = null; // This cannot be shared across instances
-    return fht;
   }
 
   /**

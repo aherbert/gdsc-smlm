@@ -45,7 +45,7 @@ public class FloatImage2D extends Image2D {
    * @param nr the number of rows
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public FloatImage2D(int nc, int nr) throws IllegalArgumentException {
+  public FloatImage2D(int nc, int nr) {
     super(nc, nr);
   }
 
@@ -55,7 +55,7 @@ public class FloatImage2D extends Image2D {
    * @param image the image
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public FloatImage2D(ImageProcessor image) throws IllegalArgumentException {
+  public FloatImage2D(ImageProcessor image) {
     super(image);
   }
 
@@ -73,7 +73,7 @@ public class FloatImage2D extends Image2D {
    * @param data the data
    * @throws IllegalArgumentException If the data is not the correct length
    */
-  public FloatImage2D(int nc, int nr, float[] data) throws IllegalArgumentException {
+  public FloatImage2D(int nc, int nr, float[] data) {
     // Avoid constructor that calls createData(int)
     super(nc, nr, false);
     if (data == null || data.length != checkSize(nc, nr, true)) {
@@ -119,7 +119,7 @@ public class FloatImage2D extends Image2D {
 
   /** {@inheritDoc} */
   @Override
-  public FloatImage2D crop(int x, int y, int w, int h) throws IllegalArgumentException {
+  public FloatImage2D crop(int x, int y, int w, int h) {
     return crop(x, y, w, h, null);
   }
 
@@ -134,8 +134,7 @@ public class FloatImage2D extends Image2D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public FloatImage2D crop(int x, int y, int w, int h, float[] region)
-      throws IllegalArgumentException {
+  public FloatImage2D crop(int x, int y, int w, int h, float[] region) {
     // Check the region range
     if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr) {
       throw new IllegalArgumentException("Region not within the data");
@@ -165,8 +164,8 @@ public class FloatImage2D extends Image2D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public static FloatImage2D crop(ImageProcessor image, int x, int y, int w, int h, float[] region)
-      throws IllegalArgumentException {
+  public static FloatImage2D crop(ImageProcessor image, int x, int y, int w, int h,
+      float[] region) {
     final int nc = image.getWidth();
     final int nr = image.getHeight();
 
@@ -201,7 +200,7 @@ public class FloatImage2D extends Image2D {
   }
 
   @Override
-  public void insert(int x, int y, Image2D image) throws IllegalArgumentException {
+  public void insert(int x, int y, Image2D image) {
     if (image instanceof FloatImage2D) {
       insert(x, y, (FloatImage2D) image);
     } else {
@@ -217,7 +216,7 @@ public class FloatImage2D extends Image2D {
    * @param image the image
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, FloatImage2D image) throws IllegalArgumentException {
+  public void insert(int x, int y, FloatImage2D image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();

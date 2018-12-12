@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.smlm.function.FastLog;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
- * Create a gradient procedure for use in the Levenberg–Marquardt (LVM) algorithm
+ * Create a gradient procedure for use in the Levenberg–Marquardt (LVM) algorithm.
  */
 public class LVMGradientProcedureFactory {
   /**
@@ -36,11 +36,12 @@ public class LVMGradientProcedureFactory {
    */
   public enum Type {
     //@formatter:off
-    /** Least-squares */
+    /** Least-squares. */
     LSQ,
     /** Maximum Likelihood Estimation (using LVM). */
     MLE { @Override public boolean isMLE()  {return true;} },
-    /** Weighted least-squares */
+
+    /** Weighted least-squares. */
     WLSQ,
     /** Fast Maximum Likelihood Estimation (using Newton iteration). */
     FastLogMLE { @Override public boolean isMLE()  {return true;} };

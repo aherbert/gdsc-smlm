@@ -28,46 +28,46 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Class for evaluating a function.
  */
 public class StandardValueProcedure implements ValueProcedure {
-  private int i;
+  private int index;
   /** The values from the last call to {@link #getValues(ValueFunction, double[])}. */
   public double[] values;
 
   /**
    * Gets the values.
    *
-   * @param f the function
-   * @param a the function coefficients
+   * @param function the function
+   * @param parameters the function coefficients
    * @return the values
    */
-  public double[] getValues(ValueFunction f, double[] a) {
-    values = new double[f.size()];
-    i = 0;
-    f.initialise0(a);
-    f.forEach(this);
+  public double[] getValues(ValueFunction function, double[] parameters) {
+    values = new double[function.size()];
+    index = 0;
+    function.initialise0(parameters);
+    function.forEach(this);
     return values;
   }
 
   /**
    * Gets the values into the buffer.
    *
-   * @param f the function
-   * @param a the function coefficients
+   * @param function the function
+   * @param parameters the function coefficients
    * @param buffer the buffer
    * @param offset the offset
    */
-  public void getValues(ValueFunction f, double[] a, double[] buffer, int offset) {
-    if (buffer == null || buffer.length < offset + f.size()) {
+  public void getValues(ValueFunction function, double[] parameters, double[] buffer, int offset) {
+    if (buffer == null || buffer.length < offset + function.size()) {
       throw new IllegalArgumentException("Buffer is not large enough for the function values");
     }
     values = buffer;
-    i = offset;
-    f.initialise0(a);
-    f.forEach(this);
+    index = offset;
+    function.initialise0(parameters);
+    function.forEach(this);
   }
 
   /** {@inheritDoc} */
   @Override
   public void execute(double value) {
-    values[i++] = value;
+    values[index++] = value;
   }
 }

@@ -498,8 +498,8 @@ public class FilterAnalysis implements PlugIn {
     if (!hysteresisPrecisionFilter) {
       return;
     }
-    for (int precisionGap = minPrecisionGap; precisionGap <= maxPrecisionGap; precisionGap +=
-        incPrecisionGap) {
+    for (int precisionGap = minPrecisionGap; precisionGap <= maxPrecisionGap;
+        precisionGap += incPrecisionGap) {
       final List<Filter> filters = new LinkedList<>();
       for (int precision = minPrecision; precision <= maxPrecision; precision++) {
         filters.add(new PrecisionHysteresisFilter(2, 0, 1, 0, precision, precisionGap));

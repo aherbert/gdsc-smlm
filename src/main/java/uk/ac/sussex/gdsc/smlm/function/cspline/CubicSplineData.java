@@ -325,8 +325,7 @@ public class CubicSplineData {
    * @param progress the progress
    * @throws IllegalArgumentException If the number of sample is not positive
    */
-  public void sample(int nx, int ny, int nz, TrivalueProcedure procedure, TrackProgress progress)
-      throws IllegalArgumentException {
+  public void sample(int nx, int ny, int nz, TrivalueProcedure procedure, TrackProgress progress) {
     if (nx < 1 || ny < 1 || nz < 1) {
       throw new IllegalArgumentException("Samples must be positive");
     }

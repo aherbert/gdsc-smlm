@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class CircularMeanDataProcessor extends DataProcessor {
   private final double radius;
-  private CircularMeanFilter filter;
+  private final CircularMeanFilter filter;
 
   /**
    * Constructor.
@@ -47,6 +47,23 @@ public class CircularMeanDataProcessor extends DataProcessor {
     super(border);
     this.radius = getSigma(smooth);
     filter = new CircularMeanFilter();
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected CircularMeanDataProcessor(CircularMeanDataProcessor source) {
+    super(source);
+    radius = source.radius;
+    filter = source.filter.copy();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public CircularMeanDataProcessor copy() {
+    return new CircularMeanDataProcessor(this);
   }
 
   /**
@@ -103,15 +120,6 @@ public class CircularMeanDataProcessor extends DataProcessor {
    */
   public double getRadius() {
     return radius;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public CircularMeanDataProcessor clone() {
-    final CircularMeanDataProcessor f = (CircularMeanDataProcessor) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.filter = filter.clone();
-    return f;
   }
 
   /** {@inheritDoc} */

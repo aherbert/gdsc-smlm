@@ -146,7 +146,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
   /** {@inheritDoc} */
   @Override
-  public void reorderFast(int[] indices) throws IllegalArgumentException {
+  public void reorderFast(int[] indices) {
     if (dirty) {
       throw new IllegalArgumentException("Mesh has been modified");
     }
@@ -237,7 +237,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor(Color3f[] color) throws IllegalArgumentException {
+  public void setItemColor(Color3f[] color) {
     this.color = null;
     final int size = size();
     if (color.length != size) {
@@ -266,7 +266,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor4(Color4f[] color) throws IllegalArgumentException {
+  public void setItemColor4(Color4f[] color) {
     this.color = null;
     final int size = size();
     if (color.length != size) {
@@ -291,7 +291,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float[] alpha) {
     final int size = size();
     if (alpha.length != size) {
       throw new IllegalArgumentException("list of size " + size + " expected");
@@ -317,7 +317,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float alpha) {
     int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
@@ -340,7 +340,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
   /** {@inheritDoc} */
   @Override
-  public void getItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void getItemAlpha(float[] alpha) {
     final int size = size();
     if (alpha.length != size) {
       throw new IllegalArgumentException("list of size " + size + " expected");

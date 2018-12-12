@@ -86,7 +86,7 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
    * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]
    * </pre>
    *
-   * This value multiplied by the [gain]^2 is the variance in counts.
+   * <p>This value multiplied by the [gain]^2 is the variance in counts.
    *
    * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getNormalisedVariance(java.awt.Rectangle)
    */
@@ -107,7 +107,7 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
    * Total variance (photons) = [Poisson mean] * 2 + [normalised variance]
    * </pre>
    *
-   * This value multiplied by the [gain]^2 is the variance in counts.
+   * <p>This value multiplied by the [gain]^2 is the variance in counts.
    *
    * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
    */

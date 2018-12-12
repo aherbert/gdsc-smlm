@@ -24,12 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
+import ij3d.ContentNode;
+
 import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Tuple3d;
-
-import ij3d.ContentNode;
 
 /**
  * Node to allow display of ItemGroup content.

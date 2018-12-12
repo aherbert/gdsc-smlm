@@ -76,8 +76,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
    * @throws IllegalArgumentException If the function does not have an integer grid spacing from the
    *         origin
    */
-  public MultiCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy)
-      throws IllegalArgumentException {
+  public MultiCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy) {
     super(splineData, maxx, maxy);
   }
 
@@ -95,7 +94,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
    *         origin
    */
   public MultiCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy, double cx,
-      double cy, double cz, int scale) throws IllegalArgumentException {
+      double cy, double cz, int scale) {
     super(splineData, maxx, maxy, cx, cy, cz, scale);
   }
 
@@ -111,7 +110,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
    * @param n the new number of splines to draw
    * @throws IllegalArgumentException If the number is not strictly positive
    */
-  public void setN(int n) throws IllegalArgumentException {
+  public void setN(int n) {
     if (n < 1) {
       throw new IllegalArgumentException();
     }

@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Contains common functionality for weighted filters.
  */
-public abstract class BaseWeightedFilter extends BaseFilter {
+public abstract class BaseWeightedFilter {
   /** The weights. */
   protected float[] weights;
 
@@ -36,6 +36,26 @@ public abstract class BaseWeightedFilter extends BaseFilter {
 
   /** The height of the weights. */
   protected int weightHeight;
+
+  /**
+   * Instantiates a new base weighted filter.
+   */
+  protected BaseWeightedFilter() {
+    // Do nothing
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected BaseWeightedFilter(BaseWeightedFilter source) {
+    // Should be thread safe
+    this.weights = source.weights;
+    // this.weights = ArrayUtils.clone(source.weights)
+    this.weightWidth = source.weightWidth;
+    this.weightHeight = source.weightHeight;
+  }
 
   /**
    * Sets the weights of the data. This should be called before filtering data samples.
@@ -65,10 +85,4 @@ public abstract class BaseWeightedFilter extends BaseFilter {
    * weights.
    */
   protected abstract void newWeights();
-
-  /** {@inheritDoc} */
-  @Override
-  public BaseWeightedFilter clone() {
-    return (BaseWeightedFilter) super.clone();
-  }
 }

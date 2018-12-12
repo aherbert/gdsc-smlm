@@ -37,12 +37,13 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * 15.5.8 for Nonlinear Models.
  */
 public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure {
-  /**
-   * The scaled Hessian curvature matrix (size n*n)
-   */
+
+  /** The scaled Hessian curvature matrix (size n*n). */
   public final double[][] alpha;
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param b Baseline pre-computed y-values
    * @param func Gradient function

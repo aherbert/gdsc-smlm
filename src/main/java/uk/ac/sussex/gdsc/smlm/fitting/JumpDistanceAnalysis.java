@@ -1670,7 +1670,7 @@ public class JumpDistanceAnalysis {
 
     /** {@inheritDoc} */
     @Override
-    public double[] value(double[] point) throws IllegalArgumentException {
+    public double[] value(double[] point) {
       return getValue(point);
     }
 
@@ -1970,7 +1970,7 @@ public class JumpDistanceAnalysis {
    * }
    * </pre>
    *
-   * Note this is only valid for {@code n>=1}.
+   * <p>Note this is only valid for {@code n>=1}.
    *
    * @param n the n
    * @return the conversion factor
@@ -2003,16 +2003,15 @@ public class JumpDistanceAnalysis {
    * <pre>
    * {@code
    * n>=1:
-   * observed = actual * (n - 1/3) / n
-   * actual = observed * n / (n - 1/3)
-   *
+   *   observed = actual * (n - 1/3) / n
+   *   actual = observed * n / (n - 1/3)
    * n<1:
-   * observed = actual * (n - n*n / 3)
-   * actual = observed / (n - n*n / 3)
+   *   observed = actual * (n - n*n / 3)
+   *   actual = observed / (n - n*n / 3)
    * }
    * </pre>
    *
-   * Note this is valid for {@code n>=0}.
+   * <p>Note this is valid for {@code n>=0}.
    *
    * @param n the n
    * @return the conversion factor
@@ -2041,7 +2040,7 @@ public class JumpDistanceAnalysis {
    * {@code correctedFrames = n - 1/3}
    * </pre>
    *
-   * Note this is only valid for {@code n>=1}.
+   * <p>Note this is only valid for {@code n>=1}.
    *
    * @param n the n
    * @return the corrected time
@@ -2067,7 +2066,7 @@ public class JumpDistanceAnalysis {
    * }
    * </pre>
    *
-   * Note this is only valid for {@code n>=1}.
+   * <p>Note this is only valid for {@code n>=1}.
    *
    * @param msd The observed MSD
    * @param n The number of frames separating the start and end points for the MSD
@@ -2094,7 +2093,7 @@ public class JumpDistanceAnalysis {
    * }
    * </pre>
    *
-   * Note this is only valid for {@code n>=1}.
+   * <p>Note this is only valid for {@code n>=1}.
    *
    * @param msd The actual MSD
    * @param n The number of frames separating the start and end points for the MSD
@@ -2209,8 +2208,8 @@ public class JumpDistanceAnalysis {
    * D* = factor * (D - s2) / (n * deltaT)
    * </pre>
    *
-   * where factor is the conversion factor to increase the MSD to correct for diffusion within the
-   * frame
+   * <p>where factor is the conversion factor to increase the MSD to correct for diffusion within
+   * the frame
    *
    * @param d The fitted diffusion coefficients D (in um^2)
    * @return The apparent diffusion coefficients D* (in um^2/s)

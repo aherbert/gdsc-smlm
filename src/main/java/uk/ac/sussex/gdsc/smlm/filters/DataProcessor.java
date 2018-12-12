@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Define a class to pre-process the data, ignoring a defined border.
  */
-public abstract class DataProcessor implements Cloneable {
+public abstract class DataProcessor {
   private final int border;
 
   /**
@@ -39,6 +39,15 @@ public abstract class DataProcessor implements Cloneable {
    */
   public DataProcessor(int border) {
     this.border = border;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected DataProcessor(DataProcessor source) {
+    border = source.border;
   }
 
   /**
@@ -84,15 +93,12 @@ public abstract class DataProcessor implements Cloneable {
     return border;
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public DataProcessor clone() {
-    try {
-      return (DataProcessor) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
-  }
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public abstract DataProcessor copy();
 
   /**
    * @return A description of the processor and parameters.

@@ -44,7 +44,7 @@ public class FramePeakResultPredicate implements PeakResultPredicate {
 
   /** {@inheritDoc} */
   @Override
-  public boolean test(PeakResult t) {
-    return t.getFrame() == frame;
+  public boolean test(PeakResult peakResult) {
+    return peakResult.getFrame() == frame;
   }
 }

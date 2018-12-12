@@ -53,6 +53,8 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
   private final double[] J;
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param x Data to fit (must be positive, i.e. the value of a Poisson process)
    * @param func Gradient function (must produce a strictly positive value, i.e. the mean of a
    *        Poisson process)

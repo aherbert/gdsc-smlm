@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
+import customnode.CustomPointMesh;
+
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
@@ -35,8 +37,6 @@ import org.scijava.vecmath.Point3f;
 
 import java.util.Arrays;
 import java.util.List;
-
-import customnode.CustomPointMesh;
 
 /**
  * Create an object to represent a set of points.
@@ -103,14 +103,14 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 
   /** {@inheritDoc} */
   @Override
-  public void reorder(int[] indices) throws IllegalArgumentException {
+  public void reorder(int[] indices) {
     checkIndices(indices, mesh.size());
     reorderFast(indices);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void reorderFast(int[] indices) throws IllegalArgumentException {
+  public void reorderFast(int[] indices) {
     changed = true;
 
     final int oldSize = size();
@@ -204,7 +204,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor(Color3f[] color) throws IllegalArgumentException {
+  public void setItemColor(Color3f[] color) {
     this.color = null;
     if (color.length != size()) {
       throw new IllegalArgumentException("list of size " + size() + " expected");

@@ -44,7 +44,7 @@ public class IdPeakResultPredicate implements PeakResultPredicate {
 
   /** {@inheritDoc} */
   @Override
-  public boolean test(PeakResult t) {
-    return t.getId() == id;
+  public boolean test(PeakResult peakResult) {
+    return peakResult.getId() == id;
   }
 }

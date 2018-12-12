@@ -1196,7 +1196,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       } else {
         showTemplate(template);
       }
-
     }
     return true;
   }

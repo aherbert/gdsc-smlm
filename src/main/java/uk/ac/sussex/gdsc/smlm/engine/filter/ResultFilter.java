@@ -136,5 +136,4 @@ public abstract class ResultFilter {
   public List<PeakResult> getResults() {
     return peakResults;
   }
-
 }

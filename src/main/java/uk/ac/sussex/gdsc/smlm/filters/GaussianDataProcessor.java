@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class GaussianDataProcessor extends DataProcessor {
   private final double sigma;
-  private GaussianFilter filter;
+  private final GaussianFilter filter;
 
   /**
    * Constructor.
@@ -48,6 +48,24 @@ public class GaussianDataProcessor extends DataProcessor {
     super(border);
     this.sigma = getSigma(smooth);
     filter = new GaussianFilter(0.02);
+  }
+
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected GaussianDataProcessor(GaussianDataProcessor source) {
+    super(source);
+    sigma = source.sigma;
+    filter = source.filter.copy();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public GaussianDataProcessor copy() {
+    return new GaussianDataProcessor(this);
   }
 
   /**
@@ -102,15 +120,6 @@ public class GaussianDataProcessor extends DataProcessor {
    */
   public double getSigma() {
     return sigma;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public GaussianDataProcessor clone() {
-    final GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.filter = filter.clone();
-    return f;
   }
 
   /** {@inheritDoc} */

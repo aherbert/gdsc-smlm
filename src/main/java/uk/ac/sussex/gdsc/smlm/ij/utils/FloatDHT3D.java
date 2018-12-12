@@ -51,7 +51,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @throws IllegalArgumentException If any dimension is less than 2, or if the combined dimensions
    *         is too large for an array
    */
-  public FloatDHT3D(ImageStack stack) throws IllegalArgumentException {
+  public FloatDHT3D(ImageStack stack) {
     super(stack);
     LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
     dht = new FloatDHT_3D(ns, nr, nc);
@@ -68,8 +68,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @throws IllegalArgumentException If any dimension is less than 2, or if the data is not the
    *         correct length
    */
-  public FloatDHT3D(int nc, int nr, int ns, float[] data, boolean isFrequencyDomain)
-      throws IllegalArgumentException {
+  public FloatDHT3D(int nc, int nr, int ns, float[] data, boolean isFrequencyDomain) {
     super(nc, nr, ns, data);
     LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
     dht = new FloatDHT_3D(ns, nr, nc);
@@ -115,7 +114,7 @@ public class FloatDHT3D extends FloatImage3D {
    *
    * @throws IllegalArgumentException If already in the frequency domain
    */
-  public void transform() throws IllegalArgumentException {
+  public void transform() {
     if (isFrequencyDomain) {
       throw new IllegalArgumentException("Already frequency domain DHT");
     }
@@ -129,7 +128,7 @@ public class FloatDHT3D extends FloatImage3D {
    *
    * @throws IllegalArgumentException If already in the space domain
    */
-  public void inverseTransform() throws IllegalArgumentException {
+  public void inverseTransform() {
     if (!isFrequencyDomain) {
       throw new IllegalArgumentException("Already space domain DHT");
     }
@@ -236,7 +235,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT3D multiply(FloatDHT3D dht) throws IllegalArgumentException {
+  public FloatDHT3D multiply(FloatDHT3D dht) {
     return multiply(dht, null);
   }
 
@@ -250,7 +249,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT3D multiply(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException {
+  public FloatDHT3D multiply(FloatDHT3D dht, float[] tmp) {
     checkDHT(dht);
     return (dht.isFastMultiply()) ? multiply(dht.h2e, dht.h2o, dht.jj, tmp)
         : multiply(dht.getData(), tmp);
@@ -266,7 +265,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  private FloatDHT3D multiply(float[] h2, float[] tmp) throws IllegalArgumentException {
+  private FloatDHT3D multiply(float[] h2, float[] tmp) {
     final float[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new float[h1.length];
@@ -322,7 +321,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT3D conjugateMultiply(FloatDHT3D dht) throws IllegalArgumentException {
+  public FloatDHT3D conjugateMultiply(FloatDHT3D dht) {
     return conjugateMultiply(dht, null);
   }
 
@@ -336,7 +335,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT3D conjugateMultiply(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException {
+  public FloatDHT3D conjugateMultiply(FloatDHT3D dht, float[] tmp) {
     checkDHT(dht);
     return (dht.isFastMultiply()) ? conjugateMultiply(dht.h2e, dht.h2o, dht.jj, tmp)
         : conjugateMultiply(dht.getData(), tmp);
@@ -352,7 +351,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  private FloatDHT3D conjugateMultiply(float[] h2, float[] tmp) throws IllegalArgumentException {
+  private FloatDHT3D conjugateMultiply(float[] h2, float[] tmp) {
     final float[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new float[h1.length];
@@ -405,7 +404,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @throws IllegalArgumentException if the dht is not the same dimensions or in the frequency
    *         domain
    */
-  public FloatDHT3D divide(FloatDHT3D dht) throws IllegalArgumentException {
+  public FloatDHT3D divide(FloatDHT3D dht) {
     return divide(dht, null);
   }
 
@@ -420,7 +419,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @throws IllegalArgumentException if the dht is not the same dimensions or in the frequency
    *         domain
    */
-  public FloatDHT3D divide(FloatDHT3D dht, float[] tmp) throws IllegalArgumentException {
+  public FloatDHT3D divide(FloatDHT3D dht, float[] tmp) {
     checkDHT(dht);
     return (dht.isFastOperations()) ? divide(dht.h2e, dht.h2o, dht.jj, dht.mag, tmp)
         : divide(dht.getData(), tmp);
@@ -437,7 +436,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @throws IllegalArgumentException if the dht is not the same dimensions or in the frequency
    *         domain
    */
-  private FloatDHT3D divide(float[] h2, float[] tmp) throws IllegalArgumentException {
+  private FloatDHT3D divide(float[] h2, float[] tmp) {
     final float[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new float[h1.length];
@@ -492,7 +491,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @param dht the dht
    * @throws IllegalArgumentException If multiplication is not possible
    */
-  private void checkDHT(FloatDHT3D dht) throws IllegalArgumentException {
+  private void checkDHT(FloatDHT3D dht) {
     if (dht.ns != ns || dht.nr != nr || dht.nc != nc) {
       throw new IllegalArgumentException("Dimension mismatch");
     }
@@ -513,7 +512,7 @@ public class FloatDHT3D extends FloatImage3D {
    *      "https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform">https://en.wikipedia.org/
    *      wiki/Hartley_transform#Relation_to_Fourier_transform</a>
    */
-  public FloatImage3D[] toDFT(float[] real, float[] imaginary) throws IllegalArgumentException {
+  public FloatImage3D[] toDFT(float[] real, float[] imaginary) {
     if (!isFrequencyDomain) {
       throw new IllegalArgumentException("Require frequency domain DHT");
     }
@@ -550,8 +549,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the DHT
    * @throws IllegalArgumentException If there is a dimension mismatch
    */
-  public static FloatDHT3D fromDFT(FloatImage3D real, FloatImage3D imaginary, float[] tmp)
-      throws IllegalArgumentException {
+  public static FloatDHT3D fromDFT(FloatImage3D real, FloatImage3D imaginary, float[] tmp) {
     if (real.ns != imaginary.ns || real.nr != imaginary.nr || real.nc != imaginary.nc) {
       throw new IllegalArgumentException("Dimension mismatch");
     }
@@ -593,7 +591,7 @@ public class FloatDHT3D extends FloatImage3D {
    * @return the result
    * @throws IllegalArgumentException if not in the frequency domain
    */
-  public FloatImage3D getAbsoluteValue(float[] tmp) throws IllegalArgumentException {
+  public FloatImage3D getAbsoluteValue(float[] tmp) {
     if (!isFrequencyDomain) {
       throw new IllegalArgumentException("Require frequency domain DHT");
     }
@@ -626,13 +624,13 @@ public class FloatDHT3D extends FloatImage3D {
    * 4 +-+ &lt;=&gt; 6 -+-
    * </pre>
    *
-   * Requires even dimensions.
+   * <p>Requires even dimensions.
    *
    * @throws IllegalArgumentException If not even dimensions
    * @see <a href=
    *      "https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
    */
-  public void swapOctants() throws IllegalArgumentException {
+  public void swapOctants() {
     swapOctants(this);
   }
 
@@ -647,14 +645,14 @@ public class FloatDHT3D extends FloatImage3D {
    * 4 +-+ &lt;=&gt; 6 -+-
    * </pre>
    *
-   * Requires even dimensions.
+   * <p>Requires even dimensions.
    *
    * @param image the image
    * @throws IllegalArgumentException If not even dimensions
    * @see <a href=
    *      "https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
    */
-  public static void swapOctants(FloatImage3D image) throws IllegalArgumentException {
+  public static void swapOctants(FloatImage3D image) {
     final int ns = image.ns;
     final int nr = image.nr;
     final int nc = image.nc;
@@ -731,14 +729,14 @@ public class FloatDHT3D extends FloatImage3D {
    * 4 +-+ &lt;=&gt; 6 -+-
    * </pre>
    *
-   * Requires even dimensions in a 32-bit float stack.
+   * <p>Requires even dimensions in a 32-bit float stack.
    *
    * @param stack the stack
    * @throws IllegalArgumentException If not a float stack with even dimensions
    * @see <a href=
    *      "https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)">https://en.m.wikipedia.org/wiki/Octant_(solid_geometry)</a>
    */
-  public static void swapOctants(ImageStack stack) throws IllegalArgumentException {
+  public static void swapOctants(ImageStack stack) {
     if (stack.getBitDepth() != 32) {
       throw new IllegalArgumentException("Require float stack");
     }

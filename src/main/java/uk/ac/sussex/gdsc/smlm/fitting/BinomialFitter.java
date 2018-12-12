@@ -595,7 +595,7 @@ public class BinomialFitter {
 
     /** {@inheritDoc} */
     @Override
-    public double[] value(double[] point) throws IllegalArgumentException {
+    public double[] value(double[] point) {
       return getP(point[0]);
     }
 

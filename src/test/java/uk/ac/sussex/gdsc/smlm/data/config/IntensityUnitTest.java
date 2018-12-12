@@ -63,7 +63,7 @@ public class IntensityUnitTest {
       final double v1 = expectedUnits[i].value;
       for (int j = 0; j < n; j++) {
         final IntensityUnit u2 = expectedUnits[j].u;
-        c = UnitConverterFactory.createConverter(u1, u2, offset, countPerPhoton);
+        c = UnitConverterUtils.createConverter(u1, u2, offset, countPerPhoton);
         final double o = c.convert(v1);
         Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
       }
@@ -78,7 +78,7 @@ public class IntensityUnitTest {
       final double v1 = expectedUnits[i].value;
       for (int j = 0; j < n; j++) {
         final IntensityUnit u2 = expectedUnits[j].u;
-        c = UnitConverterFactory.createConverter(u1, u2, countPerPhoton);
+        c = UnitConverterUtils.createConverter(u1, u2, countPerPhoton);
         final double o = c.convert(v1);
         Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
       }

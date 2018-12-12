@@ -44,7 +44,7 @@ public class CubicSplineFunctionFactory {
    *         origin
    */
   public static CubicSplineFunction createCubicSplineFunction(CubicSplineData splineData, int maxx,
-      int maxy, double cx, double cy, double cz, int scale, int n) throws IllegalArgumentException {
+      int maxy, double cx, double cy, double cz, int scale, int n) {
     if (n == 1) {
       return new SingleCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);
     }

@@ -796,7 +796,6 @@ public class PCPALMFitting implements PlugIn {
         gr[1][i] = d[1];
         gr[2][i] = d[2];
       }
-
     } catch (final IOException ex) {
       IJ.error(TITLE, "Unable to read from file " + inputFilename);
       return false;
@@ -1545,8 +1544,8 @@ public class PCPALMFitting implements PlugIn {
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
       for (int i = 0; i < variables.length; i++) {
-        d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter
-                                                  // ?
+        // Should the delta be changed for each parameter?
+        d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
         final double r = this.x.get(i);
@@ -1713,8 +1712,8 @@ public class PCPALMFitting implements PlugIn {
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
       for (int i = 0; i < variables.length; i++) {
-        d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter
-                                                  // ?
+        // Should the delta be changed for each parameter?
+        d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
         final double r = this.x.get(i);
@@ -1870,7 +1869,6 @@ public class PCPALMFitting implements PlugIn {
           //// g2, 1e-2, 1e-5))
           // System.out.printf("[%d][%d] %f == %f\n", i, j, g1, g2);
         }
-
       }
       return gradient;
     }
@@ -1897,7 +1895,7 @@ public class PCPALMFitting implements PlugIn {
     }
 
     @Override
-    public double[] value(double[] point) throws IllegalArgumentException {
+    public double[] value(double[] point) {
       return f.gradient(point);
     }
   }
@@ -2030,8 +2028,8 @@ public class PCPALMFitting implements PlugIn {
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
       for (int i = 0; i < variables.length; i++) {
-        d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter
-                                                  // ?
+        // Should the delta be changed for each parameter?
+        d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
         final double r = this.x.get(i);

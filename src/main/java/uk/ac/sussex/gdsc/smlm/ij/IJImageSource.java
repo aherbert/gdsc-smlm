@@ -124,7 +124,7 @@ public class IJImageSource extends ImageSource {
    * @return the origin
    * @throws IllegalArgumentException If the origin is not in integer pixel units
    */
-  public static int[] getOrigin(ImagePlus imp) throws IllegalArgumentException {
+  public static int[] getOrigin(ImagePlus imp) {
     final Calibration cal = imp.getLocalCalibration();
     if (cal != null) {
       if (cal.xOrigin != 0 || cal.yOrigin != 0) {
@@ -150,7 +150,7 @@ public class IJImageSource extends ImageSource {
    * @return the bounds
    * @throws IllegalArgumentException If the origin is not in integer pixel units
    */
-  public static Rectangle getBounds(ImagePlus imp) throws IllegalArgumentException {
+  public static Rectangle getBounds(ImagePlus imp) {
     final int[] origin = getOrigin(imp);
     return new Rectangle(origin[0], origin[1], imp.getWidth(), imp.getHeight());
   }
@@ -216,17 +216,15 @@ public class IJImageSource extends ImageSource {
         imp = WindowManager.getImage(getName());
       }
 
-      if (imp == null) {
+      if ((imp == null) && (path != null && path.length() > 0)) {
         // Try and open the original image from file
-        if (path != null && path.length() > 0) {
-          imp = IJ.openImage(path);
-          if (imp == null) {
-            // Some readers return null and display the image, e.g. BioFormats.
-            // Add code to handle this.
-          } else // Ensure the image has the correct name
-          if (getName() != null) {
-            imp.setTitle(getName());
-          }
+        imp = IJ.openImage(path);
+        if (imp == null) {
+          // Some readers return null and display the image, e.g. BioFormats.
+          // Add code to handle this.
+        } else if (getName() != null) {
+          // Ensure the image has the correct name
+          imp.setTitle(getName());
         }
       }
       return initialise(imp);

@@ -730,8 +730,8 @@ public class CMOSAnalysis implements PlugIn {
         ArrayMoment moment;
         if (rollingAlgorithm) {
           moment = new RollingArrayMoment();
-        } else // We assume 16-bit camera at the maximum
-        if (bitDepth <= 16
+          // We assume 16-bit camera at the maximum
+        } else if (bitDepth <= 16
             && IntegerArrayMoment.isValid(IntegerType.UNSIGNED_16, source.getFrames())) {
           moment = new IntegerArrayMoment();
         } else {
@@ -948,8 +948,7 @@ public class CMOSAnalysis implements PlugIn {
     final DoubleData data = new StoredData(values, false);
     final double minWidth = 0;
     final int removeOutliers = 0;
-    final int shape = Plot.CIRCLE; // Plot2.BAR; // A bar chart confuses the log plot since it plots
-                                   // lines to zero.
+    final int shape = Plot.CIRCLE;
     final String label = String.format("Mean = %s +/- %s", MathUtils.rounded(stats.getMean()),
         MathUtils.rounded(stats.getStandardDeviation()));
 

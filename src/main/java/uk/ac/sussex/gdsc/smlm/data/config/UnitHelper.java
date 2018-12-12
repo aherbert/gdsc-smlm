@@ -33,6 +33,18 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
  * Contains helper functions for the units. Adds functionality to the protocol buffer unit enums.
  */
 public class UnitHelper {
+
+  private static final String UNKNOWN = "unknown";
+  private static final String COUNT = "count";
+  private static final String FRAME = "frame";
+  private static final String PHOTON = "photon";
+
+  /** No public constructor. */
+  private UnitHelper() {}
+
+  // It is easier to read the code when all method from a unit are together.
+  // CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
+
   /**
    * Gets the name.
    *
@@ -48,7 +60,7 @@ public class UnitHelper {
       case UM:
         return "micrometre";
       default:
-        return "unknown";
+        return UNKNOWN;
     }
   }
 
@@ -102,11 +114,11 @@ public class UnitHelper {
   public static String getName(IntensityUnit unit) {
     switch (unit) {
       case COUNT:
-        return "count";
+        return COUNT;
       case PHOTON:
-        return "photon";
+        return PHOTON;
       default:
-        return "unknown";
+        return UNKNOWN;
     }
   }
 
@@ -119,9 +131,9 @@ public class UnitHelper {
   public static String getShortName(IntensityUnit unit) {
     switch (unit) {
       case COUNT:
-        return "count";
+        return COUNT;
       case PHOTON:
-        return "photon";
+        return PHOTON;
       default:
         return "na";
     }
@@ -135,10 +147,10 @@ public class UnitHelper {
    */
   public static IntensityUnit guessIntensityUnitFromShortName(String name) {
     if (name != null) {
-      if (name.equalsIgnoreCase("photon")) {
+      if (name.equalsIgnoreCase(PHOTON)) {
         return IntensityUnit.PHOTON;
       }
-      if (name.equalsIgnoreCase("count")) {
+      if (name.equalsIgnoreCase(COUNT)) {
         return IntensityUnit.COUNT;
       }
     }
@@ -158,7 +170,7 @@ public class UnitHelper {
       case RADIAN:
         return "radian";
       default:
-        return "unknown";
+        return UNKNOWN;
     }
   }
 
@@ -206,13 +218,13 @@ public class UnitHelper {
   public static String getName(TimeUnit unit) {
     switch (unit) {
       case FRAME:
-        return "frame";
+        return FRAME;
       case MILLISECOND:
         return "millisecond";
       case SECOND:
         return "second";
       default:
-        return "unknown";
+        return UNKNOWN;
     }
   }
 
@@ -225,7 +237,7 @@ public class UnitHelper {
   public static String getShortName(TimeUnit unit) {
     switch (unit) {
       case FRAME:
-        return "frame";
+        return FRAME;
       case MILLISECOND:
         return "ms";
       case SECOND:
@@ -243,7 +255,7 @@ public class UnitHelper {
    */
   public static TimeUnit guessTimeUnitFromShortName(String name) {
     if (name != null) {
-      if (name.equalsIgnoreCase("frame")) {
+      if (name.equalsIgnoreCase(FRAME)) {
         return TimeUnit.FRAME;
       }
       if (name.equalsIgnoreCase("s")) {

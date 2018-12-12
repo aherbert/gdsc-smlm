@@ -37,9 +37,18 @@ package uk.ac.sussex.gdsc.smlm.filters;
  *
  * <p>This algorithm does not mirror edge pixels in contrast to the BlockSumFilter.
  */
-public class IntBlockSumFilter extends BaseFilter {
+public class IntBlockSumFilter {
   private int[] buffer = null;
   private int[] intRowBuffer = null;
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public IntBlockSumFilter copy() {
+    return new IntBlockSumFilter();
+  }
 
   /**
    * Compute the filter within a 2n+1 size block around each point. Only pixels with a full block
@@ -427,14 +436,5 @@ public class IntBlockSumFilter extends BaseFilter {
 
     // Fill in data
     System.arraycopy(inData, index, row, 1, width);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public IntBlockSumFilter clone() {
-    final IntBlockSumFilter o = (IntBlockSumFilter) super.clone();
-    o.buffer = null;
-    o.intRowBuffer = null;
-    return o;
   }
 }

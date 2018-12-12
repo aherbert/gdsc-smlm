@@ -47,7 +47,7 @@ public class DoubleImage3D extends Image3D {
    * @param ns the number of slices
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public DoubleImage3D(int nc, int nr, int ns) throws IllegalArgumentException {
+  public DoubleImage3D(int nc, int nr, int ns) {
     super(nc, nr, ns);
   }
 
@@ -57,7 +57,7 @@ public class DoubleImage3D extends Image3D {
    * @param stack the stack
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public DoubleImage3D(ImageStack stack) throws IllegalArgumentException {
+  public DoubleImage3D(ImageStack stack) {
     super(stack);
   }
 
@@ -97,7 +97,7 @@ public class DoubleImage3D extends Image3D {
    * @param data the data
    * @throws IllegalArgumentException If the data is not the correct length
    */
-  public DoubleImage3D(int nc, int nr, int ns, double[] data) throws IllegalArgumentException {
+  public DoubleImage3D(int nc, int nr, int ns, double[] data) {
     // Avoid constructor that calls createData(int)
     super(nc, nr, ns, nr * nc);
     if (data == null || data.length != checkSize(nc, nr, ns, true)) {
@@ -144,8 +144,7 @@ public class DoubleImage3D extends Image3D {
 
   /** {@inheritDoc} */
   @Override
-  public DoubleImage3D crop(int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException {
+  public DoubleImage3D crop(int x, int y, int z, int w, int h, int d) {
     return crop(x, y, z, w, h, d, null);
   }
 
@@ -162,8 +161,7 @@ public class DoubleImage3D extends Image3D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public DoubleImage3D crop(int x, int y, int z, int w, int h, int d, double[] region)
-      throws IllegalArgumentException {
+  public DoubleImage3D crop(int x, int y, int z, int w, int h, int d, double[] region) {
     // Check the region range
     if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
         || (long) z + d > ns) {
@@ -199,7 +197,7 @@ public class DoubleImage3D extends Image3D {
    * @throws IllegalArgumentException if the region is not within the data
    */
   public static DoubleImage3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d,
-      double[] region) throws IllegalArgumentException {
+      double[] region) {
     final int nc = stack.getWidth();
     final int nr = stack.getHeight();
     final int ns = stack.getSize();
@@ -227,7 +225,7 @@ public class DoubleImage3D extends Image3D {
   }
 
   @Override
-  public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException {
+  public void insert(int x, int y, int z, Image3D image) {
     if (image instanceof DoubleImage3D) {
       insert(x, y, z, (DoubleImage3D) image);
     } else {
@@ -244,7 +242,7 @@ public class DoubleImage3D extends Image3D {
    * @param image the image
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, int z, DoubleImage3D image) throws IllegalArgumentException {
+  public void insert(int x, int y, int z, DoubleImage3D image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();

@@ -38,7 +38,10 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * relevant.
  */
 public class WLSQLVMGradientProcedure6 extends WLSQLVMGradientProcedure {
+
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit (must be positive)
    * @param var the base variance of each observation (must be positive)
    * @param func Gradient function

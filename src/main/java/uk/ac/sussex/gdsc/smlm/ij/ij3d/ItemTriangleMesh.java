@@ -28,6 +28,8 @@ import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 
+import customnode.CustomTriangleMesh;
+
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
@@ -41,8 +43,6 @@ import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
 import java.util.Arrays;
-
-import customnode.CustomTriangleMesh;
 
 /**
  * Use a triangle mesh object to represent a set of points. The object is duplicated, scaled and
@@ -341,7 +341,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
    * @throws IllegalArgumentException If the mode is not valid
    * @see TransparencyAttributes#setTransparencyMode(int)
    */
-  public static void setTransparencyMode(int mode) throws IllegalArgumentException {
+  public static void setTransparencyMode(int mode) {
     if ((mode < TransparencyAttributes.FASTEST) || (mode > TransparencyAttributes.NONE)) {
       throw new IllegalArgumentException("Not a valid transparency mode");
     }
@@ -463,7 +463,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
   /** {@inheritDoc} */
   @Override
-  public void reorder(int[] indices) throws IllegalArgumentException {
+  public void reorder(int[] indices) {
     if (dirty) {
       throw new IllegalArgumentException("Mesh has been modified");
     }
@@ -474,7 +474,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
   /** {@inheritDoc} */
   @Override
-  public void reorderFast(int[] indices) throws IllegalArgumentException {
+  public void reorderFast(int[] indices) {
     if (dirty) {
       throw new IllegalArgumentException("Mesh has been modified");
     }
@@ -579,7 +579,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor(Color3f[] color) throws IllegalArgumentException {
+  public void setItemColor(Color3f[] color) {
     this.color = null;
     final int size = size();
     if (color.length != size) {

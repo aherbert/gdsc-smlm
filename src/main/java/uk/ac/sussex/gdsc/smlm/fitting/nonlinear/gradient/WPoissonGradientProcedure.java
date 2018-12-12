@@ -52,15 +52,15 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    */
   public final int n;
 
-  /**
-   * Working space for the Fisher information matrix (size n * (n + 1) / 2)
-   */
+  /** Working space for the Fisher information matrix (size n * (n + 1) / 2). */
   protected double[] data;
 
   /** The y index counter. */
   protected int yi;
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param var the base variance of each observation (must be positive)
    * @param func Gradient function
@@ -99,14 +99,14 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * E = expected value
    * </pre>
    *
-   * Note that this is only a true Fisher information matrix if the function returns the expected
+   * <p>Note that this is only a true Fisher information matrix if the function returns the expected
    * value for a Poisson process (see Smith, et al (2010)). In this case the equation reduces to:
    *
    * <pre>
    * Iab = sum(i) (dYi da) * (dYi db) / Yi
    * </pre>
    *
-   * In this case Yi refers to the expected value at observation i. This expression was updated
+   * <p>In this case Yi refers to the expected value at observation i. This expression was updated
    * (Ruisheng, et al (2017)) to use Yi as the observed value at observation i (Oi). To increase
    * stability for zero or small Oi a Baysian prior is added using max(0, Oi) + 1. To account for
    * Gaussian noise per observation using the variance (vari) the weights can be combined resulting
@@ -123,7 +123,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * cameras - characterisation of a computationally efficient localization approach. Optical
    * Express 25, Issue 10, pp 11701-11716.
    *
-   * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param a Set of coefficients for the function (if null then the function must be
    *        pre-initialised)
@@ -216,6 +216,8 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
   }
 
   /**
+   * Checks if is na N gradients.
+   *
    * @return True if the last calculation produced gradients with NaN values.
    */
   public boolean isNaNGradients() {

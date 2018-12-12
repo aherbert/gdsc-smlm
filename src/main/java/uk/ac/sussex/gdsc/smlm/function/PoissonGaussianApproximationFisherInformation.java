@@ -38,7 +38,7 @@ public class PoissonGaussianApproximationFisherInformation extends BasePoissonFi
    * @param s the standard deviation of the Gaussian
    * @throws IllegalArgumentException If the standard deviation is not strictly positive
    */
-  public PoissonGaussianApproximationFisherInformation(double s) throws IllegalArgumentException {
+  public PoissonGaussianApproximationFisherInformation(double s) {
     if (!(s > 0 && s <= Double.MAX_VALUE)) {
       throw new IllegalArgumentException("Gaussian variance must be strictly positive");
     }
@@ -56,7 +56,7 @@ public class PoissonGaussianApproximationFisherInformation extends BasePoissonFi
    * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
    */
   @Override
-  public double getFisherInformation(double t) throws IllegalArgumentException {
+  public double getFisherInformation(double t) {
     if (t <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }

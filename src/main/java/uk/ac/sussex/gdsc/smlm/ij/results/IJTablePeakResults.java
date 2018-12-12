@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -186,7 +186,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
       try {
         if (helper.hasDistanceConverter()) {
-          toPixelConverter = UnitConverterFactory.createConverter(distanceUnit, DistanceUnit.PIXEL,
+          toPixelConverter = UnitConverterUtils.createConverter(distanceUnit, DistanceUnit.PIXEL,
               getCalibrationReader().getNmPerPixel());
         }
       } catch (final ConversionException ex) {

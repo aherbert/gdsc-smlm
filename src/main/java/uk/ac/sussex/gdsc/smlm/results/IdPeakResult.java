@@ -48,8 +48,7 @@ public class IdPeakResult extends PeakResult {
    * @throws IllegalArgumentException the illegal argument exception if the parameters are invalid
    */
   public IdPeakResult(int frame, int origX, int origY, float origValue, double error, float noise,
-      float meanIntensity, float[] params, float[] paramsStdDev, int id)
-      throws IllegalArgumentException {
+      float meanIntensity, float[] params, float[] paramsStdDev, int id) {
     super(frame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
     this.id = id;
   }

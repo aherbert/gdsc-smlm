@@ -2307,8 +2307,7 @@ public class MultiPathFilter implements Cloneable {
 
                 if (result[i].ignore()) {
                   // Q. should this be passed to the scoreStore?
-                } else // TODO - Check for duplicates
-                if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(),
+                } else if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(),
                     result[i].getY(), result[i].getZ())) {
                   coordinateStore.addToQueue(result[i].getX(), result[i].getY(), result[i].getZ());
                   scoreStore.add(result[i].getUniqueId());

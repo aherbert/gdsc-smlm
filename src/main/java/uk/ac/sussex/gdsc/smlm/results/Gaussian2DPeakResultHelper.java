@@ -904,7 +904,7 @@ public class Gaussian2DPeakResultHelper {
    *    = - sum [ t * ln(t) / (t + rho) ] dt
    * </pre>
    *
-   * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
+   * <p>Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
    *
    * @param rho the rho
    * @param integrationpoints the number of integration points for the LegendreGaussIntegrator
@@ -1007,7 +1007,7 @@ public class Gaussian2DPeakResultHelper {
    * @throws IllegalArgumentException If the number of PSF parameters is invalid
    */
   public static float[] createParams(float background, float intensity, float x, float y, float z,
-      float... psfParameters) throws IllegalArgumentException {
+      float... psfParameters) {
     if (psfParameters == null) {
       return createOneAxisParams(background, intensity, x, y, z, 1);
     }
@@ -1109,8 +1109,7 @@ public class Gaussian2DPeakResultHelper {
    * @throws IllegalArgumentException if the psf is not a Gaussian 2D or the input parameters are
    *         not the correct length for a Gaussian 2D function
    */
-  public static float[] createParams(PSFType psfType, float[] gaussian2DParams)
-      throws IllegalArgumentException {
+  public static float[] createParams(PSFType psfType, float[] gaussian2DParams) {
     if (gaussian2DParams.length != PeakResult.STANDARD_PARAMETERS + 3) {
       throw new IllegalArgumentException(
           "Parameters must be a full Gaussian 2D parameters array of length "
@@ -1140,7 +1139,7 @@ public class Gaussian2DPeakResultHelper {
    * return erf(x / sqrt(2))
    * </pre>
    *
-   * This uses a fast approximation to the Error function.
+   * <p>This uses a fast approximation to the Error function.
    *
    * @param x the x
    * @return the cumulative normal distribution {@code CDF(X<x)}
@@ -1158,7 +1157,7 @@ public class Gaussian2DPeakResultHelper {
    * return 1 - exp(-r * r / 2)
    * </pre>
    *
-   * This formula is provided in <a href=
+   * <p>This formula is provided in <a href=
    * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
    *
    * @param r the r
@@ -1179,14 +1178,14 @@ public class Gaussian2DPeakResultHelper {
    * return sqrt(-2 ln (1-p) )
    * </pre>
    *
-   * This formula is provided in <a href=
+   * <p>This formula is provided in <a href=
    * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
    *
    * @param p the cumulative 2D normal distribution {@code F(r)}
    * @return Mahalanobis distance r from the Gaussian
    * @throws IllegalArgumentException If p is not in the range 0-1
    */
-  public static double inverseCumulative2D(double p) throws IllegalArgumentException {
+  public static double inverseCumulative2D(double p) {
     if (p < 0 || p > 1) {
       throw new IllegalArgumentException("P must be in the range 0 - 1");
     }
@@ -1271,8 +1270,7 @@ public class Gaussian2DPeakResultHelper {
    * @return the mean
    * @throws IllegalArgumentException If p is not in the range 0-1
    */
-  public static double getMeanSignalUsingP(double intensity, double sx, double sy, double p)
-      throws IllegalArgumentException {
+  public static double getMeanSignalUsingP(double intensity, double sx, double sy, double p) {
     final double r = inverseCumulative2D(p);
     return intensity * p / (Math.PI * sx * sy * r * r);
   }
@@ -1293,7 +1291,7 @@ public class Gaussian2DPeakResultHelper {
    * (F(r)=0.5 = sqrt(-2 * log(0.5)) = sqrt(-2 * log(1 / 2)) = sqrt(-2 * (log(1) - log(2))) = sqrt(-2 * -log(2))
    * </pre>
    *
-   * Thus this computes the mean signal within the HWHM of a 2D Gaussian.
+   * <p>Thus this computes the mean signal within the HWHM of a 2D Gaussian.
    *
    * <p>Note: Argument sx and sy are not checked that they are positive.
    *

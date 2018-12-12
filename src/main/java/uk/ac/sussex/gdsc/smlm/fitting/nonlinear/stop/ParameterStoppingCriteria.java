@@ -47,6 +47,8 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
   private final DoubleEquality eq;
 
   /**
+   * Instantiates a new parameter stopping criteria.
+   *
    * @param func The Gaussian function
    */
   public ParameterStoppingCriteria(Gaussian2DFunction func) {
@@ -85,11 +87,10 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
             sb.append(0);
           }
 
-          for (int j = 0, k =
-              i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION; j < 2
-                  * 2; j++, k++) {
+          int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
+          for (int j = 0; j < 2 * 2; j++, param++) {
             sb.append(",");
-            sb.append(DoubleEquality.relativeError(bestA[k], a[k]));
+            sb.append(DoubleEquality.relativeError(bestA[param], a[param]));
           }
           sb.append("]");
         }
@@ -105,11 +106,10 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
     // Old code does not correctly compute difference in angles. This is ignored for now.
     // return eq.almostEqualRelativeOrAbsolute(bestA, a);
 
-    if (func.evaluatesBackground()) {
-      if (!eq.almostEqualRelativeOrAbsolute(bestA[Gaussian2DFunction.BACKGROUND],
-          a[Gaussian2DFunction.BACKGROUND])) {
-        return false;
-      }
+    if (func.evaluatesBackground()
+        && !eq.almostEqualRelativeOrAbsolute(bestA[Gaussian2DFunction.BACKGROUND],
+            a[Gaussian2DFunction.BACKGROUND])) {
+      return false;
     }
 
     for (int i = 0; i < peaks; i++) {
@@ -132,9 +132,9 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
         }
       }
 
-      for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK
-          + Gaussian2DFunction.X_POSITION; j < 2; j++, k++) {
-        if (!eq.almostEqualRelativeOrAbsolute(bestA[k], a[k])) {
+      int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
+      for (int j = 0; j < 2; j++, param++) {
+        if (!eq.almostEqualRelativeOrAbsolute(bestA[param], a[param])) {
           return false;
         }
       }
@@ -161,6 +161,8 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
   }
 
   /**
+   * Gets the significant digits.
+   *
    * @return the significantDigits.
    */
   public int getSignificantDigits() {

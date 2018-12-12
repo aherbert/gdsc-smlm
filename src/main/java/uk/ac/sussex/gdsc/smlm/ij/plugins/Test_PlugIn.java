@@ -53,8 +53,7 @@ public class Test_PlugIn implements PlugIn {
     gd.addAndGetButton("Options", new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent event) {
-        final ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null); // This makes it
-                                                                                    // model
+        final ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null);
         gd2.addMessage(c2.getSelectedItem());
         gd2.showDialog(true);
         gd2.getNextChoice();

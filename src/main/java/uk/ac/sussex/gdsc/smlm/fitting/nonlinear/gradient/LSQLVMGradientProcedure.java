@@ -39,12 +39,13 @@ import java.util.Arrays;
  * 15.5.8 for Nonlinear Models.
  */
 public class LSQLVMGradientProcedure extends BaseLSQLVMGradientProcedure {
-  /**
-   * Working space for the scaled Hessian curvature matrix (size n * (n + 1) / 2)
-   */
+
+  /** Working space for the scaled Hessian curvature matrix (size n * (n + 1) / 2). */
   protected final double[] alpha;
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param func Gradient function
    */
@@ -54,6 +55,8 @@ public class LSQLVMGradientProcedure extends BaseLSQLVMGradientProcedure {
   }
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param b Baseline pre-computed y-values
    * @param func Gradient function

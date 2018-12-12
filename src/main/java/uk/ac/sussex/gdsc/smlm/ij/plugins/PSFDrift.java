@@ -374,7 +374,6 @@ public class PSFDrift implements PlugIn {
 
       return true;
     }
-
   }
 
   /** {@inheritDoc} */

@@ -49,8 +49,7 @@ public class MinMaxPeakResultPredicate implements PeakResultPredicate {
    * @throws IllegalArgumentException If the min/max are NaN. If min is greater than max. If value
    *         is null.
    */
-  public MinMaxPeakResultPredicate(float min, float max, PeakResultValue value)
-      throws IllegalArgumentException {
+  public MinMaxPeakResultPredicate(float min, float max, PeakResultValue value) {
     if (Float.isNaN(min) || Float.isNaN(max) || min > max) {
       throw new IllegalArgumentException("Min/Max range is invalid");
     }
@@ -64,8 +63,8 @@ public class MinMaxPeakResultPredicate implements PeakResultPredicate {
 
   /** {@inheritDoc} */
   @Override
-  public boolean test(PeakResult t) {
-    final float v = value.getValue(t);
+  public boolean test(PeakResult peakResult) {
+    final float v = value.getValue(peakResult);
     return v >= min && v <= max;
   }
 }

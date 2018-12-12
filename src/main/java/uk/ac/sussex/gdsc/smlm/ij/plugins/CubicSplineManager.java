@@ -99,13 +99,11 @@ public class CubicSplineManager implements PlugIn {
      * @param splineData the spline data
      * @throws IllegalArgumentException If the centre is not within the function range
      */
-    public CubicSplinePSF(ImagePSF imagePSF, CubicSplineData splineData)
-        throws IllegalArgumentException {
+    public CubicSplinePSF(ImagePSF imagePSF, CubicSplineData splineData) {
       this.imagePSF = imagePSF;
       this.splineData = splineData;
-      if (
       //@formatter:off
-          imagePSF.getXCentre() < 0 ||
+      if (imagePSF.getXCentre() < 0 ||
           imagePSF.getYCentre() < 0||
           imagePSF.getZCentre() < 0 ||
           imagePSF.getXCentre() > splineData.getMaxX() ||
@@ -126,9 +124,8 @@ public class CubicSplineManager implements PlugIn {
      * @return the cubic spline function
      */
     public CubicSplineFunction createCubicSplineFunction(int maxy, int maxx, int scale) {
-      final CubicSplineFunction f = new SingleCubicSplineFunction(splineData, maxx, maxy,
-          imagePSF.getXCentre(), imagePSF.getYCentre(), imagePSF.getZCentre(), scale);
-      return f;
+      return new SingleCubicSplineFunction(splineData, maxx, maxy, imagePSF.getXCentre(),
+          imagePSF.getYCentre(), imagePSF.getZCentre(), scale);
     }
 
     /**
@@ -651,34 +648,23 @@ public class CubicSplineManager implements PlugIn {
     private void update() {
       if (lock.acquire()) {
         // Run in a new thread to allow the GUI to continue updating
-        new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              // Continue while the parameter is changing
-              //@formatter:off
-while (
-                _scale != pluginSettings.getScale() ||
-                _xshift != pluginSettings.getXShift() ||
-                _yshift != pluginSettings.getYShift() ||
-                _zshift != pluginSettings.getZShift()
-                ) {
+        new Thread(() -> {
+          try {
+            // Continue while the parameter is changing
+            while (_scale != pluginSettings.getScale() || _xshift != pluginSettings.getXShift()
+                || _yshift != pluginSettings.getYShift() || _zshift != pluginSettings.getZShift()) {
               draw();
-       }
-}
-finally
-{
-// Ensure the running flag is reset
-lock.release();
-}
-}
-}).start();
             }
+          } finally {
+            // Ensure the running flag is reset
+            lock.release();
+          }
+        }).start();
+      }
     }
   }
 
-  private void deleteCubicSpline()
-  {
+  private void deleteCubicSpline() {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] MODELS = listCubicSplines(false);
     gd.addChoice("Model", MODELS, pluginSettings.getSelected());
@@ -690,8 +676,7 @@ lock.release();
     pluginSettings.setSelected(name);
 
     final CubicSplineResource resource = settings.getCubicSplineResourcesMap().get(name);
-    if (resource == null)
-    {
+    if (resource == null) {
       IJ.log("Failed to find spline data for model: " + name);
       return;
     }
@@ -702,8 +687,7 @@ lock.release();
     ImageJUtils.log("Deleted spline model: %s\n%s", name, resource);
   }
 
-  private static void loadFromDirectory()
-  {
+  private static void loadFromDirectory() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load spline models from a directory.");
     egd.addFilenameField("Directory", directory);
@@ -714,11 +698,9 @@ lock.release();
 
     directory = egd.getNextString();
 
-    final File[] fileList = (new File(directory)).listFiles(new FileFilter()
-    {
+    final File[] fileList = (new File(directory)).listFiles(new FileFilter() {
       @Override
-      public boolean accept(File pathname)
-      {
+      public boolean accept(File pathname) {
         return pathname.isFile();
       }
     });
@@ -728,8 +710,7 @@ lock.release();
     }
   }
 
-  private static void loadFromFile()
-  {
+  private static void loadFromFile() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load a spline model from file.");
     egd.addFilenameField("Filename", filename);
@@ -743,8 +724,7 @@ lock.release();
     loadFromFileAndSaveResource(filename);
   }
 
-  private static void loadFromFileAndSaveResource(String filename)
-  {
+  private static void loadFromFileAndSaveResource(String filename) {
     final String name = getName(filename);
     final CubicSplinePSF model = loadFromFile(name, filename);
 
@@ -753,8 +733,7 @@ lock.release();
     }
   }
 
-  private void viewCubicSpline()
-  {
+  private void viewCubicSpline() {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] MODELS = listCubicSplines(false);
     gd.addChoice("Model", MODELS, pluginSettings.getSelected());
@@ -770,8 +749,7 @@ lock.release();
 
     final CubicSplinePSF psfModel = load(name);
 
-    if (psfModel == null)
-    {
+    if (psfModel == null) {
       IJ.log("Failed to find spline data for model: " + name);
       return;
     }
@@ -799,8 +777,7 @@ lock.release();
     IJ.showStatus("");
   }
 
-  private static void printCubicSplines()
-  {
+  private static void printCubicSplines() {
     IJ.log(settings.toString());
   }
 }

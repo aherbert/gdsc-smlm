@@ -369,8 +369,8 @@ public class Gaussian2DFitter {
     // Y must be the correct size
     final double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize); // Value at index
 
-    final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK; // Fixed for a
-                                                                      // Gaussian2DFunction
+    // Fixed for a Gaussian2DFunction
+    final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
 
     double background = params[Gaussian2DFunction.BACKGROUND];
     if (background == 0 && !zeroBackground) {
@@ -654,7 +654,6 @@ public class Gaussian2DFitter {
             }
           }
         }
-
       }
 
       // If the position is on the integer grid then use a centre-of-mass approximation

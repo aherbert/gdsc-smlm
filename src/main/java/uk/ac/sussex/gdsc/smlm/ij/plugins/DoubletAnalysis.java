@@ -113,14 +113,12 @@ import java.util.logging.Logger;
  * can be used to determine the best settings for optimum doublet fitting and filtering.
  */
 public class DoubletAnalysis implements PlugIn, ItemListener {
-  /*
-   * Note: 21-Oct-2016
-   *
-   * This plugin may be obsolete now that the BenchmarkSpotFit and BenchmarkFilterAnalysis plugins
-   * can handle singles, multiples and doublets together. This means that the residuals threshold
-   * can be optimised concurrently with the fail count and the filter. It is left within the
-   * codebase in case it is useful in the future.
-   */
+  // Note: 21-Oct-2016
+  //
+  // This plugin may be obsolete now that the BenchmarkSpotFit and BenchmarkFilterAnalysis plugins
+  // can handle singles, multiples and doublets together. This means that the residuals threshold
+  // can be optimised concurrently with the fail count and the filter. It is left within the
+  // codebase in case it is useful in the future.
 
   private static final String TITLE = "Doublet Analysis";
   private static FitConfiguration fitConfig;
@@ -600,12 +598,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
               matches[ii] = -1;
             }
           }
-          switch (n) {
-            //@formatter:off
-case 1: singles++; break;
-case 2: doublets++; break;
-default: multiples++;
-//@formatter:on
+          if (n == 1) {
+            singles++;
+          } else if (n == 2) {
+            doublets++;
+          } else {
+            multiples++;
           }
 
           // Initialise for fitting on first match
@@ -1476,7 +1474,6 @@ default: multiples++;
         }
       }
     }
-
   }
 
   /**

@@ -40,9 +40,13 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 public class GradientCalculator {
   /** The number of params. */
   public final int nparams;
+
+  /** The bad gradients. */
   private boolean badGradients;
 
   /**
+   * Instantiates a new gradient calculator.
+   *
    * @param nparams The number of gradient parameters
    */
   public GradientCalculator(final int nparams) {
@@ -303,10 +307,10 @@ public class GradientCalculator {
    * @param beta the scaled gradient vector of the function's partial first derivatives with respect
    *        to the parameters (size m)
    * @param func Non-linear fitting function
+   * @return The sum-of-squares value for the fit.
    * @see NonLinearFunction#eval(int, double[])
    * @see NonLinearFunction#eval(int, double[], double[])
    * @see NonLinearFunction#canComputeWeights()
-   * @return The sum-of-squares value for the fit.
    */
   public double findLinearised(final int n, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func) {
@@ -461,8 +465,7 @@ public class GradientCalculator {
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
-        // function;
-        // that is, it describes the local curvature of a function of many variables.)
+        // function. that is, it describes the local curvature of a function of many variables.)
         // - the scaled gradient vector of the function's partial first derivatives with respect to
         // the parameters
 
@@ -544,13 +547,13 @@ public class GradientCalculator {
    *
    * <p>Check if the weight is below 1 and set to 1 to avoid excessive weights.
    *
-   * @param w The computed weight
+   * @param weight The computed weight
    * @return The weight factor
    */
-  protected double getWeight(final double w) {
+  protected double getWeight(final double weight) {
     // TODO - Check if there is a better way to smooth the weights rather than just truncating them
     // at 1
-    return (w < 1) ? 1 : 1.0 / w;
+    return (weight < 1) ? 1 : 1.0 / weight;
   }
 
   /**
@@ -568,6 +571,34 @@ public class GradientCalculator {
     return ssx;
   }
 
+  /**
+   * Check gradients for NaN values.
+   *
+   * @param alpha the alpha
+   * @param nparams the number of params
+   */
+  protected void checkGradients(double[][] alpha, int nparams) {
+    badGradients = checkIsNaN(alpha, nparams);
+  }
+
+  /**
+   * Check gradients for NaN values.
+   *
+   * @param beta the beta
+   * @param nparams the number of params
+   */
+  protected void checkGradients(final double[] beta, final int nparams) {
+    badGradients = checkIsNaN(beta, nparams);
+  }
+
+  /**
+   * Check is na N.
+   *
+   * @param alpha the alpha
+   * @param beta the beta
+   * @param nparams the nparams
+   * @return true, if successful
+   */
   private static boolean checkIsNaN(final double[][] alpha, final double[] beta,
       final int nparams) {
     for (int i = 0; i < nparams; i++) {
@@ -588,16 +619,7 @@ public class GradientCalculator {
    *
    * @param alpha the alpha
    * @param nparams the number of params
-   */
-  protected void checkGradients(double[][] alpha, int nparams) {
-    badGradients = checkIsNaN(alpha, nparams);
-  }
-
-  /**
-   * Check gradients for NaN values.
-   *
-   * @param alpha the alpha
-   * @param nparams the number of params
+   * @return true, if successful
    */
   private static boolean checkIsNaN(final double[][] alpha, final int nparams) {
     for (int i = 0; i < nparams; i++) {
@@ -608,16 +630,6 @@ public class GradientCalculator {
       }
     }
     return false;
-  }
-
-  /**
-   * Check gradients for NaN values.
-   *
-   * @param beta the beta
-   * @param nparams the number of params
-   */
-  protected void checkGradients(final double[] beta, final int nparams) {
-    badGradients = checkIsNaN(beta, nparams);
   }
 
   /**
@@ -637,6 +649,8 @@ public class GradientCalculator {
   }
 
   /**
+   * Checks if the last calculation produced gradients with NaN values.
+   *
    * @return True if the last calculation produced gradients with NaN values.
    */
   public boolean isNaNGradients() {
@@ -654,17 +668,17 @@ public class GradientCalculator {
    * E = expected value
    * </pre>
    *
-   * Note that this is only a true Fisher information diagonal if the function returns the expected
-   * value for a Poisson process. In this case the equation reduces to:
+   * <p>Note that this is only a true Fisher information diagonal if the function returns the
+   * expected value for a Poisson process. In this case the equation reduces to:
    *
    * <pre>
    * Iaa = sum(i) (dYi da) * (dYi da) / Yi
    * </pre>
    *
-   * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
-   * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
+   * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
    *
-   * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param x n observations
    * @param a Set of m coefficients (if null then the function must be pre-initialised)
@@ -687,17 +701,17 @@ public class GradientCalculator {
    * E = expected value
    * </pre>
    *
-   * Note that this is only a true Fisher information diagonal if the function returns the expected
-   * value for a Poisson process. In this case the equation reduces to:
+   * <p>Note that this is only a true Fisher information diagonal if the function returns the
+   * expected value for a Poisson process. In this case the equation reduces to:
    *
    * <pre>
    * Iaa = sum(i) (dYi da) * (dYi da) / Yi
    * </pre>
    *
-   * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
-   * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
+   * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
    *
-   * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param n The number of data points
    * @param a Set of m coefficients (if null then the function must be pre-initialised)

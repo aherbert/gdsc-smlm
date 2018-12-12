@@ -44,12 +44,12 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    */
   public final int n;
 
-  /**
-   * Working space for the Fisher information matrix (size n * (n + 1) / 2)
-   */
+  /** Working space for the Fisher information matrix (size n * (n + 1) / 2). */
   protected double[] data;
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param func Gradient function
    */
   public PoissonGradientProcedure(final Gradient1Function func) {
@@ -68,21 +68,21 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * E = expected value
    * </pre>
    *
-   * Note that this is only a true Fisher information matrix if the function returns the expected
+   * <p>Note that this is only a true Fisher information matrix if the function returns the expected
    * value for a Poisson process (see Smith, et al (2010)). In this case the equation reduces to:
    *
    * <pre>
    * Iab = sum(i) (dYi da) * (dYi db) / Yi
    * </pre>
    *
-   * This expression was extended (Huang et al, (2015)) to account for Gaussian noise per
+   * <p>This expression was extended (Huang et al, (2015)) to account for Gaussian noise per
    * observation using the variance (vari):
    *
    * <pre>
    * Iab = sum(i) (dYi da) * (dYi db) / (Yi + vari)
    * </pre>
    *
-   * Thus per-observation noise can be handled by wrapping the input function with a pre-computed
+   * <p>Thus per-observation noise can be handled by wrapping the input function with a pre-computed
    * gradient function and pre-computed noise values.
    *
    * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
@@ -91,7 +91,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * <p>See: Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule
    * localization algorithms. Nature Methods 10, 653–658.
    *
-   * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+   * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *
    * @param a Set of coefficients for the function (if null then the function must be
    *        pre-initialised)
@@ -184,6 +184,8 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
   }
 
   /**
+   * Checks if is na N gradients.
+   *
    * @return True if the last calculation produced gradients with NaN values.
    */
   public boolean isNaNGradients() {

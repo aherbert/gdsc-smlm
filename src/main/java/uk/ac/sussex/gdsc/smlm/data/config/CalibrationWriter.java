@@ -57,7 +57,7 @@ public class CalibrationWriter extends CalibrationReader {
    * @param calibration the calibration
    * @throws IllegalArgumentException if the calibration is null
    */
-  public CalibrationWriter(Calibration calibration) throws IllegalArgumentException {
+  public CalibrationWriter(Calibration calibration) {
     if (calibration == null) {
       throw new IllegalArgumentException("Calibration is null");
     }
@@ -70,7 +70,7 @@ public class CalibrationWriter extends CalibrationReader {
    * @param calibration the calibration
    * @throws IllegalArgumentException if the calibration is null
    */
-  public CalibrationWriter(Calibration.Builder calibration) throws IllegalArgumentException {
+  public CalibrationWriter(Calibration.Builder calibration) {
     if (calibration == null) {
       throw new IllegalArgumentException("Calibration is null");
     }

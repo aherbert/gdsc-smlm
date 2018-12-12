@@ -123,13 +123,9 @@ public class SpotFit implements PlugIn {
     @Override
     public void showOptionsDialog() {
       final GenericDialog gd = new GenericDialog(TITLE + " Tool Options");
-      gd.addMessage(
-      //@formatter:off
-        TextUtils.wrap(
-        "Click on an image and fit a spot in a selected channel. " +
-        "The maxima within a search range is used to centre the " +
-        "fit window for Gaussian 2D fitting.", 80));
-        //@formatter:on
+      gd.addMessage(TextUtils.wrap("Click on an image and fit a spot in a selected channel. "
+          + "The maxima within a search range is used to centre the "
+          + "fit window for Gaussian 2D fitting.", 80));
       gd.addNumericField("Channel", settings.getChannel(), 0);
       gd.addSlider("Search_range", 1, 10, settings.getSearchRadius());
       gd.addSlider("Fit_radius", 3, 10, settings.getFitRadius());

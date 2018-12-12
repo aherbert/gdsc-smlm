@@ -291,5 +291,4 @@ public class PoissonGaussianConvolutionFunctionTest {
     }
     return System.nanoTime() - start;
   }
-
 }

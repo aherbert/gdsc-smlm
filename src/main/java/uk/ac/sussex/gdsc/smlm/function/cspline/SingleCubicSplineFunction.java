@@ -54,8 +54,7 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
    * @throws IllegalArgumentException If the function does not have an integer grid spacing from the
    *         origin
    */
-  public SingleCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy)
-      throws IllegalArgumentException {
+  public SingleCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy) {
     super(splineData, maxx, maxy);
     t = (splines[0][0].isSinglePrecision()) ? new FloatTargetSpline() : new DoubleTargetSpline();
   }
@@ -74,7 +73,7 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
    *         origin
    */
   public SingleCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy, double cx,
-      double cy, double cz, int scale) throws IllegalArgumentException {
+      double cy, double cz, int scale) {
     super(splineData, maxx, maxy, cx, cy, cz, scale);
     t = (splines[0][0].isSinglePrecision()) ? new FloatTargetSpline() : new DoubleTargetSpline();
   }

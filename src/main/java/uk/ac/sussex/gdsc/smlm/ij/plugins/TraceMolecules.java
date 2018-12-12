@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.engine.ParameterisedFitJob;
@@ -340,8 +340,8 @@ public class TraceMolecules implements PlugIn {
     if (settings.getTimeUnit() == TimeUnit.FRAME) {
       limit = settings.getPulseInterval();
     } else {
-      final TypeConverter<TimeUnit> convert = UnitConverterFactory.createConverter(TimeUnit.FRAME,
-          settings.getTimeUnit(), exposureTime);
+      final TypeConverter<TimeUnit> convert =
+          UnitConverterUtils.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
       limit = convert.convert(pulseInterval);
     }
 
@@ -391,8 +391,8 @@ public class TraceMolecules implements PlugIn {
     for (final Cluster cluster : clusters) {
       final Trace trace = new Trace();
       trace.setId(i + 1);
-      for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null; point =
-          point.getNext()) {
+      for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null;
+          point = point.getNext()) {
         // The point Id was the position in the original results array
         trace.add(results.get(point.getId()));
       }
@@ -893,7 +893,7 @@ public class TraceMolecules implements PlugIn {
     final double nmPerPixel = this.results.getNmPerPixel();
     final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
     pp.getPrecision();
-    stats.add(pp.precision);
+    stats.add(pp.precisions);
     // Use twice the precision to get the initial distance threshold
 
     // Use 2.5x sigma as per the PC-PALM protocol in Sengupta, et al (2013) Nature Protocols 8, 345
@@ -962,7 +962,7 @@ public class TraceMolecules implements PlugIn {
 
     // The optimiser works using frames so convert back to the correct units
     final TypeConverter<TimeUnit> convert =
-        UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
+        UnitConverterUtils.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
     settings.setTimeThreshold(convert.convert(best[1]));
 
     IJ.log(
@@ -1055,7 +1055,7 @@ public class TraceMolecules implements PlugIn {
   }
 
   private double timeThresholdIn(TimeUnit timeUnit) {
-    return UnitConverterFactory.createConverter(settings.getTimeUnit(), timeUnit, exposureTime)
+    return UnitConverterUtils.createConverter(settings.getTimeUnit(), timeUnit, exposureTime)
         .convert(settings.getTimeThreshold());
   }
 
@@ -1245,7 +1245,7 @@ public class TraceMolecules implements PlugIn {
     final double maxTimeThresholdInFrames = settings.getMaxTimeThreshold();
     // The optimiser works using frames so convert back to the correct units
     final TypeConverter<TimeUnit> convert =
-        UnitConverterFactory.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
+        UnitConverterUtils.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
 
     for (final double[] point : zeroCrossingPoints) {
       final double dx = point[0] / maxTimeThresholdInFrames;

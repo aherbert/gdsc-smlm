@@ -80,8 +80,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param molecules the molecules
    * @throws IllegalArgumentException If the input list contains nulls
    */
-  public CompoundMoleculeModel(int id, double[] xyz, List<? extends MoleculeModel> molecules)
-      throws IllegalArgumentException {
+  public CompoundMoleculeModel(int id, double[] xyz, List<? extends MoleculeModel> molecules) {
     this(id, xyz, molecules, true);
   }
 
@@ -98,7 +97,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @throws IllegalArgumentException If the input list contains nulls
    */
   public CompoundMoleculeModel(int id, double x, double y, double z,
-      List<? extends MoleculeModel> molecules) throws IllegalArgumentException {
+      List<? extends MoleculeModel> molecules) {
     this(id, x, y, z, molecules, true);
   }
 
@@ -114,7 +113,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @throws IllegalArgumentException If the input list contains nulls
    */
   public CompoundMoleculeModel(int id, double[] xyz, List<? extends MoleculeModel> molecules,
-      boolean centre) throws IllegalArgumentException {
+      boolean centre) {
     super(id, xyz);
     setMolecules(molecules, centre);
   }
@@ -133,13 +132,12 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @throws IllegalArgumentException If the input list contains nulls
    */
   public CompoundMoleculeModel(int id, double x, double y, double z,
-      List<? extends MoleculeModel> molecules, boolean centre) throws IllegalArgumentException {
+      List<? extends MoleculeModel> molecules, boolean centre) {
     super(id, x, y, z);
     setMolecules(molecules, centre);
   }
 
-  private void setMolecules(List<? extends MoleculeModel> molecules, boolean centre)
-      throws IllegalArgumentException {
+  private void setMolecules(List<? extends MoleculeModel> molecules, boolean centre) {
     if (molecules == null) {
       molecules = new ArrayList<>(0);
     }

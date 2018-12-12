@@ -910,8 +910,9 @@ public class EJMLLinearSolver {
       if (!invertSafe(getPseudoInverseSolver(), A, true)) {
         return null;
       }
-    } else // The matrix was too big for fast inversion so try linear algebra
-    if (!invertSafe(getCholeskyLDLTSolver(), A, false)) {
+
+      // The matrix was too big for fast inversion so try linear algebra
+    } else if (!invertSafe(getCholeskyLDLTSolver(), A, false)) {
       if (!invertSafe(getPseudoInverseSolver(), A, true)) {
         return null;
       }
@@ -950,8 +951,9 @@ public class EJMLLinearSolver {
       if (!invertUnsafe(getPseudoInverseSolver(), A, true)) {
         return null;
       }
-    } else // The matrix was too big for fast inversion so try linear algebra
-    if (!invertSafe(getCholeskyLDLTSolver(), A, false)) {
+
+      // The matrix was too big for fast inversion so try linear algebra
+    } else if (!invertSafe(getCholeskyLDLTSolver(), A, false)) {
       if (!invertUnsafe(getPseudoInverseSolver(), A, true)) {
         return null;
       }

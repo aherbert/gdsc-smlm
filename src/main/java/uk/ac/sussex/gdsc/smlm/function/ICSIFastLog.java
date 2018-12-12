@@ -90,7 +90,7 @@ public class ICSIFastLog extends FastLog {
    * @return the fast log instance
    * @throws IllegalArgumentException if n is not in the range 0-23, or no datatype is specified
    */
-  public static ICSIFastLog create(int n, DataType dataType) throws IllegalArgumentException {
+  public static ICSIFastLog create(int n, DataType dataType) {
     if (n < 0 || n > 23) {
       throw new IllegalArgumentException("N must be in the range 0<=n<=23");
     }

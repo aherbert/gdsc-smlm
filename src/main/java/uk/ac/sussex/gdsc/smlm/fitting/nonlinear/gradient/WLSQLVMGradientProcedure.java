@@ -46,7 +46,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure {
   protected final double[] w;
 
   /**
-   * Instantiates a new WLSQLVM gradient procedure.
+   * Instantiates a new procedure.
    *
    * @param y Data to fit
    * @param var the base variance of each observation (must be positive)

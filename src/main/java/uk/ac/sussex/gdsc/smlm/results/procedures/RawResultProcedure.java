@@ -32,12 +32,12 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  */
 //@formatter:off
 public class RawResultProcedure extends AbstractResultProcedure implements
-        BIXYZResultProcedure,
+    BIXYZResultProcedure,
     IResultProcedure,
     BResultProcedure,
-    XYZResultProcedure
-//@formatter:on
-{
+    XYZResultProcedure {
+  //@formatter:on
+
   /** The background. */
   public float[] background;
 
@@ -67,8 +67,8 @@ public class RawResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getBIXYZ() throws DataException {
-    i = 0;
+  public void getBIXYZ() {
+    counter = 0;
     this.background = allocate(this.background);
     this.intensity = allocate(this.intensity);
     this.x = allocate(this.x);
@@ -79,12 +79,12 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 
   @Override
   public void executeBIXYZ(float background, float intensity, float x, float y, float z) {
-    this.background[i] = background;
-    this.intensity[i] = intensity;
-    this.x[i] = x;
-    this.y[i] = y;
-    this.z[i] = z;
-    i++;
+    this.background[counter] = background;
+    this.intensity[counter] = intensity;
+    this.x[counter] = x;
+    this.y[counter] = y;
+    this.z[counter] = z;
+    counter++;
   }
 
   /**
@@ -92,16 +92,16 @@ public class RawResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getI() throws DataException {
-    i = 0;
+  public void getI() {
+    counter = 0;
     this.intensity = allocate(this.intensity);
     results.forEachNative((IResultProcedure) this);
   }
 
   @Override
   public void executeI(float intensity) {
-    this.intensity[i] = intensity;
-    i++;
+    this.intensity[counter] = intensity;
+    counter++;
   }
 
   /**
@@ -109,16 +109,16 @@ public class RawResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getB() throws DataException {
-    i = 0;
+  public void getB() {
+    counter = 0;
     this.background = allocate(this.background);
     results.forEachNative((BResultProcedure) this);
   }
 
   @Override
   public void executeB(float background) {
-    this.background[i] = background;
-    i++;
+    this.background[counter] = background;
+    counter++;
   }
 
   /**
@@ -126,8 +126,8 @@ public class RawResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getXyz() throws DataException {
-    i = 0;
+  public void getXyz() {
+    counter = 0;
     this.x = allocate(this.x);
     this.y = allocate(this.y);
     this.z = allocate(this.z);
@@ -136,9 +136,9 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 
   @Override
   public void executeXYZ(float x, float y, float z) {
-    this.x[i] = x;
-    this.y[i] = y;
-    this.z[i] = z;
-    i++;
+    this.x[counter] = x;
+    this.y[counter] = y;
+    this.z[counter] = z;
+    counter++;
   }
 }

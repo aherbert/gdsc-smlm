@@ -91,7 +91,7 @@ public class PeakResult implements Cloneable {
    * @throws IllegalArgumentException the illegal argument exception if the parameters are invalid
    */
   public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise,
-      float meanIntensity, float[] params, float[] paramsStdDev) throws IllegalArgumentException {
+      float meanIntensity, float[] params, float[] paramsStdDev) {
     if (params == null) {
       throw new IllegalArgumentException("Parameters must not be null");
     }

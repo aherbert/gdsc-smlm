@@ -37,8 +37,8 @@ import java.util.List;
 public abstract class MaximaSpotFilter extends SpotFilter {
   private final int search;
   private final int border;
-  private NonMaximumSuppression nms;
-  private float[] data2 = null;
+  private final NonMaximumSuppression nms;
+  private float[] data2;
 
   /**
    * Create the spot filter.
@@ -59,6 +59,17 @@ public abstract class MaximaSpotFilter extends SpotFilter {
     nms = new NonMaximumSuppression();
     // Do a neighbour check when using a low block size
     nms.setNeighbourCheck(search < 3);
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected MaximaSpotFilter(MaximaSpotFilter source) {
+    search = source.search;
+    border = source.border;
+    nms = source.nms.copy();
   }
 
   /** {@inheritDoc} */
@@ -137,15 +148,5 @@ public abstract class MaximaSpotFilter extends SpotFilter {
     list.add("search = " + search);
     list.add("border = " + border);
     return list;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public MaximaSpotFilter clone() {
-    final MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.nms = nms.copy();
-    f.data2 = null;
-    return f;
   }
 }

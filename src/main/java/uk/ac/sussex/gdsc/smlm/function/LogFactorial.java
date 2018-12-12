@@ -312,7 +312,7 @@ public class LogFactorial {
    * @param maxN the max N
    * @throws IllegalArgumentException If min is greater than max
    */
-  public void ensureRange(int minN, int maxN) throws IllegalArgumentException {
+  public void ensureRange(int minN, int maxN) {
     // Validate the range
     if (minN < 0) {
       minN = 0;

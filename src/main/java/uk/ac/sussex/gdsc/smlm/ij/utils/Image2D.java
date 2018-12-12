@@ -47,8 +47,7 @@ public abstract class Image2D {
    * @return the size, or -1 if too large
    * @throws IllegalArgumentException if too large (optional)
    */
-  public static int checkSize(int nc, int nr, boolean raiseException)
-      throws IllegalArgumentException {
+  public static int checkSize(int nc, int nr, boolean raiseException) {
     if (nc < 0 || nr < 0) {
       if (raiseException) {
         throw new IllegalArgumentException("Negative dimensions");
@@ -77,7 +76,7 @@ public abstract class Image2D {
    * @param nr the number of rows
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public Image2D(int nc, int nr) throws IllegalArgumentException {
+  public Image2D(int nc, int nr) {
     createData(checkSize(nc, nr, true));
     this.nc = nc;
     this.nr = nr;
@@ -89,7 +88,7 @@ public abstract class Image2D {
    * @param image the image
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public Image2D(ImageProcessor image) throws IllegalArgumentException {
+  public Image2D(ImageProcessor image) {
     nc = image.getWidth();
     nr = image.getHeight();
     createData(checkSize(nc, nr, true));
@@ -231,7 +230,7 @@ public abstract class Image2D {
    * @return the xy components
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public int[] getXy(int i) throws IllegalArgumentException {
+  public int[] getXy(int i) {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -249,7 +248,7 @@ public abstract class Image2D {
    * @param xy the xy components (must be an array of at least length 2)
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public void getXy(int i, int[] xy) throws IllegalArgumentException {
+  public void getXy(int i, int[] xy) {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -266,7 +265,7 @@ public abstract class Image2D {
    * @return the index
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public int getIndex(int x, int y) throws IllegalArgumentException {
+  public int getIndex(int x, int y) {
     if (x < 0 || x >= nc || y < 0 || y >= nr) {
       throw new IllegalArgumentException("Index in not inside the image");
     }
@@ -305,7 +304,7 @@ public abstract class Image2D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public Image2D crop(int x, int y, Image2D image) throws IllegalArgumentException {
+  public Image2D crop(int x, int y, Image2D image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();
@@ -332,8 +331,7 @@ public abstract class Image2D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public ImageProcessor cropToProcessor(int x, int y, int w, int h)
-      throws IllegalArgumentException {
+  public ImageProcessor cropToProcessor(int x, int y, int w, int h) {
     // Check the region range
     if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr) {
       throw new IllegalArgumentException("Region not within the data");
@@ -357,7 +355,7 @@ public abstract class Image2D {
    * @param image the image
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, Image2D image) throws IllegalArgumentException {
+  public void insert(int x, int y, Image2D image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();
@@ -384,7 +382,7 @@ public abstract class Image2D {
    * @param image the image
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, ImageProcessor image) throws IllegalArgumentException {
+  public void insert(int x, int y, ImageProcessor image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();
@@ -449,7 +447,7 @@ public abstract class Image2D {
    * @return [x,y,w,h]
    * @throws IllegalArgumentException if the intersect has no volume
    */
-  public int[] computeIntersectOrThrow(int x, int y, int w, int h) throws IllegalArgumentException {
+  public int[] computeIntersectOrThrow(int x, int y, int w, int h) {
     if (w < 0) {
       w = -w;
       x = subtract(x, w);
@@ -475,7 +473,7 @@ public abstract class Image2D {
    * @return the size
    * @throws IllegalArgumentException If the size if zero
    */
-  private static int checkSize(int size) throws IllegalArgumentException {
+  private static int checkSize(int size) {
     if (size == 0) {
       throw new IllegalArgumentException("No intersect");
     }

@@ -442,7 +442,6 @@ public class SearchDimension implements Cloneable, Dimension {
     } catch (final CloneNotSupportedException ex) {
       return null;
     }
-
   }
 
   /**

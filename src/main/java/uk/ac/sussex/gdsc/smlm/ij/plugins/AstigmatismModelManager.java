@@ -1027,7 +1027,7 @@ public class AstigmatismModelManager implements PlugIn {
 
   private class AstigmatismVectorFunction implements MultivariateVectorFunction {
     @Override
-    public double[] value(double[] p) throws IllegalArgumentException {
+    public double[] value(double[] p) {
       final double one_d2 = 1.0 / MathUtils.pow2(p[P_D]);
 
       final double[] value = new double[fitZ.length * 2];
@@ -1057,7 +1057,7 @@ public class AstigmatismModelManager implements PlugIn {
 
   private class AstigmatismMatrixFunction implements MultivariateMatrixFunction {
     @Override
-    public double[][] value(double[] p) throws IllegalArgumentException {
+    public double[][] value(double[] p) {
       final double[] pu = p.clone();
       final double[] pl = p.clone();
 
@@ -1361,8 +1361,8 @@ public class AstigmatismModelManager implements PlugIn {
 
   private void exportModel() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    final String[] MODELS = listAstigmatismModels(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listAstigmatismModels(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.addFilenameField("Filename", pluginSettings.getFilename());
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -1389,8 +1389,8 @@ public class AstigmatismModelManager implements PlugIn {
 
   private void viewModel() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    final String[] MODELS = listAstigmatismModels(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listAstigmatismModels(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.addChoice("z_distance_unit", SettingsManager.getDistanceUnitNames(),
         pluginSettings.getZDistanceUnitValue());
     gd.addChoice("s_distance_unit", SettingsManager.getDistanceUnitNames(),
@@ -1603,26 +1603,19 @@ public class AstigmatismModelManager implements PlugIn {
           public void run() {
             try {
               // Continue while the parameter is changing
-              //@formatter:off
-while (
-                _z != z ||
-                _calibratedImage != getCalibratedImage()
-                ) {
-              draw();
-       }
-}
-finally
-{
-// Ensure the running flag is reset
-lock.release();
-}
-}
-}).start();
+              while (_z != z || _calibratedImage != getCalibratedImage()) {
+                draw();
+              }
+            } finally {
+              // Ensure the running flag is reset
+              lock.release();
             }
+          }
+        }).start();
+      }
     }
 
-    private int getCalibratedImage()
-    {
+    private int getCalibratedImage() {
       return pluginSettings.getCalibratedImage() ? 1 : 0;
     }
   }
@@ -1630,27 +1623,21 @@ lock.release();
   /**
    * Convert the model to the given units.
    *
-   * @param model
-   *            the model
-   * @param zDistanceUnit
-   *            the desired input z distance unit
-   * @param sDistanceUnit
-   *            the desired output s distance unit
+   * @param model the model
+   * @param zDistanceUnit the desired input z distance unit
+   * @param sDistanceUnit the desired output s distance unit
    * @return the astigmatism model
-   * @throws ConversionException
-   *             if the units cannot be converted
+   * @throws ConversionException if the units cannot be converted
    */
   public static AstigmatismModel convert(AstigmatismModel model, DistanceUnit zDistanceUnit,
-      DistanceUnit sDistanceUnit) throws ConversionException
-  {
+      DistanceUnit sDistanceUnit) throws ConversionException {
     return PSFProtosHelper.convert(model, zDistanceUnit, sDistanceUnit);
   }
 
-  private void deleteModel()
-  {
+  private void deleteModel() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    final String[] MODELS = listAstigmatismModels(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listAstigmatismModels(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1659,8 +1646,7 @@ lock.release();
     pluginSettings.setSelected(name);
 
     final AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
-    if (model == null)
-    {
+    if (model == null) {
       IJ.error(TITLE, "Failed to find astigmatism model: " + name);
       return;
     }
@@ -1671,20 +1657,19 @@ lock.release();
     ImageJUtils.log("Deleted astigmatism model: %s", name);
   }
 
-  private void invertModel()
-  {
+  private void invertModel() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    final String[] MODELS = listAstigmatismModels(false);
+    final String[] models = listAstigmatismModels(false);
     gd.addMessage("Invert the z-orientation of a model.\n \n" + TextUtils.wrap(
-        //@formatter:off
-         "Note that a positive gamma puts the focal plane for the X-dimension " +
-         "above the z-centre (positive Z) and the focal "+
-         "plane for the Y-dimension below the z-centre (negative Z). If gamma " +
-         "is negative then the orientation of the focal "+
-         "planes of X and Y are reversed."
+    //@formatter:off
+        "Note that a positive gamma puts the focal plane for the X-dimension " +
+        "above the z-centre (positive Z) and the focal "+
+        "plane for the Y-dimension below the z-centre (negative Z). If gamma " +
+        "is negative then the orientation of the focal "+
+        "planes of X and Y are reversed.", 80));
         //@formatter:on
-        , 80));
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

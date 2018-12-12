@@ -688,8 +688,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
    * @throws IllegalArgumentException If the function does not have an integer grid spacing from the
    *         origin
    */
-  public CubicSplineFunction(CubicSplineData splineData, int maxx, int maxy)
-      throws IllegalArgumentException {
+  public CubicSplineFunction(CubicSplineData splineData, int maxx, int maxy) {
     this.splines = splineData.splines;
     this.maxx = (maxx < 1) ? 1 : maxx;
     this.maxy = (maxy < 1) ? 1 : maxy;
@@ -717,7 +716,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
    *         origin
    */
   public CubicSplineFunction(CubicSplineData splineData, int maxx, int maxy, double cx, double cy,
-      double cz, int scale) throws IllegalArgumentException {
+      double cz, int scale) {
     this.splines = splineData.splines;
     this.maxx = (maxx < 1) ? 1 : maxx;
     this.maxy = (maxy < 1) ? 1 : maxy;
@@ -780,7 +779,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
    * @param scale the new scale
    * @throws IllegalArgumentException If the scale is not strictly positive
    */
-  public void setScale(int scale) throws IllegalArgumentException {
+  public void setScale(int scale) {
     if (scale < 1) {
       throw new IllegalArgumentException();
     }

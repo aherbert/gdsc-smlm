@@ -49,8 +49,7 @@ public abstract class Image3D {
    * @return the size, or -1 if too large
    * @throws IllegalArgumentException if too large (optional)
    */
-  public static int checkSize(int nc, int nr, int ns, boolean raiseException)
-      throws IllegalArgumentException {
+  public static int checkSize(int nc, int nr, int ns, boolean raiseException) {
     if (nc < 0 || nr < 0 || ns < 0) {
       if (raiseException) {
         throw new IllegalArgumentException("Negative dimensions");
@@ -85,7 +84,7 @@ public abstract class Image3D {
    * @param ns the number of slices
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public Image3D(int nc, int nr, int ns) throws IllegalArgumentException {
+  public Image3D(int nc, int nr, int ns) {
     createData(checkSize(nc, nr, ns, true));
     this.nc = nc;
     this.nr = nr;
@@ -99,7 +98,7 @@ public abstract class Image3D {
    * @param stack the stack
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public Image3D(ImageStack stack) throws IllegalArgumentException {
+  public Image3D(ImageStack stack) {
     nc = stack.getWidth();
     nr = stack.getHeight();
     ns = stack.getSize();
@@ -264,7 +263,7 @@ public abstract class Image3D {
    * @return the xyz components
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public int[] getXyz(int i) throws IllegalArgumentException {
+  public int[] getXyz(int i) {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -284,7 +283,7 @@ public abstract class Image3D {
    * @param xyz the xyz components (must be an array of at least length 3)
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public void getXyz(int i, int[] xyz) throws IllegalArgumentException {
+  public void getXyz(int i, int[] xyz) {
     if (i < 0 || i >= getDataLength()) {
       throw new IllegalArgumentException(
           "Index in not in the correct range: 0 <= i < " + getDataLength());
@@ -304,7 +303,7 @@ public abstract class Image3D {
    * @return the index
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public int getIndex(int x, int y, int z) throws IllegalArgumentException {
+  public int getIndex(int x, int y, int z) {
     if (x < 0 || x >= nc || y < 0 || y >= nr || z < 0 || z >= ns) {
       throw new IllegalArgumentException("Index in not inside the image");
     }
@@ -348,7 +347,7 @@ public abstract class Image3D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public Image3D crop(int x, int y, int z, Image3D image) throws IllegalArgumentException {
+  public Image3D crop(int x, int y, int z, Image3D image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();
@@ -381,8 +380,7 @@ public abstract class Image3D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public ImageStack cropToStack(int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException {
+  public ImageStack cropToStack(int x, int y, int z, int w, int h, int d) {
     // Check the region range
     if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
         || (long) z + d > ns) {
@@ -416,8 +414,7 @@ public abstract class Image3D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException {
+  public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int w, int h, int d) {
     final int nc = stack.getWidth();
     final int nr = stack.getHeight();
     final int ns = stack.getSize();
@@ -445,7 +442,7 @@ public abstract class Image3D {
    * @param image the image
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException {
+  public void insert(int x, int y, int z, Image3D image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();
@@ -476,7 +473,7 @@ public abstract class Image3D {
    * @param stack the image stack
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, int z, ImageStack stack) throws IllegalArgumentException {
+  public void insert(int x, int y, int z, ImageStack stack) {
     // Check the region range
     final int w = stack.getWidth();
     final int h = stack.getHeight();
@@ -510,7 +507,7 @@ public abstract class Image3D {
    * @param image the image
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, int z, ImageProcessor image) throws IllegalArgumentException {
+  public void insert(int x, int y, int z, ImageProcessor image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();
@@ -585,8 +582,7 @@ public abstract class Image3D {
    * @return [x,y,z,w,h,d]
    * @throws IllegalArgumentException if the intersect has no volume
    */
-  public int[] computeIntersectOrThrow(int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException {
+  public int[] computeIntersectOrThrow(int x, int y, int z, int w, int h, int d) {
     if (w < 0) {
       w = -w;
       x = subtract(x, w);
@@ -619,7 +615,7 @@ public abstract class Image3D {
    * @return the size
    * @throws IllegalArgumentException If the size if zero
    */
-  private static int checkSize(int size) throws IllegalArgumentException {
+  private static int checkSize(int size) {
     if (size == 0) {
       throw new IllegalArgumentException("No intersect");
     }

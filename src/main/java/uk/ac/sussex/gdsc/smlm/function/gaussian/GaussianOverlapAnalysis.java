@@ -93,12 +93,12 @@ public class GaussianOverlapAnalysis {
    *
    * <p>The range is clipped to 1 to Integer.MAX_VALUE.
    *
-   * @param s the standard deviation
+   * @param sd the standard deviation
    * @param range the range factor
    * @return the range
    */
-  public static int getRange(double s, double range) {
-    final long l = (long) Math.ceil(2 * s * range);
+  public static int getRange(double sd, double range) {
+    final long l = (long) Math.ceil(2 * sd * range);
     if (l < 1L) {
       return 1;
     }
@@ -113,13 +113,13 @@ public class GaussianOverlapAnalysis {
    *
    * <p>The range is clipped to 1 to max.
    *
-   * @param s the standard deviation
+   * @param sd the standard deviation
    * @param range the range factor
    * @param max the max value to return
    * @return the range
    */
-  public static int getRange(double s, double range, int max) {
-    final long l = (long) Math.ceil(2 * s * range);
+  public static int getRange(double sd, double range, int max) {
+    final long l = (long) Math.ceil(2 * sd * range);
     if (l < 1L) {
       return 1;
     }

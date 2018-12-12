@@ -40,7 +40,7 @@ public class ImmutablePeakResult extends AttributePeakResult {
    * @param peakResult the peak result
    * @throws IllegalArgumentException if the parameters are invalid
    */
-  public ImmutablePeakResult(PeakResult peakResult) throws IllegalArgumentException {
+  public ImmutablePeakResult(PeakResult peakResult) {
     super(peakResult);
     built = true;
   }

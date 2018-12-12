@@ -38,7 +38,10 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * relevant.
  */
 public class MLELVMGradientProcedure extends LSQLVMGradientProcedure {
+
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit (must be positive)
    * @param func Gradient function
    */

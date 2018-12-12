@@ -256,7 +256,6 @@ public class PulseActivationAnalysis
       final double[] v = new UnitSphereRandomVectorGenerator(2, rand).nextVector();
       return new float[] {(float) (v[0] * radius + x), (float) (v[1] * radius + y)};
     }
-
   }
 
   private static String inputOption = "";
@@ -689,8 +688,9 @@ public class PulseActivationAnalysis
       } else {
         index1 = setCrosstalk(C21, crosstalk[0]);
       }
-    } else // 3-channel
-    if (targetChannel == 1) {
+
+      // 3-channel
+    } else if (targetChannel == 1) {
       index1 = setCrosstalk(C12, crosstalk[1]);
       index2 = setCrosstalk(C13, crosstalk[2]);
     } else if (targetChannel == 2) {

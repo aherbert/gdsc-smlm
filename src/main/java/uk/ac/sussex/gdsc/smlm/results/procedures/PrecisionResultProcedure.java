@@ -33,15 +33,15 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  */
 //@formatter:off
 public class PrecisionResultProcedure extends AbstractResultProcedure implements
-  StoredPrecisionProcedure,
-  LSEPrecisionProcedure,
-  LSEPrecisionBProcedure,
-  MLEPrecisionProcedure,
-  MLEPrecisionBProcedure
-//@formatter:on
-{
-  /** The precision. */
-  public double[] precision;
+    StoredPrecisionProcedure,
+    LSEPrecisionProcedure,
+    LSEPrecisionBProcedure,
+    MLEPrecisionProcedure,
+    MLEPrecisionBProcedure {
+  //@formatter:on
+
+  /** The precisions. */
+  public double[] precisions;
 
   /**
    * Instantiates a new precision result procedure.
@@ -97,15 +97,15 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    * Gets the precision stored in the results.
    */
   public void getStoredPrecision() {
-    i = 0;
-    precision = allocate(precision);
+    counter = 0;
+    precisions = allocate(precisions);
     results.forEach((StoredPrecisionProcedure) this);
   }
 
   /** {@inheritDoc} */
   @Override
   public void executeStoredPrecision(double precision) {
-    this.precision[i++] = precision;
+    this.precisions[counter++] = precision;
   }
 
   /**
@@ -114,16 +114,16 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getLSEPrecision() throws DataException {
-    i = 0;
-    precision = allocate(precision);
+  public void getLSEPrecision() {
+    counter = 0;
+    precisions = allocate(precisions);
     results.forEach((LSEPrecisionProcedure) this);
   }
 
   /** {@inheritDoc} */
   @Override
   public void executeLSEPrecision(double precision) {
-    this.precision[i++] = precision;
+    this.precisions[counter++] = precision;
   }
 
   /**
@@ -132,16 +132,16 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getLSEPrecisionB() throws DataException {
-    i = 0;
-    precision = allocate(precision);
+  public void getLSEPrecisionB() {
+    counter = 0;
+    precisions = allocate(precisions);
     results.forEach((LSEPrecisionBProcedure) this);
   }
 
   /** {@inheritDoc} */
   @Override
   public void executeLSEPrecisionB(double precision) {
-    this.precision[i++] = precision;
+    this.precisions[counter++] = precision;
   }
 
   /**
@@ -150,16 +150,16 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getMLEPrecision() throws DataException {
-    i = 0;
-    precision = allocate(precision);
+  public void getMLEPrecision() {
+    counter = 0;
+    precisions = allocate(precisions);
     results.forEach((MLEPrecisionProcedure) this);
   }
 
   /** {@inheritDoc} */
   @Override
   public void executeMLEPrecision(double precision) {
-    this.precision[i++] = precision;
+    this.precisions[counter++] = precision;
   }
 
   /**
@@ -168,15 +168,15 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getMLEPrecisionB() throws DataException {
-    i = 0;
-    precision = allocate(precision);
+  public void getMLEPrecisionB() {
+    counter = 0;
+    precisions = allocate(precisions);
     results.forEach((MLEPrecisionBProcedure) this);
   }
 
   /** {@inheritDoc} */
   @Override
   public void executeMLEPrecisionB(double precision) {
-    this.precision[i++] = precision;
+    this.precisions[counter++] = precision;
   }
 }

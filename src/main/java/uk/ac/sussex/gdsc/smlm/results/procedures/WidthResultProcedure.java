@@ -33,10 +33,10 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  */
 //@formatter:off
 public class WidthResultProcedure extends UnitResultProcedure implements
-  WResultProcedure,
-  WxWyResultProcedure
-//@formatter:on
-{
+    WResultProcedure,
+    WxWyResultProcedure {
+  //@formatter:on
+
   /** The x width. */
   public float[] wx;
 
@@ -67,15 +67,15 @@ public class WidthResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getW() throws DataException {
-    i = 0;
+  public void getW() {
+    counter = 0;
     this.wx = allocate(this.wx);
     results.forEach(getDistanceUnit(), (WResultProcedure) this);
   }
 
   @Override
-  public void executeW(float w) {
-    this.wx[i++] = w;
+  public void executeW(float width) {
+    this.wx[counter++] = width;
   }
 
   /**
@@ -83,8 +83,8 @@ public class WidthResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getWxWy() throws DataException {
-    i = 0;
+  public void getWxWy() {
+    counter = 0;
     this.wx = allocate(this.wx);
     this.wy = allocate(this.wy);
     results.forEach(getDistanceUnit(), (WxWyResultProcedure) this);
@@ -92,8 +92,8 @@ public class WidthResultProcedure extends UnitResultProcedure implements
 
   @Override
   public void executeWxWy(float wx, float wy) {
-    this.wx[i] = wx;
-    this.wy[i] = wy;
-    i++;
+    this.wx[counter] = wx;
+    this.wy[counter] = wy;
+    counter++;
   }
 }

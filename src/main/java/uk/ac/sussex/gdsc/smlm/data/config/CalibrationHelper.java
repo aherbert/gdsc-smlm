@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 /**
  * Contains helper functions for the Calibration class.
  */
-public class CalibrationHelper {
+public final class CalibrationHelper {
   /**
    * Gets a distance converter to update values.
    *
@@ -53,11 +53,11 @@ public class CalibrationHelper {
    * @throws ConversionException if a converter cannot be created
    */
   public static TypeConverter<DistanceUnit> getDistanceConverter(CalibrationOrBuilder calibration,
-      DistanceUnit toDistanceUnit) throws ConversionException {
+      DistanceUnit toDistanceUnit) {
     if (calibration != null && toDistanceUnit != null && calibration.hasDistanceCalibration()) {
       final DistanceCalibrationOrBuilder distanceCalibration =
           calibration.getDistanceCalibrationOrBuilder();
-      return UnitConverterFactory.createConverter(distanceCalibration.getDistanceUnit(),
+      return UnitConverterUtils.createConverter(distanceCalibration.getDistanceUnit(),
           toDistanceUnit, distanceCalibration.getNmPerPixel());
     }
     throw new ConversionException();
@@ -74,11 +74,11 @@ public class CalibrationHelper {
    * @throws ConversionException if a converter cannot be created
    */
   public static TypeConverter<IntensityUnit> getIntensityConverter(CalibrationOrBuilder calibration,
-      IntensityUnit toIntensityUnit) throws ConversionException {
+      IntensityUnit toIntensityUnit) {
     if (calibration != null && toIntensityUnit != null && calibration.hasIntensityCalibration()) {
       final IntensityCalibrationOrBuilder intensityCalibration =
           calibration.getIntensityCalibrationOrBuilder();
-      return UnitConverterFactory.createConverter(intensityCalibration.getIntensityUnit(),
+      return UnitConverterUtils.createConverter(intensityCalibration.getIntensityUnit(),
           toIntensityUnit, intensityCalibration.getCountPerPhoton());
     }
     throw new ConversionException();
@@ -95,12 +95,12 @@ public class CalibrationHelper {
    * @throws ConversionException if a converter cannot be created
    */
   public static TypeConverter<TimeUnit> getTimeConverter(CalibrationOrBuilder calibration,
-      TimeUnit toTimeUnit) throws ConversionException {
+      TimeUnit toTimeUnit) {
     if (calibration != null && toTimeUnit != null && calibration.hasTimeCalibration()) {
       final TimeCalibrationOrBuilder timeCalibration = calibration.getTimeCalibrationOrBuilder();
       // Assume time is in frames
       final TimeUnit timeUnit = TimeUnit.FRAME; // timeCalibration.getTimeUnit()
-      return UnitConverterFactory.createConverter(timeUnit, toTimeUnit,
+      return UnitConverterUtils.createConverter(timeUnit, toTimeUnit,
           timeCalibration.getExposureTime());
     }
     throw new ConversionException();
@@ -117,10 +117,10 @@ public class CalibrationHelper {
    * @throws ConversionException if a converter cannot be created
    */
   public static TypeConverter<AngleUnit> getAngleConverter(CalibrationOrBuilder calibration,
-      AngleUnit toAngleUnit) throws ConversionException {
+      AngleUnit toAngleUnit) {
     if (calibration != null && toAngleUnit != null && calibration.hasAngleCalibration()) {
       final AngleCalibrationOrBuilder psfCalibration = calibration.getAngleCalibrationOrBuilder();
-      return UnitConverterFactory.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
+      return UnitConverterUtils.createConverter(psfCalibration.getAngleUnit(), toAngleUnit);
     }
     throw new ConversionException();
   }
@@ -238,4 +238,7 @@ public class CalibrationHelper {
     }
     return cw.getCalibration();
   }
+
+  /** No public constructor. */
+  private CalibrationHelper() {}
 }

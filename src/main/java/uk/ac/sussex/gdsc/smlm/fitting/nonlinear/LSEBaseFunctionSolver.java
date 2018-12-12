@@ -147,7 +147,6 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
    * <pre>
    * I = sum_i { Ei,a * Ei,b }
    * E = sum_i { Ei * Ei,a * Ei,b }
-   *
    * with
    * i the number of data points fit using least squares using a function of n variable parameters
    * Ei the expected value of the function at i
@@ -197,7 +196,6 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
    * <pre>
    * I = sum_i { Ei,a * Ei,b }
    * E = sum_i { Ei * Ei,a * Ei,b }
-   *
    * with
    * i the number of data points fit using least squares using a function of n variable parameters
    * Ei the expected value of the function at i

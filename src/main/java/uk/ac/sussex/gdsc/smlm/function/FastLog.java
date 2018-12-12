@@ -64,8 +64,6 @@ public abstract class FastLog {
    * return Math.log(val) / Math.log(2)
    * </pre>
    *
-   * Math.log(2) is pre-computed.
-   *
    * @param val the input value
    * @return the log2 of the value
    */

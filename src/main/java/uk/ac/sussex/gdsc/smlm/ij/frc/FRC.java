@@ -938,8 +938,8 @@ public class FRC {
     int error = 0;
 
     for (int y = centre, y2 = centre; y >= 0 && y2 < size; y--, y2++) {
-      for (int x = centre, x2 = centre, i = size * y + x, j = size * y2 + x2; x >= 0
-          && x2 < size; x--, x2++, i--, j++) {
+      for (int x = centre, x2 = centre, i = size * y + x, j = size * y2 + x2; x >= 0 && x2 < size;
+          x--, x2++, i--, j++) {
         if (data[i] != data[j] || !FloatEquality.almostEqualRelativeOrAbsolute(data[i], data[j],
             maxRelativeError, maxAbsoluteError)) {
           // System.out.printf("[%d] %f != [%d] %f\n", i, data[i], j, data[j]);

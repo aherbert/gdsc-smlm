@@ -32,7 +32,7 @@ import java.util.List;
  * collection of filters and the combined height used to identify candidates.
  */
 public final class JurySpotFilter extends MaximaSpotFilter {
-  private DataProcessor[] processors;
+  private final DataProcessor[] processors;
 
   /**
    * Constructor.
@@ -53,6 +53,26 @@ public final class JurySpotFilter extends MaximaSpotFilter {
       }
     }
     this.processors = processors;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected JurySpotFilter(JurySpotFilter source) {
+    super(source);
+    // Ensure the object is duplicated and not passed by reference.
+    processors = new DataProcessor[source.processors.length];
+    for (int i = 0; i < processors.length; i++) {
+      processors[i] = source.processors[i].copy();
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public JurySpotFilter copy() {
+    return new JurySpotFilter(this);
   }
 
   /** {@inheritDoc} */
@@ -152,18 +172,6 @@ public final class JurySpotFilter extends MaximaSpotFilter {
       sum[j] *= divisor;
     }
     return sum;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public JurySpotFilter clone() {
-    final JurySpotFilter f = (JurySpotFilter) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.processors = processors.clone();
-    for (int i = 0; i < processors.length; i++) {
-      f.processors[i] = processors[i].clone();
-    }
-    return f;
   }
 
   /** {@inheritDoc} */

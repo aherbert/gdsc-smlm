@@ -215,7 +215,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @param s the standard deviation of the Gaussian
    * @throws IllegalArgumentException If the standard deviation is not strictly positive
    */
-  public PoissonGaussianFisherInformation(double s) throws IllegalArgumentException {
+  public PoissonGaussianFisherInformation(double s) {
     this(s, DEFAULT_SAMPLING);
   }
 
@@ -228,8 +228,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @throws IllegalArgumentException If the sampling is below 1
    * @throws IllegalArgumentException If the maximum kernel size after scaling is too large
    */
-  public PoissonGaussianFisherInformation(double s, double sampling)
-      throws IllegalArgumentException {
+  public PoissonGaussianFisherInformation(double s, double sampling) {
     if (!(s >= 0 && s <= Double.MAX_VALUE)) {
       throw new IllegalArgumentException("Gaussian standard deviation must be positive");
     }
@@ -285,7 +284,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
    */
   @Override
-  public double getFisherInformation(double t) throws IllegalArgumentException {
+  public double getFisherInformation(double t) {
     final double I = getPoissonGaussianI(t);
 
     // Check limits.
@@ -324,7 +323,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @return the Poisson Gaussian Fisher information
    * @throws IllegalArgumentException the illegal argument exception
    */
-  public double getPoissonGaussianI(double t) throws IllegalArgumentException {
+  public double getPoissonGaussianI(double t) {
     if (t <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
@@ -622,7 +621,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @return the integral
    * @throws IllegalArgumentException If the convolution will be too large
    */
-  private double compute(int scale, int range, double[] p) throws IllegalArgumentException {
+  private double compute(int scale, int range, double[] p) {
     final double[] g = gaussianKernel.getGaussianKernel(scale, range, true);
 
     final IntegrationProcedure ip =

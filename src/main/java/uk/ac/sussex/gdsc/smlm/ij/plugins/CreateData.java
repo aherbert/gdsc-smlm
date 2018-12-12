@@ -1539,7 +1539,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return hwhm;
   }
 
-  private PSF createPSF(double psfSD) throws IllegalArgumentException {
+  private PSF createPSF(double psfSD) {
     if (psf == null) {
       if (psfModelType == PSF_MODEL_ASTIGMATISM) {
         // Note: the astigmatismModel may not yet be created so create if necessary.
@@ -1688,7 +1688,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return distribution;
   }
 
-  private SpatialDistribution createConfinementDistribution() throws ConfigurationException {
+  private SpatialDistribution createConfinementDistribution() {
     if (settings.getDiffusionRate() <= 0 || settings.getFixedFraction() >= 1) {
       return null;
     }
@@ -1737,7 +1737,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return null;
   }
 
-  private static void checkConfiguration(String message) throws ConfigurationException {
+  private static void checkConfiguration(String message) {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage(TextUtils.wrap("Warning: " + message, 80));
     gd.setOKLabel("Continue");
@@ -2492,8 +2492,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return image;
   }
 
-  private PSFModel createPSFModel(List<LocalisationModelSet> localisationSets)
-      throws IllegalArgumentException {
+  private PSFModel createPSFModel(List<LocalisationModelSet> localisationSets) {
     // Allow reuse of the cached model
     if (psfModelCache != null) {
       return psfModelCache;
@@ -2575,7 +2574,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return createPSFModel(localisationSets);
   }
 
-  private PSFModel createPSFModel(PSFModel psfModel) throws IllegalArgumentException {
+  private PSFModel createPSFModel(PSFModel psfModel) {
     final PSFModel copy = psfModel.copy();
     copy.setRandomGenerator(createRandomGenerator());
     return copy;
@@ -3485,10 +3484,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         // Get precision
         final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
         pp.getPrecision();
-        stats[PRECISION].add(pp.precision);
+        stats[PRECISION].add(pp.precisions);
         for (int i = 0; i < pp.size(); i++) {
           if (Math.abs(sp.z[i]) < depth) {
-            stats[PRECISION_IN_FOCUS].add(pp.precision[i]);
+            stats[PRECISION_IN_FOCUS].add(pp.precisions[i]);
           }
         }
       } catch (final DataException ex) {
@@ -4693,7 +4692,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         }
         return true;
       }
-
     });
   }
 
@@ -5877,8 +5875,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
    * @return the camera model
    * @throws ConfigurationException If the model cannot be created
    */
-  public static CameraModel getCameraModel(BaseParameters parameters)
-      throws ConfigurationException {
+  public static CameraModel getCameraModel(BaseParameters parameters) {
     // Create the camera model
     switch (parameters.cameraType) {
       case CCD:
@@ -5914,8 +5911,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
    * @return the string builder
    * @throws ConfigurationException the configuration exception
    */
-  public static StringBuilder addCameraDescription(StringBuilder sb, BaseParameters parameters)
-      throws ConfigurationException {
+  public static StringBuilder addCameraDescription(StringBuilder sb, BaseParameters parameters) {
     if (parameters.cameraType == CameraType.SCMOS) {
       sb.append("sCMOS (").append(parameters.cameraModelName).append(") ");
       final Rectangle bounds = parameters.cameraBounds;

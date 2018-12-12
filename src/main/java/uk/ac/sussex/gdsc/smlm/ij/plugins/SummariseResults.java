@@ -163,7 +163,7 @@ public class SummariseResults implements PlugIn, MouseListener {
         // Use stored precision if possible
         stored = result.hasPrecision();
         precisionMethod = p.getPrecision(stored);
-        for (final double v : p.precision) {
+        for (final double v : p.precisions) {
           stats[0].addValue(v);
         }
       } catch (final DataException ex) {
@@ -371,7 +371,7 @@ public class SummariseResults implements PlugIn, MouseListener {
         if (stored) {
           name += " (Stored)";
         }
-        plot(wo, "Precision: " + name, StoredDataStatistics.create(p.precision));
+        plot(wo, "Precision: " + name, StoredDataStatistics.create(p.precisions));
       } catch (final DataException ex) {
         // Ignore
       }

@@ -42,6 +42,21 @@ public class ZeroKernelFilter extends KernelFilter {
     super(kernel, kw, kh);
   }
 
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected ZeroKernelFilter(ZeroKernelFilter source) {
+    super(source);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ZeroKernelFilter copy() {
+    return new ZeroKernelFilter(this);
+  }
+
   @Override
   protected void convolveData(float[] in, float[] out, final int width, final int height,
       int border) {
@@ -103,12 +118,5 @@ public class ZeroKernelFilter extends KernelFilter {
       return 0f;
     }
     return pixels[x + yIndex];
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public ZeroKernelFilter clone() {
-    final ZeroKernelFilter o = (ZeroKernelFilter) super.clone();
-    return o;
   }
 }

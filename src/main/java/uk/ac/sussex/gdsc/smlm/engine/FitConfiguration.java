@@ -1289,9 +1289,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         // XXX - Determine if precision filtering for SCMOS is valid.
         // For now we leave this in but it may have to be changed to have a precision
         // computed during the fit which is stored for validation.
-        if (nmPerPixel > 0 && gain > 0 &&
-        // calibration.isCCDCamera()
-            (calibration.isCCDCamera() || calibration.isSCMOS())) {
+        if (nmPerPixel > 0 && gain > 0 && (calibration.isCCDCamera() || calibration.isSCMOS())) {
           this.precisionThreshold = MathUtils.pow2(getPrecisionThreshold());
         }
         break;

@@ -46,9 +46,6 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
  * Contains helper functions for the FitProtos class.
  */
 public final class FitProtosHelper {
-  private static final String UNKNOWN = "Unknown";
-  private static final String UNKNOWN_NAME = "Unknown name: ";
-  private static final String UNKNOWN_METHOD = "Unknown method: ";
 
   /** The default FitSolverSettings. */
   public static final FitSolverSettings defaultFitSolverSettings;
@@ -180,9 +177,7 @@ public final class FitProtosHelper {
     defaultFitEngineSettings = builder.build();
   }
 
-  /**
-   * No public constructor.
-   */
+  /** No public constructor. */
   private FitProtosHelper() {}
 
   /**
@@ -206,9 +201,9 @@ public final class FitProtosHelper {
       case MLE:
         return "MLE";
       case UNRECOGNIZED:
-        return UNKNOWN;
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException(UNKNOWN_NAME + value);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
     }
   }
 
@@ -237,9 +232,9 @@ public final class FitProtosHelper {
       case POWELL_BOUNDED:
         return "Powell (bounded)";
       case UNRECOGNIZED:
-        return UNKNOWN;
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException(UNKNOWN_NAME + value);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
     }
   }
 
@@ -258,9 +253,9 @@ public final class FitProtosHelper {
       case SINGLE:
         return "Single";
       case UNRECOGNIZED:
-        return UNKNOWN;
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException(UNKNOWN_NAME + value);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
     }
   }
 
@@ -283,9 +278,9 @@ public final class FitProtosHelper {
       case MEDIAN:
         return "Median";
       case UNRECOGNIZED:
-        return UNKNOWN;
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException(UNKNOWN_NAME + value);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
     }
   }
 
@@ -314,9 +309,9 @@ public final class FitProtosHelper {
       case RESIDUALS_LEAST_TRIMMED_OF_SQUARES:
         return "Residuals least trimmed of squares";
       case UNRECOGNIZED:
-        return UNKNOWN;
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException(UNKNOWN_NAME + value);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
     }
   }
 
@@ -337,9 +332,9 @@ public final class FitProtosHelper {
       case POISSON_CRLB:
         return "Poisson CRLB";
       case UNRECOGNIZED:
-        return UNKNOWN;
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException(UNKNOWN_NAME + value);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
     }
   }
 
@@ -373,7 +368,7 @@ public final class FitProtosHelper {
       default:
         break;
     }
-    throw new IllegalStateException(UNKNOWN_METHOD + method);
+    throw new IllegalArgumentException(ProtosHelperUtils.unknownMethodMessage(method));
   }
 
   /**
@@ -383,7 +378,7 @@ public final class FitProtosHelper {
    * @param searchMethod the search method
    * @return the search method
    */
-  public static uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod convertSearchMethod(
+  public static MaximumLikelihoodFitter.SearchMethod convertSearchMethod(
       SearchMethod searchMethod) {
     switch (searchMethod) {
       case BFGS:
@@ -404,7 +399,7 @@ public final class FitProtosHelper {
         return MaximumLikelihoodFitter.SearchMethod.POWELL_BOUNDED;
       case UNRECOGNIZED:
       default:
-        throw new IllegalStateException(UNKNOWN_METHOD + searchMethod);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownMethodMessage(searchMethod));
     }
   }
 
@@ -415,7 +410,7 @@ public final class FitProtosHelper {
    * @param lineSearchMethod the line search method
    * @return the line search method
    */
-  public static uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod(
+  public static FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod(
       LineSearchMethod lineSearchMethod) {
     switch (lineSearchMethod) {
       case IGNORE:
@@ -426,7 +421,8 @@ public final class FitProtosHelper {
         return FastMLESteppingFunctionSolver.LineSearchMethod.PARTIAL_IGNORE;
       case UNRECOGNIZED:
       default:
-        throw new IllegalStateException(UNKNOWN_METHOD + lineSearchMethod);
+        throw new IllegalArgumentException(
+            ProtosHelperUtils.unknownMethodMessage(lineSearchMethod));
     }
   }
 }

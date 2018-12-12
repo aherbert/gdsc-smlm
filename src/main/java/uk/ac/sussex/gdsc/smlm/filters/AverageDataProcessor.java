@@ -45,9 +45,10 @@ public class AverageDataProcessor extends DataProcessor {
   public static final int AREA_FILTER_LIMIT = 3;
 
   private final float smooth;
-  private final int iSmooth;
-  private BlockMeanFilter blockMeanFilter = null;
-  private AreaAverageFilter areaAverageFilter = null;
+  private final int intSmooth;
+  // Only 1 filter is not null but the methods used are different
+  private final BlockMeanFilter blockMeanFilter;
+  private final AreaAverageFilter areaAverageFilter;
 
   /**
    * Constructor.
@@ -70,16 +71,42 @@ public class AverageDataProcessor extends DataProcessor {
     super(border);
     this.smooth = (float) convert(smooth);
     // Store the smoothing value as an integer
-    iSmooth = ((int) smooth == smooth) ? (int) smooth : 0;
+    intSmooth = ((int) smooth == smooth) ? (int) smooth : 0;
 
-    // Only create the area filter if we need it
-    if (iSmooth > 0) {
+    // Create the appropriate filter.
+    // Use block smoothing when an integer block or below the area filter limit.
+    if (intSmooth > 0 || smooth < areaFilterLimit) {
       blockMeanFilter = new BlockMeanFilter();
-    } else if (smooth > areaFilterLimit) {
-      areaAverageFilter = new AreaAverageFilter();
+      areaAverageFilter = null;
     } else {
-      blockMeanFilter = new BlockMeanFilter();
+      blockMeanFilter = null;
+      areaAverageFilter = new AreaAverageFilter();
     }
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected AverageDataProcessor(AverageDataProcessor source) {
+    super(source);
+    smooth = source.smooth;
+    intSmooth = source.intSmooth;
+    // Ensure the object is duplicated and not passed by reference.
+    if (source.blockMeanFilter != null) {
+      blockMeanFilter = source.blockMeanFilter.copy();
+      areaAverageFilter = null;
+    } else {
+      blockMeanFilter = null;
+      areaAverageFilter = source.areaAverageFilter.copy();
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public AverageDataProcessor copy() {
+    return new AverageDataProcessor(this);
   }
 
   /**
@@ -115,7 +142,7 @@ public class AverageDataProcessor extends DataProcessor {
   @Override
   public boolean hasWeights() {
     final BaseWeightedFilter f = getFilter();
-    return (f != null) ? f.hasWeights() : false;
+    return (f != null && f.hasWeights());
   }
 
   /** {@inheritDoc} */
@@ -127,15 +154,15 @@ public class AverageDataProcessor extends DataProcessor {
       smoothData = Arrays.copyOf(data, width * height);
 
       // ADH 05-Jan-2017:
-      // This was changed from 1 to 0. Previously if the iSmooth was 1 then
+      // This was changed from 1 to 0. Previously if the intSmooth was 1 then
       // it would fall through to the striped block filter using a weight of 1.
       // This can be done using the rolling block algorithm instead.
-      if (iSmooth > 0) {
+      if (intSmooth > 0) {
         // Integer smoothing is faster using a rolling block algorithm
         if (smooth <= getBorder()) {
-          blockMeanFilter.rollingBlockFilterInternal(smoothData, width, height, iSmooth);
+          blockMeanFilter.rollingBlockFilterInternal(smoothData, width, height, intSmooth);
         } else {
-          blockMeanFilter.rollingBlockFilter(smoothData, width, height, iSmooth);
+          blockMeanFilter.rollingBlockFilter(smoothData, width, height, intSmooth);
         }
       } else if (areaAverageFilter != null) {
         if (smooth <= getBorder()) {
@@ -154,7 +181,7 @@ public class AverageDataProcessor extends DataProcessor {
 
   private BaseWeightedFilter getFilter() {
     if (smooth > 0) {
-      if (iSmooth > 1) {
+      if (intSmooth > 1) {
         return blockMeanFilter;
       } else if (areaAverageFilter != null) {
         return areaAverageFilter;
@@ -172,19 +199,6 @@ public class AverageDataProcessor extends DataProcessor {
    */
   public double getSmooth() {
     return smooth;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public AverageDataProcessor clone() {
-    final AverageDataProcessor f = (AverageDataProcessor) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    if (blockMeanFilter != null) {
-      f.blockMeanFilter = blockMeanFilter.clone();
-    } else {
-      f.areaAverageFilter = areaAverageFilter.clone();
-    }
-    return f;
   }
 
   /** {@inheritDoc} */

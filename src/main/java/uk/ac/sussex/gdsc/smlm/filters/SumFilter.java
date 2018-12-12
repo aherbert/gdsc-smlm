@@ -32,9 +32,18 @@ import org.apache.commons.math3.util.FastMath;
  * @deprecated replaced by BlockSumFilter
  */
 @Deprecated
-public class SumFilter extends BaseFilter {
-  private float[] floatDataBuffer = null;
-  private float[] floatRowBuffer = null;
+public class SumFilter {
+  private float[] floatDataBuffer;
+  private float[] floatRowBuffer;
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public SumFilter copy() {
+    return new SumFilter();
+  }
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
@@ -2144,14 +2153,5 @@ public class SumFilter extends BaseFilter {
 
     // Copy back
     System.arraycopy(newData, 0, data, 0, data.length);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public SumFilter clone() {
-    final SumFilter o = (SumFilter) super.clone();
-    o.floatDataBuffer = null;
-    o.floatRowBuffer = null;
-    return o;
   }
 }

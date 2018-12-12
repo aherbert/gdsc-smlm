@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.MultiDialog.MemoryResultsItems;
@@ -314,7 +314,7 @@ public class TraceExporter implements PlugIn {
       out.write("frame,t,trajectory,x,y");
       out.newLine();
 
-      final TypeConverter<TimeUnit> converter = UnitConverterFactory.createConverter(TimeUnit.FRAME,
+      final TypeConverter<TimeUnit> converter = UnitConverterUtils.createConverter(TimeUnit.FRAME,
           TimeUnit.SECOND, results.getCalibrationReader().getExposureTime());
 
       @SuppressWarnings("resource")

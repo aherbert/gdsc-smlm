@@ -402,8 +402,8 @@ public class AiryPSFModel extends PSFModel {
       // Set the number of subintervals adaptively, i.e. for small widths use more samples per
       // pixel.
       final double nPixels = Math.PI * maxD * maxD;
-      final double number = Math.sqrt(1000 / nPixels); // Approx 1000 (or so) samples across the
-                                                       // image
+      // Approximately 1000 (or so) samples across the image
+      final double number = Math.sqrt(1000 / nPixels);
       final int nSubintervals = FastMath.max(minSamplesPerDimension,
           FastMath.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
 

@@ -297,7 +297,6 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
             }
           }
         }
-
       }
     }
   }

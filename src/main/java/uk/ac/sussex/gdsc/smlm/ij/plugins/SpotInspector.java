@@ -403,10 +403,10 @@ public class SpotInspector implements PlugIn, MouseListener {
         score = (r.getIntensity());
         break;
       case 2: // Amplitude
-        score = hp.h[i];
+        score = hp.heights[i];
         break;
       case 1: // Precision
-        score = (float) pp.precision[i];
+        score = (float) pp.precisions[i];
         negative = true;
         break;
       default: // SNR

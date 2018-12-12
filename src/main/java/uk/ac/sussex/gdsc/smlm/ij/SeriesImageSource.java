@@ -1822,7 +1822,7 @@ public class SeriesImageSource extends ImageSource {
    * @throws DataException If there was an error duing the sequential read
    */
   @Override
-  protected Object nextRawFrame() throws DataException {
+  protected Object nextRawFrame() {
     try {
       // We can take if closed
       final Object pixels = rawFramesQueue.take();

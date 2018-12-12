@@ -57,7 +57,7 @@ public class CalibrationReader {
    * @param calibration the calibration
    * @throws IllegalArgumentException if the calibration is null
    */
-  public CalibrationReader(CalibrationOrBuilder calibration) throws IllegalArgumentException {
+  public CalibrationReader(CalibrationOrBuilder calibration) {
     if (calibration == null) {
       throw new IllegalArgumentException("Calibration is null");
     }
@@ -82,8 +82,7 @@ public class CalibrationReader {
    * @return the distance converter
    * @throws ConversionException the conversion exception
    */
-  public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit)
-      throws ConversionException {
+  public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit) {
     return CalibrationHelper.getDistanceConverter(getCalibrationOrBuilder(), toDistanceUnit);
   }
 
@@ -96,8 +95,7 @@ public class CalibrationReader {
    * @return the intensity converter
    * @throws ConversionException the conversion exception
    */
-  public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit toIntensityUnit)
-      throws ConversionException {
+  public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit toIntensityUnit) {
     return CalibrationHelper.getIntensityConverter(getCalibrationOrBuilder(), toIntensityUnit);
   }
 
@@ -110,7 +108,7 @@ public class CalibrationReader {
    * @return the time converter
    * @throws ConversionException the conversion exception
    */
-  public TypeConverter<TimeUnit> getTimeConverter(TimeUnit toTimeUnit) throws ConversionException {
+  public TypeConverter<TimeUnit> getTimeConverter(TimeUnit toTimeUnit) {
     return CalibrationHelper.getTimeConverter(getCalibrationOrBuilder(), toTimeUnit);
   }
 
@@ -123,8 +121,7 @@ public class CalibrationReader {
    * @return the angle converter
    * @throws ConversionException the conversion exception
    */
-  public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit)
-      throws ConversionException {
+  public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit) {
     return CalibrationHelper.getAngleConverter(getCalibrationOrBuilder(), toAngleUnit);
   }
 

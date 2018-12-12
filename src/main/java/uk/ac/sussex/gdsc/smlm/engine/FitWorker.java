@@ -414,8 +414,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
    * @param jobs the jobs
    * @throws ConfigurationException if the configuration is invalid
    */
-  public FitWorker(FitEngineConfiguration config, PeakResults results, BlockingQueue<FitJob> jobs)
-      throws ConfigurationException {
+  public FitWorker(FitEngineConfiguration config, PeakResults results, BlockingQueue<FitJob> jobs) {
     this.config = config;
     this.fitConfig = config.getFitConfiguration();
 
@@ -1447,8 +1446,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       amplitudeEstimate[0] = getEstimate(candidates.get(candidateId), params, 0, true);
 
       // The neighbours
-      for (int i = 0, j = parametersPerPeak; i < candidateNeighbourCount; i++, j +=
-          parametersPerPeak) {
+      for (int i = 0, j = parametersPerPeak; i < candidateNeighbourCount;
+          i++, j += parametersPerPeak) {
         final Candidate candidateNeighbour = candidateNeighbours[i];
         amplitudeEstimate[i + 1] = getEstimate(candidateNeighbour, params, j, true);
 
@@ -1475,8 +1474,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         getPrecomputedFittedNeighbours();
 
         // Add the details of the already fitted peaks
-        for (int i = 0, j =
-            (1 + candidateNeighbourCount) * parametersPerPeak; i < fittedNeighbourCount; i++) {
+        for (int i = 0, j = (1 + candidateNeighbourCount) * parametersPerPeak;
+            i < fittedNeighbourCount; i++) {
           if (precomputed[i]) {
             continue;
           }
@@ -1512,8 +1511,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       if (containsAmplitudeEstimates(amplitudeEstimate)) {
         // Find the min amplitude
         double minSignal = Double.POSITIVE_INFINITY;
-        for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j +=
-            parametersPerPeak, i++) {
+        for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length;
+            j += parametersPerPeak, i++) {
           if (amplitudeEstimate[i] && minSignal > params[j]) {
             minSignal = params[j];
           }
@@ -1527,8 +1526,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           final double backgroundChange = oldBackground - params[Gaussian2DFunction.BACKGROUND];
 
           // Make the amplitude estimates higher by the change in background
-          for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j +=
-              parametersPerPeak, i++) {
+          for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length;
+              j += parametersPerPeak, i++) {
             if (amplitudeEstimate[i]) {
               params[j] += backgroundChange;
             }
@@ -1539,8 +1538,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             // Set a small height based on the data range
             final double defaultHeight = Math.max(1,
                 0.1 * (getMax(region, width, height) - params[Gaussian2DFunction.BACKGROUND]));
-            for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j +=
-                parametersPerPeak, i++) {
+            for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length;
+                j += parametersPerPeak, i++) {
               if (amplitudeEstimate[i] && params[j] <= 0) {
                 params[j] = defaultHeight;
               }
@@ -2663,8 +2662,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         if (signal > 0) {
           amplitudeEstimate[0] = false;
           params[Gaussian2DFunction.SIGNAL] = signal;
-        } else // Resort to default amplitude estimate. Ensure this is above zero.
-        if (params[Gaussian2DFunction.SIGNAL] <= 0) {
+
+          // Resort to default amplitude estimate. Ensure this is above zero.
+        } else if (params[Gaussian2DFunction.SIGNAL] <= 0) {
           // Reset to the single fitting background
           double oldBackground = params[Gaussian2DFunction.BACKGROUND];
           params[Gaussian2DFunction.BACKGROUND] = getFittingBackgroundSingle();

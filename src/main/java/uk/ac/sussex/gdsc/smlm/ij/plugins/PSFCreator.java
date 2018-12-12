@@ -69,7 +69,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -581,7 +581,7 @@ public class PSFCreator implements PlugInFilter {
 
       final HeightResultProcedure hp = new HeightResultProcedure(results, IntensityUnit.COUNT);
       hp.getH();
-      a = SimpleArrayUtils.toDouble(hp.h);
+      a = SimpleArrayUtils.toDouble(hp.heights);
 
       // Smooth the amplitude plot
       final double[] smoothA = loess.smooth(z, a);
@@ -1924,7 +1924,7 @@ public class PSFCreator implements PlugInFilter {
         fitCom[0][peak.getFrame() - 1] = xCoord[i] = peak.getXPosition() - x;
         fitCom[1][peak.getFrame() - 1] = yCoord[i] = peak.getYPosition() - y;
         sd[i] = w;
-        a[i] = hp.h[i];
+        a[i] = hp.heights[i];
       }
     });
 
@@ -3155,7 +3155,7 @@ public class PSFCreator implements PlugInFilter {
   }
 
   private static final TypeConverter<AngleUnit> angleConverter =
-      UnitConverterFactory.createConverter(AngleUnit.RADIAN, AngleUnit.DEGREE);
+      UnitConverterUtils.createConverter(AngleUnit.RADIAN, AngleUnit.DEGREE);
   private static final double NO_ANGLE = -360.0;
 
   private class PSFCentreSelector implements DialogListener {
@@ -4117,39 +4117,33 @@ public class PSFCreator implements PlugInFilter {
       // Get the dimensions after the crop
       if (aquirePlotLock1()) {
         // Run in a new thread to allow the GUI to continue updating
-        new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              // Continue while the parameter is changing
-              //@formatter:off
-while (cropBorder != settings.getCropBorder() ||
-                cropStart != settings.getCropStart() ||
-                cropEnd != settings.getCropEnd() ||
-                outputType != settings.getOutputType() ||
-                psfMagnification != settings.getPsfMagnification() ||
-                singlePrecision != settings.getSinglePrecision()) {
+        new Thread(() -> {
+          try {
+            // Continue while the parameter is changing
+            //@formatter:off
+            while (cropBorder != settings.getCropBorder() ||
+              cropStart != settings.getCropStart() ||
+              cropEnd != settings.getCropEnd() ||
+              outputType != settings.getOutputType() ||
+              psfMagnification != settings.getPsfMagnification() ||
+              singlePrecision != settings.getSinglePrecision()) {
+              //@formatter:on
               drawLabel();
-       }
-}
-finally
-{
-// Ensure the running flag is reset
-plotLock1 = false;
-}
-}
-}).start();
             }
+          } finally {
+            // Ensure the running flag is reset
+            plotLock1 = false;
+          }
+        }).start();
+      }
     }
 
     private int centre = -1;
 
-    private void drawCentre()
-    {
+    private void drawCentre() {
       centre = slice;
 
-      if (psfOut[0].getSlice() != centre)
-      {
+      if (psfOut[0].getSlice() != centre) {
         psfOut[0].setSlice(centre);
         psfOut[0].resetDisplayRange();
         psfOut[0].updateAndDraw();
@@ -4157,29 +4151,25 @@ plotLock1 = false;
 
       // Mark projections using an overlay
       // X-projection
-      psfOut[1].setOverlay(new Line(centre, 0, centre, psfOut[1].getHeight()), Color.blue, 1, Color.blue);
+      psfOut[1].setOverlay(new Line(centre, 0, centre, psfOut[1].getHeight()), Color.blue, 1,
+          Color.blue);
       // Y-projection
-      psfOut[2].setOverlay(new Line(0, centre, psfOut[2].getWidth(), centre), Color.blue, 1, Color.blue);
+      psfOut[2].setOverlay(new Line(0, centre, psfOut[2].getWidth(), centre), Color.blue, 1,
+          Color.blue);
     }
 
-    private void updateCentre()
-    {
+    private void updateCentre() {
       if (aquirePlotLock2()) {
         // Run in a new thread to allow the GUI to continue updating
-        new Thread(new Runnable()
-        {
+        new Thread(new Runnable() {
           @Override
-          public void run()
-          {
-            try
-            {
+          public void run() {
+            try {
               // Continue while the parameter is changing
               while (centre != slice) {
                 drawCentre();
               }
-            }
-            finally
-            {
+            } finally {
               // Ensure the running flag is reset
               plotLock2 = false;
             }
@@ -4189,16 +4179,14 @@ plotLock1 = false;
     }
   }
 
-  private static Roi createRoi(float x, float y, Color color)
-  {
+  private static Roi createRoi(float x, float y, Color color) {
     final Roi roi = new PointRoi(x, y);
     roi.setStrokeColor(color);
     roi.setFillColor(color);
     return roi;
   }
 
-  private ExtractedPSF combine(ExtractedPSF[] psfs)
-  {
+  private ExtractedPSF combine(ExtractedPSF[] psfs) {
     final ExtractedPSF first = psfs[0];
 
     // PSFs can have different stack sizes. XY size is the same.
@@ -4207,8 +4195,7 @@ plotLock1 = false;
 
     int before = first.stackZCentre;
     int after = first.psf.length - first.stackZCentre;
-    for (int i = 1; i < psfs.length; i++)
-    {
+    for (int i = 1; i < psfs.length; i++) {
       before = Math.max(before, psfs[i].stackZCentre);
       after = Math.max(after, psfs[i].psf.length - psfs[i].stackZCentre);
     }
@@ -4217,11 +4204,9 @@ plotLock1 = false;
     final float[][] psf = new float[totalDepth][first.psf[0].length];
     final int size = first.maxx;
     final int[] count = new int[totalDepth];
-    for (int i = 0; i < psfs.length; i++)
-    {
+    for (int i = 0; i < psfs.length; i++) {
       final int offset = before - psfs[i].stackZCentre;
-      for (int j = 0; j < psfs[i].psf.length; j++)
-      {
+      for (int j = 0; j < psfs[i].psf.length; j++) {
         final float[] from = psfs[i].psf[j];
         final float[] to = psf[j + offset];
         count[j + offset]++;
@@ -4231,8 +4216,7 @@ plotLock1 = false;
       }
     }
     // Q. Should the normalisation be done?
-    for (int j = 0; j < psf.length; j++)
-    {
+    for (int j = 0; j < psf.length; j++) {
       final float[] to = psf[j];
       final int c = count[j];
       if (c != 0) {
@@ -4247,8 +4231,7 @@ plotLock1 = false;
     return combined;
   }
 
-  private boolean showAlignmentDialog()
-  {
+  private boolean showAlignmentDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
@@ -4271,26 +4254,24 @@ plotLock1 = false;
     tf.add(gd.addAndGetSlider("Smoothing", 0.1, 0.5, settings.getSmoothing()));
     tf.add(gd.addAndGetSlider("CoM_z_window", 0, 8, settings.getComWindow()));
     tf.add(gd.addAndGetSlider("CoM_border", 0, 0.5, settings.getComBorder()));
-    tf.add(gd.addAndGetSlider("Alignment_magnification", 1, 8, settings.getAlignmentMagnification()));
+    tf.add(
+        gd.addAndGetSlider("Alignment_magnification", 1, 8, settings.getAlignmentMagnification()));
     cb.add(gd.addAndGetCheckbox("Smooth_stack_signal", settings.getSmoothStackSignal()));
     tf.add(gd.addAndGetSlider("Max_iterations", 1, 20, settings.getMaxIterations()));
     if (settings.getInteractiveMode()) {
       cb.add(gd.addAndGetCheckbox("Check_alignments", settings.getCheckAlignments()));
     }
     tf.add(gd.addAndGetNumericField("Sub-pixel_precision", settings.getSubPixelPrecision(), -2));
-    if (!settings.getInteractiveMode())
-    {
+    if (!settings.getInteractiveMode()) {
       tf.add(gd.addAndGetNumericField("RMSD_XY_threshold", settings.getRmsdXyThreshold(), -2));
       tf.add(gd.addAndGetNumericField("RMSD_Z_threshold", settings.getRmsdZThreshold(), -2));
       tf.add(gd.addAndGetNumericField("CoM_shift_threshold", settings.getComShiftThreshold(), -2));
     }
 
     if (ImageJUtils.isShowGenericDialog()) {
-      gd.addAndGetButton("Reset", new ActionListener()
-      {
+      gd.addAndGetButton("Reset", new ActionListener() {
         @Override
-        public void actionPerformed(ActionEvent event)
-        {
+        public void actionPerformed(ActionEvent event) {
           final boolean interactive = PSFCreator.this.settings.getInteractiveMode();
           final PSFCreatorSettings defaults = GUIProtosHelper.defaultPSFCreatorSettings;
           int t = 0, c = 0;
@@ -4305,8 +4286,7 @@ plotLock1 = false;
             cb.get(c++).setState(defaults.getCheckAlignments());
           }
           tf.get(t++).setText(Double.toString(defaults.getSubPixelPrecision()));
-          if (!interactive)
-          {
+          if (!interactive) {
             tf.get(t++).setText(Double.toString(defaults.getRmsdXyThreshold()));
             tf.get(t++).setText(Double.toString(defaults.getRmsdZThreshold()));
             tf.get(t++).setText(Double.toString(defaults.getComShiftThreshold()));
@@ -4343,14 +4323,12 @@ plotLock1 = false;
     settings.setAlignmentMagnification((int) gd.getNextNumber());
     settings.setSmoothStackSignal(gd.getNextBoolean());
     settings.setMaxIterations((int) gd.getNextNumber());
-    if (settings.getInteractiveMode())
-    {
+    if (settings.getInteractiveMode()) {
       checkAlignments = gd.getNextBoolean();
       settings.setCheckAlignments(checkAlignments);
     }
     settings.setSubPixelPrecision(gd.getNextNumber());
-    if (!settings.getInteractiveMode())
-    {
+    if (!settings.getInteractiveMode()) {
       settings.setRmsdXyThreshold(gd.getNextNumber());
       settings.setRmsdZThreshold(gd.getNextNumber());
       settings.setComShiftThreshold(gd.getNextNumber());
@@ -4364,22 +4342,20 @@ plotLock1 = false;
     SettingsManager.writeSettings(settings);
 
     // Check arguments
-    try
-    {
+    try {
       Parameters.isPositive("nm/pixel", nmPerPixel);
       Parameters.isPositive("nm/slice", settings.getNmPerSlice());
       // Since we do a local background estimation for each extracted PSF then we
       // do not need the bias for non sCMOS cameras.
-      //if (!cw.isSCMOS())
-      //  Parameters.isAboveZero("Bias", cw.getBias());
-      Parameters.isEqualOrAbove("Projection magnification", settings.getAlignmentMagnification(), 1);
+      // if (!cw.isSCMOS())
+      // Parameters.isAboveZero("Bias", cw.getBias());
+      Parameters.isEqualOrAbove("Projection magnification", settings.getAlignmentMagnification(),
+          1);
       Parameters.isEqualOrAbove("Max iterations", settings.getMaxIterations(), 1);
       Parameters.isEqualOrAbove("PSF magnification", settings.getPsfMagnification(), 1);
       Parameters.isAbove("Smoothing", settings.getSmoothing(), 0);
       Parameters.isBelow("Smoothing", settings.getSmoothing(), 1);
-    }
-    catch (final IllegalArgumentException e)
-    {
+    } catch (final IllegalArgumentException e) {
       IJ.error(TITLE, e.getMessage());
       return false;
     }
@@ -4387,28 +4363,24 @@ plotLock1 = false;
     return true;
   }
 
-  private ExtractedPSF[] extractPSFs(final float[][] image, final BasePoint[] centres)
-  {
+  private ExtractedPSF[] extractPSFs(final float[][] image, final BasePoint[] centres) {
     final List<Future<?>> futures = new TurboList<>(centres.length);
 
     final int w = imp.getWidth();
     final int h = imp.getHeight();
 
     final ExtractedPSF[] psfs = new ExtractedPSF[centres.length];
-    for (int i = 0; i < centres.length; i++)
-    {
+    for (int i = 0; i < centres.length; i++) {
       final int index = i;
-      futures.add(threadPool.submit(new Runnable()
-      {
+      futures.add(threadPool.submit(new Runnable() {
         @Override
-        public void run()
-        {
+        public void run() {
           psfs[index] = new ExtractedPSF(image, w, h, centres[index], boxRadius, zRadius,
               settings.getAlignmentMagnification());
           // Do this here within the thread
           psfs[index].createProjections();
 
-          //psfs[index].show(TITLE + index);
+          // psfs[index].show(TITLE + index);
         }
       }));
     }
@@ -4418,68 +4390,54 @@ plotLock1 = false;
     return psfs;
   }
 
-  private static float[][] getLimits(float[][] psf, int x, int y, int n)
-  {
+  private static float[][] getLimits(float[][] psf, int x, int y, int n) {
     final BlockMeanFilter filter = new BlockMeanFilter();
     final float[][] limits = new float[2][psf.length];
-    for (int zz = 0; zz < psf.length; zz++)
-    {
+    for (int zz = 0; zz < psf.length; zz++) {
       float[] data = psf[zz];
-      if (n > 0)
-      {
+      if (n > 0) {
         data = data.clone();
         filter.rollingBlockFilterInternal(data, x, y, n);
       }
       final float[] l = findLimits(data, x, y, n);
       limits[0][zz] = l[0];
       limits[1][zz] = l[1];
-      //float[] l2 = Maths.limits(data);
-      //System.out.printf("%f - %f vs %f - %f\n", l[0], l[1], l2[0], l2[1]);
+      // float[] l2 = Maths.limits(data);
+      // System.out.printf("%f - %f vs %f - %f\n", l[0], l[1], l2[0], l2[1]);
     }
     return limits;
   }
 
-  private static float getBackground(float[][] psf, int x, int y, int n)
-  {
+  private static float getBackground(float[][] psf, int x, int y, int n) {
     final float[][] limits = getLimits(psf, x, y, n);
     return MathUtils.min(limits[0]);
-    //return Maths.min(new Smoother().smooth(limits[0]).getFSmooth());
+    // return Maths.min(new Smoother().smooth(limits[0]).getFSmooth());
   }
 
   /**
    * Find min/max value. This must put the entire region within the image.
    *
-   * @param data
-   *            the data
-   * @param maxx
-   *            the maxx
-   * @param maxy
-   *            the maxy
-   * @param n
-   *            the block size of the region
+   * @param data the data
+   * @param maxx the maxx
+   * @param maxy the maxy
+   * @param n the block size of the region
    * @return the limits
    */
-  private static float[] findLimits(float[] data, int maxx, int maxy, int n)
-  {
+  private static float[] findLimits(float[] data, int maxx, int maxy, int n) {
     final int[] l = findLimitsIndex(data, maxx, maxy, n);
-    return new float[] { data[l[0]], data[l[1]] };
+    return new float[] {data[l[0]], data[l[1]]};
   }
 
   /**
    * Find min/max index. This must put the entire region within the image.
    *
-   * @param data
-   *            the data
-   * @param maxx
-   *            the maxx
-   * @param maxy
-   *            the maxy
-   * @param n
-   *            the block size of the region
+   * @param data the data
+   * @param maxx the maxx
+   * @param maxy the maxy
+   * @param n the block size of the region
    * @return the min/max index
    */
-  private static int[] findLimitsIndex(float[] data, int maxx, int maxy, int n)
-  {
+  private static int[] findLimitsIndex(float[] data, int maxx, int maxy, int n) {
     int min = n * maxx + n;
     int max = min;
     for (int y = n; y < maxy - n; y++) {
@@ -4491,21 +4449,18 @@ plotLock1 = false;
         }
       }
     }
-    return new int[] { min, max };
+    return new int[] {min, max};
   }
 
   /**
    * Gets the constrast as the ratio between max and min value.
    *
-   * @param min
-   *            the min value
-   * @param max
-   *            the max value
+   * @param min the min value
+   * @param max the max value
    * @return the constrast
    */
   @SuppressWarnings("unused")
-  private static double[] getConstrast(float[] min, float[] max)
-  {
+  private static double[] getConstrast(float[] min, float[] max) {
     final double[] c = new double[min.length];
     for (int i = 0; i < min.length; i++) {
       c[i] = (double) max[i] / min[i];
@@ -4513,21 +4468,17 @@ plotLock1 = false;
     return c;
   }
 
-  private static double[] getCentreOfMass(float[][] psf, int w, int h)
-  {
+  private static double[] getCentreOfMass(float[][] psf, int w, int h) {
     double cx = 0;
     double cy = 0;
     double cz = 0;
     double sumXYZ = 0;
-    for (int z = 0; z < psf.length; z++)
-    {
+    for (int z = 0; z < psf.length; z++) {
       final float[] data = psf[z];
       double sumXy = 0;
-      for (int y = 0, j = 0; y < h; y++)
-      {
+      for (int y = 0, j = 0; y < h; y++) {
         double sumX = 0;
-        for (int x = 0; x < w; x++)
-        {
+        for (int x = 0; x < w; x++) {
           final float f = data[j++];
           sumX += f;
           cx += f * x;
@@ -4542,16 +4493,15 @@ plotLock1 = false;
     cx = 0.5 + cx / sumXYZ;
     cy = 0.5 + cy / sumXYZ;
     cz = 0.5 + cz / sumXYZ;
-    return new double[] { cx, cy, cz };
+    return new double[] {cx, cy, cz};
   }
 
-  private static double[] getCentreOfMassXY(float[][] psf, int w, int h, int zCentre, int n, int border)
-  {
+  private static double[] getCentreOfMassXY(float[][] psf, int w, int h, int zCentre, int n,
+      int border) {
     double cx = 0;
     double cy = 0;
     double sumXYZ = 0;
-    for (int z = zCentre - n; z <= zCentre + n; z++)
-    {
+    for (int z = zCentre - n; z <= zCentre + n; z++) {
       // Check bounds
       if (z < 0 || z >= psf.length) {
         // Ignore. This will break the com but we only use it for the XY position
@@ -4561,11 +4511,9 @@ plotLock1 = false;
       final float[] data = psf[z];
 
       double sumXy = 0;
-      for (int y = border; y < h - border; y++)
-      {
+      for (int y = border; y < h - border; y++) {
         double sumX = 0;
-        for (int x = border, j = y * w + border; x < w - border; x++)
-        {
+        for (int x = border, j = y * w + border; x < w - border; x++) {
           final float f = data[j++];
           sumX += f;
           cx += f * x;
@@ -4578,11 +4526,10 @@ plotLock1 = false;
     // Find centre with 0.5 as the centre of the pixel
     cx = 0.5 + cx / sumXYZ;
     cy = 0.5 + cy / sumXYZ;
-    return new double[] { cx, cy };
+    return new double[] {cx, cy};
   }
 
-  private static class Projection
-  {
+  private static class Projection {
     static final int X = 0;
     static final int Y = 1;
     static final int Z = 2;
@@ -4590,8 +4537,7 @@ plotLock1 = false;
     int x, y, z;
     float[] xp, yp, zp;
 
-    Projection(float[][] psf, int x, int y)
-    {
+    Projection(float[][] psf, int x, int y) {
       // Maximum project each PSF: X, Y, Z projections
       this.x = x;
       this.y = y;
@@ -4601,8 +4547,7 @@ plotLock1 = false;
       zp = new float[x * y];
       final float[] stripx = new float[x];
       final float[] stripy = new float[y];
-      for (int zz = 0; zz < z; zz++)
-      {
+      for (int zz = 0; zz < z; zz++) {
         final float[] data = psf[zz];
 
         // Z-projection
@@ -4617,15 +4562,13 @@ plotLock1 = false;
         }
 
         // X projection
-        for (int yy = 0; yy < y; yy++)
-        {
+        for (int yy = 0; yy < y; yy++) {
           System.arraycopy(data, yy * x, stripx, 0, x);
           xp[yy * z + zz] = MathUtils.max(stripx);
         }
 
         // Y projection
-        for (int xx = 0; xx < x; xx++)
-        {
+        for (int xx = 0; xx < x; xx++) {
           for (int yy = 0; yy < y; yy++) {
             stripy[yy] = data[yy * x + xx];
           }
@@ -4635,9 +4578,8 @@ plotLock1 = false;
     }
 
     @SuppressWarnings("unused")
-    int[] getDimensions()
-    {
-      return new int[] { x, y, z };
+    int[] getDimensions() {
+      return new int[] {x, y, z};
     }
 
     /**
@@ -4645,57 +4587,51 @@ plotLock1 = false;
      *
      * @return the centre of mass
      */
-    public double[] getCentreOfMass()
-    {
+    public double[] getCentreOfMass() {
       // Start in the centre of the image
-      final double[] com = new double[] { x / 2.0, y / 2.0, z / 2.0 };
-      for (int i = 0; i < 3; i++)
-      {
+      final double[] com = new double[] {x / 2.0, y / 2.0, z / 2.0};
+      for (int i = 0; i < 3; i++) {
         // This should be croped around z-centre but the method isn't used so ignore this
         final FloatProcessor fp = getProjection(i);
         final double[] c = getCentreOfProjection(fp);
         // Get the shift relative to the centre
         final double dx = c[0] - fp.getWidth() * 0.5;
         final double dy = c[1] - fp.getHeight() * 0.5;
-        //System.out.printf("[%d]  [%d] %.2f = %.2f, [%d] %.2f = %.2f\n", i,
-        //    Projection.getXDimension(i), c[0], dx,
-        //    Projection.getYDimension(i), c[1], dy);
+        // System.out.printf("[%d] [%d] %.2f = %.2f, [%d] %.2f = %.2f\n", i,
+        // Projection.getXDimension(i), c[0], dx,
+        // Projection.getYDimension(i), c[1], dy);
         // Add the shift to the current centre
-        //com[Projection.getXDimension(i)] -= Projection.getXShiftDirection(i) * dx / 2;
-        //com[Projection.getYDimension(i)] -= Projection.getYShiftDirection(i) * dy / 2;
+        // com[Projection.getXDimension(i)] -= Projection.getXShiftDirection(i) * dx / 2;
+        // com[Projection.getYDimension(i)] -= Projection.getYShiftDirection(i) * dy / 2;
         com[Projection.getXDimension(i)] += dx / 2;
         com[Projection.getYDimension(i)] += dy / 2;
       }
       return com;
     }
 
-    public double[] getCentreOfProjection(FloatProcessor fp)
-    {
+    public double[] getCentreOfProjection(FloatProcessor fp) {
       final float[] data = (float[]) fp.getPixels();
       final double[] com = centreOfMass(data, fp.getWidth(), fp.getHeight());
 
-      //      // Compare will background subtracted centre
-      //      float min = Maths.min(data);
-      //      float[] data2 = new float[data.length];
-      //      for (int i = 0; i < data.length; i++)
-      //        data2[i] = data[i] - min;
-      //      double[] com2 = centreOfMass(data2, fp.getWidth(), fp.getHeight());
+      // // Compare will background subtracted centre
+      // float min = Maths.min(data);
+      // float[] data2 = new float[data.length];
+      // for (int i = 0; i < data.length; i++)
+      // data2[i] = data[i] - min;
+      // double[] com2 = centreOfMass(data2, fp.getWidth(), fp.getHeight());
       //
-      //      System.out.printf("COM shift %f,%f\n", com[0]-com2[0], com[1]-com2[1]);
+      // System.out.printf("COM shift %f,%f\n", com[0]-com2[0], com[1]-com2[1]);
 
       return com;
     }
 
-    private static double[] centreOfMass(float[] data, int w, int h)
-    {
+    private static double[] centreOfMass(float[] data, int w, int h) {
       double cx = 0;
       double cy = 0;
       double sum = 0;
-      for (int v = 0, j = 0; v < h; v++)
-      {
+      for (int v = 0, j = 0; v < h; v++) {
         double sumU = 0;
-        for (int u = 0; u < w; u++)
-        {
+        for (int u = 0; u < w; u++) {
           final float f = data[j++];
           sumU += f;
           cx += f * u;
@@ -4706,17 +4642,14 @@ plotLock1 = false;
       // Find centre with 0.5 as the centre of the pixel
       cx = 0.5 + cx / sum;
       cy = 0.5 + cy / sum;
-      return new double[] { cx, cy };
+      return new double[] {cx, cy};
     }
 
-    FloatProcessor getProjection(int i, int minz, int maxz)
-    {
+    FloatProcessor getProjection(int i, int minz, int maxz) {
       FloatProcessor fp = getProjection(i);
-      if (i < Z)
-      {
+      if (i < Z) {
         final int range = maxz - minz + 1;
-        switch (i)
-        {
+        switch (i) {
           case X:
             fp.setRoi(minz, 0, range, y);
             break;
@@ -4730,10 +4663,8 @@ plotLock1 = false;
       return fp;
     }
 
-    FloatProcessor getProjection(int i)
-    {
-      switch (i)
-      {
+    FloatProcessor getProjection(int i) {
+      switch (i) {
         case X:
           return new FloatProcessor(z, y, xp);
         case Y:
@@ -4744,10 +4675,8 @@ plotLock1 = false;
       return null;
     }
 
-    static int getXDimension(int i)
-    {
-      switch (i)
-      {
+    static int getXDimension(int i) {
+      switch (i) {
         case X:
           return Z;
         case Y:
@@ -4758,10 +4687,8 @@ plotLock1 = false;
       return -1;
     }
 
-    static int getYDimension(int i)
-    {
-      switch (i)
-      {
+    static int getYDimension(int i) {
+      switch (i) {
         case X:
           return Y;
         case Y:
@@ -4772,45 +4699,43 @@ plotLock1 = false;
       return -1;
     }
 
-    //    static int getXShiftDirection(int i)
-    //    {
-    //      switch (i)
-    //      {
-    //        case X:
-    //          return -1;
-    //        case Y:
-    //          return -1;
-    //        case Z:
-    //          return -1;
-    //      }
-    //      return 0;
-    //    }
+    // static int getXShiftDirection(int i)
+    // {
+    // switch (i)
+    // {
+    // case X:
+    // return -1;
+    // case Y:
+    // return -1;
+    // case Z:
+    // return -1;
+    // }
+    // return 0;
+    // }
     //
-    //    static int getYShiftDirection(int i)
-    //    {
-    //      switch (i)
-    //      {
-    //        case X:
-    //          return -1;
-    //        case Y:
-    //          return -1;
-    //        case Z:
-    //          return -1;
-    //      }
-    //      return 0;
-    //    }
+    // static int getYShiftDirection(int i)
+    // {
+    // switch (i)
+    // {
+    // case X:
+    // return -1;
+    // case Y:
+    // return -1;
+    // case Z:
+    // return -1;
+    // }
+    // return 0;
+    // }
   }
 
-  private class ExtractedPSF
-  {
+  private class ExtractedPSF {
     BasePoint centre;
     /**
-     * The centre of the stack. Used to crop the image around the centre for alignment.
-     * (Note that the centre in XY is the middle pixel).
+     * The centre of the stack. Used to crop the image around the centre for alignment. (Note that
+     * the centre in XY is the middle pixel).
      *
-*
-* <p>
-     * Also used as a relative position when combining PSFs.
+     *
+     * <p> Also used as a relative position when combining PSFs.
      */
     int stackZCentre;
     final float[][] psf;
@@ -4819,8 +4744,7 @@ plotLock1 = false;
     Projection projection;
     final int magnification;
 
-    ExtractedPSF(float[][] psf, int size, BasePoint centre, int magnification)
-    {
+    ExtractedPSF(float[][] psf, int size, BasePoint centre, int magnification) {
       this.centre = centre;
       this.magnification = magnification;
       stackZCentre = -1; // Not used
@@ -4832,12 +4756,10 @@ plotLock1 = false;
     /**
      * Crop to Z centre.
      *
-     * @param zCentre
-     *            the z centre (1-based index)
+     * @param zCentre the z centre (1-based index)
      * @return the extracted PSF
      */
-    public ExtractedPSF cropToZCentre(int zCentre)
-    {
+    public ExtractedPSF cropToZCentre(int zCentre) {
       if (zCentre < 1 || zCentre > psf.length) {
         throw new IllegalStateException("Cannot crop outside the PSF: " + zCentre);
       }
@@ -4848,13 +4770,13 @@ plotLock1 = false;
       final int to = zCentre + d + 1;
       final float[][] psf = Arrays.copyOfRange(this.psf, from, to);
       final int zShift = -from;
-      final ExtractedPSF p = new ExtractedPSF(psf, maxx, centre.shift(0, 0, -zShift), magnification);
+      final ExtractedPSF p =
+          new ExtractedPSF(psf, maxx, centre.shift(0, 0, -zShift), magnification);
       p.stackZCentre = zCentre + zShift;
       return p;
     }
 
-    ExtractedPSF(float[][] psf, int maxx, int maxy)
-    {
+    ExtractedPSF(float[][] psf, int maxx, int maxy) {
       this.centre = new BasePoint(0, 0, 0);
       this.magnification = 1;
       stackZCentre = -1; // Not used
@@ -4863,8 +4785,8 @@ plotLock1 = false;
       this.maxy = maxy;
     }
 
-    ExtractedPSF(float[][] image, int w, int h, BasePoint centre, int boxRadius, int zRadius, int magnification)
-    {
+    ExtractedPSF(float[][] image, int w, int h, BasePoint centre, int boxRadius, int zRadius,
+        int magnification) {
       this.centre = centre;
       this.magnification = magnification;
 
@@ -4914,13 +4836,10 @@ plotLock1 = false;
       final int uy = (int) cy + boxRadius + 1;
       // Note: we use the full range of the stack.
       int lz, uz;
-      if (zRadius == 0)
-      {
+      if (zRadius == 0) {
         lz = 0;
         uz = image.length - 1;
-      }
-      else
-      {
+      } else {
         lz = Math.max(0, (int) cz - zRadius);
         uz = Math.min(image.length - 1, (int) cz + zRadius + 1);
       }
@@ -4948,14 +4867,12 @@ plotLock1 = false;
       // Extract to a stack to extract the background
       final float[][] fval = new float[rangez][rangex * rangey];
 
-      for (int z = 0; z < rangez; z++)
-      {
+      for (int z = 0; z < rangez; z++) {
         // Note: rangez is already clipped to the image size
         final float[] data = image[lz + z];
         final float[] slice = fval[z];
 
-        for (int y = 0, i = 0; y < yi.length; y++)
-        {
+        for (int y = 0, i = 0; y < yi.length; y++) {
           final int index = w * yi[y];
           for (int x = 0; x < xi.length; x++, i++) {
             slice[i] = data[index + xi[x]];
@@ -4966,12 +4883,10 @@ plotLock1 = false;
       final int window = (int) Math.round(settings.getAnalysisWindow());
       background = getBackground(fval, rangex, rangey, window);
       final double[] sum = new double[rangez];
-      for (int z = 0; z < rangez; z++)
-      {
+      for (int z = 0; z < rangez; z++) {
         final float[] slice = fval[z];
         double s = 0;
-        for (int i = slice.length; i-- > 0;)
-        {
+        for (int i = slice.length; i-- > 0;) {
           slice[i] -= background;
           s += slice[i];
         }
@@ -4985,8 +4900,7 @@ plotLock1 = false;
       // It will not effect how the function interpolates in XY.
       //
       // If smoothing is off then the enlarged PSF has a much noiser signal
-      if (settings.getSmoothStackSignal())
-      {
+      if (settings.getSmoothStackSignal()) {
         // Smooth the intensity
         final double[] ssum = new Smoother().smooth(sum).getDSmooth();
 
@@ -4997,9 +4911,7 @@ plotLock1 = false;
             SimpleArrayUtils.multiply(fval[z], ssum[z] / sum[z]);
           }
         }
-      }
-      else
-      {
+      } else {
         final double norm = 1.0 / MathUtils.max(sum);
         for (int z = 0; z < rangez; z++) {
           SimpleArrayUtils.multiply(fval[z], norm);
@@ -5010,7 +4922,8 @@ plotLock1 = false;
 
       // The range x and y is controled to put the PSF in the middle of the slice
       maxx = maxy = 2 * boxRadius * magnification + 1;
-      // The output z-stack interpolates all points for each voxel so the middle may not be in the centre of the stack
+      // The output z-stack interpolates all points for each voxel so the middle may not be in the
+      // centre of the stack
       final int maxz = (rangez - 1) * magnification;
       psf = new float[maxz][maxx * maxy];
 
@@ -5029,20 +4942,17 @@ plotLock1 = false;
         // We use pointers to the position in the interpolation tables so that the initial edge is
         // treated differently. This makes the X/Y dimension the same for all PSFs
         for (int y = 0, yy = iy, py = 0; y < rangey; y++, py += (n - yy), yy = 0) {
-          for (int x = 0, xx = ix, px = 0; x < rangex; x++, px += (n - xx), xx = 0)
-          {
+          for (int x = 0, xx = ix, px = 0; x < rangex; x++, px += (n - xx), xx = 0) {
             // Build the interpolator
             final CustomTricubicFunction f = CustomTricubicInterpolator.create(value, x, y, z);
 
             // Sample NxNxN.
             // The initial edge is handled by the position indices (pz,py,px).
             // The final edge is handled by the bounds of the PSF (psf.length, maxy, maxx).
-            for (int zzz = 0, ppz = pz; zzz < n && ppz < psf.length; zzz++, ppz++)
-            {
+            for (int zzz = 0, ppz = pz; zzz < n && ppz < psf.length; zzz++, ppz++) {
               final float[] data = psf[ppz];
               for (int yyy = yy, ppy = py; yyy < n && ppy < maxy; yyy++, ppy++) {
-                for (int xxx = xx, ppx = px; xxx < n && ppx < maxx; xxx++, ppx++)
-                {
+                for (int xxx = xx, ppx = px; xxx < n && ppx < maxx; xxx++, ppx++) {
                   final double[] table = tables[xxx + n * (yyy + n * zzz)];
                   data[maxx * ppy + ppx] = (float) f.value(table);
                   if (Float.isNaN(data[maxx * ppy + ppx])) {
@@ -5057,17 +4967,14 @@ plotLock1 = false;
     }
 
     /**
-     * Creates the cubic spline position sampling 'magnification' points within the range [0-1] from the given
-     * centre.
+     * Creates the cubic spline position sampling 'magnification' points within the range [0-1] from
+     * the given centre.
      *
-     * @param centre
-     *            the centre
-     * @param pc
-     *            the pixel change (1/magnification)
+     * @param centre the centre
+     * @param pc the pixel change (1/magnification)
      * @return the cubic spline position
      */
-    private CubicSplinePosition[] createCubicSplinePosition(double centre, double pc)
-    {
+    private CubicSplinePosition[] createCubicSplinePosition(double centre, double pc) {
       final CubicSplinePosition[] c = new CubicSplinePosition[magnification];
       // Find the first position in the range [0-1]
       centre -= Math.floor(centre);
@@ -5075,16 +4982,14 @@ plotLock1 = false;
       while (centre + j * pc >= 0) {
         j--;
       }
-      for (int i = 0; i < c.length; i++)
-      {
+      for (int i = 0; i < c.length; i++) {
         j++;
         c[i] = new CubicSplinePosition(centre + j * pc);
       }
       return c;
     }
 
-    private int findCentre(CubicSplinePosition[] sx, double centre)
-    {
+    private int findCentre(CubicSplinePosition[] sx, double centre) {
       centre -= Math.floor(centre);
       for (int i = 0; i < sx.length; i++) {
         if (sx[i].getX() == centre) {
@@ -5094,23 +4999,20 @@ plotLock1 = false;
       throw new IllegalStateException();
     }
 
-    void createProjections()
-    {
+    void createProjections() {
       if (projection == null) {
         projection = new Projection(psf, maxx, maxy);
       }
     }
 
-    ImagePlus[] show(String title)
-    {
-      final int slice = (stackZCentre != -1) ? stackZCentre :
-      // The centre is in the original scale so magnify
-          centre.getZint() * magnification + 1;
+    ImagePlus[] show(String title) {
+      final int slice = (stackZCentre != -1) ? stackZCentre
+          // The centre is in the original scale so magnify
+          : centre.getZint() * magnification + 1;
       return show(title, slice);
     }
 
-    ImagePlus[] show(String title, int slice)
-    {
+    ImagePlus[] show(String title, int slice) {
       final ImagePlus[] out = new ImagePlus[4];
       final ImageStack stack = new ImageStack(maxx, maxy);
       for (final float[] pixels : psf) {
@@ -5128,26 +5030,26 @@ plotLock1 = false;
         return out;
       }
 
-      out[1] = setCalibration(ImageJUtils.display(title + " X-projection (ZY)", getProjection(0, false)), 0);
-      out[2] = setCalibration(ImageJUtils.display(title + " Y-projection (XZ)", getProjection(1, false)), 1);
-      out[3] = setCalibration(ImageJUtils.display(title + " Z-projection (XY)", getProjection(2, false)), 2);
+      out[1] = setCalibration(
+          ImageJUtils.display(title + " X-projection (ZY)", getProjection(0, false)), 0);
+      out[2] = setCalibration(
+          ImageJUtils.display(title + " Y-projection (XZ)", getProjection(1, false)), 1);
+      out[3] = setCalibration(
+          ImageJUtils.display(title + " Z-projection (XY)", getProjection(2, false)), 2);
       return out;
     }
 
-    ImagePlus setCalibration(ImagePlus imp, int dimension)
-    {
+    ImagePlus setCalibration(ImagePlus imp, int dimension) {
       imp.setCalibration(getCalibration(dimension));
       imp.resetDisplayRange();
       imp.updateAndDraw();
       return imp;
     }
 
-    Calibration getCalibration(int dimension)
-    {
+    Calibration getCalibration(int dimension) {
       final Calibration c = new Calibration();
       c.setUnit("nm");
-      switch (dimension)
-      {
+      switch (dimension) {
         case Projection.X:
           c.pixelWidth = settings.getNmPerSlice() / magnification;
           c.pixelHeight = nmPerPixel / magnification;
@@ -5165,27 +5067,21 @@ plotLock1 = false;
       return c;
     }
 
-    FloatProcessor getProjection(int i, boolean crop)
-    {
-      if (crop)
-      {
+    FloatProcessor getProjection(int i, boolean crop) {
+      if (crop) {
         final int pad = getZPadding();
         return projection.getProjection(i, stackZCentre - pad, stackZCentre + pad);
       }
       return projection.getProjection(i);
     }
 
-    public ImageStack getImageStack(boolean crop)
-    {
+    public ImageStack getImageStack(boolean crop) {
       int min, max;
-      if (crop)
-      {
+      if (crop) {
         final int pad = getZPadding();
         min = stackZCentre - pad;
         max = stackZCentre + pad;
-      }
-      else
-      {
+      } else {
         min = 0;
         max = psf.length - 1;
       }
@@ -5197,39 +5093,36 @@ plotLock1 = false;
     }
 
     /**
-     * Gets the z padding to have an equal number of slices before and after the current stack z centre.
+     * Gets the z padding to have an equal number of slices before and after the current stack z
+     * centre.
      *
      * @return the z padding
      */
-    int getZPadding()
-    {
+    int getZPadding() {
       return Math.min(stackZCentre, psf.length - stackZCentre - 1);
     }
 
     /**
      * Create a new centre using the shift computed from the projection.
      *
-     * @param translation
-     *            the translation
+     * @param translation the translation
      * @return the new base point
      */
-    BasePoint updateCentre(float[] translation)
-    {
+    BasePoint updateCentre(float[] translation) {
       return new BasePoint(
           // Centre in X,Y,Z refer to the position extracted from the image
-          centre.getX() + translation[0], centre.getY() + translation[1], centre.getZ() + translation[2]);
+          centre.getX() + translation[0], centre.getY() + translation[1],
+          centre.getZ() + translation[2]);
     }
 
     /**
      * Compute the centre of mass.
      *
-     * @param useProjection
-     *            the use projection
+     * @param useProjection the use projection
      * @return the centre of mass
      */
     @SuppressWarnings("unused")
-    public double[] getCentreOfMass(boolean useProjection)
-    {
+    public double[] getCentreOfMass(boolean useProjection) {
       if (useProjection) {
         return projection.getCentreOfMass();
       }
@@ -5237,21 +5130,17 @@ plotLock1 = false;
     }
 
     /**
-     * Compute the centre of mass and then the shift of the CoM from the centre of the
-     * image.
+     * Compute the centre of mass and then the shift of the CoM from the centre of the image.
      *
-     * @param zCentre
-     *            the z centre
+     * @param zCentre the z centre
      * @return the centre of mass shift
      */
-    public double[] getCentreOfMassXYShift(int zCentre)
-    {
-      final double[] shift = PSFCreator.getCentreOfMassXY(psf, maxx, maxy, zCentre, settings.getComWindow(),
-          getCoMXYBorder(maxx, maxy));
+    public double[] getCentreOfMassXYShift(int zCentre) {
+      final double[] shift = PSFCreator.getCentreOfMassXY(psf, maxx, maxy, zCentre,
+          settings.getComWindow(), getCoMXYBorder(maxx, maxy));
       // Turn into a shift relative to the centre
-      final int[] d = new int[] { maxx, maxy };
-      for (int i = 0; i < d.length; i++)
-      {
+      final int[] d = new int[] {maxx, maxy};
+      for (int i = 0; i < d.length; i++) {
         shift[i] -= d[i] / 2.0;
         // Account for magnification
         shift[i] /= magnification;
@@ -5266,8 +5155,7 @@ plotLock1 = false;
       return shift;
     }
 
-    public ExtractedPSF enlarge(int n, ExecutorService threadPool)
-    {
+    public ExtractedPSF enlarge(int n, ExecutorService threadPool) {
       if (n <= 1) {
         return this;
       }
@@ -5364,9 +5252,8 @@ plotLock1 = false;
     final Image2DAligner[] align = new Image2DAligner[3];
     for (int i = 0; i < 3; i++) {
       align[i] = new Image2DAligner();
-      align[i].setReference(combined.getProjection(i, true).duplicate()); // No need to set the
-                                                                          // bounds as the PSF will
-                                                                          // be smaller
+      // No need to set the bounds as the PSF will be smaller
+      align[i].setReference(combined.getProjection(i, true).duplicate());
     }
 
     final float[][] results = new float[psfs.length][3];
@@ -5472,18 +5359,15 @@ plotLock1 = false;
       final int jj = j;
       for (int i = 0; i < 3; i++) {
         final int ii = i;
-        futures.add(threadPool.submit(new Runnable() {
-          @Override
-          public void run() {
-            final ExtractedPSF psf = psfs[jj];
-            final double[] result = align[ii].align(psf.getProjection(ii, true), WindowMethod.TUKEY,
-                bounds[ii], SubPixelMethod.CUBIC);
-            // We just average the shift from each projection. There should be
-            // two shifts for each dimension
-            results[jj][Projection.getXDimension(ii)] -= result[0] / 2;
-            results[jj][Projection.getYDimension(ii)] -= result[1] / 2;
-            // psfs[index].show(TITLE + index);
-          }
+        futures.add(threadPool.submit(() -> {
+          final ExtractedPSF psf = psfs[jj];
+          final double[] result = align[ii].align(psf.getProjection(ii, true), WindowMethod.TUKEY,
+              bounds[ii], SubPixelMethod.CUBIC);
+          // We just average the shift from each projection. There should be
+          // two shifts for each dimension
+          results[jj][Projection.getXDimension(ii)] -= result[0] / 2;
+          results[jj][Projection.getYDimension(ii)] -= result[1] / 2;
+          // psfs[index].show(TITLE + index);
         }));
       }
     }

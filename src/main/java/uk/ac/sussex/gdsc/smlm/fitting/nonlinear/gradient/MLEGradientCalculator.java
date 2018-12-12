@@ -41,9 +41,13 @@ import org.apache.commons.math3.util.FastMath;
  * relevant.
  */
 public class MLEGradientCalculator extends GradientCalculator {
-  private static double LOG_FOR_MIN = Math.log(Double.MIN_VALUE);
+
+  /** The log for min. */
+  private static final double LOG_FOR_MIN = Math.log(Double.MIN_VALUE);
 
   /**
+   * Instantiates a new MLE gradient calculator.
+   *
    * @param nparams The number of gradient parameters
    */
   public MLEGradientCalculator(final int nparams) {
@@ -51,14 +55,12 @@ public class MLEGradientCalculator extends GradientCalculator {
   }
 
   /**
-   * Note: if the function returns a negative value then it is set to zero.
+   * {@inheritDoc}
+   *
+   * <p>Note: if the function returns a negative value then it is set to zero.
    *
    * @param y Data to fit (must be strictly positive Poisson data)
    * @return The MLE chi-squared value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[],
-   *      double[], double[], double[][], double[],
-   *      uk.ac.sussex.gdsc.smlm.function.NonLinearFunction)
    */
   @Override
   public double findLinearised(final int[] x, final double[] y, final double[] a,
@@ -91,8 +93,10 @@ public class MLEGradientCalculator extends GradientCalculator {
 
         // We ignore this contribution to the gradient for stability
         // compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
-      } else // We assume y[i] is positive but must handle zero
-      if (xi <= 0.0) {
+
+
+        // We assume y[i] is positive but must handle zero
+      } else if (xi <= 0.0) {
         chisq += fi;
         compute0(beta, dfi_da, fi);
       } else {
@@ -108,14 +112,12 @@ public class MLEGradientCalculator extends GradientCalculator {
   }
 
   /**
-   * Note: if the function returns a negative value then it is set to zero.
+   * {@inheritDoc}
+   *
+   * <p>Note: if the function returns a negative value then it is set to zero.
    *
    * @param y Data to fit (must be strictly positive Poisson data)
    * @return The MLE chi-squared value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[],
-   *      double[], double[], double[][], double[],
-   *      uk.ac.sussex.gdsc.smlm.function.NonLinearFunction, boolean[])
    */
   @Override
   public double findLinearised(final int[] x, final double[] y, final double[] a,
@@ -176,11 +178,10 @@ public class MLEGradientCalculator extends GradientCalculator {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @param y Data to fit (must be strictly positive Poisson data)
    * @return The MLE chi-squared value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[],
-   *      double[], double[], double[], uk.ac.sussex.gdsc.smlm.function.NonLinearFunction)
    */
   @Override
   public double findLinearised(final int[] x, final double[] y, double[] yFit, final double[] a,
@@ -208,8 +209,9 @@ public class MLEGradientCalculator extends GradientCalculator {
             // Penalise the chi-squared value by assuming fi is a very small positive value
             chisq += (-xi - xi * LOG_FOR_MIN);
           }
-        } else // We assume y[i] is positive but must handle zero
-        if (xi <= 0.0) {
+
+          // We assume y[i] is positive but must handle zero
+        } else if (xi <= 0.0) {
           chisq += fi;
         } else {
           chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -235,8 +237,9 @@ public class MLEGradientCalculator extends GradientCalculator {
             // Penalise the chi-squared value by assuming fi is a very small positive value
             chisq += (-xi - xi * LOG_FOR_MIN);
           }
-        } else // We assume y[i] is positive but must handle zero
-        if (xi <= 0.0) {
+
+          // We assume y[i] is positive but must handle zero
+        } else if (xi <= 0.0) {
           chisq += fi;
         } else {
           chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -249,12 +252,10 @@ public class MLEGradientCalculator extends GradientCalculator {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @param y Data to fit (must be strictly positive Poisson data)
    * @return The MLE chi-squared value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int,
-   *      double[], double[], double[][], double[],
-   *      uk.ac.sussex.gdsc.smlm.function.NonLinearFunction)
    */
   @Override
   public double findLinearised(final int n, final double[] y, final double[] a,
@@ -287,8 +288,9 @@ public class MLEGradientCalculator extends GradientCalculator {
 
         // We ignore this contribution to the gradient for stability
         // compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
-      } else // We assume y[i] is positive but must handle zero
-      if (xi <= 0.0) {
+
+        // We assume y[i] is positive but must handle zero
+      } else if (xi <= 0.0) {
         chisq += fi;
         compute0(beta, dfi_da, fi);
       } else {
@@ -312,12 +314,10 @@ public class MLEGradientCalculator extends GradientCalculator {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @param y Data to fit (must be strictly positive Poisson data)
    * @return The MLE chi-squared value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int,
-   *      double[], double[], double[][], double[],
-   *      uk.ac.sussex.gdsc.smlm.function.NonLinearFunction, boolean[])
    */
   @Override
   public double findLinearised(final int n, final double[] y, final double[] a,
@@ -424,8 +424,9 @@ public class MLEGradientCalculator extends GradientCalculator {
             // Penalise the chi-squared value by assuming fi is a very small positive value
             chisq += (-xi - xi * LOG_FOR_MIN);
           }
-        } else // We assume y[i] is positive but must handle zero
-        if (xi <= 0.0) {
+
+          // We assume y[i] is positive but must handle zero
+        } else if (xi <= 0.0) {
           chisq += fi;
         } else {
           chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -451,8 +452,9 @@ public class MLEGradientCalculator extends GradientCalculator {
             // Penalise the chi-squared value by assuming fi is a very small positive value
             chisq += (-xi - xi * LOG_FOR_MIN);
           }
-        } else // We assume y[i] is positive but must handle zero
-        if (xi <= 0.0) {
+
+          // We assume y[i] is positive but must handle zero
+        } else if (xi <= 0.0) {
           chisq += fi;
         } else {
           chisq += (fi - xi - xi * Math.log(fi / xi));
@@ -679,6 +681,12 @@ public class MLEGradientCalculator extends GradientCalculator {
     return Math.pow(u, x) * FastMath.exp(-u) / factorial(x);
   }
 
+  /**
+   * Factorial.
+   *
+   * @param k the k
+   * @return the double
+   */
   private static double factorial(double k) {
     if (k <= 1) {
       return 1;
@@ -701,6 +709,12 @@ public class MLEGradientCalculator extends GradientCalculator {
     return x * Math.log(u) - u - logFactorial(x);
   }
 
+  /**
+   * Log factorial.
+   *
+   * @param k the k
+   * @return the double
+   */
   private static double logFactorial(double k) {
     if (k <= 1) {
       return 0;

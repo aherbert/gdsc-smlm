@@ -57,13 +57,11 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure {
    * The number of gradients.
    */
   public final int n;
-  /**
-   * Working space for I = sum_i { Ei,a * Ei,b }
-   */
+
+  /** Working space for I = sum_i { Ei,a * Ei,b }. */
   protected final double[] I;
-  /**
-   * Working space for E = sum_i { Ei * Ei,a * Ei,b }
-   */
+
+  /** Working space for E = sum_i { Ei * Ei,a * Ei,b }. */
   protected final double[] E;
 
   /** The solver. */
@@ -73,7 +71,7 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure {
   public final double[] variance;
 
   /**
-   * Instantiates a new LSQ variance gradient procedure.
+   * Instantiates a new procedure.
    *
    * @param func Gradient function
    */
@@ -82,15 +80,14 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure {
   }
 
   /**
-   * Instantiates a new LSQ variance gradient procedure.
+   * Instantiates a new procedure.
    *
    * @param func Gradient function
    * @param solver The solver used to invert the Fisher information matrix to find the Cramér–Rao
    *        lower bound (CRLB).
    * @throws IllegalArgumentException if the solver is null
    */
-  public LSQVarianceGradientProcedure(final Gradient1Function func, EJMLLinearSolver solver)
-      throws IllegalArgumentException {
+  public LSQVarianceGradientProcedure(final Gradient1Function func, EJMLLinearSolver solver) {
     if (solver == null) {
       throw new IllegalArgumentException("The solver cannot be null");
     }

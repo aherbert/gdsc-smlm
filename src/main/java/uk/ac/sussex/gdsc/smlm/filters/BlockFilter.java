@@ -53,6 +53,22 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   private Normaliser weightedNormaliser = null;
   private float weightedNormaliserN = 0;
 
+  /**
+   * Instantiates a new block filter.
+   */
+  protected BlockFilter() {
+    super();
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected BlockFilter(BlockFilter source) {
+    super(source);
+  }
+
   /** {@inheritDoc} */
   @Override
   protected void newWeights() {
@@ -2257,14 +2273,5 @@ public abstract class BlockFilter extends BaseWeightedFilter {
 
     // Copy back
     normaliser.normalise(buffer, data, data.length);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public BlockFilter clone() {
-    final BlockFilter o = (BlockFilter) super.clone();
-    o.buffer = null;
-    o.floatRowBuffer = null;
-    return o;
   }
 }

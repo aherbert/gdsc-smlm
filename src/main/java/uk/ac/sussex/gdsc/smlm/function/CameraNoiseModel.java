@@ -80,7 +80,7 @@ public abstract class CameraNoiseModel implements NoiseModel {
    *          = read_noise^2 + signal x (emCCD) ? 2 : 1
    * </pre>
    *
-   * The read noise is Gaussian read noise of the CCD camera.
+   * <p>The read noise is Gaussian read noise of the CCD camera.
    *
    * <p>The shot noise is Poisson noise of the signal. Since the variance of the Poisson
    * distribution is the mean so we can use the signal directly.

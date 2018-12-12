@@ -277,7 +277,7 @@ public abstract class ImageSource {
    * @return the next frame (or null if at the end)
    * @throws IllegalArgumentException if the bounds do not fit in the image
    */
-  public float[] next(Rectangle bounds) throws IllegalArgumentException {
+  public float[] next(Rectangle bounds) {
     if (!checkBounds(bounds)) {
       bounds = null;
     }
@@ -362,7 +362,7 @@ public abstract class ImageSource {
    * @return the frame (or null)
    * @throws IllegalArgumentException if the bounds do not fit in the image
    */
-  public float[] get(int frame, Rectangle bounds) throws IllegalArgumentException {
+  public float[] get(int frame, Rectangle bounds) {
     if (!checkBounds(bounds)) {
       bounds = null;
     }
@@ -515,7 +515,7 @@ public abstract class ImageSource {
    *         fit the image exactly
    * @throws IllegalArgumentException if the bounds do not fit in the image
    */
-  public boolean checkBounds(Rectangle bounds) throws IllegalArgumentException {
+  public boolean checkBounds(Rectangle bounds) {
     return checkBounds(getWidth(), getHeight(), bounds);
   }
 
@@ -529,8 +529,7 @@ public abstract class ImageSource {
    *         fit the image exactly
    * @throws IllegalArgumentException if the bounds do not fit in the image
    */
-  public static boolean checkBounds(int width, int height, Rectangle bounds)
-      throws IllegalArgumentException {
+  public static boolean checkBounds(int width, int height, Rectangle bounds) {
     if (bounds != null) {
       final int maxx = bounds.x + bounds.width;
       final int maxy = bounds.y + bounds.height;

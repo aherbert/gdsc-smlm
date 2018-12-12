@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * Contains helper functions for the PSFProtos class.
  */
-public class PSFProtosHelper {
+public final class PSFProtosHelper {
   /** The default one-axis Gaussian 2D PSF. */
   public static final PSF defaultOneAxisGaussian2DPSF;
   /** The default two-axis Gaussian 2D PSF. */
@@ -73,6 +73,9 @@ public class PSFProtosHelper {
     defaultTwoAxisAndThetaGaussian2DPSF = builder.build();
   }
 
+  /** No public constructor. */
+  private PSFProtosHelper() {}
+
   /**
    * Gets the name.
    *
@@ -94,9 +97,9 @@ public class PSFProtosHelper {
       case TWO_AXIS_GAUSSIAN_2D:
         return "Elliptical Gaussian 2D";
       case UNRECOGNIZED:
-        return "Unknown";
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
     }
   }
 
@@ -122,7 +125,7 @@ public class PSFProtosHelper {
         return PSF.getDefaultInstance();
       case UNRECOGNIZED:
       default:
-        throw new IllegalStateException("No default PSF for type: " + value);
+        throw new IllegalArgumentException("No default PSF for type: " + value);
     }
   }
 
@@ -131,24 +134,24 @@ public class PSFProtosHelper {
    *
    * @param model the model
    * @param zDistanceUnit the desired input z distance unit
-   * @param sDistanceUnit the desired output s distance unit
+   * @param widthDistanceUnit the desired output width distance unit
    * @return the astigmatism model
    * @throws ConversionException if the units cannot be converted
    */
   public static AstigmatismModel convert(AstigmatismModel model, DistanceUnit zDistanceUnit,
-      DistanceUnit sDistanceUnit) throws ConversionException {
+      DistanceUnit widthDistanceUnit) {
     if (model.getZDistanceUnitValue() == zDistanceUnit.getNumber()
-        && model.getSDistanceUnitValue() == sDistanceUnit.getNumber()) {
+        && model.getSDistanceUnitValue() == widthDistanceUnit.getNumber()) {
       return model;
     }
 
     final AstigmatismModel.Builder builder = model.toBuilder();
-    final TypeConverter<DistanceUnit> zc = UnitConverterFactory
+    final TypeConverter<DistanceUnit> zc = UnitConverterUtils
         .createConverter(model.getZDistanceUnit(), zDistanceUnit, model.getNmPerPixel());
-    final TypeConverter<DistanceUnit> sc = UnitConverterFactory
-        .createConverter(model.getSDistanceUnit(), sDistanceUnit, model.getNmPerPixel());
+    final TypeConverter<DistanceUnit> sc = UnitConverterUtils
+        .createConverter(model.getSDistanceUnit(), widthDistanceUnit, model.getNmPerPixel());
     builder.setZDistanceUnitValue(zDistanceUnit.getNumber());
-    builder.setSDistanceUnitValue(sDistanceUnit.getNumber());
+    builder.setSDistanceUnitValue(widthDistanceUnit.getNumber());
 
     // Convert the input units
     builder.setGamma(zc.convert(model.getGamma()));
@@ -172,13 +175,13 @@ public class PSFProtosHelper {
    *
    * @param model the model
    * @param zDistanceUnit the desired input z distance unit
-   * @param sDistanceUnit the desired output s distance unit
+   * @param widthDistanceUnit the desired output width distance unit
    * @return the psf
    * @throws ConversionException if the units cannot be converted
    */
   public static PSF createPSF(AstigmatismModel model, DistanceUnit zDistanceUnit,
-      DistanceUnit sDistanceUnit) throws ConversionException {
-    model = convert(model, zDistanceUnit, sDistanceUnit);
+      DistanceUnit widthDistanceUnit) {
+    model = convert(model, zDistanceUnit, widthDistanceUnit);
 
     final PSF.Builder psf = PSF.newBuilder();
     final PSFParameter.Builder param = PSFParameter.newBuilder();
@@ -214,13 +217,13 @@ public class PSFProtosHelper {
    *
    * @param psf the psf
    * @param zDistanceUnit the input z distance unit
-   * @param sDistanceUnit the output s distance unit
+   * @param widthDistanceUnit the output width distance unit
    * @param nmPerPixel the nm per pixel
    * @return the model
    * @throws ConfigurationException if the model cannot be created
    */
   public static AstigmatismModel createModel(PSF psf, DistanceUnit zDistanceUnit,
-      DistanceUnit sDistanceUnit, double nmPerPixel) throws ConfigurationException {
+      DistanceUnit widthDistanceUnit, double nmPerPixel) {
     if (psf.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
       throw new ConfigurationException("Not a " + getName(PSFType.ASTIGMATIC_GAUSSIAN_2D));
     }
@@ -237,7 +240,7 @@ public class PSFProtosHelper {
     }
 
     final AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
-    model.setSDistanceUnit(sDistanceUnit);
+    model.setSDistanceUnit(widthDistanceUnit);
     model.setZDistanceUnit(zDistanceUnit);
     model.setNmPerPixel(nmPerPixel);
 

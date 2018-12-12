@@ -128,11 +128,10 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
       p.getPrecision();
 
       // Precision in nm using the median
-      precision = new Percentile().evaluate(p.precision, 50);
+      precision = new Percentile().evaluate(p.precisions, 50);
       // Maths.sum(p.precision) / p.precision.length;
-      final double rawPrecision = distanceConverter.convertBack(precision / 1e3); // Convert from nm
-                                                                                  // to um to raw
-                                                                                  // units
+      // Convert from nm to um to raw units
+      final double rawPrecision = distanceConverter.convertBack(precision / 1e3);
       // Get the localisation error (4s^2) in units^2
       error = 4 * rawPrecision * rawPrecision;
     } catch (final Exception ex) {

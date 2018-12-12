@@ -45,7 +45,7 @@ public class FunctionHelper {
    * @return the mean value
    * @throws DataException if the values are not positive.
    */
-  public static double getMeanValue(double[] values, double fraction) throws DataException {
+  public static double getMeanValue(double[] values, double fraction) {
     if (fraction <= 0) {
       return MathUtils.max(values);
     }
@@ -86,7 +86,7 @@ public class FunctionHelper {
    * @return the x-value
    * @throws DataException if the values are not positive.
    */
-  public static double getXValue(double[] values, double fraction) throws DataException {
+  public static double getXValue(double[] values, double fraction) {
     if (fraction <= 0) {
       return 0;
     }

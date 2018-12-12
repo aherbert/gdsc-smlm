@@ -243,7 +243,7 @@ public abstract class CubicSplineFunctionTest {
               Assertions.assertArrayEquals(e, o1);
               Assertions.assertArrayEquals(e, o2);
               for (int i = e.length; i-- > 0;) {
-                Assertions.assertArrayEquals(p1.dyda[i], p2.dyda[i]);
+                Assertions.assertArrayEquals(p1.gradients[i], p2.gradients1[i]);
               }
             }
           }
@@ -324,7 +324,7 @@ public abstract class CubicSplineFunctionTest {
                   final double low = p1b.values[i];
 
                   final double gradient = (high - low) / (2 * h);
-                  final double dyda = p2.dyda[i][gradientIndex];
+                  final double dyda = p2.gradients[i][gradientIndex];
                   final double error = DoubleEquality.relativeError(gradient, dyda);
                   s.add(error);
                   if ((gradient * dyda) < 0) {
@@ -430,11 +430,11 @@ public abstract class CubicSplineFunctionTest {
               for (final int x : testx) {
                 for (final int y : testy) {
                   final int i = y * maxx + x;
-                  final double high = p1a.dyda[i][gradientIndex];
-                  final double low = p1b.dyda[i][gradientIndex];
+                  final double high = p1a.gradients[i][gradientIndex];
+                  final double low = p1b.gradients[i][gradientIndex];
 
                   final double gradient = (high - low) / (2 * h);
-                  final double d2yda2 = p2.d2yda2[i][gradientIndex];
+                  final double d2yda2 = p2.gradients2[i][gradientIndex];
                   final double error = DoubleEquality.relativeError(gradient, d2yda2);
                   // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y,
                   // gradient, gradientIndex, d2yda2, error);
@@ -492,7 +492,7 @@ public abstract class CubicSplineFunctionTest {
                       Assertions.assertArrayEquals(e, o1);
                       Assertions.assertArrayEquals(e, o2);
                       for (int i = e.length; i-- > 0;) {
-                        Assertions.assertArrayEquals(p1.dyda[i], p2.dyda[i]);
+                        Assertions.assertArrayEquals(p1.gradients[i], p2.gradients1[i]);
                       }
                     }
                   }
@@ -598,7 +598,7 @@ public abstract class CubicSplineFunctionTest {
                           final double low = p1b.values[i];
 
                           final double gradient = (high - low) / (2 * h);
-                          final double dyda = p2.dyda[i][gradientIndex];
+                          final double dyda = p2.gradients[i][gradientIndex];
                           final double error = DoubleEquality.relativeError(gradient, dyda);
                           s.add(error);
 
@@ -722,11 +722,11 @@ public abstract class CubicSplineFunctionTest {
                       for (final int x : testx) {
                         for (final int y : testy) {
                           final int i = y * maxx + x;
-                          final double high = p1a.dyda[i][gradientIndex];
-                          final double low = p1b.dyda[i][gradientIndex];
+                          final double high = p1a.gradients[i][gradientIndex];
+                          final double low = p1b.gradients[i][gradientIndex];
 
                           final double gradient = (high - low) / (2 * h);
-                          final double d2yda2 = p2.d2yda2[i][gradientIndex];
+                          final double d2yda2 = p2.gradients2[i][gradientIndex];
                           final double error = DoubleEquality.relativeError(gradient, d2yda2);
                           // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
                           // y, gradient, gradientIndex, d2yda2, error);

@@ -955,10 +955,10 @@ public class CameraModelAnalysis
       if (upsample != 1) {
         // Use scaled convolution. This is faster that zero filling distribution g.
         g = Convolution.convolve(kernel, g, upsample);
-      } else // The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT.
-      // This is a problem if most of the probability is in the Dirac.
-      // Otherwise it can be ignored.
-      if (dirac > 0.01) {
+      } else if (dirac > 0.01) {
+        // The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT.
+        // This is a problem if most of the probability is in the Dirac.
+        // Otherwise it can be ignored and the FFT version is OK.
         g = Convolution.convolve(kernel, g);
       } else {
         g = Convolution.convolveFast(kernel, g);
@@ -993,8 +993,9 @@ public class CameraModelAnalysis
       g = list.toArray();
       zero = (int) Math.floor(zero);
       step = 1.0;
-    } else // No convolution means we have the Poisson PMF/Poisson-Gamma PDF already
-    if (step != 1) {
+
+      // No convolution means we have the Poisson PMF/Poisson-Gamma PDF already
+    } else if (step != 1) {
       // Sample to 1.0 pixel step interval.
       if (settings.getMode() == MODE_EM_CCD) {
         // Poisson-Gamma PDF

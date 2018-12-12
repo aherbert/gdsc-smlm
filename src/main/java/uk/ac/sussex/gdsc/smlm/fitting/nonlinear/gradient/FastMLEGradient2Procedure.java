@@ -71,6 +71,8 @@ public class FastMLEGradient2Procedure
   public final double[] u;
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param x Data to fit (must be positive, i.e. the value of a Poisson process)
    * @param func Gradient function (must produce a strictly positive value, i.e. the mean of a
    *        Poisson process)
@@ -296,6 +298,8 @@ public class FastMLEGradient2Procedure
   }
 
   /**
+   * Checks if is na N gradients.
+   *
    * @return True if the last update calculation produced gradients with NaN values.
    */
   public boolean isNaNGradients() {

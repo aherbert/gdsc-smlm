@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -818,7 +818,7 @@ class Calibration implements Cloneable {
    */
   public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit toDistanceUnit) {
     if (hasDistanceUnit()) {
-      return UnitConverterFactory.createConverter(distanceUnit, toDistanceUnit, nmPerPixel);
+      return UnitConverterUtils.createConverter(distanceUnit, toDistanceUnit, nmPerPixel);
     }
     throw new ConversionException();
   }
@@ -834,7 +834,7 @@ class Calibration implements Cloneable {
    */
   public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit toIntensityUnit) {
     if (hasIntensityUnit()) {
-      return UnitConverterFactory.createConverter(intensityUnit, toIntensityUnit, gain);
+      return UnitConverterUtils.createConverter(intensityUnit, toIntensityUnit, gain);
     }
     throw new ConversionException();
   }
@@ -850,7 +850,7 @@ class Calibration implements Cloneable {
    */
   public TypeConverter<AngleUnit> getAngleConverter(AngleUnit toAngleUnit) {
     if (hasAngleUnit()) {
-      return UnitConverterFactory.createConverter(angleUnit, toAngleUnit);
+      return UnitConverterUtils.createConverter(angleUnit, toAngleUnit);
     }
     throw new ConversionException();
   }

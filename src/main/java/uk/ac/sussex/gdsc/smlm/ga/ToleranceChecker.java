@@ -50,7 +50,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
   /**
    * Build an instance with specified thresholds. This only check convergence using the sequence.
    *
-   * In order to perform only relative checks, the absolute tolerance must be set to a negative
+   * <p>In order to perform only relative checks, the absolute tolerance must be set to a negative
    * value. In order to perform only absolute checks, the relative tolerance must be set to a
    * negative value.
    *
@@ -65,7 +65,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
   /**
    * Build an instance with specified thresholds.
    *
-   * In order to perform only relative checks, the absolute tolerance must be set to a negative
+   * <p>In order to perform only relative checks, the absolute tolerance must be set to a negative
    * value. In order to perform only absolute checks, the relative tolerance must be set to a
    * negative value.
    *

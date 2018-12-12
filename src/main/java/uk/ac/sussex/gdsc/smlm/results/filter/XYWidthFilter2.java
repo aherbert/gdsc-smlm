@@ -77,7 +77,6 @@ public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter {
     } else {
       lowerSigmaThreshold = 0f;
     }
-
   }
 
   @Override

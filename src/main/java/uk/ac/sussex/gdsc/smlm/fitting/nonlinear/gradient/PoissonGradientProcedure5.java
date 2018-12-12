@@ -33,7 +33,10 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class PoissonGradientProcedure5 extends PoissonGradientProcedure {
+
   /**
+   * Instantiates a new procedure.
+   *
    * @param func Gradient function
    */
   public PoissonGradientProcedure5(final Gradient1Function func) {

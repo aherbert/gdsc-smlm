@@ -70,21 +70,18 @@ public class GaussianFunctionFactory {
 
   /**
    * An elliptical 2D Gaussian with gradients for background, signal, rotation angle, x/y position,
-   * x/y width
+   * x/y width.
    */
   public static final int FIT_ELLIPTICAL =
       FIT_BACKGROUND | FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
-  /**
-   * An elliptical 2D Gaussian with gradients for background, signal, x/y position, x/y width
-   */
+
+  /** An elliptical 2D Gaussian with gradients for background, signal, x/y position, x/y width. */
   public static final int FIT_FREE_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
-  /**
-   * A 2D Gaussian with gradients for background, signal, x/y position, width
-   */
+
+  /** A 2D Gaussian with gradients for background, signal, x/y position, width. */
   public static final int FIT_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_SIGNAL;
-  /**
-   * A 2D Gaussian with gradients for background, signal, x/y position
-   */
+
+  /** A 2D Gaussian with gradients for background, signal, x/y position. */
   public static final int FIT_FIXED = FIT_BACKGROUND | FIT_SIGNAL;
   /**
    * An elliptical 2D Gaussian with gradients for background, signal, x/y/z position. The z position
@@ -102,18 +99,21 @@ public class GaussianFunctionFactory {
    * supported.
    */
   public static final int FIT_ERF = 0x00000100;
+
   /**
    * An elliptical 2D Gaussian (full integration per pixel) with gradients for background, signal,
-   * x/y position, x/y width
+   * x/y position, x/y width.
    */
   public static final int FIT_ERF_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_ERF;
+
   /**
    * A 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position,
-   * width
+   * width.
    */
   public static final int FIT_ERF_CIRCLE = FIT_CIRCLE | FIT_ERF;
+
   /**
-   * A 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position
+   * A 2D Gaussian (full integration per pixel) with gradients for background, signal, x/y position.
    */
   public static final int FIT_ERF_FIXED = FIT_FIXED | FIT_ERF;
   /**
@@ -132,24 +132,28 @@ public class GaussianFunctionFactory {
    * Use a single exponential at the centre of the pixel. A rotation angle is supported.
    */
   public static final int FIT_SIMPLE = 0x00000200;
+
   /**
    * An elliptical 2D Gaussian (single exponential per pixel) with gradients for background, signal,
-   * rotation angle, x/y position, x/y width
+   * rotation angle, x/y position, x/y width.
    */
   public static final int FIT_SIMPLE_ELLIPTICAL = FIT_ELLIPTICAL | FIT_SIMPLE;
+
   /**
    * An elliptical 2D Gaussian (single exponential per pixel) with gradients for background, signal,
-   * x/y position, x/y width
+   * x/y position, x/y width.
    */
   public static final int FIT_SIMPLE_FREE_CIRCLE = FIT_FREE_CIRCLE | FIT_SIMPLE;
+
   /**
    * A 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y
-   * position, width
+   * position, width.
    */
   public static final int FIT_SIMPLE_CIRCLE = FIT_CIRCLE | FIT_SIMPLE;
+
   /**
    * A 2D Gaussian (single exponential per pixel) with gradients for background, signal, x/y
-   * position
+   * position.
    */
   public static final int FIT_SIMPLE_FIXED = FIT_FIXED | FIT_SIMPLE;
 
@@ -157,46 +161,45 @@ public class GaussianFunctionFactory {
 
   /**
    * An elliptical 2D Gaussian (full integration per pixel) with gradients for signal, x/y position,
-   * x/y width
+   * x/y width.
    */
   public static final int FIT_ERF_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_ERF;
 
-  /**
-   * An 2D Gaussian (full integration per pixel) with gradients for signal, x/y position, width
-   */
+  /** An 2D Gaussian (full integration per pixel) with gradients for signal, x/y position, width. */
   public static final int FIT_ERF_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL | FIT_ERF;
 
   /**
    * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, rotation
-   * angle, x/y position, x/y width
+   * angle, x/y position, x/y width.
    */
   public static final int FIT_SIMPLE_NB_ELLIPTICAL =
       FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
+
   /**
    * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, x/y
-   * position, x/y width
+   * position, x/y width.
    */
   public static final int FIT_SIMPLE_NB_FREE_CIRCLE =
       FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
+
   /**
-   * A 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position, width
+   * A 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position, width.
    */
   public static final int FIT_SIMPLE_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL | FIT_SIMPLE;
-  /**
-   * A 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position
-   */
+
+  /** A 2D Gaussian (single exponential per pixel) with gradients for signal, x/y position. */
   public static final int FIT_SIMPLE_NB_FIXED = FIT_SIGNAL | FIT_SIMPLE;
 
-  /**
-   * A 2D Gaussian (single exponential per pixel) with gradients for background, x/y position
-   */
+  /** A 2D Gaussian (single exponential per pixel) with gradients for background, x/y position. */
   public static final int FIT_SIMPLE_NS_FIXED = FIT_BACKGROUND | FIT_SIMPLE;
-  /**
-   * A 2D Gaussian (single exponential per pixel) with gradients for x/y position
-   */
+
+  /** A 2D Gaussian (single exponential per pixel) with gradients for x/y position. */
   public static final int FIT_SIMPLE_NS_NB_FIXED = FIT_SIMPLE;
 
+  /** The flags. */
   private final int flags;
+
+  /** The z model. */
   private final AstigmatismZModel zModel;
 
   /**
@@ -219,13 +222,13 @@ public class GaussianFunctionFactory {
    * <p>Defaults to using the ERF Gaussian functions if the user has not requested a simple Gaussian
    * or angle fitting.
    *
-   * @param nPeaks The number of peaks (N)
+   * @param numberOfPeaks The number of peaks (N)
    * @param maxx The maximum X-dimension
    * @param maxy The maximum Y-dimension
    * @return The function
    */
-  public Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy) {
-    return create2D(nPeaks, maxx, maxy, flags, zModel);
+  public Gaussian2DFunction create2D(int numberOfPeaks, int maxx, int maxy) {
+    return create2D(numberOfPeaks, maxx, maxy, flags, zModel);
   }
 
   /**
@@ -234,19 +237,19 @@ public class GaussianFunctionFactory {
    * <p>Defaults to using the ERF Gaussian functions if the user has not requested a simple Gaussian
    * or angle fitting.
    *
-   * @param nPeaks The number of peaks (N)
+   * @param numberOfPeaks The number of peaks (N)
    * @param maxx The maximum X-dimension
    * @param maxy The maximum Y-dimension
    * @param flags Enable all the parameters that should evaluate gradient
    * @param zModel the z model
    * @return The function
    */
-  public static Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy, int flags,
+  public static Gaussian2DFunction create2D(int numberOfPeaks, int maxx, int maxy, int flags,
       AstigmatismZModel zModel) {
     // Default to using the ERF functions if the user has not requested a simple Gaussian or angle
     // fitting
     if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0) {
-      if (nPeaks == 1) {
+      if (numberOfPeaks == 1) {
         if ((flags & FIT_BACKGROUND) != 0) {
           // Independent X/Y width
           if ((flags & FIT_Y_WIDTH) != 0) {
@@ -275,32 +278,32 @@ public class GaussianFunctionFactory {
         if ((flags & FIT_BACKGROUND) != 0) {
           // Independent X/Y width
           if ((flags & FIT_Y_WIDTH) != 0) {
-            return new MultiFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+            return new MultiFreeCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
           }
           // Combined X/Y width
           if ((flags & FIT_X_WIDTH) != 0) {
-            return new MultiCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+            return new MultiCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
           }
           // Z-depth function
           if ((flags & FIT_Z) != 0) {
-            return new MultiAstigmatismErfGaussian2DFunction(nPeaks, maxx, maxy, zModel);
+            return new MultiAstigmatismErfGaussian2DFunction(numberOfPeaks, maxx, maxy, zModel);
           }
           // Fixed width
           if ((flags & FIT_SIGNAL) != 0) {
-            return new MultiFixedErfGaussian2DFunction(nPeaks, maxx, maxy);
+            return new MultiFixedErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
           }
         }
         if ((flags & FIT_Y_WIDTH) != 0) {
-          return new MultiNBFreeCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+          return new MultiNBFreeCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
         }
         if ((flags & FIT_X_WIDTH) != 0) {
-          return new MultiNBCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+          return new MultiNBCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
         }
       }
     }
 
     // Legacy simple Gaussian functions
-    if (nPeaks == 1) {
+    if (numberOfPeaks == 1) {
       if ((flags & FIT_BACKGROUND) != 0) {
         if ((flags & FIT_ANGLE) != 0) {
           return new SingleEllipticalGaussian2DFunction(maxx, maxy);
@@ -340,39 +343,39 @@ public class GaussianFunctionFactory {
 
     if ((flags & FIT_BACKGROUND) != 0) {
       if ((flags & FIT_ANGLE) != 0) {
-        return new EllipticalGaussian2DFunction(nPeaks, maxx, maxy);
+        return new EllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);
       }
       if ((flags & FIT_Y_WIDTH) != 0) {
-        return new FreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
+        return new FreeCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
       }
       if ((flags & FIT_X_WIDTH) != 0) {
-        return new CircularGaussian2DFunction(nPeaks, maxx, maxy);
+        return new CircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
       }
 
       // Fixed function
       if ((flags & FIT_SIGNAL) != 0) {
-        return new FixedGaussian2DFunction(nPeaks, maxx, maxy);
+        return new FixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
       }
 
-      return new NSFixedGaussian2DFunction(nPeaks, maxx, maxy);
+      return new NSFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
 
     if ((flags & FIT_ANGLE) != 0) {
-      return new NBEllipticalGaussian2DFunction(nPeaks, maxx, maxy);
+      return new NBEllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
     if ((flags & FIT_Y_WIDTH) != 0) {
-      return new NBFreeCircularGaussian2DFunction(nPeaks, maxx, maxy);
+      return new NBFreeCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
     if ((flags & FIT_X_WIDTH) != 0) {
-      return new NBCircularGaussian2DFunction(nPeaks, maxx, maxy);
+      return new NBCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
 
     // Fixed function
     if ((flags & FIT_SIGNAL) != 0) {
-      return new NBFixedGaussian2DFunction(nPeaks, maxx, maxy);
+      return new NBFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
 
-    return new NSNBFixedGaussian2DFunction(nPeaks, maxx, maxy);
+    return new NSNBFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
   /**
@@ -387,21 +390,20 @@ public class GaussianFunctionFactory {
    * @throws IllegalArgumentException If the input array is null or not the correct size for a
    *         multiple of Gaussian peak parameters.
    */
-  public static int freeze(int flags, AstigmatismZModel zModel, double[] a)
-      throws IllegalArgumentException {
+  public static int freeze(int flags, AstigmatismZModel zModel, double[] a) {
     if (a == null) {
       throw new IllegalArgumentException("Parameter array is null");
     }
-    final int nPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+    final int numberOfPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
     // Check the array length is correct (including the background at position 0)
-    if (a.length != 1 + nPeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK) {
+    if (a.length != 1 + numberOfPeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK) {
       throw new IllegalArgumentException("Incorrect array size for the number of peaks");
     }
-    if (nPeaks == 1) {
+    if (numberOfPeaks == 1) {
       return freezeSingle(flags, zModel, a);
     }
     // This supports zero peaks too
-    return freezeMulti(nPeaks, flags, zModel, a);
+    return freezeMulti(numberOfPeaks, flags, zModel, a);
   }
 
   /**
@@ -409,32 +411,33 @@ public class GaussianFunctionFactory {
    * evaluate faster. The widths of the input parameters may be modified. The shape will remain
    * unchanged even if the function flags are altered.
    *
-   * @param nPeaks The number of peaks (N)
+   * @param numberOfPeaks The number of peaks (N)
    * @param flags The function flags (defines the type of function)
    * @param zModel the z model
    * @param a the parameters of the function (modified in place)
    * @return the flags for the new function
    */
-  private static int freezeMulti(int nPeaks, int flags, AstigmatismZModel zModel, double[] a) {
+  private static int freezeMulti(int numberOfPeaks, int flags, AstigmatismZModel zModel,
+      double[] a) {
     // Default to using the ERF functions if the user has not requested a simple Gaussian or angle
     // fitting
     if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0) {
       // Check for z-model
       if ((flags & FIT_Z) != 0 && zModel != null) {
         // Convert the parameters for a free-circle function
-        for (int i = 0, j = 0; i < nPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
+        for (int i = 0, j = 0; i < numberOfPeaks;
+            i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
           final double tz = a[j + Gaussian2DFunction.Z_POSITION];
           a[j + Gaussian2DFunction.X_SD] = zModel.getSx(tz);
           a[j + Gaussian2DFunction.Y_SD] = zModel.getSy(tz);
-          // a[ErfGaussian2DFunction.Z_POSITION] = 0;
         }
-
         return FIT_ERF_FREE_CIRCLE;
       }
 
       // Check the need for X/Y widths
       if ((flags & FIT_Y_WIDTH) == 0) {
-        for (int i = 0, j = 0; i < nPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
+        for (int i = 0, j = 0; i < numberOfPeaks;
+            i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
           a[j + Gaussian2DFunction.Y_SD] = a[j + Gaussian2DFunction.X_SD];
         }
         return FIT_ERF_FIXED;
@@ -447,7 +450,7 @@ public class GaussianFunctionFactory {
 
     // Check the need for X/Y widths
     if ((flags & FIT_Y_WIDTH) == 0) {
-      for (int i = 0, j = 0; i < nPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
+      for (int i = 0, j = 0; i < numberOfPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
         a[j + Gaussian2DFunction.Y_SD] = a[j + Gaussian2DFunction.X_SD];
       }
       return FIT_SIMPLE_FIXED;
@@ -477,8 +480,6 @@ public class GaussianFunctionFactory {
         final double tz = a[Gaussian2DFunction.Z_POSITION];
         a[Gaussian2DFunction.X_SD] = zModel.getSx(tz);
         a[Gaussian2DFunction.Y_SD] = zModel.getSy(tz);
-        // a[ErfGaussian2DFunction.Z_POSITION] = 0;
-
         return FIT_ERF_FREE_CIRCLE;
       }
 

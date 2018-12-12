@@ -142,7 +142,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
    * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
    */
   @Override
-  public double getFisherInformation(double t) throws IllegalArgumentException {
+  public double getFisherInformation(double t) {
     if (t <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }

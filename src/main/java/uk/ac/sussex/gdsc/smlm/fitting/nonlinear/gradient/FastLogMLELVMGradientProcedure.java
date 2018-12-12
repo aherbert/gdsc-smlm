@@ -43,7 +43,7 @@ public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure {
   protected final FastLog fastLog;
 
   /**
-   * Instantiates a new fast log MLELVM gradient procedure.
+   * Instantiates a new procedure.
    *
    * @param y Data to fit (must be positive)
    * @param func Gradient function

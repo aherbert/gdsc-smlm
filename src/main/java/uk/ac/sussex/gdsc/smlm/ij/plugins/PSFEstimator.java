@@ -515,8 +515,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
             if (a > 90) {
               a -= 180;
             }
-          } else // Convert to 90-270 domain
-          if (a < 90) {
+            // Convert to 90-270 domain
+          } else if (a < 90) {
             a += 180;
           }
           stats.addValue(a);
@@ -553,7 +553,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     return tryAgain;
   }
 
-  private void getP(int i, double[] p, boolean[] identical) throws IllegalArgumentException {
+  private void getP(int i, double[] p, boolean[] identical) {
     getP(sampleNew[i], sampleOld[i], i, p, identical);
   }
 
@@ -572,7 +572,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private void getPairedP(DescriptiveStatistics sample1, DescriptiveStatistics sample2, int i,
-      double[] p, boolean[] identical) throws IllegalArgumentException {
+      double[] p, boolean[] identical) {
     if (sample1.getN() < 2) {
       return;
     }

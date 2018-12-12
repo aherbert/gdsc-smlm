@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -95,7 +95,7 @@ public class PSFImagePeakResults extends IJImagePeakResults {
         throw new ConfigurationException("nm/pixel is required when drawing using the precision");
       }
 
-      dc = UnitConverterFactory.createConverter(DistanceUnit.NM, DistanceUnit.PIXEL,
+      dc = UnitConverterUtils.createConverter(DistanceUnit.NM, DistanceUnit.PIXEL,
           getCalibrationReader().getNmPerPixel());
     } else {
       // We need to know the parameters for the Gaussian 2D PSF

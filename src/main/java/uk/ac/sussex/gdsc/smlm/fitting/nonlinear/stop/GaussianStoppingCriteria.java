@@ -55,6 +55,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   private double[] maximumSD = null;
 
   /**
+   * Instantiates a new gaussian stopping criteria.
+   *
    * @param func The Gaussian function
    */
   public GaussianStoppingCriteria(Gaussian2DFunction func) {
@@ -118,14 +120,15 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
       sb.append("iter = ").append(getIteration() + 1).append(", error = ").append(oldError)
           .append(" -> ").append(newError);
       if (newError <= oldError) {
+
         for (int i = 0; i < peaks; i++) {
           sb.append(", Peak").append(i + 1).append("=[");
-          for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK
-              + Gaussian2DFunction.X_POSITION; j < 2; j++, k++) {
+          int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
+          for (int j = 0; j < 2; j++, param++) {
             if (j > 0) {
               sb.append(",");
             }
-            sb.append(a[k] - bestA[k]);
+            sb.append(a[param] - bestA[param]);
           }
           sb.append("]");
         }
@@ -143,10 +146,10 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
    */
   protected boolean noCoordinateChange(double[] a) {
     for (int i = 0; i < peaks; i++) {
-      for (int j = 0, k = i * Gaussian2DFunction.PARAMETERS_PER_PEAK
-          + Gaussian2DFunction.X_POSITION; j < 2; j++, k++) {
+      int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
+      for (int j = 0; j < 2; j++, param++) {
         // Check if the coordinates have moved less than the delta limit
-        if (Math.abs(bestA[k] - a[k]) > delta) {
+        if (Math.abs(bestA[param] - a[param]) > delta) {
           return false;
         }
       }
@@ -243,6 +246,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the delta.
+   *
    * @return the delta.
    */
   public double getDelta() {
@@ -250,6 +255,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Sets the minimum signal.
+   *
    * @param minimumSignal the minimum signal
    */
   public void setMinimumSignal(double minimumSignal) {
@@ -259,6 +266,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the minimum signal.
+   *
    * @return the minimum signal.
    */
   public double getMinimumSignal() {
@@ -266,6 +275,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Sets the minimum position for each dimension.
+   *
    * @param minimumPosition the minimum position for each dimension
    */
   public void setMinimumPosition(double[] minimumPosition) {
@@ -275,6 +286,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the minimum position for each dimension.
+   *
    * @return the minimum position for each dimension.
    */
   public double[] getMinimumPosition() {
@@ -282,6 +295,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Sets the maximum position for each dimension.
+   *
    * @param maximumPosition the maximum position for each dimension
    */
   public void setMaximumPosition(double[] maximumPosition) {
@@ -291,6 +306,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the maximum position for each dimension.
+   *
    * @return the maximum position for each dimension.
    */
   public double[] getMaximumPosition() {
@@ -298,6 +315,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Sets the minimum standard deviation (SD) for each dimension.
+   *
    * @param minimumSD the minimum SD for each dimension
    */
   public void setMinimumSD(double[] minimumSD) {
@@ -307,6 +326,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the minimum standard deviation (SD) for each dimension.
+   *
    * @return the minimum SD for each dimension.
    */
   public double[] getMinimumSD() {
@@ -314,6 +335,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Sets the maximum standard deviation (SD) for each dimension.
+   *
    * @param maximumSD the maximum SD for each dimension
    */
   public void setMaximumSD(double[] maximumSD) {
@@ -323,6 +346,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the maximum standard deviation (SD) for each dimension.
+   *
    * @return the maximum SD for each dimension.
    */
   public double[] getMaximumSD() {

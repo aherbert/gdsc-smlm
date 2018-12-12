@@ -98,6 +98,8 @@ class GradientProcedureHelper {
     data[20] = 0;
   }
 
+  // CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
+
   /**
    * Gets the symmetric NxN matrix from the working matrix.
    *

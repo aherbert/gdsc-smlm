@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
 import java.util.List;
 
 /**
@@ -31,8 +33,8 @@ import java.util.List;
  * filters and the second subtracted from the first.
  */
 public class DifferenceSpotFilter extends MaximaSpotFilter {
-  private DataProcessor processor1;
-  private DataProcessor processor2;
+  private final DataProcessor processor1;
+  private final DataProcessor processor2;
 
   /**
    * Constructor.
@@ -41,25 +43,34 @@ public class DifferenceSpotFilter extends MaximaSpotFilter {
    * @param border The border to ignore for maxima
    * @param processor1 The first data processor
    * @param processor2 The second data processor
-   * @throws IllegalArgumentException if either processor is null
+   * @throws IllegalArgumentException if the spread of the second processor is smaller than the
+   *         first
    */
   public DifferenceSpotFilter(int search, int border, DataProcessor processor1,
       DataProcessor processor2) {
     super(search, border);
-    if (processor1 == null) {
-      throw new IllegalArgumentException("Processor 1 is null");
-    }
-    if (processor2 == null) {
-      throw new IllegalArgumentException("Processor 2 is null");
-    }
-    // TODO : This is a simple protection from invalid difference-of-smoothing. It could be
-    // improved.
-    if (processor2.getSpread() < processor1.getSpread()) {
-      throw new IllegalArgumentException(
-          "Processor 2 acts on a smaller spread of data than processor 1");
-    }
-    this.processor1 = processor1;
-    this.processor2 = processor2;
+    this.processor1 = ValidationUtils.checkNotNull(processor1, "Processor 1 is null");
+    this.processor2 = ValidationUtils.checkNotNull(processor2, "Processor 2 is null");
+    // This is a simple protection from invalid difference-of-smoothing.
+    ValidationUtils.checkArgument(processor2.getSpread() > processor1.getSpread(),
+        "Processor 2 acts on a smaller spread of data than processor 1");
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected DifferenceSpotFilter(DifferenceSpotFilter source) {
+    super(source);
+    processor1 = source.processor1.copy();
+    processor2 = source.processor2.copy();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public DifferenceSpotFilter copy() {
+    return new DifferenceSpotFilter(this);
   }
 
   /** {@inheritDoc} */
@@ -96,16 +107,6 @@ public class DifferenceSpotFilter extends MaximaSpotFilter {
       data1[i] -= data2[i];
     }
     return data1;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public DifferenceSpotFilter clone() {
-    final DifferenceSpotFilter f = (DifferenceSpotFilter) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.processor1 = processor1.clone();
-    f.processor2 = processor2.clone();
-    return f;
   }
 
   /** {@inheritDoc} */

@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+
 import ij.process.FloatProcessor;
 
 /**
@@ -42,7 +44,7 @@ public class KernelFilter extends BaseWeightedFilter {
   /** The kernel scale (1.0/[sum of the kernel]). */
   protected final double scale;
 
-  private Normaliser normaliser = null;
+  private Normaliser normaliser;
   private boolean convolution;
 
   /** {@inheritDoc} */
@@ -78,7 +80,7 @@ public class KernelFilter extends BaseWeightedFilter {
     if (kw * kh != kernel.length) {
       throw new IllegalArgumentException("Kernel width x height != kernel length");
     }
-    if ((kw & 1) != 1 || (kh & 1) != 1) {
+    if (isEven(kw) || isEven(kh)) {
       throw new IllegalArgumentException("Kernel width or height not odd (" + kw + "x" + kh + ")");
     }
     this.kernel = kernel.clone();
@@ -100,6 +102,32 @@ public class KernelFilter extends BaseWeightedFilter {
     this.kw = kw;
     this.kh = kh;
     this.scale = scale;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected KernelFilter(KernelFilter source) {
+    super(source);
+    // Copy the kernel as it can be rotated in place
+    kernel = source.getKernal();
+    // These are thread safe
+    kw = source.kw;
+    kh = source.kh;
+    scale = source.scale;
+    normaliser = source.normaliser;
+    convolution = source.convolution;
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public KernelFilter copy() {
+    return new KernelFilter(this);
   }
 
   /**
@@ -267,14 +295,6 @@ public class KernelFilter extends BaseWeightedFilter {
     return pixels[x + yIndex];
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public KernelFilter clone() {
-    final KernelFilter o = (KernelFilter) super.clone();
-    o.kernel = getKernal();
-    return o;
-  }
-
   /**
    * Gets the kernal.
    *
@@ -312,16 +332,23 @@ public class KernelFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Rotate 180 degrees.
+   * Rotate 180 degrees around the middle.
    *
    * @param kernel the kernel
    */
   public static void rotate180(float[] kernel) {
-    for (int i = kernel.length / 2, j = kernel.length - i; i-- > 0; j++) {
-      final float tmp = kernel[i];
-      kernel[i] = kernel[j];
-      kernel[j] = tmp;
-    }
+    // A yx-packed 2D kernel can be just be reversed
+    SimpleArrayUtils.reverse(kernel);
+  }
+
+  /**
+   * Checks if the number is even. It must be positive.
+   *
+   * @param number the number
+   * @return true if even
+   */
+  private static boolean isEven(int number) {
+    return (number & 1) == 0;
   }
 
   /**
@@ -365,6 +392,8 @@ public class KernelFilter extends BaseWeightedFilter {
    */
   public void setConvolution(boolean convolution) {
     if (this.convolution != convolution) {
+      // Reset the weighted normalisation
+      newWeights();
       rotate180(kernel);
     }
     this.convolution = convolution;

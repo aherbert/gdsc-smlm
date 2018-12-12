@@ -43,12 +43,45 @@ package uk.ac.sussex.gdsc.smlm.filters;
  */
 public class AreaAverageFilter extends BaseWeightedFilter {
   // Use duplicate filters to support efficient caching of the weights
-  private BlockSumFilter sumFilter1 = new BlockSumFilter();
-  private BlockSumFilter sumFilter2 = new BlockSumFilter();
-  private BlockMeanFilter blockMeanFilter1 = new BlockMeanFilter();
-  private BlockMeanFilter blockMeanFilter2 = new BlockMeanFilter();
+  private final BlockSumFilter sumFilter1;
+  private final BlockSumFilter sumFilter2;
+  private final BlockMeanFilter blockMeanFilter1;
+  private final BlockMeanFilter blockMeanFilter2;
 
   private boolean simpleInterpolation = false;
+
+  /**
+   * Instantiates a new area average filter.
+   */
+  public AreaAverageFilter() {
+    sumFilter1 = new BlockSumFilter();
+    sumFilter2 = new BlockSumFilter();
+    blockMeanFilter1 = new BlockMeanFilter();
+    blockMeanFilter2 = new BlockMeanFilter();
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected AreaAverageFilter(AreaAverageFilter source) {
+    super(source);
+    sumFilter1 = source.sumFilter1.copy();
+    sumFilter2 = source.sumFilter2.copy();
+    blockMeanFilter1 = source.blockMeanFilter1.copy();
+    blockMeanFilter2 = source.blockMeanFilter2.copy();
+    simpleInterpolation = source.simpleInterpolation;
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public AreaAverageFilter copy() {
+    return new AreaAverageFilter(this);
+  }
 
   /**
    * Compute the block average within a 2w+1 size block around each point. Pixels within border
@@ -289,17 +322,6 @@ public class AreaAverageFilter extends BaseWeightedFilter {
     for (int index = 0; index < av1.length; index++) {
       data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
     }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public AreaAverageFilter clone() {
-    final AreaAverageFilter o = (AreaAverageFilter) super.clone();
-    o.sumFilter1 = sumFilter1.clone();
-    o.sumFilter2 = sumFilter2.clone();
-    o.blockMeanFilter1 = blockMeanFilter1.clone();
-    o.blockMeanFilter2 = blockMeanFilter2.clone();
-    return o;
   }
 
   /**

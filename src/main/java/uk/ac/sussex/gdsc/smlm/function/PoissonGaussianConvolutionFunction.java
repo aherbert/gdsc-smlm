@@ -201,7 +201,7 @@ public class PoissonGaussianConvolutionFunction
 
   private double getX(final double D, int q) {
     // Do not round to compute the convolution point x
-    // return Math.round(D - q * g);
+    // return Math.round(D - q * g)
     return D - q * g;
   }
 
@@ -212,7 +212,7 @@ public class PoissonGaussianConvolutionFunction
    * @return the cumulative density
    */
   double gaussianCDF(final double x) {
-    // return org.apache.commons.math3.special.CDF.erf(x / sqrt_var_by_2);
+    // return org.apache.commons.math3.special.CDF.erf(x / sqrt_var_by_2)
     // This may not be precise enough.
     // Absolute error is <3e-7. Not sure what relative error is.
     // The standard CDF is much slower.

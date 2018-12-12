@@ -49,8 +49,8 @@ public class ExtendedPeakResult extends IdPeakResult {
    * @throws IllegalArgumentException the illegal argument exception if the parameters are invalid
    */
   public ExtendedPeakResult(int startFrame, int origX, int origY, float origValue, double error,
-      float noise, float meanIntensity, float[] params, float[] paramsStdDev, int endFrame, int id)
-      throws IllegalArgumentException {
+      float noise, float meanIntensity, float[] params, float[] paramsStdDev, int endFrame,
+      int id) {
     super(startFrame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
         id);
     setEndFrame(endFrame);

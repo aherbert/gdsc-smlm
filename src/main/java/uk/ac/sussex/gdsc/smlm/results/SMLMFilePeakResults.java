@@ -123,8 +123,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults {
    * @param paramsStdDevs the params std devs
    * @throws IllegalArgumentException if the parameter arrays are the wrong size
    */
-  protected static void checkSize(int numberOfParams, float[] params, float[] paramsStdDevs)
-      throws IllegalArgumentException {
+  protected static void checkSize(int numberOfParams, float[] params, float[] paramsStdDevs) {
     checkSize(numberOfParams, params);
     checkSize(numberOfParams, paramsStdDevs);
   }
@@ -136,7 +135,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults {
    * @param a the a
    * @throws IllegalArgumentException if the parameter array is the wrong size
    */
-  protected static void checkSize(int numberOfParams, float[] a) throws IllegalArgumentException {
+  protected static void checkSize(int numberOfParams, float[] a) {
     if (a.length < numberOfParams) {
       throw new IllegalArgumentException("Incorrect number of parameters " + a.length);
     }

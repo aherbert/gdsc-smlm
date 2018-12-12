@@ -40,7 +40,7 @@ public class NullAstigmatismZModel implements AstigmatismZModel {
    * @param sy the sy
    * @throws IllegalArgumentException if the widths are not positive
    */
-  public NullAstigmatismZModel(double sx, double sy) throws IllegalArgumentException {
+  public NullAstigmatismZModel(double sx, double sy) {
     if (!(sx > 0 && sy > 0)) {
       throw new IllegalArgumentException("Width must be positive");
     }
@@ -54,15 +54,15 @@ public class NullAstigmatismZModel implements AstigmatismZModel {
   }
 
   @Override
-  public double getSx(double z, double[] ds_dz) {
-    ds_dz[0] = 0;
+  public double getSx(double z, double[] dsdz) {
+    dsdz[0] = 0;
     return sx;
   }
 
   @Override
-  public double getSx2(double z, double[] ds_dz) {
-    ds_dz[0] = 0;
-    ds_dz[1] = 0;
+  public double getSx2(double z, double[] dsdz) {
+    dsdz[0] = 0;
+    dsdz[1] = 0;
     return sx;
   }
 
@@ -72,15 +72,15 @@ public class NullAstigmatismZModel implements AstigmatismZModel {
   }
 
   @Override
-  public double getSy(double z, double[] ds_dz) {
-    ds_dz[0] = 0;
+  public double getSy(double z, double[] dsdz) {
+    dsdz[0] = 0;
     return sy;
   }
 
   @Override
-  public double getSy2(double z, double[] ds_dz) {
-    ds_dz[0] = 0;
-    ds_dz[1] = 0;
+  public double getSy2(double z, double[] dsdz) {
+    dsdz[0] = 0;
+    dsdz[1] = 0;
     return sy;
   }
 }

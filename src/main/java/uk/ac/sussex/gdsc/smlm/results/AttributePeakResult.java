@@ -189,8 +189,7 @@ public class AttributePeakResult extends PeakResult {
    * @throws IllegalArgumentException the illegal argument exception if the parameters are invalid
    */
   public AttributePeakResult(int startFrame, int origX, int origY, float origValue, double error,
-      float noise, float meanIntensity, float[] params, float[] paramsStdDev)
-      throws IllegalArgumentException {
+      float noise, float meanIntensity, float[] params, float[] paramsStdDev) {
     super(startFrame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
   }
 

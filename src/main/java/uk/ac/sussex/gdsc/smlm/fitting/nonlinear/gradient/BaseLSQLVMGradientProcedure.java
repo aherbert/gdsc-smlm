@@ -37,7 +37,10 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * 15.5.8 for Nonlinear Models.
  */
 public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure {
+
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param func Gradient function
    */
@@ -46,6 +49,8 @@ public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure {
   }
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param b Baseline pre-computed y-values
    * @param func Gradient function

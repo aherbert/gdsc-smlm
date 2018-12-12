@@ -98,6 +98,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       displayHistograms[i] = false;
     }
   }
+
   private static final int TOTAL_SIGNAL = 0;
   private static final int SIGNAL_PER_FRAME = 1;
   private static final int T_ON = 2;
@@ -1282,20 +1283,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
                 fitIntercept);
 
         //@formatter:off
-final LeastSquaresProblem problem = new LeastSquaresBuilder()
+        final LeastSquaresProblem problem = new LeastSquaresBuilder()
           .maxEvaluations(Integer.MAX_VALUE)
           .maxIterations(3000)
           .start(function.guess())
           .target(function.getY())
           .weight(new DiagonalMatrix(function.getWeights()))
-          .model(function, new MultivariateMatrixFunction() {
-            @Override
-            public double[][] value(double[] point) throws IllegalArgumentException
-            {
-              return function.jacobian(point);
-            }} )
+          .model(function, function::jacobian)
           .build();
-//@formatter:on
+        // @formatter:on
 
         lvmSolution = optimizer.optimize(problem);
 

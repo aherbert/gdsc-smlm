@@ -868,7 +868,6 @@ public class FitEngineConfiguration implements Cloneable {
    * each dimension and the parameters set as follows.
    *
    * <pre>
-   *
    * int search = (int) Math.ceil(getSearch() * hwhmMax);
    * int border = (int) Math.floor(getBorder() * hwhmMax);
    * // For each filter
@@ -1176,8 +1175,7 @@ public class FitEngineConfiguration implements Cloneable {
     // Most fitters fit in photons unless we have no calibration.
     IntensityUnit intensityUnit = IntensityUnit.PHOTON;
 
-    if (// calibration.getCountPerPhoton() == 0 ||
-    fitConfig.isFitCameraCounts()) {
+    if (fitConfig.isFitCameraCounts()) {
       intensityUnit = IntensityUnit.COUNT;
     }
 

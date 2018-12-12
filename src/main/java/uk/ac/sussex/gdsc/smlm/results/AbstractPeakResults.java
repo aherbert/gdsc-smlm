@@ -145,7 +145,7 @@ public abstract class AbstractPeakResults implements PeakResults {
    * @return the calibration writer
    * @throws IllegalArgumentException if the calibration is null
    */
-  public CalibrationWriter getCalibrationWriter() throws IllegalArgumentException {
+  public CalibrationWriter getCalibrationWriter() {
     return new CalibrationWriter(calibration);
   }
 

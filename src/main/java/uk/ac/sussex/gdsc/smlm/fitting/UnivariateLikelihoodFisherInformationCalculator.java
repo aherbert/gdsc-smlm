@@ -113,7 +113,7 @@ public class UnivariateLikelihoodFisherInformationCalculator
    * @see uk.ac.sussex.gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
    */
   @Override
-  public FisherInformationMatrix compute(double[] parameters) throws DataException {
+  public FisherInformationMatrix compute(double[] parameters) {
     final int n = gf.getNumberOfGradients();
     final double[] data = new double[n * (n + 1) / 2];
     gf.initialise1(parameters);

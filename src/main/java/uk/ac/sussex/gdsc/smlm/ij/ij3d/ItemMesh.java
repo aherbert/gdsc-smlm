@@ -29,6 +29,8 @@ import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 
+import customnode.CustomMesh;
+
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.Geometry;
@@ -48,8 +50,6 @@ import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
 import java.util.Arrays;
-
-import customnode.CustomMesh;
 
 /**
  * Use a mesh object to represent a set of points. The object is duplicated, scaled and translated
@@ -601,7 +601,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
    * @throws IllegalArgumentException If the mode is not valid
    * @see TransparencyAttributes#setTransparencyMode(int)
    */
-  public static void setTransparencyMode(int mode) throws IllegalArgumentException {
+  public static void setTransparencyMode(int mode) {
     if ((mode < TransparencyAttributes.FASTEST) || (mode > TransparencyAttributes.NONE)) {
       throw new IllegalArgumentException("Not a valid transparency mode");
     }
@@ -750,14 +750,14 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   /** {@inheritDoc} */
   @Override
-  public void reorder(int[] indices) throws IllegalArgumentException {
+  public void reorder(int[] indices) {
     ItemPointMesh.checkIndices(indices, points.length);
     reorderFast(indices);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void reorderFast(int[] indices) throws IllegalArgumentException {
+  public void reorderFast(int[] indices) {
     changed = true;
 
     final int oldSize = size();
@@ -923,7 +923,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor(Color3f[] color) throws IllegalArgumentException {
+  public void setItemColor(Color3f[] color) {
     if (!hasColor()) {
       setItemColor(color[0]);
       return;
@@ -969,7 +969,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor4(Color4f[] color) throws IllegalArgumentException {
+  public void setItemColor4(Color4f[] color) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }
@@ -994,7 +994,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float[] alpha) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }
@@ -1023,7 +1023,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float alpha) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }
@@ -1049,7 +1049,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   /** {@inheritDoc} */
   @Override
-  public void getItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void getItemAlpha(float[] alpha) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }

@@ -200,10 +200,10 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
           d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
           duda[a] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
           //@formatter:off
-            d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] +
-                    d2u_dtsy2[yy] * deltaEx[xx] +
-                      du_dtsx[xx] * two_du_dtsy_tI[n];
-            //@formatter:on
+          d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] +
+                  d2u_dtsy2[yy] * deltaEx[xx] +
+                    du_dtsx[xx] * two_du_dtsy_tI[n];
+          //@formatter:on
         }
         procedure.execute(I, duda, d2uda2);
       }

@@ -30,6 +30,32 @@ package uk.ac.sussex.gdsc.smlm.filters;
  * <p>Adapted from ij.plugin.filter.RankFilters
  */
 public class CircularSumFilter extends CircularFilter {
+
+  /**
+   * Instantiates a new circular sum filter.
+   */
+  public CircularSumFilter() {
+    // Do nothing
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected CircularSumFilter(CircularSumFilter source) {
+    super(source);
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public CircularSumFilter copy() {
+    return new CircularSumFilter(this);
+  }
+
   /** {@inheritDoc} */
   @Override
   protected Normaliser computeWeightedNormaliser(double radius) {
@@ -40,12 +66,5 @@ public class CircularSumFilter extends CircularFilter {
   @Override
   protected Normaliser computeNormaliser(int npoints) {
     return NonNormaliser.INSTANCE;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public CircularSumFilter clone() {
-    final CircularSumFilter o = (CircularSumFilter) super.clone();
-    return o;
   }
 }

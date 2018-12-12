@@ -719,7 +719,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         float background) {
       this.jobs = jobs;
       this.stack = stack;
-      this.spotFilter = spotFilter.clone();
+      this.spotFilter = (MaximaSpotFilter) spotFilter.copy();
       this.results = new TIntObjectHashMap<>();
       this.background = background;
 
@@ -2442,8 +2442,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     // Check if the double holds an integer count
     if ((int) value == value) {
       sb.append((int) value);
-    } else // Otherwise add the counts using at least 2 dp
-    if (value > 100) {
+      // Otherwise add the counts using at least 2 dp
+    } else if (value > 100) {
       sb.append(IJ.d2s(value));
     } else {
       sb.append(MathUtils.rounded(value));

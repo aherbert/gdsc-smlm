@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 /**
  * Contains helper functions for the CalibrationProtos class.
  */
-public class CalibrationProtosHelper {
+public final class CalibrationProtosHelper {
   /** The default Calibration. */
   public static final Calibration defaultCalibration;
 
@@ -58,9 +58,9 @@ public class CalibrationProtosHelper {
       case SCMOS:
         return "sCMOS";
       case UNRECOGNIZED:
-        return "Unknown";
+        return ProtosHelperUtils.UNKNOWN;
       default:
-        throw new IllegalStateException("Unknown name: " + value);
+        throw new IllegalArgumentException("Unknown name: " + value);
     }
   }
 
@@ -73,4 +73,7 @@ public class CalibrationProtosHelper {
   public static boolean isCCDCameraType(CameraType cameraType) {
     return cameraType == CameraType.EMCCD || cameraType == CameraType.CCD;
   }
+
+  /** No public constructor. */
+  private CalibrationProtosHelper() {}
 }

@@ -577,7 +577,7 @@ public class PCPALMMolecules implements PlugIn {
    * @return the array list
    * @throws DataException If conversion to nm and photons with computed precision is not possible
    */
-  public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results) throws DataException {
+  public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results) {
     final ArrayList<Molecule> molecules = new ArrayList<>(results.size());
 
     // Access calibrated data
@@ -588,7 +588,7 @@ public class PCPALMMolecules implements PlugIn {
     pp.getPrecision();
 
     for (int i = 0, size = pp.size(); i < size; i++) {
-      molecules.add(new Molecule(sp.x[i], sp.y[i], pp.precision[i], sp.intensity[i]));
+      molecules.add(new Molecule(sp.x[i], sp.y[i], pp.precisions[i], sp.intensity[i]));
     }
     return molecules;
   }
@@ -1597,7 +1597,6 @@ public class PCPALMMolecules implements PlugIn {
         }
       }
     }
-
   }
 
   private static int getBlinks(RandomDataGenerator dataGenerator, double averageBlinks) {
@@ -2038,8 +2037,8 @@ public class PCPALMMolecules implements PlugIn {
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
       for (int i = 0; i < variables.length; i++) {
-        d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter
-                                                  // ?
+        // Should the delta be changed for each parameter?
+        d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
         final double x = this.x.getQuick(i);

@@ -89,13 +89,13 @@ public class OrderedItemGeometryGroup extends ItemGeometryGroup implements Updat
 
   /** {@inheritDoc} */
   @Override
-  public void reorder(int[] indices) throws IllegalArgumentException {
+  public void reorder(int[] indices) {
     reorderFast(indices);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void reorderFast(int[] indices) throws IllegalArgumentException {
+  public void reorderFast(int[] indices) {
     orderedGroup.setChildIndexOrder(indices);
   }
 }

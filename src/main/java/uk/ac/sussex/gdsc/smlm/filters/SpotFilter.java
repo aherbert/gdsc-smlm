@@ -30,7 +30,15 @@ import java.util.List;
 /**
  * Identifies candidate spots (local maxima) in an image.
  */
-public abstract class SpotFilter implements Cloneable {
+public abstract class SpotFilter {
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public abstract SpotFilter copy();
+
   /**
    * Checks if the filter is weighted, i.e. supports {@link #setWeights(float[], int, int)}.
    *
@@ -115,16 +123,6 @@ public abstract class SpotFilter implements Cloneable {
    * @return True if the intensity value of the candidate spots is absolute
    */
   public abstract boolean isAbsoluteIntensity();
-
-  /** {@inheritDoc} */
-  @Override
-  public SpotFilter clone() {
-    try {
-      return (SpotFilter) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
-  }
 
   /**
    * @return A description of the filter and parameters.

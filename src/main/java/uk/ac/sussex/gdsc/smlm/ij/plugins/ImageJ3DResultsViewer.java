@@ -85,6 +85,11 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XYZResultProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 import uk.ac.sussex.gdsc.smlm.utils.Triplet;
 
+import customnode.CustomLineMesh;
+import customnode.CustomMesh;
+import customnode.CustomMeshNode;
+import customnode.CustomPointMesh;
+
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.procedure.TObjectIntProcedure;
 
@@ -95,6 +100,18 @@ import ij.gui.GUI;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
+
+import ij3d.Content;
+import ij3d.ContentInstant;
+import ij3d.ContentNode;
+import ij3d.DefaultUniverse;
+import ij3d.Image3DMenubar;
+import ij3d.Image3DUniverse;
+import ij3d.ImageCanvas3D;
+import ij3d.ImageJ_3D_Viewer;
+import ij3d.ImageWindow3D;
+import ij3d.UniverseListener;
+import ij3d.UniverseSettings;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -157,22 +174,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import customnode.CustomLineMesh;
-import customnode.CustomMesh;
-import customnode.CustomMeshNode;
-import customnode.CustomPointMesh;
-import ij3d.Content;
-import ij3d.ContentInstant;
-import ij3d.ContentNode;
-import ij3d.DefaultUniverse;
-import ij3d.Image3DMenubar;
-import ij3d.Image3DUniverse;
-import ij3d.ImageCanvas3D;
-import ij3d.ImageJ_3D_Viewer;
-import ij3d.ImageWindow3D;
-import ij3d.UniverseListener;
-import ij3d.UniverseSettings;
 
 /**
  * Draws a localisation results set using an ImageJ 3D image.
@@ -1252,9 +1253,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       final PrecisionMethod m = p.getPrecision();
       IJ.log("Using precision method " + FitProtosHelper.getName(m));
       final Point3f[] size = new Point3f[results.size()];
-      for (int i = 0, j = 0; i < p.precision.length; i++) {
+      for (int i = 0, j = 0; i < p.precisions.length; i++) {
         // Precision is in NM which matches the rendering
-        final float v = (float) p.precision[i];
+        final float v = (float) p.precisions[i];
         size[j++] = new Point3f(v, v, v);
       }
       return size;
@@ -1966,14 +1967,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
             || !(event.isControlDown())) {
           return false;
         }
-        if ( // resultsTableSettings.getShowTable() &&
-        event.getClickCount() == 1) {
+        if (event.getClickCount() == 1) {
           return true;
         }
-        if (event.getClickCount() == 2) {
-          return true;
-        }
-        return false;
+        return (event.getClickCount() == 2);
       }
     };
 
@@ -2256,9 +2253,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       BranchGroup scene, final int x, final int y) {
     final PickCanvas pickCanvas = new PickCanvas(canvas, scene);
     pickCanvas.setMode(PickInfo.PICK_GEOMETRY);
-    pickCanvas.setFlags(PickInfo.SCENEGRAPHPATH |
-    // PickInfo.CLOSEST_INTERSECTION_POINT |
-        PickInfo.CLOSEST_GEOM_INFO);
+    pickCanvas.setFlags(PickInfo.SCENEGRAPHPATH | PickInfo.CLOSEST_GEOM_INFO
+    // | PickInfo.CLOSEST_INTERSECTION_POINT
+    );
     pickCanvas.setTolerance(3);
     pickCanvas.setShapeLocation(x, y);
     try {

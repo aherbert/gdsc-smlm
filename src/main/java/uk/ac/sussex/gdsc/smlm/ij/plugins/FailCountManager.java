@@ -891,12 +891,11 @@ public class FailCountManager implements PlugIn {
 
     // Note that 0 failures in a window can be scored using the consecutive fail counter.
     int max = Math.min(maxFail, settings.getRollingCounterMaxAllowedFailures());
-    for (int fail = MathUtils.min(maxFail,
-        Math.max(1, settings.getRollingCounterMinAllowedFailures())); fail <= max; fail++) {
+    for (int fail = MathUtils.clip(1, maxFail, settings.getRollingCounterMinAllowedFailures());
+        fail <= max; fail++) {
       // Note that n-1 failures in window n can be scored using the consecutive fail counter.
-      for (int window =
-          Math.max(fail + 2, settings.getRollingCounterMinWindow()); window <= settings
-              .getRollingCounterMaxWindow(); window++) {
+      for (int window = Math.max(fail + 2, settings.getRollingCounterMinWindow());
+          window <= settings.getRollingCounterMaxWindow(); window++) {
         counters.add(RollingWindowFailCounter.create(fail, window));
       }
       switch (checkCounters(counters)) {
@@ -913,10 +912,10 @@ public class FailCountManager implements PlugIn {
     fill(type, counters, 1);
 
     max = Math.min(maxFail, settings.getWeightedCounterMaxAllowedFailures());
-    for (int fail = MathUtils.min(maxFail,
-        settings.getWeightedCounterMinAllowedFailures()); fail <= max; fail++) {
-      for (int w = settings.getWeightedCounterMinPassDecrement(); w <= settings
-          .getWeightedCounterMaxPassDecrement(); w++) {
+    for (int fail = MathUtils.min(maxFail, settings.getWeightedCounterMinAllowedFailures());
+        fail <= max; fail++) {
+      for (int w = settings.getWeightedCounterMinPassDecrement();
+          w <= settings.getWeightedCounterMaxPassDecrement(); w++) {
         counters.add(WeightedFailCounter.create(fail, 1, w));
       }
       switch (checkCounters(counters)) {
@@ -933,11 +932,11 @@ public class FailCountManager implements PlugIn {
     fill(type, counters, 2);
 
     max = Math.min(maxFail, settings.getResettingCounterMaxAllowedFailures());
-    for (int fail = MathUtils.min(maxFail,
-        settings.getResettingCounterMinAllowedFailures()); fail <= max; fail++) {
-      for (double f = settings.getResettingCounterMinResetFraction(); f <= settings
-          .getResettingCounterMaxResetFraction(); f +=
-              settings.getResettingCounterIncResetFraction()) {
+    for (int fail = MathUtils.min(maxFail, settings.getResettingCounterMinAllowedFailures());
+        fail <= max; fail++) {
+      for (double f = settings.getResettingCounterMinResetFraction();
+          f <= settings.getResettingCounterMaxResetFraction();
+          f += settings.getResettingCounterIncResetFraction()) {
         counters.add(ResettingFailCounter.create(fail, f));
       }
       switch (checkCounters(counters)) {
@@ -953,10 +952,11 @@ public class FailCountManager implements PlugIn {
     }
     fill(type, counters, 3);
 
-    for (int count = settings.getPassRateCounterMinAllowedCounts(); count <= settings
-        .getPassRateCounterMaxAllowedCounts(); count++) {
-      for (double f = settings.getPassRateCounterMinPassRate(); f <= settings
-          .getPassRateCounterMaxPassRate(); f += settings.getPassRateCounterIncPassRate()) {
+    for (int count = settings.getPassRateCounterMinAllowedCounts();
+        count <= settings.getPassRateCounterMaxAllowedCounts(); count++) {
+      for (double f = settings.getPassRateCounterMinPassRate();
+          f <= settings.getPassRateCounterMaxPassRate();
+          f += settings.getPassRateCounterIncPassRate()) {
         counters.add(PassRateFailCounter.create(count, f));
       }
       switch (checkCounters(counters)) {

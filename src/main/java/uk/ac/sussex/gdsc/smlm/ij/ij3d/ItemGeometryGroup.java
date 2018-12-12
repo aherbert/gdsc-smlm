@@ -358,8 +358,9 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
             tr.setTransparency(t);
           }
         }
-      } else // All items the same transparency
-      if (transparency == 0f) {
+
+        // All items the same transparency
+      } else if (transparency == 0f) {
         for (int i = 0; i < transparencyAttributes.length; i++) {
           transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.NONE);
         }
@@ -515,7 +516,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor(Color3f[] color) throws IllegalArgumentException {
+  public void setItemColor(Color3f[] color) {
     if (color == null) {
       // Default
       setColor(null);
@@ -545,7 +546,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor4(Color4f[] color) throws IllegalArgumentException {
+  public void setItemColor4(Color4f[] color) {
     if (color == null) {
       this.alphas = null;
 
@@ -577,7 +578,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float[] alpha) {
     if (alpha != null) {
       final int size = size();
       if (alpha.length != size) {
@@ -618,7 +619,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
    * @throws IllegalArgumentException the illegal argument exception
    * @see #setItemAlpha(float[])
    */
-  public void setItemAlpha(float[] alpha, float transparency) throws IllegalArgumentException {
+  public void setItemAlpha(float[] alpha, float transparency) {
     if (alpha != null) {
       final int size = size();
       if (alpha.length != size) {
@@ -651,7 +652,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float alpha) {
     if (alphas == null) {
       alphas = new float[size()];
     }
@@ -668,7 +669,6 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
       // Global transparency is merged with alpha
       setTransparency(this.transparency);
     }
-
   }
 
   /**
@@ -679,7 +679,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
    * @throws IllegalArgumentException the illegal argument exception
    * @see #setItemAlpha(float)
    */
-  public void setItemAlpha(float alpha, float transparency) throws IllegalArgumentException {
+  public void setItemAlpha(float alpha, float transparency) {
     // Reuse current alpha storage
     if (alphas == null) {
       alphas = new float[size()];
@@ -699,7 +699,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
   /** {@inheritDoc} */
   @Override
-  public void getItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void getItemAlpha(float[] alpha) {
     final int size = size();
     if (alpha.length != size) {
       throw new IllegalArgumentException("list of size " + size + " expected");

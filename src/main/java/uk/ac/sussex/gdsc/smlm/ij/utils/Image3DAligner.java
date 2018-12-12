@@ -37,8 +37,6 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimize
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.PointValuePair;
@@ -1038,36 +1036,21 @@ public class Image3DAligner implements Cloneable {
         try {
           final SplineFunction sf = new SplineFunction(f, origin);
 
-          // @formatter:off
-final BFGSOptimizer optimiser = new BFGSOptimizer(
-// Use a simple check on the relative value change and
-// set the number of refinements
-new SimpleValueChecker(relativeThreshold, -1, refinements));
+          final BFGSOptimizer optimiser = new BFGSOptimizer(
+              // Use a simple check on the relative value change and
+              // set the number of refinements
+              new SimpleValueChecker(relativeThreshold, -1, refinements));
 
-final PointValuePair opt = optimiser.optimize(
-maxEvaluations,
-bounds,
-gradientTolerance,
-stepLength,
-new InitialGuess(origin),
-// Scale the error for the position check
-new PositionChecker(-1, error / 3.0),
-new ObjectiveFunction(new MultivariateFunction(){
-@Override
-public double value(double[] point)
-{
-              return sf.value(point);
-}}),
-new ObjectiveFunctionGradient(new MultivariateVectorFunction(){
-@Override
-public double[] value(double[] point) throws IllegalArgumentException
-{
-              // This must be new each time
-              final double[] df_da = new double[3];
-              sf.value(point, df_da);
-              return df_da;
-}}));
-// @formatter:on
+          final PointValuePair opt = optimiser.optimize(maxEvaluations, bounds, gradientTolerance,
+              stepLength, new InitialGuess(origin),
+              // Scale the error for the position check
+              new PositionChecker(-1, error / 3.0), new ObjectiveFunction(sf::value),
+              new ObjectiveFunctionGradient(point -> {
+                // This must be new each time
+                final double[] partialDerivative1 = new double[3];
+                sf.value(point, partialDerivative1);
+                return partialDerivative1;
+              }));
 
           // Check it is higher. Invert since we did a minimisation.
           final double value = -opt.getValue();

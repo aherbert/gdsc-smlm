@@ -49,9 +49,10 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
    * The number of gradients.
    */
   public final int n;
+
   /**
    * The scaled gradient vector of the function's partial first derivatives with respect to the
-   * parameters (size n)
+   * parameters (size n).
    */
   public final double[] beta;
   /**
@@ -63,6 +64,8 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
   protected int yi;
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param func Gradient function
    */
@@ -74,6 +77,8 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
   }
 
   /**
+   * Instantiates a new procedure.
+   *
    * @param y Data to fit
    * @param b Baseline pre-computed y-values
    * @param func Gradient function
@@ -197,6 +202,8 @@ public abstract class LVMGradientProcedure implements Gradient1Procedure, ValueP
   }
 
   /**
+   * Checks if is na N gradients.
+   *
    * @return True if the last calculation produced gradients with NaN values.
    */
   public boolean isNaNGradients() {

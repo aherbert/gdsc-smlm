@@ -40,13 +40,14 @@ import ij.plugin.PlugIn;
  * ${root}/macros -&gt; ${root}/target/classes/macros
  * </pre>
  *
- * Set the project to run ij.ImageJ as the main class and use the root directory as the ImageJ path:
+ * <p>Set the project to run ij.ImageJ as the main class and use the root directory as the ImageJ
+ * path:
  *
  * <pre>
  * ij.ImageJ -ijpath ${root}
  * </pre>
  *
- * ImageJ will load this class from the plugins directory. This class can call all other plugins.
+ * <p>ImageJ will load this class from the plugins directory. This class can call all other plugins.
  */
 public class Smlm_PlugIn implements PlugIn {
   /** {@inheritDoc} */

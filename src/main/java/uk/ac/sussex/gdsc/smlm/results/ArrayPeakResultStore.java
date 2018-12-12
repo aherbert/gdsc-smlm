@@ -506,5 +506,4 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
   public boolean contains(PeakResult result) {
     return indexOf(result) != -1;
   }
-
 }

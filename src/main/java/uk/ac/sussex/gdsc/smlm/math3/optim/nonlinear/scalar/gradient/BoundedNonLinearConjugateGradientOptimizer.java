@@ -113,7 +113,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    * successive conjugate search directions. For non-linear conjugate gradients, there are two
    * formulas: <ul> <li>Fletcher-Reeves formula</li> <li>Polak-Ribière formula</li> </ul>
    *
-   * On the one hand, the Fletcher-Reeves formula is guaranteed to converge if the start point is
+   * <p>On the one hand, the Fletcher-Reeves formula is guaranteed to converge if the start point is
    * close enough of the optimum whether the Polak-Ribière formula may not converge in rare cases.
    * On the other hand, the Polak-Ribière formula is often faster when it does converge.
    * Polak-Ribière is often used.

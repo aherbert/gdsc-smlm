@@ -166,7 +166,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * @throws IllegalArgumentException If the gain is below 1 (the Gamma distribution is not modelled
    *         for a scale below 1).
    */
-  public PoissonGammaGaussianFunction(double alpha, double s) throws IllegalArgumentException {
+  public PoissonGammaGaussianFunction(double alpha, double s) {
     if (!(alpha > 0 && alpha <= 1)) {
       throw new IllegalArgumentException("Gain must be above 1");
     }

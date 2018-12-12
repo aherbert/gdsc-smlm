@@ -681,8 +681,8 @@ public class BlinkEstimator implements PlugIn {
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
       for (int i = 0; i < variables.length; i++) {
-        d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter
-                                                  // ?
+        // Should the delta be changed for each parameter?
+        d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
         final double r = this.x.get(i);

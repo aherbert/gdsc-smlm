@@ -49,7 +49,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @throws IllegalArgumentException If any dimension is less than 2, or if the combined dimensions
    *         is too large for an array
    */
-  public FloatDHT2D(ImageProcessor image) throws IllegalArgumentException {
+  public FloatDHT2D(ImageProcessor image) {
     super(image);
     LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
     dht = new FloatDHT_2D(nr, nc);
@@ -65,8 +65,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @throws IllegalArgumentException If any dimension is less than 2, or if the data is not the
    *         correct length
    */
-  public FloatDHT2D(int nc, int nr, float[] data, boolean isFrequencyDomain)
-      throws IllegalArgumentException {
+  public FloatDHT2D(int nc, int nr, float[] data, boolean isFrequencyDomain) {
     super(nc, nr, data);
     LargeArray.setMaxSizeOf32bitArray(MAX_SIZE_OF_32_BIT_ARRAY);
     dht = new FloatDHT_2D(nr, nc);
@@ -108,7 +107,7 @@ public class FloatDHT2D extends FloatImage2D {
    *
    * @throws IllegalArgumentException If already in the frequency domain
    */
-  public void transform() throws IllegalArgumentException {
+  public void transform() {
     if (isFrequencyDomain) {
       throw new IllegalArgumentException("Already frequency domain DHT");
     }
@@ -122,7 +121,7 @@ public class FloatDHT2D extends FloatImage2D {
    *
    * @throws IllegalArgumentException If already in the space domain
    */
-  public void inverseTransform() throws IllegalArgumentException {
+  public void inverseTransform() {
     if (!isFrequencyDomain) {
       throw new IllegalArgumentException("Already space domain DHT");
     }
@@ -227,7 +226,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT2D multiply(FloatDHT2D dht) throws IllegalArgumentException {
+  public FloatDHT2D multiply(FloatDHT2D dht) {
     return multiply(dht, null);
   }
 
@@ -241,7 +240,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT2D multiply(FloatDHT2D dht, float[] tmp) throws IllegalArgumentException {
+  public FloatDHT2D multiply(FloatDHT2D dht, float[] tmp) {
     checkDHT(dht);
     return (dht.isFastMultiply()) ? multiply(dht.h2e, dht.h2o, dht.jj, tmp)
         : multiply(dht.getData(), tmp);
@@ -257,7 +256,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  private FloatDHT2D multiply(float[] h2, float[] tmp) throws IllegalArgumentException {
+  private FloatDHT2D multiply(float[] h2, float[] tmp) {
     final float[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new float[h1.length];
@@ -311,7 +310,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT2D conjugateMultiply(FloatDHT2D dht) throws IllegalArgumentException {
+  public FloatDHT2D conjugateMultiply(FloatDHT2D dht) {
     return conjugateMultiply(dht, null);
   }
 
@@ -325,7 +324,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  public FloatDHT2D conjugateMultiply(FloatDHT2D dht, float[] tmp) throws IllegalArgumentException {
+  public FloatDHT2D conjugateMultiply(FloatDHT2D dht, float[] tmp) {
     checkDHT(dht);
     return (dht.isFastMultiply()) ? conjugateMultiply(dht.h2e, dht.h2o, dht.jj, tmp)
         : conjugateMultiply(dht.getData(), tmp);
@@ -341,7 +340,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the result
    * @throws IllegalArgumentException if the dht is not the same dimensions
    */
-  private FloatDHT2D conjugateMultiply(float[] h2, float[] tmp) throws IllegalArgumentException {
+  private FloatDHT2D conjugateMultiply(float[] h2, float[] tmp) {
     final float[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new float[h1.length];
@@ -392,7 +391,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @throws IllegalArgumentException if the dht is not the same dimensions or in the frequency
    *         domain
    */
-  public FloatDHT2D divide(FloatDHT2D dht) throws IllegalArgumentException {
+  public FloatDHT2D divide(FloatDHT2D dht) {
     return divide(dht, null);
   }
 
@@ -407,7 +406,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @throws IllegalArgumentException if the dht is not the same dimensions or in the frequency
    *         domain
    */
-  public FloatDHT2D divide(FloatDHT2D dht, float[] tmp) throws IllegalArgumentException {
+  public FloatDHT2D divide(FloatDHT2D dht, float[] tmp) {
     checkDHT(dht);
     return (dht.isFastOperations()) ? divide(dht.h2e, dht.h2o, dht.jj, dht.mag, tmp)
         : divide(dht.getData(), tmp);
@@ -424,7 +423,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @throws IllegalArgumentException if the dht is not the same dimensions or in the frequency
    *         domain
    */
-  private FloatDHT2D divide(float[] h2, float[] tmp) throws IllegalArgumentException {
+  private FloatDHT2D divide(float[] h2, float[] tmp) {
     final float[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new float[h1.length];
@@ -477,7 +476,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @param dht the dht
    * @throws IllegalArgumentException If multiplication is not possible
    */
-  private void checkDHT(FloatDHT2D dht) throws IllegalArgumentException {
+  private void checkDHT(FloatDHT2D dht) {
     if (dht.nr != nr || dht.nc != nc) {
       throw new IllegalArgumentException("Dimension mismatch");
     }
@@ -498,7 +497,7 @@ public class FloatDHT2D extends FloatImage2D {
    *      "https://en.wikipedia.org/wiki/Hartley_transform#Relation_to_Fourier_transform">https://en.wikipedia.org/
    *      wiki/Hartley_transform#Relation_to_Fourier_transform</a>
    */
-  public FloatImage2D[] toDFT(float[] real, float[] imaginary) throws IllegalArgumentException {
+  public FloatImage2D[] toDFT(float[] real, float[] imaginary) {
     if (!isFrequencyDomain) {
       throw new IllegalArgumentException("Require frequency domain DHT");
     }
@@ -533,8 +532,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the DHT
    * @throws IllegalArgumentException If there is a dimension mismatch
    */
-  public static FloatDHT2D fromDFT(FloatImage2D real, FloatImage2D imaginary, float[] tmp)
-      throws IllegalArgumentException {
+  public static FloatDHT2D fromDFT(FloatImage2D real, FloatImage2D imaginary, float[] tmp) {
     if (real.nr != imaginary.nr || real.nc != imaginary.nc) {
       throw new IllegalArgumentException("Dimension mismatch");
     }
@@ -572,7 +570,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @return the result
    * @throws IllegalArgumentException if not in the frequency domain
    */
-  public FloatImage2D getAbsoluteValue(float[] tmp) throws IllegalArgumentException {
+  public FloatImage2D getAbsoluteValue(float[] tmp) {
     if (!isFrequencyDomain) {
       throw new IllegalArgumentException("Require frequency domain DHT");
     }
@@ -619,7 +617,7 @@ public class FloatDHT2D extends FloatImage2D {
    * @param image The image (must be even dimensions)
    * @throws IllegalArgumentException If not even dimensions
    */
-  public static void swapQuadrants(FloatImage2D image) throws IllegalArgumentException {
+  public static void swapQuadrants(FloatImage2D image) {
     // This is a specialised version to allow using a float buffer and
     // optimised for even sized images
 

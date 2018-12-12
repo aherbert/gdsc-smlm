@@ -224,8 +224,8 @@ public class FisherInformationMatrix {
    * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of
    * the central diagonal of the Fisher information matrix.
    *
-   * The information matrix is NOT inverted. The reciprocal of the central diagonal returned for a
-   * (possibly loose) lower bound.
+   * <p>The information matrix is NOT inverted. The reciprocal of the central diagonal returned for
+   * a (possibly loose) lower bound.
    *
    * @return CRLB (or null if inversion failed)
    */
@@ -282,8 +282,8 @@ public class FisherInformationMatrix {
    * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the
    * central diagonal of the Fisher information matrix.
    *
-   * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central
-   * diagonal returned for a (possibly loose) lower bound.
+   * <p>The information matrix is NOT inverted. Uses the square root of the reciprocal of the
+   * central diagonal returned for a (possibly loose) lower bound.
    *
    * @return CRLB (or null if inversion failed)
    */
@@ -299,7 +299,7 @@ public class FisherInformationMatrix {
    * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of
    * the central diagonal of the Fisher information matrix.
    *
-   * The information matrix is NOT inverted. Uses the reciprocal of the central diagonal returned
+   * <p>The information matrix is NOT inverted. Uses the reciprocal of the central diagonal returned
    * for a (possibly loose) lower bound.
    *
    * @param m the fisher information matrix
@@ -318,8 +318,8 @@ public class FisherInformationMatrix {
    * Compute the Cramér–Rao Lower Bound (CRLB) for fitted variables using the reciprocal of the
    * central diagonal of the Fisher information matrix.
    *
-   * The information matrix is NOT inverted. Uses the square root of the reciprocal of the central
-   * diagonal returned for a (possibly loose) lower bound.
+   * <p>The information matrix is NOT inverted. Uses the square root of the reciprocal of the
+   * central diagonal returned for a (possibly loose) lower bound.
    *
    * @param m the fisher information matrix
    * @return CRLB

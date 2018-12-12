@@ -1047,8 +1047,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       } else {
         // Default to the fit config settings
         final FitConfiguration tmp = new FitConfiguration();
-        tmp.setPrecisionMethod(PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND); // So we get a
-                                                                            // MultiFilter2
+        // So we get a MultiFilter2
+        tmp.setPrecisionMethod(PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND);
         scoreFilter = tmp.getDefaultSmartFilter();
       }
     }
@@ -3866,8 +3866,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         type += n;
         bestFilter.put(type, newFilterScore);
         bestFilterOrder.add(type);
-      } else // Replace (even if the same so that the latest results settings are stored)
-      if (newFilterScore.compareTo(filterScore) <= 0) {
+
+        // Replace (even if the same so that the latest results settings are stored)
+      } else if (newFilterScore.compareTo(filterScore) <= 0) {
         bestFilter.put(type, newFilterScore);
         // filterScore.update(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
       }
@@ -4300,9 +4301,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     residualsThreshold = sResidualsThreshold = point[1];
     duplicateDistance = point[2];
     // Refresh the coordinate store
-    if (coordinateStore == null ||
-    // Due to the scaling factor the distance may not be exactly the same
-        DoubleEquality.relativeError(duplicateDistance,
+    if (coordinateStore == null
+        // Due to the scaling factor the distance may not be exactly the same
+        || DoubleEquality.relativeError(duplicateDistance,
             coordinateStore.getXYResolution() / distanceScallingFactor) > 0.01) {
       coordinateStore = createCoordinateStore();
     }
@@ -4723,8 +4724,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       // Check if the double holds an integer count
       if ((int) value == value) {
         sb.append('\t').append((int) value);
-      } else // Otherwise add the counts using at least 2 dp
-      if (value > 100) {
+        // Otherwise add the counts using at least 2 decimal places
+      } else if (value > 100) {
         sb.append('\t').append(IJ.d2s(value));
       } else {
         add(sb, MathUtils.rounded(value));
@@ -6415,10 +6416,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     // FractionClassificationResult r2 = scoreFilter(filter, minFilter,
     // BenchmarkFilterAnalysis.clonedResultsList);
     // if
-    // (!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTruePositives(),
-    // r2.getTruePositives(), 1e-6, 1e-10) ||
-    // !uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFalsePositives(),
-    // r2.getFalsePositives(), 1e-6, 1e-10) ||
+    // (!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(
+    // r.getTruePositives(), r2.getTruePositives(), 1e-6, 1e-10) ||
+    // !uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(
+    // r.getFalsePositives(), r2.getFalsePositives(), 1e-6, 1e-10) ||
     // !uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(),
     // r2.getFN(), 1e-6, 1e-10))
     // {

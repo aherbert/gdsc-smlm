@@ -108,7 +108,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
       kf.convolve(data, w, h, border);
     } else {
       // Use a clone for thread safety
-      final FHTFilter f = (ticker.getTotal() > 1l) ? ff.clone() : ff;
+      final FHTFilter f = (ticker.getTotal() > 1l) ? ff.copy() : ff;
       f.filter(data, w, h, border);
     }
     if (ticker.getTotal() == 1l) {

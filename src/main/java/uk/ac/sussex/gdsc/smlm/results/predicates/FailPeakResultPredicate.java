@@ -30,14 +30,9 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Always fail a result.
  */
 public class FailPeakResultPredicate implements PeakResultPredicate {
-  /**
-   * Instantiates a new fail peak result predicate.
-   */
-  public FailPeakResultPredicate() {}
-
   /** {@inheritDoc} */
   @Override
-  public boolean test(PeakResult t) {
+  public boolean test(PeakResult peakResult) {
     return false;
   }
 }

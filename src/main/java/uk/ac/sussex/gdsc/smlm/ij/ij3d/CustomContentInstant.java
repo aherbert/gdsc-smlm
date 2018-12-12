@@ -24,12 +24,27 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
+import customnode.CustomMesh;
+import customnode.CustomMeshNode;
+
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.io.FileInfo;
 import ij.io.OpenDialog;
+
+import ij3d.Content;
+import ij3d.ContentInstant;
+import ij3d.ContentNode;
+import ij3d.UniverseSettings;
+import ij3d.pointlist.PointListDialog;
+import ij3d.pointlist.PointListPanel;
+import ij3d.pointlist.PointListShape;
+import ij3d.shapes.BoundingBox;
+import ij3d.shapes.CoordinateSystem;
+
+import isosurface.MeshGroup;
 
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.Group;
@@ -44,28 +59,19 @@ import org.scijava.vecmath.Matrix3f;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Vector3d;
 
+import orthoslice.MultiOrthoGroup;
+import orthoslice.OrthoGroup;
+
+import surfaceplot.SurfacePlotGroup;
+
+import vib.PointList;
+
+import voltex.VoltexGroup;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Enumeration;
-
-import customnode.CustomMesh;
-import customnode.CustomMeshNode;
-import ij3d.Content;
-import ij3d.ContentInstant;
-import ij3d.ContentNode;
-import ij3d.UniverseSettings;
-import ij3d.pointlist.PointListDialog;
-import ij3d.pointlist.PointListPanel;
-import ij3d.pointlist.PointListShape;
-import ij3d.shapes.BoundingBox;
-import ij3d.shapes.CoordinateSystem;
-import isosurface.MeshGroup;
-import orthoslice.MultiOrthoGroup;
-import orthoslice.OrthoGroup;
-import surfaceplot.SurfacePlotGroup;
-import vib.PointList;
-import voltex.VoltexGroup;
 
 /**
  * Extend the ContentInstant class to avoid using an OrderedPath.
@@ -198,7 +204,6 @@ public class CustomContentInstant extends ContentInstant {
       for (int i = 0; i < h.length; i++) {
         h[i] += tmp[i];
       }
-
     }
     return imp.getProcessor().getAutoThreshold(h);
   }
@@ -217,15 +222,15 @@ public class CustomContentInstant extends ContentInstant {
         return (int) Math.ceil(max / 256f);
       case SURFACE_PLOT2D:
         return (int) Math.ceil(max / 128f);
+      default:
+        return 1;
     }
-    return 1;
   }
 
   @Override
   public void display(final ContentNode node) {
     // remove everything if possible
-    for (@SuppressWarnings("rawtypes")
-    final Enumeration e = ordered.getAllChildren(); e.hasMoreElements();) {
+    for (final Enumeration<Node> e = ordered.getAllChildren(); e.hasMoreElements();) {
       final Switch s = (Switch) e.nextElement();
       s.removeAllChildren();
     }

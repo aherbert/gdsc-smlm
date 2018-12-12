@@ -117,11 +117,12 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
       if (DoubleEquality.almostEqualRelativeOrAbsolute(oldError, newError, maxRelativeError, 0)
           || newError < 0.001 || false) {
         negligable = true;
-      } else // The desire is to avoid a lot of computation if the error is not really moving
-             // anywhere.
-      // Once we have reached a set number of iterations, e.g. maximumIterations/2
-      // then allow stopping if the absolute change is the same.
-      if (getIteration() > insignificantImprovmentIteration) {
+
+        // The desire is to avoid a lot of computation if the error is not really moving anywhere.
+      } else if (getIteration() > insignificantImprovmentIteration) {
+        // Once we have reached a set number of iterations, e.g. maximumIterations/2
+        // then allow stopping if the absolute change is the same.
+
         // Get the exponent of the improvement
         final int exp = getExponent(DoubleEquality.relativeError(newError, oldError));
 
@@ -222,6 +223,8 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the iteration limit.
+   *
    * @return the iterationLimit.
    */
   public int getIterationLimit() {
@@ -229,6 +232,8 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Sets the significant digits for a negligible change in error.
+   *
    * @param significantDigits the significant digits for a negligible change in error
    */
   public void setSignificantDigits(int significantDigits) {
@@ -237,6 +242,8 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Gets the significant digits for a negligible change in error.
+   *
    * @return the significantDigits.
    */
   public int getSignificantDigits() {
@@ -244,6 +251,8 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   }
 
   /**
+   * Checks if avoiding plateaus.
+   *
    * @return true if avoiding plateaus.
    */
   public boolean isAvoidPlateau() {

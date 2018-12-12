@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 public class FastLogMLELVMGradientProcedure6 extends FastLogMLELVMGradientProcedure {
 
   /**
-   * Instantiates a new fast log MLELVM gradient procedure 6.
+   * Instantiates a new procedure.
    *
    * @param y Data to fit (must be positive)
    * @param func Gradient function

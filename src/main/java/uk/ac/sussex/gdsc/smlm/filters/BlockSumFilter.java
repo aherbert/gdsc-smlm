@@ -28,6 +28,32 @@ package uk.ac.sussex.gdsc.smlm.filters;
  * Computes the sum using a square block mask.
  */
 public class BlockSumFilter extends BlockFilter {
+
+  /**
+   * Instantiates a new block sum filter.
+   */
+  public BlockSumFilter() {
+    // Do nothing
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected BlockSumFilter(BlockSumFilter source) {
+    super(source);
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public BlockSumFilter copy() {
+    return new BlockSumFilter(this);
+  }
+
   /** {@inheritDoc} */
   @Override
   protected Normaliser computeWeightedNormaliser(float n) {
@@ -49,12 +75,5 @@ public class BlockSumFilter extends BlockFilter {
   @Override
   protected Normaliser computeNormaliser(float n) {
     return NonNormaliser.INSTANCE;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public BlockSumFilter clone() {
-    final BlockSumFilter o = (BlockSumFilter) super.clone();
-    return o;
   }
 }

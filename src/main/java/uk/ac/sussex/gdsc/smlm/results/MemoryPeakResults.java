@@ -268,7 +268,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @param store the backing storage implementation
    * @throws IllegalArgumentException If the store is null
    */
-  public MemoryPeakResults(PeakResultStoreList store) throws IllegalArgumentException {
+  public MemoryPeakResults(PeakResultStoreList store) {
     if (store == null) {
       throw new IllegalArgumentException("Store must not be null");
     }
@@ -656,7 +656,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @return the bounds of the result coordinates
    * @throws DataException if conversion to pixel units is not possible
    */
-  public Rectangle getBounds(boolean calculate) throws DataException {
+  public Rectangle getBounds(boolean calculate) {
     Rectangle bounds = getBounds();
     if ((bounds == null || bounds.width == 0 || bounds.height == 0) && calculate) {
       bounds = new Rectangle();
@@ -692,7 +692,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @return the bounds of the result coordinates
    * @throws DataException if conversion to the required units is not possible
    */
-  public Rectangle2D.Float getDataBounds(DistanceUnit distanceUnit) throws DataException {
+  public Rectangle2D.Float getDataBounds(DistanceUnit distanceUnit) {
     if (isEmpty()) {
       return new Rectangle2D.Float();
     }
@@ -1639,7 +1639,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(TResultProcedure procedure) throws ConfigurationException {
+  public void forEach(TResultProcedure procedure) {
     checkCalibration();
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1704,10 +1704,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
     if (isx == isy) {
       for (int i = 0, size = size(); i < size; i++) {
         final PeakResult r = getf(i);
-        //@formatter:off
-    procedure.executeW(
-            dc.convert(r.getParameter(isx)));
-    //@formatter:on
+        procedure.executeW(dc.convert(r.getParameter(isx)));
       }
     } else {
       for (int i = 0, size = size(); i < size; i++) {
@@ -1715,10 +1712,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
         // Convert the separate widths into a single width
         final double s = Gaussian2DPeakResultHelper.getStandardDeviation(r.getParameter(isx),
             r.getParameter(isy));
-        //@formatter:off
-    procedure.executeW(
-            (float)dc.convert(s));
-    //@formatter:on
+        procedure.executeW((float) dc.convert(s));
       }
     }
   }

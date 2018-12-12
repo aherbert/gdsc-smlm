@@ -240,7 +240,6 @@ public class FixedDimension implements Cloneable, Dimension {
     } catch (final CloneNotSupportedException ex) {
       return null;
     }
-
   }
 
   /** {@inheritDoc} */

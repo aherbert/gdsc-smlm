@@ -144,8 +144,8 @@ public class DrawClusters implements PlugIn {
       if (maxD == 0) {
         // Note that imageSize can be zero (for auto sizing)
         w = h = (imageSize == 0) ? 20 : imageSize;
-      } else // Note that imageSize can be zero (for auto sizing)
-      if (imageSize == 0) {
+      } else if (imageSize == 0) {
+        // Note that imageSize can be zero (for auto sizing)
         w = bounds.width;
         h = bounds.height;
       } else {
@@ -168,8 +168,9 @@ public class DrawClusters implements PlugIn {
       for (int i = 9; i-- > 0 && iw.getWidth() < 500 && iw.getHeight() < 500;) {
         iw.getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
       }
-    } else // Check if the image has enough frames for all the traces
-    if (maxFrame > imp.getNFrames()) {
+
+      // Check if the image has enough frames for all the traces
+    } else if (maxFrame > imp.getNFrames()) {
       isUseStackPosition = false;
     }
 

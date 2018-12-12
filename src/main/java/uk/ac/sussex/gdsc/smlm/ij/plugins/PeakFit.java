@@ -64,7 +64,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngine;
@@ -2458,7 +2458,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // pixels.
     // TypeConverter<DistanceUnit> c =
     // fitConfig.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
-    final TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(DistanceUnit.PIXEL,
+    final TypeConverter<DistanceUnit> c = UnitConverterUtils.createConverter(DistanceUnit.PIXEL,
         DistanceUnit.NM, fitConfig.getCalibrationReader().getNmPerPixel());
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -3074,7 +3074,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * @throws IllegalArgumentException If the model is null or the crop cannot be done
    */
   public static CameraModel cropCameraModel(CameraModel cameraModel, Rectangle sourceBounds,
-      Rectangle cropBounds, boolean resetOrigin) throws IllegalArgumentException {
+      Rectangle cropBounds, boolean resetOrigin) {
     if (cameraModel == null) {
       throw new IllegalArgumentException("No camera model");
     }
@@ -3170,9 +3170,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
         resultsFilename =
             resultsSettings.getResultsDirectory() + File.separatorChar + source.getName()
                 + ".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat());
-      } else // This is used for running via other code calling PeakFit methods,
-      // i.e. not as an ImageJ plugin.
-      if (plugin_flags == 0) {
+
+        // This is used for running via other code calling PeakFit methods,
+        // i.e. not as an ImageJ plugin.
+      } else if (plugin_flags == 0) {
         resultsFilename = resultsSettings.getResultsFilename();
       }
       final PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings,

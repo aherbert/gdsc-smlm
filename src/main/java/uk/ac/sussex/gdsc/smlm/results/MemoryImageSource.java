@@ -43,7 +43,7 @@ public class MemoryImageSource extends ImageSource {
    * @param data the data
    * @throws IllegalArgumentException If the image dimensions are invalid
    */
-  public MemoryImageSource(int width, int height, float[]... data) throws IllegalArgumentException {
+  public MemoryImageSource(int width, int height, float[]... data) {
     this(0, 0, width, height, data);
   }
 
@@ -57,8 +57,7 @@ public class MemoryImageSource extends ImageSource {
    * @param data the data
    * @throws IllegalArgumentException If the image dimensions are invalid
    */
-  public MemoryImageSource(int xOrigin, int yOrigin, int width, int height, float[]... data)
-      throws IllegalArgumentException {
+  public MemoryImageSource(int xOrigin, int yOrigin, int width, int height, float[]... data) {
     super("Memory");
     if (width < 1) {
       throw new IllegalArgumentException("Width must be above zero");

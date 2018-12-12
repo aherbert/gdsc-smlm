@@ -2113,20 +2113,22 @@ public class OPTICS implements PlugIn {
             LutMapper mapper = new LutHelper.NullLutMapper();
             if (mode.isMapped()) {
               switch (mode) {
-                //@formatter:off
-case CLUSTER_ORDER: lut = clusterOrderLut; break;
-case CLUSTER_ID:    lut = clusterLut; break;
-case CLUSTER_DEPTH:
-lut = clusterDepthLut;
-mapper = new ValueLUTMapper(map);
-break;
-case LOOP:
-lut = loopLut;
-mapper = new ValueLUTMapper(loop);
-break;
-default:
-throw new NotImplementedException();
-//@formatter:on
+                case CLUSTER_ORDER:
+                  lut = clusterOrderLut;
+                  break;
+                case CLUSTER_ID:
+                  lut = clusterLut;
+                  break;
+                case CLUSTER_DEPTH:
+                  lut = clusterDepthLut;
+                  mapper = new ValueLUTMapper(map);
+                  break;
+                case LOOP:
+                  lut = loopLut;
+                  mapper = new ValueLUTMapper(loop);
+                  break;
+                default:
+                  throw new NotImplementedException();
               }
             }
             image.getImagePlus().getProcessor().setColorModel(lut);

@@ -238,8 +238,8 @@ public abstract class LikelihoodWrapper {
    * Iaa = sum(i) (dYi da) * (dYi da) / Yi
    * </pre>
    *
-   * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
-   * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
+   * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
+   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
    *
    * @param variables The variables of the function
    * @return Fisher's Information Matrix (I)

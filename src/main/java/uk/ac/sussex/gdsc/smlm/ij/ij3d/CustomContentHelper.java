@@ -38,14 +38,14 @@ import ij.process.ImageProcessor;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 
-import java.util.List;
-
 import vib.InterpolatedImage;
+
+import java.util.List;
 
 /**
  * Provide helper functionality for dealing with the CustomContent.
  */
-public class CustomContentHelper {
+public final class CustomContentHelper {
   /**
    * Define the largest array size for Java 3D. If an ArrayGeometry is larger than this then there
    * will be exceptions within the Java 3D code. The code writes the float array of a GeometryArray
@@ -56,6 +56,9 @@ public class CustomContentHelper {
    * strip of a GeometryArray is 2^30 / 2^2 / 2 = 2^27.
    */
   public static final int MAX_ARRAY_SIZE = 1 << 27;
+
+  /** No public constructor. */
+  private CustomContentHelper() {}
 
   /**
    * Load surface colors from a 2D image. This only works if the xy coordinates from the mesh can be

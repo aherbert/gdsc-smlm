@@ -688,7 +688,7 @@ public abstract class PSFModel {
    * @throws IllegalArgumentException If value or gradient are not length [width*height]
    */
   public boolean getValue(final int width, final int height, double x0, double x1, double x2,
-      double[] value) throws IllegalArgumentException {
+      double[] value) {
     checkSize(width, height);
     final int size = width * height;
     if (value.length != size) {
@@ -755,7 +755,7 @@ public abstract class PSFModel {
    * @throws IllegalArgumentException If value or gradient are not length [width*height]
    */
   public boolean getValueAndGradient(final int width, final int height, double x0, double x1,
-      double x2, double[] value, double[][] gradient) throws IllegalArgumentException {
+      double x2, double[] value, double[][] gradient) {
     checkSize(width, height);
     final int size = width * height;
     if (value.length != size) {

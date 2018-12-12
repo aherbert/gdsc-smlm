@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class BlockAverageDataProcessor extends DataProcessor {
   private final double smooth;
-  private BlockMeanFilter filter = new BlockMeanFilter();
+  private final BlockMeanFilter filter;
 
   /**
    * Constructor.
@@ -48,6 +48,24 @@ public class BlockAverageDataProcessor extends DataProcessor {
   public BlockAverageDataProcessor(int border, double smooth) {
     super(border);
     this.smooth = convert(smooth);
+    filter = new BlockMeanFilter();
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected BlockAverageDataProcessor(BlockAverageDataProcessor source) {
+    super(source);
+    smooth = source.smooth;
+    filter = source.filter.copy();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public BlockAverageDataProcessor copy() {
+    return new BlockAverageDataProcessor(this);
   }
 
   /**
@@ -112,15 +130,6 @@ public class BlockAverageDataProcessor extends DataProcessor {
    */
   public double getSmooth() {
     return smooth;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public BlockAverageDataProcessor clone() {
-    final BlockAverageDataProcessor f = (BlockAverageDataProcessor) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.filter = filter.clone();
-    return f;
   }
 
   /** {@inheritDoc} */

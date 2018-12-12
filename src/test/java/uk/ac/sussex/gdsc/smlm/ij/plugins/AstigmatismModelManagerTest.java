@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterFactory;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
@@ -84,9 +84,9 @@ public class AstigmatismModelManagerTest {
     final AstigmatismZModel m2 = AstigmatismModelManager.create(model2);
 
     final TypeConverter<DistanceUnit> zc =
-        UnitConverterFactory.createConverter(DistanceUnit.UM, zDistanceUnit, nmPerPixel);
+        UnitConverterUtils.createConverter(DistanceUnit.UM, zDistanceUnit, nmPerPixel);
     final TypeConverter<DistanceUnit> sc =
-        UnitConverterFactory.createConverter(DistanceUnit.PIXEL, sDistanceUnit, nmPerPixel);
+        UnitConverterUtils.createConverter(DistanceUnit.PIXEL, sDistanceUnit, nmPerPixel);
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
     for (double z = -0.5; z <= 0.5; z += 0.1) {

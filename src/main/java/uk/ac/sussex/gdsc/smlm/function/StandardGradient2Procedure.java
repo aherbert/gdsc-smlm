@@ -28,41 +28,46 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Class for evaluating a function.
  */
 public class StandardGradient2Procedure implements Gradient2Procedure {
-  private int i;
+  private int index;
 
-  /** The values from the last call to {@link #getValues(Gradient2Function, double[])}. */
+  /**
+   * The values from the last call to {@link #getValues(Gradient2Function, double[])}.
+   */
   public double[] values;
-  /** The gradients from the last call to {@link #getValues(Gradient2Function, double[])}. */
-  public double[][] dyda;
+  /**
+   * The first order gradients from the last call to
+   * {@link #getValues(Gradient2Function, double[])}.
+   */
+  public double[][] gradients1;
   /**
    * The second order gradients from the last call to
    * {@link #getValues(Gradient2Function, double[])}.
    */
-  public double[][] d2yda2;
+  public double[][] gradients2;
 
   /**
    * Gets the values.
    *
-   * @param f the function
-   * @param a the function coefficients
+   * @param function the function
+   * @param parameters the function coefficients
    * @return the values
    */
-  public double[] getValues(Gradient2Function f, double[] a) {
-    values = new double[f.size()];
-    dyda = new double[values.length][];
-    d2yda2 = new double[values.length][];
-    i = 0;
-    f.initialise2(a);
-    f.forEach(this);
+  public double[] getValues(Gradient2Function function, double[] parameters) {
+    values = new double[function.size()];
+    gradients1 = new double[values.length][];
+    gradients2 = new double[values.length][];
+    index = 0;
+    function.initialise2(parameters);
+    function.forEach(this);
     return values;
   }
 
   /** {@inheritDoc} */
   @Override
-  public void execute(double value, double[] dy_da, double[] d2y_da2) {
-    values[i] = value;
-    dyda[i] = dy_da.clone();
-    d2yda2[i] = d2y_da2.clone();
-    i++;
+  public void execute(double value, double[] gradient1, double[] gradient2) {
+    values[index] = value;
+    this.gradients1[index] = gradient1.clone();
+    this.gradients2[index] = gradient2.clone();
+    index++;
   }
 }

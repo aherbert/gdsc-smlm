@@ -109,7 +109,6 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.random.Well19937c;
-// import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
@@ -499,10 +498,6 @@ public class FIRE implements PlugIn {
 
         // Show a combined FRC curve plot of all the smoothed curves if we have multiples.
         final LUT valuesLUT = LutHelper.createLut(LutColour.FIRE_GLOW);
-        @SuppressWarnings("unused")
-        final LUT noSmoothLUT = LutHelper.createLut(LutColour.GRAYS).createInvertedLut(); // Black
-                                                                                          // at max
-                                                                                          // value
         final LutHelper.DefaultLutMapper mapper = new LutHelper.DefaultLutMapper(0, repeats);
         final FrcCurve curve = new FrcCurve();
 
@@ -529,13 +524,8 @@ public class FIRE implements PlugIn {
           }
           if (showFRCCurve) {
             final int index = mapper.map(i + 1);
-            //@formatter:off
-            curve.add(name, result, thresholdMethod,
-                LutHelper.getColour(valuesLUT, index),
-                Color.blue,
-                null //LUTHelper.getColour(noSmoothLUT, index)
-                );
-            //@formatter:on
+            curve.add(name, result, thresholdMethod, LutHelper.getColour(valuesLUT, index),
+                Color.blue, null);
           }
         }
 
@@ -552,15 +542,15 @@ public class FIRE implements PlugIn {
 
         if (oom) {
           //@formatter:off
-                  IJ.error(TITLE,
-                      "ERROR - Parallel computation out-of-memory.\n \n" +
-                  TextUtils.wrap("The number of results will be reduced. " +
-                          "Please reduce the size of the Fourier image " +
-                          "or change the number of threads " +
-                          "using the extra options (hold down the 'Shift' " +
-                          "key when running the plugin).",
-                          80));
-                  //@formatter:on
+          IJ.error(TITLE,
+              "ERROR - Parallel computation out-of-memory.\n \n" +
+          TextUtils.wrap("The number of results will be reduced. " +
+                  "Please reduce the size of the Fourier image " +
+                  "or change the number of threads " +
+                  "using the extra options (hold down the 'Shift' " +
+                  "key when running the plugin).",
+                  80));
+          //@formatter:on
         }
       }
 
@@ -1857,7 +1847,7 @@ public class FIRE implements PlugIn {
     }
 
     @Override
-    public double value(double[] point) throws IllegalArgumentException {
+    public double value(double[] point) {
       return value(point[0]);
     }
   }
@@ -1900,7 +1890,7 @@ public class FIRE implements PlugIn {
     }
 
     @Override
-    public double value(double[] point) throws IllegalArgumentException {
+    public double value(double[] point) {
       final double mean = point[0];
       final double sigma = point[1];
       double qValue = point[2];
@@ -2444,7 +2434,7 @@ public class FIRE implements PlugIn {
         }
       });
     } else {
-      precision.add(pp.precision);
+      precision.add(pp.precisions);
     }
 
     double yMin = Double.NEGATIVE_INFINITY;
@@ -2570,10 +2560,10 @@ public class FIRE implements PlugIn {
     // Check they are different
     for (int i = 0; i < pp.size(); i++) {
       // Check this is valid
-      if (Double.isFinite(pp.precision[i])) {
-        final double p1 = pp.precision[i];
+      if (Double.isFinite(pp.precisions[i])) {
+        final double p1 = pp.precisions[i];
         for (int j = i + 1; j < pp.size(); j++) {
-          if (Double.isFinite(pp.precision[j]) && pp.precision[j] != p1) {
+          if (Double.isFinite(pp.precisions[j]) && pp.precisions[j] != p1) {
             return true;
           }
         }

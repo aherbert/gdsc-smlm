@@ -155,7 +155,7 @@ public class ReferenceItemMesh extends ItemMesh {
 
   /** {@inheritDoc} */
   @Override
-  public void reorderFast(int[] indices) throws IllegalArgumentException {
+  public void reorderFast(int[] indices) {
     changed = true;
 
     final int oldSize = size();
@@ -281,7 +281,7 @@ public class ReferenceItemMesh extends ItemMesh {
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor(Color3f[] color) throws IllegalArgumentException {
+  public void setItemColor(Color3f[] color) {
     if (!hasColor()) {
       setItemColor(color[0]);
       return;
@@ -317,7 +317,7 @@ public class ReferenceItemMesh extends ItemMesh {
 
   /** {@inheritDoc} */
   @Override
-  public void setItemColor4(Color4f[] color) throws IllegalArgumentException {
+  public void setItemColor4(Color4f[] color) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }
@@ -342,7 +342,7 @@ public class ReferenceItemMesh extends ItemMesh {
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float[] alpha) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }
@@ -370,7 +370,7 @@ public class ReferenceItemMesh extends ItemMesh {
 
   /** {@inheritDoc} */
   @Override
-  public void setItemAlpha(float alpha) throws IllegalArgumentException {
+  public void setItemAlpha(float alpha) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }
@@ -395,7 +395,7 @@ public class ReferenceItemMesh extends ItemMesh {
 
   /** {@inheritDoc} */
   @Override
-  public void getItemAlpha(float[] alpha) throws IllegalArgumentException {
+  public void getItemAlpha(float[] alpha) {
     if (!hasColor4()) {
       throw new IllegalArgumentException("Per-item alpha not supported");
     }

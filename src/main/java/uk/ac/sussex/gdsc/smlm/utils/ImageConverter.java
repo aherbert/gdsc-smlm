@@ -47,8 +47,7 @@ public class ImageConverter {
    * @param bFactor the b factor
    * @throws IllegalArgumentException if the factors do not sum to a positive value
    */
-  public void setWeightingFactors(double rFactor, double gFactor, double bFactor)
-      throws IllegalArgumentException {
+  public void setWeightingFactors(double rFactor, double gFactor, double bFactor) {
     if (!(rFactor >= 0 && gFactor >= 0 && bFactor >= 0)) {
       throw new IllegalArgumentException("Weights must sum to a positive value");
     }

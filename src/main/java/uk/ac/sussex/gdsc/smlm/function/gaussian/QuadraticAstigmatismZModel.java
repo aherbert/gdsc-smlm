@@ -34,7 +34,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
   /** The z-depth where the width is 1.5. */
   public final double zDepth;
   /** Pre-computed factor for the second derivative of s given z. */
-  private final double d2s_dz2;
+  private final double d2sOverDz2;
 
   /**
    * Constructor.
@@ -45,7 +45,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
   public QuadraticAstigmatismZModel(double gamma, double zDepth) {
     this.gamma = gamma;
     this.zDepth = zDepth;
-    d2s_dz2 = 1.0 / (zDepth * zDepth);
+    d2sOverDz2 = 1.0 / (zDepth * zDepth);
   }
 
   /**
@@ -53,14 +53,14 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
    *
    * @param z the z
    * @param zDepth The z-depth where the width is 1.5
-   * @param ds_dz the first and second derivative of s given z
+   * @param dsdz the first and second derivative of s given z
    * @return the standard deviation
    */
-  public static double getS2(double z, double zDepth, double[] ds_dz) {
+  public static double getS2(double z, double zDepth, double[] dsdz) {
     z /= zDepth; // Scale so z=1 at the configured z-depth
     final double s = 1.0 + z * z * 0.5;
-    ds_dz[0] = z / zDepth;
-    ds_dz[1] = 1.0 / (zDepth * zDepth);
+    dsdz[0] = z / zDepth;
+    dsdz[1] = 1.0 / (zDepth * zDepth);
     return s;
   }
 
@@ -69,13 +69,13 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
    *
    * @param z the z
    * @param zDepth The z-depth where the width is 1.5
-   * @param ds_dz the first derivative of s given z
+   * @param dsdz the first derivative of s given z
    * @return the standard deviation
    */
-  public static double getS1(double z, double zDepth, double[] ds_dz) {
+  public static double getS1(double z, double zDepth, double[] dsdz) {
     z /= zDepth; // Scale so z=1 at the configured z-depth
     final double s = 1.0 + z * z * 0.5;
-    ds_dz[0] = z / zDepth;
+    dsdz[0] = z / zDepth;
     return s;
   }
 
@@ -95,12 +95,12 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
    * Gets the standard deviation, first and second derivatives for the z-depth.
    *
    * @param z the z
-   * @param ds_dz the first and second derivative of s given z
+   * @param dsdz the first and second derivative of s given z
    * @return the standard deviation
    */
-  private double getS2(double z, double[] ds_dz) {
-    final double s = getS1(z, zDepth, ds_dz);
-    ds_dz[1] = d2s_dz2; // Use cached value
+  private double getS2(double z, double[] dsdz) {
+    final double s = getS1(z, zDepth, dsdz);
+    dsdz[1] = d2sOverDz2; // Use cached value
     return s;
   }
 
@@ -112,14 +112,14 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
 
   /** {@inheritDoc} */
   @Override
-  public double getSx(double z, double[] ds_dz) {
-    return getS1(z - gamma, zDepth, ds_dz);
+  public double getSx(double z, double[] dsdz) {
+    return getS1(z - gamma, zDepth, dsdz);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double getSx2(double z, double[] ds_dz) {
-    return getS2(z - gamma, ds_dz);
+  public double getSx2(double z, double[] dsdz) {
+    return getS2(z - gamma, dsdz);
   }
 
   /** {@inheritDoc} */
@@ -130,13 +130,13 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
 
   /** {@inheritDoc} */
   @Override
-  public double getSy(double z, double[] ds_dz) {
-    return getS1(z + gamma, zDepth, ds_dz);
+  public double getSy(double z, double[] dsdz) {
+    return getS1(z + gamma, zDepth, dsdz);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double getSy2(double z, double[] ds_dz) {
-    return getS2(z + gamma, ds_dz);
+  public double getSy2(double z, double[] dsdz) {
+    return getS2(z + gamma, dsdz);
   }
 }

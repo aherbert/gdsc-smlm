@@ -118,7 +118,7 @@ public class InterpolatedPoissonFisherInformationTest {
     final double I = f.getFisherInformation(FastMath.exp(min));
     final BasePoissonFisherInformation fixedI = new BasePoissonFisherInformation() {
       @Override
-      public double getFisherInformation(double t) throws IllegalArgumentException {
+      public double getFisherInformation(double t) {
         return I;
       }
 
@@ -142,7 +142,7 @@ public class InterpolatedPoissonFisherInformationTest {
     final double A = alpha[0];
     final BasePoissonFisherInformation fixedA = new BasePoissonFisherInformation() {
       @Override
-      public double getFisherInformation(double t) throws IllegalArgumentException {
+      public double getFisherInformation(double t) {
         return t / A;
       }
 

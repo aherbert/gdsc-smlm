@@ -76,7 +76,7 @@ public class FitEngine {
    * @return The filter used for identifying candidate local maxima.
    */
   public MaximaSpotFilter getSpotFilter() {
-    return spotFilter.clone();
+    return (MaximaSpotFilter) spotFilter.copy();
   }
 
   /**

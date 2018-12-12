@@ -727,7 +727,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       this.fitWorker = new FitWorker(config.clone(), peakResults, null);
 
       final int fitting = config.getFittingWidth();
-      fitWorker.setSearchParameters(spotFilter.clone(), fitting);
+      fitWorker.setSearchParameters((MaximaSpotFilter)spotFilter.copy(), fitting);
 
       this.actualCoordinates = actualCoordinates;
       this.filterCandidates = filterCandidates;
@@ -1875,9 +1875,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final StringBuilder sb = new StringBuilder(300);
 
     // Add information about the simulation
-    final double signal = simulationParameters.averageSignal; // (simulationParameters.minSignal +
-                                                              // simulationParameters.maxSignal) *
-                                                              // 0.5;
+    final double signal = simulationParameters.averageSignal;
     final int n = results.size();
     sb.append(imp.getStackSize()).append('\t');
     final int w = imp.getWidth();
@@ -2087,16 +2085,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     upper[FILTER_SNR] *= 2; // Make this a bit bigger
     final double factor = 0.25;
     if (lower[FILTER_MIN_WIDTH] != 0) {
-      upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming
+      // (assuming lower is less than 1)
+      upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH]));
     }
-    // lower is
-    // less
-    // than 1)
     if (upper[FILTER_MIN_WIDTH] != 0) {
-      lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1)); // (assuming
-                                                                                         // upper is
-                                                                                         // more
-                                                                                         // than 1)
+      // (assuming upper is more than 1)
+      lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1));
     }
 
     // Round the ranges
@@ -2677,8 +2671,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Check if the double holds an integer count
     if ((int) value == value) {
       sb.append('\t').append((int) value);
-    } else // Otherwise add the counts using at least 2 dp
-    if (value > 100) {
+      // Otherwise add the counts using at least 2 decimal places
+    } else if (value > 100) {
       sb.append('\t').append(IJ.d2s(value));
     } else {
       add(sb, MathUtils.rounded(value));

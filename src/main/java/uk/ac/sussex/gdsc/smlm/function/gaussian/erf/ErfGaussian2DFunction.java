@@ -264,7 +264,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
    * @param erfFunction the new erf function
    * @throws IllegalArgumentException If the error function is unknown
    */
-  public void setErfFunction(ErfFunction erfFunction) throws IllegalArgumentException {
+  public void setErfFunction(ErfFunction erfFunction) {
     switch (erfFunction) {
       case COMMONS_MATH:
         errorFunction = commontsMathErrorFunction;

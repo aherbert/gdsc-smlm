@@ -30,7 +30,6 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-// import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.Arrays;

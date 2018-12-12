@@ -261,8 +261,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    * b = Gradient vector (beta)
    * </pre>
    *
-   * The Hessian and gradient parameter from the current best scoring parameter set are assumed to
-   * be in alpha and beta. The lambda parameter is used to weight the diagonal of the Hessian.
+   * <p>The Hessian and gradient parameter from the current best scoring parameter set are assumed
+   * to be in alpha and beta. The lambda parameter is used to weight the diagonal of the Hessian.
    *
    * @param a the current fit parameters
    * @param m the number of fit parameters

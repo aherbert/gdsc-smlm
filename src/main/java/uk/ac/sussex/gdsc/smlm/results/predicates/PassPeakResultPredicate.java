@@ -30,14 +30,9 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Always pass a result.
  */
 public class PassPeakResultPredicate implements PeakResultPredicate {
-  /**
-   * Instantiates a new pass peak result predicate.
-   */
-  public PassPeakResultPredicate() {}
-
   /** {@inheritDoc} */
   @Override
-  public boolean test(PeakResult t) {
+  public boolean test(PeakResult peakResult) {
     return true;
   }
 }

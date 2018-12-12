@@ -28,6 +28,32 @@ package uk.ac.sussex.gdsc.smlm.filters;
  * Computes the mean using a square block mask.
  */
 public class BlockMeanFilter extends BlockFilter {
+
+  /**
+   * Instantiates a new block mean filter.
+   */
+  public BlockMeanFilter() {
+    // Do nothing
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected BlockMeanFilter(BlockMeanFilter source) {
+    super(source);
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public BlockMeanFilter copy() {
+    return new BlockMeanFilter(this);
+  }
+
   /** {@inheritDoc} */
   @Override
   protected Normaliser computeWeightedNormaliser(float n) {
@@ -37,11 +63,9 @@ public class BlockMeanFilter extends BlockFilter {
     final BlockSumFilter sum = new BlockSumFilter();
     if ((int) n == n) {
       sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
-      // sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
     } else {
       sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
     }
-    // sum.blockFilter(divisor, weightWidth, weightHeight, n);
     return new PerPixelNormaliser(divisor);
   }
 
@@ -59,12 +83,5 @@ public class BlockMeanFilter extends BlockFilter {
    */
   private static float pow2(float f) {
     return f * f;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public BlockMeanFilter clone() {
-    final BlockMeanFilter o = (BlockMeanFilter) super.clone();
-    return o;
   }
 }

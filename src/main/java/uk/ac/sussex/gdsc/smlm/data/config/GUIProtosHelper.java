@@ -66,7 +66,7 @@ import java.io.File;
 /**
  * Contains helper functions for the GUIProtos class.
  */
-public class GUIProtosHelper {
+public final class GUIProtosHelper {
   /** The default GUIFilterSettings. */
   public static final GUIFilterSettings defaultGUIFilterSettings =
       GUIFilterSettings.getDefaultInstance();
@@ -283,8 +283,8 @@ public class GUIProtosHelper {
     builder.setWindow(3);
     builder.setSmoothStackSignal(true);
     builder.setComBorder(0.40); // Right in the middle of a spot
-    builder.setAlignmentMode(0); // 2D Projections (3D cross correlation has normalisations
-                                 // stability issues)
+    // Use 2D Projections (3D cross correlation has normalisation stability issues)
+    builder.setAlignmentMode(0);
     builder.setAlignmentZRadius(0); // All of the z-stack
     builder.setSubPixelPrecision(0.01);
     builder.setRmsdXyThreshold(0.01);
@@ -328,8 +328,11 @@ public class GUIProtosHelper {
     builder.setEmSamples(5);
     defaultCameraModelAnalysisSettings = builder.build();
   }
+
   /** The default CameraModelFisherInformationAnalysisSettings. */
+  // @CHECKSTYLE.OFF: LineLength
   public static final CameraModelFisherInformationAnalysisSettings defaultCameraModelFisherInformationAnalysisSettings;
+  // @CHECKSTYLE.ON: LineLength
 
   static {
     final CameraModelFisherInformationAnalysisSettings.Builder builder =
@@ -465,4 +468,7 @@ public class GUIProtosHelper {
     builder.setShowOverlay(true);
     defaultSpotFitSettings = builder.build();
   }
+
+  /** No public constructor. */
+  private GUIProtosHelper() {}
 }

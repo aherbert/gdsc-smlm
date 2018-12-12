@@ -438,22 +438,22 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
       if (modelBounds != null) {
         if (!modelBounds.contains(bounds)) {
           //@formatter:off
-                ImageJUtils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
-                    modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
-                    bounds.x, bounds.y, bounds.width, bounds.height
-                    );
-                //@formatter:on
-        } else
-        // Warn if the model bounds are mismatched than the image as this may be an incorrect
-        // selection for the camera model
-        if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth()
+          ImageJUtils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
+              modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
+              bounds.x, bounds.y, bounds.width, bounds.height
+              );
+          //@formatter:on
+
+          // Warn if the model bounds are mismatched than the image as this may be an incorrect
+          // selection for the camera model
+        } else if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth()
             || modelBounds.height > ip.getHeight()) {
           //@formatter:off
-                ImageJUtils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
-                    modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
-                    ip.getWidth(),  ip.getHeight()
-                    );
-                //@formatter:on
+          ImageJUtils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
+              modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
+              ip.getWidth(),  ip.getHeight()
+              );
+          //@formatter:on
         }
       }
     }

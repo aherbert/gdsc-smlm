@@ -122,8 +122,7 @@ public class GaussianKernel implements Cloneable {
    *         index
    * @throws IllegalArgumentException If the input scale is not a power of 2
    */
-  public double[] getGaussianKernel(int scale, double range, boolean edgeCorrection)
-      throws IllegalArgumentException {
+  public double[] getGaussianKernel(int scale, double range, boolean edgeCorrection) {
     if (!MathUtils.isPow2(scale)) {
       throw new IllegalArgumentException("Scale must be a power of 2: " + scale);
     }
@@ -190,8 +189,7 @@ public class GaussianKernel implements Cloneable {
    *         index
    * @throws IllegalArgumentException If the input scale is above zero
    */
-  public double[] getDownscaleGaussianKernel(int scale, double range, boolean edgeCorrection)
-      throws IllegalArgumentException {
+  public double[] getDownscaleGaussianKernel(int scale, double range, boolean edgeCorrection) {
     if (scale < 1) {
       throw new IllegalArgumentException("Scale must be strictly positive: " + scale);
     }

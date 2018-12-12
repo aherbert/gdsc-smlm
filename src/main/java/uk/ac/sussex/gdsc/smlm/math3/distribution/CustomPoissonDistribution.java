@@ -303,7 +303,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   /**
    * {@inheritDoc}
    *
-   * For mean parameter {@code p}, the mean is {@code p}.
+   * <p>For mean parameter {@code p}, the mean is {@code p}.
    */
   @Override
   public double getNumericalMean() {
@@ -313,7 +313,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   /**
    * {@inheritDoc}
    *
-   * For mean parameter {@code p}, the variance is {@code p}.
+   * <p>For mean parameter {@code p}, the variance is {@code p}.
    */
   @Override
   public double getNumericalVariance() {
@@ -323,7 +323,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   /**
    * {@inheritDoc}
    *
-   * The lower bound of the support is always 0 no matter the mean parameter.
+   * <p>The lower bound of the support is always 0 no matter the mean parameter.
    *
    * @return lower bound of the support (always 0)
    */
@@ -335,8 +335,8 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   /**
    * {@inheritDoc}
    *
-   * The upper bound of the support is positive infinity, regardless of the parameter values. There
-   * is no integer infinity, so this method returns {@code Integer.MAX_VALUE}.
+   * <p>The upper bound of the support is positive infinity, regardless of the parameter values.
+   * There is no integer infinity, so this method returns {@code Integer.MAX_VALUE}.
    *
    * @return upper bound of the support (always {@code Integer.MAX_VALUE} for positive infinity)
    */
@@ -348,7 +348,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   /**
    * {@inheritDoc}
    *
-   * The support of this distribution is connected.
+   * <p>The support of this distribution is connected.
    *
    * @return {@code true}
    */

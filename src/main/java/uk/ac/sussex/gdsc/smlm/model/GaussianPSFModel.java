@@ -571,7 +571,7 @@ public class GaussianPSFModel extends PSFModel {
    * @param range the new range
    * @throws IllegalArgumentException If the range is not strictly positive
    */
-  public void setRange(double range) throws IllegalArgumentException {
+  public void setRange(double range) {
     if (!(range > 0)) {
       throw new IllegalArgumentException("Range must be strictly positive");
     }

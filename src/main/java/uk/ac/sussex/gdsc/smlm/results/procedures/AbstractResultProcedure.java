@@ -35,7 +35,7 @@ public abstract class AbstractResultProcedure {
   final MemoryPeakResults results;
 
   /** The counter for procedures. */
-  protected int i;
+  protected int counter;
 
   /**
    * Instantiates a new abstract result procedure.

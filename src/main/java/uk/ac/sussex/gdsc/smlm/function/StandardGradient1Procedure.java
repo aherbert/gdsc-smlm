@@ -28,34 +28,34 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Class for evaluating a function.
  */
 public class StandardGradient1Procedure implements Gradient1Procedure {
-  private int i;
+  private int index;
 
   /** The values from the last call to {@link #getValues(Gradient1Function, double[])}. */
   public double[] values;
   /** The gradients from the last call to {@link #getValues(Gradient1Function, double[])}. */
-  public double[][] dyda;
+  public double[][] gradients;
 
   /**
    * Gets the values.
    *
-   * @param f the function
-   * @param a the function coefficients
+   * @param function the function
+   * @param parameters the function coefficients
    * @return the values
    */
-  public double[] getValues(Gradient1Function f, double[] a) {
-    values = new double[f.size()];
-    dyda = new double[values.length][];
-    i = 0;
-    f.initialise1(a);
-    f.forEach(this);
+  public double[] getValues(Gradient1Function function, double[] parameters) {
+    values = new double[function.size()];
+    gradients = new double[values.length][];
+    index = 0;
+    function.initialise1(parameters);
+    function.forEach(this);
     return values;
   }
 
   /** {@inheritDoc} */
   @Override
-  public void execute(double value, double[] dy_da) {
-    values[i] = value;
-    dyda[i] = dy_da.clone();
-    i++;
+  public void execute(double value, double[] gradient) {
+    values[index] = value;
+    gradients[index] = gradient.clone();
+    index++;
   }
 }

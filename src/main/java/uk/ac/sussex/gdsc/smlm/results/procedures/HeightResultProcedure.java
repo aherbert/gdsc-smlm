@@ -32,8 +32,8 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  * Contains functionality to obtain the standard calibrated data for results.
  */
 public class HeightResultProcedure extends UnitResultProcedure implements HResultProcedure {
-  /** The height. */
-  public float[] h;
+  /** The heights. */
+  public float[] heights;
 
   /**
    * Instantiates a new width result procedure.
@@ -59,14 +59,14 @@ public class HeightResultProcedure extends UnitResultProcedure implements HResul
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getH() throws DataException {
-    i = 0;
-    this.h = allocate(this.h);
+  public void getH() {
+    counter = 0;
+    this.heights = allocate(this.heights);
     results.forEach(getIntensityUnit(), this);
   }
 
   @Override
-  public void executeH(float a) {
-    this.h[i++] = a;
+  public void executeH(float height) {
+    this.heights[counter++] = height;
   }
 }

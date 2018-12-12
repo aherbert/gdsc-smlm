@@ -970,15 +970,16 @@ public class FastLogTest {
   /**
    * Get a supplier for the string using the format and arguments.
    *
-   * <p>This can be used where it is not convenient to create a lambda function using:
+   * <p>This can be used where it is not convenient to create a lambda function directly because the
+   * arguments are not effectively final.
+   *
+   * <p>Returns a function of:
    *
    * <pre>
-   * <code>
+   * {@code
    * () -> String.format(format, args);
-   * </code>
+   * }
    * </pre>
-   *
-   * directly because the arguments are not effectively final.
    *
    * @param format the format
    * @param args the arguments

@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class MedianDataProcessor extends DataProcessor {
   private final int smooth;
-  private MedianFilter filter = new MedianFilter();
+  private final MedianFilter filter;
 
   /**
    * Constructor.
@@ -46,6 +46,24 @@ public class MedianDataProcessor extends DataProcessor {
   public MedianDataProcessor(int border, double smooth) {
     super(border);
     this.smooth = convert(smooth);
+    filter = new MedianFilter();
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected MedianDataProcessor(MedianDataProcessor source) {
+    super(source);
+    smooth = source.smooth;
+    filter = source.filter.copy();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public MedianDataProcessor copy() {
+    return new MedianDataProcessor(this);
   }
 
   /**
@@ -122,15 +140,6 @@ public class MedianDataProcessor extends DataProcessor {
    */
   public int getSmooth() {
     return smooth;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public MedianDataProcessor clone() {
-    final MedianDataProcessor f = (MedianDataProcessor) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.filter = filter.clone();
-    return f;
   }
 
   /** {@inheritDoc} */

@@ -160,7 +160,6 @@ public class GaussianPSFModelTest {
                   Assertions.fail(String.format("[%d] %s != %s  error = %f", ii,
                       Double.toString(g[ii][l]), Double.toString(g2[ii][l]), error));
                 }
-
               }
             }
           }

@@ -48,9 +48,18 @@ import org.apache.commons.math3.util.FastMath;
  * @deprecated Replaced by BlockMeanFilter
  */
 @Deprecated
-public class AverageFilter extends BaseFilter {
-  private float[] floatDataBuffer = null;
-  private float[] floatRowBuffer = null;
+public class AverageFilter {
+  private float[] floatDataBuffer;
+  private float[] floatRowBuffer;
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public AverageFilter copy() {
+    return new AverageFilter();
+  }
 
   /**
    * Compute the block average within a 2n+1 size block around each point. Only pixels with a full
@@ -2391,14 +2400,5 @@ public class AverageFilter extends BaseFilter {
 
     // Copy back
     System.arraycopy(newData, 0, data, 0, data.length);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public AverageFilter clone() {
-    final AverageFilter o = (AverageFilter) super.clone();
-    o.floatDataBuffer = null;
-    o.floatRowBuffer = null;
-    return o;
   }
 }

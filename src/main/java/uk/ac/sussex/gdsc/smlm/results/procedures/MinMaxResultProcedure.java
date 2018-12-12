@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
 
 /**
- * Class to get min/max value in a set of results
+ * Class to get min/max value in a set of results.
  */
 public class MinMaxResultProcedure implements PeakResultProcedure {
   private float min;

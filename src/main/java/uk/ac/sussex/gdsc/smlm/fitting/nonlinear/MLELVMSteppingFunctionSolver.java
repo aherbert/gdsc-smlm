@@ -257,7 +257,6 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
             lastyFit[i] += w[i];
           }
         }
-
       }
 
       // ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY);

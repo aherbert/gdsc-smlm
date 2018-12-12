@@ -34,7 +34,10 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
  * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 12.
  */
 public class FastMLEGradient2Procedure6 extends FastMLEGradient2Procedure {
+
   /**
+   * Instantiates a new procedure.
+   *
    * @param x Data to fit (must be positive, i.e. the value of a Poisson process)
    * @param func Gradient function (must produce a strictly positive value, i.e. the mean of a
    *        Poisson process)

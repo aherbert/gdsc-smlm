@@ -52,7 +52,7 @@ public class PSFHelper {
    * @param psf the psf
    * @throws IllegalArgumentException if the psf is null
    */
-  public PSFHelper(PSF psf) throws IllegalArgumentException {
+  public PSFHelper(PSF psf) {
     if (psf == null) {
       throw new IllegalArgumentException("PSF is null");
     }
@@ -75,7 +75,7 @@ public class PSFHelper {
    * @return true, if is a Gaussian 2D PSF
    * @throws ConfigurationException if the psf is null
    */
-  public static boolean isGaussian2D(PSFOrBuilder psf) throws ConfigurationException {
+  public static boolean isGaussian2D(PSFOrBuilder psf) {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
@@ -103,7 +103,7 @@ public class PSFHelper {
    * @return the Gaussian 2D x-width and y-width indices for the PeakResult parameters.
    * @throws ConfigurationException if the psf is null, or not a Gaussian 2D function
    */
-  public static int[] getGaussian2DWxWyIndices(PSFOrBuilder psf) throws ConfigurationException {
+  public static int[] getGaussian2DWxWyIndices(PSFOrBuilder psf) {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
@@ -131,7 +131,7 @@ public class PSFHelper {
    * @return the Gaussian 2D x-width and y-width for the PSF parameters.
    * @throws ConfigurationException if the psf is null, or not a Gaussian 2D function
    */
-  public static double[] getGaussian2DWxWy(PSFOrBuilder psf) throws ConfigurationException {
+  public static double[] getGaussian2DWxWy(PSFOrBuilder psf) {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
@@ -155,9 +155,9 @@ public class PSFHelper {
     throw new ConfigurationException("psf is not Gaussian2D");
   }
 
-  private static double getParameterValue(PSFOrBuilder psf, int i, double defaultValue) {
-    if (psf.getParametersCount() > i) {
-      final double v = psf.getParameters(i).getValue();
+  private static double getParameterValue(PSFOrBuilder psf, int index, double defaultValue) {
+    if (psf.getParametersCount() > index) {
+      final double v = psf.getParameters(index).getValue();
       if (v > 0) {
         return v;
       }
@@ -172,7 +172,7 @@ public class PSFHelper {
    * @return the Gaussian 2D x-width for the PSF parameters.
    * @throws ConfigurationException if the psf is null, or not a one-axis Gaussian 2D function
    */
-  public static double getGaussian2DWx(PSFOrBuilder psf) throws ConfigurationException {
+  public static double getGaussian2DWx(PSFOrBuilder psf) {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
@@ -203,7 +203,7 @@ public class PSFHelper {
    * @throws ConfigurationException if the psf is null, or not a rotated two axis Gaussian 2D
    *         function
    */
-  public static int getGaussian2DAngleIndex(PSFOrBuilder psf) throws ConfigurationException {
+  public static int getGaussian2DAngleIndex(PSFOrBuilder psf) {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
@@ -225,7 +225,7 @@ public class PSFHelper {
    * @return the parameters
    * @throws ConfigurationException if the psf is null, or not recognised
    */
-  public static List<PSFParameter> getParameters(PSFOrBuilder psf) throws ConfigurationException {
+  public static List<PSFParameter> getParameters(PSFOrBuilder psf) {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
@@ -263,7 +263,7 @@ public class PSFHelper {
    * @return the parameter count
    * @throws ConfigurationException if the psf is null, or not recognised
    */
-  public static int getParameterCount(PSFOrBuilder psf) throws ConfigurationException {
+  public static int getParameterCount(PSFOrBuilder psf) {
     if (psf == null) {
       throw new ConfigurationException("psf is null");
     }
@@ -314,9 +314,9 @@ public class PSFHelper {
       List<PSFParameter> list) {
     if (list != null && list.size() == defaultList.size()) {
       // Check each
-      int i = 0;
+      int count = 0;
       for (final PSFParameter p : list) {
-        if (p.getUnit() != defaultList.get(i++).getUnit()) {
+        if (p.getUnit() != defaultList.get(count++).getUnit()) {
           return defaultList;
         }
       }

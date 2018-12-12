@@ -47,7 +47,7 @@ public class FloatImage3D extends Image3D {
    * @param ns the number of slices
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public FloatImage3D(int nc, int nr, int ns) throws IllegalArgumentException {
+  public FloatImage3D(int nc, int nr, int ns) {
     super(nc, nr, ns);
   }
 
@@ -57,7 +57,7 @@ public class FloatImage3D extends Image3D {
    * @param stack the stack
    * @throws IllegalArgumentException If the combined dimensions is too large for an array
    */
-  public FloatImage3D(ImageStack stack) throws IllegalArgumentException {
+  public FloatImage3D(ImageStack stack) {
     super(stack);
   }
 
@@ -103,7 +103,7 @@ public class FloatImage3D extends Image3D {
    * @param data the data
    * @throws IllegalArgumentException If the data is not the correct length
    */
-  public FloatImage3D(int nc, int nr, int ns, float[] data) throws IllegalArgumentException {
+  public FloatImage3D(int nc, int nr, int ns, float[] data) {
     // Avoid constructor that calls createData(int)
     super(nc, nr, ns, nr * nc);
     if (data == null || data.length != checkSize(nc, nr, ns, true)) {
@@ -150,8 +150,7 @@ public class FloatImage3D extends Image3D {
 
   /** {@inheritDoc} */
   @Override
-  public FloatImage3D crop(int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException {
+  public FloatImage3D crop(int x, int y, int z, int w, int h, int d) {
     return crop(x, y, z, w, h, d, null);
   }
 
@@ -168,8 +167,7 @@ public class FloatImage3D extends Image3D {
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public FloatImage3D crop(int x, int y, int z, int w, int h, int d, float[] region)
-      throws IllegalArgumentException {
+  public FloatImage3D crop(int x, int y, int z, int w, int h, int d, float[] region) {
     // Check the region range
     if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
         || (long) z + d > ns) {
@@ -205,7 +203,7 @@ public class FloatImage3D extends Image3D {
    * @throws IllegalArgumentException if the region is not within the data
    */
   public static FloatImage3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d,
-      float[] region) throws IllegalArgumentException {
+      float[] region) {
     final int nc = stack.getWidth();
     final int nr = stack.getHeight();
     final int ns = stack.getSize();
@@ -247,7 +245,7 @@ public class FloatImage3D extends Image3D {
   }
 
   @Override
-  public void insert(int x, int y, int z, Image3D image) throws IllegalArgumentException {
+  public void insert(int x, int y, int z, Image3D image) {
     if (image instanceof FloatImage3D) {
       insert(x, y, z, (FloatImage3D) image);
     } else {
@@ -264,7 +262,7 @@ public class FloatImage3D extends Image3D {
    * @param image the image
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public void insert(int x, int y, int z, FloatImage3D image) throws IllegalArgumentException {
+  public void insert(int x, int y, int z, FloatImage3D image) {
     // Check the region range
     final int w = image.getWidth();
     final int h = image.getHeight();

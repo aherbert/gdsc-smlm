@@ -42,15 +42,15 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
   /** the gamma parameter (half the distance between the focal planes). */
   public final double gamma;
   /** one over the depth of focus squared (1./d^2) */
-  public final double one_d2;
+  public final double oneOverD2;
   /** Empirical constant A for the x-astigmatism of the PSF. */
-  public final double Ax;
+  public final double ax;
   /** Empirical constant B for the x-astigmatism of the PSF. */
-  public final double Bx;
+  public final double bx;
   /** Empirical constant A for the y-astigmatism of the PSF. */
-  public final double Ay;
+  public final double ay;
   /** Empirical constant B for the y-astigmatism of the PSF. */
-  public final double By;
+  public final double by;
 
   /**
    * Static constructor.
@@ -63,16 +63,16 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
    * @param s0y The width in the y focal plane
    * @param gamma the gamma parameter (half the distance between the focal planes)
    * @param d the depth of focus
-   * @param Ax Empirical constant A for the x-astigmatism of the PSF
-   * @param Bx Empirical constant B for the x-astigmatism of the PSF
-   * @param Ay Empirical constant A for the y-astigmatism of the PSF
-   * @param By Empirical constant B for the y-astigmatism of the PSF
+   * @param ax Empirical constant A for the x-astigmatism of the PSF
+   * @param bx Empirical constant B for the x-astigmatism of the PSF
+   * @param ay Empirical constant A for the y-astigmatism of the PSF
+   * @param by Empirical constant B for the y-astigmatism of the PSF
    * @return the holtzer astimatism Z model
    */
   public static HoltzerAstigmatismZModel create(double s0x, double s0y, double gamma, double d,
-      double Ax, double Bx, double Ay, double By) {
+      double ax, double bx, double ay, double by) {
     final double d2 = d * d;
-    return new HoltzerAstigmatismZModel(s0x, s0y, gamma, 1.0 / d2, Ax, Bx, Ay, By);
+    return new HoltzerAstigmatismZModel(s0x, s0y, gamma, 1.0 / d2, ax, bx, ay, by);
   }
 
   /**
@@ -85,22 +85,22 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
    * @param s0x The width in the x focal plane
    * @param s0y The width in the y focal plane
    * @param gamma the gamma parameter (half the distance between the focal planes)
-   * @param one_d2 one over the depth of focus squared (1/d^2)
-   * @param Ax Empirical constant A for the x-astigmatism of the PSF
-   * @param Bx Empirical constant B for the x-astigmatism of the PSF
-   * @param Ay Empirical constant A for the y-astigmatism of the PSF
-   * @param By Empirical constant B for the y-astigmatism of the PSF
+   * @param oneOverD2 one over the depth of focus squared (1/d^2)
+   * @param ax Empirical constant A for the x-astigmatism of the PSF
+   * @param bx Empirical constant B for the x-astigmatism of the PSF
+   * @param ay Empirical constant A for the y-astigmatism of the PSF
+   * @param by Empirical constant B for the y-astigmatism of the PSF
    */
-  public HoltzerAstigmatismZModel(double s0x, double s0y, double gamma, double one_d2, double Ax,
-      double Bx, double Ay, double By) {
+  public HoltzerAstigmatismZModel(double s0x, double s0y, double gamma, double oneOverD2, double ax,
+      double bx, double ay, double by) {
     this.s0x = s0x;
     this.s0y = s0y;
     this.gamma = gamma;
-    this.one_d2 = one_d2;
-    this.Ax = Ax;
-    this.Bx = Bx;
-    this.Ay = Ay;
-    this.By = By;
+    this.oneOverD2 = oneOverD2;
+    this.ax = ax;
+    this.bx = bx;
+    this.ay = ay;
+    this.by = by;
   }
 
   /**
@@ -108,24 +108,24 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
    *
    * @param s0 the width in the focal plane
    * @param z the z
-   * @param one_d2 one over the depth of focus squared (1/d^2)
-   * @param A Empirical constant A for the astigmatism of the PSF
-   * @param B Empirical constant B for the astigmatism of the PSF
-   * @param ds_dz the first and second derivative of s given z
+   * @param oneOverD2 one over the depth of focus squared (1/d^2)
+   * @param a Empirical constant A for the astigmatism of the PSF
+   * @param b Empirical constant B for the astigmatism of the PSF
+   * @param dsdz the first and second derivative of s given z
    * @return the standard deviation
    */
-  public static double getS2(double s0, double z, double one_d2, double A, double B,
-      double[] ds_dz) {
+  public static double getS2(double s0, double z, double oneOverD2, double a, double b,
+      double[] dsdz) {
     final double z2 = z * z;
     final double z3 = z2 * z;
     final double z4 = z2 * z2;
     // Eq. 17a
-    final double s = Math.sqrt(1 + one_d2 * (z2 + A * z3 + B * z4));
+    final double s = Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
     // Eq. 19a
-    ds_dz[0] = s0 * (one_d2 * (2 * z + A * 3 * z2 + B * 4 * z3)) / (2 * s);
+    dsdz[0] = s0 * (oneOverD2 * (2 * z + a * 3 * z2 + b * 4 * z3)) / (2 * s);
     // Eq. 19b
-    ds_dz[1] = s0 * ((one_d2 * (2 + A * 6 * z + B * 12 * z2)) / (2 * s)
-        - pow2(one_d2 * (2 * z + A * 3 * z2 + B * 4 * z3)) / (4 * s * s * s));
+    dsdz[1] = s0 * ((oneOverD2 * (2 + a * 6 * z + b * 12 * z2)) / (2 * s)
+        - pow2(oneOverD2 * (2 * z + a * 3 * z2 + b * 4 * z3)) / (4 * s * s * s));
     return s0 * s;
   }
 
@@ -138,21 +138,21 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
    *
    * @param s0 the width in the focal plane
    * @param z the z
-   * @param one_d2 one over the depth of focus squared (1/d^2)
-   * @param A Empirical constant A for the astigmatism of the PSF
-   * @param B Empirical constant B for the astigmatism of the PSF
-   * @param ds_dz the first derivative of s given z
+   * @param oneOverD2 one over the depth of focus squared (1/d^2)
+   * @param a Empirical constant A for the astigmatism of the PSF
+   * @param b Empirical constant B for the astigmatism of the PSF
+   * @param dsdz the first derivative of s given z
    * @return the standard deviation
    */
-  public static double getS1(double s0, double z, double one_d2, double A, double B,
-      double[] ds_dz) {
+  public static double getS1(double s0, double z, double oneOverD2, double a, double b,
+      double[] dsdz) {
     final double z2 = z * z;
     final double z3 = z2 * z;
     final double z4 = z2 * z2;
     // Eq. 17a
-    final double s = Math.sqrt(1 + one_d2 * (z2 + A * z3 + B * z4));
+    final double s = Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
     // Eq. 19a
-    ds_dz[0] = s0 * (one_d2 * (2 * z + A * 3 * z2 + B * 4 * z3)) / (2 * s);
+    dsdz[0] = s0 * (oneOverD2 * (2 * z + a * 3 * z2 + b * 4 * z3)) / (2 * s);
     return s0 * s;
   }
 
@@ -161,69 +161,59 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
    *
    * @param s0 the width in the focal plane
    * @param z the z
-   * @param one_d2 one over the depth of focus squared (1/d^2)
-   * @param A Empirical constant A for the astigmatism of the PSF
-   * @param B Empirical constant B for the astigmatism of the PSF
+   * @param oneOverD2 one over the depth of focus squared (1/d^2)
+   * @param a Empirical constant A for the astigmatism of the PSF
+   * @param b Empirical constant B for the astigmatism of the PSF
    * @return the standard deviation
    */
-  public static double getS(double s0, double z, double one_d2, double A, double B) {
+  public static double getS(double s0, double z, double oneOverD2, double a, double b) {
     final double z2 = z * z;
     final double z3 = z2 * z;
     final double z4 = z2 * z2;
     // Eq. 17a
-    return s0 * Math.sqrt(1 + one_d2 * (z2 + A * z3 + B * z4));
+    return s0 * Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
   }
 
   /** {@inheritDoc} */
   @Override
   public double getSx(double z) {
-    return getS(s0x, z - gamma, one_d2, Ax, Bx);
+    return getS(s0x, z - gamma, oneOverD2, ax, bx);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double getSx(double z, double[] ds_dz) {
-    return getS1(s0x, z - gamma, one_d2, Ax, Bx, ds_dz);
+  public double getSx(double z, double[] dsdz) {
+    return getS1(s0x, z - gamma, oneOverD2, ax, bx, dsdz);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double getSx2(double z, double[] ds_dz) {
-    return getS2(s0x, z - gamma, one_d2, Ax, Bx, ds_dz);
+  public double getSx2(double z, double[] dsdz) {
+    return getS2(s0x, z - gamma, oneOverD2, ax, bx, dsdz);
   }
 
   /** {@inheritDoc} */
   @Override
   public double getSy(double z) {
-    return getS(s0y, z + gamma, one_d2, Ay, By);
+    return getS(s0y, z + gamma, oneOverD2, ay, by);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double getSy(double z, double[] ds_dz) {
-    return getS1(s0y, z + gamma, one_d2, Ay, By, ds_dz);
+  public double getSy(double z, double[] dsdz) {
+    return getS1(s0y, z + gamma, oneOverD2, ay, by, dsdz);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double getSy2(double z, double[] ds_dz) {
-    return getS2(s0y, z + gamma, one_d2, Ay, By, ds_dz);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public HoltzerAstigmatismZModel clone() {
-    try {
-      return (HoltzerAstigmatismZModel) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
+  public double getSy2(double z, double[] dsdz) {
+    return getS2(s0y, z + gamma, oneOverD2, ay, by, dsdz);
   }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("s0x=%f s0y=%f gamma=%f 1/d^2=%f Ax=%f Bx=%f Ay=%f By=%f", s0x, s0y, gamma,
-        one_d2, Ax, Bx, Ay, By);
+        oneOverD2, ax, bx, ay, by);
   }
 }

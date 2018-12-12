@@ -36,14 +36,30 @@ import org.apache.commons.math3.util.FastMath;
  * <p>Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less
  * than 2. All routines are OK for 3x3 images and larger.
  */
-public class MedianFilter extends BaseFilter {
-  private float[] floatDataBuffer = null;
+public class MedianFilter {
+  private float[] floatDataBuffer;
+
+  /** The number of values above the guess. */
   private int nAbove;
+  /** The number of values below the guess. */
   private int nBelow;
+  /** Half of the total number of values that will be added to the data. */
   private int half;
+  /** The guess for the median. */
   private float guess;
-  private float[] aboveBuf = null;
-  private float[] belowBuf = null;
+  /** Buffer to store all values above the guess. */
+  private float[] aboveBuf;
+  /** Buffer to store all values below the guess. */
+  private float[] belowBuf;
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public MedianFilter copy() {
+    return new MedianFilter();
+  }
 
   /**
    * Compute the block median within a 2n+1 size block around each point. Only pixels with a full
@@ -551,21 +567,22 @@ public class MedianFilter extends BaseFilter {
 
     // Buffer to hold the initial region
     final float[] values = new float[9];
+
     for (int y = 1; y < ylimit; y++) {
+
+      values[0] = 0;
+      values[1] = 0;
+      values[2] = 0;
+
       int p1 = y * maxx;
       int p0 = p1 - maxx;
       int p2 = p1 + maxx;
-
-      int i = 0;
-      values[i++] = 0;
-      values[i++] = 0;
-      values[i++] = 0;
-      values[i++] = data[p0++];
-      values[i++] = data[p1++];
-      values[i++] = data[p2++];
-      values[i++] = data[p0++];
-      values[i++] = data[p1++];
-      values[i++] = data[p2++];
+      values[3] = data[p0++];
+      values[4] = data[p1++];
+      values[5] = data[p2++];
+      values[6] = data[p0++];
+      values[7] = data[p1++];
+      values[8] = data[p2++];
 
       // Initialise the rolling window
       final FloatLinkedMedianWindow window = new FloatLinkedMedianWindow(values);
@@ -708,29 +725,29 @@ public class MedianFilter extends BaseFilter {
 
     // Buffer to hold the initial region
     final float[] values = new float[9];
+
     int index = 0;
     for (int y = 0; y < maxy; y++) {
       // Set up the pointers to the image data at x=0, y=?
-      int i = 0;
       int p1 = maxx * y;
       int p0 = (y > 0) ? p1 - maxx : p1;
       int p2 = (y < ylimit) ? p1 + maxx : p1;
 
-      values[i++] = 0;
-      values[i++] = 0;
-      values[i++] = 0;
+      values[0] = 0;
+      values[1] = 0;
+      values[2] = 0;
 
       // Fill the initial region
 
       // The columns below x==0 use x=0
-      values[i++] = data[p0];
-      values[i++] = data[p1];
-      values[i++] = data[p2];
+      values[3] = data[p0];
+      values[4] = data[p1];
+      values[5] = data[p2];
 
       // The remaining columns increment. Do not include x==xwidth
-      values[i++] = data[p0++];
-      values[i++] = data[p1++];
-      values[i++] = data[p2++];
+      values[6] = data[p0++];
+      values[7] = data[p1++];
+      values[8] = data[p2++];
 
       // Initialise the rolling window
       final FloatLinkedMedianWindow window = new FloatLinkedMedianWindow(values);
@@ -754,14 +771,5 @@ public class MedianFilter extends BaseFilter {
 
     // Copy back
     System.arraycopy(newData, 0, data, 0, length);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public MedianFilter clone() {
-    final MedianFilter o = (MedianFilter) super.clone();
-    o.floatDataBuffer = null;
-    o.aboveBuf = o.belowBuf = null;
-    return o;
   }
 }

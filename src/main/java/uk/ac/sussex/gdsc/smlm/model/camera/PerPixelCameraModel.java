@@ -52,8 +52,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @param variance the variance (in counts)
    * @throws IllegalArgumentException If the data is not valid
    */
-  public PerPixelCameraModel(int width, int height, float[] bias, float[] gain, float[] variance)
-      throws IllegalArgumentException {
+  public PerPixelCameraModel(int width, int height, float[] bias, float[] gain, float[] variance) {
     this(0, 0, width, height, bias, gain, variance);
   }
 
@@ -70,7 +69,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @throws IllegalArgumentException If the data is not valid
    */
   public PerPixelCameraModel(int xorigin, int yorigin, int width, int height, float[] bias,
-      float[] gain, float[] variance) throws IllegalArgumentException {
+      float[] gain, float[] variance) {
     this(new Rectangle(xorigin, yorigin, width, height), bias, gain, variance, false, true);
   }
 
@@ -83,8 +82,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @param variance the variance (in counts)
    * @throws IllegalArgumentException If the data is not valid
    */
-  public PerPixelCameraModel(Rectangle bounds, float[] bias, float[] gain, float[] variance)
-      throws IllegalArgumentException {
+  public PerPixelCameraModel(Rectangle bounds, float[] bias, float[] gain, float[] variance) {
     this(bounds, bias, gain, variance, true, true);
   }
 
@@ -100,7 +98,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @throws IllegalArgumentException If the data is not valid
    */
   private PerPixelCameraModel(Rectangle bounds, float[] bias, float[] gain, float[] variance,
-      boolean cloneBounds, boolean cloneData) throws IllegalArgumentException {
+      boolean cloneBounds, boolean cloneData) {
     if (bounds == null) {
       throw new IllegalArgumentException("Bounds must not be null");
     }
@@ -132,7 +130,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @param bounds the bounds
    * @throws IllegalArgumentException If the data is not valid
    */
-  private static void checkBounds(Rectangle bounds) throws IllegalArgumentException {
+  private static void checkBounds(Rectangle bounds) {
     if (bounds.x < 0) {
       throw new IllegalArgumentException("Bounds must have positive x origin");
     }
@@ -187,7 +185,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @throws IllegalArgumentException If the data is not valid
    */
   public static PerPixelCameraModel create(Rectangle bounds, float[] bias, float[] gain,
-      float[] variance) throws IllegalArgumentException {
+      float[] variance) {
     return new PerPixelCameraModel(bounds, bias, gain, variance, false, false);
   }
 
@@ -529,7 +527,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @return the data value
    * @throws IllegalArgumentException If the coordinates are not inside the bounds
    */
-  private float getData(int x, int y, float[] data) throws IllegalArgumentException {
+  private float getData(int x, int y, float[] data) {
     x -= cameraBounds.x;
     y -= cameraBounds.y;
     if (x < 0 || y < 0 || x >= cameraBounds.width || y >= cameraBounds.height) {

@@ -234,7 +234,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       this.spots = spots;
       this.zPosition = zPosition;
     }
-
   }
 
   /**
@@ -1167,8 +1166,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     // Check if the double holds an integer count
     if ((int) value == value) {
       sb.append('\t').append((int) value);
-    } else // Otherwise add the counts using at least 2 dp
-    if (value > 100) {
+      // Otherwise add the counts using at least 2 decimal places
+    } else if (value > 100) {
       sb.append('\t').append(IJ.d2s(value));
     } else {
       add(sb, MathUtils.rounded(value));

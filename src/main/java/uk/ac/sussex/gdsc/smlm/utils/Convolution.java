@@ -82,7 +82,7 @@ public class Convolution {
    * @throws IllegalArgumentException if either {@code x} or {@code h} is {@code null} or either
    *         {@code x} or {@code h} is empty.
    */
-  public static double[] convolve(double[] x, double[] h) throws IllegalArgumentException {
+  public static double[] convolve(double[] x, double[] h) {
     checkInput(x, h);
 
     final int xLen = x.length;
@@ -124,8 +124,7 @@ public class Convolution {
    * @throws IllegalArgumentException if either {@code x} or {@code h} is {@code null} or either
    *         {@code x} or {@code h} is empty.
    */
-  public static void convolve(double[] x, double[] h, ConvolutionValueProcedure v)
-      throws IllegalArgumentException {
+  public static void convolve(double[] x, double[] h, ConvolutionValueProcedure v) {
     checkInput(x, h);
 
     if (v == null) {
@@ -170,7 +169,7 @@ public class Convolution {
    * @throws IllegalArgumentException if either {@code x} or {@code h} is {@code null} or either
    *         {@code x} or {@code h} is empty.
    */
-  public static double[] convolveFFT(double[] x, double[] h) throws IllegalArgumentException {
+  public static double[] convolveFFT(double[] x, double[] h) {
     checkInput(x, h);
 
     // This is not needed
@@ -238,7 +237,7 @@ public class Convolution {
    * @throws IllegalArgumentException if either {@code x} or {@code h} is {@code null} or either
    *         {@code x} or {@code h} is empty.
    */
-  public static double[] convolveFast(double[] x, double[] h) throws IllegalArgumentException {
+  public static double[] convolveFast(double[] x, double[] h) {
     checkInput(x, h);
     // See Junit class ConvolveTest to determine when to switch to the FFT method.
     // This is not perfect for all length combinations but the switch will happen
@@ -313,8 +312,7 @@ public class Convolution {
    * @throws IllegalArgumentException If any input is null or empty. If h1 and h2 are different
    *         lengths.
    */
-  public static double[][] convolve(double[] x, double[] h1, double[] h2)
-      throws IllegalArgumentException {
+  public static double[][] convolve(double[] x, double[] h1, double[] h2) {
     checkInput(x, h1, h2);
 
     final int xLen = x.length;
@@ -363,7 +361,7 @@ public class Convolution {
    *         lengths.
    */
   public static void convolve(double[] x, double[] h1, double[] h2,
-      DoubleConvolutionValueProcedure v) throws IllegalArgumentException {
+      DoubleConvolutionValueProcedure v) {
     checkInput(x, h1, h2);
 
     if (v == null) {
@@ -412,8 +410,7 @@ public class Convolution {
    * @throws IllegalArgumentException If any input is null or empty. If h1 and h2 are different
    *         lengths.
    */
-  public static double[][] convolveFFT(double[] x, double[] h1, double[] h2)
-      throws IllegalArgumentException {
+  public static double[][] convolveFFT(double[] x, double[] h1, double[] h2) {
     checkInput(x, h1, h2);
 
     final int xLen = x.length;
@@ -480,8 +477,7 @@ public class Convolution {
    * @throws IllegalArgumentException If any input is null or empty. If h1 and h2 are different
    *         lengths.
    */
-  public static double[][] convolveFast(double[] x, double[] h1, double[] h2)
-      throws IllegalArgumentException {
+  public static double[][] convolveFast(double[] x, double[] h1, double[] h2) {
     checkInput(x, h1, h2);
     // See Junit class ConvolveTest to determine when to switch to the FFT method.
     // This is not perfect for all length combinations but the switch will happen
@@ -536,8 +532,7 @@ public class Convolution {
    *         {@code x} or {@code h} is empty.
    * @throws IllegalArgumentException if the scale is not strictly positive
    */
-  public static double[] convolve(double[] x, double[] h, int scale)
-      throws IllegalArgumentException {
+  public static double[] convolve(double[] x, double[] h, int scale) {
     checkInput(x, h);
 
     if (scale < 1) {
@@ -615,8 +610,7 @@ public class Convolution {
    *         {@code x} or {@code h} is empty.
    * @throws IllegalArgumentException if the scale is not strictly positive
    */
-  public static void convolve(double[] x, double[] h, int scale, ConvolutionValueProcedure v)
-      throws IllegalArgumentException {
+  public static void convolve(double[] x, double[] h, int scale, ConvolutionValueProcedure v) {
     // As above but dynamically output the result
 
     checkInput(x, h);
@@ -678,8 +672,7 @@ public class Convolution {
    *         lengths.
    * @throws IllegalArgumentException if the scale is not strictly positive
    */
-  public static double[][] convolve(double[] x, double[] h1, double[] h2, int scale)
-      throws IllegalArgumentException {
+  public static double[][] convolve(double[] x, double[] h1, double[] h2, int scale) {
     checkInput(x, h1, h2);
 
     if (scale < 1) {
@@ -764,7 +757,7 @@ public class Convolution {
    * @throws IllegalArgumentException if the output size is above the max size supported
    */
   public static void convolve(double[] x, double[] h1, double[] h2, int scale,
-      DoubleConvolutionValueProcedure v) throws IllegalArgumentException {
+      DoubleConvolutionValueProcedure v) {
     checkInput(x, h1, h2);
 
     if (scale < 1) {

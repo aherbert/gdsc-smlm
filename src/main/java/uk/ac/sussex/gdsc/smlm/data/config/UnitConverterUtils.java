@@ -38,27 +38,26 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 /**
  * Factory for creating unit converters.
  */
-public class UnitConverterFactory {
+public final class UnitConverterUtils {
+
+  /** No public constructor. */
+  private UnitConverterUtils() {}
+
   /**
-   * Creates the converter.
+   * Creates the {@link DistanceUnit} converter.
    *
-   * @param from the from
-   * @param to the to
+   * @param from the unit to convert from
+   * @param to the unit to convert to
    * @param nmPerPixel the nm per pixel
    * @return the unit converter
    * @throws ConversionException if a converter cannot be created
    */
   public static TypeConverter<DistanceUnit> createConverter(DistanceUnit from, DistanceUnit to,
-      double nmPerPixel) throws ConversionException {
+      double nmPerPixel) {
     if (from == to) {
       return new IdentityTypeConverter<>(from);
     }
-    if (from == null) {
-      throw new ConversionException("from must not be null");
-    }
-    if (to == null) {
-      throw new ConversionException("to must not be null");
-    }
+    checkNotNull(from, to);
 
     switch (from) {
       case NM:
@@ -96,33 +95,21 @@ public class UnitConverterFactory {
     }
   }
 
-  private static double checkNmPerPixel(double nmPerPixel) {
-    if (!(nmPerPixel > 0 && nmPerPixel <= java.lang.Double.MAX_VALUE)) {
-      throw new ConversionException("nm/pixel must be positive");
-    }
-    return nmPerPixel;
-  }
-
   /**
-   * Creates the converter.
+   * Creates the {@link TimeUnit} converter.
    *
-   * @param from the from
-   * @param to the to
+   * @param from the unit to convert from
+   * @param to the unit to convert to
    * @param msPerFrame the ms per frame
    * @return the unit converter
    * @throws ConversionException if a converter cannot be created
    */
   public static TypeConverter<TimeUnit> createConverter(TimeUnit from, TimeUnit to,
-      double msPerFrame) throws ConversionException {
+      double msPerFrame) {
     if (from == to) {
       return new IdentityTypeConverter<>(from);
     }
-    if (from == null) {
-      throw new ConversionException("from must not be null");
-    }
-    if (to == null) {
-      throw new ConversionException("to must not be null");
-    }
+    checkNotNull(from, to);
 
     switch (from) {
       case MILLISECOND:
@@ -160,49 +147,32 @@ public class UnitConverterFactory {
     }
   }
 
-  private static double checkMsPerFrame(double msPerFrame) {
-    if (!(msPerFrame > 0 && msPerFrame <= java.lang.Double.MAX_VALUE)) {
-      throw new ConversionException("ms/frame must be positive");
-    }
-    return msPerFrame;
-  }
-
   /**
-   * Creates the converter.
+   * Creates the {@link AngleUnit} converter.
    *
-   * @param from the from
-   * @param to the to
+   * @param from the unit to convert from
+   * @param to the unit to convert to
    * @return the unit converter
    * @throws ConversionException if a converter cannot be created
    */
-  public static TypeConverter<AngleUnit> createConverter(AngleUnit from, AngleUnit to)
-      throws ConversionException {
+  public static TypeConverter<AngleUnit> createConverter(AngleUnit from, AngleUnit to) {
     if (from == to) {
       return new IdentityTypeConverter<>(from);
     }
-    if (from == null) {
-      throw new ConversionException("from must not be null");
-    }
-    if (to == null) {
-      throw new ConversionException("to must not be null");
-    }
+    checkNotNull(from, to);
 
     switch (from) {
       case RADIAN:
-        switch (to) {
-          case DEGREE:
-            return new MultiplyTypeConverter<>(from, to, 180.0 / Math.PI);
-          default:
-            throw new ConversionException(from + " to " + to);
+        if (to == AngleUnit.DEGREE) {
+          return new MultiplyTypeConverter<>(from, to, 180.0 / Math.PI);
         }
+        throw new ConversionException(from + " to " + to);
 
       case DEGREE:
-        switch (to) {
-          case RADIAN:
-            return new MultiplyTypeConverter<>(from, to, Math.PI / 180.0);
-          default:
-            throw new ConversionException(from + " to " + to);
+        if (to == AngleUnit.RADIAN) {
+          return new MultiplyTypeConverter<>(from, to, Math.PI / 180.0);
         }
+        throw new ConversionException(from + " to " + to);
 
       default:
         throw new ConversionException(from + " to " + to);
@@ -210,49 +180,104 @@ public class UnitConverterFactory {
   }
 
   /**
-   * Creates the converter.
+   * Creates the {@link IntensityUnit} converter.
    *
-   * @param from the from
-   * @param to the to
+   * @param from the unit to convert from
+   * @param to the unit to convert to
    * @param offset the offset
    * @param countPerPhoton the count per photon
    * @return the unit converter
    * @throws ConversionException if a converter cannot be created
    */
   public static TypeConverter<IntensityUnit> createConverter(IntensityUnit from, IntensityUnit to,
-      double offset, double countPerPhoton) throws ConversionException {
+      double offset, double countPerPhoton) {
     if (from == to) {
       return new IdentityTypeConverter<>(from);
     }
+    checkNotNull(from, to);
+
+    switch (from) {
+      case COUNT:
+        if (to == IntensityUnit.PHOTON) {
+          return new AddMultiplyTypeConverter<>(from, to, checkOffset(offset, -1),
+              1.0 / checkCountPerPhoton(countPerPhoton));
+        }
+        throw new ConversionException(from + " to " + to);
+
+      case PHOTON:
+        if (to == IntensityUnit.COUNT) {
+          return new MultiplyAddTypeConverter<>(from, to, checkCountPerPhoton(countPerPhoton),
+              checkOffset(offset, 1));
+        }
+        throw new ConversionException(from + " to " + to);
+
+      default:
+        throw new ConversionException(from + " to " + to);
+    }
+  }
+
+  /**
+   * Creates the {@link IntensityUnit} converter.
+   *
+   * @param from the unit to convert from
+   * @param to the unit to convert to
+   * @param countPerPhoton the count per photon
+   * @return the unit converter
+   * @throws ConversionException if a converter cannot be created
+   */
+  public static TypeConverter<IntensityUnit> createConverter(IntensityUnit from, IntensityUnit to,
+      double countPerPhoton) {
+    if (from == to) {
+      return new IdentityTypeConverter<>(from);
+    }
+    checkNotNull(from, to);
+
+    switch (from) {
+      case COUNT:
+        if (to == IntensityUnit.PHOTON) {
+          return new MultiplyTypeConverter<>(from, to, 1.0 / checkCountPerPhoton(countPerPhoton));
+        }
+        throw new ConversionException(from + " to " + to);
+
+      case PHOTON:
+        if (to == IntensityUnit.COUNT) {
+          return new MultiplyTypeConverter<>(from, to, checkCountPerPhoton(countPerPhoton));
+        }
+        throw new ConversionException(from + " to " + to);
+
+      default:
+        throw new ConversionException(from + " to " + to);
+    }
+  }
+
+  /**
+   * Check the from and to units are not null.
+   *
+   * @param from the unit to convert from
+   * @param to the unit to convert to
+   * @throws ConversionException if any arguments are null
+   */
+  private static void checkNotNull(Object from, Object to) {
     if (from == null) {
       throw new ConversionException("from must not be null");
     }
     if (to == null) {
       throw new ConversionException("to must not be null");
     }
+  }
 
-    switch (from) {
-      case COUNT:
-        switch (to) {
-          case PHOTON:
-            return new AddMultiplyTypeConverter<>(from, to, checkOffset(offset, -1),
-                1.0 / checkCountPerPhoton(countPerPhoton));
-          default:
-            throw new ConversionException(from + " to " + to);
-        }
-
-      case PHOTON:
-        switch (to) {
-          case COUNT:
-            return new MultiplyAddTypeConverter<>(from, to, checkCountPerPhoton(countPerPhoton),
-                checkOffset(offset, 1));
-          default:
-            throw new ConversionException(from + " to " + to);
-        }
-
-      default:
-        throw new ConversionException(from + " to " + to);
+  private static double checkNmPerPixel(double nmPerPixel) {
+    if (!(nmPerPixel > 0 && nmPerPixel <= java.lang.Double.MAX_VALUE)) {
+      throw new ConversionException("nm/pixel must be positive");
     }
+    return nmPerPixel;
+  }
+
+  private static double checkMsPerFrame(double msPerFrame) {
+    if (!(msPerFrame > 0 && msPerFrame <= java.lang.Double.MAX_VALUE)) {
+      throw new ConversionException("ms/frame must be positive");
+    }
+    return msPerFrame;
   }
 
   private static double checkOffset(double offset, int sign) {
@@ -267,48 +292,5 @@ public class UnitConverterFactory {
       throw new ConversionException("count/photon must be positive");
     }
     return countPerPhoton;
-  }
-
-  /**
-   * Creates the converter.
-   *
-   * @param from the from
-   * @param to the to
-   * @param countPerPhoton the count per photon
-   * @return the unit converter
-   * @throws ConversionException if a converter cannot be created
-   */
-  public static TypeConverter<IntensityUnit> createConverter(IntensityUnit from, IntensityUnit to,
-      double countPerPhoton) throws ConversionException {
-    if (from == to) {
-      return new IdentityTypeConverter<>(from);
-    }
-    if (from == null) {
-      throw new ConversionException("from must not be null");
-    }
-    if (to == null) {
-      throw new ConversionException("to must not be null");
-    }
-
-    switch (from) {
-      case COUNT:
-        switch (to) {
-          case PHOTON:
-            return new MultiplyTypeConverter<>(from, to, 1.0 / checkCountPerPhoton(countPerPhoton));
-          default:
-            throw new ConversionException(from + " to " + to);
-        }
-
-      case PHOTON:
-        switch (to) {
-          case COUNT:
-            return new MultiplyTypeConverter<>(from, to, checkCountPerPhoton(countPerPhoton));
-          default:
-            throw new ConversionException(from + " to " + to);
-        }
-
-      default:
-        throw new ConversionException(from + " to " + to);
-    }
   }
 }

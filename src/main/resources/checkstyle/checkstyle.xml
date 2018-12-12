@@ -35,7 +35,7 @@
     </module>
     <module name="LineLength">
       <property name="max" value="100" />
-      <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://" />
+      <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://|\{@link " />
     </module>
     <module name="AvoidStarImport" />
     <module name="OneTopLevelClass" />
@@ -94,7 +94,9 @@
     </module>
     <module name="ParameterName">
       <!-- Allow single characters x,y,z for numerical functions, e.g. xPosition -->
-      <property name="format" value="^(([a-z][a-z0-9])|([xyz]))[a-zA-Z0-9]*$" />
+      <!-- Allow single characters a,n for numerical functions, e.g. function.initialise(a). -->
+      <!-- The use of a,n should be removed in the future. -->
+      <property name="format" value="^((([a-z][a-z0-9])|([xyz]))[a-zA-Z0-9]*)|[an]$" />
       <message key="name.invalidPattern" value="Parameter name ''{0}'' must match pattern ''{1}''." />
     </module>
     <module name="CatchParameterName">
@@ -134,10 +136,13 @@
       <property name="lineWrappingIndentation" value="4" />
       <property name="arrayInitIndent" value="2" />
     </module>
+    <!--
+    This should be added back when more severe problems have been fixed.
     <module name="AbbreviationAsWordInName">
       <property name="ignoreFinal" value="false" />
       <property name="allowedAbbreviationLength" value="1" />
     </module>
+     -->
     <module name="OverloadMethodsDeclarationOrder" />
     <module name="VariableDeclarationUsageDistance" />
     <module name="CustomImportOrder">
@@ -203,6 +208,10 @@
     <module name="SuppressionCommentFilter">
       <property name="offCommentFormat" value="@formatter\:off" />
       <property name="onCommentFormat" value="@formatter\:on" />
+    </module>
+    <module name="SuppressionCommentFilter">
+      <property name="offCommentFormat" value="CHECKSTYLE.OFF" />
+      <property name="onCommentFormat" value="CHECKSTYLE.ON" />
     </module>
     <module name="SuppressionCommentFilter">
       <property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)" />

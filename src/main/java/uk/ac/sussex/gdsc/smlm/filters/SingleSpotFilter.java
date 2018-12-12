@@ -31,7 +31,7 @@ import java.util.List;
  * filter.
  */
 public class SingleSpotFilter extends MaximaSpotFilter {
-  private DataProcessor processor;
+  private final DataProcessor processor;
 
   /**
    * Constructor.
@@ -47,6 +47,22 @@ public class SingleSpotFilter extends MaximaSpotFilter {
       throw new IllegalArgumentException("Processor is null");
     }
     this.processor = processor;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected SingleSpotFilter(SingleSpotFilter source) {
+    super(source);
+    processor = source.processor.copy();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public SingleSpotFilter copy() {
+    return new SingleSpotFilter(this);
   }
 
   /** {@inheritDoc} */
@@ -77,15 +93,6 @@ public class SingleSpotFilter extends MaximaSpotFilter {
   @Override
   public float[] preprocessData(float[] data, int width, int height) {
     return processor.process(data, width, height);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public SingleSpotFilter clone() {
-    final SingleSpotFilter f = (SingleSpotFilter) super.clone();
-    // Ensure the object is duplicated and not passed by reference.
-    f.processor = processor.clone();
-    return f;
   }
 
   /** {@inheritDoc} */
