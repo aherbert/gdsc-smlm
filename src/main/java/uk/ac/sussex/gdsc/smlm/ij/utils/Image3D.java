@@ -35,9 +35,93 @@ import ij.process.ImageProcessor;
  */
 public abstract class Image3D {
   /**
-   * The largest array size for which a regular 1D Java array is used to store the data (2^30)
+   * The largest array size for which a regular 1D Java array is used to store the data (2^30).
    */
   public static final int MAX_SIZE_OF_32_BIT_ARRAY = 1073741824;
+
+  /** The number of slices (max z). */
+  public final int ns;
+  /** The number of rows (max y). */
+  public final int nr;
+  /** The number of columns (max x). */
+  public final int nc;
+
+  /** The number of rows multiplied by the number of columns. */
+  public final int nrByNc;
+
+  /**
+   * Instantiates a new 3D image.
+   *
+   * @param nc the number of columns
+   * @param nr the number of rows
+   * @param ns the number of slices
+   * @throws IllegalArgumentException If the combined dimensions is too large for an array
+   */
+  public Image3D(int nc, int nr, int ns) {
+    createData(checkSize(nc, nr, ns, true));
+    this.nc = nc;
+    this.nr = nr;
+    this.ns = ns;
+    nrByNc = nr * nc;
+  }
+
+  /**
+   * Instantiates a new 3D image.
+   *
+   * @param stack the stack
+   * @throws IllegalArgumentException If the combined dimensions is too large for an array
+   */
+  public Image3D(ImageStack stack) {
+    nc = stack.getWidth();
+    nr = stack.getHeight();
+    ns = stack.getSize();
+    createData(checkSize(nc, nr, ns, true));
+    nrByNc = nr * nc;
+    if (stack.getBitDepth() == 32) {
+      for (int s = 0; s < ns; s++) {
+        copyFrom((float[]) stack.getPixels(s + 1), 0, nrByNc, s * nrByNc);
+      }
+    } else {
+      for (int s = 1, i = 0; s <= ns; s++) {
+        final ImageProcessor ip = stack.getProcessor(s);
+        for (int j = 0; i < nrByNc; j++) {
+          setf(i++, ip.getf(j));
+        }
+      }
+    }
+  }
+
+  /**
+   * Instantiates a new 3D image.
+   *
+   * <p>It is assumed that the sub-class will correctly create the data storage.
+   *
+   * @param nc the number of columns
+   * @param nr the number of rows
+   * @param ns the number of slices
+   * @param nrByNc the number of rows multiplied by the number of columns
+   */
+  protected Image3D(int nc, int nr, int ns, int nrByNc) {
+    // No checks as this is used internally
+    this.nc = nc;
+    this.nr = nr;
+    this.ns = ns;
+    this.nrByNc = nrByNc;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * <p>It is assumed that the sub-class will correctly create the data storage.
+   *
+   * @param source the source
+   */
+  protected Image3D(Image3D source) {
+    this.nc = source.nc;
+    this.nr = source.nr;
+    this.ns = source.ns;
+    this.nrByNc = source.nrByNc;
+  }
 
   /**
    * Check the size can fit in a 1D array.
@@ -66,75 +150,6 @@ public abstract class Image3D {
     return (int) size;
   }
 
-  /** The number of slices (max z). */
-  public final int ns;
-  /** The number of rows (max y). */
-  public final int nr;
-  /** The number of columns (max x). */
-  public final int nc;
-
-  /** The number of rows multiplied by the number of columns. */
-  public final int nr_by_nc;
-
-  /**
-   * Instantiates a new 3D image.
-   *
-   * @param nc the number of columns
-   * @param nr the number of rows
-   * @param ns the number of slices
-   * @throws IllegalArgumentException If the combined dimensions is too large for an array
-   */
-  public Image3D(int nc, int nr, int ns) {
-    createData(checkSize(nc, nr, ns, true));
-    this.nc = nc;
-    this.nr = nr;
-    this.ns = ns;
-    nr_by_nc = nr * nc;
-  }
-
-  /**
-   * Instantiates a new 3D image.
-   *
-   * @param stack the stack
-   * @throws IllegalArgumentException If the combined dimensions is too large for an array
-   */
-  public Image3D(ImageStack stack) {
-    nc = stack.getWidth();
-    nr = stack.getHeight();
-    ns = stack.getSize();
-    createData(checkSize(nc, nr, ns, true));
-    nr_by_nc = nr * nc;
-    if (stack.getBitDepth() == 32) {
-      for (int s = 0; s < ns; s++) {
-        copyFrom((float[]) stack.getPixels(s + 1), 0, nr_by_nc, s * nr_by_nc);
-      }
-    } else {
-      for (int s = 1, i = 0; s <= ns; s++) {
-        final ImageProcessor ip = stack.getProcessor(s);
-        for (int j = 0; i < nr_by_nc; j++) {
-          setf(i++, ip.getf(j));
-        }
-      }
-    }
-  }
-
-  /**
-   * Instantiates a new 3D image. It is assumed that the sub-class will correctly create the data
-   * storage.
-   *
-   * @param nc the number of columns
-   * @param nr the number of rows
-   * @param ns the number of slices
-   * @param nr_by_nc the number of rows multiplied by the number of columns
-   */
-  protected Image3D(int nc, int nr, int ns, int nr_by_nc) {
-    // No checks as this is used internally
-    this.nc = nc;
-    this.nr = nr;
-    this.ns = ns;
-    this.nr_by_nc = nr_by_nc;
-  }
-
   /**
    * Creates the array to store the data.
    *
@@ -147,56 +162,56 @@ public abstract class Image3D {
    *
    * <p>Utility method to handle conversion with ImageJ ImageProcessor objects.
    *
-   * @param i the index
+   * @param index the index
    * @param buffer the buffer
-   * @param j the buffer index
-   * @param size the size
+   * @param bufferIndex the buffer index
+   * @param size the size to copy
    */
-  protected abstract void copyTo(int i, float[] buffer, int j, int size);
+  protected abstract void copyTo(int index, float[] buffer, int bufferIndex, int size);
 
   /**
    * Copy the data from the given buffer to the given index.
    *
    * <p>Utility method to handle conversion with ImageJ ImageProcessor objects.
    *
-   * @param i the index
    * @param buffer the buffer
-   * @param j the buffer index
-   * @param size the size
+   * @param bufferIndex the buffer index
+   * @param size the size to copy
+   * @param index the index
    */
-  protected abstract void copyFrom(float[] buffer, int j, int size, int i);
+  protected abstract void copyFrom(float[] buffer, int bufferIndex, int size, int index);
 
   /**
    * Gets the value at the given index.
    *
-   * @param i the index
+   * @param index the index
    * @return the value
    */
-  public abstract double get(int i);
+  public abstract double get(int index);
 
   /**
    * Sets the value at the given index.
    *
-   * @param i the index
+   * @param index the index
    * @param value the value
    */
-  public abstract void set(int i, double value);
+  public abstract void set(int index, double value);
 
   /**
    * Gets the value at the given index.
    *
-   * @param i the index
+   * @param index the index
    * @return the value
    */
-  public abstract float getf(int i);
+  public abstract float getf(int index);
 
   /**
    * Sets the value at the given index.
    *
-   * @param i the index
+   * @param index the index
    * @param value the value
    */
-  public abstract void setf(int i, float value);
+  public abstract void setf(int index, float value);
 
   /**
    * Return a copy of the 3D image.
@@ -238,7 +253,7 @@ public abstract class Image3D {
    * @return the data length
    */
   public int getDataLength() {
-    return ns * nr_by_nc;
+    return ns * nrByNc;
   }
 
   /**
@@ -249,8 +264,8 @@ public abstract class Image3D {
   public ImageStack getImageStack() {
     final ImageStack stack = new ImageStack(nc, nr);
     for (int s = 0; s < ns; s++) {
-      final float[] pixels = new float[nr_by_nc];
-      copyTo(s * nr_by_nc, pixels, 0, nr_by_nc);
+      final float[] pixels = new float[nrByNc];
+      copyTo(s * nrByNc, pixels, 0, nrByNc);
       stack.addSlice(null, pixels);
     }
     return stack;
@@ -259,39 +274,39 @@ public abstract class Image3D {
   /**
    * Gets the xyz components of the index.
    *
-   * @param i the index
+   * @param index the index
    * @return the xyz components
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public int[] getXyz(int i) {
-    if (i < 0 || i >= getDataLength()) {
+  public int[] getXyz(int index) {
+    if (index < 0 || index >= getDataLength()) {
       throw new IllegalArgumentException(
-          "Index in not in the correct range: 0 <= i < " + getDataLength());
+          "Index in not in the correct range: 0 <= index < " + getDataLength());
     }
     final int[] xyz = new int[3];
-    xyz[2] = i / nr_by_nc;
-    final int j = i % nr_by_nc;
-    xyz[1] = j / nc;
-    xyz[0] = j % nc;
+    xyz[2] = index / nrByNc;
+    final int xy = index % nrByNc;
+    xyz[1] = xy / nc;
+    xyz[0] = xy % nc;
     return xyz;
   }
 
   /**
    * Gets the xyz components of the index.
    *
-   * @param i the index
+   * @param index the index
    * @param xyz the xyz components (must be an array of at least length 3)
    * @throws IllegalArgumentException if the index is not within the data
    */
-  public void getXyz(int i, int[] xyz) {
-    if (i < 0 || i >= getDataLength()) {
+  public void getXyz(int index, int[] xyz) {
+    if (index < 0 || index >= getDataLength()) {
       throw new IllegalArgumentException(
-          "Index in not in the correct range: 0 <= i < " + getDataLength());
+          "Index in not in the correct range: 0 <= index < " + getDataLength());
     }
-    xyz[2] = i / nr_by_nc;
-    final int j = i % nr_by_nc;
-    xyz[1] = j / nc;
-    xyz[0] = j % nc;
+    xyz[2] = index / nrByNc;
+    final int xy = index % nrByNc;
+    xyz[1] = xy / nc;
+    xyz[0] = xy % nc;
   }
 
   /**
@@ -319,7 +334,7 @@ public abstract class Image3D {
    * @return the index
    */
   protected int index(int x, int y, int z) {
-    return z * nr_by_nc + y * nc + x;
+    return z * nrByNc + y * nc + x;
   }
 
   /**
@@ -328,14 +343,13 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public abstract Image3D crop(int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException;
+  public abstract Image3D crop(int x, int y, int z, int width, int height, int depth);
 
   /**
    * Crop a sub-region of the data into the given image. The target dimensions must be positive.
@@ -349,17 +363,17 @@ public abstract class Image3D {
    */
   public Image3D crop(int x, int y, int z, Image3D image) {
     // Check the region range
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    final int d = image.getSize();
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
-        || (long) z + d > ns) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    final int depth = image.getSize();
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
+        || z < 0 || depth < 1 || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    for (int s = 0, i = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        for (int c = 0; c < w; c++) {
+    for (int s = 0, i = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
           image.set(i++, get(base + c));
         }
         base += nc;
@@ -374,27 +388,27 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public ImageStack cropToStack(int x, int y, int z, int w, int h, int d) {
+  public ImageStack cropToStack(int x, int y, int z, int width, int height, int depth) {
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
-        || (long) z + d > ns) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
+        || z < 0 || depth < 1 || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final int size = w * h;
-    final ImageStack stack = new ImageStack(w, h, d);
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
+    final int size = width * height;
+    final ImageStack stack = new ImageStack(width, height, depth);
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
       final float[] region = new float[size];
-      for (int r = 0, i = 0; r < h; r++) {
-        copyTo(base, region, i, w);
+      for (int r = 0, i = 0; r < height; r++) {
+        copyTo(base, region, i, width);
         base += nc;
-        i += w;
+        i += width;
       }
       stack.setPixels(region, 1 + s);
     }
@@ -408,26 +422,27 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int w, int h, int d) {
+  public static ImageStack cropToStack(ImageStack stack, int x, int y, int z, int width, int height,
+      int depth) {
     final int nc = stack.getWidth();
     final int nr = stack.getHeight();
     final int ns = stack.getSize();
 
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
-        || (long) z + d > ns) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
+        || z < 0 || depth < 1 || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final ImageStack stack2 = new ImageStack(w, h, d);
-    for (int s = 0; s < d; s++, z++) {
+    final ImageStack stack2 = new ImageStack(width, height, depth);
+    for (int s = 0; s < depth; s++, z++) {
       final ImageProcessor ip = stack.getProcessor(1 + z);
-      ip.setRoi(x, y, w, h);
+      ip.setRoi(x, y, width, height);
       stack2.setPixels(ip.crop().getPixels(), 1 + s);
     }
     return stack2;
@@ -444,19 +459,20 @@ public abstract class Image3D {
    */
   public void insert(int x, int y, int z, Image3D image) {
     // Check the region range
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    final int d = image.getSize();
-    if (w < 1 || h < 1 || d < 1) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    final int depth = image.getSize();
+    if (width < 1 || height < 1 || depth < 1) {
       return;
     }
-    if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns) {
+    if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr || z < 0
+        || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    for (int s = 0, i = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        for (int c = 0; c < w; c++) {
+    for (int s = 0, i = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
           set(base + c, image.get(i++));
         }
         base += nc;
@@ -475,25 +491,26 @@ public abstract class Image3D {
    */
   public void insert(int x, int y, int z, ImageStack stack) {
     // Check the region range
-    final int w = stack.getWidth();
-    final int h = stack.getHeight();
-    final int d = stack.getSize();
-    if (w < 1 || h < 1 || d < 1) {
+    final int width = stack.getWidth();
+    final int height = stack.getHeight();
+    final int depth = stack.getSize();
+    if (width < 1 || height < 1 || depth < 1) {
       return;
     }
-    if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns) {
+    if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr || z < 0
+        || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
     final boolean isFloat = stack.getBitDepth() == 32;
-    final FloatProcessor fp = (isFloat) ? new FloatProcessor(w, h) : null;
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
+    final FloatProcessor fp = (isFloat) ? new FloatProcessor(width, height) : null;
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
       final float[] region = (float[]) ((isFloat) ? stack.getPixels(1 + s)
           : stack.getProcessor(1 + s).toFloat(0, fp).getPixels());
-      for (int r = 0, i = 0; r < h; r++) {
-        copyFrom(region, i, w, base);
+      for (int r = 0, i = 0; r < height; r++) {
+        copyFrom(region, i, width, base);
         base += nc;
-        i += w;
+        i += width;
       }
     }
   }
@@ -509,57 +526,58 @@ public abstract class Image3D {
    */
   public void insert(int x, int y, int z, ImageProcessor image) {
     // Check the region range
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    if (w < 1 || h < 1) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    if (width < 1 || height < 1) {
       return;
     }
-    if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || z >= ns) {
+    if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr || z < 0 || z >= ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
     final boolean isFloat = image.getBitDepth() == 32;
-    int base = z * nr_by_nc + y * nc + x;
+    int base = z * nrByNc + y * nc + x;
     final float[] region =
         (float[]) ((isFloat) ? image.getPixels() : image.toFloat(0, null).getPixels());
-    for (int r = 0, i = 0; r < h; r++) {
-      copyFrom(region, i, w, base);
+    for (int r = 0, i = 0; r < height; r++) {
+      copyFrom(region, i, width, base);
       base += nc;
-      i += w;
+      i += width;
     }
   }
 
   /**
    * Compute 3D intersect with this object.
    *
-   * <p>If any of w,h,d are negative then the corresponding x,y,z is updated and the w,h,d is
-   * inverted. The maximum bounds of the given dimensions are then computed by adding the w,h,d to
-   * the x,y,z. The bounds are then clipped to the image dimensions and the intersect returned.
+   * <p>If any of width,height,depth are negative then the corresponding x,y,z is updated and the
+   * width,height,depth is inverted. The maximum bounds of the given dimensions are then computed by
+   * adding the width,height,depth to the x,y,z. The bounds are then clipped to the image dimensions
+   * and the intersect returned.
    *
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
-   * @return [x,y,z,w,h,d]
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
+   * @return [x,y,z,width,height,depth]
    */
-  public int[] computeIntersect(int x, int y, int z, int w, int h, int d) {
-    if (w < 0) {
-      w = -w;
-      x = subtract(x, w);
+  public int[] computeIntersect(int x, int y, int z, int width, int height, int depth) {
+    if (width < 0) {
+      width = -width;
+      x = subtract(x, width);
     }
-    if (h < 0) {
-      h = -h;
-      y = subtract(y, h);
+    if (height < 0) {
+      height = -height;
+      y = subtract(y, height);
     }
-    if (d < 0) {
-      d = -d;
-      z = subtract(z, d);
+    if (depth < 0) {
+      depth = -depth;
+      z = subtract(z, depth);
     }
     // Compute 3D intersect with this object
-    final int x2 = clip(nc, x, w);
-    final int y2 = clip(nr, y, h);
-    final int z2 = clip(ns, z, d);
+    final int x2 = clip(nc, x, width);
+    final int y2 = clip(nr, y, height);
+    final int z2 = clip(ns, z, depth);
     x = clip(nc, x);
     y = clip(nr, y);
     z = clip(ns, z);
@@ -569,43 +587,44 @@ public abstract class Image3D {
   /**
    * Compute 3D intersect with this object or throw an exception if the intersect has no volume.
    *
-   * <p>If any of w,h,d are negative then the corresponding x,y,z is updated and the w,h,d is
-   * inverted. The maximum bounds of the given dimensions are then computed by adding the w,h,d to
-   * the x,y,z. The bounds are then clipped to the image dimensions and the intersect returned.
+   * <p>If any of width,height,depth are negative then the corresponding x,y,z is updated and the
+   * width,height,depth is inverted. The maximum bounds of the given dimensions are then computed by
+   * adding the width,height,depth to the x,y,z. The bounds are then clipped to the image dimensions
+   * and the intersect returned.
    *
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
-   * @return [x,y,z,w,h,d]
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
+   * @return [x,y,z,width,height,depth]
    * @throws IllegalArgumentException if the intersect has no volume
    */
-  public int[] computeIntersectOrThrow(int x, int y, int z, int w, int h, int d) {
-    if (w < 0) {
-      w = -w;
-      x = subtract(x, w);
+  public int[] computeIntersectOrThrow(int x, int y, int z, int width, int height, int depth) {
+    if (width < 0) {
+      width = -width;
+      x = subtract(x, width);
     }
-    if (h < 0) {
-      h = -h;
-      y = subtract(y, h);
+    if (height < 0) {
+      height = -height;
+      y = subtract(y, height);
     }
-    if (d < 0) {
-      d = -d;
-      z = subtract(z, d);
+    if (depth < 0) {
+      depth = -depth;
+      z = subtract(z, depth);
     }
     // Compute 3D intersect with this object
-    final int x2 = clip(nc, x, w);
-    final int y2 = clip(nr, y, h);
-    final int z2 = clip(ns, z, d);
+    final int x2 = clip(nc, x, width);
+    final int y2 = clip(nr, y, height);
+    final int z2 = clip(ns, z, depth);
     x = clip(nc, x);
     y = clip(nr, y);
     z = clip(ns, z);
-    w = checkSize(x2 - x);
-    h = checkSize(y2 - y);
-    d = checkSize(z2 - z);
-    return new int[] {x, y, z, w, h, d};
+    width = checkIntersectSize(x2 - x);
+    height = checkIntersectSize(y2 - y);
+    depth = checkIntersectSize(z2 - z);
+    return new int[] {x, y, z, width, height, depth};
   }
 
   /**
@@ -615,7 +634,7 @@ public abstract class Image3D {
    * @return the size
    * @throws IllegalArgumentException If the size if zero
    */
-  private static int checkSize(int size) {
+  private static int checkIntersectSize(int size) {
     if (size == 0) {
       throw new IllegalArgumentException("No intersect");
     }
@@ -663,7 +682,7 @@ public abstract class Image3D {
    * @return the clipped value
    */
   private static int clip(int upper, int value) {
-    return (value < 0) ? 0 : (value > upper) ? upper : value;
+    return MathUtils.clip(0, upper, value);
   }
 
   /**
@@ -672,28 +691,27 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the min index
    * @throws IllegalArgumentException if there is no intersect
    * @throws IllegalStateException if the region is just NaN values
    */
-  public int findMinIndex(int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException, IllegalStateException {
-    final int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
+  public int findMinIndex(int x, int y, int z, int width, int height, int depth) {
+    final int[] intersect = computeIntersectOrThrow(x, y, z, width, height, depth);
     x = intersect[0];
     y = intersect[1];
     z = intersect[2];
-    w = intersect[3];
-    h = intersect[4];
-    d = intersect[5];
-    int index = findValueIndex(x, y, z, w, h, d);
+    width = intersect[3];
+    height = intersect[4];
+    depth = intersect[5];
+    int index = findValueIndex(x, y, z, width, height, depth);
     double min = get(index);
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        for (int j = 0; j < w; j++) {
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        for (int j = 0; j < width; j++) {
           if (get(base + j) < min) {
             index = base + j;
             min = get(index);
@@ -711,28 +729,27 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the min index
    * @throws IllegalArgumentException if there is no intersect
    * @throws IllegalStateException if the region is just NaN values
    */
-  public int findMaxIndex(int x, int y, int z, int w, int h, int d)
-      throws IllegalArgumentException, IllegalStateException {
-    final int[] intersect = computeIntersectOrThrow(x, y, z, w, h, d);
+  public int findMaxIndex(int x, int y, int z, int width, int height, int depth) {
+    final int[] intersect = computeIntersectOrThrow(x, y, z, width, height, depth);
     x = intersect[0];
     y = intersect[1];
     z = intersect[2];
-    w = intersect[3];
-    h = intersect[4];
-    d = intersect[5];
-    int index = findValueIndex(x, y, z, w, h, d);
+    width = intersect[3];
+    height = intersect[4];
+    depth = intersect[5];
+    int index = findValueIndex(x, y, z, width, height, depth);
     double max = get(index);
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        for (int j = 0; j < w; j++) {
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        for (int j = 0; j < width; j++) {
           if (get(base + j) > max) {
             index = base + j;
             max = get(index);
@@ -750,23 +767,22 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the index
    * @throws IllegalStateException if the region is just NaN values
    */
-  private int findValueIndex(int x, int y, int z, int w, int h, int d)
-      throws IllegalStateException {
+  private int findValueIndex(int x, int y, int z, int width, int height, int depth) {
     // Quick check without loops
-    if (!Double.isNaN(get(z * nr_by_nc + y * nc + x))) {
-      return z * nr_by_nc + y * nc + x;
+    if (!Double.isNaN(get(z * nrByNc + y * nc + x))) {
+      return z * nrByNc + y * nc + x;
     }
 
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        for (int j = 0; j < w; j++) {
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        for (int j = 0; j < width; j++) {
           if (!Double.isNaN(get(base + j))) {
             return base + j;
           }
@@ -775,42 +791,6 @@ public abstract class Image3D {
       }
     }
     throw new IllegalStateException("Region is NaN");
-  }
-
-  /**
-   * Compute the sum of the region.
-   *
-   * @param x the x index
-   * @param y the y index
-   * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
-   * @return the sum
-   */
-  public double computeSum(int x, int y, int z, int w, int h, int d) {
-    final int[] intersect = computeIntersect(x, y, z, w, h, d);
-    w = intersect[3];
-    h = intersect[4];
-    d = intersect[5];
-    // Recheck bounds
-    if (w == 0 || h == 0 || d == 0) {
-      return 0;
-    }
-    x = intersect[0];
-    y = intersect[1];
-    z = intersect[2];
-    double sum = 0;
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        for (int j = 0; j < w; j++) {
-          sum += get(base + j);
-        }
-        base += nc;
-      }
-    }
-    return sum;
   }
 
   /**
@@ -830,21 +810,21 @@ public abstract class Image3D {
     // First build a table for each XY slice
     for (int s = 0; s < ns; s++) {
       double sum = 0;
-      int i = s * nr_by_nc;
+      int index = s * nrByNc;
       // Initialise first row sum
-      // sum = rolling sum of (0 - colomn)
-      for (int c = 0; c < nc; c++, i++) {
-        sum += get(i);
-        table[i] = sum;
+      // sum = rolling sum of (0 - column)
+      for (int c = 0; c < nc; c++, index++) {
+        sum += get(index);
+        table[index] = sum;
       }
       // Remaining rows
-      // sum = rolling sum of (0 - colomn) + sum of same position above
-      for (int r = 1, ii = i - nc; r < nr; r++) {
+      // sum = rolling sum of (0 - column) + sum of same position above
+      for (int r = 1, ii = index - nc; r < nr; r++) {
         sum = 0;
-        for (int c = 0; c < nc; c++, i++) {
-          sum += get(i);
+        for (int c = 0; c < nc; c++, index++) {
+          sum += get(index);
           // Add the sum from the previous row
-          table[i] = sum + table[ii++];
+          table[index] = sum + table[ii++];
         }
       }
     }
@@ -853,14 +833,50 @@ public abstract class Image3D {
     // sum = rolling sum of (0,0 to column,row) + sum of same position above
     // => rolling sum of (0,0,0 to column,row,slice)
     for (int s = 1; s < ns; s++) {
-      int i = s * nr_by_nc;
-      int ii = i - nr_by_nc;
-      for (int j = 0; j < nr_by_nc; j++) {
-        table[i++] += table[ii++];
+      int i1 = s * nrByNc;
+      int i2 = i1 - nrByNc;
+      for (int j = 0; j < nrByNc; j++) {
+        table[i1++] += table[i2++];
       }
     }
 
     return table;
+  }
+
+  /**
+   * Compute the sum of the region.
+   *
+   * @param x the x index
+   * @param y the y index
+   * @param z the z index
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
+   * @return the sum
+   */
+  public double computeSum(int x, int y, int z, int width, int height, int depth) {
+    final int[] intersect = computeIntersect(x, y, z, width, height, depth);
+    width = intersect[3];
+    height = intersect[4];
+    depth = intersect[5];
+    // Recheck bounds
+    if (width == 0 || height == 0 || depth == 0) {
+      return 0;
+    }
+    x = intersect[0];
+    y = intersect[1];
+    z = intersect[2];
+    double sum = 0;
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        for (int j = 0; j < width; j++) {
+          sum += get(base + j);
+        }
+        base += nc;
+      }
+    }
+    return sum;
   }
 
   /**
@@ -870,18 +886,18 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the sum
    */
-  public double computeSum(double[] table, int x, int y, int z, int w, int h, int d) {
-    final int[] intersect = computeIntersect(x, y, z, w, h, d);
-    w = intersect[3];
-    h = intersect[4];
-    d = intersect[5];
+  public double computeSum(double[] table, int x, int y, int z, int width, int height, int depth) {
+    final int[] intersect = computeIntersect(x, y, z, width, height, depth);
+    width = intersect[3];
+    height = intersect[4];
+    depth = intersect[5];
     // Recheck bounds
-    if (w == 0 || h == 0 || d == 0) {
+    if (width == 0 || height == 0 || depth == 0) {
       return 0;
       // x = intersect[0];
       // y = intersect[1];
@@ -889,15 +905,15 @@ public abstract class Image3D {
     }
 
     // Compute sum from rolling sum using:
-    // sum(x,y,z,w,h,d) =
-    // + s(x+w-1,y+h-1,z+d-1)
-    // - s(x-1,y+h-1,z+d-1)
-    // - s(x+w-1,y-1,z+d-1)
-    // + s(x-1,y-1,z+d-1)
+    // sum(x,y,z,width,height,depth) =
+    // + s(x+width-1,y+height-1,z+depth-1)
+    // - s(x-1,y+height-1,z+depth-1)
+    // - s(x+width-1,y-1,z+depth-1)
+    // + s(x-1,y-1,z+depth-1)
     // /* Stack above must be subtracted so reverse sign*/
-    // - s(x+w-1,y+h-1,z-1)
-    // + s(x-1,y+h-1,z-1)
-    // + s(x+w-1,y-1,z-1)
+    // - s(x+width-1,y+height-1,z-1)
+    // + s(x-1,y+height-1,z-1)
+    // + s(x+width-1,y-1,z-1)
     // - s(x-1,y-1,z-1)
     // Note:
     // s(i,j,k) = 0 when either i,j,k < 0
@@ -909,12 +925,12 @@ public abstract class Image3D {
     final int y_1 = intersect[1] - 1;
     final int z_1 = intersect[2] - 1;
     // The intersect has already checked the bounds
-    // int x_w_1 = Math.min(x_1 + w, nc);
-    // int y_h_1 = Math.min(y_1 + h, nr);
-    // int z_d_1 = Math.min(z_1 + d, ns);
-    final int x_w_1 = x_1 + w;
-    final int y_h_1 = y_1 + h;
-    final int z_d_1 = z_1 + d;
+    // int x_w_1 = Math.min(x_1 + width, nc);
+    // int y_h_1 = Math.min(y_1 + height, nr);
+    // int z_d_1 = Math.min(z_1 + depth, ns);
+    final int x_w_1 = x_1 + width;
+    final int y_h_1 = y_1 + height;
+    final int z_d_1 = z_1 + depth;
 
     // double sum = table[index(x_w_1, y_h_1, z_d_1)];
     // if (y_1 >= 0)
@@ -943,64 +959,66 @@ public abstract class Image3D {
     // }
     // return sum;
 
-    // This has been ordered to use the smallest sums first (i.e. closer to x,y,z than x+w,y+h,z+d)
+    // This has been ordered to use the smallest sums first (i.e. closer to x,y,z than
+    // x+width,y+height,z+depth)
     final int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
     if (z_1 >= 0) {
-      final int xw_yh_z = xw_yh_zd - d * nr_by_nc;
+      final int xw_yh_z = xw_yh_zd - depth * nrByNc;
       double sum = 0;
       if (y_1 >= 0) {
-        final int h_ = h * nc;
+        final int h_ = height * nc;
         if (x_1 >= 0) {
-          sum = table[xw_yh_zd - w - h_] - table[xw_yh_z - w - h_] - table[xw_yh_zd - w]
-              + table[xw_yh_z - w];
+          sum = table[xw_yh_zd - width - h_] - table[xw_yh_z - width - h_] - table[xw_yh_zd - width]
+              + table[xw_yh_z - width];
         }
         sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
       } else if (x_1 >= 0) {
-        sum = table[xw_yh_z - w] - table[xw_yh_zd - w];
+        sum = table[xw_yh_z - width] - table[xw_yh_zd - width];
       }
       return sum + table[xw_yh_zd] - table[xw_yh_z];
     }
     double sum = 0;
     if (y_1 >= 0) {
-      final int h_ = h * nc;
+      final int h_ = height * nc;
       if (x_1 >= 0) {
-        sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
+        sum = table[xw_yh_zd - width - h_] - table[xw_yh_zd - width];
       }
       sum -= table[xw_yh_zd - h_];
     } else if (x_1 >= 0) {
-      sum = -table[xw_yh_zd - w];
+      sum = -table[xw_yh_zd - width];
     }
     return sum + table[xw_yh_zd];
   }
 
   /**
-   * Compute the sum of the region using the precomputed rolling sum table. Assumes x+w,y+h,z+d will
-   * not overflow!
+   * Compute the sum of the region using the precomputed rolling sum table. Assumes
+   * x+width,y+height,z+depth will not overflow!
    *
    * @param table the rolling sum table
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @return the sum
    */
-  public double computeSumFast(double[] table, int x, int y, int z, int w, int h, int d) {
-    if (w <= 0 || h <= 0 || d <= 0 || x >= nc || y >= nr || z >= ns) {
+  public double computeSumFast(double[] table, int x, int y, int z, int width, int height,
+      int depth) {
+    if (width <= 0 || height <= 0 || depth <= 0 || x >= nc || y >= nr || z >= ns) {
       return 0;
     }
 
     // Compute sum from rolling sum using:
-    // sum(x,y,z,w,h,d) =
-    // + s(x+w-1,y+h-1,z+d-1)
-    // - s(x-1,y+h-1,z+d-1)
-    // - s(x+w-1,y-1,z+d-1)
-    // + s(x-1,y-1,z+d-1)
+    // sum(x,y,z,width,height,depth) =
+    // + s(x+width-1,y+height-1,z+depth-1)
+    // - s(x-1,y+height-1,z+depth-1)
+    // - s(x+width-1,y-1,z+depth-1)
+    // + s(x-1,y-1,z+depth-1)
     // /* Stack above must be subtracted so reverse sign*/
-    // - s(x+w-1,y+h-1,z-1)
-    // + s(x-1,y+h-1,z-1)
-    // + s(x+w-1,y-1,z-1)
+    // - s(x+width-1,y+height-1,z-1)
+    // + s(x-1,y+height-1,z-1)
+    // + s(x+width-1,y-1,z-1)
     // - s(x-1,y-1,z-1)
     // Note:
     // s(i,j,k) = 0 when either i,j,k < 0
@@ -1008,81 +1026,82 @@ public abstract class Image3D {
     // j = jmax when j>jmax
     // k = kmax when k>kmax
 
-    // Compute bounds assuming w,h,d is small and positive.
-    int x_1;
-    int y_1;
-    int z_1;
-    int x_w_1;
-    int y_h_1;
-    int z_d_1;
+    // Compute bounds assuming width,height,depth is small and positive.
+    int x1;
+    int y1;
+    int z1;
+    int xw1;
+    int yh1;
+    int zd1;
     if (x < 0) {
-      x_1 = 0;
-      x_w_1 = MathUtils.clip(0, nc, x + w);
+      x1 = 0;
+      xw1 = MathUtils.clip(0, nc, x + width);
     } else {
-      x_1 = x;
-      x_w_1 = Math.min(nc, x + w);
+      x1 = x;
+      xw1 = Math.min(nc, x + width);
     }
-    w = x_w_1 - x_1;
-    if (w == 0) {
+    width = xw1 - x1;
+    if (width == 0) {
       return 0;
     }
     if (y < 0) {
-      y_1 = 0;
-      y_h_1 = MathUtils.clip(0, nr, y + h);
+      y1 = 0;
+      yh1 = MathUtils.clip(0, nr, y + height);
     } else {
-      y_1 = y;
-      y_h_1 = Math.min(nr, y + h);
+      y1 = y;
+      yh1 = Math.min(nr, y + height);
     }
-    h = y_h_1 - y_1;
-    if (h == 0) {
+    height = yh1 - y1;
+    if (height == 0) {
       return 0;
     }
     if (z < 0) {
-      z_1 = 0;
-      z_d_1 = MathUtils.clip(0, ns, z + d);
+      z1 = 0;
+      zd1 = MathUtils.clip(0, ns, z + depth);
     } else {
-      z_1 = z;
-      z_d_1 = Math.min(ns, z + d);
+      z1 = z;
+      zd1 = Math.min(ns, z + depth);
     }
-    d = z_d_1 - z_1;
-    if (d == 0) {
+    depth = zd1 - z1;
+    if (depth == 0) {
       return 0;
     }
 
     // Adjust for the -1
-    x_1--;
-    y_1--;
-    z_1--;
-    x_w_1--;
-    y_h_1--;
-    z_d_1--;
+    x1--;
+    y1--;
+    z1--;
+    xw1--;
+    yh1--;
+    zd1--;
 
-    // This has been ordered to use the smallest sums first (i.e. closer to x,y,z than x+w,y+h,z+d)
-    final int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
-    if (z_1 >= 0) {
-      final int xw_yh_z = xw_yh_zd - d * nr_by_nc;
+    // This has been ordered to use the smallest sums first (i.e. closer to x,y,z than
+    // x+width,y+height,z+depth)
+    final int xw_yh_zd = index(xw1, yh1, zd1);
+    if (z1 >= 0) {
+      final int xw_yh_z = xw_yh_zd - depth * nrByNc;
       double sum = 0;
-      if (y_1 >= 0) {
-        final int h_ = h * nc;
-        if (x_1 >= 0) {
-          sum = table[xw_yh_zd - w - h_] - table[xw_yh_z - w - h_] - table[xw_yh_zd - w]
-              + table[xw_yh_z - w];
+      if (y1 >= 0) {
+        final int h_ = height * nc;
+        if (x1 >= 0) {
+          sum = table[xw_yh_zd - width - h_] - table[xw_yh_z - width - h_] - table[xw_yh_zd - width]
+              + table[xw_yh_z - width];
         }
         sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
-      } else if (x_1 >= 0) {
-        sum = table[xw_yh_z - w] - table[xw_yh_zd - w];
+      } else if (x1 >= 0) {
+        sum = table[xw_yh_z - width] - table[xw_yh_zd - width];
       }
       return sum + table[xw_yh_zd] - table[xw_yh_z];
     }
     double sum = 0;
-    if (y_1 >= 0) {
-      final int h_ = h * nc;
-      if (x_1 >= 0) {
-        sum = table[xw_yh_zd - w - h_] - table[xw_yh_zd - w];
+    if (y1 >= 0) {
+      final int h_ = height * nc;
+      if (x1 >= 0) {
+        sum = table[xw_yh_zd - width - h_] - table[xw_yh_zd - width];
       }
       sum -= table[xw_yh_zd - h_];
-    } else if (x_1 >= 0) {
-      sum = -table[xw_yh_zd - w];
+    } else if (x1 >= 0) {
+      sum = -table[xw_yh_zd - width];
     }
     return sum + table[xw_yh_zd];
   }
@@ -1102,27 +1121,27 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @param value the value
    */
-  public void fill(int x, int y, int z, int w, int h, int d, double value) {
-    final int[] intersect = computeIntersect(x, y, z, w, h, d);
-    w = intersect[3];
-    h = intersect[4];
-    d = intersect[5];
+  public void fill(int x, int y, int z, int width, int height, int depth, double value) {
+    final int[] intersect = computeIntersect(x, y, z, width, height, depth);
+    width = intersect[3];
+    height = intersect[4];
+    depth = intersect[5];
     // Recheck bounds
-    if (w == 0 || h == 0 || d == 0) {
+    if (width == 0 || height == 0 || depth == 0) {
       return;
     }
     x = intersect[0];
     y = intersect[1];
     z = intersect[2];
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        fill(base, w, value);
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        fill(base, width, value);
         base += nc;
       }
     }
@@ -1131,11 +1150,11 @@ public abstract class Image3D {
   /**
    * Fill with the given value from the given index.
    *
-   * @param i the index
+   * @param index the index
    * @param size the size to fill
    * @param value the value
    */
-  protected abstract void fill(int i, int size, double value);
+  protected abstract void fill(int index, int size, double value);
 
   /**
    * Fill outside the region. If the region is not within the image then the entire image is filled.
@@ -1143,18 +1162,18 @@ public abstract class Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @param value the value
    */
-  public void fillOutside(int x, int y, int z, int w, int h, int d, double value) {
-    final int[] intersect = computeIntersect(x, y, z, w, h, d);
-    w = intersect[3];
-    h = intersect[4];
-    d = intersect[5];
+  public void fillOutside(int x, int y, int z, int width, int height, int depth, double value) {
+    final int[] intersect = computeIntersect(x, y, z, width, height, depth);
+    width = intersect[3];
+    height = intersect[4];
+    depth = intersect[5];
     // Recheck bounds
-    if (w == 0 || h == 0 || d == 0) {
+    if (width == 0 || height == 0 || depth == 0) {
       fill(value);
       return;
     }
@@ -1164,24 +1183,24 @@ public abstract class Image3D {
 
     // Before
     if (z > 0) {
-      fill(0, z * nr_by_nc, value);
+      fill(0, z * nrByNc, value);
     }
     // After
-    if (z + d < ns) {
-      fill((z + d) * nr_by_nc, (ns - z - d) * nr_by_nc, value);
+    if (z + depth < ns) {
+      fill((z + depth) * nrByNc, (ns - z - depth) * nrByNc, value);
     }
 
-    final int y_p_h = y + h;
+    final int y_p_h = y + height;
     final int fillYBefore = y * nc;
     final int yAfter = y_p_h * nc;
     final int fillYAfter = (nr - y_p_h) * nc;
 
-    final int x_p_w = x + w;
+    final int x_p_w = x + width;
     final int fillXBefore = x;
     final int fillXAfter = (nc - x_p_w);
 
-    for (int s = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc;
+    for (int s = 0; s < depth; s++, z++) {
+      int base = z * nrByNc;
 
       if (fillYBefore != 0) {
         fill(base, fillYBefore, value);
@@ -1192,7 +1211,7 @@ public abstract class Image3D {
 
       base += fillYBefore;
 
-      for (int r = 0; r < h; r++) {
+      for (int r = 0; r < height; r++) {
         if (fillXBefore != 0) {
           fill(base, fillXBefore, value);
         }

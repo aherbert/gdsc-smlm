@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
 
 import ij.process.ImageProcessor;
@@ -34,12 +35,17 @@ import java.awt.Rectangle;
  * Contains methods for converting an image to float data. Simple wrapper around
  * uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
  */
-public class IJImageConverter {
+public final class IJImageConverter {
   /**
    * The instance that does the conversion. This can be manipulated for different RGB colour
    * conversions.
    */
   public static final ImageConverter IMAGE_CONVERTER = new ImageConverter();
+
+  /**
+   * No public construction.
+   */
+  private IJImageConverter() {}
 
   /**
    * Get the data from the image processor as a float array (include cropping to the ROI).
@@ -63,10 +69,6 @@ public class IJImageConverter {
    * @return The float array data
    */
   public static float[] getData(ImageProcessor ip, float[] buffer) {
-    if (ip == null) {
-      return null;
-    }
-
     return getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), ip.getRoi(), buffer);
   }
 
@@ -80,16 +82,31 @@ public class IJImageConverter {
    * <p>If the object pixels array is incorrect size (it should be width*height) then null will be
    * returned.
    *
-   * @param oPixels the pixels object
+   * @param pixels the pixels object
    * @param width the width
    * @param height the height
    * @param bounds the bounds
    * @param buffer the buffer
    * @return The float array data
    */
-  public static float[] getData(final Object oPixels, final int width, final int height,
+  public static float[] getData(final Object pixels, final int width, final int height,
       final Rectangle bounds, float[] buffer) {
-    return IMAGE_CONVERTER.getData(oPixels, width, height, bounds, buffer);
+    return IMAGE_CONVERTER.getData(pixels, width, height, bounds, buffer);
+  }
+
+  /**
+   * Get the data from the image pixels as a float array. Data is not duplicated if the input is
+   * already a float array unless a buffer is provided.
+   *
+   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
+   * than the pixels array. If smaller then a new buffer will be created.
+   *
+   * @param pixels the pixels
+   * @param buffer the buffer
+   * @return The float array data
+   */
+  public static float[] getData(final Object pixels, float[] buffer) {
+    return IMAGE_CONVERTER.getData(pixels, buffer);
   }
 
   /**
@@ -103,11 +120,7 @@ public class IJImageConverter {
    * @param buffer the buffer
    * @return The double array data
    */
-  public static double[] getDoubleData(ImageProcessor ip, double[] buffer) {
-    if (ip == null) {
-      return null;
-    }
-
+  public static @Nullable double[] getDoubleData(ImageProcessor ip, double[] buffer) {
     return getDoubleData(ip.getPixels(), ip.getWidth(), ip.getHeight(), ip.getRoi(), buffer);
   }
 
@@ -121,30 +134,15 @@ public class IJImageConverter {
    * <p>If the object pixels array is incorrect size (it should be width*height) then null will be
    * returned.
    *
-   * @param oPixels the pixels object
+   * @param pixels the pixels object
    * @param width the width
    * @param height the height
    * @param bounds the bounds
    * @param buffer the buffer
    * @return The double array data
    */
-  public static double[] getDoubleData(final Object oPixels, final int width, final int height,
+  public static double[] getDoubleData(final Object pixels, final int width, final int height,
       final Rectangle bounds, double[] buffer) {
-    return IMAGE_CONVERTER.getDoubleData(oPixels, width, height, bounds, buffer);
-  }
-
-  /**
-   * Get the data from the image pixels as a float array. Data is not duplicated if the input is
-   * already a float array unless a buffer is provided.
-   *
-   * <p>Allows reuse of an existing buffer if provided. This will not be truncated if it is larger
-   * than the pixels array. If smaller then a new buffer will be created.
-   *
-   * @param oPixels the pixels
-   * @param buffer the buffer
-   * @return The float array data
-   */
-  public static float[] getData(final Object oPixels, float[] buffer) {
-    return IMAGE_CONVERTER.getData(oPixels, buffer);
+    return IMAGE_CONVERTER.getDoubleData(pixels, width, height, bounds, buffer);
   }
 }

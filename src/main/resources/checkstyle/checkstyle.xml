@@ -89,14 +89,14 @@
     </module>
     <module name="MemberName">
       <!-- Allow single characters x,y,z for numerical functions, e.g. xPosition -->
-      <property name="format" value="^(([a-z][a-z0-9])|([xyz]))[a-zA-Z0-9]*$" />
+      <property name="format" value="^([a-z][a-z0-9]|[xyz])[a-zA-Z0-9]*$" />
       <message key="name.invalidPattern" value="Member name ''{0}'' must match pattern ''{1}''." />
     </module>
     <module name="ParameterName">
       <!-- Allow single characters x,y,z for numerical functions, e.g. xPosition -->
       <!-- Allow single characters a,n for numerical functions, e.g. function.initialise(a). -->
       <!-- The use of a,n should be removed in the future. -->
-      <property name="format" value="^((([a-z][a-z0-9])|([xyz]))[a-zA-Z0-9]*)|[an]$" />
+      <property name="format" value="^([a-z][a-z0-9]|[xyz])[a-zA-Z0-9]*$|^[an]$" />
       <message key="name.invalidPattern" value="Parameter name ''{0}'' must match pattern ''{1}''." />
     </module>
     <module name="CatchParameterName">
@@ -105,7 +105,8 @@
     </module>
     <module name="LocalVariableName">
       <property name="tokens" value="VARIABLE_DEF" />
-      <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$" />
+      <!-- Allow single characters x,y,z for numerical functions -->
+      <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$|^[xyz]$" />
       <property name="allowOneCharVarInForLoop" value="true" />
       <message key="name.invalidPattern" value="Local variable name ''{0}'' must match pattern ''{1}''." />
     </module>

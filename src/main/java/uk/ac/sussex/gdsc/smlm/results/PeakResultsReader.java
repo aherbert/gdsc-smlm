@@ -265,9 +265,9 @@ public class PeakResultsReader {
       readEndFrame = header.contains("\tEnd ");
       deviations = header.contains("\t+/-\t");
       readSource = header.contains("Source\t");
-    }
-    // Check for Nikon NSTORM header
-    else if (header.contains("Channel Name")) {
+
+      // Check for Nikon NSTORM header
+    } else if (header.contains("Channel Name")) {
       format = FileFormat.NSTORM;
     } else if (header.contains("<localizations ")) {
       // RapidSTORM can use the MALK format
@@ -277,9 +277,9 @@ public class PeakResultsReader {
         // There may be many other formats for RapidSTORM. Just support the one we know about.
         format = FileFormat.RAPID_STORM;
       }
-    }
-    // Check for MALK format: X,Y,T,Signal
-    else if (isMALKFormat(firstLine)) {
+
+      // Check for MALK format: X,Y,T,Signal
+    } else if (isMALKFormat(firstLine)) {
       format = FileFormat.MALK;
     } else {
       format = FileFormat.UNKNOWN;
@@ -809,8 +809,8 @@ public class PeakResultsReader {
 
         int c = 0;
         final boolean convert = smlmVersion == 1;
-        while (true) // Halted by the EOFException
-        {
+        // Halted by the EOFException
+        while (true) {
           // Note: Reading single strips seems fast enough at the moment.
           // This could be modified to read larger blocks of data if necessary.
 

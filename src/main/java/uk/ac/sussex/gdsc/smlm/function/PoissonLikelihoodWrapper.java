@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
+//@formatter:off
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson
  * distribution:
@@ -35,9 +36,15 @@ import org.apache.commons.math3.util.FastMath;
  * f(x) = l(x) - k * ln(l(x)) + log(k!)
  * </pre>
  *
- * Where: <ul> <li>l(x) is the function (expected) value <li>k is the observed value </ul> The
- * negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or
- * for a chosen observed value.
+ * <p>Where:
+ *
+ * <ul>
+ * <li>l(x) is the function (expected) value
+ * <li>k is the observed value
+ * </ul>
+ *
+ * <p>The negative log-likelihood (and gradient) can be evaluated over the entire set of observed
+ * values or for a chosen observed value.
  *
  * <p>To allow a likelihood to be computed when the function predicts negative count data, the
  * function prediction is set to {@link Double#MIN_VALUE}. This can be disabled.
@@ -48,12 +55,18 @@ import org.apache.commons.math3.util.FastMath;
  * PMF(l, k) = C * e ^ -l * l ^ x / gamma(k + 1)
  * </pre>
  *
- * with: <ul> <li>l = the function (expected) value <li>gamma = the gamma function <li>C = a
- * normalising constant </ul>
+ * <p>with:
  *
- * The normalising constant is used to ensure the PMF sums to 1. However it is omitted in this
+ * <ul>
+ * <li>l = the function (expected) value
+ * <li>gamma = the gamma function
+ * <li>C = a normalising constant
+ * </ul>
+ *
+ * <p>The normalising constant is used to ensure the PMF sums to 1. However it is omitted in this
  * implementation for speed. The PMF sums to approximately 1 for {@code l>=4}.
  */
+//@formatter:on
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
   private final boolean integerData;
   private final double sumLogFactorialK;

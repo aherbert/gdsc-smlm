@@ -1776,8 +1776,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     // System.out.println(spotFilter.getDescription());
 
     // Extract all the results in memory into a list per frame. This can be cached
-    if (lastId != simulationParameters.id) // || lastRelativeDistances != relativeDistances)
-    {
+    if (lastId != simulationParameters.id) {
       // Always use float coordinates.
       // The Worker adds a pixel offset for the spot coordinates.
       final TIntObjectHashMap<ArrayList<Coordinate>> coordinates =

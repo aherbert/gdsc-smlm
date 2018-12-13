@@ -88,18 +88,24 @@ public class DoubleDHT2D extends DoubleImage2D {
   }
 
   /**
-   * Return a copy of the 2D discrete Hartley transform.
+   * Copy constructor.
    *
-   * @return the copy
+   * @param source the source
    */
+  protected DoubleDHT2D(DoubleDHT2D source) {
+    super(source);
+    isFrequencyDomain = source.isFrequencyDomain;
+    dht = source.dht;
+    h2e = source.h2e;
+    h2o = source.h2o;
+    mag = source.mag;
+    jj = source.jj;
+  }
+
+  /** {@inheritDoc} */
   @Override
   public DoubleDHT2D copy() {
-    final DoubleDHT2D copy = new DoubleDHT2D(nc, nr, data.clone(), isFrequencyDomain, dht);
-    copy.h2e = h2e;
-    copy.h2o = h2o;
-    copy.jj = jj;
-    copy.mag = mag;
-    return copy;
+    return new DoubleDHT2D(this);
   }
 
   /**
@@ -154,9 +160,9 @@ public class DoubleDHT2D extends DoubleImage2D {
       final double[] h2e = new double[h2.length];
       final double[] h2o = new double[h2e.length];
       final int[] jj = new int[h2e.length];
-      for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r) {
-        for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
-          final int j = nr_m_r * nc + nc_m_c;
+      for (int r = 0, nrMinusR = 0, i = 0; r < nr; r++, nrMinusR = nr - r) {
+        for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
+          final int j = nrMinusR * nc + ncMinusC;
           h2e[i] = (h2[i] + h2[j]) / 2.0;
           h2o[i] = (h2[i] - h2[j]) / 2.0;
           jj[i] = j;
@@ -262,14 +268,14 @@ public class DoubleDHT2D extends DoubleImage2D {
       tmp = new double[h1.length];
     }
 
-    for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r) {
-      for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int r = 0, nrMinusR = 0, i = 0; r < nr; r++, nrMinusR = nr - r) {
+      for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
         // This is actually doing for 2D data stored as x[rows][columns]
         // https://en.wikipedia.org/wiki/Discrete_Hartley_transform
         // h2e = (h2[r][c] + h2[Nr-r][Nr-c]) / 2;
         // h2o = (h2[r][c] - h2[Nr-r][Nr-c]) / 2;
         // tmp[r][c] =(h1[r][c] * h2e + h1[Nr-r][Nc-c] * h2o);
-        final int j = nr_m_r * nc + nc_m_c;
+        final int j = nrMinusR * nc + ncMinusC;
         final double h2e = (h2[i] + h2[j]) / 2.0;
         final double h2o = (h2[i] - h2[j]) / 2.0;
         tmp[i] = (h1[i] * h2e + h1[j] * h2o);
@@ -346,9 +352,9 @@ public class DoubleDHT2D extends DoubleImage2D {
       tmp = new double[h1.length];
     }
 
-    for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r) {
-      for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
-        final int j = nr_m_r * nc + nc_m_c;
+    for (int r = 0, nrMinusR = 0, i = 0; r < nr; r++, nrMinusR = nr - r) {
+      for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
+        final int j = nrMinusR * nc + ncMinusC;
         final double h2e = (h2[i] + h2[j]) / 2.0;
         final double h2o = (h2[i] - h2[j]) / 2.0;
         // As per multiply but reverse the addition sign for the conjugate
@@ -429,10 +435,10 @@ public class DoubleDHT2D extends DoubleImage2D {
       tmp = new double[h1.length];
     }
 
-    for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r) {
-      for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int r = 0, nrMinusR = 0, i = 0; r < nr; r++, nrMinusR = nr - r) {
+      for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
         // This is a copy of the divide operation in ij.process.FHT
-        final int j = nr_m_r * nc + nc_m_c;
+        final int j = nrMinusR * nc + ncMinusC;
         final double h2i = h2[i];
         final double h2j = h2[j];
         double mag = h2i * h2i + h2j * h2j;
@@ -480,9 +486,8 @@ public class DoubleDHT2D extends DoubleImage2D {
     if (dht.nr != nr || dht.nc != nc) {
       throw new IllegalArgumentException("Dimension mismatch");
     }
-    if (!dht.isFrequencyDomain || !isFrequencyDomain) {
-      throw new IllegalArgumentException("Require frequency domain DHT");
-    }
+    DhtHelper.checkFrequencyDomain(dht.isFrequencyDomain);
+    DhtHelper.checkFrequencyDomain(isFrequencyDomain);
   }
 
   /**
@@ -498,9 +503,7 @@ public class DoubleDHT2D extends DoubleImage2D {
    *      wiki/Hartley_transform#Relation_to_Fourier_transform</a>
    */
   public DoubleImage2D[] toDFT(double[] real, double[] imaginary) {
-    if (!isFrequencyDomain) {
-      throw new IllegalArgumentException("Require frequency domain DHT");
-    }
+    DhtHelper.checkFrequencyDomain(isFrequencyDomain);
 
     final double[] h1 = this.data;
     if (real == null || real.length != h1.length) {
@@ -510,10 +513,10 @@ public class DoubleDHT2D extends DoubleImage2D {
       imaginary = new double[h1.length];
     }
 
-    for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r) {
-      for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int r = 0, nrMinusR = 0, i = 0; r < nr; r++, nrMinusR = nr - r) {
+      for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
         // This is a copy of the getComplexTransform operation in ij.process.FHT
-        final int j = nr_m_r * nc + nc_m_c;
+        final int j = nrMinusR * nc + ncMinusC;
         real[i] = (h1[i] + h1[j]) * 0.5;
         imaginary[i] = (-h1[i] + h1[j]) * 0.5;
       }
@@ -546,9 +549,9 @@ public class DoubleDHT2D extends DoubleImage2D {
     final int nc = real.nc;
     final int nr = real.nr;
 
-    for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r) {
-      for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
-        final int j = nr_m_r * nc + nc_m_c;
+    for (int r = 0, nrMinusR = 0, i = 0; r < nr; r++, nrMinusR = nr - r) {
+      for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
+        final int j = nrMinusR * nc + ncMinusC;
         // Reverse the toDFT() method
         // re = (a+b)/2
         // im = (-a+b)/2
@@ -571,19 +574,17 @@ public class DoubleDHT2D extends DoubleImage2D {
    * @throws IllegalArgumentException if not in the frequency domain
    */
   public DoubleImage2D getAbsoluteValue(double[] tmp) {
-    if (!isFrequencyDomain) {
-      throw new IllegalArgumentException("Require frequency domain DHT");
-    }
+    DhtHelper.checkFrequencyDomain(isFrequencyDomain);
 
     final double[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new double[h1.length];
     }
 
-    for (int r = 0, nr_m_r = 0, i = 0; r < nr; r++, nr_m_r = nr - r) {
-      for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int r = 0, nrMinusR = 0, i = 0; r < nr; r++, nrMinusR = nr - r) {
+      for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
         // This is a copy of the amplitude operation in ij.process.FHT
-        final int j = nr_m_r * nc + nc_m_c;
+        final int j = nrMinusR * nc + ncMinusC;
         tmp[i] = Math.sqrt(h1[i] * h1[i] + h1[j] * h1[j]);
       }
     }
@@ -627,18 +628,18 @@ public class DoubleDHT2D extends DoubleImage2D {
       throw new IllegalArgumentException("Require even dimensions");
     }
 
-    final int ny_2 = ny / 2;
-    final int nx_2 = nx / 2;
+    final int nyOver2 = ny / 2;
+    final int nxOver2 = nx / 2;
 
     final double[] tmp = new double[nx];
-    final double[] a = image.getData();
+    final double[] pixels = image.getData();
 
     //@formatter:off
     // We swap: 0 <=> nx_2, 0 <=> ny_2
     // 1 <=> 3
-    swap(a, a, nx, nx_2,    0,    0, ny_2, nx_2, ny_2, tmp);
+    swap(pixels, pixels, nx, nxOver2, 0,       0, nyOver2, nxOver2, nyOver2, tmp);
     // 2 <=> 4
-    swap(a, a, nx,    0,    0, nx_2, ny_2, nx_2, ny_2, tmp);
+    swap(pixels, pixels, nx,       0, 0, nxOver2, nyOver2, nxOver2, nyOver2, tmp);
     //@formatter:on
   }
 
@@ -647,25 +648,25 @@ public class DoubleDHT2D extends DoubleImage2D {
    *
    * <p>No bounds checks are performed so use with care!
    *
-   * @param a the a pixels
-   * @param b the b pixels (must match a.length)
+   * @param apixels the a pixels
+   * @param bpixels the b pixels (must match a.length)
    * @param width the width of each set of pixels
    * @param ax the x origin from a
    * @param ay the y origin from a
    * @param bx the x origin from b
    * @param by the b origin from b
-   * @param w the width of the rectangle to swap
-   * @param h the height of the rectangle to swap
+   * @param rw the width of the rectangle to swap
+   * @param rh the height of the rectangle to swap
    * @param tmp the tmp buffer (must be at least width in length)
    */
-  public static void swap(double[] a, double[] b, int width, int ax, int ay, int bx, int by, int w,
-      int h, double[] tmp) {
-    for (int ayy = ay + h, byy = by + h - 1; ayy-- > ay; byy--) {
+  public static void swap(double[] apixels, double[] bpixels, int width, int ax, int ay, int bx,
+      int by, int rw, int rh, double[] tmp) {
+    for (int ayy = ay + rh, byy = by + rh - 1; ayy-- > ay; byy--) {
       final int ai = ayy * width + ax;
       final int bi = byy * width + bx;
-      System.arraycopy(a, ai, tmp, 0, w);
-      System.arraycopy(b, bi, a, ai, w);
-      System.arraycopy(tmp, 0, b, bi, w);
+      System.arraycopy(apixels, ai, tmp, 0, rw);
+      System.arraycopy(bpixels, bi, apixels, ai, rw);
+      System.arraycopy(tmp, 0, bpixels, bi, rw);
     }
   }
 }

@@ -205,7 +205,7 @@ public class DriftCalculator implements PlugIn {
     int from;
     int to;
 
-    public ImageTranslator(ImageProcessor[] images, ImageProcessor[] ip, double dx[], double dy[],
+    public ImageTranslator(ImageProcessor[] images, ImageProcessor[] ip, double[] dx, double[] dy,
         int from, int to) {
       this.images = images;
       this.ip = ip;

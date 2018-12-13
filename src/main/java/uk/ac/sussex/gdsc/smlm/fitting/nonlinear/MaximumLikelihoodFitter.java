@@ -590,7 +590,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // So our bracketing step should be a minimum of 1 / average length of the first gradient
         // vector to prevent
         // the first step being too large when bracketing.
-        final double gradient[] = new double[startPoint.length];
+        final double[] gradient = new double[startPoint.length];
         maximumLikelihoodFunction.likelihood(startPoint, gradient);
         double l = 0;
         for (final double d : gradient) {

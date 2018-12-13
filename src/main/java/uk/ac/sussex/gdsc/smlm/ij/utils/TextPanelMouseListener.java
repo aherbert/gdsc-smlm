@@ -26,14 +26,14 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.text.TextPanel;
 
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 /**
  * Attaches to a text panel and listens for mouse events. Responds to double click on a single line
  * or a selection of multiple lines.
  */
-public abstract class TextPanelMouseListener implements MouseListener {
+public abstract class TextPanelMouseListener extends MouseAdapter {
   /** The text panel. */
   protected TextPanel textPanel;
 
@@ -82,17 +82,6 @@ public abstract class TextPanelMouseListener implements MouseListener {
    */
   public abstract void selected(int selectedIndex);
 
-  /** {@inheritDoc} */
-  @Override
-  public void mousePressed(MouseEvent event) {
-    final int index = textPanel.getSelectionStart();
-    final int index2 = textPanel.getSelectionEnd();
-    if (index == index2) {
-      return;
-    }
-    selected(textPanel.getSelectionStart(), textPanel.getSelectionEnd());
-  }
-
   /**
    * Triggered when multiple lines from the panel have been selected.
    *
@@ -103,19 +92,12 @@ public abstract class TextPanelMouseListener implements MouseListener {
 
   /** {@inheritDoc} */
   @Override
-  public void mouseReleased(MouseEvent event) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void mouseEntered(MouseEvent event) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void mouseExited(MouseEvent event) {
-    // Ignore
+  public void mousePressed(MouseEvent event) {
+    final int index = textPanel.getSelectionStart();
+    final int index2 = textPanel.getSelectionEnd();
+    if (index == index2) {
+      return;
+    }
+    selected(textPanel.getSelectionStart(), textPanel.getSelectionEnd());
   }
 }

@@ -329,9 +329,8 @@ public class TSFPeakResultsReader {
               paramsStdDev[i] = spot.getParamStdDevs(i);
             }
           }
-        }
-        // Use the standard cluster field for the ID
-        else if (spot.hasCluster()) {
+        } else if (spot.hasCluster()) {
+          // Use the standard cluster field for the ID
           id = spot.getCluster();
         }
 

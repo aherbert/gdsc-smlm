@@ -879,9 +879,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     final int[] allIndices = new int[100];
     final float[] allValues = new float[allIndices.length];
 
-    // Not sure why the image was forced to update with replace
-    // boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
-
     // We add at most 4 indices for each peak
     final int limit = allIndices.length - 4;
 
@@ -912,8 +909,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
 
       npoints++;
 
-      if (nValues > limit) // || replace)
-      {
+      if (nValues > limit) {
         addData(npoints, nValues, allIndices, allValues);
         npoints = 0;
         nValues = 0;
@@ -953,8 +949,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     final int[] allIndices = new int[100];
     final float[] allValues = new float[allIndices.length];
 
-    // boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
-
     // We add at most 4 indices for each peak
     final int limit = allIndices.length - 4;
 
@@ -977,8 +971,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
 
       npoints++;
 
-      if (nValues > limit) // || replace)
-      {
+      if (nValues > limit) {
         addData(npoints, nValues, allIndices, allValues);
         npoints = 0;
         nValues = 0;
@@ -1024,8 +1017,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
    * @param peak the peak
    */
   protected void updateToFrame(int peak) {
-    synchronized (data) // Stop other threads adding more data
-    {
+    // Stop other threads adding more data
+    synchronized (data) {
       int i = 0;
       final ImageStack stack = imp.getStack();
       peak -= rollingWindowSize;
@@ -1082,8 +1075,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     final int[] allIndices = new int[100];
     final float[] allValues = new float[allIndices.length];
 
-    // boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
-
     // We add at most 4 indices for each peak
     final int limit = allIndices.length - 4;
 
@@ -1113,8 +1104,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
 
       npoints++;
 
-      if (nValues > limit) // || replace)
-      {
+      if (nValues > limit) {
         addData(npoints, nValues, allIndices, allValues);
         npoints = 0;
         nValues = 0;

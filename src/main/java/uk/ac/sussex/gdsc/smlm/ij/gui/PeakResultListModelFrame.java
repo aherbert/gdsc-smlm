@@ -60,12 +60,8 @@ public class PeakResultListModelFrame extends JFrame {
     private static final long serialVersionUID = 1998620838894273028L;
 
     @Override
-    public Component getListCellRendererComponent(JList<? extends PeakResult> list, // the list
-        PeakResult value, // value to display
-        int index, // cell index
-        boolean isSelected, // is the cell selected
-        boolean cellHasFocus) // does the cell have focus
-    {
+    public Component getListCellRendererComponent(JList<? extends PeakResult> list,
+        PeakResult value, int index, boolean isSelected, boolean cellHasFocus) {
       // TODO - Make this a better representation of the Peak Result.
       // Build a configurable layout using the TableResults settings.
       final StringBuilder sb = new StringBuilder();

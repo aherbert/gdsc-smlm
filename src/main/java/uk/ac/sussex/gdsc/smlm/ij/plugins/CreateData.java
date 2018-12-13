@@ -4664,9 +4664,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
                   + "the pixel pitch if fitting of the data is to be performed (i.e. fitting requires the "
                   + "astigmatism model to be calibrated to the image). If not then the model will be "
                   + "optionally converted before the simulation.", 80));
-        }
-        // Get the width of the model
-        else {
+        } else {
+          // Get the width of the model
           type = 2;
           egd.addNumericField("Depth-of-focus (nm)", settings.getDepthOfFocus(), 2);
           egd.addCheckbox("Enter_width", settings.getEnterWidth());

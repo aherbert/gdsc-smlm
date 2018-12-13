@@ -104,13 +104,23 @@ import java.util.concurrent.Future;
  * Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed
  * light activation.
  *
- * This plugin is based on the methods described in: Mark Bates, Bo Huang, Graham T. Dempsey,
+ * <p>This plugin is based on the methods described in: Mark Bates, Bo Huang, Graham T. Dempsey,
  * Xiaowei Zhuang (2007). Multicolor Super-Resolution Imaging with Photo-Switchable Fluorescent
  * Probes. Science 317, 1749. DOI: 10.1126/science.1146598.
  */
 public class PulseActivationAnalysis
     implements PlugIn, DialogListener, ActionListener, OptionCollectedListener {
   private String title = "Activation Analysis";
+
+  private static final Correction[] specificCorrection;
+  private static final Correction[] nonSpecificCorrection;
+
+  static {
+    final EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
+    specificCorrection = correction.toArray(new Correction[correction.size()]);
+    correction.remove(Correction.SUBTRACTION);
+    nonSpecificCorrection = correction.toArray(new Correction[correction.size()]);
+  }
 
   private enum Correction {
     //@formatter:off
@@ -135,16 +145,6 @@ public class PulseActivationAnalysis
      * @return the name
      */
     public abstract String getName();
-  }
-
-  private static Correction[] specificCorrection;
-  private static Correction[] nonSpecificCorrection;
-
-  static {
-    final EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
-    specificCorrection = correction.toArray(new Correction[correction.size()]);
-    correction.remove(Correction.SUBTRACTION);
-    nonSpecificCorrection = correction.toArray(new Correction[correction.size()]);
   }
 
   private enum SimulationDistribution {
@@ -298,7 +298,7 @@ public class PulseActivationAnalysis
   private static int[] sim_nMolecules = {1000, 1000, 1000};
   private static SimulationDistribution[] sim_distribution =
       {SimulationDistribution.CIRCLE, SimulationDistribution.LINE, SimulationDistribution.POINT};
-  private static double sim_precision[] = {15, 15, 15}; // nm
+  private static double[] sim_precision = {15, 15, 15}; // nm
   private static int sim_cycles = 1000;
   private static int sim_size = 256;
   private static double sim_nmPerPixel = 100;
@@ -312,18 +312,18 @@ public class PulseActivationAnalysis
 
   // The output. Used for the loop functionality
   private PeakResultsList[] output;
-  private static Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
-  private static String[] MAGNIFICATION;
+  private static final Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
+  private static final String[] MAGNIFICATIONS;
 
   static {
     final ArrayList<String> list = new ArrayList<>();
     for (int i = 1; i <= 256; i *= 2) {
       list.add(Integer.toString(i));
     }
-    MAGNIFICATION = list.toArray(new String[list.size()]);
+    MAGNIFICATIONS = list.toArray(new String[list.size()]);
   }
 
-  private static String magnification = MAGNIFICATION[1];
+  private static String magnification = MAGNIFICATIONS[1];
   private Choice magnificationChoice;
   private Checkbox previewCheckBox;
 
@@ -390,9 +390,6 @@ public class PulseActivationAnalysis
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
     switch (isSimulation()) {
-      case 0:
-        // Most common to not run the simulation
-        break;
       case -1:
         // Cancelled
         return;
@@ -400,6 +397,10 @@ public class PulseActivationAnalysis
         // OK'd
         runSimulation();
         return;
+      case 0:
+      default:
+        // Most common to not run the simulation
+        break;
     }
 
     if (MemoryPeakResults.isMemoryEmpty()) {
@@ -1083,7 +1084,7 @@ public class PulseActivationAnalysis
     final String buttonLabel = "Draw loop";
     gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop view");
     gd.addAndGetButton(buttonLabel, this);
-    magnificationChoice = gd.addAndGetChoice("Magnification", MAGNIFICATION, magnification);
+    magnificationChoice = gd.addAndGetChoice("Magnification", MAGNIFICATIONS, magnification);
 
     gd.addDialogListener(this);
     gd.addOptionCollectedListener(this);
@@ -1985,8 +1986,8 @@ public class PulseActivationAnalysis
     return (float) rand.nextDouble() * sim_size;
   }
 
-  private static boolean outOfBounds(float f) {
-    return f < 0 || f > sim_size;
+  private static boolean outOfBounds(float value) {
+    return value < 0 || value > sim_size;
   }
 
   private void simulateActivations(RandomDataGenerator rdg, float[][][] molecules, int c,

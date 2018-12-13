@@ -268,8 +268,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         } else if (a1.getLog10Mean() < mean) {
           list.add(a1);
           i++;
-        } else // if (a1.getLog10Mean() > mean)
-        {
+        } else {
+          // (a1.getLog10Mean() > mean)
           a2.setLog10Mean(mean);
           a2.setAlpha(alpha[j++]);
           list.add(a2.build());

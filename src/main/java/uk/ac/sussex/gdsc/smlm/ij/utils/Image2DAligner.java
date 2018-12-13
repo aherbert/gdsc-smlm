@@ -43,7 +43,7 @@ import java.util.Arrays;
  *  ( Σ xiyi - nx̄ӯ ) / ( (Σ xi^2 - nx̄^2) (Σ yi^2 - nӯ^2) )^0.5
  * </pre>
  *
- * The summation in the numerator is computed using a conjugate multiplication in the frequency
+ * <p>The summation in the numerator is computed using a conjugate multiplication in the frequency
  * domain. The summation terms are computed using rolling sum tables. Images are converted to the
  * full range of an unsigned 16-bit integer before computation to avoid errors in the rolling sum
  * tables. This should have minimal impact on the correlation value since it is normalised.
@@ -53,50 +53,24 @@ import java.util.Arrays;
  * @see <a href="http://scribblethink.org/Work/nvisionInterface/nip.html">Fast Normalized
  *      Cross-Correlation by J.P. Lewis</a>
  */
-public class Image2DAligner implements Cloneable {
+public class Image2DAligner {
+
+  /**
+   * The limit for the range of the data as an integer.
+   *
+   * <p>When this it too high the sumXy from the DHT conjugate multiplication does not match the sum
+   * from correlation in the spatial domain.
+   *
+   * <p>In theory the largest sumXy should be 2^bits * 2^bits * max integer (the size of the largest
+   * array). 10-bit integer: 2^10 * 2^10 * 2^31 = 2^51. This is smaller than the mantissa of a
+   * double (2^52) so should be represented correctly.
+   */
+  private static final double LIMIT = 1024;
+
   private static final int X = 0;
   private static final int XX = 1;
   private static final int Y = 0;
   private static final int YY = 1;
-
-  private class DHTData {
-    DoubleDHT2D dht;
-    double[] input;
-    double[] s_;
-    double[] ss;
-    // Original dimensions and 2D size
-    int w;
-    int h;
-    int size;
-    // Insert position
-    int ix;
-    int iy;
-
-    DHTData(DoubleDHT2D dht, int w, int h) {
-      setDHT(dht, w, h);
-    }
-
-    void setDHT(DoubleDHT2D dht, int w, int h) {
-      this.dht = dht;
-      s_ = resize(s_);
-      ss = resize(ss);
-      this.w = w;
-      this.h = h;
-      size = w * h;
-      ix = getInsert(dht.nc, w);
-      iy = getInsert(dht.nr, h);
-      // Make storage of the original data optional. It is just used for
-      // the spatial domain correlation check
-      if (isCheckCorrelation()) {
-        input = resize(input);
-      }
-    }
-
-    private double[] resize(double[] data) {
-      return (data == null || data.length != dht.getDataLength()) ? new double[dht.getDataLength()]
-          : data;
-    }
-  }
 
   private double edgeWindow;
   private double relativeThreshold = 1e-6;
@@ -110,7 +84,7 @@ public class Image2DAligner implements Cloneable {
   /** The number of columns (max x) of the discrete Hartley transform. */
   private int nc;
   /** The number of rows by columns of the discrete Hartley transform. */
-  private int nr_by_nc;
+  private int nrByNc;
 
   /** The reference. */
   private DHTData reference;
@@ -125,6 +99,45 @@ public class Image2DAligner implements Cloneable {
   // Allow cached window weights
   private double[] wx;
   private double[] wy;
+
+  private class DHTData {
+    DoubleDHT2D dht;
+    double[] input;
+    double[] sum;
+    double[] sumSq;
+    // Original dimensions and 2D size
+    int width;
+    int height;
+    int size;
+    // Insert position
+    int ix;
+    int iy;
+
+    DHTData(DoubleDHT2D dht, int width, int height) {
+      setDHT(dht, width, height);
+    }
+
+    void setDHT(DoubleDHT2D dht, int width, int height) {
+      this.dht = dht;
+      sum = resize(sum);
+      sumSq = resize(sumSq);
+      this.width = width;
+      this.height = height;
+      size = width * height;
+      ix = getInsert(dht.nc, width);
+      iy = getInsert(dht.nr, height);
+      // Make storage of the original data optional. It is just used for
+      // the spatial domain correlation check
+      if (isCheckCorrelation()) {
+        input = resize(input);
+      }
+    }
+
+    private double[] resize(double[] data) {
+      return (data == null || data.length != dht.getDataLength()) ? new double[dht.getDataLength()]
+          : data;
+    }
+  }
 
   /**
    * Instantiates a new image aligner with a default edge window of 0.25
@@ -143,6 +156,37 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected Image2DAligner(Image2DAligner source) {
+    // Copy what is thread safe
+    edgeWindow = source.edgeWindow;
+    relativeThreshold = source.relativeThreshold;
+    checkCorrelation = source.checkCorrelation;
+    minimumOverlap = source.minimumOverlap;
+    minimumDimensionOverlap = source.minimumDimensionOverlap;
+    fastMultiply = source.fastMultiply;
+    nr = source.nr;
+    nc = source.nc;
+    nrByNc = source.nrByNc;
+    reference = source.reference;
+    wx = source.wx;
+    wy = source.wy;
+  }
+
+  /**
+   * Copy the aligner. This copies the initialised state for use in alignment on multiple threads
+   * concurrently.
+   *
+   * @return the image aligner
+   */
+  public Image2DAligner copy() {
+    return new Image2DAligner(this);
+  }
+
+  /**
    * Sets the reference image and assumes the target image will be the same size.
    *
    * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
@@ -156,24 +200,60 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
+   * Sets the reference image and assumes the target image will be the same size.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
+   *
+   * @param image the image (destructively modified)
+   * @throws IllegalArgumentException If any dimension is less than 2
+   */
+  public void setReference(Image2D image) {
+    setReference(image, image.getWidth(), image.getHeight());
+  }
+
+  /**
    * Sets the reference image and the size of the target image.
    *
    * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
    * within the maximum size of a single array.
    *
    * @param image the image (may be destructively modified)
-   * @param w the width of the target image
-   * @param h the height of the target image
+   * @param width the width of the target image
+   * @param height the height of the target image
    * @throws IllegalArgumentException If any dimension is less than 2
    */
-  public void setReference(ImageProcessor image, int w, int h) {
+  public void setReference(ImageProcessor image, int width, int height) {
     check2D(image);
-    if (w < 2 || h < 2) {
+    if (width < 2 || height < 2) {
       throw new IllegalArgumentException("Require a 2D target image");
     }
-    nc = MathUtils.nextPow2(Math.max(w, image.getWidth()));
-    nr = MathUtils.nextPow2(Math.max(h, image.getHeight()));
-    nr_by_nc = nr * nc;
+    nc = MathUtils.nextPow2(Math.max(width, image.getWidth()));
+    nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
+    nrByNc = nr * nc;
+    // Window and pad the reference
+    setReference(createDHT(image, reference));
+  }
+
+  /**
+   * Sets the reference image and the size of the target image.
+   *
+   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
+   * within the maximum size of a single array.
+   *
+   * @param image the image (may be destructively modified)
+   * @param width the width of the target image
+   * @param height the height of the target image
+   * @throws IllegalArgumentException If any dimension is less than 2
+   */
+  public void setReference(Image2D image, int width, int height) {
+    check2D(image);
+    if (width < 2 || height < 2) {
+      throw new IllegalArgumentException("Require a 2D target image");
+    }
+    nc = MathUtils.nextPow2(Math.max(width, image.getWidth()));
+    nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
+    nrByNc = nr * nc;
     // Window and pad the reference
     setReference(createDHT(image, reference));
   }
@@ -210,6 +290,24 @@ public class Image2DAligner implements Cloneable {
   }
 
   /**
+   * Check the image is 2D and has data.
+   *
+   * @param image the image
+   */
+  private static void check2D(Image2D image) {
+    if (image.getWidth() < 2 || image.getHeight() < 2) {
+      throw new IllegalArgumentException("Require a 2D image");
+    }
+    // Check for data
+    for (int i = 0, size = image.getDataLength(); i < size; i++) {
+      if (image.get(i) != 0) {
+        return;
+      }
+    }
+    throw new IllegalArgumentException("No data in 2D image");
+  }
+
+  /**
    * Creates the DHT.
    *
    * @param image the image
@@ -222,69 +320,115 @@ public class Image2DAligner implements Cloneable {
     }
 
     // Shift mean to 0 with optional window
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    final double[] wx = createXWindow(w);
-    final double[] wy = createYWindow(h);
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    final double[] wx = createXWindow(width);
+    final double[] wy = createYWindow(height);
 
     // We need to compute the weighted centre
     final double[] sum = new double[2];
 
     final float[] pixels = (float[]) image.getPixels();
-    calculateWeightedCentre(pixels, w, h, wx, wy, sum);
+    calculateWeightedCentre(pixels, width, height, wx, wy, sum);
 
     final double shift = sum[0] / sum[1];
 
-    applyWindow(pixels, w, h, wx, wy, shift);
+    applyWindow(pixels, width, height, wx, wy, shift);
 
     DoubleDHT2D dht;
 
     // Pad into the desired data size.
     // We always do this so the data is reused
     double[] dest;
-    if (dhtData == null || dhtData.dht.getDataLength() != nr_by_nc) {
-      dest = new double[nr_by_nc];
+    if (dhtData == null || dhtData.dht.getDataLength() != nrByNc) {
+      dest = new double[nrByNc];
     } else {
       // Re-use space
       dest = dhtData.dht.getData();
       Arrays.fill(dest, 0);
     }
     dht = new DoubleDHT2D(nc, nr, dest, false);
-    final int ix = getInsert(nc, w);
-    final int iy = getInsert(nr, h);
+    final int ix = getInsert(nc, width);
+    final int iy = getInsert(nr, height);
     dht.insert(ix, iy, image);
 
     if (dhtData == null) {
-      dhtData = new DHTData(dht, w, h);
+      dhtData = new DHTData(dht, width, height);
     } else {
-      dhtData.setDHT(dht, w, h);
+      dhtData.setDHT(dht, width, height);
+    }
+
+    return prepareDHT(dhtData);
+  }
+
+  private DHTData createDHT(Image2D image, DHTData dhtData) {
+    // Shift mean to 0 with optional window
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    final double[] wx = createXWindow(width);
+    final double[] wy = createYWindow(height);
+
+    // We need to compute the weighted centre
+    final double[] sum = new double[2];
+
+    calculateWeightedCentre(image, width, height, wx, wy, sum);
+
+    final double shift = sum[0] / sum[1];
+
+    applyWindow(image, width, height, wx, wy, shift);
+
+    // System.out.printf("Sum = %g => %g\n", sum[0], Maths.sum(pixels));
+
+    DoubleDHT2D dht;
+
+    // Pad into the desired data size.
+    // We always do this to handle input of float/double Image2D data.
+    double[] dest;
+    if (dhtData == null || dhtData.dht.getDataLength() != nrByNc) {
+      dest = new double[nrByNc];
+    } else {
+      // Re-use space
+      dest = dhtData.dht.getData();
+      Arrays.fill(dest, 0);
+    }
+    dht = new DoubleDHT2D(nc, nr, dest, false);
+    final int ix = getInsert(nc, width);
+    final int iy = getInsert(nr, height);
+    dht.insert(ix, iy, image);
+
+    if (dhtData == null) {
+      dhtData = new DHTData(dht, width, height);
+    } else {
+      dhtData.setDHT(dht, width, height);
     }
 
     return prepareDHT(dhtData);
   }
 
   private double[] createXWindow(int n) {
-    return wx = createWindow(wx, n);
+    wx = createWindow(wx, n);
+    return wx;
   }
 
   private double[] createYWindow(int n) {
-    return wy = createWindow(wy, n);
+    wy = createWindow(wy, n);
+    return wy;
   }
 
-  private double[] createWindow(double[] w, int n) {
-    if (w == null || w.length != n) {
-      w = ImageWindow.tukey(n, edgeWindow);
+  private double[] createWindow(double[] window, int n) {
+    if (window == null || window.length != n) {
+      return ImageWindow.tukey(n, edgeWindow);
     }
-    return w;
+    return window;
   }
 
   private static void calculateWeightedCentre(float[] image, int maxx, int maxy, double[] wx,
       double[] wy, double[] sum) {
     for (int y = 0, i = 0; y < maxy; y++) {
       for (int x = 0; x < maxx; x++, i++) {
-        final double w = wx[x] * wy[y];
-        sum[0] += image[i] * w;
-        sum[1] += w;
+        final double weight = wx[x] * wy[y];
+        sum[0] += image[i] * weight;
+        sum[1] += weight;
       }
     }
   }
@@ -293,9 +437,9 @@ public class Image2DAligner implements Cloneable {
       double[] wy, double[] sum) {
     for (int y = 0, i = 0; y < maxy; y++) {
       for (int x = 0; x < maxx; x++, i++) {
-        final double w = wx[x] * wy[y];
-        sum[0] += image.get(i) * w;
-        sum[1] += w;
+        final double weight = wx[x] * wy[y];
+        sum[0] += image.get(i) * weight;
+        sum[1] += weight;
       }
     }
   }
@@ -341,8 +485,8 @@ public class Image2DAligner implements Cloneable {
    */
   private static DHTData prepareDHT(DHTData dhtData) {
     final DoubleDHT2D dht = dhtData.dht;
-    final double[] s_ = dhtData.s_;
-    final double[] ss = dhtData.ss;
+    final double[] sum = dhtData.sum;
+    final double[] sumSq = dhtData.sumSq;
 
     // Note previous versions converted to 10-bit integer data. However the 2D DHT creates very
     // large
@@ -369,38 +513,38 @@ public class Image2DAligner implements Cloneable {
 
     // This has been adapted from Image2D to compute two rolling sum table at once
 
-    double sum_ = 0;
+    double sum1 = 0;
     double sum2 = 0;
-    int i = 0;
+    int index = 0;
     // Initialise first row sum
-    // sum = rolling sum of (0 - colomn)
-    for (int c = 0; c < nc; c++, i++) {
-      final double v = transform(data[i], scale);
-      data[i] = v;
-      sum_ += v;
+    // sum = rolling sum of (0 - column)
+    for (int c = 0; c < nc; c++, index++) {
+      final double v = transform(data[index], scale);
+      data[index] = v;
+      sum1 += v;
       sum2 += v * v;
-      s_[i] = sum_;
-      ss[i] = sum2;
+      sum[index] = sum1;
+      sumSq[index] = sum2;
     }
     // Remaining rows
-    // sum = rolling sum of (0 - colomn) + sum of same position above
+    // sum = rolling sum of (0 - column) + sum of same position above
     for (int r = 1, ii = 0; r < nr; r++) {
-      sum_ = 0;
+      sum1 = 0;
       sum2 = 0;
-      for (int c = 0; c < nc; c++, i++, ii++) {
-        final double v = transform(data[i], scale);
-        data[i] = v;
-        sum_ += v;
+      for (int c = 0; c < nc; c++, index++, ii++) {
+        final double v = transform(data[index], scale);
+        data[index] = v;
+        sum1 += v;
         sum2 += v * v;
         // Add the sum from the previous row
-        s_[i] = sum_ + s_[ii];
-        ss[i] = sum2 + ss[ii];
+        sum[index] = sum1 + sum[ii];
+        sumSq[index] = sum2 + sumSq[ii];
       }
     }
 
     // Store after numerical transform
-    if (dhtData.input != null && dhtData.input.length == ss.length) {
-      System.arraycopy(dht.getData(), 0, dhtData.input, 0, ss.length);
+    if (dhtData.input != null && dhtData.input.length == sumSq.length) {
+      System.arraycopy(dht.getData(), 0, dhtData.input, 0, sumSq.length);
     }
 
     // Transform the data
@@ -408,125 +552,14 @@ public class Image2DAligner implements Cloneable {
     return dhtData;
   }
 
-  /**
-   * The limit for the range of the data as an integer.
-   *
-   * <p>When this it too high the sumXy from the DHT conjugate multiplication does not match the sum
-   * from correlation in the spatial domain.
-   *
-   * <p>In theory the largest sumXy should be 2^bits * 2^bits * max integer (the size of the largest
-   * array). 10-bit integer: 2^10 * 2^10 * 2^31 = 2^51. This is smaller than the mantissa of a
-   * double (2^52) so should be represented correctly.
-   */
-  private static double LIMIT = 1024;
-
-  private static double transform(double f, double scale) {
+  private static double transform(double value, double scale) {
     // Ensure zero is zero
-    if (f == 0.0) {
+    if (value == 0.0) {
       return 0.0;
     }
 
     // Maintain the sign information
-    final double value = f * scale;
-    return Math.round(value); // / scale;
-  }
-
-  /**
-   * Sets the reference image and assumes the target image will be the same size.
-   *
-   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
-   * within the maximum size of a single array.
-   *
-   * @param image the image (destructively modified)
-   * @throws IllegalArgumentException If any dimension is less than 2
-   */
-  public void setReference(Image2D image) {
-    setReference(image, image.getWidth(), image.getHeight());
-  }
-
-  /**
-   * Sets the reference image and the size of the target image.
-   *
-   * <p>The dimension are converted to the next power of 2 for speed. The combined size must fit
-   * within the maximum size of a single array.
-   *
-   * @param image the image (may be destructively modified)
-   * @param w the width of the target image
-   * @param h the height of the target image
-   * @throws IllegalArgumentException If any dimension is less than 2
-   */
-  public void setReference(Image2D image, int w, int h) {
-    check2D(image);
-    if (w < 2 || h < 2) {
-      throw new IllegalArgumentException("Require a 2D target image");
-    }
-    nc = MathUtils.nextPow2(Math.max(w, image.getWidth()));
-    nr = MathUtils.nextPow2(Math.max(h, image.getHeight()));
-    nr_by_nc = nr * nc;
-    // Window and pad the reference
-    setReference(createDHT(image, reference));
-  }
-
-  /**
-   * Check the image is 2D and has data.
-   *
-   * @param image the image
-   */
-  private static void check2D(Image2D image) {
-    if (image.getWidth() < 2 || image.getHeight() < 2) {
-      throw new IllegalArgumentException("Require a 2D image");
-    }
-    // Check for data
-    for (int i = 0, size = image.getDataLength(); i < size; i++) {
-      if (image.get(i) != 0) {
-        return;
-      }
-    }
-    throw new IllegalArgumentException("No data in 2D image");
-  }
-
-  private DHTData createDHT(Image2D image, DHTData dhtData) {
-    // Shift mean to 0 with optional window
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    final double[] wx = createXWindow(w);
-    final double[] wy = createYWindow(h);
-
-    // We need to compute the weighted centre
-    final double[] sum = new double[2];
-
-    calculateWeightedCentre(image, w, h, wx, wy, sum);
-
-    final double shift = sum[0] / sum[1];
-
-    applyWindow(image, w, h, wx, wy, shift);
-
-    // System.out.printf("Sum = %g => %g\n", sum[0], Maths.sum(pixels));
-
-    DoubleDHT2D dht;
-
-    // Pad into the desired data size.
-    // We always do this to handle input of float/double Image2D data.
-    double[] dest;
-    if (dhtData == null || dhtData.dht.getDataLength() != nr_by_nc) {
-      dest = new double[nr_by_nc];
-    } else {
-      // Re-use space
-      dest = dhtData.dht.getData();
-      Arrays.fill(dest, 0);
-    }
-    dht = new DoubleDHT2D(nc, nr, dest, false);
-    final int ix = getInsert(nc, w);
-    final int iy = getInsert(nr, h);
-    dht.insert(ix, iy, image);
-
-    if (dhtData == null) {
-      dhtData = new DHTData(dht, w, h);
-    } else {
-      dhtData.setDHT(dht, w, h);
-    }
-
-    return prepareDHT(dhtData);
+    return Math.round(value * scale); // / scale
   }
 
   /**
@@ -554,9 +587,9 @@ public class Image2DAligner implements Cloneable {
    */
   public double[] align(ImageProcessor image, int refinements) {
     check2D(image);
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    if (w > nc || h > nr) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    if (width > nc || height > nr) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
@@ -589,9 +622,9 @@ public class Image2DAligner implements Cloneable {
    */
   public double[] align(Image2D image, int refinements) {
     check2D(image);
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    if (w > nc || h > nr) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    if (width > nc || height > nr) {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
@@ -625,13 +658,13 @@ public class Image2DAligner implements Cloneable {
     // i.e. the insert point of one will be the middle of the other when shifted.
     int ix = Math.min(reference.ix, target.ix);
     int iy = Math.min(reference.iy, target.iy);
-    int ixw = Math.max(reference.ix + reference.w, target.ix + target.w);
-    int iyh = Math.max(reference.iy + reference.h, target.iy + target.h);
+    int ixw = Math.max(reference.ix + reference.width, target.ix + target.width);
+    int iyh = Math.max(reference.iy + reference.height, target.iy + target.height);
 
     if (minimumDimensionOverlap > 0) {
       final double f = (1 - minimumDimensionOverlap) / 2;
-      final int ux = (int) (Math.round(Math.min(reference.w, target.w) * f));
-      final int uy = (int) (Math.round(Math.min(reference.h, target.h) * f));
+      final int ux = (int) (Math.round(Math.min(reference.width, target.width) * f));
+      final int uy = (int) (Math.round(Math.min(reference.height, target.height) * f));
       ix += ux;
       ixw -= ux;
       iy += uy;
@@ -645,16 +678,15 @@ public class Image2DAligner implements Cloneable {
     // to restrict the bounds for finding the maximum of the normalised correlation
     // which should be close to this.
     int maxi = correlation.findMaxIndex(ix, iy, crop[2], crop[3]);
-    int[] xy = correlation.getXy(maxi);
 
     // Check in the spatial domain
     checkCorrelation(target, correlation, maxi);
 
     // Compute sum from rolling sum using:
-    // sum(x,y,w,h) =
-    // + s(x+w-1,y+h-1)
-    // - s(x-1,y+h-1)
-    // - s(x+w-1,y-1)
+    // sum(x,y,width,height) =
+    // + s(x+width-1,y+height-1)
+    // - s(x-1,y+height-1)
+    // - s(x+width-1,y-1)
     // + s(x-1,y-1)
     // Note:
     // s(i,j) = 0 when either i,j < 0
@@ -678,27 +710,27 @@ public class Image2DAligner implements Cloneable {
     int tx = dx;
     int ty = dy;
 
-    // Precompute the x-1,x+w-1
+    // Precompute the x-1,x+width-1
     final int nx = crop[2];
-    final int[] rx_1 = new int[nx];
-    final int[] rx_w_1 = new int[nx];
-    final int[] tx_1 = new int[nx];
-    final int[] tx_w_1 = new int[nx];
-    final int[] w = new int[nx];
+    final int[] rx1 = new int[nx];
+    final int[] rxw1 = new int[nx];
+    final int[] tx1 = new int[nx];
+    final int[] txw1 = new int[nx];
+    final int[] width = new int[nx];
     for (int c = ix, i = 0; c < ixw; c++, i++) {
-      rx_1[i] = Math.max(-1, rx - 1);
-      rx_w_1[i] = Math.min(nc, rx + nc) - 1;
+      rx1[i] = Math.max(-1, rx - 1);
+      rxw1[i] = Math.min(nc, rx + nc) - 1;
       rx++;
-      tx_1[i] = Math.max(-1, tx - 1);
-      tx_w_1[i] = Math.min(nc, tx + nc) - 1;
+      tx1[i] = Math.max(-1, tx - 1);
+      txw1[i] = Math.min(nc, tx + nc) - 1;
       tx--;
-      w[i] = rx_w_1[i] - rx_1[i];
+      width[i] = rxw1[i] - rx1[i];
     }
 
-    final double[] rs_ = reference.s_;
-    final double[] rss = reference.ss;
-    final double[] ts_ = target.s_;
-    final double[] tss = target.ss;
+    final double[] rs = reference.sum;
+    final double[] rss = reference.sumSq;
+    final double[] ts = target.sum;
+    final double[] tss = target.sumSq;
     final double[] rsum = new double[2];
     final double[] tsum = new double[2];
 
@@ -708,66 +740,66 @@ public class Image2DAligner implements Cloneable {
     double max = 0;
 
     for (int r = iy; r < iyh; r++) {
-      // Compute the y-1,y+h-1
+      // Compute the y-1,y+height-1
       final int ry_1 = Math.max(-1, ry - 1);
       final int ry_h_1 = Math.min(nr, ry + nr) - 1;
       ry++;
       final int ty_1 = Math.max(-1, ty - 1);
       final int ty_h_1 = Math.min(nr, ty + nr) - 1;
       ty--;
-      final int h = ry_h_1 - ry_1;
+      final int height = ry_h_1 - ry_1;
 
       final int base = r * nc;
       for (int c = ix, i = 0; c < ixw; c++, i++) {
         final double sumXy = buffer[base + c];
 
-        compute(rx_1[i], ry_1, rx_w_1[i], ry_h_1, w[i], h, rs_, rss, rsum);
-        compute(tx_1[i], ty_1, tx_w_1[i], ty_h_1, w[i], h, ts_, tss, tsum);
+        compute(rx1[i], ry_1, rxw1[i], ry_h_1, width[i], height, rs, rss, rsum);
+        compute(tx1[i], ty_1, txw1[i], ty_h_1, width[i], height, ts, tss, tsum);
 
         // Compute the correlation
         // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )
 
-        final int n = w[i] * h;
+        final int n = width[i] * height;
         final double numerator = sumXy - (rsum[X] * tsum[Y] / n);
         final double denominator1 = rsum[XX] - (rsum[X] * rsum[X] / n);
         final double denominator2 = tsum[YY] - (tsum[Y] * tsum[Y] / n);
 
-        double R;
+        double corr;
         if (denominator1 == 0 || denominator2 == 0) {
           // If there is data and all the variances are the same then correlation is perfect
           if (rsum[XX] == tsum[YY] && rsum[XX] == sumXy && rsum[XX] > 0) {
-            R = 1;
+            corr = 1;
           } else {
-            R = 0;
+            corr = 0;
           }
         } else {
-          R = numerator / Math.sqrt(denominator1 * denominator2);
+          corr = numerator / Math.sqrt(denominator1 * denominator2);
           // Leave as raw for debugging
           // R = Maths.clip(-1, 1, R);
         }
 
-        buffer[base + c] = R;
+        buffer[base + c] = corr;
 
         if (n < minimumN) {
           continue;
         }
 
-        if (R > 1.0001) // some margin for error
-        {
+        // Check normalisation with some margin for error
+        if (corr > 1.0001) {
           // Normalisation has failed.
           // This occurs when the correlation sum XY is incorrect.
           // The other terms are exact due to the quantisation to integer data.
           // It is likely to occur at the bounds.
 
-          System.out.printf("Bad normalisation [%d,%d] = %g  (overlap=%g)\n", c, r, R,
+          System.out.printf("Bad normalisation [%d,%d] = %g  (overlap=%g)\n", c, r, corr,
               (double) n / size);
           continue;
         }
 
-        if (R > max) {
-          max = R;
+        if (corr > max) {
+          max = corr;
           maxj = base + c;
-        } else if (R == max) {
+        } else if (corr == max) {
           // Get shift from centre
           final int[] xyz1 = correlation.getXy(maxj);
           final int[] xyz2 = correlation.getXy(base + c);
@@ -778,7 +810,7 @@ public class Image2DAligner implements Cloneable {
             d2 += MathUtils.pow2(xyz2[k] - centre[k]);
           }
           if (d2 < d1) {
-            max = R;
+            max = corr;
             maxj = base + c;
           }
         }
@@ -787,7 +819,7 @@ public class Image2DAligner implements Cloneable {
 
     // The maximum correlation with normalisation
     maxi = maxj; // correlation.findMaxIndex(ix, iy, iz, iw - ix, ih - iy, id - iz);
-    xy = correlation.getXy(maxi);
+    final int[] xy = correlation.getXy(maxi);
 
     // Report the shift required to move from the centre of the target image to the reference
     // @formatter:off
@@ -849,12 +881,13 @@ public class Image2DAligner implements Cloneable {
     final int nr_2 = nr / 2;
     final int tx = Math.max(0, xy[0] - nc_2);
     final int ty = Math.max(0, xy[1] - nr_2);
-    final int w = Math.min(nc, xy[0] + nc_2) - tx;
-    final int h = Math.min(nr, xy[1] + nr_2) - ty;
+    final int width = Math.min(nc, xy[0] + nc_2) - tx;
+    final int height = Math.min(nr, xy[1] + nr_2) - ty;
 
     // For the reference we express as a shift relative to the centre
     // and subtract the half-width.
-    // Formally: (nc_2 - xy[0]) // shift
+    // Formally:
+    // (nc_2 - xy[0]) // shift
     // + nc_2 // centre
     // - nc_2 // Half width
     final int rx = Math.max(0, -xy[0] + nc_2);
@@ -862,46 +895,47 @@ public class Image2DAligner implements Cloneable {
 
     final double[] tar = target.input;
     final double[] ref = reference.input;
-    final double o = correlation.get(maxi);
-    double e = 0;
-    for (int y = 0; y < h; y++) {
-      int i = (ty + y) * nc + tx;
-      int j = (ry + y) * nc + rx;
-      for (int x = 0; x < w; x++) {
-        e += tar[i++] * ref[j++];
+    final double frequencyCorrelation = correlation.get(maxi);
+    double spatialCorrelation = 0;
+    for (int y = 0; y < height; y++) {
+      int ti = (ty + y) * nc + tx;
+      int ri = (ry + y) * nc + rx;
+      for (int x = 0; x < width; x++) {
+        spatialCorrelation += tar[ti++] * ref[ri++];
       }
     }
 
     // System.out.printf("Raw %d,%d = %g\n", xy[0], xy[1], o);
 
-    frequencyDomainCorrelationError = DoubleEquality.relativeError(o, e);
+    frequencyDomainCorrelationError =
+        DoubleEquality.relativeError(frequencyCorrelation, spatialCorrelation);
     if (frequencyDomainCorrelationError > 0.05) {
       System.err.printf("2D Correlation Error = %s : Spatial = %s, Freq = %s\n",
-          MathUtils.rounded(frequencyDomainCorrelationError), Double.toString(e),
-          Double.toString(o));
+          MathUtils.rounded(frequencyDomainCorrelationError), Double.toString(spatialCorrelation),
+          Double.toString(frequencyCorrelation));
     }
   }
 
   /**
    * Compute the sum from the rolling sum tables.
    *
-   * @param x_1 the x value -1
-   * @param y_1 the y value -1
-   * @param x_w_1 the x value +w -1
-   * @param y_h_1 the y value +h -1
-   * @param w the width
-   * @param h the height
-   * @param s_ the sum table
-   * @param ss the sum-of-squares table
-   * @param sum the sum (output = [sum, sum-of-squares])
+   * @param x1 the x value -1
+   * @param y1 the y value -1
+   * @param xw1 the x value +width -1
+   * @param yh1 the y value +height -1
+   * @param width the width
+   * @param height the height
+   * @param sum the sum table
+   * @param sumSq the sum-of-squares table
+   * @param result the sum (output = [sum, sum-of-squares])
    */
-  private void compute(int x_1, int y_1, int x_w_1, int y_h_1, int w, int h, double[] s_,
-      double[] ss, double[] sum) {
+  private void compute(int x1, int y1, int xw1, int yh1, int width, int height, double[] sum,
+      double[] sumSq, double[] result) {
     // Compute sum from rolling sum using:
-    // sum(x,y,w,h) =
-    // + s(x+w-1,y+h-1)
-    // - s(x-1,y+h-1)
-    // - s(x+w-1,y-1)
+    // sum(x,y,width,height) =
+    // + s(x+width-1,y+height-1)
+    // - s(x-1,y+height-1)
+    // - s(x+width-1,y-1)
     // + s(x-1,y-1)
     // Note:
     // s(i,j) = 0 when either i,j < 0
@@ -911,23 +945,23 @@ public class Image2DAligner implements Cloneable {
     // This has been adapted from Image2D to compute the twos sums together
 
     // int xw_yh = reference.dht.getIndex(x_w_1, y_h_1);
-    final int xw_yh = y_h_1 * nc + x_w_1;
-    sum[0] = 0;
-    sum[1] = 0;
-    if (y_1 >= 0) {
-      final int h_ = h * nc;
-      if (x_1 >= 0) {
-        sum[0] = s_[xw_yh - w - h_] - s_[xw_yh - w];
-        sum[1] = ss[xw_yh - w - h_] - ss[xw_yh - w];
+    final int xw_yh = yh1 * nc + xw1;
+    result[0] = 0;
+    result[1] = 0;
+    if (y1 >= 0) {
+      final int h_ = height * nc;
+      if (x1 >= 0) {
+        result[0] = sum[xw_yh - width - h_] - sum[xw_yh - width];
+        result[1] = sumSq[xw_yh - width - h_] - sumSq[xw_yh - width];
       }
-      sum[0] -= s_[xw_yh - h_];
-      sum[1] -= ss[xw_yh - h_];
-    } else if (x_1 >= 0) {
-      sum[0] = -s_[xw_yh - w];
-      sum[1] = -ss[xw_yh - w];
+      result[0] -= sum[xw_yh - h_];
+      result[1] -= sumSq[xw_yh - h_];
+    } else if (x1 >= 0) {
+      result[0] = -sum[xw_yh - width];
+      result[1] = -sumSq[xw_yh - width];
     }
-    sum[0] = sum[0] + s_[xw_yh];
-    sum[1] = sum[1] + ss[xw_yh];
+    result[0] = result[0] + sum[xw_yh];
+    result[1] = result[1] + sumSq[xw_yh];
   }
 
   /**
@@ -939,16 +973,16 @@ public class Image2DAligner implements Cloneable {
    * With refinements = 3 the distance is 0.5 + 0.25 + 0.125 = 0.875.
    *
    * @param fp Float processor containing a peak surface
-   * @param i The peak x position
-   * @param j The peak y position
+   * @param x The peak x position
+   * @param y The peak y position
    * @param refinements the maximum number of refinements
    * @param relativeThreshold Sets the relative threshold for change in the value for halting
    *        refinement. This applies only if the position moved during the refinement step.
    * @return The peak location with sub-pixel accuracy [x,y,value]
    */
-  public static double[] performCubicFit(FloatProcessor fp, int i, int j, int refinements,
+  public static double[] performCubicFit(FloatProcessor fp, int x, int y, int refinements,
       double relativeThreshold) {
-    final double[] centre = new double[] {i, j, fp.getf(i, j)};
+    final double[] centre = new double[] {x, y, fp.getf(x, y)};
     // This value will be progressively halved.
     // Start with a value that allows the number of iterations to fully cover the region +/- 1 pixel
     // 0.5 will result in an minimum range of 0.5 / 2^9 = 0.000976
@@ -1095,42 +1129,21 @@ public class Image2DAligner implements Cloneable {
           // Current maximum
           continue;
         }
-        final double v = nodes[ix][iy[k]].getValue(x, x2, x3, y[k * 3], y[k * 3 + 1], y[k * 3 + 2]);
+        final double value =
+            nodes[ix][iy[k]].getValue(x, x2, x3, y[k * 3], y[k * 3 + 1], y[k * 3 + 2]);
         // double v2 = fp.getBicubicInterpolatedPixel(ix + 1 + x, iy[k] + 1 + y[k * 3], fp);
         // System.out.printf("%g vs %g @ %g,%g\n", v, v2, x + ix, iy[k] + y[k * 3]);
-        if (centre[2] < v) {
+        if (centre[2] < value) {
           // Add back the node index to get the correct x/y-values
           centre[0] = x + ix;
           centre[1] = y[k * 3] + iy[k];
-          centre[2] = v;
+          centre[2] = value;
           moved = true;
         }
       }
     }
     // System.out.printf("Centre %g,%g = %g\n", centre[0], centre[1], centre[2]);
     return moved;
-  }
-
-  /**
-   * Copy the aligner. This copies the initialised state for use in alignment on multiple threads
-   * concurrently.
-   *
-   * @return the image aligner
-   */
-  public Image2DAligner copy() {
-    Image2DAligner copy;
-    try {
-      copy = (Image2DAligner) clone();
-      // Reset objects that are not thread safe
-      copy.buffer = null;
-      copy.region = null;
-      copy.target = null;
-      copy.crop = null;
-      copy.frequencyDomainCorrelationError = 0;
-      return copy;
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
   }
 
   /**

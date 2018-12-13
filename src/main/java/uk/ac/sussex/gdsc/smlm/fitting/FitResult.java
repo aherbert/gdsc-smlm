@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+import com.google.common.annotations.VisibleForTesting;
+
 /**
  * Contains the fitting result.
  */

@@ -93,8 +93,8 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param s The standard deviation of the Gaussian distribution at readout
-   * @throws IllegalArgumentException if the variance is zero or below
    * @return the poisson poisson function
+   * @throws IllegalArgumentException if the variance is zero or below
    */
   public static PoissonPoissonFunction createWithStandardDeviation(final double alpha,
       final double s) {
@@ -106,8 +106,8 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param var The variance of the Gaussian distribution at readout (must be positive)
-   * @throws IllegalArgumentException if the variance is zero or below
    * @return the poisson poisson function
+   * @throws IllegalArgumentException if the variance is zero or below
    */
   public static PoissonPoissonFunction createWithVariance(final double alpha, final double var) {
     return new PoissonPoissonFunction(alpha, var);

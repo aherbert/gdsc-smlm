@@ -191,42 +191,6 @@ public class CustomContentInstant extends ContentInstant {
     this.type = type;
   }
 
-  public static int getDefaultThreshold(final ImagePlus imp, final int type) {
-    if (type != SURFACE) {
-      return 0;
-    }
-    final ImageStack stack = imp.getStack();
-    final int d = imp.getStackSize();
-    // compute stack histogram
-    final int[] h = stack.getProcessor(1).getHistogram();
-    for (int z = 1; z < d; z++) {
-      final int[] tmp = stack.getProcessor(z + 1).getHistogram();
-      for (int i = 0; i < h.length; i++) {
-        h[i] += tmp[i];
-      }
-    }
-    return imp.getProcessor().getAutoThreshold(h);
-  }
-
-  public static int getDefaultResamplingFactor(final ImagePlus imp, final int type) {
-    final int w = imp.getWidth();
-    final int h = imp.getHeight();
-    final int d = imp.getStackSize();
-    final int max = Math.max(w, Math.max(h, d));
-    switch (type) {
-      case SURFACE:
-        return (int) Math.ceil(max / 128f);
-      case VOLUME:
-        return (int) Math.ceil(max / 256f);
-      case ORTHO:
-        return (int) Math.ceil(max / 256f);
-      case SURFACE_PLOT2D:
-        return (int) Math.ceil(max / 128f);
-      default:
-        return 1;
-    }
-  }
-
   @Override
   public void display(final ContentNode node) {
     // remove everything if possible

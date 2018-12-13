@@ -31,10 +31,8 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Calculate the value of the Skew Normal distribution
  *
- * <p>
- *
- * @see <a href=
- *      "http://en.wikipedia.org/wiki/Skew_normal_distribution">http://en.wikipedia.org/wiki/Skew_normal_distribution</a>
+ * @see <a href= "http://en.wikipedia.org/wiki/Skew_normal_distribution">Skew Normal
+ *      distribution</a>
  */
 public class SkewNormalFunction {
   /** The amplitude. */

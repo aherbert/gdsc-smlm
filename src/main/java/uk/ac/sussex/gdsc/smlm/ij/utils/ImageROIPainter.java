@@ -50,6 +50,8 @@ public class ImageROIPainter extends TextPanelMouseListener {
   private CoordinateProvider coordProvider;
 
   /**
+   * Instantiates a new image ROI painter.
+   *
    * @param textPanel The text panel to listen to for mouse events
    * @param title The title of the image to add the ROI to
    * @param coordProvider Provides coordinates from the lines selected in the text panel
@@ -177,11 +179,11 @@ public class ImageROIPainter extends TextPanelMouseListener {
    * @param y the y
    * @param slice the slice
    * @param indices the indices
-   * @param o the o
+   * @param overlay the o
    * @param start the start
    * @param end the end
    */
-  private static void appendRoi(float[] x, float[] y, int[] slice, int[] indices, Overlay o,
+  private static void appendRoi(float[] x, float[] y, int[] slice, int[] indices, Overlay overlay,
       int start, int end) {
     final int p = end - start;
     final float[] x2 = new float[p];
@@ -192,7 +194,7 @@ public class ImageROIPainter extends TextPanelMouseListener {
     }
     final PointRoi roi = new PointRoi(x2, y2, p);
     roi.setPosition(slice[indices[start]]);
-    o.add(roi);
+    overlay.add(roi);
   }
 
   /**
@@ -225,6 +227,8 @@ public class ImageROIPainter extends TextPanelMouseListener {
   }
 
   /**
+   * Gets the title.
+   *
    * @return the title of the image.
    */
   public String getTitle() {
@@ -232,6 +236,8 @@ public class ImageROIPainter extends TextPanelMouseListener {
   }
 
   /**
+   * Sets the title.
+   *
    * @param title the title of the image
    */
   public void setTitle(String title) {
@@ -239,14 +245,18 @@ public class ImageROIPainter extends TextPanelMouseListener {
   }
 
   /**
-   * @return the coordProvider.
+   * Gets the coord provider.
+   *
+   * @return the coord provider
    */
   public CoordinateProvider getCoordProvider() {
     return coordProvider;
   }
 
   /**
-   * @param coordProvider the coordProvider to set
+   * Sets the coord provider.
+   *
+   * @param coordProvider the new coord provider
    */
   public void setCoordProvider(CoordinateProvider coordProvider) {
     this.coordProvider = coordProvider;

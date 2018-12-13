@@ -93,7 +93,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     final Point3f[] coords = new Point3f[vertexCount];
     mesh.toArray(coords);
 
-    final Color4f colors[] = new Color4f[vertexCount];
+    final Color4f[] colors = new Color4f[vertexCount];
     if (color == null) {
       color = DEFAULT_COLOR;
     }

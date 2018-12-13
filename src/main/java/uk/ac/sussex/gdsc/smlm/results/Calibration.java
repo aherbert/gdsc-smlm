@@ -39,8 +39,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
  * <p>The calibration has flags to indicate that a valid value has been set for each property. If
  * these are false then the property get method can optionally throw an exception.
  *
- * <p>
- *
  * @deprecated This class has been replaced with generated objects using Google protocol buffers. It
  *             is left to support deserialisation of legacy files.
  */
@@ -48,37 +46,37 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 class Calibration implements Cloneable {
   /** The field missing exception. */
   // State flags
-  private static int FIELD_MISSING_EXCEPTION = 0x00000001;
+  private static final int FIELD_MISSING_EXCEPTION = 0x1;
 
   /** The field nm per pixel. */
-  private static int FIELD_NM_PER_PIXEL = 0x00000002;
+  private static final int FIELD_NM_PER_PIXEL = 0x2;
 
   /** The field gain. */
-  private static int FIELD_GAIN = 0x00000004;
+  private static final int FIELD_GAIN = 0x4;
 
   /** The field exposure time. */
-  private static int FIELD_EXPOSURE_TIME = 0x00000008;
+  private static final int FIELD_EXPOSURE_TIME = 0x8;
 
   /** The field read noise. */
-  private static int FIELD_READ_NOISE = 0x00000010;
+  private static final int FIELD_READ_NOISE = 0x10;
 
   /** The field bias. */
-  private static int FIELD_BIAS = 0x00000020;
+  private static final int FIELD_BIAS = 0x20;
 
   /** The field camera type. */
-  private static int FIELD_CAMERA_TYPE = 0x00000040;
+  private static final int FIELD_CAMERA_TYPE = 0x40;
 
   /** The field amplification. */
-  private static int FIELD_AMPLIFICATION = 0x00000080;
+  private static final int FIELD_AMPLIFICATION = 0x80;
 
   /** The field distance unit. */
-  private static int FIELD_DISTANCE_UNIT = 0x00000100;
+  private static final int FIELD_DISTANCE_UNIT = 0x100;
 
   /** The field intensity unit. */
-  private static int FIELD_INTENSITY_UNIT = 0x00000200;
+  private static final int FIELD_INTENSITY_UNIT = 0x200;
 
   /** The field intensity unit. */
-  private static int FIELD_ANGLE_UNIT = 0x00000400;
+  private static final int FIELD_ANGLE_UNIT = 0x400;
 
   /** The fields. */
   private int fields;
@@ -432,13 +430,11 @@ class Calibration implements Cloneable {
   /** {@inheritDoc} */
   @Override
   public Calibration clone() {
-    Calibration c;
     try {
-      c = (Calibration) super.clone();
+      return (Calibration) super.clone();
     } catch (final CloneNotSupportedException ex) {
       return null;
     }
-    return c;
   }
 
   /**

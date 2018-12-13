@@ -605,8 +605,7 @@ public class BlinkEstimator implements PlugIn {
    * flourophore<br> td = The dark time<br> tOff = The off-time<br>
    */
   public class BlinkingFunction extends LoggingOptimiserFunction
-      implements MultivariateVectorFunction // , DifferentiableMultivariateVectorFunction
-  {
+      implements MultivariateVectorFunction {
     /**
      * Instantiates a new blinking function.
      */

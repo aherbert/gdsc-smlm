@@ -284,7 +284,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     // Do not try to get the colour back from the geometry as is done
     // in the super-class. That will only work if the size is the same
     // and this method is likely to be called when the size changes.
-    final Color3f colors[] = new Color3f[vertexCount];
+    final Color3f[] colors = new Color3f[vertexCount];
     Arrays.fill(colors, (color == null) ? DEFAULT_COLOR : color);
 
     final GeometryArray ta = new TriangleArray(vertexCount,

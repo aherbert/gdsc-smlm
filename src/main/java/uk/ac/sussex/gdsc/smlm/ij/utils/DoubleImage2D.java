@@ -59,12 +59,6 @@ public class DoubleImage2D extends Image2D {
     super(image);
   }
 
-  /** {@inheritDoc} */
-  @Override
-  protected void createData(int size) {
-    data = new double[size];
-  }
-
   /**
    * Instantiates a new 2D image.
    *
@@ -96,10 +90,26 @@ public class DoubleImage2D extends Image2D {
     this.data = data;
   }
 
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected DoubleImage2D(DoubleImage2D source) {
+    super(source);
+    this.data = source.data.clone();
+  }
+
   /** {@inheritDoc} */
   @Override
   public DoubleImage2D copy() {
-    return new DoubleImage2D(nc, nr, data.clone(), false);
+    return new DoubleImage2D(this);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void createData(int size) {
+    data = new double[size];
   }
 
   /**
@@ -119,8 +129,8 @@ public class DoubleImage2D extends Image2D {
 
   /** {@inheritDoc} */
   @Override
-  public DoubleImage2D crop(int x, int y, int w, int h) {
-    return crop(x, y, w, h, null);
+  public DoubleImage2D crop(int x, int y, int width, int height) {
+    return crop(x, y, width, height, null);
   }
 
   /**
@@ -128,28 +138,29 @@ public class DoubleImage2D extends Image2D {
    *
    * @param x the x index
    * @param y the y index
-   * @param w the width
-   * @param h the height
+   * @param width the width
+   * @param height the height
    * @param region the cropped data (will be reused if the correct size)
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public DoubleImage2D crop(int x, int y, int w, int h, double[] region) {
+  public DoubleImage2D crop(int x, int y, int width, int height, double[] region) {
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1
+        || (long) y + height > nr) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final int size = h * w;
+    final int size = height * width;
     if (region == null || region.length != size) {
       region = new double[size];
     }
     int base = y * nc + x;
-    for (int r = 0, i = 0; r < h; r++) {
-      System.arraycopy(data, base, region, i, w);
+    for (int r = 0, i = 0; r < height; r++) {
+      System.arraycopy(data, base, region, i, width);
       base += nc;
-      i += w;
+      i += width;
     }
-    return new DoubleImage2D(w, h, region, false);
+    return new DoubleImage2D(width, height, region, false);
   }
 
   /**
@@ -158,33 +169,34 @@ public class DoubleImage2D extends Image2D {
    * @param image the image
    * @param x the x index
    * @param y the y index
-   * @param w the width
-   * @param h the height
+   * @param width the width
+   * @param height the height
    * @param region the cropped data (will be reused if the correct size)
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public static DoubleImage2D crop(ImageProcessor image, int x, int y, int w, int h,
+  public static DoubleImage2D crop(ImageProcessor image, int x, int y, int width, int height,
       double[] region) {
     final int nc = image.getWidth();
     final int nr = image.getHeight();
 
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1
+        || (long) y + height > nr) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final int size = checkSize(w, h, true);
+    final int size = checkSize(width, height, true);
     if (region == null || region.length != size) {
       region = new double[size];
     }
     int base = y * nc + x;
-    for (int r = 0, i = 0; r < h; r++) {
-      for (int c = 0; c < w; c++) {
+    for (int r = 0, i = 0; r < height; r++) {
+      for (int c = 0; c < width; c++) {
         region[i++] = image.getf(base + c);
       }
       base += nc;
     }
-    return new DoubleImage2D(w, h, region, false);
+    return new DoubleImage2D(width, height, region, false);
   }
 
   @Override
@@ -206,61 +218,61 @@ public class DoubleImage2D extends Image2D {
    */
   public void insert(int x, int y, DoubleImage2D image) {
     // Check the region range
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    if (w < 1 || h < 1) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    if (width < 1 || height < 1) {
       return;
     }
-    if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr) {
+    if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr) {
       throw new IllegalArgumentException("Region not within the data");
     }
     final double[] region = image.data;
     int base = y * nc + x;
-    for (int r = 0, i = 0; r < h; r++) {
-      System.arraycopy(region, i, data, base, w);
+    for (int r = 0, i = 0; r < height; r++) {
+      System.arraycopy(region, i, data, base, width);
       base += nc;
-      i += w;
+      i += width;
     }
   }
 
   @Override
-  protected void copyTo(int i, float[] buffer, int j, int size) {
+  protected void copyTo(int index, float[] buffer, int bufferIndex, int size) {
     while (size-- > 0) {
-      buffer[j++] = (float) data[i++];
+      buffer[bufferIndex++] = (float) data[index++];
     }
   }
 
   @Override
-  protected void copyFrom(float[] buffer, int j, int size, int i) {
+  protected void copyFrom(float[] buffer, int bufferIndex, int size, int index) {
     while (size-- > 0) {
-      data[i++] = buffer[j++];
+      data[index++] = buffer[bufferIndex++];
     }
   }
 
   @Override
-  public double get(int i) {
-    return data[i];
+  public double get(int index) {
+    return data[index];
   }
 
   @Override
-  public void set(int i, double value) {
-    data[i] = value;
+  public void set(int index, double value) {
+    data[index] = value;
   }
 
   @Override
-  public float getf(int i) {
-    return (float) data[i];
+  public float getf(int index) {
+    return (float) data[index];
   }
 
   @Override
-  public void setf(int i, float value) {
-    data[i] = value;
+  public void setf(int index, float value) {
+    data[index] = value;
   }
 
   @Override
-  protected void fill(int i, int size, double value) {
+  protected void fill(int index, int size, double value) {
     while (size-- > 0) {
-      data[i++] = value;
+      data[index++] = value;
     }
   }
 }

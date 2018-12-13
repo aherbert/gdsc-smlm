@@ -4739,8 +4739,7 @@ public class PSFCreator implements PlugInFilter {
      * The centre of the stack. Used to crop the image around the centre for alignment. (Note that
      * the centre in XY is the middle pixel).
      *
-     *
-     * <p> Also used as a relative position when combining PSFs.
+     * <p>Also used as a relative position when combining PSFs.
      */
     int stackZCentre;
     final float[][] psf;

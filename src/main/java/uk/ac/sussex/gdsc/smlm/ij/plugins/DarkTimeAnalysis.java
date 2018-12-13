@@ -218,12 +218,13 @@ public class DarkTimeAnalysis implements PlugIn {
     int truncate = 0;
     for (int i = 0; i < x.length; i++) {
       x[i] = i * msPerFrame;
-      y[i] = (100.0 * times[i]) / total;
-      if (times[i] == total) // 100%
-      {
+      if (times[i] == total) {
+        // Final value at 100%
+        y[i] = 100.0;
         truncate = i + 1;
         break;
       }
+      y[i] = (100.0 * times[i]) / total;
     }
     if (truncate > 0) {
       x = Arrays.copyOf(x, truncate);

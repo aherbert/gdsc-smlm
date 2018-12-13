@@ -64,7 +64,7 @@ public interface PeakResultStoreList extends PeakResultStore {
   /**
    * Sort the results.
    */
-  default public void sort() {
+  public default void sort() {
     sort(FrameIdPeakResultComparator.INSTANCE);
   }
 

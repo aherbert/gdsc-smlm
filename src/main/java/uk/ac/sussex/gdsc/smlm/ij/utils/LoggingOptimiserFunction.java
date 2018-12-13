@@ -50,11 +50,11 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction {
   /**
    * Log the count of evaluations to the ImageJ status bar.
    *
-   * @param b the new logging
+   * @param logging the new logging
    */
-  public void setLogging(boolean b) {
-    logging = b;
-    if (b) {
+  public void setLogging(boolean logging) {
+    this.logging = logging;
+    if (logging) {
       evalCount = 0;
     }
   }
@@ -70,6 +70,8 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction {
   }
 
   /**
+   * Gets the function name.
+   *
    * @return The function name.
    */
   public String getName() {

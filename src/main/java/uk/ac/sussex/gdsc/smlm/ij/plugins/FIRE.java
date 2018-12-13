@@ -845,9 +845,7 @@ public class FIRE implements PlugIn {
     // Use the float data bounds. This prevents problems if the data is far from the origin.
     dataBounds = results.getDataBounds(null);
 
-    if (this.results2 != null)
-
-    {
+    if (this.results2 != null) {
       final Rectangle2D dataBounds2 = results.getDataBounds(null);
       dataBounds = dataBounds.createUnion(dataBounds2);
     }

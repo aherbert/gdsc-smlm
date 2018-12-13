@@ -53,7 +53,7 @@ import java.util.Arrays;
  * p(z|v(θ,k) = the likelihood function for data z given value v
  * </pre>
  *
- * This reduces to:
+ * <p>This reduces to:
  *
  * <pre>
  * Iij = sum(k) (d v(θ,k) / dθi) . (d v(θ,k) / dθj) . I(v(θ,k))

@@ -61,33 +61,6 @@ public class DoubleImage3D extends Image3D {
     super(stack);
   }
 
-  /** {@inheritDoc} */
-  @Override
-  protected void createData(int size) {
-    data = new double[size];
-  }
-
-  /**
-   * Instantiates a new 3D image.
-   *
-   * @param stack the stack
-   * @param data the data
-   */
-  private DoubleImage3D(ImageStack stack, double[] data) {
-    super(stack.getWidth(), stack.getHeight(), stack.getSize(),
-        stack.getWidth() * stack.getHeight());
-
-    // This is used internally so the data is the correct length
-    this.data = data;
-
-    for (int s = 1, i = 0; s <= ns; s++) {
-      final ImageProcessor ip = stack.getProcessor(s);
-      for (int j = 0; i < nr_by_nc; j++) {
-        data[i++] = ip.getf(j);
-      }
-    }
-  }
-
   /**
    * Instantiates a new 3D image.
    *
@@ -112,19 +85,35 @@ public class DoubleImage3D extends Image3D {
    * @param nc the number of columns
    * @param nr the number of rows
    * @param ns the number of slices
-   * @param nr_by_nc the number of rows multiplied by the number of columns
+   * @param nrByNc the number of rows multiplied by the number of columns
    * @param data the data
    */
-  protected DoubleImage3D(int nc, int nr, int ns, int nr_by_nc, double[] data) {
+  protected DoubleImage3D(int nc, int nr, int ns, int nrByNc, double[] data) {
     // No checks as this is used internally
-    super(nc, nr, ns, nr_by_nc);
+    super(nc, nr, ns, nrByNc);
     this.data = data;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected DoubleImage3D(DoubleImage3D source) {
+    super(source);
+    this.data = source.data.clone();
   }
 
   /** {@inheritDoc} */
   @Override
   public DoubleImage3D copy() {
-    return new DoubleImage3D(nc, nr, ns, nr_by_nc, data.clone());
+    return new DoubleImage3D(this);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void createData(int size) {
+    data = new double[size];
   }
 
   /**
@@ -144,8 +133,8 @@ public class DoubleImage3D extends Image3D {
 
   /** {@inheritDoc} */
   @Override
-  public DoubleImage3D crop(int x, int y, int z, int w, int h, int d) {
-    return crop(x, y, z, w, h, d, null);
+  public DoubleImage3D crop(int x, int y, int z, int width, int height, int depth) {
+    return crop(x, y, z, width, height, depth, null);
   }
 
   /**
@@ -154,32 +143,33 @@ public class DoubleImage3D extends Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @param region the cropped data (will be reused if the correct size)
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public DoubleImage3D crop(int x, int y, int z, int w, int h, int d, double[] region) {
+  public DoubleImage3D crop(int x, int y, int z, int width, int height, int depth,
+      double[] region) {
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
-        || (long) z + d > ns) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
+        || z < 0 || depth < 1 || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final int size = d * h * w;
+    final int size = depth * height * width;
     if (region == null || region.length != size) {
       region = new double[size];
     }
-    for (int s = 0, i = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        System.arraycopy(data, base, region, i, w);
+    for (int s = 0, i = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        System.arraycopy(data, base, region, i, width);
         base += nc;
-        i += w;
+        i += width;
       }
     }
-    return new DoubleImage3D(w, h, d, w * h, region);
+    return new DoubleImage3D(width, height, depth, width * height, region);
   }
 
   /**
@@ -189,39 +179,39 @@ public class DoubleImage3D extends Image3D {
    * @param x the x index
    * @param y the y index
    * @param z the z index
-   * @param w the width
-   * @param h the height
-   * @param d the depth
+   * @param width the width
+   * @param height the height
+   * @param depth the depth
    * @param region the cropped data (will be reused if the correct size)
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public static DoubleImage3D crop(ImageStack stack, int x, int y, int z, int w, int h, int d,
-      double[] region) {
+  public static DoubleImage3D crop(ImageStack stack, int x, int y, int z, int width, int height,
+      int depth, double[] region) {
     final int nc = stack.getWidth();
     final int nr = stack.getHeight();
     final int ns = stack.getSize();
 
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr || z < 0 || d < 1
-        || (long) z + d > ns) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
+        || z < 0 || depth < 1 || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final int size = checkSize(w, h, d, true);
+    final int size = checkSize(width, height, depth, true);
     if (region == null || region.length != size) {
       region = new double[size];
     }
-    for (int s = 0, i = 0; s < d; s++, z++) {
+    for (int s = 0, i = 0; s < depth; s++, z++) {
       final ImageProcessor ip = stack.getProcessor(1 + z);
       int base = y * nc + x;
-      for (int r = 0; r < h; r++) {
-        for (int c = 0; c < w; c++) {
+      for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
           region[i++] = ip.getf(base + c);
         }
         base += nc;
       }
     }
-    return new DoubleImage3D(w, h, d, w * h, region);
+    return new DoubleImage3D(width, height, depth, width * height, region);
   }
 
   @Override
@@ -244,64 +234,65 @@ public class DoubleImage3D extends Image3D {
    */
   public void insert(int x, int y, int z, DoubleImage3D image) {
     // Check the region range
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    final int d = image.getSize();
-    if (w < 1 || h < 1 || d < 1) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    final int depth = image.getSize();
+    if (width < 1 || height < 1 || depth < 1) {
       return;
     }
-    if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr || z < 0 || (long) z + d > ns) {
+    if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr || z < 0
+        || (long) z + depth > ns) {
       throw new IllegalArgumentException("Region not within the data");
     }
     final double[] region = image.data;
-    for (int s = 0, i = 0; s < d; s++, z++) {
-      int base = z * nr_by_nc + y * nc + x;
-      for (int r = 0; r < h; r++) {
-        System.arraycopy(region, i, data, base, w);
+    for (int s = 0, i = 0; s < depth; s++, z++) {
+      int base = z * nrByNc + y * nc + x;
+      for (int r = 0; r < height; r++) {
+        System.arraycopy(region, i, data, base, width);
         base += nc;
-        i += w;
+        i += width;
       }
     }
   }
 
   @Override
-  protected void copyTo(int i, float[] buffer, int j, int size) {
+  protected void copyTo(int index, float[] buffer, int bufferIndex, int size) {
     while (size-- > 0) {
-      buffer[j++] = (float) data[i++];
+      buffer[bufferIndex++] = (float) data[index++];
     }
   }
 
   @Override
-  protected void copyFrom(float[] buffer, int j, int size, int i) {
+  protected void copyFrom(float[] buffer, int bufferIndex, int size, int index) {
     while (size-- > 0) {
-      data[i++] = buffer[j++];
+      data[index++] = buffer[bufferIndex++];
     }
   }
 
   @Override
-  public double get(int i) {
-    return data[i];
+  public double get(int index) {
+    return data[index];
   }
 
   @Override
-  public void set(int i, double value) {
-    data[i] = value;
+  public void set(int index, double value) {
+    data[index] = value;
   }
 
   @Override
-  public float getf(int i) {
-    return (float) data[i];
+  public float getf(int index) {
+    return (float) data[index];
   }
 
   @Override
-  public void setf(int i, float value) {
-    data[i] = value;
+  public void setf(int index, float value) {
+    data[index] = value;
   }
 
   @Override
-  protected void fill(int i, int size, double value) {
+  protected void fill(int index, int size, double value) {
     while (size-- > 0) {
-      data[i++] = value;
+      data[index++] = value;
     }
   }
 }

@@ -2691,9 +2691,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     try {
       config.createSpotFilter();
-    } catch (final Exception e) // IllegalStateException
-    {
-      IJ.error(TITLE, e.getMessage());
+    } catch (final IllegalStateException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
@@ -2799,9 +2798,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
         Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
         Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
         fitConfig.getFunctionSolver();
-      } catch (final Exception e) // IllegalArgumentException, IllegalStateException
-      {
-        IJ.error(TITLE, e.getMessage());
+      } catch (final IllegalArgumentException | IllegalStateException ex) {
+        IJ.error(TITLE, ex.getMessage());
         return false;
       }
     } else if (isSteppingFunctionSolver) {
@@ -2947,9 +2945,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
         }
         // This call will check if the configuration is OK (including convergence criteria)
         fitConfig.getFunctionSolver();
-      } catch (final Exception e) // IllegalArgumentException, IllegalStateException
-      {
-        IJ.error(TITLE, e.getMessage());
+      } catch (final IllegalArgumentException | IllegalStateException ex) {
+        IJ.error(TITLE, ex.getMessage());
         return false;
       }
     } else {

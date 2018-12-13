@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.filters.FilteredNonMaximumSuppression;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -99,7 +100,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   private boolean filterResults = Prefs.get(Constants.filterResults, false);
   private boolean showFit = Prefs.get(Constants.showFit, false);
 
-  private final int flags = DOES_16 | DOES_8G | DOES_32 | FINAL_PROCESSING | SNAPSHOT;
+  private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | FINAL_PROCESSING | SNAPSHOT;
   private ImagePlus imp;
 
   private int[] maxIndices;
@@ -130,10 +131,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       return DONE;
     }
 
-    return flags;
+    return FLAGS;
   }
 
-  private static PSFType[] _PSFTypeValues;
+  private static PSFType[] psfTypeValues;
 
   /**
    * Gets the PSF type values.
@@ -141,13 +142,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the PSF type values
    */
   public static PSFType[] getPSFTypeValues() {
-    if (_PSFTypeValues == null) {
+    if (psfTypeValues == null) {
       initPSFType();
     }
-    return _PSFTypeValues;
+    return psfTypeValues;
   }
 
-  private static String[] _PSFTypeNames;
+  private static String[] psfTypeNames;
 
   /**
    * Gets the PSF type names.
@@ -155,10 +156,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the PSF type names
    */
   public static String[] getPSFTypeNames() {
-    if (_PSFTypeNames == null) {
+    if (psfTypeNames == null) {
       initPSFType();
     }
-    return _PSFTypeNames;
+    return psfTypeNames;
   }
 
   private static void initPSFType() {
@@ -168,10 +169,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
         PSFType.TWO_AXIS_GAUSSIAN_2D,
         PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
     //@formatter:on
-    _PSFTypeValues = d.toArray(new PSFType[d.size()]);
-    _PSFTypeNames = new String[_PSFTypeValues.length];
-    for (int i = 0; i < _PSFTypeValues.length; i++) {
-      _PSFTypeNames[i] = PSFProtosHelper.getName(_PSFTypeValues[i]);
+    psfTypeValues = d.toArray(new PSFType[d.size()]);
+    psfTypeNames = new String[psfTypeValues.length];
+    for (int i = 0; i < psfTypeValues.length; i++) {
+      psfTypeNames[i] = PSFProtosHelper.getName(psfTypeValues[i]);
     }
   }
 
@@ -225,20 +226,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     gd.addPreviewCheckbox(pfr);
     gd.addDialogListener(this);
 
-    // // Initialise preview
-    // gd.getPreviewCheckbox().setState(true);
-    // setProperties();
-    // this.run(imp.getProcessor());
-
     gd.showDialog();
 
     if (gd.wasCanceled() || !dialogItemChanged(gd, null)) {
-      // imp.getProcessor().reset();
       imp.setOverlay(null);
       return DONE;
     }
 
-    return flags;
+    return FLAGS;
   }
 
   /**
@@ -667,7 +662,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     return status.toString().toLowerCase().replace("_", " ");
   }
 
-  private static double[] extractParams(double[] params, int i) {
+  private static double[] extractParams(double[] params, int index) {
     if (params == null) {
       return null;
     }
@@ -675,7 +670,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     // 0 is the background. Then the peaks are packed.
     final double[] p = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
     p[0] = params[0];
-    System.arraycopy(params, i, p, 1, Gaussian2DFunction.PARAMETERS_PER_PEAK);
+    System.arraycopy(params, index, p, 1, Gaussian2DFunction.PARAMETERS_PER_PEAK);
     return p;
   }
 
@@ -737,11 +732,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return Array containing the fitted curve data: The first value is the Background. The
    *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak. If
    *         elliptical fitting is performed the values are Amplitude, Angle, PosX, PosY, StdDevX,
-   *         StdDevY for each fitted peak
-   *
-   *         <p>Null if no fit is possible.
+   *         StdDevY for each fitted peak Null if no fit is possible.
    */
-  public double[] fitMultiple(float[] data, int width, int height, int[] maxIndices) {
+  public @Nullable double[] fitMultiple(float[] data, int width, int height, int[] maxIndices) {
     return fitMultiple(data, width, height, maxIndices, null);
   }
 
@@ -760,11 +753,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return Array containing the fitted curve data: The first value is the Background. The
    *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak. If
    *         elliptical fitting is performed the values are Amplitude, Angle, PosX, PosY, StdDevX,
-   *         StdDevY for each fitted peak
-   *
-   *         <p>Null if no fit is possible.
+   *         StdDevY for each fitted peak Null if no fit is possible.
    */
-  private double[] fitMultiple(float[] data, int width, int height, int[] maxIndices,
+  private @Nullable double[] fitMultiple(float[] data, int width, int height, int[] maxIndices,
       double[] estimatedHeights) {
     if (data == null || data.length != width * height) {
       return null;
@@ -835,12 +826,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param index Index of the data to fit
    * @param estimatedHeight Estimated height for the peak (input from smoothed data)
    * @return Array containing the fitted curve data: The first value is the Background. The
-   *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak.
-   *
-   *         <p> Null if no fit is possible.
+   *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak. Null
+   *         if no fit is possible.
    */
-  private double[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height, int index,
-      double estimatedHeight) {
+  private @Nullable double[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height,
+      int index, double estimatedHeight) {
     this.fitResult = gf.fit(SimpleArrayUtils.toDouble(data), width, height, new int[] {index},
         new double[] {estimatedHeight});
     if (fitResult.getStatus() == FitStatus.OK) {
@@ -1003,154 +993,198 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   }
 
   /**
-   * @param smooth the smooth to set
+   * Sets the smooth.
+   *
+   * @param smooth the new smooth
    */
   public void setSmooth(double smooth) {
     this.smooth = smooth;
   }
 
   /**
-   * @return the smooth.
+   * Gets the smooth.
+   *
+   * @return the smooth
    */
   public double getSmooth() {
     return smooth;
   }
 
   /**
-   * @param boxSize the boxSize to set
+   * Sets the box size.
+   *
+   * @param boxSize the new box size
    */
   public void setBoxSize(int boxSize) {
     this.boxSize = boxSize;
   }
 
   /**
-   * @return the boxSize.
+   * Gets the box size.
+   *
+   * @return the box size
    */
   public int getBoxSize() {
     return boxSize;
   }
 
   /**
-   * @param background the background to set
+   * Sets the background.
+   *
+   * @param background the new background
    */
   public void setBackground(float background) {
     this.background = background;
   }
 
   /**
-   * @return the background.
+   * Gets the background.
+   *
+   * @return the background
    */
   public float getBackground() {
     return background;
   }
 
   /**
-   * @param peakHeight the peakHeight to set
+   * Sets the peak height.
+   *
+   * @param peakHeight the new peak height
    */
   public void setPeakHeight(float peakHeight) {
     this.peakHeight = peakHeight;
   }
 
   /**
-   * @return the peakHeight.
+   * Gets the peak height.
+   *
+   * @return the peak height
    */
   public float getPeakHeight() {
     return peakHeight;
   }
 
   /**
-   * @param fractionAboveBackground the fractionAboveBackground to set
+   * Sets the fraction above background.
+   *
+   * @param fractionAboveBackground the new fraction above background
    */
   public void setFractionAboveBackground(float fractionAboveBackground) {
     this.fractionAboveBackground = fractionAboveBackground;
   }
 
   /**
-   * @return the fractionAboveBackground.
+   * Gets the fraction above background.
+   *
+   * @return the fraction above background
    */
   public float getFractionAboveBackground() {
     return fractionAboveBackground;
   }
 
   /**
-   * @param peakWidth the peakWidth to set
+   * Sets the peak width.
+   *
+   * @param peakWidth the new peak width
    */
   public void setPeakWidth(float peakWidth) {
     this.peakWidth = peakWidth;
   }
 
   /**
-   * @return the peakWidth.
+   * Gets the peak width.
+   *
+   * @return the peak width
    */
   public float getPeakWidth() {
     return peakWidth;
   }
 
   /**
-   * @return the topN.
+   * Gets the top N.
+   *
+   * @return the top N
    */
   public int getTopN() {
     return topN;
   }
 
   /**
-   * @param topN the topN to set
+   * Sets the top N.
+   *
+   * @param topN the new top N
    */
   public void setTopN(int topN) {
     this.topN = topN;
   }
 
   /**
-   * @param blockFindAlgorithm the blockFindAlgorithm to set
+   * Sets the block find algorithm.
+   *
+   * @param blockFindAlgorithm the new block find algorithm
    */
   public void setBlockFindAlgorithm(boolean blockFindAlgorithm) {
     this.blockFindAlgorithm = blockFindAlgorithm;
   }
 
   /**
-   * @return the blockFindAlgorithm.
+   * Checks if is block find algorithm.
+   *
+   * @return true, if is block find algorithm
    */
   public boolean isBlockFindAlgorithm() {
     return blockFindAlgorithm;
   }
 
   /**
-   * @param neighbourCheck the neighbourCheck to set
+   * Sets the neighbour check.
+   *
+   * @param neighbourCheck the new neighbour check
    */
   public void setNeighbourCheck(boolean neighbourCheck) {
     this.neighbourCheck = neighbourCheck;
   }
 
   /**
-   * @return the neighbourCheck.
+   * Checks if is neighbour check.
+   *
+   * @return true, if is neighbour check
    */
   public boolean isNeighbourCheck() {
     return neighbourCheck;
   }
 
   /**
-   * @param border the border to set
+   * Sets the border.
+   *
+   * @param border the new border
    */
   public void setBorder(int border) {
     this.border = border;
   }
 
   /**
-   * @return the border.
+   * Gets the border.
+   *
+   * @return the border
    */
   public int getBorder() {
     return border;
   }
 
   /**
-   * @param fitFunction the fitFunction to set
+   * Sets the fit function.
+   *
+   * @param fitFunction the new fit function
    */
   public void setFitFunction(int fitFunction) {
     this.fitFunction = fitFunction;
   }
 
   /**
-   * @return the fitFunction.
+   * Gets the fit function.
+   *
+   * @return the fit function
    */
   public int getFitFunction() {
     return fitFunction;
@@ -1169,64 +1203,81 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   }
 
   /**
-   * @param fitBackground the fitBackground to set
+   * Sets the fit background.
+   *
+   * @param fitBackground the new fit background
    */
   public void setFitBackground(boolean fitBackground) {
     this.fitBackground = fitBackground;
   }
 
   /**
-   * @return the fitBackground.
+   * Checks if is fit background.
+   *
+   * @return true, if is fit background
    */
   public boolean isFitBackground() {
     return fitBackground;
   }
 
   /**
-   * @param logProgress the logProgress to set
+   * Sets the log progress.
+   *
+   * @param logProgress the new log progress
    */
   public void setLogProgress(boolean logProgress) {
     this.logProgress = logProgress;
   }
 
   /**
-   * @return the logProgress.
+   * Checks if is log progress.
+   *
+   * @return true, if is log progress
    */
   public boolean isLogProgress() {
     return logProgress;
   }
 
   /**
-   * @param maxIterations the maxIterations to set
+   * Sets the max iterations.
+   *
+   * @param maxIterations the new max iterations
    */
   public void setMaxIterations(int maxIterations) {
     this.maxIterations = maxIterations;
   }
 
   /**
-   * @return the maxIterations.
+   * Gets the max iterations.
+   *
+   * @return the max iterations
    */
   public int getMaxIterations() {
     return maxIterations;
   }
 
   /**
-   * @return True if fitting an elliptical Gaussian.
+   * Checks if is elliptical fitting.
+   *
+   * @return true, if is elliptical fitting
    */
   public boolean isEllipticalFitting() {
     return fitFunction == 3;
   }
 
   /**
-   * @param initialPeakStdDev the initial peak standard deviation. This is estimated from the data
-   *        if zero
+   * Sets the initial peak standard deviation. This is estimated from the data if zero
+   *
+   * @param initialPeakStdDev the new initial peak standard deviation
    */
   public void setInitialPeakStdDev(double initialPeakStdDev) {
     this.initialPeakStdDev = initialPeakStdDev;
   }
 
   /**
-   * @return the the initial peak standard deviation.
+   * Gets the initial peak standard deviation.
+   *
+   * @return the initial peak standard deviation
    */
   public double getInitialPeakStdDev() {
     return initialPeakStdDev;

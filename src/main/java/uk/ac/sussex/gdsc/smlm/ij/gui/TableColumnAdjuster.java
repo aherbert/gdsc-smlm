@@ -48,17 +48,17 @@ import javax.swing.table.TableModel;
 /**
  * Class to manage the widths of columns in a table.
  *
- * Various properties control how the width of the column is calculated. Another property controls
- * whether column width calculation should be dynamic. Finally, various Actions will be added to the
- * table to allow the user to customize the functionality.
+ * <p>Various properties control how the width of the column is calculated. Another property
+ * controls whether column width calculation should be dynamic. Finally, various Actions will be
+ * added to the table to allow the user to customize the functionality.
  *
- * This class was designed to be used with tables that use an auto resize mode of AUTO_RESIZE_OFF.
- * With all other modes you are constrained as the width of the columns must fit inside the table.
- * So if you increase one column, one or more of the other columns must decrease. Because of this
- * the resize mode of RESIZE_ALL_COLUMNS will work the best.
+ * <p>This class was designed to be used with tables that use an auto resize mode of
+ * AUTO_RESIZE_OFF. With all other modes you are constrained as the width of the columns must fit
+ * inside the table. So if you increase one column, one or more of the other columns must decrease.
+ * Because of this the resize mode of RESIZE_ALL_COLUMNS will work the best.
  *
  * @see <a href=
- *      "https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/">https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/</a>
+ *      "https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/">Table-column-adjuster/</a>
  */
 public class TableColumnAdjuster implements PropertyChangeListener, TableModelListener {
   private final JTable table;
@@ -232,9 +232,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
     final TableCellRenderer cellRenderer = table.getCellRenderer(row, column);
     final Component c = table.prepareRenderer(cellRenderer, row, column);
-    final int width = c.getPreferredSize().width + table.getIntercellSpacing().width;
-
-    return width;
+    return c.getPreferredSize().width + table.getIntercellSpacing().width;
   }
 
   /*
@@ -255,7 +253,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
       width = Math.max(width, tableColumn.getPreferredWidth());
     }
 
-    columnSizes.put(tableColumn, new Integer(tableColumn.getWidth()));
+    columnSizes.put(tableColumn, Integer.valueOf(tableColumn.getWidth()));
 
     table.getTableHeader().setResizingColumn(tableColumn);
     tableColumn.setWidth(width);
@@ -363,31 +361,26 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
     }
 
     // Needed when table is sorted.
+    SwingUtilities.invokeLater(() -> {
+      // A cell has been updated
+      final int column = table.convertColumnIndexToView(event.getColumn());
 
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // A cell has been updated
+      if (event.getType() == TableModelEvent.UPDATE && column != -1) {
+        // Only need to worry about an increase in width for this cell
 
-        final int column = table.convertColumnIndexToView(event.getColumn());
+        if (isOnlyAdjustLarger) {
+          final int row = event.getFirstRow();
+          final TableColumn tableColumn = table.getColumnModel().getColumn(column);
 
-        if (event.getType() == TableModelEvent.UPDATE && column != -1) {
-          // Only need to worry about an increase in width for this cell
-
-          if (isOnlyAdjustLarger) {
-            final int row = event.getFirstRow();
-            final TableColumn tableColumn = table.getColumnModel().getColumn(column);
-
-            if (tableColumn.getResizable()) {
-              final int width = getCellDataWidth(row, column);
-              updateTableColumn(column, width);
-            }
-          } else {
-            adjustColumn(column);
+          if (tableColumn.getResizable()) {
+            final int width = getCellDataWidth(row, column);
+            updateTableColumn(column, width);
           }
         } else {
-          adjustColumns();
+          adjustColumn(column);
         }
+      } else {
+        adjustColumns();
       }
     });
   }
@@ -464,7 +457,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
   /**
    * Toggle properties of the TableColumnAdjuster so the user can customize the functionality to
-   * their preferences
+   * their preferences.
    */
   private class ToggleAction extends AbstractAction {
     private static final long serialVersionUID = 8147471317715640019L;
@@ -485,7 +478,6 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
       if (isToggleLarger) {
         setOnlyAdjustLarger(!isOnlyAdjustLarger);
-        return;
       }
     }
   }

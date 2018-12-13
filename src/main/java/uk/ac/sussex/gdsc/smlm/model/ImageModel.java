@@ -712,8 +712,8 @@ public abstract class ImageModel {
       // Create a random unit vector using 2/3 Gaussian variables
       axis = new double[3];
       double length = 0;
-      while (length == 0) // Check the vector has a length
-      {
+      // Check the vector has a length
+      while (length == 0) {
         axis[0] = random.nextGaussian();
         axis[1] = random.nextGaussian();
         if (!diffusion2D) {
@@ -735,7 +735,6 @@ public abstract class ImageModel {
 
     if (confinementDistribution != null) {
       confinementDistribution.initialise(compound.getCoordinates());
-      // int pass=0,fail=0;
     }
 
     for (int t = sequenceStart, step = 0; t <= sequenceEnd; t++, step++) {

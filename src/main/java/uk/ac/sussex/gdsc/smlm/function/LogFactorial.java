@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Compute the log of n!
+ * Compute the log of {@code n!}.
  */
 public class LogFactorial {
   /**
@@ -42,10 +42,9 @@ public class LogFactorial {
   private static volatile double[] MASTER_TABLE;
 
   /** All long-representable factorials. */
-  static final long[] FACTORIALS =
-      new long[] {1l, 1l, 2l, 6l, 24l, 120l, 720l, 5040l, 40320l, 362880l, 3628800l, 39916800l,
-          479001600l, 6227020800l, 87178291200l, 1307674368000l, 20922789888000l, 355687428096000l,
-          6402373705728000l, 121645100408832000l, 2432902008176640000l};
+  static final long[] FACTORIALS = {1L, 1L, 2L, 6L, 24L, 120L, 720L, 5040L, 40320L, 362880L,
+      3628800L, 39916800L, 479001600L, 6227020800L, 87178291200L, 1307674368000L, 20922789888000L,
+      355687428096000L, 6402373705728000L, 121645100408832000L, 2432902008176640000L};
 
   static {
     MASTER_TABLE = new double[FACTORIALS.length];
@@ -55,7 +54,9 @@ public class LogFactorial {
     }
   }
 
-  /** Main lock guarding all access to {@link #MASTER_TABLE}. */
+  /**
+   * Main lock guarding all access to {@link #MASTER_TABLE}.
+   */
   private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
   /**

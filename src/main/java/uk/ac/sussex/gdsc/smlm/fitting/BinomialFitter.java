@@ -380,9 +380,9 @@ public class BinomialFitter {
           ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
         }
         return new PointValuePair(solution.getPointRef(), ss);
-      }
-      // We can do a LVM refit if the number of fitted points is more than 1
-      else if (nFittedPoints > 1) {
+
+        // We can do a LVM refit if the number of fitted points is more than 1.
+      } else if (nFittedPoints > 1) {
         // Improve SS fit with a gradient based LVM optimizer
         final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 

@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
@@ -33,6 +35,9 @@ import java.util.Arrays;
  * Find objects defined by contiguous pixels of the same value.
  */
 public class ObjectAnalyzer {
+  private static final int[] DIR_X_OFFSET = {0, 1, 0, -1, 1, 1, -1, -1};
+  private static final int[] DIR_Y_OFFSET = {-1, 0, 1, 0, -1, 1, 1, -1};
+
   private final ImageProcessor ip;
   private boolean eightConnected;
   private int[] objectMask;
@@ -60,6 +65,8 @@ public class ObjectAnalyzer {
   }
 
   /**
+   * Gets the object mask.
+   *
    * @return A pixel array containing the object number for each pixel in the input image.
    */
   public int[] getObjectMask() {
@@ -68,16 +75,18 @@ public class ObjectAnalyzer {
   }
 
   /**
-   * @param n The object number
+   * Gets the object mask.
+   *
+   * @param objectNumber The object number
    * @return A byte mask of the object (objects pixels set to (byte)255)
    */
-  public byte[] getObjectMask(final int n) {
-    if (n > getMaxObject()) {
+  public @Nullable byte[] getObjectMask(final int objectNumber) {
+    if (objectNumber > getMaxObject()) {
       return null;
     }
     final byte[] pixels = new byte[objectMask.length];
     for (int i = 0; i < pixels.length; i++) {
-      if (objectMask[i] == n) {
+      if (objectMask[i] == objectNumber) {
         pixels[i] = (byte) 255;
       }
     }
@@ -85,17 +94,21 @@ public class ObjectAnalyzer {
   }
 
   /**
-   * @param n The object number
+   * Gets the object processor.
+   *
+   * @param objectNumber The object number
    * @return A byte mask of the object
    */
-  public ByteProcessor getObjectProcessor(final int n) {
-    if (n > getMaxObject()) {
+  public ByteProcessor getObjectProcessor(final int objectNumber) {
+    if (objectNumber > getMaxObject()) {
       return null;
     }
-    return new ByteProcessor(ip.getWidth(), ip.getHeight(), getObjectMask(n));
+    return new ByteProcessor(ip.getWidth(), ip.getHeight(), getObjectMask(objectNumber));
   }
 
   /**
+   * Gets the maximum object number.
+   *
    * @return The maximum object number.
    */
   public int getMaxObject() {
@@ -214,8 +227,6 @@ public class ObjectAnalyzer {
   private int xlimit;
   private int ylimit;
   private int[] offset;
-  private final int[] DIR_X_OFFSET = new int[] {0, 1, 0, -1, 1, 1, -1, -1};
-  private final int[] DIR_Y_OFFSET = new int[] {-1, 0, 1, 0, -1, 1, 1, -1};
 
   /**
    * Creates the direction offset tables.
@@ -270,6 +281,8 @@ public class ObjectAnalyzer {
   }
 
   /**
+   * Gets the image width.
+   *
    * @return The image width.
    */
   public int getWidth() {
@@ -277,6 +290,8 @@ public class ObjectAnalyzer {
   }
 
   /**
+   * Gets the image height.
+   *
    * @return The image height.
    */
   public int getHeight() {
@@ -315,29 +330,36 @@ public class ObjectAnalyzer {
   }
 
   /**
-   * @return The minimum object size. Objects below this are removed.
+   * Gets the minimum object size. Objects below this are removed.
+   *
+   * @return The minimum object size
    */
   public int getMinObjectSize() {
     return minObjectSize;
   }
 
   /**
-   * @param minObjectSize The minimum object size. Objects below this are removed.
+   * Sets the minimum object size. Objects below this are removed.
+   *
+   * @param minObjectSize The minimum object size
    */
   public void setMinObjectSize(int minObjectSize) {
     this.minObjectSize = minObjectSize;
   }
 
   /**
-   * @return True if objects should use 8-connected pixels. The default is 4-connected.
+   * Checks if objects should use 8-connected pixels. The default is 4-connected.
+   *
+   * @return True if objects should use 8-connected pixels
    */
   public boolean isEightConnected() {
     return eightConnected;
   }
 
   /**
-   * @param eightConnected True if objects should use 8-connected pixels. The default is
-   *        4-connected.
+   * Sets to true if objects should use 8-connected pixels. The default is 4-connected.
+   *
+   * @param eightConnected True if objects should use 8-connected pixels
    */
   public void setEightConnected(boolean eightConnected) {
     this.eightConnected = eightConnected;

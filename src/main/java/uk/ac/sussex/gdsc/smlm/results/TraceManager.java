@@ -908,9 +908,9 @@ public class TraceManager {
           return trace;
         }
       }
-    } else
-    // traceMode == TraceMode.SINGLE_LINKAGE
-    {
+    } else {
+      // traceMode == TraceMode.SINGLE_LINKAGE
+
       // Find the closest spot
       minD = dThresh2;
       int minI = -1;
@@ -971,9 +971,7 @@ public class TraceManager {
           }
 
           return (nextMinD > dExclusion2) ? trace : 0;
-        }
-        // If the same frame
-        else if (currentT == endLocalisations[i].t) {
+        } else if (currentT == endLocalisations[i].t) {
           // Store the minimum distance to the next spot in the same frame
           if (d2 < nextMinD) {
             nextMinD = d2;
@@ -1014,9 +1012,7 @@ public class TraceManager {
           }
 
           return (nextMinD > dExclusion2) ? trace : 0;
-        }
-        // If the same frame
-        else if (currentT == endLocalisations[i].t) {
+        } else if (currentT == endLocalisations[i].t) {
           // Store the minimum distance to the next spot in the same frame
           if (d2 < nextMinD) {
             nextMinD = d2;
@@ -1027,9 +1023,9 @@ public class TraceManager {
         }
         currentT = endLocalisations[i].t;
       }
-    } else
-    // traceMode == TraceMode.SINGLE_LINKAGE
-    {
+    } else {
+      // traceMode == TraceMode.SINGLE_LINKAGE
+
       // Find the closest spot
       minD = dThresh2;
       int minI = -1;
@@ -1184,9 +1180,9 @@ public class TraceManager {
           return trace;
         }
       }
-    } else
-    // traceMode == TraceMode.SINGLE_LINKAGE
-    {
+    } else {
+      // traceMode == TraceMode.SINGLE_LINKAGE
+
       // Find the closest spot
       minD = dThresh2;
       int minI = -1;
@@ -1276,9 +1272,7 @@ public class TraceManager {
           }
 
           return (nextMinD > dExclusion2) ? trace : 0;
-        }
-        // If the same frame
-        else if (currentT == endLocalisations[i].t) {
+        } else if (currentT == endLocalisations[i].t) {
           // Store the minimum distance to the next spot in the same frame
           if (d2 < nextMinD) {
             nextMinD = d2;
@@ -1327,9 +1321,7 @@ public class TraceManager {
           }
 
           return (nextMinD > dExclusion2) ? trace : 0;
-        }
-        // If the same frame
-        else if (currentT == endLocalisations[i].t) {
+        } else if (currentT == endLocalisations[i].t) {
           // Store the minimum distance to the next spot in the same frame
           if (d2 < nextMinD) {
             nextMinD = d2;
@@ -1340,9 +1332,9 @@ public class TraceManager {
         }
         currentT = endLocalisations[i].t;
       }
-    } else
-    // traceMode == TraceMode.SINGLE_LINKAGE
-    {
+    } else {
+      // traceMode == TraceMode.SINGLE_LINKAGE
+
       // Find the closest spot
       minD = dThresh2;
       int minI = -1;

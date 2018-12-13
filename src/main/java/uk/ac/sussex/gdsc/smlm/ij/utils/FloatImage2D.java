@@ -59,12 +59,6 @@ public class FloatImage2D extends Image2D {
     super(image);
   }
 
-  /** {@inheritDoc} */
-  @Override
-  protected void createData(int size) {
-    data = new float[size];
-  }
-
   /**
    * Instantiates a new 2D image.
    *
@@ -96,10 +90,26 @@ public class FloatImage2D extends Image2D {
     this.data = data;
   }
 
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected FloatImage2D(FloatImage2D source) {
+    super(source);
+    this.data = source.data.clone();
+  }
+
   /** {@inheritDoc} */
   @Override
   public FloatImage2D copy() {
-    return new FloatImage2D(nc, nr, data.clone(), false);
+    return new FloatImage2D(this);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void createData(int size) {
+    data = new float[size];
   }
 
   /**
@@ -119,8 +129,8 @@ public class FloatImage2D extends Image2D {
 
   /** {@inheritDoc} */
   @Override
-  public FloatImage2D crop(int x, int y, int w, int h) {
-    return crop(x, y, w, h, null);
+  public FloatImage2D crop(int x, int y, int width, int height) {
+    return crop(x, y, width, height, null);
   }
 
   /**
@@ -128,28 +138,29 @@ public class FloatImage2D extends Image2D {
    *
    * @param x the x index
    * @param y the y index
-   * @param w the width
-   * @param h the height
+   * @param width the width
+   * @param height the height
    * @param region the cropped data (will be reused if the correct size)
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public FloatImage2D crop(int x, int y, int w, int h, float[] region) {
+  public FloatImage2D crop(int x, int y, int width, int height, float[] region) {
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1
+        || (long) y + height > nr) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final int size = h * w;
+    final int size = height * width;
     if (region == null || region.length != size) {
       region = new float[size];
     }
     int base = y * nc + x;
-    for (int r = 0, i = 0; r < h; r++) {
-      System.arraycopy(data, base, region, i, w);
+    for (int r = 0, i = 0; r < height; r++) {
+      System.arraycopy(data, base, region, i, width);
       base += nc;
-      i += w;
+      i += width;
     }
-    return new FloatImage2D(w, h, region, false);
+    return new FloatImage2D(width, height, region, false);
   }
 
   /**
@@ -158,22 +169,23 @@ public class FloatImage2D extends Image2D {
    * @param image the image
    * @param x the x index
    * @param y the y index
-   * @param w the width
-   * @param h the height
+   * @param width the width
+   * @param height the height
    * @param region the cropped data (will be reused if the correct size)
    * @return the cropped data
    * @throws IllegalArgumentException if the region is not within the data
    */
-  public static FloatImage2D crop(ImageProcessor image, int x, int y, int w, int h,
+  public static FloatImage2D crop(ImageProcessor image, int x, int y, int width, int height,
       float[] region) {
     final int nc = image.getWidth();
     final int nr = image.getHeight();
 
     // Check the region range
-    if (x < 0 || w < 1 || (long) x + w > nc || y < 0 || h < 1 || (long) y + h > nr) {
+    if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1
+        || (long) y + height > nr) {
       throw new IllegalArgumentException("Region not within the data");
     }
-    final int size = checkSize(w, h, true);
+    final int size = checkSize(width, height, true);
     if (region == null || region.length != size) {
       region = new float[size];
     }
@@ -181,8 +193,8 @@ public class FloatImage2D extends Image2D {
     if (image.getBitDepth() != 32) {
       // Handle non-float data
       int base = y * nc + x;
-      for (int r = 0, i = 0; r < h; r++) {
-        for (int c = 0; c < w; c++) {
+      for (int r = 0, i = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
           region[i++] = image.getf(base + c);
         }
         base += nc;
@@ -190,13 +202,13 @@ public class FloatImage2D extends Image2D {
     } else {
       final float[] data = (float[]) image.getPixels();
       int base = y * nc + x;
-      for (int r = 0, i = 0; r < h; r++) {
-        System.arraycopy(data, base, region, i, w);
+      for (int r = 0, i = 0; r < height; r++) {
+        System.arraycopy(data, base, region, i, width);
         base += nc;
-        i += w;
+        i += width;
       }
     }
-    return new FloatImage2D(w, h, region, false);
+    return new FloatImage2D(width, height, region, false);
   }
 
   @Override
@@ -218,58 +230,58 @@ public class FloatImage2D extends Image2D {
    */
   public void insert(int x, int y, FloatImage2D image) {
     // Check the region range
-    final int w = image.getWidth();
-    final int h = image.getHeight();
-    if (w < 1 || h < 1) {
+    final int width = image.getWidth();
+    final int height = image.getHeight();
+    if (width < 1 || height < 1) {
       return;
     }
-    if (x < 0 || (long) x + w > nc || y < 0 || (long) y + h > nr) {
+    if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr) {
       throw new IllegalArgumentException("Region not within the data");
     }
     final float[] region = image.data;
     int base = y * nc + x;
-    for (int r = 0, i = 0; r < h; r++) {
-      System.arraycopy(region, i, data, base, w);
+    for (int r = 0, i = 0; r < height; r++) {
+      System.arraycopy(region, i, data, base, width);
       base += nc;
-      i += w;
+      i += width;
     }
   }
 
   @Override
-  protected void copyTo(int i, float[] buffer, int j, int size) {
-    System.arraycopy(data, i, buffer, j, size);
+  protected void copyTo(int index, float[] buffer, int bufferIndex, int size) {
+    System.arraycopy(data, index, buffer, bufferIndex, size);
   }
 
   @Override
-  protected void copyFrom(float[] buffer, int j, int size, int i) {
-    System.arraycopy(buffer, j, data, i, size);
+  protected void copyFrom(float[] buffer, int bufferIndex, int size, int index) {
+    System.arraycopy(buffer, bufferIndex, data, index, size);
   }
 
   @Override
-  public double get(int i) {
-    return data[i];
+  public double get(int index) {
+    return data[index];
   }
 
   @Override
-  public void set(int i, double value) {
-    data[i] = (float) value;
+  public void set(int index, double value) {
+    data[index] = (float) value;
   }
 
   @Override
-  public float getf(int i) {
-    return data[i];
+  public float getf(int index) {
+    return data[index];
   }
 
   @Override
-  public void setf(int i, float value) {
-    data[i] = value;
+  public void setf(int index, float value) {
+    data[index] = value;
   }
 
   @Override
-  protected void fill(int i, int size, double value) {
+  protected void fill(int index, int size, double value) {
     final float v = (float) value;
     while (size-- > 0) {
-      data[i++] = v;
+      data[index++] = v;
     }
   }
 }

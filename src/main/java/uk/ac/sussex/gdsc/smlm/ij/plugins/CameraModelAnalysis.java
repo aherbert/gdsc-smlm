@@ -290,8 +290,8 @@ public class CameraModelAnalysis
           settings.setEmGain(egd.getNextNumber());
           settings.setEmNoise(egd.getNextNumber());
           settings.setEmSamples(Math.max(1, (int) egd.getNextNumber()));
-        } else // MODE_SCMOS
-        {
+        } else {
+          // MODE_SCMOS
           settings.setCmosGain(egd.getNextNumber());
           settings.setCmosNoise(egd.getNextNumber());
         }
@@ -543,8 +543,8 @@ public class CameraModelAnalysis
       if (s1.getCmosNoise() != s2.getCmosNoise()) {
         return true;
       }
-    } else // MODE_EM_CCD
-    {
+    } else {
+      // MODE_EM_CCD
       if (s1.getEmGain() != s2.getEmGain()) {
         return true;
       }

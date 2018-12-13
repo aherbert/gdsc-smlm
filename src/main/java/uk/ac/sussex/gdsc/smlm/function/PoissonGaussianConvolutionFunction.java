@@ -175,20 +175,18 @@ public class PoissonGaussianConvolutionFunction
     // the Poisson PMF and Gaussian PDF
     if (computePMF) {
       for (int q = qmin; q <= qmax; q++) {
+        final double poisson = FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
+        // Use Gaussian CDF
         final double x = getX(D, q);
-        p +=
-            // Poisson PMF
-            FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q)) *
-            // Gaussian CDF
-                (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+        final double gaussian = (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+        p += poisson * gaussian;
       }
     } else {
       for (int q = qmin; q <= qmax; q++) {
-        p += FastMath.exp(
-            // Poisson
-            q * logu - u - logFactorial.getLogFUnsafe(q)
-            // Gaussian
-                - (MathUtils.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+        final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
+        final double x = getX(D, q);
+        final double logGaussian = -(MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian;
+        p += FastMath.exp(logPoisson + logGaussian);
       }
     }
 
@@ -212,7 +210,7 @@ public class PoissonGaussianConvolutionFunction
    * @return the cumulative density
    */
   double gaussianCDF(final double x) {
-    // return org.apache.commons.math3.special.CDF.erf(x / sqrt_var_by_2)
+    // return org.apache.commons.math3.special.Erf.erf(x / sqrt_var_by_2)
     // This may not be precise enough.
     // Absolute error is <3e-7. Not sure what relative error is.
     // The standard CDF is much slower.
@@ -259,20 +257,21 @@ public class PoissonGaussianConvolutionFunction
     double p = 0;
     if (computePMF) {
       for (int q = qmin; q <= qmax; q++) {
+        final double poisson = FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
+        // Use Gaussian CDF
         final double x = getX(D, q);
-        p +=
-            // Poisson PMF
-            FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q)) *
-            // Gaussian CDF
-                (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+        final double gaussian = (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+        p += poisson * gaussian;
       }
     } else {
       for (int q = qmin; q <= qmax; q++) {
-        p += FastMath.exp(
-            // Poisson
-            q * logu - u - logFactorial.getLogFUnsafe(q)
+        final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
+        final double x = getX(D, q);
+        // final double logGaussian = (MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian;
+        // p += FastMath.exp(logPoisson - logGaussian);
+        p += FastMath.exp(logPoisson
             // Gaussian
-                - (MathUtils.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+            - (MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian);
       }
     }
     return Math.log(p);

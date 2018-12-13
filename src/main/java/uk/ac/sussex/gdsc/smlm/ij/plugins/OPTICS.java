@@ -1711,8 +1711,8 @@ public class OPTICS implements PlugIn {
           if (distance > limits[1]) {
             limits[1] = distance * 1.05;
           }
-        } else // Assume Optics Xi
-        {
+        } else {
+          // Assume Optics Xi
           if (settings.getUpperLimit() > 0) {
             distance = settings.getUpperLimit();
           }
@@ -3555,8 +3555,8 @@ public class OPTICS implements PlugIn {
                   inputSettings.setSaveApproximateSets(egd.getNextBoolean());
                   inputSettings.setSampleMode(egd.getNextChoiceIndex());
                 }
-              } else // OPTICS
-              {
+              } else {
+                // OPTICS
                 egd.addNumericField("Generating_distance", inputSettings.getGeneratingDistance(), 2,
                     6, "nm");
                 egd.showDialog(true, gd);
@@ -3612,8 +3612,8 @@ public class OPTICS implements PlugIn {
                 inputSettings.setTopLevel(egd.getNextBoolean());
                 inputSettings.setUpperLimit(Math.abs(egd.getNextNumber()));
                 inputSettings.setLowerLimit(Math.abs(egd.getNextNumber()));
-              } else // DBSCAN
-              {
+              } else {
+                // DBSCAN
                 egd.addMessage(ClusteringMode.DBSCAN.toString() + " options:");
                 egd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 4,
                     10, "nm");

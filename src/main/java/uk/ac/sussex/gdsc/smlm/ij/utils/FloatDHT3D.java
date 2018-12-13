@@ -81,32 +81,37 @@ public class FloatDHT3D extends FloatImage3D {
    * @param nc the number of columns
    * @param nr the number of rows
    * @param ns the number of slices
-   * @param nr_by_nc the number of rows multiplied by the number of columns
+   * @param nrByNc the number of rows multiplied by the number of columns
    * @param data the data
    * @param isFrequencyDomain the is frequency domain
    * @param dht the dht
    */
-  private FloatDHT3D(int nc, int nr, int ns, int nr_by_nc, float[] data, boolean isFrequencyDomain,
+  private FloatDHT3D(int nc, int nr, int ns, int nrByNc, float[] data, boolean isFrequencyDomain,
       FloatDHT_3D dht) {
-    super(nc, nr, ns, nr_by_nc, data);
+    super(nc, nr, ns, nrByNc, data);
     this.isFrequencyDomain = isFrequencyDomain;
     this.dht = dht; // This can be reused across objects
   }
 
   /**
-   * Return a copy of the 3D discrete Hartley transform.
+   * Copy constructor.
    *
-   * @return the copy
+   * @param source the source
    */
+  protected FloatDHT3D(FloatDHT3D source) {
+    super(source);
+    isFrequencyDomain = source.isFrequencyDomain;
+    dht = source.dht;
+    h2e = source.h2e;
+    h2o = source.h2o;
+    mag = source.mag;
+    jj = source.jj;
+  }
+
+  /** {@inheritDoc} */
   @Override
   public FloatDHT3D copy() {
-    final FloatDHT3D copy =
-        new FloatDHT3D(nc, nr, ns, nr_by_nc, data.clone(), isFrequencyDomain, dht);
-    copy.h2e = h2e;
-    copy.h2o = h2o;
-    copy.jj = jj;
-    copy.mag = mag;
-    return copy;
+    return new FloatDHT3D(this);
   }
 
   /**
@@ -157,23 +162,23 @@ public class FloatDHT3D extends FloatImage3D {
     if (h2e == null) {
       // Do this on new arrays for thread safety (i.e. concurrent initialisation)
       final float[] h2 = getData();
-      final double[] h2e = new double[h2.length];
-      final double[] h2o = new double[h2e.length];
-      final int[] jj = new int[h2e.length];
-      for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s) {
-        for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r) {
-          for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
-            final int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-            h2e[i] = ((double) h2[i] + (double) h2[j]) / 2.0;
-            h2o[i] = ((double) h2[i] - (double) h2[j]) / 2.0;
-            jj[i] = j;
+      final double[] lh2e = new double[h2.length];
+      final double[] lh2o = new double[lh2e.length];
+      final int[] ljj = new int[lh2e.length];
+      for (int s = 0, nsMinusS = 0, i = 0; s < ns; s++, nsMinusS = ns - s) {
+        for (int r = 0, nrMinusR = 0; r < nr; r++, nrMinusR = nr - r) {
+          for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
+            final int j = nsMinusS * nrByNc + nrMinusR * nc + ncMinusC;
+            lh2e[i] = ((double) h2[i] + (double) h2[j]) / 2.0;
+            lh2o[i] = ((double) h2[i] - (double) h2[j]) / 2.0;
+            ljj[i] = j;
           }
         }
       }
-      this.h2o = h2o;
-      this.jj = jj;
+      this.h2o = lh2o;
+      this.jj = ljj;
       // Assign at the end for thread safety (i.e. concurrent initialisation)
-      this.h2e = h2e;
+      this.h2e = lh2e;
     }
   }
 
@@ -189,15 +194,15 @@ public class FloatDHT3D extends FloatImage3D {
     initialiseFastMultiply();
     if (mag == null) {
       // Do this on new arrays for thread safety (i.e. concurrent initialisation)
-      final double[] mag = new double[h2e.length];
+      final double[] lmag = new double[h2e.length];
       final float[] h2 = getData();
       for (int i = 0; i < h2.length; i++) {
         // Note that pre-computed h2e and h2o are divided by 2 so we also
         // divide the magnitude by 2 to allow reuse of the pre-computed values
         // in the divide operation (which does not require h2e/2 and h2o/2)
-        mag[i] = Math.max(1e-20, h2[i] * h2[i] + h2[jj[i]] * h2[jj[i]]) / 2;
+        lmag[i] = Math.max(1e-20, h2[i] * h2[i] + h2[jj[i]] * h2[jj[i]]) / 2;
       }
-      this.mag = mag;
+      this.mag = lmag;
     }
   }
 
@@ -271,23 +276,23 @@ public class FloatDHT3D extends FloatImage3D {
       tmp = new float[h1.length];
     }
 
-    for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s) {
-      for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r) {
-        for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int s = 0, nsMinusS = 0, i = 0; s < ns; s++, nsMinusS = ns - s) {
+      for (int r = 0, nrMinusR = 0; r < nr; r++, nrMinusR = nr - r) {
+        for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
           // This is actually doing for 3D data stored as x[slices][rows][columns]
           // https://en.wikipedia.org/wiki/Discrete_Hartley_transform
           // h2e = (h2[s][r][c] + h2[Ns-s][Nr-r][Nr-c]) / 2;
           // h2o = (h2[s][r][c] - h2[Ns-s][Nr-r][Nr-c]) / 2;
           // tmp[s][r][c] = (float) (h1[s][r][c] * h2e + h1[Ns-s][Nr-r][Nc-c] * h2o);
-          final int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-          final double h2e = ((double) h2[i] + (double) h2[j]) / 2.0;
-          final double h2o = ((double) h2[i] - (double) h2[j]) / 2.0;
-          tmp[i] = (float) (h1[i] * h2e + h1[j] * h2o);
+          final int j = nsMinusS * nrByNc + nrMinusR * nc + ncMinusC;
+          final double lh2e = ((double) h2[i] + (double) h2[j]) / 2.0;
+          final double lh2o = ((double) h2[i] - (double) h2[j]) / 2.0;
+          tmp[i] = (float) (h1[i] * lh2e + h1[j] * lh2o);
         }
       }
     }
 
-    return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+    return new FloatDHT3D(nc, nr, ns, nrByNc, tmp, true, this.dht);
   }
 
   /**
@@ -309,7 +314,7 @@ public class FloatDHT3D extends FloatImage3D {
     for (int i = 0; i < h1.length; i++) {
       tmp[i] = (float) (h1[i] * h2e[i] + h1[jj[i]] * h2o[i]);
     }
-    return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+    return new FloatDHT3D(nc, nr, ns, nrByNc, tmp, true, this.dht);
   }
 
   /**
@@ -357,19 +362,19 @@ public class FloatDHT3D extends FloatImage3D {
       tmp = new float[h1.length];
     }
 
-    for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s) {
-      for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r) {
-        for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
-          final int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-          final double h2e = ((double) h2[i] + (double) h2[j]) / 2.0;
-          final double h2o = ((double) h2[i] - (double) h2[j]) / 2.0;
+    for (int s = 0, nsMinusS = 0, i = 0; s < ns; s++, nsMinusS = ns - s) {
+      for (int r = 0, nrMinusR = 0; r < nr; r++, nrMinusR = nr - r) {
+        for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
+          final int j = nsMinusS * nrByNc + nrMinusR * nc + ncMinusC;
+          final double lh2e = ((double) h2[i] + (double) h2[j]) / 2.0;
+          final double lh2o = ((double) h2[i] - (double) h2[j]) / 2.0;
           // As per multiply but reverse the addition sign for the conjugate
-          tmp[i] = (float) (h1[i] * h2e - h1[j] * h2o);
+          tmp[i] = (float) (h1[i] * lh2e - h1[j] * lh2o);
         }
       }
     }
 
-    return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+    return new FloatDHT3D(nc, nr, ns, nrByNc, tmp, true, this.dht);
   }
 
   /**
@@ -391,7 +396,7 @@ public class FloatDHT3D extends FloatImage3D {
     for (int i = 0; i < h1.length; i++) {
       tmp[i] = (float) (h1[i] * h2e[i] - h1[jj[i]] * h2o[i]);
     }
-    return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+    return new FloatDHT3D(nc, nr, ns, nrByNc, tmp, true, this.dht);
   }
 
   /**
@@ -442,25 +447,25 @@ public class FloatDHT3D extends FloatImage3D {
       tmp = new float[h1.length];
     }
 
-    for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s) {
-      for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r) {
-        for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int s = 0, nsMinusS = 0, i = 0; s < ns; s++, nsMinusS = ns - s) {
+      for (int r = 0, nrMinusR = 0; r < nr; r++, nrMinusR = nr - r) {
+        for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
           // This is a copy of the divide operation in ij.process.FHT
-          final int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+          final int j = nsMinusS * nrByNc + nrMinusR * nc + ncMinusC;
           final double h2i = h2[i];
           final double h2j = h2[j];
-          double mag = h2i * h2i + h2j * h2j;
-          if (mag < 1e-20) {
-            mag = 1e-20;
+          double lmag = h2i * h2i + h2j * h2j;
+          if (lmag < 1e-20) {
+            lmag = 1e-20;
           }
-          final double h2e = (h2i + h2j);
-          final double h2o = (h2i - h2j);
-          tmp[i] = (float) ((h1[i] * h2e - h1[j] * h2o) / mag);
+          final double lh2e = (h2i + h2j);
+          final double lh2o = (h2i - h2j);
+          tmp[i] = (float) ((h1[i] * lh2e - h1[j] * lh2o) / lmag);
         }
       }
     }
 
-    return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+    return new FloatDHT3D(nc, nr, ns, nrByNc, tmp, true, this.dht);
   }
 
   /**
@@ -482,7 +487,7 @@ public class FloatDHT3D extends FloatImage3D {
     for (int i = 0; i < h1.length; i++) {
       tmp[i] = (float) ((h1[i] * h2e[i] - h1[jj[i]] * h2o[i]) / mag[i]);
     }
-    return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, this.dht);
+    return new FloatDHT3D(nc, nr, ns, nrByNc, tmp, true, this.dht);
   }
 
   /**
@@ -495,9 +500,8 @@ public class FloatDHT3D extends FloatImage3D {
     if (dht.ns != ns || dht.nr != nr || dht.nc != nc) {
       throw new IllegalArgumentException("Dimension mismatch");
     }
-    if (!dht.isFrequencyDomain || !isFrequencyDomain) {
-      throw new IllegalArgumentException("Require frequency domain DHT");
-    }
+    DhtHelper.checkFrequencyDomain(dht.isFrequencyDomain);
+    DhtHelper.checkFrequencyDomain(isFrequencyDomain);
   }
 
   /**
@@ -513,9 +517,7 @@ public class FloatDHT3D extends FloatImage3D {
    *      wiki/Hartley_transform#Relation_to_Fourier_transform</a>
    */
   public FloatImage3D[] toDFT(float[] real, float[] imaginary) {
-    if (!isFrequencyDomain) {
-      throw new IllegalArgumentException("Require frequency domain DHT");
-    }
+    DhtHelper.checkFrequencyDomain(isFrequencyDomain);
 
     final float[] h1 = this.data;
     if (real == null || real.length != h1.length) {
@@ -525,19 +527,19 @@ public class FloatDHT3D extends FloatImage3D {
       imaginary = new float[h1.length];
     }
 
-    for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s) {
-      for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r) {
-        for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int s = 0, nsMinusS = 0, i = 0; s < ns; s++, nsMinusS = ns - s) {
+      for (int r = 0, nrMinusR = 0; r < nr; r++, nrMinusR = nr - r) {
+        for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
           // This is a copy of the getComplexTransform operation in ij.process.FHT
-          final int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+          final int j = nsMinusS * nrByNc + nrMinusR * nc + ncMinusC;
           real[i] = (h1[i] + h1[j]) * 0.5f;
           imaginary[i] = (-h1[i] + h1[j]) * 0.5f;
         }
       }
     }
 
-    return new FloatImage3D[] {new FloatImage3D(nc, nr, ns, nr_by_nc, real),
-        new FloatImage3D(nc, nr, ns, nr_by_nc, imaginary)};
+    return new FloatImage3D[] {new FloatImage3D(nc, nr, ns, nrByNc, real),
+        new FloatImage3D(nc, nr, ns, nrByNc, imaginary)};
   }
 
   /**
@@ -563,12 +565,12 @@ public class FloatDHT3D extends FloatImage3D {
     final int nc = real.nc;
     final int nr = real.nr;
     final int ns = real.ns;
-    final int nr_by_nc = real.nr_by_nc;
+    final int nrByNc = real.nrByNc;
 
-    for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s) {
-      for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r) {
-        for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
-          final int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+    for (int s = 0, nsMinusS = 0, i = 0; s < ns; s++, nsMinusS = ns - s) {
+      for (int r = 0, nrMinusR = 0; r < nr; r++, nrMinusR = nr - r) {
+        for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
+          final int j = nsMinusS * nrByNc + nrMinusR * nc + ncMinusC;
           // Reverse the toDFT() method
           // re = (a+b)/2
           // im = (-a+b)/2
@@ -580,7 +582,7 @@ public class FloatDHT3D extends FloatImage3D {
       }
     }
 
-    return new FloatDHT3D(nc, nr, ns, nr_by_nc, tmp, true, new FloatDHT_3D(ns, nr, nc));
+    return new FloatDHT3D(nc, nr, ns, nrByNc, tmp, true, new FloatDHT_3D(ns, nr, nc));
   }
 
   /**
@@ -592,26 +594,24 @@ public class FloatDHT3D extends FloatImage3D {
    * @throws IllegalArgumentException if not in the frequency domain
    */
   public FloatImage3D getAbsoluteValue(float[] tmp) {
-    if (!isFrequencyDomain) {
-      throw new IllegalArgumentException("Require frequency domain DHT");
-    }
+    DhtHelper.checkFrequencyDomain(isFrequencyDomain);
 
     final float[] h1 = this.data;
     if (tmp == null || tmp.length != h1.length) {
       tmp = new float[h1.length];
     }
 
-    for (int s = 0, ns_m_s = 0, i = 0; s < ns; s++, ns_m_s = ns - s) {
-      for (int r = 0, nr_m_r = 0; r < nr; r++, nr_m_r = nr - r) {
-        for (int c = 0, nc_m_c = 0; c < nc; c++, nc_m_c = nc - c, i++) {
+    for (int s = 0, nsMinusS = 0, i = 0; s < ns; s++, nsMinusS = ns - s) {
+      for (int r = 0, nrMinusR = 0; r < nr; r++, nrMinusR = nr - r) {
+        for (int c = 0, ncMinusC = 0; c < nc; c++, ncMinusC = nc - c, i++) {
           // This is a copy of the amplitude operation in ij.process.FHT
-          final int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
+          final int j = nsMinusS * nrByNc + nrMinusR * nc + ncMinusC;
           tmp[i] = (float) Math.sqrt(h1[i] * h1[i] + h1[j] * h1[j]);
         }
       }
     }
 
-    return new FloatImage3D(nc, nr, ns, nr_by_nc, tmp);
+    return new FloatImage3D(nc, nr, ns, nrByNc, tmp);
   }
 
   /**
@@ -661,60 +661,31 @@ public class FloatDHT3D extends FloatImage3D {
       throw new IllegalArgumentException("Require even dimensions");
     }
 
-    final int ns_2 = ns / 2;
-    final int nr_2 = nr / 2;
-    final int nc_2 = nc / 2;
+    final int nsOver2 = ns / 2;
+    final int nrOver2 = nr / 2;
+    final int ncOver2 = nc / 2;
 
     final float[] tmp = new float[nc];
 
-    final int nr_by_nc = image.nr_by_nc;
+    final int nrByNc = image.nrByNc;
     final float[] a = image.data;
 
-    for (int s = 0; s < ns_2; s++) {
+    for (int s = 0; s < nsOver2; s++) {
       // Insert points
-      final int ia = s * nr_by_nc;
-      final int ib = (s + ns_2) * nr_by_nc;
+      final int ia = s * nrByNc;
+      final int ib = (s + nsOver2) * nrByNc;
 
       //@formatter:off
-      // We swap: 0 <=> nc_2, 0 <=> nc_2
+      // We swap: 0 <=> ncOver2, 0 <=> ncOver2
       // 1 <=> 7
-      swap(a, ia, a, ib, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
+      swap(a, ia, a, ib, nc, ncOver2,       0,       0, nrOver2, ncOver2, nrOver2, tmp);
       // 2 <=> 8
-      swap(a, ia, a, ib, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
+      swap(a, ia, a, ib, nc,       0,       0, ncOver2, nrOver2, ncOver2, nrOver2, tmp);
       // 3 <=> 5
-      swap(a, ia, a, ib, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
+      swap(a, ia, a, ib, nc,       0, nrOver2, ncOver2,    0,    ncOver2, nrOver2, tmp);
       // 4 <=> 6
-      swap(a, ia, a, ib, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
+      swap(a, ia, a, ib, nc, ncOver2, nrOver2,       0,    0,    ncOver2, nrOver2, tmp);
       //@formatter:on
-    }
-  }
-
-  /**
-   * Swap the rectangle pixel values from a with b.
-   *
-   * <p>No bounds checks are performed so use with care!
-   *
-   * @param a the a pixels
-   * @param ia the insert position for a
-   * @param b the b pixels (must match a.length)
-   * @param ib the insert position for b
-   * @param width the width of each set of XY pixels
-   * @param ax the x origin from a
-   * @param ay the y origin from a
-   * @param bx the x origin from b
-   * @param by the b origin from b
-   * @param w the width of the rectangle to swap
-   * @param h the height of the rectangle to swap
-   * @param tmp the tmp buffer (must be at least width in length)
-   */
-  private static void swap(float[] a, int ia, float[] b, int ib, int width, int ax, int ay, int bx,
-      int by, int w, int h, float[] tmp) {
-    for (int ayy = ay + h, byy = by + h - 1; ayy-- > ay; byy--) {
-      final int ai = ia + ayy * width + ax;
-      final int bi = ib + byy * width + bx;
-      System.arraycopy(a, ai, tmp, 0, w);
-      System.arraycopy(b, bi, a, ai, w);
-      System.arraycopy(tmp, 0, b, bi, w);
     }
   }
 
@@ -747,27 +718,56 @@ public class FloatDHT3D extends FloatImage3D {
       throw new IllegalArgumentException("Require even dimensions");
     }
 
-    final int ns_2 = ns / 2;
-    final int nr_2 = nr / 2;
-    final int nc_2 = nc / 2;
+    final int nsOver2 = ns / 2;
+    final int nrOver2 = nr / 2;
+    final int ncOver2 = nc / 2;
 
     final float[] tmp = new float[nc];
 
-    for (int s = 0; s < ns_2; s++) {
+    for (int s = 0; s < nsOver2; s++) {
       // slice index is 1-based
       final float[] a = (float[]) stack.getPixels(1 + s);
-      final float[] b = (float[]) stack.getPixels(1 + s + ns_2);
+      final float[] b = (float[]) stack.getPixels(1 + s + nsOver2);
       //@formatter:off
-      // We swap: 0 <=> nc_2, 0 <=> nc_2
+      // We swap: 0 <=> ncOver2, 0 <=> ncOver2
       // 1 <=> 7
-      Fht.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
+      Fht.swap(a, b, nc, ncOver2,       0,       0, nrOver2, ncOver2, nrOver2, tmp);
       // 2 <=> 8
-      Fht.swap(a, b, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
+      Fht.swap(a, b, nc,       0,       0, ncOver2, nrOver2, ncOver2, nrOver2, tmp);
       // 3 <=> 5
-      Fht.swap(a, b, nc,    0, nr_2, nc_2,    0, nc_2, nr_2, tmp);
+      Fht.swap(a, b, nc,       0, nrOver2, ncOver2,       0, ncOver2, nrOver2, tmp);
       // 4 <=> 6
-      Fht.swap(a, b, nc, nc_2, nr_2,    0,    0, nc_2, nr_2, tmp);
+      Fht.swap(a, b, nc, ncOver2, nrOver2,       0,       0, ncOver2, nrOver2, tmp);
       //@formatter:on
+    }
+  }
+
+  /**
+   * Swap the rectangle pixel values from a with b.
+   *
+   * <p>No bounds checks are performed so use with care!
+   *
+   * @param apixels the a pixels
+   * @param ia the insert position for a
+   * @param bpixels the b pixels (must match a.length)
+   * @param ib the insert position for b
+   * @param width the width of each set of XY pixels
+   * @param ax the x origin from a
+   * @param ay the y origin from a
+   * @param bx the x origin from b
+   * @param by the b origin from b
+   * @param rw the width of the rectangle to swap
+   * @param rh the height of the rectangle to swap
+   * @param tmp the tmp buffer (must be at least width in length)
+   */
+  private static void swap(float[] apixels, int ia, float[] bpixels, int ib, int width, int ax,
+      int ay, int bx, int by, int rw, int rh, float[] tmp) {
+    for (int ayy = ay + rh, byy = by + rh - 1; ayy-- > ay; byy--) {
+      final int ai = ia + ayy * width + ax;
+      final int bi = ib + byy * width + bx;
+      System.arraycopy(apixels, ai, tmp, 0, rw);
+      System.arraycopy(bpixels, bi, apixels, ai, rw);
+      System.arraycopy(tmp, 0, bpixels, bi, rw);
     }
   }
 }
