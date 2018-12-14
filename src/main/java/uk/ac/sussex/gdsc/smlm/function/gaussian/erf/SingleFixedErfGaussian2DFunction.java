@@ -201,8 +201,6 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
    * @param i Input predictor
    * @param duda Partial gradient of function with respect to each coefficient
    * @return The predicted value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int, double[])
    */
   @Override
   public double eval(final int i, final double[] duda) {

@@ -435,7 +435,7 @@ public class PSFDrift implements PlugIn {
     fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
     fitConfig.setMinWidthFactor(gd.getNextNumber());
-    fitConfig.setWidthFactor(gd.getNextNumber());
+    fitConfig.setMaxWidthFactor(gd.getNextNumber());
     offsetFitting = gd.getNextBoolean();
     startOffset = Math.abs(gd.getNextNumber());
     comFitting = gd.getNextBoolean();

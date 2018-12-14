@@ -49,11 +49,16 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
  */
 public class NonLinearFit extends LSEBaseFunctionSolver
     implements MLEFunctionSolver, WLSEFunctionSolver {
-  /** Index for the best sum-of-squares in {@link #sumOfSquaresWorking}. */
-  protected static final int SUM_OF_SQUARES_BEST = 0;
-  /** Index for the new sum-of-squares in {@link #sumOfSquaresWorking}. */
+  /**
+   * Index for the best sum-of-squares in {@link #sumOfSquaresWorking}.
+   */  protected static final int SUM_OF_SQUARES_BEST = 0;
+  /**
+   * Index for the new sum-of-squares in {@link #sumOfSquaresWorking}.
+   */
   protected static final int SUM_OF_SQUARES_OLD = 1;
-  /** Index for the previous sum-of-squares in {@link #sumOfSquaresWorking}. */
+  /**
+   * Index for the previous sum-of-squares in {@link #sumOfSquaresWorking}.
+   */
   protected static final int SUM_OF_SQUARES_NEW = 2;
 
   /** The solver. */

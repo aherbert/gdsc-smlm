@@ -66,8 +66,6 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
    * crossover.
    *
    * <p>The positions are then chosen randomly and the new chromosome generated.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.ga.Recombiner#cross(Chromosome, Chromosome)
    */
   @Override
   public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2) {

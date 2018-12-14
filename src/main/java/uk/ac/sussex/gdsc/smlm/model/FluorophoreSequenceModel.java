@@ -149,7 +149,6 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel
    *
    * @param o The other fluorophore
    * @return -1,0,1
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   @Override
   public int compareTo(FluorophoreSequenceModel o) {

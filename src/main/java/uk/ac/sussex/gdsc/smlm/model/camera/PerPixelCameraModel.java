@@ -375,8 +375,6 @@ public class PerPixelCameraModel extends BaseCameraModel {
 
   /**
    * Return the weights as 1/variance.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getWeights(java.awt.Rectangle)
    */
   @Override
   public float[] getWeights(Rectangle bounds) {
@@ -385,8 +383,6 @@ public class PerPixelCameraModel extends BaseCameraModel {
 
   /**
    * Return the weights as 1/[normalised variance].
-   *
-   * @see uk.ac.sussex.gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
    */
   @Override
   public float[] getNormalisedWeights(Rectangle bounds) {

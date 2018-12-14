@@ -200,7 +200,7 @@ public class SummariseResults implements PlugIn, MouseListener {
     if (size > 0) {
       final boolean includeDeviations = result.hasDeviations();
       final long memorySize = MemoryPeakResults.estimateMemorySize(size, includeDeviations);
-      final String memory = MemoryPeakResults.memorySizeString(memorySize);
+      final String memory = TextUtils.bytesToString(memorySize);
       sb.append('\t').append(memory);
     } else {
       sb.append("\t-");

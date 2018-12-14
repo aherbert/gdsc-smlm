@@ -190,8 +190,6 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * paper Mortensen, et al (2010) Nature Methods 7, 377-383.
    *
    * <p>The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
    */
   @Override
   public double likelihood(final double o, final double e) {
@@ -459,7 +457,6 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * @return The log-likelihood
    *
    * @see #likelihood(double, double)
-   * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
    */
   @Override
   public double logLikelihood(final double o, final double e) {

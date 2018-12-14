@@ -48,11 +48,6 @@ public class ConvertResults implements PlugIn {
 
   private static String inputOption = "";
 
-  /*
-   * (non-)
-   *
-   * @see ij.plugin.PlugIn#run(java.lang.String)
-   */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

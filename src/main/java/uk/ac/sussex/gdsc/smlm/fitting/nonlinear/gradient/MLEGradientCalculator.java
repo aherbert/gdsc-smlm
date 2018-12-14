@@ -394,9 +394,6 @@ public class MLEGradientCalculator extends GradientCalculator {
    * @param a the a
    * @param func the func
    * @return The MLE chi-squared value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int,
-   *      double[], double[], double[], uk.ac.sussex.gdsc.smlm.function.NonLinearFunction)
    */
   @Override
   public double findLinearised(final int n, final double[] y, double[] yFit, final double[] a,

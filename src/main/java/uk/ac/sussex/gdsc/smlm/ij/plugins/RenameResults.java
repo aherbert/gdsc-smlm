@@ -45,11 +45,6 @@ public class RenameResults implements PlugIn {
 
   private String renameText = "";
 
-  /*
-   * (non-)
-   *
-   * @see ij.plugin.PlugIn#run(java.lang.String)
-   */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

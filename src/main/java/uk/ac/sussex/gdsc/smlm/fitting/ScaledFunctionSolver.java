@@ -124,8 +124,6 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver {
    *
    * <p>This value is NOT scaled. It is assumed that the caller requires the value of the solution
    * unmodified.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.WrappedFunctionSolver#getValue()
    */
   @Override
   public double getValue() {

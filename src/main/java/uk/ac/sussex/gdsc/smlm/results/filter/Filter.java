@@ -1459,8 +1459,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
    * Return the Manhattan (city-block) distance between two chromosomes. This measure is intended to
    * return if the sequences are the same (zero distance) or not). It is not intended for use in
    * distance analysis.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.ga.Chromosome#distance(uk.ac.sussex.gdsc.smlm.ga.Chromosome)
    */
   @Override
   public double distance(Chromosome<FilterScore> other) {

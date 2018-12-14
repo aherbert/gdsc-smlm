@@ -106,8 +106,6 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
    * position may be chosen multiple times. The random shifts for each mutation are taken from a
    * Gaussian using the chromosome mutation step range as the standard deviation. Set step size to
    * zero for no mutation at a position.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.ga.Mutator#mutate(uk.ac.sussex.gdsc.smlm.ga.Chromosome)
    */
   @Override
   public Chromosome<T> mutate(Chromosome<T> chromosome) {

@@ -568,7 +568,7 @@ public class AstigmatismModelManager implements PlugIn {
     fitConfig.setSignalStrength(gd.getNextNumber());
     fitConfig.setMinPhotons(gd.getNextNumber());
     fitConfig.setMinWidthFactor(gd.getNextNumber());
-    fitConfig.setWidthFactor(gd.getNextNumber());
+    fitConfig.setMaxWidthFactor(gd.getNextNumber());
     fitConfig.setPrecisionThreshold(gd.getNextNumber());
 
     gd.collectOptions();

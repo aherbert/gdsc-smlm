@@ -304,23 +304,23 @@ public abstract class HysteresisFilter extends Filter {
       return;
     }
 
+    // This must be in frames
     int myTimeThreshold;
-    switch (timeThresholdMode) {
-      case 1:
-        myTimeThreshold = 1;
-        if (peakResults.hasCalibration()) {
-          final CalibrationReader cr = peakResults.getCalibrationReader();
-          final double et = cr.getExposureTime();
-          if (et > 0) {
-            myTimeThreshold = (int) Math.round((this.timeThreshold / et));
-          }
-        } else {
-          break;
+    if (timeThresholdMode == 1) {
+      // time threshold is in Seconds.
+      // Default to 1 frame if not calibrated.
+      myTimeThreshold = 1;
+      if (peakResults.hasCalibration()) {
+        // Convert time threshold in seconds to frames
+        final CalibrationReader cr = peakResults.getCalibrationReader();
+        final double et = cr.getExposureTime();
+        if (et > 0) {
+          myTimeThreshold = (int) Math.round((this.timeThreshold / et));
         }
-
-      case 0:
-      default:
-        myTimeThreshold = (int) this.timeThreshold;
+      }
+    } else {
+      // frames
+      myTimeThreshold = (int) this.timeThreshold;
     }
 
     if (myTimeThreshold <= 0) {
@@ -383,12 +383,13 @@ public abstract class HysteresisFilter extends Filter {
   protected abstract PeakStatus getStatus(PeakResult result);
 
   /**
+   * {@inheritDoc}
+   *
    * @throws NullPointerException if not first initialised with a call to
    *         {@link #setup(MemoryPeakResults)}
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#accept(uk.ac.sussex.gdsc.smlm.results.PeakResult)
    */
   @Override
-  public boolean accept(PeakResult peak) throws NullPointerException {
+  public boolean accept(PeakResult peak) {
     return ok.contains(peak);
   }
 
@@ -403,8 +404,9 @@ public abstract class HysteresisFilter extends Filter {
   @Override
   public String getDescription() {
     return "Any results between the limits (candidates) are included only if they can be traced "
-        + "through time, potentially via other candidates, to a valid result. The distance used for "
-        + "tracing is the search distance multiplied by the average precision of the candidates.";
+        + "through time, potentially via other candidates, to a valid result. The distance used "
+        + "for tracing is the search distance multiplied by the average precision of the "
+        + "candidates.";
   }
 
   /** {@inheritDoc} */

@@ -33,14 +33,20 @@ import org.apache.commons.math3.util.FastMath;
  * Scientific Computing, Second Edition, W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
  * (Cambridge University Press, Cambridge, 2002).
  */
-public class Bessel {
+public final class Bessel {
+
+  /**
+   * No public constructor.
+   */
+  private Bessel() {}
+
   /**
    * Compute the zero th order Bessel function of the first kind.
    *
    * @param x the x value
    * @return the Bessel function J0
    */
-  public static double J0(final double x) {
+  public static double j0(final double x) {
     double ax;
 
     if ((ax = Math.abs(x)) < 8.0) {
@@ -70,7 +76,7 @@ public class Bessel {
    * @param x the x value
    * @return the Bessel function J1
    */
-  public static double J1(final double x) {
+  public static double j1(final double x) {
     double ax;
 
     if ((ax = Math.abs(x)) < 8.0) {
@@ -103,12 +109,12 @@ public class Bessel {
    * @param x the x value
    * @return the Bessel function J2
    */
-  public static double J2(double x) {
+  public static double j2(double x) {
     if (x == 0.0) {
       return 0.0;
     }
-    final double value0 = J0(x);
-    final double value1 = J1(x);
+    final double value0 = j0(x);
+    final double value1 = j1(x);
     return 2.0 * value1 / x + value0;
   }
 
@@ -118,7 +124,7 @@ public class Bessel {
    * @param x the x value
    * @return the modified Bessel function I0
    */
-  public static double I0(final double x) {
+  public static double i0(final double x) {
     double ax;
     double ans;
     double y;
@@ -142,7 +148,7 @@ public class Bessel {
    * @param x the x value
    * @return the modified Bessel function I1
    */
-  public static double I1(final double x) {
+  public static double i1(final double x) {
     double ax;
     double ans;
     double y;

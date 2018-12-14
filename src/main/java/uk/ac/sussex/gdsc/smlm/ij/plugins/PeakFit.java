@@ -1450,8 +1450,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
     String name;
     /** The fit engine configuration provider. */
     FitEngineConfigurationProvider fitEngineConfigurationProvider;
-    /** Set to true to include the value in {@link #getMin()} and {@link #getMax()}. */
-    boolean includeValue;
+    /**
+     * Set to true to include the value in {@link #getMin()} and {@link #getMax()}.
+     */    boolean includeValue;
 
     /**
      * Instantiates a new relative parameter provider.
@@ -2208,7 +2209,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
         config.setNoiseMethod(gd.getNextChoiceIndex());
       }
       fitConfig.setMinWidthFactor(gd.getNextNumber());
-      fitConfig.setWidthFactor(gd.getNextNumber());
+      fitConfig.setMaxWidthFactor(gd.getNextNumber());
       fitConfig.setPrecisionThreshold(gd.getNextNumber());
     }
 

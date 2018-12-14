@@ -1463,7 +1463,6 @@ public class TraceManager {
 
   /**
    * @return the trace mode
-   * @see uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode
    */
   public TraceMode getTraceMode() {
     return traceMode;
@@ -1471,7 +1470,6 @@ public class TraceManager {
 
   /**
    * @param traceMode the trace mode to set
-   * @see uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode
    */
   public void setTraceMode(TraceMode traceMode) {
     this.traceMode = traceMode;

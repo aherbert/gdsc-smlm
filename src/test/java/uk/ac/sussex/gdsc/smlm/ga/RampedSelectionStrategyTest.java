@@ -33,7 +33,7 @@ public class RampedSelectionStrategyTest {
 
   @Test
   public void canSearchUsingActualKey() {
-    final long[] sum = RampedSelectionStrategy.createSum(10);
+    final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length - 1; i++) {
       final long key = sum[i];
@@ -44,7 +44,7 @@ public class RampedSelectionStrategyTest {
 
   @Test
   public void canBinarySearchUsingActualKey() {
-    final long[] sum = RampedSelectionStrategy.createSum(10);
+    final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length - 1; i++) {
       final long key = sum[i];
@@ -55,7 +55,7 @@ public class RampedSelectionStrategyTest {
 
   @Test
   public void canSearchUsingNotActualKey() {
-    final long[] sum = RampedSelectionStrategy.createSum(10);
+    final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length; i++) {
       final long key = sum[i] - 1;
@@ -66,7 +66,7 @@ public class RampedSelectionStrategyTest {
 
   @Test
   public void canBinarySearchUsingNotActualKey() {
-    final long[] sum = RampedSelectionStrategy.createSum(10);
+    final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length; i++) {
       final long key = sum[i] - 1;
@@ -77,7 +77,7 @@ public class RampedSelectionStrategyTest {
 
   @Test
   public void binarySearchEqualsSearch() {
-    final long[] sum = RampedSelectionStrategy.createSum(100);
+    final long[] sum = RampedSelectionStrategy.createRampedSum(100);
     for (int key = (int) sum[sum.length - 1]; key-- > 0;) {
       final int i = RampedSelectionStrategy.search(sum, key);
       final int j = RampedSelectionStrategy.binarySearch(sum, key);
@@ -115,13 +115,13 @@ public class RampedSelectionStrategyTest {
   }
 
   private static void speedTest(final int size, boolean faster, int runs) {
-    final long[] sum = RampedSelectionStrategy.createSum(size);
+    final long[] sum = RampedSelectionStrategy.createRampedSum(size);
 
     final TimingService ts = new TimingService(runs);
 
     ts.execute(new BaseTimingTask("search" + size) {
       @Override
-      public Object getData(int i) {
+      public Object getData(int index) {
         return sum;
       }
 
@@ -141,8 +141,8 @@ public class RampedSelectionStrategyTest {
 
     ts.execute(new BaseTimingTask("binarySearch" + size) {
       @Override
-      public Object getData(int i) {
-        return sum[i];
+      public Object getData(int index) {
+        return sum[index];
       }
 
       @Override

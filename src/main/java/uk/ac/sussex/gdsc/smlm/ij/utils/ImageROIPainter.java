@@ -70,7 +70,6 @@ public class ImageROIPainter extends TextPanelMouseListener {
    * Trigger the ROI painter using the selected index from the text panel.
    *
    * @param selectedIndex the selected index
-   * @see uk.ac.sussex.gdsc.smlm.ij.utils.TextPanelMouseListener#selected(int)
    */
   @Override
   public void selected(int selectedIndex) {
@@ -103,7 +102,6 @@ public class ImageROIPainter extends TextPanelMouseListener {
    *
    * @param selectionStart the selection start
    * @param selectionEnd the selection end
-   * @see uk.ac.sussex.gdsc.smlm.ij.utils.TextPanelMouseListener#selected(int, int)
    */
   @Override
   public void selected(int selectionStart, int selectionEnd) {

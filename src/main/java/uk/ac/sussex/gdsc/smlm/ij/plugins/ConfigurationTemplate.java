@@ -286,7 +286,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     fitConfig.setSignalStrength(5);
     fitConfig.setMinPhotons(30);
     fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
-    fitConfig.setWidthFactor(1.8);
+    fitConfig.setMaxWidthFactor(1.8);
     fitConfig.setPrecisionThreshold(45);
     addInlineTemplate("PALM LSE", config);
 
@@ -304,7 +304,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     fitConfig.setSignalStrength(4.5);
     fitConfig.setMinPhotons(30);
     fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
-    fitConfig.setWidthFactor(1.8);
+    fitConfig.setMaxWidthFactor(1.8);
     fitConfig.setPrecisionThreshold(47);
     addInlineTemplate("PALM MLE", config);
 
@@ -320,7 +320,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     fitConfig.setSignalStrength(4.5);
     fitConfig.setMinPhotons(30);
     fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
-    fitConfig.setWidthFactor(1.8);
+    fitConfig.setMaxWidthFactor(1.8);
     fitConfig.setPrecisionThreshold(50);
     addInlineTemplate("PALM MLE Camera", config);
 

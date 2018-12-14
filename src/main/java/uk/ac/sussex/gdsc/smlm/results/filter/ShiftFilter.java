@@ -36,11 +36,16 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * coordinates are reported relative to their initial positions.
  */
 public class ShiftFilter extends DirectFilter implements IMultiFilter {
-  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-  public static final double DEFAULT_INCREMENT = 0.05;
-  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */  public static final double DEFAULT_INCREMENT = 0.05;
+  /**
+   * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double DEFAULT_RANGE = 10;
-  /** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double UPPER_LIMIT = 5;
 
   @XStreamAsAttribute

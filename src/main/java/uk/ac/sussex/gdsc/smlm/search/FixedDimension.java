@@ -45,8 +45,9 @@ public class FixedDimension implements Cloneable, Dimension {
   /** The min increment to use around the centre. */
   public final double minIncrement;
 
-  /** Set to true if {@link #min} &lt; {@link #max}. */
-  public final boolean active;
+  /**
+   * Set to true if {@link #min} &lt; {@link #max}.
+   */  public final boolean active;
 
   /**
    * Instantiates a new inactive search dimension. The centre is set to zero.
@@ -136,7 +137,6 @@ public class FixedDimension implements Cloneable, Dimension {
    * @param lower the lower
    * @param upper the upper
    * @return the fixed dimension
-   * @see uk.ac.sussex.gdsc.smlm.search.Dimension#create(double, double)
    */
   @Override
   public FixedDimension create(double lower, double upper) {
@@ -189,7 +189,6 @@ public class FixedDimension implements Cloneable, Dimension {
    * If the dimension is not active or min increment is zero no rounding is performed.
    *
    * @return true, if successful
-   * @see uk.ac.sussex.gdsc.smlm.search.Dimension#canRound()
    */
   @Override
   public boolean canRound() {

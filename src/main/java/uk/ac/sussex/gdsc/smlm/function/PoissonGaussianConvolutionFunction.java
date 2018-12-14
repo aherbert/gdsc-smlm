@@ -122,8 +122,6 @@ public class PoissonGaussianConvolutionFunction
    *
    * <p>The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true
    * the function does not error if the input x is non-integer.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
    * @see #isComputePMF()
    */
   @Override
@@ -223,7 +221,6 @@ public class PoissonGaussianConvolutionFunction
    * <p>The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true
    * the function does not error if the input x is non-integer.
    *
-   * @see uk.ac.sussex.gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
    * @see #isComputePMF()
    */
   @Override

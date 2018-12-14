@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
@@ -81,12 +82,19 @@ import java.util.Set;
  */
 public class MemoryPeakResults extends AbstractPeakResults implements Cloneable {
   private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<>();
-  private static final Runtime s_runtime = Runtime.getRuntime();
-  private static int byteSize;
-  private static int byteSizeWithDeviations;
 
-  private static final int DEFAULT_SIZE = 104;
-  private static final int DEFAULT_SIZE_WITH_DEVIATIONS = 152;
+  /**
+   * The memory size of a PeakResult object without deviations. Only the standard parameters are
+   * included.
+   */
+  @VisibleForTesting
+  static final int PEAK_RESULT_SIZE = 96;
+  /**
+   * The memory size of a PeakResult object with deviations. Only the standard parameters are
+   * included.
+   */
+  @VisibleForTesting
+  static final int PEAK_RESULT_SIZE_WITH_DEVIATIONS = 136;
 
   private boolean sortAfterEnd;
 
@@ -166,8 +174,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * Add all results.
    *
    * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResult[])
    */
   @Override
   public void addAll(PeakResult[] results) {
@@ -178,8 +184,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * Add all results.
    *
    * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.AbstractPeakResults#addAll(uk.ac.sussex.gdsc.smlm.results.PeakResultStore)
    */
   @Override
   public void addAll(PeakResultStore results) {
@@ -427,173 +431,34 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Convert the size in bytes into a string.
-   *
-   * @param memorySize the memory size
-   * @return The memory size string
-   */
-  public static String memorySizeString(long memorySize) {
-    return memorySize < 10000 * 1024 ? memorySize / 1024L + "K" : memorySize / 1048576L + "MB";
-  }
-
-  /**
    * Return an estimate of the memory size taken by PeakResult objects.
    *
    * <p>Note: This is just a guess based on measured sizes for the objects in memory.
    *
-   * @param r the r
+   * @param results the results
    * @return The memory size
    */
-  public static long estimateMemorySize(MemoryPeakResults r) {
+  public static long estimateMemorySize(MemoryPeakResults results) {
     long memorySize = 0;
-    if (r != null && r.size() > 0) {
-      final boolean includeDeviations = r.getf(0).hasParameterDeviations();
-      memorySize = MemoryPeakResults.estimateMemorySize(r.size(), includeDeviations);
+    if (results != null && results.size() > 0) {
+      final boolean includeDeviations = results.getf(0).hasParameterDeviations();
+      memorySize = estimateMemorySize(results.size(), includeDeviations);
     }
     return memorySize;
   }
 
   /**
-   * Return an estimate of the memory size taken by PeakResult objects.
+   * Return an estimate of the memory size taken by {@link PeakResult} objects.
    *
    * <p>Note: This is just a guess based on measured sizes for the objects in memory.
    *
-   * @param size the size
-   * @param includeDeviations the include deviations
+   * @param size the number of results
+   * @param includeDeviations Set to true if the results have deviations
    * @return The memory size
    */
   public static long estimateMemorySize(int size, boolean includeDeviations) {
-    if (byteSize == 0) {
-      // Comment out to speed up the code
-      // byteSize = (int) (measureSize(10000, false) / 10000);
-      // byteSizeWithDeviations = (int) (measureSize(10000, true) / 10000);
-      // System.out.printf("Size = %d, Size with deviations = %d", byteSize,
-      // byteSizeWithDeviations);
-
-      // Check just in case the estimate is bad
-      if (byteSize <= 0) {
-        byteSize = DEFAULT_SIZE;
-      }
-      if (byteSizeWithDeviations <= 0) {
-        byteSizeWithDeviations = DEFAULT_SIZE_WITH_DEVIATIONS;
-      }
-    }
-    return size * ((includeDeviations) ? byteSize : byteSizeWithDeviations);
-  }
-
-  // The following code can be used to determine the memory size of an object.
-  // Taken from: http://www.javaworld.com/javaworld/javatips/jw-javatip130.html?page=1
-
-  /**
-   * Measure size.
-   *
-   * @param size the size
-   * @param includeDeviations the include deviations
-   * @return the long
-   */
-  public static long measureSize(int size, boolean includeDeviations) {
-    // Warm up all classes/methods we will use
-    runGC();
-    usedMemory();
-    // Array to keep strong references to allocated objects
-    final int count = 1000;
-    Object[] objects = new Object[count];
-
-    long heap1 = 0;
-    // Allocate count+1 objects, discard the first one
-    for (int i = -1; i < count; ++i) {
-      Object object = null;
-
-      // Instantiate your data here and assign it to object
-
-      object = new PeakResult(0, 1, 2, 3.0f, 4.0, 5.0f, 6f, new float[7],
-          (includeDeviations) ? new float[7] : null);
-
-      if (i >= 0) {
-        objects[i] = object;
-      } else {
-        object = null; // Discard the warm up object
-        runGC();
-        heap1 = usedMemory(); // Take a before heap snapshot
-      }
-    }
-    runGC();
-    final long heap2 = usedMemory(); // Take an after heap snapshot:
-
-    final long memorySize = Math.round(((double) (heap2 - heap1)) / count);
-    // System.out.println("'before' heap: " + heap1 + ", 'after' heap: " + heap2);
-    // System.out.println("heap delta: " + (heap2 - heap1) + ", {" + objects[0].getClass() + "} size
-    // = " + memorySize +
-    // " bytes");
-    for (int i = 0; i < count; ++i) {
-      objects[i] = null;
-    }
-    objects = null;
-    runGC();
-
-    return memorySize * size;
-  }
-
-  /**
-   * Run the garbage collector multiple times to free memory.
-   */
-  public static void runGC() {
-    // It helps to call Runtime.gc()
-    // using several method calls:
-    for (int r = 0; r < 4; ++r) {
-      _runGC();
-    }
-  }
-
-  /**
-   * Run GC.
-   */
-  private static void _runGC() {
-    long usedMem1 = usedMemory();
-    long usedMem2 = Long.MAX_VALUE;
-    for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++i) {
-      runGCOnce();
-      Thread.currentThread();
-      Thread.yield();
-
-      usedMem2 = usedMem1;
-      usedMem1 = usedMemory();
-    }
-  }
-
-  /**
-   * Run GC once.
-   */
-  public static void runGCOnce() {
-    s_runtime.runFinalization();
-    s_runtime.gc();
-  }
-
-  /**
-   * Used memory.
-   *
-   * @return the long
-   */
-  public static long usedMemory() {
-    return s_runtime.totalMemory() - s_runtime.freeMemory();
-  }
-
-  /**
-   * Total memory.
-   *
-   * @return the long
-   */
-  public static long totalMemory() {
-    return s_runtime.totalMemory();
-  }
-
-  /**
-   * Free memory.
-   *
-   * @return the long
-   */
-  public static long freeMemory() {
-    return s_runtime.freeMemory();
+    return (long) size
+        * ((includeDeviations) ? PEAK_RESULT_SIZE : PEAK_RESULT_SIZE_WITH_DEVIATIONS);
   }
 
   /////////////////////////////////////////////////////////////////
@@ -625,9 +490,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
    *
    * {@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float,
-   *      float[], float[])
    */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,

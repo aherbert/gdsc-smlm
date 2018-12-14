@@ -325,7 +325,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     fitConfig.setCoordinateShiftFactor(0);
     fitConfig.setPrecisionThreshold(0);
     fitConfig.setMinWidthFactor(0);
-    fitConfig.setWidthFactor(0);
+    fitConfig.setMaxWidthFactor(0);
 
     fitConfig.setBackgroundFitting(true);
     fitConfig.setNoise(0);
@@ -1246,7 +1246,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // position is wrong.
     fitConfig.setCoordinateShiftFactor(0);
     fitConfig.setMinWidthFactor(1.0 / 5);
-    fitConfig.setWidthFactor(5);
+    fitConfig.setMaxWidthFactor(5);
     // Disable the direct filter
     fitConfig.setDirectFilter(null);
 

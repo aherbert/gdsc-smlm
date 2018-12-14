@@ -87,8 +87,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
    * </pre>
    *
    * <p>This value multiplied by the [gain]^2 is the variance in counts.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getNormalisedVariance(java.awt.Rectangle)
    */
   @Override
   public float[] getNormalisedVariance(Rectangle bounds) {
@@ -108,8 +106,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
    * </pre>
    *
    * <p>This value multiplied by the [gain]^2 is the variance in counts.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.model.camera.FixedPixelCameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
    */
   @Override
   public double getMeanNormalisedVariance(Rectangle bounds) {

@@ -385,8 +385,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
     /**
      * Does nothing.
-     *
-     * @see ij.VirtualStack#addSlice(java.lang.String)
      */
     @Override
     public void addSlice(String name) {
@@ -395,8 +393,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
     /**
      * Does nothing.
-     *
-     * @see ij.VirtualStack#deleteSlice(int)
      */
     @Override
     public void deleteSlice(int n) {

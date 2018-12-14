@@ -134,8 +134,6 @@ public class AggregatedImageSource extends ImageSource {
 
   /**
    * Overridden to allow the crop to be done before aggregation.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#next(java.awt.Rectangle)
    */
   @Override
   public float[] next(Rectangle bounds) {
@@ -184,8 +182,6 @@ public class AggregatedImageSource extends ImageSource {
 
   /**
    * Overridden to allow the crop to be done before aggregation.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.ImageSource#get(int, java.awt.Rectangle)
    */
   @Override
   public float[] get(int frame, Rectangle bounds) {

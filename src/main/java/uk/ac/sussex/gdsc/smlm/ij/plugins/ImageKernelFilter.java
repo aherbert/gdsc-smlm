@@ -51,7 +51,7 @@ import java.awt.AWTEvent;
  */
 public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Image Kernel Filter";
-  private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS
+  private static final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS
       | CONVERT_TO_FLOAT | FINAL_PROCESSING;
 
   private static final String[] METHODS = {"Spatial domain", "FHT"};
@@ -108,10 +108,10 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
       kf.convolve(data, w, h, border);
     } else {
       // Use a clone for thread safety
-      final FHTFilter f = (ticker.getTotal() > 1l) ? ff.copy() : ff;
+      final FHTFilter f = (ticker.getTotal() > 1) ? ff.copy() : ff;
       f.filter(data, w, h, border);
     }
-    if (ticker.getTotal() == 1l) {
+    if (ticker.getTotal() == 1) {
       ip.resetMinAndMax();
     }
     ticker.tick();

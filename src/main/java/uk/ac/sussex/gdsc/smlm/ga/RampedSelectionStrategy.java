@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
+import uk.ac.sussex.gdsc.core.data.ComputationException;
+
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ import java.util.List;
 public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSelectionStrategy<T>
     implements SelectionStrategy<T> {
   private List<? extends Chromosome<T>> sorted;
-  private int n;
+  private int numberSelected;
   private long[] sum;
   private long upper;
 
@@ -63,7 +65,6 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
    *
    * @param individuals the individuals
    * @return the subset
-   * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
    */
   @Override
   public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals) {
@@ -71,19 +72,18 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       return individuals;
     }
 
-    final ArrayList<Chromosome<T>> sorted = new ArrayList<>(individuals.size());
+    final ArrayList<Chromosome<T>> scored = new ArrayList<>(individuals.size());
     // Add only those with a fitness score
     for (final Chromosome<T> c : individuals) {
       if (c.getFitness() != null) {
-        sorted.add(c);
+        scored.add(c);
       }
     }
-    if (sorted.size() < 3) {
-      return sorted;
+    if (scored.size() < 3) {
+      return scored;
     }
 
     // Get the fraction relative to the input list size
-    // final int size = getSize(sorted.size());
     final int size = getSize(individuals.size());
 
     if (tracker != null) {
@@ -91,26 +91,26 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
     }
 
     // Sort the list
-    ChromosomeComparator.sort(sorted);
+    ChromosomeComparator.sort(scored);
 
     // Create the output subset
     final ArrayList<Chromosome<T>> subset = new ArrayList<>(size);
 
     // Get the number of point available for selection:
     // n in this case is (size-1) since we include the top ranking individual.
-    int n = sorted.size() - 1;
+    final int numberOfPoints = scored.size() - 1;
 
     // Add the top individual
-    subset.add(sorted.get(0));
+    subset.add(scored.get(0));
 
     // Get the cumulative total of the rank: total = n(n+1)/2
-    long cumulative = (n * (n + 1l)) / 2l;
+    long cumulative = (numberOfPoints * (numberOfPoints + 1L)) / 2L;
 
     // Build an array of rank weighting. The highest ranked starts at n.
     // The first index is ignored since this has been included already.
-    final int[] rank = new int[sorted.size()];
+    final int[] rank = new int[scored.size()];
     for (int i = 1; i < rank.length; i++) {
-      rank[i] = n--;
+      rank[i] = numberOfPoints - i + 1;
     }
 
     // Now pick chromosomes using the cumulative as the upper limit
@@ -123,14 +123,14 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       final long previous = cumulative;
 
       // Generate a random positive within the cumulative range - note the end points are inclusive
-      final long next = random.nextLong(1l, cumulative);
+      final long next = random.nextLong(1L, cumulative);
       // Find the random position
-      long sum = 0;
+      long total = 0;
       for (int i = 1; i < rank.length; i++) {
-        sum += rank[i];
-        if (next <= sum) {
+        total += rank[i];
+        if (next <= total) {
           // Pick this point
-          subset.add(sorted.get(i));
+          subset.add(scored.get(i));
           // Update the cumulative then eliminate from future selection
           cumulative -= rank[i];
           rank[i] = 0;
@@ -140,7 +140,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
       // Check we chose something
       if (previous == cumulative) {
-        throw new RuntimeException(
+        throw new ComputationException(
             "Failed to select a candidate. Size = " + subset.size() + " / " + size);
       }
     }
@@ -191,9 +191,9 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       ChromosomeComparator.sort(list);
 
       // Create a ramped sum for all those we can sort
-      sum = createSum(list.size());
+      sum = createRampedSum(list.size());
       // Extend the sum linearly for those we cannot sort (i.e. they have the same selection chance)
-      sum = extendSum(sum, subset.size());
+      sum = extendSumLinearly(sum, subset.size());
 
       list.addAll(subset);
     } else {
@@ -201,12 +201,13 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       ChromosomeComparator.sort(list);
 
       // Build a cumulative array of rank weighting. The highest ranked starts at n.
-      sum = createSum(list.size());
+      sum = createRampedSum(list.size());
     }
 
     this.sorted = list;
 
-    n = 0;
+    // Reset
+    numberSelected = 0;
 
     // Bounds are inclusive so subtract 1
     upper = sum[sum.length - 1] - 1;
@@ -218,7 +219,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
    * @param size the size
    * @return the sum
    */
-  public static long[] createSum(int size) {
+  public static long[] createRampedSum(int size) {
     final long[] sum = new long[size];
     int rank = size;
     sum[0] = rank--;
@@ -232,14 +233,14 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
    * Extend the sum.
    *
    * @param sum the sum
-   * @param size the size
+   * @param addition the addition
    * @return the new sum
    */
-  public static long[] extendSum(long[] sum, int size) {
-    final long[] sum2 = Arrays.copyOf(sum, sum.length + size);
-    long s = sum[sum.length - 1];
+  public static long[] extendSumLinearly(long[] sum, int addition) {
+    final long[] sum2 = Arrays.copyOf(sum, sum.length + addition);
+    long rank = sum[sum.length - 1];
     for (int i = sum.length; i < sum2.length; i++) {
-      sum2[i] = ++s;
+      sum2[i] = ++rank;
     }
     return sum2;
   }
@@ -248,8 +249,6 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
    * Select pairs randomly from the population. The first is selected from the top n individuals
    * with n starting at 1 and incrementing for each call. The second is selected from the entire
    * population with the weighting equal to their ranking by fitness.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#next()
    */
   @Override
   public ChromosomePair<T> next() {
@@ -263,14 +262,14 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       second = 1;
     } else {
       // Pick from the first n
-      if (n == 0) {
+      if (numberSelected == 0) {
         // This is the first call so select the top individual
         first = 0;
       } else {
         // Restrict the upper limit to the population range
-        first = random.nextInt(0, Math.min(n, sorted.size() - 1));
+        first = random.nextInt(0, Math.min(numberSelected, sorted.size() - 1));
       }
-      n++;
+      numberSelected++;
 
       // Select the second from the ramped cumulative
       second = nextSample();
@@ -279,7 +278,6 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
         second = nextSample();
       }
     }
-    // System.out.printf("Next [%d] %d x %d\n", n, first, second);
     return new ChromosomePair<>(sorted.get(first), sorted.get(second));
   }
 

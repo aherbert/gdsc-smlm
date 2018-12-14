@@ -35,7 +35,7 @@ import java.util.List;
  * two block sizes. This is an approximation due to incorrect weighting of the corners. Note that at
  * large sizes the corners are a fraction of the total edge pixels so the difference is minor.
  *
- * @see uk.ac.sussex.gdsc.smlm.filters.AreaAverageFilter
+ * @see AreaAverageFilter
  */
 public class AverageDataProcessor extends DataProcessor {
   /**

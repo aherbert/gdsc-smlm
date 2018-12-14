@@ -484,21 +484,28 @@ public class Gaussian2DPeakResultHelper {
     }
   }
 
-  /** Flag for the {@link Gaussian2DPeakResultCalculator#getAmplitude(float[])} function. */
-  public static final int AMPLITUDE = 0x00000001;
+  /**
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getAmplitude(float[])} function.
+   */  public static final int AMPLITUDE = 0x00000001;
   /**
    * Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[], float)} function.
    */
   public static final int LSE_PRECISION = 0x00000002;
-  /** Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[])} function. */
+  /**
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[])} function.
+   */
   public static final int LSE_PRECISION_X = 0x00000004;
   /**
    * Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[], float)} function.
    */
   public static final int MLE_PRECISION = 0x00000008;
-  /** Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[])} function. */
+  /**
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[])} function.
+   */
   public static final int MLE_PRECISION_X = 0x00000010;
-  /** Flag for the {@link Gaussian2DPeakResultCalculator#getPixelAmplitude(float[])} function. */
+  /**
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getPixelAmplitude(float[])} function.
+   */
   public static final int PIXEL_AMPLITUDE = 0x00000020;
 
   /** Dummy Gaussian 2D parameters. */

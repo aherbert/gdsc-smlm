@@ -206,6 +206,7 @@ public class ParameterBounds {
    *
    * @param lowerBounds the lower bounds
    * @param upperBounds the upper bounds
+   * @throws IllegalArgumentException If the lower bound is above the upper bound
    */
   public void setBounds(double[] lowerBounds, double[] upperBounds) {
     // Extract the bounds for the parameters we are fitting

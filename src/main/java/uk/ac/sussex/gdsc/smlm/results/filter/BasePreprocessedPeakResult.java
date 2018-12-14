@@ -349,7 +349,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
    *
    * @param predictedId the predicted id
    * @return the assignments
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
    */
   @Override
   public FractionalAssignment[] getAssignments(final int predictedId) {

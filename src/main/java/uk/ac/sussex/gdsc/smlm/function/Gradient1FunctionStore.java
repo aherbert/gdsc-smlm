@@ -35,8 +35,9 @@ public class Gradient1FunctionStore extends ValueFunctionStore
   /** The number of gradients. */
   protected final int length;
 
-  /** The gradients from the last call to {@link #forEach(Gradient1Procedure)}. */
-  public double[][] dyda;
+  /**
+   * The gradients from the last call to {@link #forEach(Gradient1Procedure)}.
+   */  public double[][] dyda;
 
   /**
    * Instantiates a new gradient 1 function store.

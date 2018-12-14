@@ -69,9 +69,7 @@ class NonRoundingDimension implements Dimension {
   }
 
   /**
-   * Does not round the number.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.search.Dimension#round(double)
+   * Note: Does <strong>not</strong> round the number.
    */
   @Override
   public double round(double value) {

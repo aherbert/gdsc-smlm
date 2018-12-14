@@ -134,8 +134,6 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
    * @param i Input predictor
    * @param duda Partial gradient of function with respect to each coefficient
    * @return The predicted value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int, double[])
    */
   @Override
   public abstract double eval(final int i, final double[] duda);

@@ -64,8 +64,6 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
    * Evaluates an 2-dimensional circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */
   @Override
   public double eval(final int x, final double[] dyda) {

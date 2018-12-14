@@ -33,9 +33,12 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
  * Filter results using a coordinate range.
  */
 public class CoordinateFilter extends DirectFilter {
-  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-  public static final double DEFAULT_INCREMENT = 0.01;
-  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */  public static final double DEFAULT_INCREMENT = 0.01;
+  /**
+   * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double DEFAULT_RANGE = 1;
 
   @XStreamAsAttribute

@@ -239,8 +239,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
    * 10, 335-338, SI Eq S8. Note that that equation computes the noise coefficient relative to a
    * Poisson, this computes the Fisher information. To get the noise coefficient multiply by the
    * input parameter.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
    */
   @Override
   public double getFisherInformation(double t) {

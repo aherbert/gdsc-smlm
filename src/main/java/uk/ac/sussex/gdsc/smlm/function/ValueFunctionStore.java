@@ -33,8 +33,9 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure {
 
   /** The counter i. */
   protected int i;
-  /** The values from the last call to {@link #forEach(ValueProcedure)}. */
-  public double[] values;
+  /**
+   * The values from the last call to {@link #forEach(ValueProcedure)}.
+   */  public double[] values;
 
   /**
    * Instantiates a new value function store.

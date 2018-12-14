@@ -150,10 +150,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   /** The image data. */
   protected double[] data;
 
-  /** The xlimit. This is {@link #imageWidth} -1 */
-  protected final float xlimit;
+  /**
+   * The xlimit. This is {@link #imageWidth} -1
+   */  protected final float xlimit;
 
-  /** The ylimit. This is {@link #imageHeight} -1 */
+  /**
+   * The ylimit. This is {@link #imageHeight} -1
+   */
   protected final float ylimit;
 
   /** The image. */
@@ -1314,8 +1317,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
 
   /**
    * Over-ridden to IGNORE any passed in bounds. The bounds must be set when the image is created.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.AbstractPeakResults#setBounds(java.awt.Rectangle)
    */
   @Override
   public void setBounds(Rectangle bounds) {

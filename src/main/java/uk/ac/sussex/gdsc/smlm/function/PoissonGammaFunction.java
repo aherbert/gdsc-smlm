@@ -100,7 +100,7 @@ public class PoissonGammaFunction
         return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
       }
       // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
-      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
     } else if (c == 0.0) {
       return FastMath.exp(-p) * (1 + p / m);
     } else {
@@ -138,7 +138,7 @@ public class PoissonGammaFunction
         return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
       }
       // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
-      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
     } else if (c == 0.0) {
       // No Dirac delta function
       return FastMath.exp(-p) * p / m;
@@ -227,8 +227,8 @@ public class PoissonGammaFunction
 
       final double exp_c_m_p = FastMath.exp(_c_m_p);
       // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
-      final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
-      dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
+      final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
+      dG_dp[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
     } else if (c == 0.0) {
       // f(p) = exp(-p) * (1 + p / m)
@@ -276,8 +276,8 @@ public class PoissonGammaFunction
         return G;
       }
       final double exp_c_m_p = FastMath.exp(_c_m_p);
-      final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
-      dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
+      final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
+      dG_dp[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
     } else if (c == 0.0) {
       // No Dirac delta function
@@ -320,8 +320,8 @@ public class PoissonGammaFunction
       }
       final double exp_c_m_p = FastMath.exp(_c_m_p);
       // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
-      final double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
-      dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m;
+      final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
+      dG_dp[0] = exp_c_m_p * Bessel.i0(x) / m;
       return G;
     } else if (c == 0.0) {
       final double exp_p = FastMath.exp(-p);
@@ -367,8 +367,8 @@ public class PoissonGammaFunction
         return G;
       }
       final double exp_c_m = FastMath.exp(-c_m);
-      final double G = (x / (2 * c)) * exp_c_m * Bessel.I1(x);
-      dG_dp[0] = exp_c_m * Bessel.I0(x) / m;
+      final double G = (x / (2 * c)) * exp_c_m * Bessel.i1(x);
+      dG_dp[0] = exp_c_m * Bessel.i0(x) / m;
       return G;
     } else if (c == 0.0) {
       final double G = 1 + p / m;
@@ -400,7 +400,7 @@ public class PoissonGammaFunction
       if (x > 709) {
         return 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x);
       }
-      return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.I1(x));
+      return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.i1(x));
     } else if (c == 0.0) {
       // log (FastMath.exp(-p) * (1 + p / m))
       return -p + Math.log(1 + p / m);

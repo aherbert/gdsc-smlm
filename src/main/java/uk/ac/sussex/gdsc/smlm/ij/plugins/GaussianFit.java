@@ -888,7 +888,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     config.setCoordinateShift(halfMk);
     config.setSignalStrength(0);
     config.setMinWidthFactor(0.5);
-    config.setWidthFactor(3);
+    config.setMaxWidthFactor(3);
     if (logProgress) {
       config.setLog(ImageJPluginLoggerHelper.getLogger(getClass()));
     }

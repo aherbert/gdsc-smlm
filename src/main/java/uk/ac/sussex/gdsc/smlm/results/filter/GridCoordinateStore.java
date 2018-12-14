@@ -197,7 +197,6 @@ public class GridCoordinateStore implements CoordinateStore {
    * Create a new instance with the same settings.
    *
    * @return the grid coordinate store
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#newInstance()
    */
   @Override
   public GridCoordinateStore newInstance() {
@@ -284,8 +283,6 @@ public class GridCoordinateStore implements CoordinateStore {
 
   /**
    * Note: This does not check that the x,y coordinates are within the correct bounds.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
    */
   @Override
   public void addToQueue(double x, double y, double z) {
@@ -307,8 +304,6 @@ public class GridCoordinateStore implements CoordinateStore {
   /**
    * Note: This does not check that the x,y coordinates are within the correct bounds. Use
    * {@link #safeAdd(double, double, double)} to do a bounds check.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
    */
   @Override
   public void add(final double x, final double y, final double z) {

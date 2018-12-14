@@ -51,6 +51,7 @@ import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow.WindowMethod;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -483,7 +484,7 @@ public class PSFCreator implements PlugInFilter {
       try {
         runUsingAlignment();
       } catch (final OutOfMemoryError ex) {
-        MemoryPeakResults.runGC();
+        MemoryUtils.runGarbageCollector();
         IJ.log(ExceptionUtils.getStackTrace(ex));
         IJ.showMessage(TITLE, TextUtils.wrap("Out-of-memory. You may be using too many spots or "
             + "too large a PSF projection. The default projection size is 2.", 80));
@@ -4356,8 +4357,8 @@ public class PSFCreator implements PlugInFilter {
       Parameters.isEqualOrAbove("PSF magnification", settings.getPsfMagnification(), 1);
       Parameters.isAbove("Smoothing", settings.getSmoothing(), 0);
       Parameters.isBelow("Smoothing", settings.getSmoothing(), 1);
-    } catch (final IllegalArgumentException e) {
-      IJ.error(TITLE, e.getMessage());
+    } catch (IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
       return false;
     }
 

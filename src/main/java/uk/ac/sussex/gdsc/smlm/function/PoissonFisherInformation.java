@@ -31,13 +31,11 @@ package uk.ac.sussex.gdsc.smlm.function;
  * href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
 public class PoissonFisherInformation extends BasePoissonFisherInformation {
-  /*
+  /**
    * {@inheritDoc}
    *
    * <p>The input parameter refers to the mean of the Poisson distribution. The Fisher information
    * is 1/mean.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.FisherInformation#getFisherInformation(double)
    */
   @Override
   public double getFisherInformation(double t) {

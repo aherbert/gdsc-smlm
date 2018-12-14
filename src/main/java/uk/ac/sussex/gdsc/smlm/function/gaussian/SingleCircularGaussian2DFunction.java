@@ -105,8 +105,6 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
    * Evaluates an 2-dimensional circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */
   @Override
   public double eval(final int x, final double[] dyda) {
@@ -143,8 +141,6 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
    * Evaluates an 2-dimensional circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
    */
   @Override
   public double eval(final int x) {

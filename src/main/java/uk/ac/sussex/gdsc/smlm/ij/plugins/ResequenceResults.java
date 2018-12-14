@@ -46,11 +46,6 @@ public class ResequenceResults implements PlugIn {
   private static int skip;
   private static boolean logMapping;
 
-  /*
-   * (non-)
-   *
-   * @see ij.plugin.PlugIn#run(java.lang.String)
-   */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

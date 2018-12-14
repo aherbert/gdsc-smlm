@@ -29,8 +29,9 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class StandardValueProcedure implements ValueProcedure {
   private int index;
-  /** The values from the last call to {@link #getValues(ValueFunction, double[])}. */
-  public double[] values;
+  /**
+   * The values from the last call to {@link #getValues(ValueFunction, double[])}.
+   */  public double[] values;
 
   /**
    * Gets the values.

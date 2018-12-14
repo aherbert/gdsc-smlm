@@ -88,8 +88,6 @@ public abstract class CameraNoiseModel implements NoiseModel {
    * <p>The em-ccd noise factor is sqrt(2) for EM CCD cameras, otherwise it is 1. This is only
    * applied to the signal noise standard deviation. Applying it directly to the signal variance
    * uses a factor of sqrt(2)^2 = 2.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.NoiseModel#variance(double)
    */
   @Override
   public abstract double variance(final double value);

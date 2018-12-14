@@ -211,8 +211,9 @@ public class LogFactorial {
 
   private volatile double[] objectTable;
 
-  /** Main lock guarding all access to {@link #objectTable}. */
-  private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
+  /**
+   * Main lock guarding all access to {@link #objectTable}.
+   */  private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
 
   /**
    * Instantiates a new log factorial using the current static table.

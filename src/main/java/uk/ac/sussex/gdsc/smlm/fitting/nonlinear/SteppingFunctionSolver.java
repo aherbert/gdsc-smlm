@@ -403,7 +403,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * <p>Setting a new function removes the current bounds.
    *
    * @param f the new gradient function
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(uk.ac.sussex.gdsc.smlm.function.GradientFunction)
    */
   @Override
   public void setGradientFunction(GradientFunction f) {

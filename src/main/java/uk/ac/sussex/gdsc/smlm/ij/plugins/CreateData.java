@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -1010,7 +1011,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     simulationParameters = null;
     setBenchmarkResults(null, null);
     // Run the garbage collector to free memory
-    MemoryPeakResults.runGC();
+    MemoryUtils.runGarbageCollector();
   }
 
   /**
@@ -2284,8 +2285,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           // Free memory
           imageArray[j] = null;
           // Attempt to stay within memory (check vs 32MB)
-          if (MemoryPeakResults.freeMemory() < 33554432L) {
-            MemoryPeakResults.runGCOnce();
+          if (MemoryUtils.getFreeMemory() < 33554432L) {
+            MemoryUtils.runGarbageCollectorOnce();
           }
         }
         for (int k = 2; k-- > 0;) {
@@ -5387,8 +5388,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
    * {@inheritDoc}
    *
    * <p>The generators used in the simulation can be adjusted by changing this method.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.model.RandomGeneratorFactory#createRandomGenerator()
    */
   @Override
   public RandomGenerator createRandomGenerator() {

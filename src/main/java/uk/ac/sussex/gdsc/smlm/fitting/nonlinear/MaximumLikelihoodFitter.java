@@ -820,40 +820,46 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
-   * @return the relative threshold for convergence in the Maximum Likelihood Estimator.
+   * Gets the relative threshold for convergence in the Maximum Likelihood Estimator.
+   *
+   * @return the relative threshold
    */
   public double getRelativeThreshold() {
     return relativeThreshold;
   }
 
   /**
-   * @param relativeThreshold the relative threshold for convergence in the Maximum Likelihood
-   *        Estimator
+   * Sets the relative threshold for convergence in the Maximum Likelihood Estimator.
+   *
+   * @param relativeThreshold the relative threshold
    */
   public void setRelativeThreshold(double relativeThreshold) {
     this.relativeThreshold = relativeThreshold;
   }
 
   /**
-   * @return the absolute threshold for convergence in the Maximum Likelihood Estimator.
+   * Gets the absolute threshold for convergence in the Maximum Likelihood Estimator.
+   *
+   * @return the absolute threshold
    */
   public double getAbsoluteThreshold() {
     return absoluteThreshold;
   }
 
   /**
-   * @param absoluteThreshold the absolute threshold for convergence in the Maximum Likelihood
-   *        Estimator
+   * Sets the absolute threshold for convergence in the Maximum Likelihood Estimator.
+   *
+   * @param absoluteThreshold the absolute threshold
    */
   public void setAbsoluteThreshold(double absoluteThreshold) {
     this.absoluteThreshold = absoluteThreshold;
   }
 
   /**
-   * Note that certain search methods require bounds to function. A null pointer exception will be
-   * thrown by fitter if the bounds are not set for these methods.
+   * {@inheritDoc}
    *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isBounded()
+   * <p>Note that certain search methods require constraints to function. A null pointer exception
+   * will be thrown by the fitter if the constraints are not set for these methods.
    */
   @Override
   public boolean isBounded() {
@@ -870,10 +876,10 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
-   * Note that certain search methods require constraints to function. A null pointer exception will
-   * be thrown by fitter if the constraints are not set for these methods.
+   * {@inheritDoc}
    *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isConstrained()
+   * <p>Note that certain search methods require constraints to function. A null pointer exception
+   * will be thrown by the fitter if the constraints are not set for these methods.
    */
   @Override
   public boolean isConstrained() {
@@ -952,17 +958,17 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     if (lastY != null) {
       final int n = y.length;
       // The function value must be scaled to the expected value of a Poisson process.
-      double[] e;
+      double[] scaledy;
       if (alpha != 0) {
-        e = new double[n];
+        scaledy = new double[n];
         for (int i = n; i-- > 0;) {
-          e[i] = y[i] * alpha;
+          scaledy[i] = y[i] * alpha;
         }
       } else {
-        e = y;
+        scaledy = y;
       }
       final LikelihoodWrapper maximumLikelihoodFunction =
-          createLikelihoodWrapper(new FixedNonLinearFunction(e), n, lastY, a);
+          createLikelihoodWrapper(new FixedNonLinearFunction(scaledy), n, lastY, a);
 
       final double l = maximumLikelihoodFunction.likelihood(a);
       if (l == Double.POSITIVE_INFINITY) {

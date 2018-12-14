@@ -71,7 +71,6 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
    *
    * @param individuals the individuals
    * @return the subset
-   * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
    */
   @Override
   public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals) {
@@ -135,8 +134,6 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 
   /**
    * Select pairs randomly from the population.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.ga.SelectionStrategy#next()
    */
   @Override
   public ChromosomePair<T> next() {

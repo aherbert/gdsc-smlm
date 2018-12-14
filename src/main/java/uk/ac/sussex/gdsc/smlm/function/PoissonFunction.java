@@ -69,8 +69,6 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
    * {@inheritDoc}
    *
    * <p>This is a PMF.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
    */
   @Override
   public double likelihood(double o, double e) {

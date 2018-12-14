@@ -55,8 +55,9 @@ import java.util.Scanner;
  * allowed with the # character.
  */
 public class MALKFilePeakResults extends FilePeakResults {
-  /** Converter to change the distances to nm. It is created in {@link #begin()} but may be null. */
-  protected TypeConverter<DistanceUnit> toNMConverter;
+  /**
+   * Converter to change the distances to nm. It is created in {@link #begin()} but may be null.
+   */  protected TypeConverter<DistanceUnit> toNMConverter;
   /**
    * Converter to change the intensity to photons. It is created in {@link #begin()} but may be
    * null.

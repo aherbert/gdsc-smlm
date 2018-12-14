@@ -51,7 +51,6 @@ import ij.plugin.PlugIn;
 import ij3d.ContentInstant;
 import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
-import ij3d.ImageJ_3D_Viewer;
 import ij3d.ImageWindow3D;
 
 import org.scijava.java3d.Appearance;
@@ -70,38 +69,13 @@ import java.util.List;
  *
  * @see <A href="https://imagej.net/3D_Viewer">https://imagej.net/3D_Viewer</a>
  */
-public class ImageJ3DResultsViewerTest implements PlugIn {
+public class ImageJ3DResultsViewerDemo implements PlugIn {
   private static final String TITLE = "ImageJ 3D Results Viewer";
-
-  // To debug this from Eclipse relies on being able to find the native
-  // runtime libraries for Open GL. See the README in the eclipse project folder.
-
-  private static String version = "";
-
-  static {
-    // Try setting -Dj3d.sortShape3DBounds for faster centroid computation
-    // See MasterControl.sortShape3DBounds. This only works if The VirtualUniverse
-    // has not been created.
-    java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<String>() {
-      @Override
-      public String run() {
-        return System.setProperty("j3d.sortShape3DBounds", Boolean.toString(true));
-      }
-    });
-
-    // Support gracefully handling missing dependencies for the 3D viewer
-    try {
-      version = ImageJ_3D_Viewer.getJava3DVersion();
-    } catch (final Throwable t) {
-      t.printStackTrace();
-      version = null;
-    }
-  }
 
   /** {@inheritDoc} */
   @Override
   public void run(String arg) {
-    if (version == null) {
+    if (ImageJ3DViewerUtils.JAVA_3D_VERSION == null) {
       IJ.error(TITLE, "Java 3D is not available");
       return;
     }

@@ -36,11 +36,16 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using a precision threshold.
  */
 public class PrecisionFilter extends DirectFilter implements IMultiFilter {
-  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-  public static final double DEFAULT_INCREMENT = 1;
-  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */  public static final double DEFAULT_INCREMENT = 1;
+  /**
+   * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double DEFAULT_RANGE = 10;
-  /** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double UPPER_LIMIT = 70;
 
   @XStreamAsAttribute

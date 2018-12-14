@@ -46,11 +46,15 @@ public abstract class CombinedFilter extends DirectFilter {
   /** The second filter. */
   protected Filter filter2;
 
-  /** The first filter, if it is a {@link DirectFilter}. */
+  /**
+   * The first filter, if it is a {@link DirectFilter}.
+   */
   @XStreamOmitField
   protected DirectFilter dfilter1;
 
-  /** The second filter, if it is a {@link DirectFilter}. */
+  /**
+   * The second filter, if it is a {@link DirectFilter}.
+   */
   @XStreamOmitField
   protected DirectFilter dfilter2;
 
@@ -100,12 +104,12 @@ public abstract class CombinedFilter extends DirectFilter {
     return sb.toString();
   }
 
-  private static void addText(StringBuilder sb, Filter f, String text) {
-    if (f instanceof CombinedFilter) {
+  private static void addText(StringBuilder sb, Filter filter, String text) {
+    if (filter instanceof CombinedFilter) {
       sb.append("(");
     }
     sb.append(text);
-    if (f instanceof CombinedFilter) {
+    if (filter instanceof CombinedFilter) {
       sb.append(")");
     }
   }
@@ -164,16 +168,6 @@ public abstract class CombinedFilter extends DirectFilter {
   }
 
   /**
-   * Filter the result using filter2.
-   *
-   * @param peak The result
-   * @return The filter result
-   */
-  public boolean accept2(PeakResult peak) {
-    return filter2.accept(peak);
-  }
-
-  /**
    * Filter the result using filter1 if it is a DirectFilter, otherwise return true.
    *
    * @param peak The result
@@ -182,6 +176,16 @@ public abstract class CombinedFilter extends DirectFilter {
   public boolean accept1(PreprocessedPeakResult peak) {
     result1 = (dfilter1 != null) ? dfilter1.validate(peak) : 0;
     return result1 == 0;
+  }
+
+  /**
+   * Filter the result using filter2.
+   *
+   * @param peak The result
+   * @return The filter result
+   */
+  public boolean accept2(PeakResult peak) {
+    return filter2.accept(peak);
   }
 
   /**
@@ -238,11 +242,9 @@ public abstract class CombinedFilter extends DirectFilter {
    * <p>The method from the combined filter doesn't throw, leaving that to the underlying filters.
    * This does mean that a combined filter can be created from two already initialised filters and
    * the flags returned may not exactly recreate the state, since they are joined.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#getFilterSetupFlags()
    */
   @Override
-  public int getFilterSetupFlags() throws IllegalStateException {
+  public int getFilterSetupFlags() {
     int flags = 0;
     if (dfilter1 != null) {
       flags |= dfilter1.getFilterSetupFlags();
@@ -259,11 +261,9 @@ public abstract class CombinedFilter extends DirectFilter {
    * <p>The method from the combined filter doesn't throw, leaving that to the underlying filters.
    * This does mean that a combined filter can be created from two already initialised filters and
    * the data returned may not exactly recreate the state, since they are joined.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter#getFilterSetupData()
    */
   @Override
-  public FilterSetupData[] getFilterSetupData() throws IllegalStateException {
+  public FilterSetupData[] getFilterSetupData() {
     final FilterSetupData[] data1 = (dfilter1 == null) ? null : dfilter1.getFilterSetupData();
     if (data1 != null) {
       if (dfilter2 != null) {

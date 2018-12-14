@@ -108,7 +108,6 @@ import ij3d.DefaultUniverse;
 import ij3d.Image3DMenubar;
 import ij3d.Image3DUniverse;
 import ij3d.ImageCanvas3D;
-import ij3d.ImageJ_3D_Viewer;
 import ij3d.ImageWindow3D;
 import ij3d.UniverseListener;
 import ij3d.UniverseSettings;
@@ -144,7 +143,6 @@ import org.scijava.vecmath.Vector3d;
 import java.awt.Color;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -180,8 +178,19 @@ import javax.swing.event.ListSelectionListener;
  *
  * @see <A href="https://imagej.net/3D_Viewer">https://imagej.net/3D_Viewer</a>
  */
-public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseListener {
+public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
   private static final String TITLE = "ImageJ 3D Results Viewer";
+
+  // To debug this from Eclipse relies on being able to find the native
+  // runtime libraries for Open GL. See the README in the eclipse project folder.
+
+  private static final String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
+  private static final String[] RENDERING = SettingsManager.getNames((Object[]) Rendering.values());
+  private static final String[] DEPTH_MODE =
+      SettingsManager.getNames((Object[]) DepthMode.values());
+  private static final String[] TRANSPARENCY_MODE =
+      SettingsManager.getNames((Object[]) TransparencyMode.values());
+  private static final String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
 
   //@formatter:off
   private enum SizeMode implements NamedObject
@@ -194,6 +203,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     public String getName() { return "XYZ Deviations"; }},
         ;
 
+    static final SizeMode[] values = SizeMode.values();
+
     @Override
     public String getShortName()
     {
@@ -202,17 +213,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     public static SizeMode forNumber(int number)
     {
-      final SizeMode[] values = SizeMode.values();
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
       return values[number];
     }
   }
-
-  private static final String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
-
-  private static final String[] RENDERING = SettingsManager.getNames((Object[]) Rendering.values());
 
   private enum DepthMode implements NamedObject
   {
@@ -224,6 +230,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     public String getName() { return "Dither"; }},
         ;
 
+    static final DepthMode[] values = DepthMode.values();
+
     @Override
     public String getShortName()
     {
@@ -232,15 +240,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     public static DepthMode forNumber(int number)
     {
-      final DepthMode[] values = DepthMode.values();
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
       return values[number];
     }
   }
-
-  private static final String[] DEPTH_MODE = SettingsManager.getNames((Object[]) DepthMode.values());
 
   private enum TransparencyMode implements NamedObject
   {
@@ -256,6 +261,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     public String getName() { return "XYZ Deviations"; }},
         ;
 
+    static final TransparencyMode[] values = TransparencyMode.values();
+
     @Override
     public String getShortName()
     {
@@ -264,15 +271,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     public static TransparencyMode forNumber(int number)
     {
-      final TransparencyMode[] values = TransparencyMode.values();
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
       return values[number];
     }
   }
-
-  private static final String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());
 
   private enum SortMode implements NamedObject
   {
@@ -294,6 +298,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     public String getDescription() { return "Rank by distance to the eye position for true depth perspective rendering."; }},
         ;
 
+    static final SortMode[] values = SortMode.values();
+
     @Override
     public String getShortName()
     {
@@ -302,7 +308,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     public static SortMode forNumber(int number)
     {
-      final SortMode[] values = SortMode.values();
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
@@ -316,34 +321,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       return getName() + ": " + getDescription();
     }
   }
-
-  private static final String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
   //@formatter:on
-
-  // To debug this from Eclipse relies on being able to find the native
-  // runtime libraries for Open GL. See the README in the eclipse project folder.
-
-  private static String version = "";
-
-  static {
-    // Try setting -Dj3d.sortShape3DBounds for faster centroid computation
-    // See org.scijava.java3d.MasterControl.sortShape3DBounds.
-    // This only works if The VirtualUniverse has not been created.
-    java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<String>() {
-      @Override
-      public String run() {
-        return System.setProperty("j3d.sortShape3DBounds", Boolean.toString(true));
-      }
-    });
-
-    // Support gracefully handling missing dependencies for the 3D viewer
-    try {
-      version = ImageJ_3D_Viewer.getJava3DVersion();
-    } catch (final Throwable t) {
-      t.printStackTrace();
-      version = null;
-    }
-  }
 
   private static class ResultsMetaData implements ListSelectionListener {
     PeakResultTableModel peakResultTableModel;
@@ -375,7 +353,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     TurboList<PeakResult> selected = new TurboList<>();
     TurboList<TransformGroup> selectedNode = new TurboList<>();
 
-    public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
+    ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
         TurboList<Point3f> points, Point3f[] sizes) {
       this.settings = settings;
       this.results = results;
@@ -391,7 +369,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       highlightColourUpdated();
     }
 
-    public void createClickSelectionNode(CustomContentInstant contentInstance) {
+    void createClickSelectionNode(CustomContentInstant contentInstance) {
       // Note: Allow multiple items to be picked.
       // Maintain a list of the results that are picked (the table model).
       // At each new click, check the list does not contain the points
@@ -468,7 +446,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       // return mesh;
     }
 
-    public void select(int index) {
+    void select(int index) {
       if (index < 0 || index >= points.size()) {
         return;
       }
@@ -545,24 +523,24 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       }
     }
 
-    public void select(PeakResult r) {
+    void select(PeakResult r) {
       select(results.indexOf(r));
     }
 
-    public void setPointSize(float f) {
+    void setPointSize(float f) {
       if (rendering == Rendering.POINT) {
         ((ItemPointMesh) outline).setPointSize(f);
       }
     }
 
-    public void highlightColourUpdated() {
+    void highlightColourUpdated() {
       this.highlightColor = ImageJ3DResultsViewer.highlightColor;
       if (outline != null) {
         outline.setColor(highlightColor);
       }
     }
 
-    public void addSelectionModel(
+    void addSelectionModel(
         Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t) {
       this.peakResultTableModel = t.a;
       this.listSelectionModel = t.b;
@@ -641,14 +619,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       }
     }
 
-    public void removeSelectionModel() {
+    void removeSelectionModel() {
       if (listSelectionModel != null) {
         listSelectionModel.removeListSelectionListener(this);
         listSelectionModel = null;
       }
     }
 
-    public void removeFromSelectionModel(PeakResult p) {
+    void removeFromSelectionModel(PeakResult p) {
       if (peakResultTableModel == null) {
         return;
       }
@@ -665,7 +643,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
       }
     }
 
-    public void addToSelectionModel(PeakResult p) {
+    void addToSelectionModel(PeakResult p) {
       if (peakResultTableModel == null) {
         return;
       }
@@ -745,7 +723,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-    if (version == null) {
+    if (ImageJ3DViewerUtils.JAVA_3D_VERSION == null) {
       IJ.error(TITLE, "Java 3D is not available");
       return;
     }
@@ -2294,58 +2272,58 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     add.setMnemonic(KeyEvent.VK_G);
 
     resetRotation = new JMenuItem("Reset global rotation", KeyEvent.VK_R);
-    resetRotation.addActionListener(this);
+    resetRotation.addActionListener(this::menuActionPerformed);
     add.add(resetRotation);
 
     resetTranslation = new JMenuItem("Reset global translation", KeyEvent.VK_T);
-    resetTranslation.addActionListener(this);
+    resetTranslation.addActionListener(this::menuActionPerformed);
     add.add(resetTranslation);
 
     resetZoom = new JMenuItem("Reset global zoom", KeyEvent.VK_Z);
-    resetZoom.addActionListener(this);
+    resetZoom.addActionListener(this::menuActionPerformed);
     add.add(resetZoom);
 
     add.addSeparator();
 
     resetAll = new JMenuItem("Reset all transformations", KeyEvent.VK_A);
-    resetAll.addActionListener(this);
+    resetAll.addActionListener(this::menuActionPerformed);
     add.add(resetAll);
 
     resetSelectedView = new JMenuItem("Reset selected transformation", KeyEvent.VK_S);
-    resetSelectedView.addActionListener(this);
+    resetSelectedView.addActionListener(this::menuActionPerformed);
     add.add(resetSelectedView);
 
     findEyePoint = new JMenuItem("Find eye point", KeyEvent.VK_E);
-    findEyePoint.addActionListener(this);
+    findEyePoint.addActionListener(this::menuActionPerformed);
     add.add(findEyePoint);
 
     sortBackToFront = new JMenuItem("Sort Back-to-Front", KeyEvent.VK_B);
     sortBackToFront.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed B"));
-    sortBackToFront.addActionListener(this);
+    sortBackToFront.addActionListener(this::menuActionPerformed);
     add.add(sortBackToFront);
 
     sortFrontToBack = new JMenuItem("Sort Front-to-Back", KeyEvent.VK_F);
     sortFrontToBack.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed R"));
-    sortFrontToBack.addActionListener(this);
+    sortFrontToBack.addActionListener(this::menuActionPerformed);
     add.add(sortFrontToBack);
 
     add.addSeparator();
 
     changeColour = new JMenuItem("Change colour", KeyEvent.VK_O);
-    changeColour.addActionListener(this);
+    changeColour.addActionListener(this::menuActionPerformed);
     add.add(changeColour);
 
     changePointSize = new JMenuItem("Change point size", KeyEvent.VK_H);
-    changePointSize.addActionListener(this);
+    changePointSize.addActionListener(this::menuActionPerformed);
     add.add(changePointSize);
 
     toggleTransparent = new JMenuItem("Toggle transparent", KeyEvent.VK_P);
     toggleTransparent.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed E"));
-    toggleTransparent.addActionListener(this);
+    toggleTransparent.addActionListener(this::menuActionPerformed);
     add.add(toggleTransparent);
 
     toggleShaded = new JMenuItem("Toggle shaded", KeyEvent.VK_S);
-    toggleShaded.addActionListener(this);
+    toggleShaded.addActionListener(this::menuActionPerformed);
     add.add(toggleShaded);
 
     toggleDynamicTransparency = new JCheckBoxMenuItem("Toggle dynamic transparency");
@@ -2353,24 +2331,24 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     toggleDynamicTransparency.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed D"));
     toggleDynamicTransparency.setSelected(
         univ.getViewer().getView().getTransparencySortingPolicy() != View.TRANSPARENCY_SORT_NONE);
-    toggleDynamicTransparency.addActionListener(this);
+    toggleDynamicTransparency.addActionListener(this::menuActionPerformed);
     add.add(toggleDynamicTransparency);
 
     colourSurface = new JMenuItem("Colour surface from 2D image", KeyEvent.VK_I);
-    colourSurface.addActionListener(this);
+    colourSurface.addActionListener(this::menuActionPerformed);
     add.add(colourSurface);
 
     add.addSeparator();
 
     cropResults = new JMenuItem("Crop results", KeyEvent.VK_C);
     cropResults.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed X"));
-    cropResults.addActionListener(this);
+    cropResults.addActionListener(this::menuActionPerformed);
     add.add(cropResults);
 
     add.addSeparator();
 
     updateSettings = new JMenuItem("Update settings", KeyEvent.VK_U);
-    updateSettings.addActionListener(this);
+    updateSettings.addActionListener(this::menuActionPerformed);
     add.add(updateSettings);
 
     menubar.add(add);
@@ -3050,9 +3028,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
     return vWorldToLocal;
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public void actionPerformed(ActionEvent event) {
+  private void menuActionPerformed(ActionEvent event) {
     final Object src = event.getSource();
 
     ContentAction action = null;

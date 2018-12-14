@@ -112,8 +112,6 @@ public class FastMLEGradient2Procedure
    * the Smith, et al (2010) paper.
    *
    * {@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure#execute(double, double[], double[])
    */
   @Override
   public void execute(double uk, double[] duk_dt, double[] d2uk_dt2) {
@@ -159,8 +157,6 @@ public class FastMLEGradient2Procedure
    * Variables are named as per the Smith, et al (2010) paper.
    *
    * {@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
    */
   @Override
   public void execute(double uk, double[] duk_dt) {
@@ -195,8 +191,6 @@ public class FastMLEGradient2Procedure
    * Variables are named as per the Smith, et al (2010) paper.
    *
    * {@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.ValueProcedure#execute(double)
    */
   @Override
   public void execute(double uk) {

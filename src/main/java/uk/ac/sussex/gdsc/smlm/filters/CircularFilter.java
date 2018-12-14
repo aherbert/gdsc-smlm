@@ -143,10 +143,6 @@ public abstract class CircularFilter extends BaseWeightedFilter {
     rank(data, roi, maxx, maxy, radius);
   }
 
-  /**
-   *
-   * @param radius The kernel radius
-   */
   private void rank(float[] data, Rectangle roi, int width, int height, double radius) {
     final int[] lineRadii = makeLineRadii(radius);
 
@@ -167,40 +163,41 @@ public abstract class CircularFilter extends BaseWeightedFilter {
         data[i] *= weights[i];
       }
     } else {
-      normaliser = computeNormaliser(kNPoints(lineRadii));
+      normaliser = computeNormaliser(getKernelNumberOfPoints(lineRadii));
     }
 
-    final int kHeight = kHeight(lineRadii);
-    final int kRadius = kRadius(lineRadii);
-    final int cacheWidth = roi.width + 2 * kRadius;
-    final int cacheHeight = kHeight;
+    final int kheight = getKernelHeight(lineRadii);
+    final int kradius = getKernelRadius(lineRadii);
+    final int cacheWidth = roi.width + 2 * kradius;
+    final int cacheHeight = kheight;
     // 'cache' is the input buffer. Each line y in the image is mapped onto cache line y%cacheHeight
     final float[] cache = new float[cacheWidth * cacheHeight];
 
     doFiltering(data, outData, roi, width, height, lineRadii, cache, cacheWidth, cacheHeight);
   }
 
-  // Filter a grayscale image or one channel of an RGB image using one thread
-  //
-  // Data handling: The area needed for processing a line is written into the array 'cache'.
-  // This is a stripe of sufficient width for all threads to have each thread processing one
-  // line, and some extra space if one thread is finished to start the next line.
-  // This array is padded at the edges of the image so that a surrounding with radius kRadius
-  // for each pixel processed is within 'cache'. Out-of-image
-  // pixels are set to the value of the nearest edge pixel. When adding a new line, the lines in
-  // 'cache' are not shifted but rather the smaller array with the start and end pointers of the
-  // kernel area is modified to point at the addresses for the next line.
-  //
-  // Algorithm: For mean and variance, except for very small radius, usually do not calculate the
-  // sum over all pixels. This sum is calculated for the first pixel of every line only. For the
-  // following pixels, add the new values and subtract those that are not in the sum any more.
+  /**
+   * Filter a grayscale image or one channel of an RGB image using one thread
+   *
+   * <p>Data handling: The area needed for processing a line is written into the array 'cache'. This
+   * is a stripe of sufficient width for all threads to have each thread processing one line, and
+   * some extra space if one thread is finished to start the next line. This array is padded at the
+   * edges of the image so that a surrounding with radius kradius for each pixel processed is within
+   * 'cache'. Out-of-image pixels are set to the value of the nearest edge pixel. When adding a new
+   * line, the lines in 'cache' are not shifted but rather the smaller array with the start and end
+   * pointers of the kernel area is modified to point at the addresses for the next line.
+   *
+   * <p>Algorithm: For mean and variance, except for very small radius, usually do not calculate the
+   * sum over all pixels. This sum is calculated for the first pixel of every line only. For the
+   * following pixels, add the new values and subtract those that are not in the sum any more.
+   */
   private void doFiltering(float[] inPixels, float[] outPixels, Rectangle roi, int width,
       int height, int[] lineRadii, float[] cache, int cacheWidth, int cacheHeight) {
-    final int kHeight = kHeight(lineRadii);
-    final int kRadius = kRadius(lineRadii);
+    final int kheight = getKernelHeight(lineRadii);
+    final int kradius = getKernelRadius(lineRadii);
 
-    final int xmin = roi.x - kRadius;
-    final int xmax = roi.x + roi.width + kRadius;
+    final int xmin = roi.x - kradius;
+    final int xmax = roi.x + roi.width + kradius;
     final int[] cachePointers = makeCachePointers(lineRadii, cacheWidth);
 
     final int padLeft = xmin < 0 ? -xmin : 0;
@@ -211,7 +208,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
 
     final double[] sums = new double[2];
 
-    int previousY = kHeight / 2 - cacheHeight;
+    int previousY = kheight / 2 - cacheHeight;
 
     for (int y = roi.y; y < roi.y + roi.height; y++) {
       for (int i = 0; i < cachePointers.length; i++) {
@@ -220,14 +217,13 @@ public abstract class CircularFilter extends BaseWeightedFilter {
       }
       previousY = y;
 
-      final int yStartReading = y == roi.y ? Math.max(roi.y - kHeight / 2, 0) : y + kHeight / 2;
-      for (int yNew = yStartReading; yNew <= y + kHeight / 2; yNew++) {
+      final int yStartReading = y == roi.y ? Math.max(roi.y - kheight / 2, 0) : y + kheight / 2;
+      for (int yy = yStartReading; yy <= y + kheight / 2; yy++) {
         readLineToCacheOrPad(inPixels, width, height, roi.y, xminInside, widthInside, cache,
-            cacheWidth, cacheHeight, padLeft, padRight, kHeight, yNew);
+            cacheWidth, cacheHeight, padLeft, padRight, kheight, yy);
       }
 
-      filterLine(outPixels, width, cache, cachePointers, roi, y, // F I L T E R
-          sums);
+      filterLine(outPixels, width, cache, cachePointers, roi, y, sums);
     }
   }
 
@@ -249,14 +245,14 @@ public abstract class CircularFilter extends BaseWeightedFilter {
    */
   private static void readLineToCacheOrPad(Object pixels, int width, int height, int roiY,
       int xminInside, int widthInside, float[] cache, int cacheWidth, int cacheHeight, int padLeft,
-      int padRight, int kHeight, int y) {
-    final int lineInCache = y % cacheHeight;
-    if (y < height) {
-      readLineToCache(pixels, y * width, xminInside, widthInside, cache, lineInCache * cacheWidth,
-          padLeft, padRight);
-      if (y == 0) {
+      int padRight, int kheight, int yposition) {
+    final int lineInCache = yposition % cacheHeight;
+    if (yposition < height) {
+      readLineToCache(pixels, yposition * width, xminInside, widthInside, cache,
+          lineInCache * cacheWidth, padLeft, padRight);
+      if (yposition == 0) {
         // for y<0, pad with y=0 border pixels
-        for (int prevY = roiY - kHeight / 2; prevY < 0; prevY++) {
+        for (int prevY = roiY - kheight / 2; prevY < 0; prevY++) {
           final int prevLineInCache = cacheHeight + prevY;
           System.arraycopy(cache, 0, cache, prevLineInCache * cacheWidth, cacheWidth);
         }
@@ -269,7 +265,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
 
   /**
    * Read a line into the cache (includes conversion to flaot). Pad with edge pixels in x if
-   * necessary
+   * necessary.
    */
   private static void readLineToCache(Object pixels, int pixelLineP, int xminInside,
       int widthInside, float[] cache, int cacheLineP, int padLeft, int padRight) {
@@ -297,7 +293,6 @@ public abstract class CircularFilter extends BaseWeightedFilter {
       }
     }
     sums[0] = sum;
-    return;
   }
 
   /**
@@ -309,13 +304,10 @@ public abstract class CircularFilter extends BaseWeightedFilter {
   private static void addSideSums(float[] cache, int xCache0, int[] kernel, double[] sums) {
     double sum = 0;
     for (int kk = 0; kk < kernel.length; /* k++;k++ below */) {
-      float v = cache[kernel[kk++] + (xCache0 - 1)];
-      sum -= v;
-      v = cache[kernel[kk++] + xCache0];
-      sum += v;
+      sum -= cache[kernel[kk++] + (xCache0 - 1)];
+      sum += cache[kernel[kk++] + xCache0];
     }
     sums[0] += sum;
-    return;
   }
 
   /**
@@ -340,31 +332,28 @@ public abstract class CircularFilter extends BaseWeightedFilter {
     }
     lastRadius = radius;
 
-    // System.out.println(java.util.Arrays.toString(getRadii(10, 0.1)));
-
     if (radius >= 1.5 && radius < 1.75) {
       radius = 1.75;
     } else if (radius >= 2.5 && radius < 2.85) {
       radius = 2.85;
     }
     final int r2 = (int) (radius * radius) + 1;
-    final int kRadius = (int) (Math.sqrt(r2 + 1e-10));
-    final int kHeight = 2 * kRadius + 1;
-    kernel = new int[2 * kHeight + 2];
-    kernel[2 * kRadius] = -kRadius;
-    kernel[2 * kRadius + 1] = kRadius;
-    int npoints = 2 * kRadius + 1;
-    for (int y = 1; y <= kRadius; y++) { // lines above and below center together
+    final int kradius = (int) (Math.sqrt(r2 + 1e-10));
+    final int kheight = 2 * kradius + 1;
+    kernel = new int[2 * kheight + 2];
+    kernel[2 * kradius] = -kradius;
+    kernel[2 * kradius + 1] = kradius;
+    int npoints = 2 * kradius + 1;
+    for (int y = 1; y <= kradius; y++) { // lines above and below center together
       final int dx = (int) (Math.sqrt(r2 - y * y + 1e-10));
-      kernel[2 * (kRadius - y)] = -dx;
-      kernel[2 * (kRadius - y) + 1] = dx;
-      kernel[2 * (kRadius + y)] = -dx;
-      kernel[2 * (kRadius + y) + 1] = dx;
+      kernel[2 * (kradius - y)] = -dx;
+      kernel[2 * (kradius - y) + 1] = dx;
+      kernel[2 * (kradius + y)] = -dx;
+      kernel[2 * (kradius + y) + 1] = dx;
       npoints += 4 * dx + 2; // 2*dx+1 for each line, above&below
     }
     kernel[kernel.length - 2] = npoints;
-    kernel[kernel.length - 1] = kRadius;
-    // for (int i=0; i<kHeight;i++)IJ.log(i+": "+kernel[2*i]+"-"+kernel[2*i+1]);
+    kernel[kernel.length - 1] = kradius;
     return kernel;
   }
 
@@ -404,9 +393,9 @@ public abstract class CircularFilter extends BaseWeightedFilter {
       radius = 2.85;
     }
     final int r2 = (int) (radius * radius) + 1;
-    final int kRadius = (int) (Math.sqrt(r2 + 1e-10));
-    int npoints = 2 * kRadius + 1;
-    for (int y = 1; y <= kRadius; y++) {
+    final int kradius = (int) (Math.sqrt(r2 + 1e-10));
+    int npoints = 2 * kradius + 1;
+    for (int y = 1; y <= kradius; y++) {
       final int dx = (int) (Math.sqrt(r2 - y * y + 1e-10));
       npoints += 4 * dx + 2;
     }
@@ -421,9 +410,8 @@ public abstract class CircularFilter extends BaseWeightedFilter {
    */
   public static int getDiameter(double radius) {
     final int r2 = (int) (radius * radius) + 1;
-    final int kRadius = (int) (Math.sqrt(r2 + 1e-10));
-    final int kHeight = 2 * kRadius + 1;
-    return kHeight;
+    final int kradius = (int) (Math.sqrt(r2 + 1e-10));
+    return 2 * kradius + 1;
   }
 
   /**
@@ -438,28 +426,28 @@ public abstract class CircularFilter extends BaseWeightedFilter {
   }
 
   // kernel height
-  private static int kHeight(int[] lineRadii) {
+  private static int getKernelHeight(int[] lineRadii) {
     return (lineRadii.length - 2) / 2;
   }
 
-  // kernel radius in x direction. width is 2+kRadius+1
-  private static int kRadius(int[] lineRadii) {
+  // kernel radius in x direction. width is 2+kradius+1
+  private static int getKernelRadius(int[] lineRadii) {
     return lineRadii[lineRadii.length - 1];
   }
 
   // number of points in kernal area
-  private static int kNPoints(int[] lineRadii) {
+  private static int getKernelNumberOfPoints(int[] lineRadii) {
     return lineRadii[lineRadii.length - 2];
   }
 
   // cache pointers for a given kernel
   private static int[] makeCachePointers(int[] lineRadii, int cacheWidth) {
-    final int kRadius = kRadius(lineRadii);
-    final int kHeight = kHeight(lineRadii);
-    final int[] cachePointers = new int[2 * kHeight];
-    for (int i = 0; i < kHeight; i++) {
-      cachePointers[2 * i] = i * cacheWidth + kRadius + lineRadii[2 * i];
-      cachePointers[2 * i + 1] = i * cacheWidth + kRadius + lineRadii[2 * i + 1];
+    final int kradius = getKernelRadius(lineRadii);
+    final int kheight = getKernelHeight(lineRadii);
+    final int[] cachePointers = new int[2 * kheight];
+    for (int i = 0; i < kheight; i++) {
+      cachePointers[2 * i] = i * cacheWidth + kradius + lineRadii[2 * i];
+      cachePointers[2 * i + 1] = i * cacheWidth + kradius + lineRadii[2 * i + 1];
     }
     return cachePointers;
   }

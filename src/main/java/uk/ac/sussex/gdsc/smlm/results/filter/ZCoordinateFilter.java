@@ -35,11 +35,16 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 public class ZCoordinateFilter extends DirectFilter {
   // Assuming units are in pixels with 100nm/px set the default range as +/- 1000nm
 
-  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-  public static final double DEFAULT_INCREMENT = 0.1;
-  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */  public static final double DEFAULT_INCREMENT = 0.1;
+  /**
+   * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double DEFAULT_RANGE = 10;
-  /** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double UPPER_LIMIT = 50; // This may need to be changed
 
   @XStreamAsAttribute

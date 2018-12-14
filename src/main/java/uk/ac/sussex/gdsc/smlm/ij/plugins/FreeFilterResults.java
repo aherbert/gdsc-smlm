@@ -72,11 +72,6 @@ public class FreeFilterResults implements PlugIn, ItemListener {
   private GUIFilterSettings.Builder filterSettings;
   private MemoryPeakResults results;
 
-  /*
-   * (non-)
-   *
-   * @see ij.plugin.PlugIn#run(java.lang.String)
-   */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

@@ -37,11 +37,16 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using an upper width factor. Assumes width is identical on the X and Y axis.
  */
 public class WidthFilter extends DirectFilter implements IMultiFilter {
-  /** The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-  public static final double DEFAULT_INCREMENT = 0.05;
-  /** The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */  public static final double DEFAULT_INCREMENT = 0.05;
+  /**
+   * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double DEFAULT_RANGE = 1;
-  /** The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
+  /**
+   * The default limit. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */
   public static final double UPPER_LIMIT = 5;
 
   /** The width. */

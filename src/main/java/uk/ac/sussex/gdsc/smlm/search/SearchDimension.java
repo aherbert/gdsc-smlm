@@ -44,8 +44,9 @@ public class SearchDimension implements Cloneable, Dimension {
   /** The number of increments to use around the centre. */
   public final int nIncrement;
 
-  /** Set to true if {@link #min} &lt; {@link #max}. */
-  public final boolean active;
+  /**
+   * Set to true if {@link #min} &lt; {@link #max}.
+   */  public final boolean active;
 
   private double centre;
   private double increment;
@@ -198,8 +199,6 @@ public class SearchDimension implements Cloneable, Dimension {
 
   /**
    * If the dimension is not active or min increment is zero no rounding is performed.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.search.Dimension#canRound()
    */
   @Override
   public boolean canRound() {

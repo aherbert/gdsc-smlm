@@ -177,22 +177,22 @@ public class BinomialFitter {
     double bestSS = initialSS;
     double[] parameters = null;
     int worse = 0;
-    int N = histogram.length - 1;
+    int currentN = histogram.length - 1;
     if (minN < 1) {
       minN = 1;
     }
     if (maxN > 0) {
-      if (N > maxN) {
-        // Limit the number fitted to maximum
-        N = maxN;
-      } else if (N < maxN) {
+      if (currentN > maxN) {
+        // Limit the number fitted to the maximum
+        currentN = maxN;
+      } else if (currentN < maxN) {
         // Expand the histogram to the maximum
         histogram = Arrays.copyOf(histogram, maxN + 1);
-        N = maxN;
+        currentN = maxN;
       }
     }
-    if (minN > N) {
-      minN = N;
+    if (minN > currentN) {
+      minN = currentN;
     }
 
     final double mean = getMean(histogram);
@@ -206,7 +206,7 @@ public class BinomialFitter {
     // Since varying the N should be done in integer steps do this
     // for n=1,2,3,... until the SS peaks then falls off (is worse than the best
     // score several times in succession)
-    for (int n = minN; n <= N; n++) {
+    for (int n = minN; n <= currentN; n++) {
       final PointValuePair solution = fitBinomial(histogram, mean, n, zeroTruncated);
       if (solution == null) {
         continue;
@@ -220,10 +220,8 @@ public class BinomialFitter {
         bestSS = solution.getValue();
         parameters = new double[] {n, p};
         worse = 0;
-      } else if (bestSS != initialSS) {
-        if (++worse >= 3) {
-          break;
-        }
+      } else if (bestSS != initialSS && ++worse >= 3) {
+        break;
       }
     }
 
@@ -263,7 +261,8 @@ public class BinomialFitter {
     }
 
     if (zeroTruncated && histogram[0] > 0) {
-      log("Fitting zero-truncated histogram but there are zero values - Renormalising to ignore zero");
+      log("Fitting zero-truncated histogram but there are zero values - "
+          + "Renormalising to ignore zero");
       double cumul = 0;
       for (int i = 1; i < histogram.length; i++) {
         cumul += histogram[i];
@@ -374,7 +373,7 @@ public class BinomialFitter {
         // comparison across different n
         final double p = solution.getPointRef()[0];
         double ss = 0;
-        final double[] obs = function.p;
+        final double[] obs = function.pvalues;
         final double[] exp = function.getP(p);
         for (int i = 0; i < obs.length; i++) {
           ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
@@ -395,7 +394,7 @@ public class BinomialFitter {
               .maxEvaluations(Integer.MAX_VALUE)
               .maxIterations(3000)
               .start(solution.getPointRef())
-              .target(gradientFunction.p)
+              .target(gradientFunction.pvalues)
               .weight(new DiagonalMatrix(gradientFunction.getWeights()))
               .model(gradientFunction, new MultivariateMatrixFunction() {
                 @Override
@@ -465,30 +464,30 @@ public class BinomialFitter {
    */
   private class BinomialModel {
     int trials;
-    double[] p;
+    double[] pvalues;
     int startIndex;
 
     /**
      * Create a new Binomial model using the input p-values.
      *
-     * @param p The observed p-value
+     * @param pvalues The observed p-value
      * @param trials The number of trials
      * @param zeroTruncated Set to true to ignore the x=0 datapoint
      */
-    public BinomialModel(double[] p, int trials, boolean zeroTruncated) {
+    public BinomialModel(double[] pvalues, int trials, boolean zeroTruncated) {
       this.trials = trials;
       startIndex = (zeroTruncated) ? 1 : 0;
-      this.p = p;
+      this.pvalues = pvalues;
     }
 
     /**
-     * Get the probability function for the input pValue.
+     * Get the probability function for the input p-value.
      *
-     * @param pValue the value
+     * @param pvalue the value
      * @return the probability function
      */
-    public double[] getP(double pValue) {
-      final BinomialDistribution dist = new BinomialDistribution(trials, pValue);
+    public double[] getP(double pvalue) {
+      final BinomialDistribution dist = new BinomialDistribution(trials, pvalue);
 
       // Optionally ignore x=0 since we cannot see a zero size cluster.
       // This is done by re-normalising the cumulative probability excluding x=0
@@ -499,7 +498,7 @@ public class BinomialFitter {
       // pi = 1 / ( 1 - f(0) )
       // Fzt(x) = pi . F(x)
 
-      final double[] p2 = new double[p.length];
+      final double[] p2 = new double[pvalues.length];
       for (int i = startIndex; i <= trials; i++) {
         p2[i] = dist.probability(i);
       }
@@ -523,12 +522,12 @@ public class BinomialFitter {
     /**
      * Instantiates a new binomial model function.
      *
-     * @param p the p
+     * @param pvalues the p
      * @param trials the trials
      * @param zeroTruncated the zero truncated
      */
-    public BinomialModelFunction(double[] p, int trials, boolean zeroTruncated) {
-      super(p, trials, zeroTruncated);
+    public BinomialModelFunction(double[] pvalues, int trials, boolean zeroTruncated) {
+      super(pvalues, trials, zeroTruncated);
     }
 
     /** {@inheritDoc} */
@@ -543,15 +542,15 @@ public class BinomialFitter {
         for (int i = startIndex; i < limit; i++) {
           // Sum for all observations the probability of the observation.
           // Use p[i] to indicate the frequency of this observation.
-          ll += p[i] * Math.log(p2[i]);
+          ll += pvalues[i] * Math.log(p2[i]);
         }
         // System.out.printf("%f => %f\n", parameters[0], ll);
         return ll;
       }
       // Calculate the sum of squares
       double ss = 0;
-      for (int i = startIndex; i < p.length; i++) {
-        final double dx = p[i] - p2[i];
+      for (int i = startIndex; i < pvalues.length; i++) {
+        final double dx = pvalues[i] - p2[i];
         ss += dx * dx;
       }
       return ss;
@@ -563,7 +562,9 @@ public class BinomialFitter {
    */
   private class BinomialModelFunctionGradient extends BinomialModel
       implements MultivariateVectorFunction {
-    long[] nC;
+
+    /** Binomial coefficient nCk for k=0 to the array length. */
+    long[] nchoose;
 
     /**
      * Instantiates a new binomial model function gradient.
@@ -581,14 +582,14 @@ public class BinomialFitter {
       // an offset of 1 and assumes the index of p is X.
 
       final int n = trials;
-      nC = new long[n + 1];
+      nchoose = new long[n + 1];
       for (int k = 0; k <= n; k++) {
-        nC[k] = CombinatoricsUtils.binomialCoefficient(n, k);
+        nchoose[k] = CombinatoricsUtils.binomialCoefficient(n, k);
       }
     }
 
     private double[] getWeights() {
-      final double[] w = new double[p.length];
+      final double[] w = new double[pvalues.length];
       Arrays.fill(w, 1);
       return w;
     }
@@ -606,7 +607,7 @@ public class BinomialFitter {
       // nCk * p^k * (n-k) * (1-p)^(n-k-1) * -1
 
       final double p = variables[0];
-      final double[][] jacobian = new double[this.p.length][1];
+      final double[][] jacobian = new double[this.pvalues.length][1];
 
       // Compute the gradient using analytical differentiation
       final int n = trials;
@@ -624,7 +625,7 @@ public class BinomialFitter {
           final double q = 1 - p;
           final double q_n_k_1 = FastMath.pow(q, n - k - 1);
           final double q_n_k = q * q_n_k_1;
-          jacobian[k][0] = nC[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
+          jacobian[k][0] = nchoose[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
         }
       } else {
         // Account for zero-truncated distribution
@@ -641,8 +642,8 @@ public class BinomialFitter {
         // double pi = dist.probability(0);
         final double q = 1 - p;
         final double p_n = FastMath.pow(1 - p, n);
-        final double f = 1.0 / (1.0 - nC[0] * p_n);
-        final double ff = -1 / FastMath.pow(1.0 - nC[0] * p_n, 2) + n * FastMath.pow(q, n - 1);
+        final double f = 1.0 / (1.0 - nchoose[0] * p_n);
+        final double ff = -1 / FastMath.pow(1.0 - nchoose[0] * p_n, 2) + n * FastMath.pow(q, n - 1);
 
         for (int k = 1; k <= n; ++k) {
           final double pk_1 = FastMath.pow(p, k - 1);
@@ -650,9 +651,9 @@ public class BinomialFitter {
           final double q_n_k_1 = FastMath.pow(q, n - k - 1);
           final double q_n_k = q * q_n_k_1;
 
-          final double g = nC[k] * pk * q_n_k;
+          final double g = nchoose[k] * pk * q_n_k;
           // Differentiate as above
-          final double gg = nC[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
+          final double gg = nchoose[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
           jacobian[k][0] = ff * g + f * gg;
         }
       }
@@ -688,6 +689,8 @@ public class BinomialFitter {
   }
 
   /**
+   * Checks if using maximum likelihood fitting.
+   *
    * @return True if use maximum likelihood fitting.
    */
   public boolean isMaximumLikelihood() {
@@ -695,6 +698,8 @@ public class BinomialFitter {
   }
 
   /**
+   * Sets to true to use maximum likelihood fitting.
+   *
    * @param maximumLikelihood True if use maximum likelihood fitting
    */
   public void setMaximumLikelihood(boolean maximumLikelihood) {
@@ -702,6 +707,8 @@ public class BinomialFitter {
   }
 
   /**
+   * Gets the number of  fit restarts.
+   *
    * @return the number of restarts for fitting.
    */
   public int getFitRestarts() {

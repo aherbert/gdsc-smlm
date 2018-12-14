@@ -51,7 +51,7 @@ public class ImmutablePeakResult extends AttributePeakResult {
   }
 
   @Override
-  public void setSignal(float s) {
+  public void setIntensity(float s) {
     throw new DataException("This result is immutable");
   }
 

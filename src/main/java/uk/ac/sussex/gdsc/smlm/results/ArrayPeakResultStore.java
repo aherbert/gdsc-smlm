@@ -62,7 +62,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
    * @param store the store to copy
    * @throws NullPointerException if the store is null
    */
-  public ArrayPeakResultStore(ArrayPeakResultStore store) throws NullPointerException {
+  public ArrayPeakResultStore(ArrayPeakResultStore store) {
     this.results = store.toArray();
     this.size = store.size;
   }
@@ -73,7 +73,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
    * @param results the results
    * @throws NullPointerException if the results are null
    */
-  public ArrayPeakResultStore(PeakResult[] results) throws NullPointerException {
+  public ArrayPeakResultStore(PeakResult[] results) {
     this.results = results;
     this.size = results.length;
   }
@@ -82,8 +82,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
    * {@inheritDoc}
    *
    * <p>Note: This does not check against the current size so can return stale data.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList#get(int)
    */
   @Override
   public PeakResult get(int index) {
@@ -325,8 +323,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
    *
    * <p>Note: This does not remove the references to the underlying data or reallocate storage thus
    * {@link #get(int)} can return stale data.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#clear()
    */
   @Override
   public void clear() {
@@ -379,8 +375,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
    *
    * <p>Note: This does not remove the references to the underlying data or reallocate storage thus
    * {@link #get(int)} can return stale data.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.results.PeakResultStore#removeIf(uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate)
    */
   @Override
   public boolean removeIf(PeakResultPredicate filter) {

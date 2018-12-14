@@ -78,8 +78,8 @@ import java.util.Arrays;
  */
 public class EMGainAnalysis implements PlugInFilter {
   private static final String TITLE = "EM-Gain Analysis";
-  private final int FLAGS = DOES_8G | DOES_16 | NO_CHANGES | NO_UNDO;
-  private final int MINIMUM_PIXELS = 1000000;
+  private static final int FLAGS = DOES_8G | DOES_16 | NO_CHANGES | NO_UNDO;
+  private static final int MINIMUM_PIXELS = 1000000;
 
   private static double bias = 500;
   private static double gain = 40;
@@ -558,7 +558,7 @@ public class EMGainAnalysis implements PlugInFilter {
     final StoredDataStatistics stats = new StoredDataStatistics(100);
     stats.add(FastMath.exp(-p));
     for (int c = 1;; c++) {
-      final double g = pEMGain(c * step, p, m);
+      final double g = probabilityEMGain(c * step, p, m);
       stats.add(g);
       final double delta = g / stats.getSum();
       if (delta < 1e-5) {
@@ -579,7 +579,7 @@ public class EMGainAnalysis implements PlugInFilter {
    * @param m The multiplication factor (gain)
    * @return The PDF
    */
-  private static double pEMGain(double c, double p, double m) {
+  private static double probabilityEMGain(double c, double p, double m) {
     return PoissonGammaFunction.poissonGamma(c, p, m);
   }
 
@@ -603,7 +603,7 @@ public class EMGainAnalysis implements PlugInFilter {
     g[0] = FastMath.exp(-p);
     for (int c = 1;; c++) {
       final double count = c * step;
-      g[c] = pEMGain(count, p, m);
+      g[c] = probabilityEMGain(count, p, m);
       if (g[c] == 0 || count >= max) {
         break;
       }

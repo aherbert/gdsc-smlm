@@ -64,13 +64,17 @@ public class QuadrantAnalysis {
   public double sumC2;
   /**
    * The sum of the D quadrant using the + dividing lines (horizontal and vertical through the
-   * centre)
+   * centre).
    */
   public double sumD2;
 
-  /** {@link #sumA} + {@link #sumC}. */
+  /**
+   * {@link #sumA} + {@link #sumC}.
+   */
   public double sumAC;
-  /** {@link #sumB} + {@link #sumD}. */
+  /**
+   * {@link #sumB} + {@link #sumD}.
+   */
   public double sumBD;
   /**
    * The asymmetry score for the + dividing lines. Math.abs({@link #sumAC} - {@link #sumBD}) /
@@ -78,9 +82,13 @@ public class QuadrantAnalysis {
    */
   public double score1;
 
-  /** {@link #sumA2} + {@link #sumC2}. */
+  /**
+   * {@link #sumA2} + {@link #sumC2}.
+   */
   public double sumAC2;
-  /** {@link #sumB2} + {@link #sumD2}. */
+  /**
+   * {@link #sumB2} + {@link #sumD2}.
+   */
   public double sumBD2;
   /**
    * The asymmetry score for the + dividing lines. Math.abs({@link #sumAC2} - {@link #sumBD2}) /
@@ -282,7 +290,7 @@ public class QuadrantAnalysis {
 
   /**
    * Locate the 2 new centres by moving out into the quadrant defined by the computed vector by the
-   * defined shift
+   * defined shift.
    *
    * <p>Requires a valid call to {@link #quadrantAnalysis(double[], int, int, int, int)} to create
    * the vector

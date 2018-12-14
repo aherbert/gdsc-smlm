@@ -247,8 +247,6 @@ public abstract class Gaussian2DFunction
    *
    * @param x Input predictor
    * @return The predicted value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int)
    */
   @Override
   public abstract double eval(final int x);
@@ -264,8 +262,6 @@ public abstract class Gaussian2DFunction
    * @param x Input predictor
    * @param dyda Partial gradient of function with respect to each coefficient
    * @return The predicted value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#eval(int, double[])
    */
   @Override
   public abstract double eval(final int x, final double[] dyda);
@@ -290,7 +286,6 @@ public abstract class Gaussian2DFunction
    * Execute the {@link #eval(int)} method and set the expected variance using the noise model.
    *
    * @throws NullPointerException if the noise model is null
-   * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
    */
   @Override
   public double evalw(int x, double[] w) {

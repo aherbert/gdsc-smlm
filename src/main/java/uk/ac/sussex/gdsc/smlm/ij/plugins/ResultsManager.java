@@ -224,7 +224,7 @@ public class ResultsManager implements PlugIn {
         memorySize += MemoryPeakResults.estimateMemorySize(results);
         size += results.size();
       }
-      final String memory = MemoryPeakResults.memorySizeString(memorySize);
+      final String memory = TextUtils.bytesToString(memorySize);
       final String count = TextUtils.pleural(size, "result");
       final String sets = TextUtils.pleural(allResults.size(), "set");
 

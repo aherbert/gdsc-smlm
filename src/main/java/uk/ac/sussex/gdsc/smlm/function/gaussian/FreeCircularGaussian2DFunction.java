@@ -165,8 +165,6 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
    * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
    *
    * <p>{@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
    */
   @Override
   public double eval(final int x, final double[] dyda) {
@@ -251,8 +249,6 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
    * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
    *
    * <p>{@inheritDoc}
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
    */
   @Override
   public double eval(final int x) {

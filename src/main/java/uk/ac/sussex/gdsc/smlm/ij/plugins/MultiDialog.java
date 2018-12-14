@@ -79,10 +79,10 @@ public class MultiDialog extends Dialog
   private final String macroOptions;
   private final boolean macro;
 
+  private final Items items;
+
   /**
    * Interface to allow a list of any type to be shown in the MultiDialog.
-   *
-   * @author Alex Herbert
    */
   public interface Items {
     /**
@@ -95,10 +95,10 @@ public class MultiDialog extends Dialog
     /**
      * Gets the formatted name of the result for display in the dialog.
      *
-     * @param i the result i
+     * @param index the result index
      * @return the formatted name
      */
-    public String getFormattedName(int i);
+    public String getFormattedName(int index);
 
     /**
      * Removes the formatting from the name. The plain name will be in the list returned by
@@ -112,16 +112,10 @@ public class MultiDialog extends Dialog
 
   /**
    * Base class for default implementation of the Items interface.
-   *
-   * @author Alex Herbert
    */
   public abstract static class BaseItems implements Items {
     /**
      * Returns the same formatted name.
-     *
-     * <p>{@inheritDoc}
-     *
-     * @see uk.ac.sussex.gdsc.smlm.ij.plugins.MultiDialog.Items#removeFormatting(java.lang.String)
      */
     @Override
     public String removeFormatting(String formattedName) {
@@ -130,7 +124,7 @@ public class MultiDialog extends Dialog
   }
 
   /**
-   * Interface to allow resulst to populate the items in the multi dialog.
+   * Interface to allow results to populate the items in the multi dialog.
    */
   public interface MemoryResultsFilter {
     /**
@@ -151,8 +145,6 @@ public class MultiDialog extends Dialog
 
   /**
    * Class that allows the current results held in memory to be shown in the dialog.
-   *
-   * @author Alex Herbert
    */
   public static class MemoryResultsItems implements Items {
     private final String[] names;
@@ -187,8 +179,8 @@ public class MultiDialog extends Dialog
     }
 
     @Override
-    public String getFormattedName(int i) {
-      return names[i];
+    public String getFormattedName(int index) {
+      return names[index];
     }
 
     @Override
@@ -196,8 +188,6 @@ public class MultiDialog extends Dialog
       return ResultsManager.removeFormatting(formattedName);
     }
   }
-
-  private final Items items;
 
   /**
    * Instantiates a new multi dialog.
@@ -541,7 +531,9 @@ public class MultiDialog extends Dialog
    */
   protected int lastIndex;
 
-  /** The modifiers captured in from {@link #mouseClicked(MouseEvent)}. */
+  /**
+   * The modifiers captured in from {@link #mouseClicked(MouseEvent)}.
+   */
   protected int modifiers;
 
   /**
@@ -564,16 +556,14 @@ public class MultiDialog extends Dialog
 
     // If we have the shift key down, support multiple select/deselect
     if (event == lastEvent && (modifiers & InputEvent.SHIFT_MASK) != 0
-        && (event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED)) {
-      if (lastIndex != index) {
-        final int top = Math.max(index, lastIndex);
-        final int bottom = Math.min(index, lastIndex);
-        for (int i = bottom + 1; i < top; i++) {
-          if (event == ItemEvent.SELECTED) {
-            list.select(i);
-          } else {
-            list.deselect(i);
-          }
+        && (event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED) && lastIndex != index) {
+      final int top = Math.max(index, lastIndex);
+      final int bottom = Math.min(index, lastIndex);
+      for (int i = bottom + 1; i < top; i++) {
+        if (event == ItemEvent.SELECTED) {
+          list.select(i);
+        } else {
+          list.deselect(i);
         }
       }
     }

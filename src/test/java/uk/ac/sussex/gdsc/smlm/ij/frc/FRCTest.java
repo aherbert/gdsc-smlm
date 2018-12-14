@@ -1,6 +1,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.frc;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
 import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
@@ -87,7 +88,8 @@ public class FRCTest {
     final ImageProcessor ip2 = i2.getImagePlus().getProcessor();
     // Test
     final FRC frc = new FRC();
-    FloatProcessor[] fft1, fft2;
+    FloatProcessor[] fft1;
+    FloatProcessor[] fft2;
     fft1 = frc.getComplexFFT(ip1);
     fft2 = frc.getComplexFFT(ip2);
 
@@ -102,9 +104,9 @@ public class FRCTest {
 
     FRC.compute(numeratorE, absFFT1E, absFFT2E, dataA1, dataB1, dataA2, dataB2);
 
-    Assertions.assertTrue(FRC.checkSymmetry(numeratorE, size), "numeratorE");
-    Assertions.assertTrue(FRC.checkSymmetry(absFFT1E, size), "absFFT1E");
-    Assertions.assertTrue(FRC.checkSymmetry(absFFT2E, size), "absFFT2E");
+    Assertions.assertTrue(checkSymmetry(numeratorE, size), "numeratorE");
+    Assertions.assertTrue(checkSymmetry(absFFT1E, size), "absFFT1E");
+    Assertions.assertTrue(checkSymmetry(absFFT2E, size), "absFFT2E");
 
     final float[] numeratorA = new float[dataA1.length];
     final float[] absFFT1A = new float[dataA1.length];
@@ -141,6 +143,32 @@ public class FRCTest {
     return i1;
   }
 
+  /**
+   * Check symmetry.
+   *
+   * @param data the data
+   * @param size the size
+   * @return true, if successful
+   */
+  private static boolean checkSymmetry(float[] data, int size) {
+    // Symmetry is around the centre
+    final int centre = size / 2;
+
+    final float maxRelativeError = 1e-10f;
+    final float maxAbsoluteError = 1e-16f;
+
+    for (int y = centre, y2 = centre; y >= 0 && y2 < size; y--, y2++) {
+      for (int x = centre, x2 = centre, i = size * y + x, j = size * y2 + x2; x >= 0 && x2 < size;
+          x--, x2++, i--, j++) {
+        if (data[i] != data[j] || !FloatEquality.almostEqualRelativeOrAbsolute(data[i], data[j],
+            maxRelativeError, maxAbsoluteError)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   private abstract class MyTimingTask extends BaseTimingTask {
     public MyTimingTask(String name) {
       super(name);
@@ -152,7 +180,7 @@ public class FRCTest {
     }
 
     @Override
-    public Object getData(int i) {
+    public Object getData(int index) {
       return null;
     }
   }
@@ -163,42 +191,42 @@ public class FRCTest {
 
     final int steps = 100000;
     final double delta = 2 * Math.PI / steps;
-    final double[] a = new double[steps + 1];
-    final double[] cosA = new double[steps + 1];
+    final double[] angle = new double[steps + 1];
+    final double[] cosAngle = new double[steps + 1];
     for (int i = 0; i <= steps; i++) {
-      a[i] = i * delta;
-      cosA[i] = Math.cos(a[i]);
+      angle[i] = i * delta;
+      cosAngle[i] = Math.cos(angle[i]);
     }
 
     final TimingService ts = new TimingService(100);
     ts.execute(new MyTimingTask("sin") {
       @Override
       public Object run(Object data) {
-        double d = 0;
-        for (int i = 0; i < a.length; i++) {
-          d += Math.sin(a[i]);
+        double value = 0;
+        for (int i = 0; i < angle.length; i++) {
+          value += Math.sin(angle[i]);
         }
-        return d;
+        return value;
       }
     });
     ts.execute(new MyTimingTask("FastMath.sin") {
       @Override
       public Object run(Object data) {
-        double d = 0;
-        for (int i = 0; i < a.length; i++) {
-          d += FastMath.sin(a[i]);
+        double value = 0;
+        for (int i = 0; i < angle.length; i++) {
+          value += FastMath.sin(angle[i]);
         }
-        return d;
+        return value;
       }
     });
     ts.execute(new MyTimingTask("getSine") {
       @Override
       public Object run(Object data) {
-        double d = 0;
-        for (int i = 0; i < a.length; i++) {
-          d += FRC.getSine(a[i], cosA[i]);
+        double value = 0;
+        for (int i = 0; i < angle.length; i++) {
+          value += FRC.getSine(angle[i], cosAngle[i]);
         }
-        return d;
+        return value;
       }
     });
 
@@ -243,7 +271,8 @@ public class FRCTest {
     final ImageProcessor ip2 = i2.getImagePlus().getProcessor();
     // Test
     final FRC frc = new FRC();
-    FloatProcessor[] fft1, fft2;
+    FloatProcessor[] fft1;
+    FloatProcessor[] fft2;
     fft1 = frc.getComplexFFT(ip1);
     fft2 = frc.getComplexFFT(ip2);
 

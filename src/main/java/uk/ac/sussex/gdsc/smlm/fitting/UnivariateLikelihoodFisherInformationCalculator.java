@@ -109,8 +109,6 @@ public class UnivariateLikelihoodFisherInformationCalculator
    *
    * @throws DataException If the Fisher information cannot be computed for a function value
    * @throws DataException If the Fisher information is infinite for a function value
-   *
-   * @see uk.ac.sussex.gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
    */
   @Override
   public FisherInformationMatrix compute(double[] parameters) {

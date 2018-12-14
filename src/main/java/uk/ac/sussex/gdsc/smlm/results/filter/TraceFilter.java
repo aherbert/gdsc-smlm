@@ -52,8 +52,9 @@ public class TraceFilter extends Filter {
    * The default distance range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
    */
   private static final double DEFAULT_DISTANCE_RANGE = 2;
-  /** The default time range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface. */
-  private static final int DEFAULT_TIME_RANGE = 10;
+  /**
+   * The default time range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
+   */  private static final int DEFAULT_TIME_RANGE = 10;
 
   @XStreamAsAttribute
   private final double d;
@@ -98,10 +99,9 @@ public class TraceFilter extends Filter {
   /**
    * @throws NullPointerException if not first initialised with a call to
    *         {@link #setup(MemoryPeakResults)}
-   * @see uk.ac.sussex.gdsc.smlm.results.filter.Filter#accept(uk.ac.sussex.gdsc.smlm.results.PeakResult)
    */
   @Override
-  public boolean accept(PeakResult peak) throws NullPointerException {
+  public boolean accept(PeakResult peak) {
     return ok.contains(peak);
   }
 

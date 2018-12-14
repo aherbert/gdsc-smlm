@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.match.MatchCalculator;
 import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -139,7 +140,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     fitConfig.setCoordinateShiftFactor(0); // Disable
     fitConfig.setPrecisionThreshold(0);
     fitConfig.setMinWidthFactor(0);
-    fitConfig.setWidthFactor(0);
+    fitConfig.setMaxWidthFactor(0);
 
     fitConfig.setNoise(0);
     config.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
@@ -157,7 +158,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     filterFitConfig.setCoordinateShiftFactor(0);
     filterFitConfig.setPrecisionThreshold(0);
     filterFitConfig.setMinWidthFactor(0);
-    filterFitConfig.setWidthFactor(0);
+    filterFitConfig.setMaxWidthFactor(0);
     filterFitConfig.setPrecisionMethod(PrecisionMethod.MORTENSEN);
   }
 
@@ -1640,7 +1641,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     fitConfig.setMinPhotons(15); // Realistically we cannot fit lower than this
     // Set the width factors to help establish bounds for bounded fitters
     fitConfig.setMinWidthFactor(1.0 / 10);
-    fitConfig.setWidthFactor(10);
+    fitConfig.setMaxWidthFactor(10);
 
     iterationIncrease = gd.getNextNumber();
     ignoreWithNeighbours = gd.getNextBoolean();
@@ -1918,7 +1919,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       imp.setOverlay(overlay);
     }
 
-    MemoryPeakResults.freeMemory();
+    MemoryUtils.runGarbageCollector();
 
     Collections.sort(results);
     summariseResults(results, density, runTime);
@@ -3017,7 +3018,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     filterFitConfig.setSignalStrength(gd.getNextNumber());
     filterFitConfig.setMinPhotons(gd.getNextNumber());
     filterFitConfig.setMinWidthFactor(gd.getNextNumber());
-    filterFitConfig.setWidthFactor(gd.getNextNumber());
+    filterFitConfig.setMaxWidthFactor(gd.getNextNumber());
     filterFitConfig.setPrecisionThreshold(gd.getNextNumber());
     filterFitConfig.setPrecisionMethod(gd.getNextChoiceIndex());
     analysisDriftAngle = gd.getNextNumber();

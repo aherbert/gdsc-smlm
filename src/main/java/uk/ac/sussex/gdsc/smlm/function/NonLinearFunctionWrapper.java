@@ -59,8 +59,6 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
    * Set the predictor coefficients for the function that are not fixed (i.e. those corresponding to
    * the gradient indices in the wrapped function). The fixed coefficients are set in the
    * constructor.
-   *
-   * @see uk.ac.sussex.gdsc.smlm.function.NonLinearFunction#initialise(double[])
    */
   @Override
   public void initialise(double[] variables) {

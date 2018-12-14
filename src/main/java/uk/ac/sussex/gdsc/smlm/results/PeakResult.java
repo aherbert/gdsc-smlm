@@ -48,11 +48,11 @@ public class PeakResult implements Cloneable {
   /**
    * Gets the parameter name.
    *
-   * @param i the index
+   * @param index the index
    * @return the parameter name
    */
-  public static String getParameterName(int i) {
-    return NAMES[i];
+  public static String getParameterName(int index) {
+    return NAMES[index];
   }
 
   private int frame;
@@ -243,6 +243,8 @@ public class PeakResult implements Cloneable {
   }
 
   /**
+   * Gets the background for the first peak.
+   *
    * @return The background for the first peak.
    */
   public float getBackground() {
@@ -250,16 +252,16 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * Sets the background.
+   * Sets the background for the first peak.
    *
-   * @param b the new background
+   * @param background the new background
    */
-  public void setBackground(float b) {
-    params[BACKGROUND] = b;
+  public void setBackground(float background) {
+    params[BACKGROUND] = background;
   }
 
   /**
-   * Get the intensity.
+   * Get the intensity for the first peak.
    *
    * @return The intensity of the first peak
    */
@@ -268,23 +270,25 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * Sets the signal.
+   * Sets the intensity for the first peak.
    *
-   * @param s the new signal
+   * @param intensity the new intensity
    */
-  public void setSignal(float s) {
-    params[INTENSITY] = s;
+  public void setIntensity(float intensity) {
+    params[INTENSITY] = intensity;
   }
 
   /**
-   * @return The x position for the first peak.
+   * Gets the x position for the first peak.
+   *
+   * @return The x position for the first peak
    */
   public float getXPosition() {
     return params[X];
   }
 
   /**
-   * Sets the x position.
+   * Sets the x position for the first peak.
    *
    * @param x the new x position
    */
@@ -293,14 +297,16 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * @return The y position for the first peak.
+   * Gets the y position for the first peak.
+   *
+   * @return The y position for the first peak
    */
   public float getYPosition() {
     return params[Y];
   }
 
   /**
-   * Sets the y position.
+   * Sets the y position for the first peak.
    *
    * @param y the new y position
    */
@@ -309,14 +315,16 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * @return The z position for the first peak.
+   * Gets the z position for the first peak.
+   *
+   * @return The z position for the first peak
    */
   public float getZPosition() {
     return params[Z];
   }
 
   /**
-   * Sets the z position.
+   * Sets the z position for the first peak.
    *
    * @param z the new z position
    */
@@ -325,18 +333,18 @@ public class PeakResult implements Cloneable {
   }
 
   /**
-   * Gets the frame.
+   * Gets the time frame.
    *
-   * @return The time frame that this result corresponds to
+   * @return The time frame
    */
   public int getFrame() {
     return frame;
   }
 
   /**
-   * Sets the frame.
+   * Sets the time frame.
    *
-   * @param frame The time frame that this result corresponds to
+   * @param frame The time frame
    */
   public void setFrame(int frame) {
     this.frame = frame;
@@ -583,23 +591,13 @@ public class PeakResult implements Cloneable {
   /**
    * Return the squared distance to the other peak result.
    *
-   * @param r The result
+   * @param result The result
    * @return The squared distance
    */
-  public double distance2(PeakResult r) {
-    final double dx = getXPosition() - r.getXPosition();
-    final double dy = getYPosition() - r.getYPosition();
+  public double distance2(PeakResult result) {
+    final double dx = getXPosition() - result.getXPosition();
+    final double dy = getYPosition() - result.getYPosition();
     return dx * dx + dy * dy;
-  }
-
-  /**
-   * Return the distance to the other peak result.
-   *
-   * @param r The result
-   * @return The distance
-   */
-  public double distance(PeakResult r) {
-    return Math.sqrt(distance2(r));
   }
 
   /**
@@ -613,6 +611,16 @@ public class PeakResult implements Cloneable {
     final double dx = getXPosition() - x;
     final double dy = getYPosition() - y;
     return dx * dx + dy * dy;
+  }
+
+  /**
+   * Return the distance to the other peak result.
+   *
+   * @param result The result
+   * @return The distance
+   */
+  public double distance(PeakResult result) {
+    return Math.sqrt(distance2(result));
   }
 
   /**
@@ -689,41 +697,41 @@ public class PeakResult implements Cloneable {
   /**
    * Gets the parameter for the given index.
    *
-   * @param i the index
+   * @param index the index
    * @return the parameter
    */
-  public float getParameter(int i) {
-    return params[i];
+  public float getParameter(int index) {
+    return params[index];
   }
 
   /**
    * Sets the parameter for the given index.
    *
-   * @param i the index
+   * @param index the index
    * @param value the value
    */
-  public void setParameter(int i, float value) {
-    params[i] = value;
+  public void setParameter(int index, float value) {
+    params[index] = value;
   }
 
   /**
    * Gets the parameter deviation for the given index.
    *
-   * @param i the index
+   * @param index the index
    * @return the parameter deviation
    */
-  public float getParameterDeviation(int i) {
-    return paramStdDevs[i];
+  public float getParameterDeviation(int index) {
+    return paramStdDevs[index];
   }
 
   /**
    * Sets the parameter deviation for the given index.
    *
-   * @param i the index
+   * @param index the index
    * @param value the value
    */
-  public void setParameterDeviation(int i, float value) {
-    paramStdDevs[i] = value;
+  public void setParameterDeviation(int index, float value) {
+    paramStdDevs[index] = value;
   }
 
   /**

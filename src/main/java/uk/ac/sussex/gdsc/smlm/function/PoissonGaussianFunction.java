@@ -45,8 +45,9 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    */
   final double alpha;
 
-  /** The log of {@link #alpha}. */
-  final double logAlpha;
+  /**
+   * The log of {@link #alpha}.
+   */  final double logAlpha;
 
   private static final double EPSILON = 1e-4; // 1e-6
 

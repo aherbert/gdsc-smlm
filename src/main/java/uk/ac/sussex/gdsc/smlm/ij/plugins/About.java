@@ -103,7 +103,8 @@ public class About implements PlugIn, MacroExtension {
     if (arg.equals("toolset")) {
       installResource("/macros/toolsets/SMLM Tools.txt", "macros",
           "toolsets" + File.separator + "SMLM Tools.txt", "SMLM toolset",
-          "Select the toolset from the ImageJ 'More Tools' menu to load buttons on to the ImageJ menu bar.",
+          "Select the toolset from the ImageJ 'More Tools' menu to load buttons on to the "
+              + "ImageJ menu bar.",
           ConfigureOption.INSTALL, ConfigureOption.REMOVE);
       return;
     }
@@ -111,7 +112,9 @@ public class About implements PlugIn, MacroExtension {
     if (arg.equals("config")) {
       final int result = installResource("/uk/ac/sussex/gdsc/smlm/plugins.config", "plugins",
           "smlm.config", "SMLM Tools Configuration",
-          "The configuration file is used to specify which plugins to display on the SMLM Tools window. Creating a custom file will need to be repeated when the available plugins change.",
+          "The configuration file is used to specify which plugins to display on the SMLM Tools "
+              + "window. Creating a custom file will need to be repeated when the available "
+              + "plugins change.",
           ConfigureOption.INSTALL, ConfigureOption.EDIT, ConfigureOption.REMOVE);
       // If install/remove was successful then reload the GDSC SMLM Panel if it is showing.
       if (result != -1 && SMLMTools.isFrameVisible()) {
