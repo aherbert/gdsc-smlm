@@ -48,8 +48,8 @@ public class ActivationEnergyImageModel extends ImageModel {
    *        second dark states)
    * @param blinks2 Average number of blinks into the second dark state
    */
-  public ActivationEnergyImageModel(double activationEnergy, SpatialIllumination illumination, double onTime,
-      double offTime1, double offTime2, double blinks1, double blinks2) {
+  public ActivationEnergyImageModel(double activationEnergy, SpatialIllumination illumination,
+      double onTime, double offTime1, double offTime2, double blinks1, double blinks2) {
     super(onTime, offTime1, offTime2, blinks1, blinks2);
     init(activationEnergy, illumination);
   }
