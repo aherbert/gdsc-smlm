@@ -435,8 +435,9 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
               }
               totalAccuracy[index]++;
             }
-          } else // The same means. Check that it is more precise
-          if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0)) {
+
+            // The same means. Check that it is more precise
+          } else if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0)) {
             if (sd2 < sd1) {
               betterPrecision[index]++;
               args[args.length - 1] = "P*";
