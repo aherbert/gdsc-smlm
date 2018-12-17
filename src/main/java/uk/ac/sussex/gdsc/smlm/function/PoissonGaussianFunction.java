@@ -47,7 +47,8 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
   /**
    * The log of {@link #alpha}.
-   */  final double logAlpha;
+   */
+  final double logAlpha;
 
   private static final double EPSILON = 1e-4; // 1e-6
 
@@ -63,19 +64,21 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
   private boolean usePicardApproximation;
   private final double mu;
-  private final double sigmasquared;
+  private final double sigmaSquared;
   private final boolean noPoisson;
 
   private final double probabilityNormalisation;
   private final double logNormalisation;
 
   /**
+   * Instantiates a new poisson gaussian function.
+   *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param mu The mean of the Poisson distribution before gain
-   * @param sigmasquared The variance of the Gaussian distribution at readout (must be positive)
+   * @param sigmaSquared The variance of the Gaussian distribution at readout (must be positive)
    */
-  private PoissonGaussianFunction(double alpha, double mu, double sigmasquared) {
-    if (sigmasquared <= 0) {
+  private PoissonGaussianFunction(double alpha, double mu, double sigmaSquared) {
+    if (sigmaSquared <= 0) {
       throw new IllegalArgumentException("Gaussian variance must be strictly positive");
     }
     alpha = Math.abs(alpha);
@@ -85,19 +88,19 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // This compresses the probability distribution by alpha. Thus we can compute the
     // probability using a Poisson or Poisson-Gaussian mixture and then compress the
     // output probability so the cumulative probability is 1 over the uncompressed range.
-    sigmasquared *= (alpha * alpha);
+    sigmaSquared *= (alpha * alpha);
 
-    // System.out.printf("mu=%f s^2=%f\n", mu, sigmasquared);
+    // System.out.printf("mu=%f s^2=%f\n", mu, sigmaSquared);
 
     this.alpha = alpha;
     this.mu = mu;
-    this.sigmasquared = sigmasquared;
+    this.sigmaSquared = sigmaSquared;
 
     probabilityNormalisation =
-        ((noPoisson) ? getProbabilityNormalisation(sigmasquared) : 1) * alpha;
+        ((noPoisson) ? getProbabilityNormalisation(sigmaSquared) : 1) * alpha;
 
     logAlpha = Math.log(alpha);
-    logNormalisation = ((noPoisson) ? getLogNormalisation(sigmasquared)
+    logNormalisation = ((noPoisson) ? getLogNormalisation(sigmaSquared)
         // Note that this uses the LOG_NORMALISATION (not zero) as the logProbability function
         // uses the getPseudoLikelihood function. It would be zero if the static logProbability
         // was called.
@@ -109,13 +112,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param mu The mean of the Poisson distribution before gain
-   * @param s The standard deviation of the Gaussian distribution at readout
+   * @param sd The standard deviation of the Gaussian distribution at readout
    * @return the poisson gaussian function
    * @throws IllegalArgumentException if the mean or variance is zero or below
    */
   public static PoissonGaussianFunction createWithStandardDeviation(final double alpha,
-      final double mu, final double s) {
-    return new PoissonGaussianFunction(alpha, mu, s * s);
+      final double mu, final double sd) {
+    return new PoissonGaussianFunction(alpha, mu, sd * sd);
   }
 
   /**
@@ -156,8 +159,8 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // convert to photons
     x *= alpha;
 
-    return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisation
-        : getProbability(x, mu, sigmasquared, usePicardApproximation) * probabilityNormalisation;
+    return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmaSquared) * probabilityNormalisation
+        : getProbability(x, mu, sigmaSquared, usePicardApproximation) * probabilityNormalisation;
   }
 
   /**
@@ -184,8 +187,8 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // convert to photons
     x *= alpha;
 
-    return (noPoisson) ? (-0.5 * x * x / sigmasquared) + logNormalisation
-        : getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + logNormalisation;
+    return (noPoisson) ? (-0.5 * x * x / sigmaSquared) + logNormalisation
+        : getPseudoLikelihood(x, mu, sigmaSquared, usePicardApproximation) + logNormalisation;
   }
 
   /**
@@ -194,29 +197,29 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    * @param x The observation value
    * @param mu The mean of the Poisson distribution (if zero or below the probability is that of the
    *        Gaussian)
-   * @param sigmasquared The variance of the Gaussian distribution (must be positive)
+   * @param sigmaSquared The variance of the Gaussian distribution (must be positive)
    * @param usePicardApproximation Use the Picard approximation for the initial saddle point. The
    *        default is Pade.
    * @return The probability
    */
-  public static double probability(final double x, final double mu, final double sigmasquared,
+  public static double probability(final double x, final double mu, final double sigmaSquared,
       final boolean usePicardApproximation) {
     // If no Poisson mean then just use the Gaussian
     if (mu <= 0) {
-      return FastMath.exp(-0.5 * x * x / sigmasquared) * getProbabilityNormalisation(sigmasquared);
+      return FastMath.exp(-0.5 * x * x / sigmaSquared) * getProbabilityNormalisation(sigmaSquared);
     }
-    return getProbability(x, mu, sigmasquared, usePicardApproximation);
+    return getProbability(x, mu, sigmaSquared, usePicardApproximation);
   }
 
   /**
    * Gets the probability normalisation for the Gaussian distribution so the cumulative probability
    * is 1.
    *
-   * @param sigmasquared the sigma squared
+   * @param sigmaSquared the sigma squared
    * @return the probability normalisation
    */
-  static double getProbabilityNormalisation(double sigmasquared) {
-    return NORMALISATION / Math.sqrt(sigmasquared);
+  static double getProbabilityNormalisation(double sigmaSquared) {
+    return NORMALISATION / Math.sqrt(sigmaSquared);
   }
 
   /**
@@ -224,17 +227,17 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    *
    * @param x The observation value
    * @param mu The mean of the Poisson distribution (must be positive)
-   * @param sigmasquared The variance of the Gaussian distribution (must be positive)
+   * @param sigmaSquared The variance of the Gaussian distribution (must be positive)
    * @param usePicardApproximation Use the Picard approximation for the initial saddle point. The
    *        default is Pade.
    * @return The probability
    */
-  private static double getProbability(final double x, final double mu, final double sigmasquared,
+  private static double getProbability(final double x, final double mu, final double sigmaSquared,
       final boolean usePicardApproximation) {
     double saddlepoint =
-        (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
-    saddlepoint = newton_iteration(x, mu, sigmasquared, saddlepoint);
-    final double logP = sp_approx(x, mu, sigmasquared, saddlepoint);
+        (usePicardApproximation) ? picard(x, mu, sigmaSquared) : pade(x, mu, sigmaSquared);
+    saddlepoint = newton_iteration(x, mu, sigmaSquared, saddlepoint);
+    final double logP = sp_approx(x, mu, sigmaSquared, saddlepoint);
     return FastMath.exp(logP) * NORMALISATION;
   }
 
@@ -244,29 +247,29 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    * @param x The observation value
    * @param mu The mean of the Poisson distribution (if zero or below the probability is that of the
    *        Gaussian)
-   * @param sigmasquared The variance of the Gaussian distribution (must be positive)
+   * @param sigmaSquared The variance of the Gaussian distribution (must be positive)
    * @param usePicardApproximation Use the Picard approximation for the initial saddle point. The
    *        default is Pade.
    * @return The log of the probability
    */
-  public static double logProbability(final double x, final double mu, final double sigmasquared,
+  public static double logProbability(final double x, final double mu, final double sigmaSquared,
       final boolean usePicardApproximation) {
     // If no Poisson mean then just use the Gaussian
     if (mu <= 0) {
-      return (-0.5 * x * x / sigmasquared) + getLogNormalisation(sigmasquared);
+      return (-0.5 * x * x / sigmaSquared) + getLogNormalisation(sigmaSquared);
     }
 
-    return getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
+    return getPseudoLikelihood(x, mu, sigmaSquared, usePicardApproximation) + LOG_NORMALISATION;
   }
 
   /**
    * Gets the log probability normalisation for the Gaussian distribution.
    *
-   * @param sigmasquared the sigma squared
+   * @param sigmaSquared the sigma squared
    * @return the log probability normalisation
    */
-  static double getLogNormalisation(double sigmasquared) {
-    return LOG_NORMALISATION - Math.log(sigmasquared) * 0.5;
+  static double getLogNormalisation(double sigmaSquared) {
+    return LOG_NORMALISATION - Math.log(sigmaSquared) * 0.5;
   }
 
   /**
@@ -280,19 +283,19 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    * @param x The observation value
    * @param mu The mean of the Poisson distribution (if zero or below the probability is that of the
    *        Gaussian)
-   * @param sigmasquared The variance of the Gaussian distribution (must be positive)
+   * @param sigmaSquared The variance of the Gaussian distribution (must be positive)
    * @param usePicardApproximation Use the Picard approximation for the initial saddle point. The
    *        default is Pade.
    * @return The probability
    */
-  public static double pseudoLikelihood(final double x, final double mu, final double sigmasquared,
+  public static double pseudoLikelihood(final double x, final double mu, final double sigmaSquared,
       final boolean usePicardApproximation) {
     // If no Poisson mean then just use the Gaussian
     if (mu <= 0) {
-      return (-0.5 * x * x / sigmasquared);
+      return (-0.5 * x * x / sigmaSquared);
     }
 
-    return getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation);
+    return getPseudoLikelihood(x, mu, sigmaSquared, usePicardApproximation);
   }
 
   /**
@@ -305,17 +308,17 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    *
    * @param x The observation value
    * @param mu The mean of the Poisson distribution (must be positive)
-   * @param sigmasquared The variance of the Gaussian distribution (must be positive)
+   * @param sigmaSquared The variance of the Gaussian distribution (must be positive)
    * @param usePicardApproximation Use the Picard approximation for the initial saddle point. The
    *        default is Pade.
    * @return The probability
    */
   private static double getPseudoLikelihood(final double x, final double mu,
-      final double sigmasquared, final boolean usePicardApproximation) {
+      final double sigmaSquared, final boolean usePicardApproximation) {
     double saddlepoint =
-        (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
-    saddlepoint = newton_iteration(x, mu, sigmasquared, saddlepoint);
-    return sp_approx(x, mu, sigmasquared, saddlepoint);
+        (usePicardApproximation) ? picard(x, mu, sigmaSquared) : pade(x, mu, sigmaSquared);
+    saddlepoint = newton_iteration(x, mu, sigmaSquared, saddlepoint);
+    return sp_approx(x, mu, sigmaSquared, saddlepoint);
   }
 
   /**
@@ -323,29 +326,29 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    *
    * @param x the x
    * @param mu the mu
-   * @param sigmasquared the sigma squared
+   * @param sigmaSquared the sigma squared
    * @return The saddle point
    */
-  static double pade(final double x, final double mu, final double sigmasquared) {
-    final double bterm = x - 2 * sigmasquared - mu;
+  static double pade(final double x, final double mu, final double sigmaSquared) {
+    final double bterm = x - 2 * sigmaSquared - mu;
 
     // Original code
-    // return -Math.log(0.5 * (bterm + Math.sqrt(bterm * bterm + 4 * mu * (2 * sigmasquared + x))) /
+    // return -Math.log(0.5 * (bterm + Math.sqrt(bterm * bterm + 4 * mu * (2 * sigmaSquared + x))) /
     // mu);
 
     // Check for negative sqrt
-    final double argument_to_sqrt = bterm * bterm + 4 * mu * (2 * sigmasquared + x);
+    final double argument_to_sqrt = bterm * bterm + 4 * mu * (2 * sigmaSquared + x);
     // This check is needed if x is very negative
     if (argument_to_sqrt < 0) {
       // Revert to Taylor approximation
-      return (mu - x) / (mu + sigmasquared);
+      return (mu - x) / (mu + sigmaSquared);
     }
 
     // Check for negative log
     final double argument_to_log = 0.5 * (bterm + Math.sqrt(argument_to_sqrt)) / mu;
     if (argument_to_log <= 0) {
       // Revert to Taylor approximation
-      return (mu - x) / (mu + sigmasquared);
+      return (mu - x) / (mu + sigmaSquared);
     }
     return -Math.log(argument_to_log);
   }
@@ -355,15 +358,15 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    *
    * @param x the x
    * @param mu the mu
-   * @param sigmasquared the sigma squared
+   * @param sigmaSquared the sigma squared
    * @return The saddle point
    */
-  static double picard(final double x, final double mu, final double sigmasquared) {
+  static double picard(final double x, final double mu, final double sigmaSquared) {
     // Use Taylor approximation to obtain the starting point for Picard iteration
-    final double taylor = (mu - x) / (mu + sigmasquared);
+    final double taylor = (mu - x) / (mu + sigmaSquared);
     double saddlepoint = taylor;
     for (int i = 0; i < NUM_PICARD; i++) {
-      final double argument_to_log = mu / (x + sigmasquared * saddlepoint);
+      final double argument_to_log = mu / (x + sigmaSquared * saddlepoint);
       if (argument_to_log <= 0) {
         // Break out of loop if argument to log goes negative
         return taylor;
@@ -374,16 +377,16 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
   }
 
   /**
-   * Returns the saddlepoint found by Newton iteration for a given x, mu, sigmasquared and an
+   * Returns the saddlepoint found by Newton iteration for a given x, mu, sigmaSquared and an
    * initial estimate of the saddle point (found with either the Pade or Picard approach).
    *
    * @param x the x
    * @param mu the mu
-   * @param sigmasquared the sigma squared
+   * @param sigmaSquared the sigma squared
    * @param initial_saddlepoint the initial saddlepoint
    * @return The saddle point
    */
-  static double newton_iteration(final double x, final double mu, final double sigmasquared,
+  static double newton_iteration(final double x, final double mu, final double sigmaSquared,
       final double initial_saddlepoint) {
     double change = 0;
     double saddlepoint = initial_saddlepoint;
@@ -392,7 +395,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // do
     // {
     // final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
-    // change = (x + sigmasquared * saddlepoint - mu_exp_minus_s) / (sigmasquared + mu_exp_minus_s);
+    // change = (x + sigmaSquared * saddlepoint - mu_exp_minus_s) / (sigmaSquared + mu_exp_minus_s);
     // saddlepoint -= change;
     // } while (FastMath.abs(change) > EPSILON * FastMath.abs(saddlepoint));
     // return saddlepoint;
@@ -400,7 +403,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // Limit the number of iterations
     for (int i = 0; i < 20; i++) {
       final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
-      change = (x + sigmasquared * saddlepoint - mu_exp_minus_s) / (sigmasquared + mu_exp_minus_s);
+      change = (x + sigmaSquared * saddlepoint - mu_exp_minus_s) / (sigmaSquared + mu_exp_minus_s);
       saddlepoint -= change;
       if (FastMath.abs(change) <= EPSILON * FastMath.abs(saddlepoint)) {
         return saddlepoint;
@@ -409,28 +412,28 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
     // This happens when we cannot converge
     // System.out.printf("No Newton convergence: x=%f, mu=%f, s2=%f, %s -> %s : logP=%f, p=%f\n", x,
-    // mu, sigmasquared,
-    // initial_saddlepoint, saddlepoint, sp_approx(x, mu, sigmasquared, initial_saddlepoint),
-    // FastMath.exp(sp_approx(x, mu, sigmasquared, initial_saddlepoint)) * NORMALISATION);
+    // mu, sigmaSquared,
+    // initial_saddlepoint, saddlepoint, sp_approx(x, mu, sigmaSquared, initial_saddlepoint),
+    // FastMath.exp(sp_approx(x, mu, sigmaSquared, initial_saddlepoint)) * NORMALISATION);
 
     return saddlepoint; // initial_saddlepoint;
   }
 
   /**
-   * Return the saddlepoint approximation to the log of p(x,mu,sigmasquared) given the saddle point
+   * Return the saddlepoint approximation to the log of p(x,mu,sigmaSquared) given the saddle point
    * found by the Newton iteration. Remember the sqrt(2*PI) factor has been left out.
    *
    * @param x the x
    * @param mu the mu
-   * @param sigmasquared the sigma squared
+   * @param sigmaSquared the sigma squared
    * @param saddlepoint the saddlepoint
    * @return The saddlepoint approximation
    */
-  static double sp_approx(final double x, final double mu, final double sigmasquared,
+  static double sp_approx(final double x, final double mu, final double sigmaSquared,
       final double saddlepoint) {
     final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
-    final double phi2 = sigmasquared + mu_exp_minus_s;
-    return -mu + (saddlepoint * (x + 0.5 * sigmasquared * saddlepoint)) + mu_exp_minus_s
+    final double phi2 = sigmaSquared + mu_exp_minus_s;
+    return -mu + (saddlepoint * (x + 0.5 * sigmaSquared * saddlepoint)) + mu_exp_minus_s
         - 0.5 * Math.log(phi2);
   }
 
@@ -455,13 +458,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
   /** {@inheritDoc} */
   @Override
-  public double likelihood(double o, double e) {
-    return probability(o, e);
+  public double likelihood(double x, double mu) {
+    return probability(x, mu);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double logLikelihood(double o, double e) {
-    return logProbability(o, e);
+  public double logLikelihood(double x, double mu) {
+    return logProbability(x, mu);
   }
 }

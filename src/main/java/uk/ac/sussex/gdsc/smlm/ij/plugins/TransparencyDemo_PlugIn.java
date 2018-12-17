@@ -44,7 +44,7 @@ import java.util.List;
 /**
  * This is a demo to demonstrate the issues with transparency in the ImageJ 3D Viewer.
  */
-public class Transparency_Demo implements PlugIn {
+public class TransparencyDemo_PlugIn implements PlugIn {
   @Override
   public void run(String arg) {
     createUniverse("Transparency_Demo Backface Normal Flip (Default)", false, false);
@@ -69,14 +69,14 @@ public class Transparency_Demo implements PlugIn {
   }
 
   private static void addPoint(Image3DUniverse univ, boolean disableBackfaceNormalFlip,
-      boolean backfaceCull, float x, float y, float z, Color3f c) {
+      boolean backfaceCull, float x, float y, float z, Color3f color) {
     final List<Point3f> points = MeshMaker.createIcosahedron(0, 1f);
     for (final Point3f p : points) {
       p.x += x;
       p.y += y;
       p.z += z;
     }
-    final CustomMesh mesh = new CustomTriangleMesh(points, c, 0.5f);
+    final CustomMesh mesh = new CustomTriangleMesh(points, color, 0.5f);
     mesh.getAppearance().getPolygonAttributes().setBackFaceNormalFlip(!disableBackfaceNormalFlip);
     if (backfaceCull) {
       mesh.getAppearance().getPolygonAttributes().setCullFace(PolygonAttributes.CULL_BACK);

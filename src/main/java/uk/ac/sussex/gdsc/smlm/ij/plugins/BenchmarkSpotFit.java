@@ -445,22 +445,22 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final PreprocessedPeakResult result;
     final int id;
     final int type;
-    final int i;
+    final int index;
 
-    public MultiPathPoint(PreprocessedPeakResult result, int id, int type, int i) {
+    public MultiPathPoint(PreprocessedPeakResult result, int id, int type, int index) {
       super(result.getX(), result.getY());
       this.result = result;
       this.id = id;
       this.type = type;
-      this.i = i;
+      this.index = index;
     }
 
-    public MultiPathPoint(float x, float y, int id, int type, int i) {
+    public MultiPathPoint(float x, float y, int id, int type, int index) {
       super(x, y);
       this.result = null;
       this.id = id;
       this.type = type;
-      this.i = i;
+      this.index = index;
     }
   }
 
@@ -471,15 +471,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     /**
      * The index for the spot candidate.
      */
-    final int i;
+    final int index;
     /**
      * The distance to the spot.
      */
-    final double d;
+    final double distance;
     /**
      * The depth of the actual spot.
      */
-    final double z;
+    final double zdepth;
     /**
      * The score.
      */
@@ -488,17 +488,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     /**
      * Instantiates a new spot match.
      *
-     * @param i The index for the spot candidate
-     * @param d The distance to the spot
-     * @param z The depth of the actual spot
+     * @param index The index for the spot candidate
+     * @param distance The distance to the spot
+     * @param zdepth The depth of the actual spot
      */
-    public SpotMatch(int i, double d, double z) {
-      this.i = i;
-      this.d = d;
-      this.z = z;
+    public SpotMatch(int index, double distance, double zdepth) {
+      this.index = index;
+      this.distance = distance;
+      this.zdepth = zdepth;
     }
 
     /**
+     * Checks if the spot candidate was successfully fitted.
+     *
      * @return True if the spot candidate was successfully fitted.
      */
     public abstract boolean isFitResult();
@@ -543,14 +545,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * Instantiates a new fit match.
      *
      * @param point the point
-     * @param d The distance to the spot
-     * @param z The depth of the actual spot
+     * @param distance The distance to the spot
+     * @param zdepth The depth of the actual spot
      * @param predictedSignal the predicted signal
      * @param actualSignal the actual signal
      */
-    public FitMatch(MultiPathPoint point, double d, double z, double predictedSignal,
+    public FitMatch(MultiPathPoint point, double distance, double zdepth, double predictedSignal,
         double actualSignal) {
-      super(point.i, d, z);
+      super(point.index, distance, zdepth);
       this.point = point;
       this.predictedSignal = predictedSignal;
       this.actualSignal = actualSignal;
@@ -580,8 +582,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for
     // above.
     // Reset the signal factor from 0
-    final double sf = (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
-    return sf;
+    return (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
   }
 
   /**
@@ -592,12 +593,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     /**
      * Instantiates a new candidate match.
      *
-     * @param i The index for the spot candidate
-     * @param d The distance to the spot
+     * @param index The index for the spot candidate
+     * @param distance The distance to the spot
      * @param z The depth of the actual spot
      */
-    public CandidateMatch(int i, double d, double z) {
-      super(i, d, z);
+    public CandidateMatch(int index, double distance, double z) {
+      super(index, distance, z);
     }
 
     @Override
@@ -616,9 +617,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    */
   public class FilterCandidates implements Cloneable {
     /** Integer counts of positives (matches). */
-    final int p;
+    final int pos;
     /** Integer counts of negatives. */
-    final int n;
+    final int neg;
     /** Double sums of the fractions match score. */
     final double np;
     /** Double sums of the fractions match antiscore. */
@@ -659,17 +660,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     /**
      * Instantiates a new filter candidates.
      *
-     * @param p the positives
-     * @param n the negatives
+     * @param pos the positives
+     * @param neg the negatives
      * @param np the sum of the fraction match score
      * @param nn the sum of the fraction match antiscore
      * @param spots the spots
      * @param maxCandidate the max candidate
      */
-    public FilterCandidates(int p, int n, double np, double nn, ScoredSpot[] spots,
+    public FilterCandidates(int pos, int neg, double np, double nn, ScoredSpot[] spots,
         int maxCandidate) {
-      this.p = p;
-      this.n = n;
+      this.pos = pos;
+      this.neg = neg;
       this.np = np;
       this.nn = nn;
       this.spots = spots;
@@ -727,7 +728,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       this.fitWorker = new FitWorker(config.clone(), peakResults, null);
 
       final int fitting = config.getFittingWidth();
-      fitWorker.setSearchParameters((MaximaSpotFilter)spotFilter.copy(), fitting);
+      fitWorker.setSearchParameters((MaximaSpotFilter) spotFilter.copy(), fitting);
 
       this.actualCoordinates = actualCoordinates;
       this.filterCandidates = filterCandidates;
@@ -945,7 +946,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
                 } else {
                   // This is a candidate that could not be fitted
                   match[matchCount++] =
-                      new CandidateMatch(point.i, d, p3.peakResult.getZPosition());
+                      new CandidateMatch(point.index, d, p3.peakResult.getZPosition());
                 }
               }
             }
@@ -963,7 +964,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       for (int i = 0; i < match.length; i++) {
         // Score using just the distance.
         // The signal has been used only to compute the best match when two spots are close.
-        final double s = rampedScore.scoreAndFlatten(match[i].d, 256);
+        final double s = rampedScore.scoreAndFlatten(match[i].distance, 256);
         match[i].score = s;
 
         if (match[i].isFitResult()) {
@@ -1071,9 +1072,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(String.format("Fit candidate spots in the benchmark image created by "
-        + CreateData.TITLE + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
-        + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
+    gd.addMessage(String.format(
+        "Fit candidate spots in the benchmark image created by " + CreateData.TITLE
+            + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
+            + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \n"
+            + "Configure the fitting:",
         MathUtils.rounded(simulationParameters.s), MathUtils.rounded(getSa())));
 
     gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
@@ -1359,7 +1362,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     // Fit the frames
-    long runTime = System.nanoTime();
+    final long startTime = System.nanoTime();
     totalProgress = stack.getSize();
     stepProgress = ImageJUtils.getProgressInterval(totalProgress);
     progress = 0;
@@ -1382,7 +1385,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     threads.clear();
 
     IJ.showProgress(1);
-    runTime = System.nanoTime() - runTime;
+    final long runTime = System.nanoTime() - startTime;
 
     if (ImageJUtils.isInterrupted()) {
       return;
@@ -1446,8 +1449,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     fitResults = null;
   }
 
-  private static int count(
-      uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult) {
+  private static int
+      count(uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult) {
     if (fitResult == null || fitResult.results == null) {
       return 0;
     }
@@ -1485,8 +1488,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @param fitting the fitting
    * @return The filter candidates
    */
-  private TIntObjectHashMap<FilterCandidates> subsetFilterResults(
-      TIntObjectHashMap<FilterResult> filterResults, int fitting) {
+  private TIntObjectHashMap<FilterCandidates>
+      subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults, int fitting) {
     // Convert fractions from percent
     final double f1 = Math.min(1, fractionPositives / 100.0);
     final double f2 = fractionNegativesAfterAllPositives / 100.0;
@@ -1726,8 +1729,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         }
 
         final FitMatch fitMatch = (FitMatch) result.match[i];
-        distanceStats.add(fitMatch.d * nmPerPixel);
-        depthStats.add(fitMatch.z * nmPerPixel);
+        distanceStats.add(fitMatch.distance * nmPerPixel);
+        depthStats.add(fitMatch.zdepth * nmPerPixel);
       }
     }
 
@@ -1749,7 +1752,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         }
 
         final FitMatch fitMatch = (FitMatch) result.match[i];
-        final ScoredSpot spot = result.spots[fitMatch.i];
+        final ScoredSpot spot = result.spots[fitMatch.index];
         i1[ci] = fitMatch.predictedSignal;
         i2[ci] = fitMatch.actualSignal;
         is[ci] = spot.spot.intensity;
@@ -2333,8 +2336,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     return true;
   }
 
-  private static boolean isMatch(
-      uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult) {
+  private static boolean
+      isMatch(uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult) {
     if (fitResult == null) {
       return false;
     }
@@ -2688,7 +2691,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   private String createHeader() {
     final StringBuilder sb = new StringBuilder(
-        "Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
+        "Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\t"
+            + "Fixed\tGain\tReadNoise (ADUs)\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
     sb.append("Filter\t");
     sb.append("Spots\t");
     sb.append("nP\t");

@@ -2367,13 +2367,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    */
   private static String createSummaryHeader() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(
-        "Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
+    sb.append("Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\t"
+        + "ReadNoise (ADUs)\tB (photons)\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
     for (final String name : NAMES2) {
       sb.append(name).append('\t');
     }
-    sb.append(
-        "Matching\tBest J\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
+    sb.append("Matching\tBest J\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\t"
+        + "Area 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\t"
+        + "Area >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
     return sb.toString();
   }
 
@@ -2490,7 +2491,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @return the string
    */
   private static String createResultsHeader() {
-    return "Frame\tx\ty\tI\tn\tneighbours\talmost\tscore1\tscore2\tR1\tR2\tss1\tss2\tll1\tll2\tv1\tv2\tr1\tr2\taic1\taic2\tbic1\tbic2\tmaic1\tmaic2\tmbic1\tmbic2\ta1\ta2\tgap\tx1\ty1\tx2\ty2\ti1\ti2\te1\te2\tparams1\tparams2";
+    return "Frame\tx\ty\tI\tn\tneighbours\talmost\tscore1\tscore2\tR1\tR2\tss1\tss2\t"
+        + "ll1\tll2\tv1\tv2\tr1\tr2\taic1\taic2\tbic1\tbic2\tmaic1\tmaic2\tmbic1\tmbic2\t"
+        + "a1\ta2\tgap\tx1\ty1\tx2\ty2\ti1\ti2\te1\te2\tparams1\tparams2";
   }
 
   /**
@@ -2642,7 +2645,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                 if (result.a[n] > analysisDriftAngle && result.a[n] < otherDriftAngle) {
                   if (logger != null) {
                     LoggerUtils.log(logger, Level.INFO,
-                        "Reject P%d (%.2f): Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)",
+                        "Reject P%d (%.2f): Fitted coordinates moved into wrong quadrant"
+                            + " (x=%g,y=%g,a=%f)",
                         n + 1, result.getMaxScore(), xShift, yShift, result.a[n]);
                   }
                   continue;
@@ -3071,7 +3075,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @return the string
    */
   private static String createAnalysisHeader() {
-    return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\tFilter\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
+    return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\t"
+        + "Filter\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\t"
+        + "J (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\t"
+        + "wMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
   }
 
   /** {@inheritDoc} */

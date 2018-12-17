@@ -32,47 +32,48 @@ package uk.ac.sussex.gdsc.smlm.model;
  * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
 public class ActivationTimeImageModel extends ImageModel {
-  private double tAct;
+  private double activationTime;
 
   /**
-   * Construct a new image model.
+   * Instantiates a new activation time image model.
    *
-   * @param tAct Average time for activation
-   * @param tOn Average on-state time
-   * @param tOff Average off-state time for the first dark state
-   * @param tOff2 Average off-state time for the second dark state
-   * @param nBlinks Average number of blinks in the first dark state (used for each burst between
+   * @param activationTime Average time for activation
+   * @param onTime Average on-state time
+   * @param offTime1 Average off-state time for the first dark state
+   * @param offTime2 Average off-state time for the second dark state
+   * @param blinks1 Average number of blinks in the first dark state (used for each burst between
    *        second dark states)
-   * @param nBlinks2 Average number of blinks into the second dark state
+   * @param blinks2 Average number of blinks into the second dark state
    */
-  public ActivationTimeImageModel(double tAct, double tOn, double tOff, double tOff2,
-      double nBlinks, double nBlinks2) {
-    super(tOn, tOff, tOff2, nBlinks, nBlinks2);
-    init(tAct);
+  public ActivationTimeImageModel(double activationTime, double onTime, double offTime1,
+      double offTime2, double blinks1, double blinks2) {
+    super(onTime, offTime1, offTime2, blinks1, blinks2);
+    init(activationTime);
   }
 
-  private void init(double tAct) {
-    checkParameter("tAct", tAct);
-    this.tAct = tAct;
+  private void init(double activationTime) {
+    checkParameter("activationTime", activationTime);
+    this.activationTime = activationTime;
   }
 
   /**
-   * @return the tAct.
+   * Gets the average time for activation.
+   *
+   * @return the activationTime.
    */
-  public double gettAct() {
-    return tAct;
+  public double getActivationTime() {
+    return activationTime;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double createActivationTime(double[] xyz) {
-    return getRandom().nextExponential(tAct);
+    return getRandom().nextExponential(activationTime);
   }
 
-  /** {@inheritDoc} */
   @Override
-  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct) {
-    return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
-        isUseGeometricDistribution(), getRandom());
+  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz,
+      double activationTime) {
+    return new StandardFluorophoreSequenceModel(id, xyz, activationTime, onTime, offTime1, offTime2,
+        blinks1, blinks2, isUseGeometricDistribution(), getRandom());
   }
 }

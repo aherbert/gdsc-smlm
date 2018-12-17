@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector for
- * use in NonLinearFit
+ * use in non-linear fitting.
  */
 @SuppressWarnings({"javadoc"})
 public class GradientCalculatorSpeedTest {
@@ -62,7 +62,7 @@ public class GradientCalculatorSpeedTest {
 
   DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
-  int MAX_ITER = 20000;
+  static final int MAX_ITER = 20000;
   int blockWidth = 10;
   double background = 0.5;
   double amplitude = 100;
@@ -72,8 +72,8 @@ public class GradientCalculatorSpeedTest {
   double xwidth = 1.2;
   double ywidth = 1.2;
 
-  private static double random(UniformRandomProvider r, double d) {
-    return d - d * 0.1 + r.nextDouble() * 0.2;
+  private static double random(UniformRandomProvider rng, double value) {
+    return value - value * 0.1 + rng.nextDouble() * 0.2;
   }
 
   @SeededTest
@@ -419,7 +419,7 @@ public class GradientCalculatorSpeedTest {
   }
 
   @SeededTest
-  public void gradientCalculatorComputesGradient(RandomSeed seed) {
+  public void lvmGradientCalculatorComputesGradient(RandomSeed seed) {
     gradientCalculatorComputesGradient(seed, new GradientCalculator(7));
   }
 
@@ -512,15 +512,15 @@ public class GradientCalculatorSpeedTest {
       double ll = 0;
       final PoissonDistribution pd = new PoissonDistribution(u);
       for (final int x : xx) {
-        double o = MLEGradientCalculator.likelihood(u, x);
-        double e = pd.probability(x);
-        TestAssertions.assertTest(e, o, predicate, "likelihood");
+        double obs = MLEGradientCalculator.likelihood(u, x);
+        double exp = pd.probability(x);
+        TestAssertions.assertTest(exp, obs, predicate, "likelihood");
 
-        o = MLEGradientCalculator.logLikelihood(u, x);
-        e = pd.logProbability(x);
-        TestAssertions.assertTest(e, o, predicate, "log likelihood");
+        obs = MLEGradientCalculator.logLikelihood(u, x);
+        exp = pd.logProbability(x);
+        TestAssertions.assertTest(exp, obs, predicate, "log likelihood");
 
-        ll += e;
+        ll += exp;
       }
 
       final MLEGradientCalculator gc = new MLEGradientCalculator(1);
@@ -636,12 +636,12 @@ public class GradientCalculatorSpeedTest {
     }
   }
 
-  private static double[] add(double[] d, double b) {
-    d = d.clone();
-    for (int i = 0; i < d.length; i++) {
-      d[i] += b;
+  private static double[] add(double[] data, double value) {
+    data = data.clone();
+    for (int i = 0; i < data.length; i++) {
+      data[i] += value;
     }
-    return d;
+    return data;
   }
 
   @SeededTest
@@ -650,16 +650,16 @@ public class GradientCalculatorSpeedTest {
         new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
     final int n = blockWidth * blockWidth;
     final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int run = 5; run-- > 0;) {
-      a[Gaussian2DFunction.BACKGROUND] = random(r, background);
-      a[Gaussian2DFunction.SIGNAL] = random(r, amplitude);
-      a[Gaussian2DFunction.ANGLE] = random(r, angle);
-      a[Gaussian2DFunction.X_POSITION] = random(r, xpos);
-      a[Gaussian2DFunction.Y_POSITION] = random(r, ypos);
-      a[Gaussian2DFunction.X_SD] = random(r, xwidth);
-      a[Gaussian2DFunction.Y_SD] = random(r, ywidth);
+      a[Gaussian2DFunction.BACKGROUND] = random(rng, background);
+      a[Gaussian2DFunction.SIGNAL] = random(rng, amplitude);
+      a[Gaussian2DFunction.ANGLE] = random(rng, angle);
+      a[Gaussian2DFunction.X_POSITION] = random(rng, xpos);
+      a[Gaussian2DFunction.Y_POSITION] = random(rng, ypos);
+      a[Gaussian2DFunction.X_SD] = random(rng, xwidth);
+      a[Gaussian2DFunction.Y_SD] = random(rng, ywidth);
 
       // Simulate Poisson process
       func.initialise(a);
@@ -670,7 +670,7 @@ public class GradientCalculatorSpeedTest {
         u[i] = value;
         // Add random Poisson noise
         if (value > 0) {
-          x[i] = new PoissonSampler(r, value).sample();
+          x[i] = new PoissonSampler(rng, value).sample();
         }
       }
 
@@ -692,33 +692,33 @@ public class GradientCalculatorSpeedTest {
    * Only the chosen parameters are randomised and returned for a maximum of (background, amplitude,
    * angle, xpos, ypos, xwidth, ywidth }
    *
-   * @param r the random
+   * @param rng the random
    * @param npeaks the npeaks
    * @param params set on output
    * @param randomiseParams Set to true to randomise the params
    * @return the double[]
    */
-  private double[] doubleCreateGaussianData(UniformRandomProvider r, int npeaks, double[] params,
+  private double[] doubleCreateGaussianData(UniformRandomProvider rng, int npeaks, double[] params,
       boolean randomiseParams) {
     final int n = blockWidth * blockWidth;
 
     // Generate a 2D Gaussian
     final EllipticalGaussian2DFunction func =
         new EllipticalGaussian2DFunction(npeaks, blockWidth, blockWidth);
-    params[0] = random(r, background);
+    params[0] = random(rng, background);
     for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
-      params[j + Gaussian2DFunction.SIGNAL] = random(r, amplitude);
-      params[j + Gaussian2DFunction.ANGLE] = random(r, angle);
-      params[j + Gaussian2DFunction.X_POSITION] = random(r, xpos);
-      params[j + Gaussian2DFunction.Y_POSITION] = random(r, ypos);
-      params[j + Gaussian2DFunction.X_SD] = random(r, xwidth);
-      params[j + Gaussian2DFunction.Y_SD] = random(r, ywidth);
+      params[j + Gaussian2DFunction.SIGNAL] = random(rng, amplitude);
+      params[j + Gaussian2DFunction.ANGLE] = random(rng, angle);
+      params[j + Gaussian2DFunction.X_POSITION] = random(rng, xpos);
+      params[j + Gaussian2DFunction.Y_POSITION] = random(rng, ypos);
+      params[j + Gaussian2DFunction.X_SD] = random(rng, xwidth);
+      params[j + Gaussian2DFunction.Y_SD] = random(rng, ywidth);
     }
 
     final double[] y = new double[n];
     func.initialise(params);
     final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
     for (int i = 0; i < y.length; i++) {
       // Add random Poisson noise
       final double u = func.eval(i);
@@ -727,30 +727,28 @@ public class GradientCalculatorSpeedTest {
     }
 
     if (randomiseParams) {
-      params[0] = random(r, params[0]);
+      params[0] = random(rng, params[0]);
       for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
-        params[j + Gaussian2DFunction.SIGNAL] = random(r, params[j + Gaussian2DFunction.SIGNAL]);
-        params[j + Gaussian2DFunction.ANGLE] = random(r, params[j + Gaussian2DFunction.ANGLE]);
+        params[j + Gaussian2DFunction.SIGNAL] = random(rng, params[j + Gaussian2DFunction.SIGNAL]);
+        params[j + Gaussian2DFunction.ANGLE] = random(rng, params[j + Gaussian2DFunction.ANGLE]);
         params[j + Gaussian2DFunction.X_POSITION] =
-            random(r, params[j + Gaussian2DFunction.X_POSITION]);
+            random(rng, params[j + Gaussian2DFunction.X_POSITION]);
         params[j + Gaussian2DFunction.Y_POSITION] =
-            random(r, params[j + Gaussian2DFunction.Y_POSITION]);
-        params[j + Gaussian2DFunction.X_SD] = random(r, params[j + Gaussian2DFunction.X_SD]);
-        params[j + Gaussian2DFunction.Y_SD] = random(r, params[j + Gaussian2DFunction.Y_SD]); // params[j
-                                                                                              // +
-                                                                                              // 4];
+            random(rng, params[j + Gaussian2DFunction.Y_POSITION]);
+        params[j + Gaussian2DFunction.X_SD] = random(rng, params[j + Gaussian2DFunction.X_SD]);
+        params[j + Gaussian2DFunction.Y_SD] = random(rng, params[j + Gaussian2DFunction.Y_SD]);
       }
     }
 
     return y;
   }
 
-  protected int[] createData(UniformRandomProvider r, int npeaks, int iter,
+  protected int[] createData(UniformRandomProvider rng, int npeaks, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList) {
-    return createData(r, npeaks, iter, paramsList, yList, true);
+    return createData(rng, npeaks, iter, paramsList, yList, true);
   }
 
-  protected int[] createData(UniformRandomProvider r, int npeaks, int iter,
+  protected int[] createData(UniformRandomProvider rng, int npeaks, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList, boolean randomiseParams) {
     final int[] x = new int[blockWidth * blockWidth];
     for (int i = 0; i < x.length; i++) {
@@ -758,7 +756,7 @@ public class GradientCalculatorSpeedTest {
     }
     for (int i = 0; i < iter; i++) {
       final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-      final double[] y = doubleCreateGaussianData(r, npeaks, params, randomiseParams);
+      final double[] y = doubleCreateGaussianData(rng, npeaks, params, randomiseParams);
       paramsList.add(params);
       yList.add(y);
     }

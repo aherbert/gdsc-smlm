@@ -139,7 +139,7 @@ public class Configuration
     PeakFit.addPSFOptions(gd, fitConfig);
 
     gd.addMessage("--- Maxima identification ---");
-    final FitEngineConfigurationProvider provider = this; // Fit.SimpleFitEngineConfigurationProvider(config);
+    final FitEngineConfigurationProvider provider = this;
     PeakFit.addDataFilterOptions(gd, provider);
     PeakFit.addSearchOptions(gd, provider);
     PeakFit.addBorderOptions(gd, provider);

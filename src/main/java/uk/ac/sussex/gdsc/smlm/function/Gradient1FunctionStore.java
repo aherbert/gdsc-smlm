@@ -37,7 +37,8 @@ public class Gradient1FunctionStore extends ValueFunctionStore
 
   /**
    * The gradients from the last call to {@link #forEach(Gradient1Procedure)}.
-   */  public double[][] dyda;
+   */
+  public double[][] dyda;
 
   /**
    * Instantiates a new gradient 1 function store.

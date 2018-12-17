@@ -63,6 +63,8 @@ public class InterpolatedPoissonFunction
   final boolean nonInteger;
 
   /**
+   * Instantiates a new interpolated poisson function.
+   *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param nonInteger Allow non-integer observed values
    */
@@ -75,13 +77,13 @@ public class InterpolatedPoissonFunction
 
   /** {@inheritDoc} */
   @Override
-  public double likelihood(double o, double e) {
-    if (o < 0 || e <= 0) {
+  public double likelihood(double x, double mu) {
+    if (x < 0 || mu <= 0) {
       return 0;
     }
 
     // convert to photons
-    o *= alpha;
+    x *= alpha;
 
     // Allow non-integer observed value using the gamma function to provide a factorial for
     // non-integer values
@@ -90,63 +92,12 @@ public class InterpolatedPoissonFunction
     if (nonInteger) {
       // return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
 
-      final double ll = -e + o * Math.log(e) - logFactorial(o);
+      final double ll = -mu + x * Math.log(mu) - logFactorial(x);
       return FastMath.exp(ll) * alpha;
     }
 
-    pd.setMeanUnsafe(e);
-    return pd.probability((int) o) * alpha;
-  }
-
-  /**
-   * Return the log of the factorial for the given real number, using the gamma function.
-   *
-   * @param k the number
-   * @return the log factorial
-   */
-  public static double logFactorial(double k) {
-    if (k <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(k + 1);
-  }
-
-  /**
-   * Return the factorial for the given real number, using the gamma function.
-   *
-   * @param k the number
-   * @return the factorial
-   */
-  public static double factorial(double k) {
-    if (k <= 1) {
-      return 1;
-    }
-    return Gamma.gamma(k + 1);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public double logLikelihood(double o, double e) {
-    if (o < 0 || e <= 0) {
-      return Double.NEGATIVE_INFINITY;
-    }
-
-    // convert to photons
-    o *= alpha;
-
-    // Allow non-integer observed value using the gamma function to provide a factorial for
-    // non-integer values
-    // PMF(l,k) = e^-l * l^k / gamma(k+1)
-    // log(PMF) = -l + k * log(l) - logGamma(k+1)
-    if (nonInteger) {
-      // return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
-
-      final double ll = -e + o * Math.log(e) - logFactorial(o);
-      return ll + logAlpha;
-    }
-
-    pd.setMeanUnsafe(e);
-    return pd.logProbability((int) o) + logAlpha;
+    pd.setMeanUnsafe(mu);
+    return pd.probability((int) x) * alpha;
   }
 
   /**
@@ -157,14 +108,14 @@ public class InterpolatedPoissonFunction
    * {@code (o/gain - 1)!}.
    */
   @Override
-  public double likelihood(double o, double e, double[] dp_dt) {
-    if (o < 0 || e <= 0) {
-      dp_dt[0] = 0;
+  public double likelihood(double x, double mu, double[] dpDmu) {
+    if (x < 0 || mu <= 0) {
+      dpDmu[0] = 0;
       return 0;
     }
 
     // convert to photons
-    o *= alpha;
+    x *= alpha;
 
     // PMF(l,k) = e^-l * l^k / k!
     // PMF'(l,k) = e^-l * k*l^(k-1) / k! + -e^-l * l^k / k!
@@ -172,57 +123,108 @@ public class InterpolatedPoissonFunction
     // = PMF(l,k-1) - PMF(l,k)
 
     double lk;
-    double lk_1;
+    double lkm1;
 
     if (nonInteger) {
-      final double loge = Math.log(e);
-      double ll = -e + o * loge - logFactorial(o);
+      final double loge = Math.log(mu);
+      double ll = -mu + x * loge - logFactorial(x);
       lk = FastMath.exp(ll);
-      if (o == e) {
+      if (x == mu) {
         // Special case
-        dp_dt[0] = 0;
+        dpDmu[0] = 0;
         return lk * alpha;
       }
 
-      if (o >= 1) {
+      if (x >= 1) {
         // In contrast to the logFactorial(o-1)
         // this continues to use the logGamma function even when o-1 < 1.
         // It creates the correct gradient down to o==1.
-        ll = -e + (o - 1) * loge - Gamma.logGamma(o);
-        lk_1 = FastMath.exp(ll);
-      } else if (o > 0) {
-        // o is between 0 and 1.
-        // There is no definition for the factorial (o-1)!
+        ll = -mu + (x - 1) * loge - Gamma.logGamma(x);
+        lkm1 = FastMath.exp(ll);
+      } else if (x > 0) {
+        // x is between 0 and 1.
+        // There is no definition for the factorial (x-1)!
 
-        // ll = -e - Gamma.logGamma(o);
-        // ll = -e - Math.abs(o - 1) * loge - Gamma.logGamma(o);
+        // ll = -e - Gamma.logGamma(x);
+        // ll = -e - Math.abs(x - 1) * loge - Gamma.logGamma(x);
 
         // This continues to be the best match to the numerical gradient
-        // even though it impossible. It works because the gamma function is still
-        // defined when o>0.
-        ll = -e + (o - 1) * loge - Gamma.logGamma(o);
-        lk_1 = FastMath.exp(ll);
+        // even though it is impossible. It works because the gamma function is still
+        // defined when x>0.
+        ll = -mu + (x - 1) * loge - Gamma.logGamma(x);
+        lkm1 = FastMath.exp(ll);
       } else {
-        lk_1 = 0;
+        lkm1 = 0;
       }
     } else {
-      final int k = (int) o;
-      pd.setMeanUnsafe(e);
+      final int k = (int) x;
+      pd.setMeanUnsafe(mu);
       lk = pd.probability(k);
-      if (k == e) {
+      if (k == mu) {
         // Special case
-        dp_dt[0] = 0;
+        dpDmu[0] = 0;
         return lk * alpha;
       }
 
       if (k != 0) {
-        lk_1 = pd.probability(k - 1);
+        lkm1 = pd.probability(k - 1);
       } else {
-        lk_1 = 0;
+        lkm1 = 0;
       }
     }
 
-    dp_dt[0] = (lk_1 - lk) * alpha;
+    dpDmu[0] = (lkm1 - lk) * alpha;
     return lk * alpha;
+  }
+
+  /**
+   * Return the log of the factorial for the given real number, using the gamma function.
+   *
+   * @param value the number
+   * @return the log factorial
+   */
+  public static double logFactorial(double value) {
+    if (value <= 1) {
+      return 0;
+    }
+    return Gamma.logGamma(value + 1);
+  }
+
+  /**
+   * Return the factorial for the given real number, using the gamma function.
+   *
+   * @param value the number
+   * @return the factorial
+   */
+  public static double factorial(double value) {
+    if (value <= 1) {
+      return 1;
+    }
+    return Gamma.gamma(value + 1);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public double logLikelihood(double x, double mu) {
+    if (x < 0 || mu <= 0) {
+      return Double.NEGATIVE_INFINITY;
+    }
+
+    // convert to photons
+    x *= alpha;
+
+    // Allow non-integer observed value using the gamma function to provide a factorial for
+    // non-integer values
+    // PMF(l,k) = e^-l * l^k / gamma(k+1)
+    // log(PMF) = -l + k * log(l) - logGamma(k+1)
+    if (nonInteger) {
+      // return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
+
+      final double ll = -mu + x * Math.log(mu) - logFactorial(x);
+      return ll + logAlpha;
+    }
+
+    pd.setMeanUnsafe(mu);
+    return pd.logProbability((int) x) + logAlpha;
   }
 }

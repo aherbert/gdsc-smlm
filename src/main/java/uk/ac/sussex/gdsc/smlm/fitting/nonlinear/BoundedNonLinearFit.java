@@ -118,9 +118,9 @@ public class BoundedNonLinearFit extends NonLinearFit {
 
   /** {@inheritDoc} */
   @Override
-  public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev) {
+  public FitStatus computeFit(double[] y, double[] fx, double[] a, double[] parametersVariance) {
     bounds.initialise();
-    return super.computeFit(y, yFit, a, aDev);
+    return super.computeFit(y, fx, a, parametersVariance);
   }
 
   /** {@inheritDoc} */
@@ -152,7 +152,7 @@ public class BoundedNonLinearFit extends NonLinearFit {
    */
   public void setBounds(ParameterBounds bounds) {
     if (bounds == null) {
-      bounds = new ParameterBounds(f);
+      bounds = new ParameterBounds(function);
     }
     this.bounds = bounds;
   }

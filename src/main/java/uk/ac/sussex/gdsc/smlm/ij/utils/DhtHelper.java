@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 /**
  * Helper for the discrete Hartley transform.
  */
-final class DhtHelper  {
+final class DhtHelper {
 
   /**
    * No public construction.

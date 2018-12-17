@@ -795,7 +795,8 @@ public class PSFCreator implements PlugInFilter {
                 settings.getNmPerSlice(), stats.getN(), fwhm, createNote())));
 
     ImageJUtils.log(
-        "%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
+        "%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, "
+            + "PSF SD = %s nm, FWHM = %s px\n",
         psfImp.getTitle(), maxz, MathUtils.rounded(nmPerPixel / settings.getMagnification(), 3),
         MathUtils.rounded(settings.getNmPerSlice(), 3), stats.getN(),
         MathUtils.rounded(fittedSd * nmPerPixel, 4), MathUtils.rounded(fwhm));
@@ -959,9 +960,9 @@ public class PSFCreator implements PlugInFilter {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.hideCancelButton();
-      gd.addMessage(String.format(
-          "Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n",
-          n, cx, cy, cz, csd));
+      gd.addMessage(
+          String.format("Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \n"
+              + "x = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n", n, cx, cy, cz, csd));
       gd.addSlider("Slice", z[0], z[z.length - 1], slice);
       if (yesNoPosition != null) {
         gd.centerDialog(false);
@@ -1642,10 +1643,12 @@ public class PSFCreator implements PlugInFilter {
   }
 
   /**
-   * @return Extract all the ROI points.
+   * Extract all the ROI points.
+   *
+   * @return the spots
    */
   private BasePoint[] getSpots() {
-    final float z = imp.getStackSize() / 2;
+    final float zpos = imp.getStackSize() / 2;
     final Roi roi = imp.getRoi();
     if (roi != null && roi.getType() == Roi.POINT) {
       final FloatPolygon p = roi.getFloatPolygon();
@@ -1660,7 +1663,7 @@ public class PSFCreator implements PlugInFilter {
 
       final BasePoint[] roiPoints = new BasePoint[n];
       for (int i = 0; i < n; i++) {
-        roiPoints[i] = new BasePoint(p.xpoints[i] + offset, p.ypoints[i] + offset, z);
+        roiPoints[i] = new BasePoint(p.xpoints[i] + offset, p.ypoints[i] + offset, zpos);
       }
       return roiPoints;
     }
@@ -1804,7 +1807,9 @@ public class PSFCreator implements PlugInFilter {
   }
 
   /**
-   * @return The input image as a 32-bit (float) image stack.
+   * Gets the image stack as a 32-bit (float) image stack.
+   *
+   * @return The input image
    */
   private ImageStack getImageStack() {
     final int width = imp.getWidth();

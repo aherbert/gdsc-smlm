@@ -41,7 +41,8 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure {
   /**
    * The fast log instance for computing the equivalent of {@link java.lang.Math#log(double)}.
-   */  protected final FastLog fastLog;
+   */
+  protected final FastLog fastLog;
 
   /**
    * Instantiates a new procedure.

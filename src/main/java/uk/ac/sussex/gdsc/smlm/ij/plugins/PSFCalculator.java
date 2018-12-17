@@ -263,29 +263,6 @@ public class PSFCalculator implements PlugIn, DialogListener {
   }
 
   /**
-   * If the pixel size (a) is provided the standard deviation (s) is adjusted to account for square
-   * pixels:
-   *
-   * <pre>
-   * sa^2 = s^2 + a^2/12.
-   * </pre>
-   *
-   * <p>This is relevant if using a single Gaussian evaluated at the centre of the pixel (0.5,0.5)
-   * to represent the value over the entire pixel. If using a complete Gaussian function using the
-   * integral of the error function (erf) then this is not needed.
-   *
-   * @param s Gaussian standard deviation
-   * @param a The pixel size
-   * @return sa The adjusted standard deviation
-   */
-  public static double squarePixelAdjustment(double s, final double a) {
-    if (a > 0) {
-      s = Math.sqrt(s * s + a * a / 12.0);
-    }
-    return s;
-  }
-
-  /**
    * Calculates the expected PSF standard deviation (pixels) for a Gaussian approximation to the
    * Airy disk.
    *
@@ -300,13 +277,36 @@ public class PSFCalculator implements PlugIn, DialogListener {
    */
   private static double calculateStdDev(double pixelPitch, double magnification, double wavelength,
       double numericalAperture, double scaleFactor, boolean adjust) {
-    double s = calculateStdDev(wavelength, numericalAperture, scaleFactor);
+    double sd = calculateStdDev(wavelength, numericalAperture, scaleFactor);
     final double pixelPitchInNm = pixelPitch * 1000 / magnification;
     if (adjust) {
-      s = squarePixelAdjustment(s, pixelPitchInNm);
+      sd = squarePixelAdjustment(sd, pixelPitchInNm);
     }
-    s /= pixelPitchInNm;
-    return s;
+    sd /= pixelPitchInNm;
+    return sd;
+  }
+
+  /**
+   * If the pixel size (a) is provided the standard deviation (s) is adjusted to account for square
+   * pixels:
+   *
+   * <pre>
+   * sa^2 = s^2 + a^2/12.
+   * </pre>
+   *
+   * <p>This is relevant if using a single Gaussian evaluated at the centre of the pixel (0.5,0.5)
+   * to represent the value over the entire pixel. If using a complete Gaussian function using the
+   * integral of the error function (erf) then this is not needed.
+   *
+   * @param sd Gaussian standard deviation
+   * @param pixelSize The pixel size
+   * @return sa The adjusted standard deviation
+   */
+  public static double squarePixelAdjustment(double sd, final double pixelSize) {
+    if (pixelSize > 0) {
+      sd = Math.sqrt(sd * sd + pixelSize * pixelSize / 12.0);
+    }
+    return sd;
   }
 
   /**
@@ -419,6 +419,8 @@ public class PSFCalculator implements PlugIn, DialogListener {
   }
 
   /**
+   * Plot the profile.
+   *
    * @param airyWidth The Airy width
    * @param factor Factor used to scale the Airy approximation using the Gaussian
    */

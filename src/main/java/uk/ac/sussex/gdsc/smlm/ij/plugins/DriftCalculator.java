@@ -353,8 +353,8 @@ public class DriftCalculator implements PlugIn {
   private static Roi[] getRois() {
     final RoiManager rmanager = RoiManager.getInstance();
     if (rmanager == null || rmanager.getCount() == 0) {
-      IJ.log(
-          "To use feducial markers for drift correction, add ROIs to the RoiManager (select a region then press [t]).");
+      IJ.log("To use feducial markers for drift correction, add ROIs to the RoiManager"
+          + " (select a region then press [t]).");
       return null;
     }
     return rmanager.getRoisAsArray();

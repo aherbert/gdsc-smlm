@@ -398,6 +398,8 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
+   * Gets the number of molecules in the compound molecule.
+   *
    * @return The number of molecules in the compound molecule.
    */
   public int getSize() {
@@ -410,9 +412,9 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The xyz coordinates
    * @see #getSize()
-   * @throws IndexOutOfBoundsException If the requested molecule does not exist
+   * @If the requested molecule does not exist
    */
-  public double[] getCoordinates(int n) throws IndexOutOfBoundsException {
+  public double[] getCoordinates(int n) {
     final double[] xyz = Arrays.copyOf(this.xyz, 3);
     final MoleculeModel m = molecules.get(n);
     for (int i = 0; i < 3; i++) {
@@ -423,14 +425,14 @@ public class CompoundMoleculeModel extends MoleculeModel {
 
   /**
    * Get the current coordinates of the n<sup>th</sup> molecule molecule in the compound molecule
-   * relative to the centre-of-mass
+   * relative to the centre-of-mass.
    *
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The xyz coordinates
    * @see #getSize()
-   * @throws IndexOutOfBoundsException If the requested molecule does not exist
+   * @If the requested molecule does not exist
    */
-  public double[] getRelativeCoordinates(int n) throws IndexOutOfBoundsException {
+  public double[] getRelativeCoordinates(int n) {
     final MoleculeModel m = molecules.get(n);
     return Arrays.copyOf(m.xyz, 3);
   }
@@ -443,13 +445,15 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The molecule
    * @see #getSize()
-   * @throws IndexOutOfBoundsException If the requested molecule does not exist
+   * @If the requested molecule does not exist
    */
-  public MoleculeModel getMolecule(int n) throws IndexOutOfBoundsException {
+  public MoleculeModel getMolecule(int n) {
     return molecules.get(n);
   }
 
   /**
+   * Gets the fraction of a population that this molecule represents.
+   *
    * @return The fraction of a population that this molecule represents.
    */
   public double getFraction() {
@@ -495,14 +499,18 @@ public class CompoundMoleculeModel extends MoleculeModel {
   }
 
   /**
-   * @return the diffusionRate.
+   * Gets the diffusion rate.
+   *
+   * @return the diffusion rate
    */
   public double getDiffusionRate() {
     return diffusionRate;
   }
 
   /**
-   * @param diffusionRate the diffusionRate to set
+   * Sets the diffusion rate.
+   *
+   * @param diffusionRate the new diffusion rate
    */
   public void setDiffusionRate(double diffusionRate) {
     this.diffusionRate = diffusionRate;

@@ -62,7 +62,7 @@ public class FastMLEGradient2ProcedureTest {
 
   DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
-  int MAX_ITER = 20000;
+  static final int MAX_ITER = 20000;
   int blockWidth = 10;
   double background = 0.5;
   double signal = 100;
@@ -72,12 +72,45 @@ public class FastMLEGradient2ProcedureTest {
   double xwidth = 1.2;
   double ywidth = 1.2;
 
-  private static double nextUniform(UniformRandomProvider r, double min, double max) {
-    return min + r.nextDouble() * (max - min);
+  private abstract class Timer {
+    private int loops;
+    int min = 5;
+
+    Timer() {}
+
+    Timer(int min) {
+      this.min = min;
+    }
+
+    long getTime() {
+      // Run till stable timing
+      long t1 = time();
+      for (int i = 0; i < 10; i++) {
+        final long t2 = t1;
+        t1 = time();
+        if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) {
+          break;
+        }
+      }
+      return t1;
+    }
+
+    long time() {
+      loops++;
+      final long time = System.nanoTime();
+      run();
+      return System.nanoTime() - time;
+    }
+
+    abstract void run();
   }
 
-  private static double random(UniformRandomProvider r, double d) {
-    return d - d * 0.1 + r.nextDouble() * 0.2;
+  private static double nextUniform(UniformRandomProvider rng, double min, double max) {
+    return min + rng.nextDouble() * (max - min);
+  }
+
+  private static double random(UniformRandomProvider rng, double value) {
+    return value - value * 0.1 + rng.nextDouble() * 0.2;
   }
 
   @Test
@@ -102,19 +135,6 @@ public class FastMLEGradient2ProcedureTest {
     gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 6, equality);
     gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 11, equality);
     gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(seed, 21, equality);
-  }
-
-  @SpeedTag
-  @SeededTest
-  public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    // Note: The procedure does not have a lot of work within loops. It is only a single loop
-    // so unrolling does not produce performance gains. The JVM can optimise this.
-
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21);
   }
 
   private void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(RandomSeed seed,
@@ -184,15 +204,15 @@ public class FastMLEGradient2ProcedureTest {
       // Simulate Poisson data
       f2.initialise0(a2);
       f1.forEach(new ValueProcedure() {
-        int k = 0;
+        int index = 0;
 
         @Override
         public void execute(double value) {
           if (value > 0) {
             pd.setMeanUnsafe(value);
-            x[k++] = pd.sample();
+            x[index++] = pd.sample();
           } else {
-            x[k++] = 0;
+            x[index++] = 0;
           }
         }
       });
@@ -204,11 +224,11 @@ public class FastMLEGradient2ProcedureTest {
       }
       f1.initialise0(a1);
       f1.forEach(new ValueProcedure() {
-        int k = 0;
+        int index = 0;
 
         @Override
         public void execute(double value) {
-          b[k++] = value;
+          b[index++] = value;
         }
       });
 
@@ -244,38 +264,17 @@ public class FastMLEGradient2ProcedureTest {
     }
   }
 
-  private abstract class Timer {
-    private int loops;
-    int min = 5;
+  @SpeedTag
+  @SeededTest
+  public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+    // Note: The procedure does not have a lot of work within loops. It is only a single loop
+    // so unrolling does not produce performance gains. The JVM can optimise this.
 
-    Timer() {}
-
-    Timer(int min) {
-      this.min = min;
-    }
-
-    long getTime() {
-      // Run till stable timing
-      long t1 = time();
-      for (int i = 0; i < 10; i++) {
-        final long t2 = t1;
-        t1 = time();
-        if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) {
-          break;
-        }
-      }
-      return t1;
-    }
-
-    long time() {
-      loops++;
-      long t = System.nanoTime();
-      run();
-      t = System.nanoTime() - t;
-      return t;
-    }
-
-    abstract void run();
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4);
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5);
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6);
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11);
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21);
   }
 
   private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed,
@@ -369,10 +368,10 @@ public class FastMLEGradient2ProcedureTest {
     final IntArrayFormatSupplier msg2Dd2 =
         getMessage(nparams, "[%d] second derivative: Not same d2 @ %d");
 
-    FastMLEGradient2Procedure p1, p2;
     for (int i = 0; i < paramsList.size(); i++) {
-      p1 = new FastMLEGradient2Procedure(yList.get(i), func);
-      p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
+      FastMLEGradient2Procedure p1 = new FastMLEGradient2Procedure(yList.get(i), func);
+      FastMLEGradient2Procedure p2 =
+          FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
       final double[] a = paramsList.get(i);
 
       final double ll1 = p1.computeLogLikelihood(a);
@@ -545,20 +544,17 @@ public class FastMLEGradient2ProcedureTest {
         // logger.fine("[%d,%d] ll - %f (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f", i, k, ll,
         // func.getName(k), a[k], d,
         // gradient1, d1[j], gradient2, d2[j]);
-        failCounter.run(j, () -> {
-          return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
-        }, () -> {
+        failCounter.run(j, () -> eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]), () -> {
           Assertions
               .fail(FunctionUtils.getSupplier("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii,
                   j_, gradient1, d1[j_], DoubleEquality.relativeError(gradient1, d1[j_])));
         });
-        failCounter.run(nparams + j, () -> {
-          return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
-        }, () -> {
-          Assertions
-              .fail(FunctionUtils.getSupplier("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii,
-                  j_, gradient2, d2[j_], DoubleEquality.relativeError(gradient2, d2[j_])));
-        });
+        failCounter.run(nparams + j, () -> eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]),
+            () -> {
+              Assertions
+                  .fail(FunctionUtils.getSupplier("Not same gradient2 @ %d,%d: %s != %s (error=%s)",
+                      ii, j_, gradient2, d2[j_], DoubleEquality.relativeError(gradient2, d2[j_])));
+            });
       }
     }
   }
@@ -568,13 +564,13 @@ public class FastMLEGradient2ProcedureTest {
    * Only the chosen parameters are randomised and returned for a maximum of (background, amplitude,
    * angle, xpos, ypos, xwidth, ywidth }
    *
-   * @param r the random
+   * @param rng the random
    * @param npeaks the npeaks
    * @param params set on output
    * @param randomiseParams Set to true to randomise the params
    * @return the double[]
    */
-  private double[] doubleCreateGaussianData(UniformRandomProvider r, int npeaks, double[] params,
+  private double[] doubleCreateGaussianData(UniformRandomProvider rng, int npeaks, double[] params,
       boolean randomiseParams) {
     final int n = blockWidth * blockWidth;
 
@@ -582,19 +578,19 @@ public class FastMLEGradient2ProcedureTest {
     final ErfGaussian2DFunction func =
         (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth,
             GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
-    params[0] = random(r, background);
+    params[0] = random(rng, background);
     for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
-      params[j + Gaussian2DFunction.SIGNAL] = random(r, signal);
-      params[j + Gaussian2DFunction.X_POSITION] = random(r, xpos);
-      params[j + Gaussian2DFunction.Y_POSITION] = random(r, ypos);
-      params[j + Gaussian2DFunction.X_SD] = random(r, xwidth);
-      params[j + Gaussian2DFunction.Y_SD] = random(r, ywidth);
+      params[j + Gaussian2DFunction.SIGNAL] = random(rng, signal);
+      params[j + Gaussian2DFunction.X_POSITION] = random(rng, xpos);
+      params[j + Gaussian2DFunction.Y_POSITION] = random(rng, ypos);
+      params[j + Gaussian2DFunction.X_SD] = random(rng, xwidth);
+      params[j + Gaussian2DFunction.Y_SD] = random(rng, ywidth);
     }
 
     final double[] y = new double[n];
     func.initialise(params);
     final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
     for (int i = 0; i < y.length; i++) {
       // Add random Poisson noise
       final double u = func.eval(i);
@@ -603,29 +599,27 @@ public class FastMLEGradient2ProcedureTest {
     }
 
     if (randomiseParams) {
-      params[0] = random(r, params[0]);
+      params[0] = random(rng, params[0]);
       for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
-        params[j + Gaussian2DFunction.SIGNAL] = random(r, params[j + Gaussian2DFunction.SIGNAL]);
+        params[j + Gaussian2DFunction.SIGNAL] = random(rng, params[j + Gaussian2DFunction.SIGNAL]);
         params[j + Gaussian2DFunction.X_POSITION] =
-            random(r, params[j + Gaussian2DFunction.X_POSITION]);
+            random(rng, params[j + Gaussian2DFunction.X_POSITION]);
         params[j + Gaussian2DFunction.Y_POSITION] =
-            random(r, params[j + Gaussian2DFunction.Y_POSITION]);
-        params[j + Gaussian2DFunction.X_SD] = random(r, params[j + Gaussian2DFunction.X_SD]);
-        params[j + Gaussian2DFunction.Y_SD] = random(r, params[j + Gaussian2DFunction.Y_SD]); // params[j
-                                                                                              // +
-                                                                                              // 4];
+            random(rng, params[j + Gaussian2DFunction.Y_POSITION]);
+        params[j + Gaussian2DFunction.X_SD] = random(rng, params[j + Gaussian2DFunction.X_SD]);
+        params[j + Gaussian2DFunction.Y_SD] = random(rng, params[j + Gaussian2DFunction.Y_SD]);
       }
     }
 
     return y;
   }
 
-  protected int[] createData(UniformRandomProvider r, int npeaks, int iter,
+  protected int[] createData(UniformRandomProvider rng, int npeaks, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList) {
-    return createData(r, npeaks, iter, paramsList, yList, true);
+    return createData(rng, npeaks, iter, paramsList, yList, true);
   }
 
-  protected int[] createData(UniformRandomProvider r, int npeaks, int iter,
+  protected int[] createData(UniformRandomProvider rng, int npeaks, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList, boolean randomiseParams) {
     final int[] x = new int[blockWidth * blockWidth];
     for (int i = 0; i < x.length; i++) {
@@ -633,14 +627,14 @@ public class FastMLEGradient2ProcedureTest {
     }
     for (int i = 0; i < iter; i++) {
       final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-      final double[] y = doubleCreateGaussianData(r, npeaks, params, randomiseParams);
+      final double[] y = doubleCreateGaussianData(rng, npeaks, params, randomiseParams);
       paramsList.add(params);
       yList.add(y);
     }
     return x;
   }
 
-  protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter,
+  protected int[] createFakeData(UniformRandomProvider rng, int nparams, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList) {
     final int[] x = new int[blockWidth * blockWidth];
     for (int i = 0; i < x.length; i++) {
@@ -648,23 +642,23 @@ public class FastMLEGradient2ProcedureTest {
     }
     for (int i = 0; i < iter; i++) {
       final double[] params = new double[nparams];
-      final double[] y = createFakeData(r, params);
+      final double[] y = createFakeData(rng, params);
       paramsList.add(params);
       yList.add(y);
     }
     return x;
   }
 
-  private double[] createFakeData(UniformRandomProvider r, double[] params) {
+  private double[] createFakeData(UniformRandomProvider rng, double[] params) {
     final int n = blockWidth * blockWidth;
 
     for (int i = 0; i < params.length; i++) {
-      params[i] = r.nextDouble();
+      params[i] = rng.nextDouble();
     }
 
     final double[] y = new double[n];
     for (int i = 0; i < y.length; i++) {
-      y[i] = r.nextDouble() * 10;
+      y[i] = rng.nextDouble() * 10;
     }
 
     return y;

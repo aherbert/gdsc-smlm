@@ -73,6 +73,8 @@ public class FitEngine {
   }
 
   /**
+   * Gets the spot filter for identifying candidate local maxima.
+   *
    * @return The filter used for identifying candidate local maxima.
    */
   public MaximaSpotFilter getSpotFilter() {
@@ -302,14 +304,16 @@ public class FitEngine {
   }
 
   /**
-   * @return the total fitting time.
+   * Gets the total fitting time.
+   *
+   * @return the total fitting time
    */
   public long getTime() {
     return time;
   }
 
   /**
-   * If false then the engine can be shutdown by using {@link #end(boolean)}
+   * If false then the engine can be shutdown by using {@link #end(boolean)}.
    *
    * @return True if there are no worker threads
    */
@@ -318,6 +322,8 @@ public class FitEngine {
   }
 
   /**
+   * Checks if the jobs queue is empty.
+   *
    * @return True if there are no jobs queued.
    */
   public boolean isQueueEmpty() {

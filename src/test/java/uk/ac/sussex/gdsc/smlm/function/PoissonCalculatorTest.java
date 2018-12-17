@@ -347,7 +347,8 @@ public class PoissonCalculatorTest {
       final double p = ChiSquaredDistributionTable.computePValue(llr, df);
       final double q = ChiSquaredDistributionTable.computeQValue(llr, df);
       logger.log(TestLogUtils.getRecord(Level.INFO,
-          "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f (reject=%b @ %.3f, reject=%b @ %.3f)",
+          "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f "
+          + "(reject=%b @ %.3f, reject=%b @ %.3f)",
           a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q,
           table.reject(llr, df), table.getSignificanceValue(), table2.reject(llr, df),
           table2.getSignificanceValue()));

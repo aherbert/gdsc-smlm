@@ -38,7 +38,14 @@ import org.apache.commons.math3.util.FastMath;
  *      Winitzki, Sergei (6 February 2008).
  *      "A handy approximation for the error function and its inverse"</a>
  */
-public class Erf {
+public final class Erf {
+
+  private static final double FOUR_OVER_PI = 4.0 / Math.PI;
+  private static double DERIVATIVE_FACTOR = 2 / Math.sqrt(Math.PI);
+
+  /** No public constructor. */
+  private Erf() {}
+
   /**
    * Returns the error function.
    *
@@ -69,17 +76,6 @@ public class Erf {
         1 - 1 / pow4(1.0 + 0.278393 * x + 0.230389 * x2 + 0.000972 * x2 * x + 0.078108 * x2 * x2);
 
     return (negative) ? -ret : ret;
-  }
-
-  /**
-   * Compute d^4.
-   *
-   * @param d the d
-   * @return d^4
-   */
-  static double pow4(double d) {
-    d = d * d; // power 2
-    return d * d;
   }
 
   /**
@@ -130,19 +126,6 @@ public class Erf {
   }
 
   /**
-   * Compute d^16.
-   *
-   * @param d the d
-   * @return d^16
-   */
-  static double pow16(double d) {
-    d = d * d; // power2
-    d = d * d; // power4
-    d = d * d; // power8
-    return d * d;
-  }
-
-  /**
    * Returns the difference between erf(x1) and erf(x2). Uses the fast approximation
    * {@link #erf(double)}.
    *
@@ -153,8 +136,6 @@ public class Erf {
   public static double erf(double x1, double x2) {
     return erf(x2) - erf(x1);
   }
-
-  private static final double four_over_pi = 4.0 / Math.PI;
 
   /**
    * Returns the error function.
@@ -184,7 +165,7 @@ public class Erf {
 
     final double x2 = x * x;
     final double ax2 = 0.147 * x2;
-    final double ret = Math.sqrt(1 - FastMath.exp(-x2 * (four_over_pi + ax2) / (1 + ax2)));
+    final double ret = Math.sqrt(1 - FastMath.exp(-x2 * (FOUR_OVER_PI + ax2) / (1 + ax2)));
 
     return negative ? -ret : ret;
   }
@@ -201,17 +182,39 @@ public class Erf {
     return erf2(x2) - erf2(x1);
   }
 
-  private static double D_FACTOR = 2 / Math.sqrt(Math.PI);
-
   /**
-   * Compute the first derivative of the Error function = (2 / sqrt(pi)) * exp(-x*x)
+   * Compute the first derivative of the Error function = (2 / sqrt(pi)) * exp(-x*x).
    *
    * @see <a href="http://mathworld.wolfram.com/Erf.html">http://mathworld.wolfram.com/Erf.html</a>
    *
    * @param x the x
    * @return the first derivative
    */
-  public static double dErf_dx(double x) {
-    return D_FACTOR * FastMath.exp(-x * x);
+  public static double erfDerivative(double x) {
+    return DERIVATIVE_FACTOR * FastMath.exp(-x * x);
+  }
+
+  /**
+   * Compute the value to the power of 4.
+   *
+   * @param value the value
+   * @return value^4
+   */
+  static double pow4(double value) {
+    value = value * value; // power 2
+    return value * value;
+  }
+
+  /**
+   * Compute the value to the power of 16.
+   *
+   * @param value the value
+   * @return value^16
+   */
+  static double pow16(double value) {
+    value = value * value; // power2
+    value = value * value; // power4
+    value = value * value; // power8
+    return value * value;
   }
 }

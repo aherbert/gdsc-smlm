@@ -78,45 +78,45 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @throws NullPointerException if the function is null
    */
-  public MLELVMSteppingFunctionSolver(Gradient1Function f) {
-    super(FunctionSolverType.MLE, f);
+  public MLELVMSteppingFunctionSolver(Gradient1Function function) {
+    super(FunctionSolverType.MLE, function);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum relative error
    * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum absolute error
    * @throws NullPointerException if the function is null
    */
-  public MLELVMSteppingFunctionSolver(Gradient1Function f, double maxRelativeError,
+  public MLELVMSteppingFunctionSolver(Gradient1Function function, double maxRelativeError,
       double maxAbsoluteError) {
-    super(FunctionSolverType.MLE, f, maxRelativeError, maxAbsoluteError);
+    super(FunctionSolverType.MLE, function, maxRelativeError, maxAbsoluteError);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public MLELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+  public MLELVMSteppingFunctionSolver(Gradient1Function function, ToleranceChecker tc,
       ParameterBounds bounds) {
-    super(FunctionSolverType.MLE, f, tc, bounds);
+    super(FunctionSolverType.MLE, function, tc, bounds);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
@@ -125,9 +125,9 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
    *        maximum absolute error
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public MLELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+  public MLELVMSteppingFunctionSolver(Gradient1Function function, ToleranceChecker tc,
       ParameterBounds bounds, double maxRelativeError, double maxAbsoluteError) {
-    super(FunctionSolverType.MLE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
+    super(FunctionSolverType.MLE, function, tc, bounds, maxRelativeError, maxAbsoluteError);
   }
 
   /** {@inheritDoc} */
@@ -161,7 +161,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   protected LVMGradientProcedure createGradientProcedure(double[] y) {
     // We can handle per-observation variances as detailed in
     // Huang, et al. (2015) by simply adding the variances to the computed value.
-    f1 = (Gradient1Function) f;
+    f1 = (Gradient1Function) function;
     if (w != null) {
       f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
     }
@@ -180,8 +180,8 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
 
   /** {@inheritDoc} */
   @Override
-  protected void computeValues(double[] yFit) {
-    super.computeValues(yFit);
+  protected void computeValues(double[] fx) {
+    super.computeValues(fx);
 
     // Cache the values to compute the log-likelihood
     final int size = f1.size();
@@ -191,24 +191,24 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     if (w != null) {
       // For the log-likelihood we must add the per observation weights
       for (int i = 0; i < size; i++) {
-        lastyFit[i] = yFit[i] + w[i];
+        lastyFit[i] = fx[i] + w[i];
       }
     } else {
-      System.arraycopy(yFit, 0, lastyFit, 0, size);
+      System.arraycopy(fx, 0, lastyFit, 0, size);
     }
   }
 
   /** {@inheritDoc} */
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit) {
+  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
     // The Hessian matrix refers to the log-likelihood ratio.
     // Compute and invert a matrix related to the Poisson log-likelihood.
     // This assumes this does achieve the maximum likelihood estimate for a
     // Poisson process.
-    Gradient1Function f1 = (Gradient1Function) f;
+    Gradient1Function f1 = (Gradient1Function) function;
     // Capture the y-values if necessary
-    if (yFit != null && yFit.length == f1.size()) {
-      f1 = new Gradient2FunctionValueStore(f1, yFit);
+    if (fx != null && fx.length == f1.size()) {
+      f1 = new Gradient2FunctionValueStore(f1, fx);
     }
     // Add the weights if necessary
     if (w != null) {
@@ -229,7 +229,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     // This assumes this does achieve the maximum likelihood estimate for a
     // Poisson process.
     // We must wrap the gradient function if weights are present.
-    Gradient1Function f1 = (Gradient1Function) f;
+    Gradient1Function f1 = (Gradient1Function) function;
     if (w != null) {
       f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
     }
@@ -238,7 +238,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     if (p.isNaNGradients()) {
       throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
     }
-    return new FisherInformationMatrix(p.getLinear(), f.getNumberOfGradients());
+    return new FisherInformationMatrix(p.getLinear(), function.getNumberOfGradients());
   }
 
   /** {@inheritDoc} */

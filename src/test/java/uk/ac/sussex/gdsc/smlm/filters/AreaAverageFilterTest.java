@@ -54,10 +54,12 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final float boxSize : fBoxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -78,7 +80,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float areaAverageInternal [%dx%d] @ %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx",
+                "float areaAverageInternal [%dx%d] @ %.1f : "
+                    + "%d => areaAverageUsingSumsInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
             // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
@@ -130,10 +133,12 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final float boxSize : fBoxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -154,7 +159,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float areaAverageUsingAverages [%dx%d] @ %.1f : %d => stripedBlockAverage %d = %.2fx",
+                "float areaAverageUsingAverages [%dx%d] @ %.1f : "
+                    + "%d => stripedBlockAverage %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
             // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
@@ -207,10 +213,12 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final float boxSize : fBoxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -231,7 +239,8 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : %d => stripedBlockAverageInternal %d = %.2fx",
+                "float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : "
+                    + "%d => stripedBlockAverageInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
             // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,

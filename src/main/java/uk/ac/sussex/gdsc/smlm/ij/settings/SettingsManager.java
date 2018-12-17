@@ -709,12 +709,12 @@ public class SettingsManager {
   }
 
   /**
-   * @return The settings filename (from the ImageJ preferences or the default in the home
-   *         directory).
+   * Gets the settings filename (from the ImageJ preferences or the default in the home directory).
+   *
+   * @return The settings filename
    */
   public static String getSettingsFilename() {
-    final String filename = Prefs.get(Constants.settingsFilename, DEFAULT_FILENAME);
-    return filename;
+    return Prefs.get(Constants.settingsFilename, DEFAULT_FILENAME);
   }
 
   /**
@@ -1054,8 +1054,8 @@ public class SettingsManager {
    * @param flags the flags
    * @return the CameraModelFisherInformationAnalysisSettings
    */
-  public static CameraModelFisherInformationAnalysisSettings readCameraModelFisherInformationAnalysisSettings(
-      int flags) {
+  public static CameraModelFisherInformationAnalysisSettings
+      readCameraModelFisherInformationAnalysisSettings(int flags) {
     return new ConfigurationReader<>(
         GUIProtosHelper.defaultCameraModelFisherInformationAnalysisSettings).read(flags);
   }

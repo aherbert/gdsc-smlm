@@ -249,8 +249,8 @@ public class CreateFilters implements PlugIn, ItemListener {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(
-        "Create a set of filters for use in the Filter Analysis plugin.\nAttributes will be enumerated if they are of the form 'min:max:increment'");
+    gd.addMessage("Create a set of filters for use in the Filter Analysis plugin.\n"
+        + "Attributes will be enumerated if they are of the form 'min:max:increment'");
 
     filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
 

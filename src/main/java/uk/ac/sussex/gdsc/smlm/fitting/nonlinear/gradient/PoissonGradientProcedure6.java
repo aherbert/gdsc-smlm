@@ -49,29 +49,29 @@ public class PoissonGradientProcedure6 extends PoissonGradientProcedure {
   @Override
   public void execute(double value, double[] dy_da) {
     if (value > 0) {
-      final double f = 1.0 / value;
+      final double function = 1.0 / value;
 
-      data[0] += dy_da[0] * f * dy_da[0];
+      data[0] += dy_da[0] * function * dy_da[0];
       double w;
-      w = dy_da[1] * f;
+      w = dy_da[1] * function;
       data[1] += w * dy_da[0];
       data[2] += w * dy_da[1];
-      w = dy_da[2] * f;
+      w = dy_da[2] * function;
       data[3] += w * dy_da[0];
       data[4] += w * dy_da[1];
       data[5] += w * dy_da[2];
-      w = dy_da[3] * f;
+      w = dy_da[3] * function;
       data[6] += w * dy_da[0];
       data[7] += w * dy_da[1];
       data[8] += w * dy_da[2];
       data[9] += w * dy_da[3];
-      w = dy_da[4] * f;
+      w = dy_da[4] * function;
       data[10] += w * dy_da[0];
       data[11] += w * dy_da[1];
       data[12] += w * dy_da[2];
       data[13] += w * dy_da[3];
       data[14] += w * dy_da[4];
-      w = dy_da[5] * f;
+      w = dy_da[5] * function;
       data[15] += w * dy_da[0];
       data[16] += w * dy_da[1];
       data[17] += w * dy_da[2];

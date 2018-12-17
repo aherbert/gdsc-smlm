@@ -61,7 +61,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object> {
   static final int w = 113, h = 29, size = w * h;
 
   private static class PerPixelCameraModelTestData {
-    float[] bias, gain, variance, var_g2, image;
+    float[] bias, gain, variance, varG2, image;
   }
 
   @Override
@@ -72,14 +72,14 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object> {
     data.bias = new float[size];
     data.gain = new float[size];
     data.variance = new float[size];
-    data.var_g2 = new float[size];
+    data.varG2 = new float[size];
     data.image = new float[size];
     for (int i = 0; i < size; i++) {
       data.bias[i] = r.nextFloat();
       data.gain[i] = 1f + r.nextFloat(); // Ensure positive
       data.variance[i] = r.nextFloat();
       data.image[i] = 100 * r.nextFloat();
-      data.var_g2[i] = data.variance[i] / (data.gain[i] * data.gain[i]);
+      data.varG2[i] = data.variance[i] / (data.gain[i] * data.gain[i]);
     }
     return data;
   }
@@ -94,11 +94,11 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object> {
     Assertions.assertArrayEquals(data.bias, model.getBias(bounds));
     Assertions.assertArrayEquals(data.gain, model.getGain(bounds));
     Assertions.assertArrayEquals(data.variance, model.getVariance(bounds));
-    Assertions.assertArrayEquals(data.var_g2, model.getNormalisedVariance(bounds));
+    Assertions.assertArrayEquals(data.varG2, model.getNormalisedVariance(bounds));
     Assertions.assertArrayEquals(data.bias, model.getBias());
     Assertions.assertArrayEquals(data.gain, model.getGain());
     Assertions.assertArrayEquals(data.variance, model.getVariance());
-    Assertions.assertArrayEquals(data.var_g2, model.getNormalisedVariance());
+    Assertions.assertArrayEquals(data.varG2, model.getNormalisedVariance());
   }
 
   @SeededTest
@@ -118,7 +118,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object> {
       check(data.bias, bounds, model.getBias(bounds));
       check(data.gain, bounds, model.getGain(bounds));
       check(data.variance, bounds, model.getVariance(bounds));
-      check(data.var_g2, bounds, model.getNormalisedVariance(bounds));
+      check(data.varG2, bounds, model.getNormalisedVariance(bounds));
     }
   }
 
@@ -164,7 +164,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object> {
       check(data.bias, bounds, model2.getBias(bounds));
       check(data.gain, bounds, model2.getGain(bounds));
       check(data.variance, bounds, model2.getVariance(bounds));
-      check(data.var_g2, bounds, model2.getNormalisedVariance(bounds));
+      check(data.varG2, bounds, model2.getNormalisedVariance(bounds));
     }
   }
 
@@ -330,7 +330,7 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object> {
         Assertions.assertEquals(bias[i], model.getBias(x1, y1));
         Assertions.assertEquals(gain[i], model.getGain(x1, y1));
         Assertions.assertEquals(variance[i], model.getVariance(x1, y1));
-        Assertions.assertEquals(data.var_g2[i], model.getNormalisedVariance(x1, y1));
+        Assertions.assertEquals(data.varG2[i], model.getNormalisedVariance(x1, y1));
       }
     }
   }

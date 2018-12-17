@@ -247,18 +247,18 @@ public class GradientCalculator {
    *
    * @param x n observations
    * @param y The data
-   * @param yFit The function data
+   * @param fx The function data
    * @param a Set of m coefficients
    * @param func Non-linear fitting function
    * @return The sum-of-squares value for the fit
    */
-  public double findLinearised(final int[] x, final double[] y, double[] yFit, final double[] a,
+  public double findLinearised(final int[] x, final double[] y, double[] fx, final double[] a,
       final NonLinearFunction func) {
     double ssx = 0;
 
     func.initialise(a);
 
-    if (yFit == null || yFit.length < x.length) {
+    if (fx == null || fx.length < x.length) {
       if (func.canComputeWeights()) {
         final double[] w = new double[1];
         for (int i = 0; i < x.length; i++) {
@@ -275,15 +275,15 @@ public class GradientCalculator {
     } else if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < x.length; i++) {
-        yFit[i] = func.evalw(x[i], w);
-        final double dy = y[i] - yFit[i];
+        fx[i] = func.evalw(x[i], w);
+        final double dy = y[i] - fx[i];
         final double weight = getWeight(w[0]);
         ssx += dy * dy * weight;
       }
     } else {
       for (int i = 0; i < x.length; i++) {
-        yFit[i] = func.eval(x[i]);
-        final double dy = y[i] - yFit[i];
+        fx[i] = func.eval(x[i]);
+        final double dy = y[i] - fx[i];
         ssx += dy * dy;
       }
     }
@@ -498,18 +498,18 @@ public class GradientCalculator {
    *
    * @param n The number of data points
    * @param y The data
-   * @param yFit The function data
+   * @param fx The function data
    * @param a Set of m coefficients
    * @param func Non-linear fitting function
    * @return The sum-of-squares value for the fit
    */
-  public double findLinearised(final int n, final double[] y, double[] yFit, final double[] a,
+  public double findLinearised(final int n, final double[] y, double[] fx, final double[] a,
       final NonLinearFunction func) {
     double ssx = 0;
 
     func.initialise(a);
 
-    if (yFit == null || yFit.length < n) {
+    if (fx == null || fx.length < n) {
       if (func.canComputeWeights()) {
         final double[] w = new double[1];
         for (int i = 0; i < n; i++) {
@@ -526,15 +526,15 @@ public class GradientCalculator {
     } else if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < n; i++) {
-        yFit[i] = func.evalw(i, w);
-        final double dy = y[i] - yFit[i];
+        fx[i] = func.evalw(i, w);
+        final double dy = y[i] - fx[i];
         final double weight = getWeight(w[0]);
         ssx += dy * dy * weight;
       }
     } else {
       for (int i = 0; i < n; i++) {
-        yFit[i] = func.eval(i);
-        final double dy = y[i] - yFit[i];
+        fx[i] = func.eval(i);
+        final double dy = y[i] - fx[i];
         ssx += dy * dy;
       }
     }

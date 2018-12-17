@@ -43,15 +43,15 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    */
   private static class SimpleValueProcedure implements ValueProcedure {
     int i;
-    double[] yFit;
+    double[] fx;
 
-    SimpleValueProcedure(double[] yFit) {
-      this.yFit = yFit;
+    SimpleValueProcedure(double[] fx) {
+      this.fx = fx;
     }
 
     @Override
     public void execute(double value) {
-      yFit[i++] = value;
+      fx[i++] = value;
     }
   }
 
@@ -67,34 +67,34 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * Create a new stepping function solver.
    *
    * @param type the type
-   * @param f the function
+   * @param function the function
    * @throws NullPointerException if the function is null
    */
-  public SteppingFunctionSolver(FunctionSolverType type, Gradient1Function f) {
-    this(type, f, new ToleranceChecker(1e-3, 1e-6), null);
+  public SteppingFunctionSolver(FunctionSolverType type, Gradient1Function function) {
+    this(type, function, new ToleranceChecker(1e-3, 1e-6), null);
   }
 
   /**
    * Create a new stepping function solver.
    *
    * @param type the type
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    * @throws IllegalArgumentException if the bounds are not constructed with the same gradient
    *         function
    */
-  public SteppingFunctionSolver(FunctionSolverType type, Gradient1Function f, ToleranceChecker tc,
-      ParameterBounds bounds) {
-    super(type, f);
+  public SteppingFunctionSolver(FunctionSolverType type, Gradient1Function function,
+      ToleranceChecker tc, ParameterBounds bounds) {
+    super(type, function);
     if (tc == null) {
       throw new NullPointerException("Null tolerance checker");
     }
     this.tc = tc;
     if (bounds == null) {
-      bounds = new ParameterBounds(f);
-    } else if (bounds.getGradientFunction() != f) {
+      bounds = new ParameterBounds(function);
+    } else if (bounds.getGradientFunction() != function) {
       throw new IllegalArgumentException(
           "Bounds must be constructed with the same gradient function");
     }
@@ -105,19 +105,19 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * Compute fit.
    *
    * @param y the y
-   * @param yFit the yFit
+   * @param fx the fx
    * @param a the a
-   * @param aDev the aDev
+   * @param parametersVariance the parametersVariance
    * @return the fit status
    */
   @Override
-  protected FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev) {
+  protected FitStatus computeFit(double[] y, double[] fx, double[] a, double[] parametersVariance) {
     // Lay out a simple iteration loop for a stepping solver.
     // The sub-class must compute the next step.
     // This class handles attenuation of the step.
     // The sub-class determines if the step is accepted or rejected.
 
-    gradientIndices = f.gradientIndices();
+    gradientIndices = function.gradientIndices();
     final double[] step = new double[gradientIndices.length];
     final double[] newA = a.clone();
 
@@ -169,10 +169,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
       if (BitFlagUtils.anySet(status, ToleranceChecker.STATUS_CONVERGED)) {
         log("%s Converged [%s]\n", name, tc.getIterations());
         // A solver may compute both at the same time...
-        if (aDev != null) {
-          computeDeviationsAndValues(aDev, yFit);
-        } else if (yFit != null) {
-          computeValues(yFit);
+        if (parametersVariance != null) {
+          computeDeviationsAndValues(parametersVariance, fx);
+        } else if (fx != null) {
+          computeValues(fx);
         }
         return FitStatus.OK;
       }
@@ -265,15 +265,15 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * Compute the deviations for the parameters a from the last call to
    * {@link #computeFitValue(double[])}. Optionally store the function values.
    *
-   * @param aDev the parameter deviations
-   * @param yFit the y fit (may be null)
+   * @param parametersVariance the parameter deviations
+   * @param fx the y fit (may be null)
    */
-  protected void computeDeviationsAndValues(double[] aDev, double[] yFit) {
+  protected void computeDeviationsAndValues(double[] parametersVariance, double[] fx) {
     // Use a dedicated solver optimised for inverting the matrix diagonal.
     // The last Hessian matrix should be stored in the working alpha.
-    final FisherInformationMatrix m = computeFisherInformationMatrix(yFit);
+    final FisherInformationMatrix m = computeFisherInformationMatrix(fx);
 
-    setDeviations(aDev, m);
+    setDeviations(parametersVariance, m);
   }
 
   /**
@@ -285,10 +285,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * {@link #computeDeviationsAndValues(double[], double[])} directly and provide a dummy
    * implementation of this function as it will not be used, e.g. throw an exception.
    *
-   * @param yFit the y fit (may be null)
+   * @param fx the y fit (may be null)
    * @return the Fisher Information matrix
    */
-  protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] yFit);
+  protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] fx);
 
   /**
    * Compute the function y-values using the y and parameters a from the last call to
@@ -301,17 +301,17 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * <p>The base gradient function is used. If sub-classes wrap the function (e.g. with
    * per-observation weights) then these will be omitted.
    *
-   * @param yFit the y fit values
+   * @param fx the y fit values
    */
-  protected void computeValues(double[] yFit) {
-    final ValueFunction f = (ValueFunction) this.f;
-    f.forEach(new SimpleValueProcedure(yFit));
+  protected void computeValues(double[] fx) {
+    final ValueFunction function = (ValueFunction) this.function;
+    function.forEach(new SimpleValueProcedure(fx));
   }
 
   /** {@inheritDoc} */
   @Override
-  protected boolean computeValue(double[] y, double[] yFit, double[] a) {
-    // If the yFit array is not null then wrap the gradient function.
+  protected boolean computeValue(double[] y, double[] fx, double[] a) {
+    // If the fx array is not null then wrap the gradient function.
     // Compute the value and the wrapper will store the values appropriately.
     // Then reset the gradient function.
 
@@ -323,13 +323,13 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
     // However if the base function is already wrapped then this will occur:
     // Wrapped (+weights) < FunctionStore < Wrapped (+precomputed) < Function
 
-    gradientIndices = f.gradientIndices();
-    if (yFit != null && yFit.length == ((Gradient1Function) f).size()) {
-      final GradientFunction tmp = f;
-      f = new Gradient1FunctionStore((Gradient1Function) f, yFit, null);
+    gradientIndices = function.gradientIndices();
+    if (fx != null && fx.length == ((Gradient1Function) function).size()) {
+      final GradientFunction tmp = function;
+      function = new Gradient1FunctionStore((Gradient1Function) function, fx, null);
       lastY = prepareFunctionValue(y, a);
       value = computeFunctionValue(a);
-      f = tmp;
+      function = tmp;
     } else {
       lastY = prepareFunctionValue(y, a);
       value = computeFunctionValue(a);
@@ -358,7 +358,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   /** {@inheritDoc} */
   @Override
   protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a) {
-    gradientIndices = f.gradientIndices();
+    gradientIndices = function.gradientIndices();
     y = prepareFunctionFisherInformationMatrix(y, a);
     return computeFunctionFisherInformationMatrix(y, a);
   }
@@ -402,12 +402,12 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    *
    * <p>Setting a new function removes the current bounds.
    *
-   * @param f the new gradient function
+   * @param function the new gradient function
    */
   @Override
-  public void setGradientFunction(GradientFunction f) {
-    super.setGradientFunction(f);
-    bounds.setGradientFunction(f);
+  public void setGradientFunction(GradientFunction function) {
+    super.setGradientFunction(function);
+    bounds.setGradientFunction(function);
   }
 
   /** {@inheritDoc} */

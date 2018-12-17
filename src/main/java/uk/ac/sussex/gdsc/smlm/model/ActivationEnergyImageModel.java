@@ -33,72 +33,72 @@ package uk.ac.sussex.gdsc.smlm.model;
  * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
 public class ActivationEnergyImageModel extends ImageModel {
-  private double eAct;
+  private double activationEnergy;
   private SpatialIllumination illumination;
 
   /**
    * Construct a new image model.
    *
-   * @param eAct Average energy for activation
+   * @param activationEnergy Average energy for activation
    * @param illumination The illumination model
-   * @param tOn Average on-state time
-   * @param tOff Average off-state time for the first dark state
-   * @param tOff2 Average off-state time for the second dark state
-   * @param nBlinks Average number of blinks int the first dark state (used for each burst between
+   * @param onTime Average on-state time
+   * @param offTime1 Average off-state time for the first dark state
+   * @param offTime2 Average off-state time for the second dark state
+   * @param blinks1 Average number of blinks int the first dark state (used for each burst between
    *        second dark states)
-   * @param nBlinks2 Average number of blinks into the second dark state
+   * @param blinks2 Average number of blinks into the second dark state
    */
-  public ActivationEnergyImageModel(double eAct, SpatialIllumination illumination, double tOn,
-      double tOff, double tOff2, double nBlinks, double nBlinks2) {
-    super(tOn, tOff, tOff2, nBlinks, nBlinks2);
-    init(eAct, illumination);
+  public ActivationEnergyImageModel(double activationEnergy, SpatialIllumination illumination, double onTime,
+      double offTime1, double offTime2, double blinks1, double blinks2) {
+    super(onTime, offTime1, offTime2, blinks1, blinks2);
+    init(activationEnergy, illumination);
   }
 
-  private void init(double eAct, SpatialIllumination illumination) {
-    checkParameter("eAct", eAct);
+  private void init(double activationEnergy, SpatialIllumination illumination) {
+    checkParameter("activationEnergy", activationEnergy);
     if (illumination == null) {
       throw new IllegalArgumentException("SpatialIllumination is null");
     }
-    this.eAct = eAct;
+    this.activationEnergy = activationEnergy;
     this.illumination = illumination;
   }
 
   /**
+   * Gets the activation energy.
+   *
    * @return the average energy for activation.
    */
   public double getActivationEnergy() {
-    return eAct;
+    return activationEnergy;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double createActivationTime(double[] xyz) {
-    return getActivationTime(xyz, frameLimit);
+    return getimeActivationTime(xyz, frameLimit);
   }
 
-  /** {@inheritDoc} */
   @Override
-  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct) {
-    return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
-        isUseGeometricDistribution(), getRandom());
+  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double timeAct) {
+    return new StandardFluorophoreSequenceModel(id, xyz, timeAct, onTime, offTime1, offTime2,
+        blinks1, blinks2, isUseGeometricDistribution(), getRandom());
   }
 
-  private double getActivationTime(double[] xyz, int frames) {
-    final double activation = getRandom().nextExponential(eAct);
-    double e = 0;
+  private double getimeActivationTime(double[] xyz, int frames) {
+    final double activation = getRandom().nextExponential(activationEnergy);
+    double energy = 0;
     for (int t = 0; t < frames; t++) {
       // Q. Should the molecule be moving during the activation phase?
       final double[] photons = illumination.getPulsedPhotons(xyz, t + 1);
 
-      e += photons[0]; // pulse energy
-      if (e > activation) {
+      energy += photons[0]; // pulse energy
+      if (energy > activation) {
         return t;
       }
 
-      e += photons[1]; // during energy
-      if (e > activation) {
+      energy += photons[1]; // during energy
+      if (energy > activation) {
         // Interpolate
-        return t + 1 - (e - activation) / photons[1];
+        return t + 1 - (energy - activation) / photons[1];
       }
     }
     return frames; // default to the number of frames.

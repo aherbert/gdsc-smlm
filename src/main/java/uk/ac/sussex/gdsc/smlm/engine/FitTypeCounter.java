@@ -140,6 +140,8 @@ public class FitTypeCounter {
   }
 
   /**
+   * Gets the total count.
+   *
    * @return The total count.
    */
   public int getTotal() {

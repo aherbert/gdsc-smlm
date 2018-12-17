@@ -81,7 +81,8 @@ public class ResequenceResults implements PlugIn {
         + "Start = The first frame that contained the data\n"
         + "Block = The number of continuous frames containing data\n"
         + "Skip = The number of continuous frames to ignore before the next data\n \n"
-        + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+        + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore,"
+        + " then repeat.");
 
     ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
     gd.addNumericField("Start", start, 0);

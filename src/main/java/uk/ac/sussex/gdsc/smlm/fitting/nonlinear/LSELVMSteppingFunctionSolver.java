@@ -55,45 +55,45 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @throws NullPointerException if the function is null
    */
-  public LSELVMSteppingFunctionSolver(Gradient1Function f) {
-    super(FunctionSolverType.LSE, f);
+  public LSELVMSteppingFunctionSolver(Gradient1Function function) {
+    super(FunctionSolverType.LSE, function);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum relative error
    * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum absolute error
    * @throws NullPointerException if the function is null
    */
-  public LSELVMSteppingFunctionSolver(Gradient1Function f, double maxRelativeError,
+  public LSELVMSteppingFunctionSolver(Gradient1Function function, double maxRelativeError,
       double maxAbsoluteError) {
-    super(FunctionSolverType.LSE, f, maxRelativeError, maxAbsoluteError);
+    super(FunctionSolverType.LSE, function, maxRelativeError, maxAbsoluteError);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public LSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+  public LSELVMSteppingFunctionSolver(Gradient1Function function, ToleranceChecker tc,
       ParameterBounds bounds) {
-    super(FunctionSolverType.LSE, f, tc, bounds);
+    super(FunctionSolverType.LSE, function, tc, bounds);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
@@ -102,9 +102,9 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
    *        maximum absolute error
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public LSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+  public LSELVMSteppingFunctionSolver(Gradient1Function function, ToleranceChecker tc,
       ParameterBounds bounds, double maxRelativeError, double maxAbsoluteError) {
-    super(FunctionSolverType.LSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
+    super(FunctionSolverType.LSE, function, tc, bounds, maxRelativeError, maxAbsoluteError);
   }
 
   /** {@inheritDoc} */
@@ -116,41 +116,41 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   /** {@inheritDoc} */
   @Override
   protected LVMGradientProcedure createGradientProcedure(double[] y) {
-    return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) f);
+    return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) function);
   }
 
   @Override
-  protected void computeDeviationsAndValues(double[] aDev, double[] yFit) {
-    Gradient1Function f1 = (Gradient1Function) this.f;
+  protected void computeDeviationsAndValues(double[] parametersVariance, double[] fx) {
+    Gradient1Function f1 = (Gradient1Function) this.function;
     // Capture the y-values if necessary
-    if (yFit != null && yFit.length == f1.size()) {
-      f1 = new Gradient2FunctionValueStore(f1, yFit);
+    if (fx != null && fx.length == f1.size()) {
+      f1 = new Gradient2FunctionValueStore(f1, fx);
     }
     final LSQVarianceGradientProcedure p = createVarianceProcedure(f1);
     if (p.variance(null) == LSQVarianceGradientProcedure.STATUS_OK) {
-      setDeviations(aDev, p.variance);
+      setDeviations(parametersVariance, p.variance);
     }
   }
 
-  private LSQVarianceGradientProcedure createVarianceProcedure(Gradient1Function f) {
+  private LSQVarianceGradientProcedure createVarianceProcedure(Gradient1Function function) {
     if (inversionSolver == null) {
       inversionSolver = EJMLLinearSolver.createForInversion(1e-2);
     }
-    return LSQVarianceGradientProcedureFactory.create(f, inversionSolver);
+    return LSQVarianceGradientProcedureFactory.create(function, inversionSolver);
   }
 
   @Override
-  public boolean computeDeviations(double[] y, double[] a, double[] aDev) {
-    final LSQVarianceGradientProcedure p = createVarianceProcedure((Gradient1Function) f);
+  public boolean computeDeviations(double[] y, double[] a, double[] parametersVariance) {
+    final LSQVarianceGradientProcedure p = createVarianceProcedure((Gradient1Function) function);
     if (p.variance(a) == LSQVarianceGradientProcedure.STATUS_OK) {
-      setDeviations(aDev, p.variance);
+      setDeviations(parametersVariance, p.variance);
       return true;
     }
     return false;
   }
 
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit) {
+  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
     // This solver directly implements computation of the deviations
     throw new NotImplementedException();
   }
@@ -181,7 +181,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   // if (gradientProcedure.isNaNGradients())
   // throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
   // return new FisherInformationMatrix(gradientProcedure.getAlphaLinear(),
-  // f.getNumberOfGradients());
+  // function.getNumberOfGradients());
   // }
 
   /** {@inheritDoc} */

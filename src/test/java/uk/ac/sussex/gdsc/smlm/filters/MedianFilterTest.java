@@ -36,8 +36,8 @@ public class MedianFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
@@ -63,8 +63,8 @@ public class MedianFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
@@ -121,10 +121,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -145,7 +147,8 @@ public class MedianFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float rollingMedianNxNInternal [%dx%d] @ %d : %d => blockMedianNxNInternal %d = %.2fx",
+                "float rollingMedianNxNInternal [%dx%d] @ %d : %d => "
+                + "blockMedianNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
             // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
@@ -162,8 +165,8 @@ public class MedianFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
@@ -216,10 +219,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : speedPrimes) {
       for (final int height : speedPrimes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -240,7 +245,8 @@ public class MedianFilterTest extends AbstractFilterTest {
         boxFastTotal += fastTime;
         if (debug) {
           logger.fine(() -> String.format(
-              "float blockMedianNxNInternal [%dx%d] %d => blockMedian3x3Internal %d = %.2fx", width,
+              "float blockMedianNxNInternal [%dx%d] %d => "
+              + "blockMedian3x3Internal %d = %.2fx", width,
               height, time, fastTime, speedUpFactor(time, fastTime)));
           // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
           // faster: [%dx%d] %d > %d", width, height,
@@ -283,10 +289,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : speedPrimes) {
       for (final int height : speedPrimes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -320,8 +328,8 @@ public class MedianFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
@@ -374,10 +382,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : speedPrimes) {
       for (final int height : speedPrimes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -469,10 +479,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -543,10 +555,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -618,10 +632,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -711,10 +727,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : speedPrimes) {
       for (final int height : speedPrimes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -801,10 +819,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : speedPrimes) {
       for (final int height : speedPrimes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -868,10 +888,12 @@ public class MedianFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : speedPrimes) {
       for (final int height : speedPrimes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());

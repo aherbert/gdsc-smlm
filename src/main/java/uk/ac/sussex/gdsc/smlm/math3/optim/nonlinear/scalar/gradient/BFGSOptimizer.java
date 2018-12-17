@@ -180,6 +180,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
   }
 
   /**
+   * Instantiates a new BFGS optimizer.
+   *
    * @param checker Convergence checker.
    */
   public BFGSOptimizer(ConvergenceChecker<PointValuePair> checker) {
@@ -501,6 +503,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
   private static double epsilon = calculateMachineEpsilonDouble();
 
   /**
+   * Calculate machine epsilon for two doubles.
+   *
    * @return The minimum value between two doubles
    * @see <a href=
    *      "http://en.wikipedia.org/wiki/Machine_epsilon#Approximation_using_C.2B.2B">http://en.wikipedia.org/wiki/Machine_epsilon#Approximation_using_C.2B.2B</a>

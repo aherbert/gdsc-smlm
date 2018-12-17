@@ -127,11 +127,11 @@ public class AstigmatismModelManager implements PlugIn {
   private double[] z;
   private double[] x;
   private double[] y;
-  private double[] I;
+  private double[] intensity;
   private double[] sx;
   private double[] sy;
   private PlotWindow xyPlot;
-  private PlotWindow sPlot;
+  private PlotWindow widthPlot;
   private int minz;
   private int maxz;
   private double[] fitZ;
@@ -161,14 +161,6 @@ public class AstigmatismModelManager implements PlugIn {
     final List<String> list = createList(includeNone);
     list.addAll(settings.getAstigmatismModelResourcesMap().keySet());
     return list.toArray(new String[list.size()]);
-  }
-
-  private static List<String> createList(boolean includeNone) {
-    final List<String> list = new TurboList<>();
-    if (includeNone) {
-      list.add("[None]");
-    }
-    return list;
   }
 
   /**
@@ -228,6 +220,14 @@ public class AstigmatismModelManager implements PlugIn {
       }
     }
     return list.toArray(new String[list.size()]);
+  }
+
+  private static List<String> createList(boolean includeNone) {
+    final List<String> list = new TurboList<>();
+    if (includeNone) {
+      list.add("[None]");
+    }
+    return list;
   }
 
   /**
@@ -452,15 +452,15 @@ public class AstigmatismModelManager implements PlugIn {
   private void guessScale() {
     final CalibrationWriter cw = CalibrationWriter.create(pluginSettings.getCalibration());
     // It does not matter if we already have settings, try and update them anyway
-    final Calibration c = imp.getCalibration();
-    double r = guessScale(c.getXUnit(), c.pixelWidth);
-    if (r != 0) {
-      cw.setNmPerPixel(r);
+    final Calibration cal = imp.getCalibration();
+    double scale = guessScale(cal.getXUnit(), cal.pixelWidth);
+    if (scale != 0) {
+      cw.setNmPerPixel(scale);
       pluginSettings.setCalibration(cw.getBuilder());
     }
-    r = guessScale(c.getZUnit(), c.pixelDepth);
-    if (r != 0) {
-      pluginSettings.setNmPerSlice(r);
+    scale = guessScale(cal.getZUnit(), cal.pixelDepth);
+    if (scale != 0) {
+      pluginSettings.setNmPerSlice(scale);
     }
   }
 
@@ -512,13 +512,13 @@ public class AstigmatismModelManager implements PlugIn {
 
   private boolean showConfigurationDialog() {
     fitConfig = config.getFitConfiguration();
-    CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
     gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
     PeakFit.addCameraOptions(gd, fitConfig);
+    CalibrationWriter calibration = fitConfig.getCalibrationWriter();
     gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
     // gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
@@ -706,7 +706,7 @@ public class AstigmatismModelManager implements PlugIn {
     z = new double[results.size()];
     x = new double[z.length];
     y = new double[z.length];
-    I = new double[z.length];
+    intensity = new double[z.length];
     final Counter counter = new Counter();
 
     // We have fit the results so they will be in the preferred units
@@ -717,7 +717,7 @@ public class AstigmatismModelManager implements PlugIn {
         z[i] = peak.getFrame() * umPerSlice;
         x[i] = (peak.getXPosition() - cx);
         y[i] = (peak.getYPosition() - cy);
-        I[i] = peak.getIntensity();
+        intensity[i] = peak.getIntensity();
       }
     });
 
@@ -728,9 +728,9 @@ public class AstigmatismModelManager implements PlugIn {
 
     final WindowOrganiser wo = new WindowOrganiser();
 
-    plot(wo, z, "Intensity (photon)", I, "Intensity", null, null);
+    plot(wo, z, "Intensity (photon)", intensity, "Intensity", null, null);
     xyPlot = plot(wo, z, "Position (px)", x, "X", y, "Y");
-    sPlot = plot(wo, z, "Width (px)", sx, "Sx", sy, "Sy");
+    widthPlot = plot(wo, z, "Width (px)", sx, "Sx", sy, "Sy");
 
     wo.tile();
 
@@ -776,8 +776,8 @@ public class AstigmatismModelManager implements PlugIn {
     maxz = z.length - 1;
 
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-    gd.addMessage(
-        "Select z-range for curve fit.\nChoose a region with a smooth width curve and low XY drift.");
+    gd.addMessage("Select z-range for curve fit.\n"
+        + "Choose a region with a smooth width curve and low XY drift.");
     gd.addSlider("Min_z", minz, maxz, minz);
     gd.addSlider("Max_z", minz, maxz, maxz);
     gd.addMessage("Curve parameter estimation");
@@ -813,7 +813,7 @@ public class AstigmatismModelManager implements PlugIn {
     boolean showRoi = ImageJUtils.isShowGenericDialog();
 
     public ZDialogListener() {
-      sPlot.getImagePlus().killRoi();
+      widthPlot.getImagePlus().killRoi();
       xyPlot.getImagePlus().killRoi();
     }
 
@@ -827,7 +827,7 @@ public class AstigmatismModelManager implements PlugIn {
       pluginSettings.setShowEstimatedCurve(gd.getNextBoolean());
       pluginSettings.setWeightedFit(gd.getNextBoolean());
       if (showRoi && (oldMinz != minz || oldMaxz != maxz)) {
-        addRoi(sPlot);
+        addRoi(widthPlot);
         addRoi(xyPlot);
       }
       return maxz > minz;
@@ -859,7 +859,7 @@ public class AstigmatismModelManager implements PlugIn {
       smoothSx = loess.smooth(fitZ, fitSx);
       smoothSy = loess.smooth(fitZ, fitSy);
 
-      final Plot plot = sPlot.getPlot();
+      final Plot plot = widthPlot.getPlot();
       plot.setColor(Color.RED);
       plot.addPoints(fitZ, smoothSx, Plot.LINE);
       plot.setColor(Color.BLUE);
@@ -984,11 +984,11 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private static double[] getWeights(double[]... y) {
-    int n = 0;
+    int size = 0;
     for (int i = 0; i < y.length; i++) {
-      n += y[i].length;
+      size += y[i].length;
     }
-    final double[] w = new double[n];
+    final double[] w = new double[size];
     for (int i = 0, k = 0; i < y.length; i++) {
       for (int j = 0; j < y[i].length; j++) {
         w[k++] = 1.0 / y[i][j];
@@ -1012,23 +1012,23 @@ public class AstigmatismModelManager implements PlugIn {
    *
    * @param s0 the width in the focal plane
    * @param z the z
-   * @param one_d2 one over the depth of focus squared (1/d^2)
-   * @param A Empirical constant A for the astigmatism of the PSF
-   * @param B Empirical constant B for the astigmatism of the PSF
+   * @param oneOverD2 one over the depth of focus squared (1/d^2)
+   * @param a Empirical constant A for the astigmatism of the PSF
+   * @param b Empirical constant B for the astigmatism of the PSF
    * @return the standard deviation
    */
-  public static double getS(double s0, double z, double one_d2, double A, double B) {
+  public static double getS(double s0, double z, double oneOverD2, double a, double b) {
     final double z2 = z * z;
     final double z3 = z2 * z;
     final double z4 = z2 * z2;
     // Eq. 17a
-    return s0 * Math.sqrt(1 + one_d2 * (z2 + A * z3 + B * z4));
+    return s0 * Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
   }
 
   private class AstigmatismVectorFunction implements MultivariateVectorFunction {
     @Override
-    public double[] value(double[] p) {
-      final double one_d2 = 1.0 / MathUtils.pow2(p[P_D]);
+    public double[] value(double[] point) {
+      final double one_d2 = 1.0 / MathUtils.pow2(point[P_D]);
 
       final double[] value = new double[fitZ.length * 2];
       double z;
@@ -1038,17 +1038,19 @@ public class AstigmatismModelManager implements PlugIn {
 
       for (int i = 0, j = fitZ.length; i < fitZ.length; i++, j++) {
         // X : z -> z-gamma
-        z = fitZ[i] - p[P_Z0] - p[P_GAMMA];
+        z = fitZ[i] - point[P_Z0] - point[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        value[i] = p[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + p[P_BX] * z4));
+        value[i] =
+            point[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
         // Y : z -> z+gamma
-        z = fitZ[i] - p[P_Z0] + p[P_GAMMA];
+        z = fitZ[i] - point[P_Z0] + point[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        value[j] = p[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + p[P_BY] * z4));
+        value[j] =
+            point[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
       }
 
       return value;
@@ -1057,24 +1059,24 @@ public class AstigmatismModelManager implements PlugIn {
 
   private class AstigmatismMatrixFunction implements MultivariateMatrixFunction {
     @Override
-    public double[][] value(double[] p) {
-      final double[] pu = p.clone();
-      final double[] pl = p.clone();
+    public double[][] value(double[] point) {
+      final double[] pu = point.clone();
+      final double[] pl = point.clone();
 
       // Numerical gradients
       final double delta = 1e-6;
       final double twoDelta = 2 * delta;
 
-      for (int i = 0; i < p.length; i++) {
+      for (int i = 0; i < point.length; i++) {
         pu[i] += delta;
         pl[i] -= delta;
       }
 
-      final double one_d2 = 1.0 / MathUtils.pow2(p[P_D]);
+      final double one_d2 = 1.0 / MathUtils.pow2(point[P_D]);
       pu[P_D] = 1.0 / MathUtils.pow2(pu[P_D]);
       pl[P_D] = 1.0 / MathUtils.pow2(pl[P_D]);
 
-      final double[][] value = new double[fitZ.length * 2][p.length];
+      final double[][] value = new double[fitZ.length * 2][point.length];
       double z;
       double z2;
       double z3;
@@ -1085,16 +1087,16 @@ public class AstigmatismModelManager implements PlugIn {
       // X : z -> z-gamma
       for (int i = 0; i < fitZ.length; i++) {
         // X : z -> z-gamma
-        z = fitZ[i] - p[P_Z0] - pu[P_GAMMA];
+        z = fitZ[i] - point[P_Z0] - pu[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v1 = p[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + p[P_BX] * z4));
-        z = fitZ[i] - p[P_Z0] - pl[P_GAMMA];
+        v1 = point[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
+        z = fitZ[i] - point[P_Z0] - pl[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v2 = p[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + p[P_BX] * z4));
+        v2 = point[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
 
         value[i][P_GAMMA] = (v1 - v2) / twoDelta;
 
@@ -1102,39 +1104,39 @@ public class AstigmatismModelManager implements PlugIn {
         value[i][P_Z0] = value[i][P_GAMMA];
 
         // All other gradients have the same z
-        z = fitZ[i] - p[P_Z0] - p[P_GAMMA];
+        z = fitZ[i] - point[P_Z0] - point[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
 
         //@formatter:off
-        value[i][P_D] = p[P_S0X] * (
-            Math.sqrt(1 + pu[P_D] * (z2 + p[P_AX] * z3 + p[P_BX] * z4))-
-            Math.sqrt(1 + pl[P_D] * (z2 + p[P_AX] * z3 + p[P_BX] * z4))) / twoDelta;
+        value[i][P_D] = point[P_S0X] * (
+            Math.sqrt(1 + pu[P_D] * (z2 + point[P_AX] * z3 + point[P_BX] * z4))-
+            Math.sqrt(1 + pl[P_D] * (z2 + point[P_AX] * z3 + point[P_BX] * z4))) / twoDelta;
         // Analytical gradient
-        value[i][P_S0X] = Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + p[P_BX] * z4));
-        value[i][P_AX] = p[P_S0X] * (
-            Math.sqrt(1 + one_d2 * (z2 + pu[P_AX] * z3 + p[P_BX] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + pl[P_AX] * z3 + p[P_BX] * z4))) / twoDelta;
-        value[i][P_BX] = p[P_S0X] * (
-            Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + pu[P_BX] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + pl[P_BX] * z4))) / twoDelta;
+        value[i][P_S0X] = Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
+        value[i][P_AX] = point[P_S0X] * (
+            Math.sqrt(1 + one_d2 * (z2 + pu[P_AX] * z3 + point[P_BX] * z4))-
+            Math.sqrt(1 + one_d2 * (z2 + pl[P_AX] * z3 + point[P_BX] * z4))) / twoDelta;
+        value[i][P_BX] = point[P_S0X] * (
+            Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + pu[P_BX] * z4))-
+            Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + pl[P_BX] * z4))) / twoDelta;
         //@formatter:on
       }
 
       // Y : z -> z+gamma
       for (int i = 0, j = fitZ.length; i < fitZ.length; i++, j++) {
         // Y : z -> z+gamma
-        z = fitZ[i] - p[P_Z0] + pu[P_GAMMA];
+        z = fitZ[i] - point[P_Z0] + pu[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v1 = p[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + p[P_BY] * z4));
-        z = fitZ[i] - p[P_Z0] + pl[P_GAMMA];
+        v1 = point[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
+        z = fitZ[i] - point[P_Z0] + pl[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v2 = p[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + p[P_BY] * z4));
+        v2 = point[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
 
         value[j][P_GAMMA] = (v1 - v2) / twoDelta;
 
@@ -1142,23 +1144,23 @@ public class AstigmatismModelManager implements PlugIn {
         value[j][P_Z0] = value[j][P_GAMMA];
 
         // All other gradients have the same z
-        z = fitZ[i] - p[P_Z0] + p[P_GAMMA];
+        z = fitZ[i] - point[P_Z0] + point[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
 
         //@formatter:off
-        value[j][P_D] = p[P_S0Y] * (
-            Math.sqrt(1 + pu[P_D] * (z2 + p[P_AY] * z3 + p[P_BY] * z4))-
-            Math.sqrt(1 + pl[P_D] * (z2 + p[P_AY] * z3 + p[P_BY] * z4))) / twoDelta;
+        value[j][P_D] = point[P_S0Y] * (
+            Math.sqrt(1 + pu[P_D] * (z2 + point[P_AY] * z3 + point[P_BY] * z4))-
+            Math.sqrt(1 + pl[P_D] * (z2 + point[P_AY] * z3 + point[P_BY] * z4))) / twoDelta;
         // Analytical gradient
-        value[j][P_S0Y] = Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + p[P_BY] * z4));
-        value[j][P_AY] = p[P_S0Y] * (
-            Math.sqrt(1 + one_d2 * (z2 + pu[P_AY] * z3 + p[P_BY] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + pl[P_AY] * z3 + p[P_BY] * z4))) / twoDelta;
-        value[j][P_BY] = p[P_S0Y] * (
-            Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + pu[P_BY] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + pl[P_BY] * z4))) / twoDelta;
+        value[j][P_S0Y] = Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
+        value[j][P_AY] = point[P_S0Y] * (
+            Math.sqrt(1 + one_d2 * (z2 + pu[P_AY] * z3 + point[P_BY] * z4))-
+            Math.sqrt(1 + one_d2 * (z2 + pl[P_AY] * z3 + point[P_BY] * z4))) / twoDelta;
+        value[j][P_BY] = point[P_S0Y] * (
+            Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + pu[P_BY] * z4))-
+            Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + pl[P_BY] * z4))) / twoDelta;
         //@formatter:on
       }
 
@@ -1206,8 +1208,8 @@ public class AstigmatismModelManager implements PlugIn {
     }
 
     // Just redraw the plot
-    sPlot = plot(null, z, "Width (px)", sx, "Sx", sy, "Sy");
-    final Plot plot = sPlot.getPlot();
+    widthPlot = plot(null, z, "Width (px)", sx, "Sx", sy, "Sy");
+    final Plot plot = widthPlot.getPlot();
     plot.setColor(Color.RED);
     plot.addPoints(z, sx1, Plot.LINE);
     plot.setColor(Color.BLUE);
@@ -1256,8 +1258,8 @@ public class AstigmatismModelManager implements PlugIn {
     gd.addMessage("Save the model");
     gd.addCheckbox("Save_model", pluginSettings.getSaveModel());
     gd.addStringField("Model_name", pluginSettings.getModelName());
-    gd.addMessage(
-        "Save the model width to this plugin's settings, e.g. to use\non another selected PSF when creating a model.");
+    gd.addMessage("Save the model width to this plugin's settings, e.g. to use\n"
+        + "on another selected PSF when creating a model.");
     gd.addCheckbox("Save_fit_width", pluginSettings.getSaveFitWidth());
     // gd.setCancelLabel(" No ");
     gd.showDialog();
@@ -1514,14 +1516,17 @@ public class AstigmatismModelManager implements PlugIn {
     GaussianPSFModel psf;
     Plot plot;
 
-    public ModelRenderer(String name, AstigmatismModel model, HoltzerAstigmatismZModel m,
+    private double lastZ = -1;
+    private int lastCalibratedImage = -1;
+
+    public ModelRenderer(String name, AstigmatismModel model, HoltzerAstigmatismZModel zmodel,
         double range, int width, Plot plot) {
       this.name = name;
       this.model = model;
       this.range = range;
       this.width = width;
       cx = width * 0.5;
-      psf = new GaussianPSFModel(m);
+      psf = new GaussianPSFModel(zmodel);
       this.plot = plot;
     }
 
@@ -1562,17 +1567,14 @@ public class AstigmatismModelManager implements PlugIn {
       return true;
     }
 
-    private double _z = -1;
-    private int _calibratedImage = -1;
-
     private void draw() {
-      _z = z;
+      lastZ = z;
       final int calibratedImage = getCalibratedImage();
       final float[] data = new float[width * width];
-      psf.create3D(data, width, width, 1, cx, cx, _z, false);
+      psf.create3D(data, width, width, 1, cx, cx, lastZ, false);
       final ImagePlus imp =
           ImageJUtils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
-      if (_calibratedImage != calibratedImage) {
+      if (lastCalibratedImage != calibratedImage) {
         if (calibratedImage == 1) {
           final Calibration cal = new Calibration();
           cal.setXUnit("um");
@@ -1581,12 +1583,12 @@ public class AstigmatismModelManager implements PlugIn {
         } else {
           imp.setCalibration(null);
         }
-        _calibratedImage = calibratedImage;
+        lastCalibratedImage = calibratedImage;
       }
       imp.resetDisplayRange();
 
       // Show the z position using an overlay
-      final double x = plot.scaleXtoPxl(_z);
+      final double x = plot.scaleXtoPxl(lastZ);
       final double[] limits = plot.getLimits();
       final int y1 = (int) plot.scaleYtoPxl(limits[3]);
       final int y2 = (int) plot.scaleYtoPxl(limits[2]);
@@ -1603,7 +1605,7 @@ public class AstigmatismModelManager implements PlugIn {
           public void run() {
             try {
               // Continue while the parameter is changing
-              while (_z != z || _calibratedImage != getCalibratedImage()) {
+              while (lastZ != z || lastCalibratedImage != getCalibratedImage()) {
                 draw();
               }
             } finally {
@@ -1625,13 +1627,13 @@ public class AstigmatismModelManager implements PlugIn {
    *
    * @param model the model
    * @param zDistanceUnit the desired input z distance unit
-   * @param sDistanceUnit the desired output s distance unit
+   * @param widthDistanceUnit the desired output width distance unit
    * @return the astigmatism model
    * @throws ConversionException if the units cannot be converted
    */
   public static AstigmatismModel convert(AstigmatismModel model, DistanceUnit zDistanceUnit,
-      DistanceUnit sDistanceUnit) throws ConversionException {
-    return PSFProtosHelper.convert(model, zDistanceUnit, sDistanceUnit);
+      DistanceUnit widthDistanceUnit) throws ConversionException {
+    return PSFProtosHelper.convert(model, zDistanceUnit, widthDistanceUnit);
   }
 
   private void deleteModel() {
@@ -1661,13 +1663,11 @@ public class AstigmatismModelManager implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listAstigmatismModels(false);
     gd.addMessage("Invert the z-orientation of a model.\n \n" + TextUtils.wrap(
-        //@formatter:off
-        "Note that a positive gamma puts the focal plane for the X-dimension " +
-        "above the z-centre (positive Z) and the focal "+
-        "plane for the Y-dimension below the z-centre (negative Z). If gamma " +
-        "is negative then the orientation of the focal "+
-        "planes of X and Y are reversed.", 80));
-        //@formatter:on
+        "Note that a positive gamma puts the focal plane for the X-dimension "
+            + "above the z-centre (positive Z) and the focal "
+            + "plane for the Y-dimension below the z-centre (negative Z). If gamma "
+            + "is negative then the orientation of the focal planes of X and Y are reversed.",
+        80));
 
     gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();

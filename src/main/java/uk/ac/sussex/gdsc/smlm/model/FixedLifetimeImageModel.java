@@ -35,32 +35,32 @@ public class FixedLifetimeImageModel extends ImageModel {
   /**
    * Construct a new image model.
    *
-   * @param tOn Fixed on-state time
-   * @param tOff Dark time between successive fluorophores
+   * @param onTime Fixed on-state time
+   * @param offTime1 Dark time between successive fluorophores
    */
-  public FixedLifetimeImageModel(double tOn, double tOff) {
-    super(tOn, tOff, 0, 0, 0);
+  public FixedLifetimeImageModel(double onTime, double offTime1) {
+    super(onTime, offTime1, 0, 0, 0);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double createActivationTime(double[] xyz) {
-    final double tAct = next + getRandom().getRandomGenerator().nextDouble();
-    // Ensure at least tOff full dark frames between lifetimes:
-    // Frames: | | | |
-    // ------|
-    // end |--------
-    // start
-    // tOff
-    final int unit = (int) Math.ceil(tOff);
-    final int endT = (int) Math.ceil((tAct + tOn) / unit);
+    final double timeAct = next + getRandom().getRandomGenerator().nextDouble();
+    // @formatter:off
+    // Ensure at least offTime1 full dark frames between lifetimes:
+    // Frames:    |      |      |      |
+    //         ------|
+    //              end             |--------
+    //                              start
+    //                   offTime1
+    // @formatter:on
+    final int unit = (int) Math.ceil(offTime1);
+    final int endT = (int) Math.ceil((timeAct + onTime) / unit);
     next = (endT + 1) * unit;
-    return tAct;
+    return timeAct;
   }
 
-  /** {@inheritDoc} */
   @Override
-  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct) {
-    return new SimpleFluorophoreSequenceModel(id, xyz, tAct, tOn);
+  protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double timeAct) {
+    return new SimpleFluorophoreSequenceModel(id, xyz, timeAct, onTime);
   }
 }

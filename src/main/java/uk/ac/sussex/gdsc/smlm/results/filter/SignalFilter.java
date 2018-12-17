@@ -36,7 +36,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class SignalFilter extends DirectFilter implements IMultiFilter {
   /**
    * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
-   */  public static final double DEFAULT_INCREMENT = 5;
+   */
+  public static final double DEFAULT_INCREMENT = 5;
   /**
    * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
    */
@@ -83,7 +84,8 @@ public class SignalFilter extends DirectFilter implements IMultiFilter {
   /** {@inheritDoc} */
   @Override
   public String getDescription() {
-    return "Filter results using a lower signal threshold. The threshold is applied in photons (i.e. the signal is divided by the calibrated gain).";
+    return "Filter results using a lower signal threshold. The threshold is applied in "
+        + "photons (i.e. the signal is divided by the calibrated gain).";
   }
 
   /** {@inheritDoc} */

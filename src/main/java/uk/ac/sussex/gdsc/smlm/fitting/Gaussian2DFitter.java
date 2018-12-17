@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import org.apache.commons.math3.util.FastMath;
@@ -63,46 +64,43 @@ public class Gaussian2DFitter {
     computeResiduals = fitConfiguration.isComputeResiduals();
   }
 
-  private static double half_max_position(double[] data, int index, int[] point, int[] dim,
-      int dimension, int[] cumul_region, int dirn, double background) {
-    int i;
-    int i_start;
-    int i_end;
-    int i_step;
-    final double v = data[index];
-    final double v_half = 0.5f * (v + background);
-    double v_prev = v;
-    double v_this;
-    int jump;
+  private static double halfMaxPosition(double[] data, int index, int[] point, int[] dimemnsions,
+      int dimension, int[] cumulRegion, int direction, double background) {
+    double value = data[index];
+    final double half = 0.5 * (value + background);
 
-    if (dirn == 1) {
-      i_start = point[dimension] + 1;
-      i_end = dim[dimension];
-      i_step = 1;
+    int istart;
+    int iend;
+    int istep;
+    if (direction == 1) {
+      istart = point[dimension] + 1;
+      iend = dimemnsions[dimension];
+      istep = 1;
     } else {
-      i_start = point[dimension] - 1;
-      i_end = -1;
-      i_step = -1;
+      istart = point[dimension] - 1;
+      iend = -1;
+      istep = -1;
     }
 
-    jump = i_step * cumul_region[dimension];
+    final int jump = istep * cumulRegion[dimension];
 
-    for (i = i_start; i != i_end; i += i_step) {
+    for (int i = istart; i != iend; i += istep) {
       index += jump;
-      v_this = data[index];
+      double previous = value;
+      value = data[index];
 
-      if (v_this < v_half) {
-        return i - i_step * (v_half - v_this) / (v_prev - v_this);
+      if (value < half) {
+        return i - istep * (half - value) / (previous - value);
       }
 
-      v_prev = v_this;
+      previous = value;
     }
 
     // Not reached the half-max point. Return the dimension limit.
-    if (dirn == 1) {
-      return dim[dimension];
+    if (direction == 1) {
+      return dimemnsions[dimension];
     }
-    return 0f;
+    return 0;
   }
 
   /**
@@ -113,98 +111,14 @@ public class Gaussian2DFitter {
    * @param point the point
    * @param dim the maximum size of each dimension
    * @param dimension the dimension (0 or 1)
-   * @param cumul_region the cumulative region sizes (1, dim[0], dim[0] * dim[1])
+   * @param cumulRegion the cumulative region sizes (1, dim[0], dim[0] * dim[1])
    * @param background the background
    * @return the FWHM
    */
   public static double half_max_linewidth(double[] data, int index, int[] point, int[] dim,
-      int dimension, int[] cumul_region, double background) {
-    double linewidth;
-    double a;
-    double b;
-
-    a = half_max_position(data, index, point, dim, dimension, cumul_region, 1, background);
-    b = half_max_position(data, index, point, dim, dimension, cumul_region, -1, background);
-
-    linewidth = a - b;
-
-    return linewidth;
-  }
-
-  /**
-   * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
-   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
-   *
-   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
-   *
-   * <p>Adapted from the CCPN fit_peaks routine for Python.
-   *
-   * @param data The data to fit
-   * @param maxx The data size in the x dimension
-   * @param maxy The data size in the y dimension
-   * @param peaks The index of the peaks
-   * @return The fit result
-   */
-  public FitResult fit(final double[] data, final int maxx, final int maxy, final int[] peaks) {
-    return fit(data, maxx, maxy, peaks, null);
-  }
-
-  /**
-   * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
-   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
-   *
-   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
-   *
-   * @param data The data to fit
-   * @param maxx The data size in the x dimension
-   * @param maxy The data size in the y dimension
-   * @param peaks The index of the peaks (must be within the data bounds if the heights are null)
-   * @param heights An initial estimate of the peak heights (can be null)
-   * @return The fit result
-   */
-  public FitResult fit(final double[] data, final int maxx, final int maxy, final int[] peaks,
-      double[] heights) {
-    final int npeaks = peaks.length;
-
-    final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
-
-    final double[] params = new double[1 + paramsPerPeak * npeaks];
-
-    // Get peak heights (if multiple peaks)
-    if (npeaks > 1 && (heights == null || heights.length != peaks.length)) {
-      heights = new double[peaks.length];
-      for (int i = 0; i < peaks.length; i++) {
-        heights[i] = data[peaks[i]];
-      }
-    }
-
-    final double background = getBackground(data, maxx, maxy, npeaks);
-
-    // Set the initial parameters
-    params[Gaussian2DFunction.BACKGROUND] = background;
-
-    final boolean[] amplitudeEstimate = new boolean[npeaks];
-    if (npeaks == 1) {
-      double sum = 0;
-      final int size = maxx * maxy;
-      for (int i = size; i-- > 0;) {
-        sum += data[i];
-      }
-      params[Gaussian2DFunction.SIGNAL] = sum - background * size;
-      params[Gaussian2DFunction.X_POSITION] = peaks[0] % maxx;
-      params[Gaussian2DFunction.Y_POSITION] = peaks[0] / maxx;
-    } else {
-      for (int i = 0, j = 0; i < peaks.length; i++, j += paramsPerPeak) {
-        final int index = peaks[i];
-        params[j + Gaussian2DFunction.SIGNAL] = heights[i] - background;
-        params[j + Gaussian2DFunction.X_POSITION] = index % maxx;
-        params[j + Gaussian2DFunction.Y_POSITION] = index / maxx;
-        amplitudeEstimate[i] = true;
-      }
-    }
-
-    // We have estimated the background already
-    return fit(data, maxx, maxy, npeaks, params, amplitudeEstimate, true);
+      int dimension, int[] cumulRegion, double background) {
+    return halfMaxPosition(data, index, point, dim, dimension, cumulRegion, 1, background)
+        - halfMaxPosition(data, index, point, dim, dimension, cumulRegion, -1, background);
   }
 
   /**
@@ -286,13 +200,84 @@ public class Gaussian2DFitter {
     return background;
   }
 
-  @SuppressWarnings("unused")
-  private static int getIndex(int x, int y, int maxx) {
-    return y * maxx + x;
+  private static double min(double v1, double v2) {
+    return (v1 < v2) ? v1 : v2;
   }
 
-  private static double min(double a, double b) {
-    return (a < b) ? a : b;
+  /**
+   * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
+   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
+   *
+   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
+   *
+   * <p>Adapted from the CCPN fit_peaks routine for Python.
+   *
+   * @param data The data to fit
+   * @param maxx The data size in the x dimension
+   * @param maxy The data size in the y dimension
+   * @param peaks The index of the peaks
+   * @return The fit result
+   */
+  public FitResult fit(final double[] data, final int maxx, final int maxy, final int[] peaks) {
+    return fit(data, maxx, maxy, peaks, null);
+  }
+
+  /**
+   * Accepts a single array containing 2-dimensional data and a list of the peaks to fit. Data
+   * should be packed in descending dimension order, e.g. Y,X : Index for [y,z] = MaxX*y + x.
+   *
+   * <p>Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
+   *
+   * @param data The data to fit
+   * @param maxx The data size in the x dimension
+   * @param maxy The data size in the y dimension
+   * @param peaks The index of the peaks (must be within the data bounds if the heights are null)
+   * @param heights An initial estimate of the peak heights (can be null)
+   * @return The fit result
+   */
+  public FitResult fit(final double[] data, final int maxx, final int maxy, final int[] peaks,
+      double[] heights) {
+    final int npeaks = peaks.length;
+
+    final int paramsPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
+
+    final double[] params = new double[1 + paramsPerPeak * npeaks];
+
+    // Get peak heights (if multiple peaks)
+    if (npeaks > 1 && (heights == null || heights.length != peaks.length)) {
+      heights = new double[peaks.length];
+      for (int i = 0; i < peaks.length; i++) {
+        heights[i] = data[peaks[i]];
+      }
+    }
+
+    final double background = getBackground(data, maxx, maxy, npeaks);
+
+    // Set the initial parameters
+    params[Gaussian2DFunction.BACKGROUND] = background;
+
+    final boolean[] amplitudeEstimate = new boolean[npeaks];
+    if (npeaks == 1) {
+      double sum = 0;
+      final int size = maxx * maxy;
+      for (int i = size; i-- > 0;) {
+        sum += data[i];
+      }
+      params[Gaussian2DFunction.SIGNAL] = sum - background * size;
+      params[Gaussian2DFunction.X_POSITION] = peaks[0] % maxx;
+      params[Gaussian2DFunction.Y_POSITION] = peaks[0] / maxx;
+    } else {
+      for (int i = 0, j = 0; i < peaks.length; i++, j += paramsPerPeak) {
+        final int index = peaks[i];
+        params[j + Gaussian2DFunction.SIGNAL] = heights[i] - background;
+        params[j + Gaussian2DFunction.X_POSITION] = index % maxx;
+        params[j + Gaussian2DFunction.Y_POSITION] = index / maxx;
+        amplitudeEstimate[i] = true;
+      }
+    }
+
+    // We have estimated the background already
+    return fit(data, maxx, maxy, npeaks, params, amplitudeEstimate, true);
   }
 
   /**
@@ -489,7 +474,8 @@ public class Gaussian2DFitter {
     // Bounds are more restrictive than constraints
     if (solver.isBounded()) {
       // Input configured bounds
-      setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, this.lower, this.upper);
+      setParameterBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, this.lower,
+          this.upper);
     } else if (solver.isConstrained()) {
       setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
     }
@@ -578,7 +564,7 @@ public class Gaussian2DFitter {
       final int paramsPerPeak, double background, double[] initialParams) {
     final int[] dim = new int[] {maxx, maxy};
     final int[] position = new int[2];
-    final int[] cumul_region = new int[] {1, maxx, ySize};
+    final int[] cumulRegion = new int[] {1, maxx, ySize};
     for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak) {
       // ----
       // Check all input parameters and estimate them if necessary
@@ -621,7 +607,7 @@ public class Gaussian2DFitter {
               return false;
             }
 
-            sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
+            sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumulRegion, background));
           }
         }
 
@@ -635,8 +621,7 @@ public class Gaussian2DFitter {
                 return false;
               }
 
-              sy = fwhm2sd(
-                  half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
+              sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumulRegion, background));
             }
           } else {
             sy = sx;
@@ -743,34 +728,34 @@ public class Gaussian2DFitter {
    * @param lower2 the input lower bounds
    * @param upper2 the input upper bounds
    */
-  protected void setBounds(final int maxx, final int maxy, final int npeaks, final double[] params,
-      final double[] y, final int ySize, final int paramsPerPeak, double[] lower2,
-      double[] upper2) {
+  protected void setParameterBounds(final int maxx, final int maxy, final int npeaks,
+      final double[] params, final double[] y, final int ySize, final int paramsPerPeak,
+      double[] lower2, double[] upper2) {
     // Create appropriate bounds for the parameters
     final double[] lower = new double[params.length];
     final double[] upper = new double[lower.length];
-    double yMax = y[0];
-    double yMin = y[0];
+    double ymax = y[0];
+    double ymin = y[0];
     for (int i = 1; i < ySize; i++) {
-      if (yMax < y[i]) {
-        yMax = y[i];
-      } else if (yMin > y[i]) {
-        yMin = y[i];
+      if (ymax < y[i]) {
+        ymax = y[i];
+      } else if (ymin > y[i]) {
+        ymin = y[i];
       }
     }
     if (fitConfiguration.isBackgroundFitting()) {
-      if (yMax > params[Gaussian2DFunction.BACKGROUND]) {
-        upper[Gaussian2DFunction.BACKGROUND] = yMax;
+      if (ymax > params[Gaussian2DFunction.BACKGROUND]) {
+        upper[Gaussian2DFunction.BACKGROUND] = ymax;
       } else {
         upper[Gaussian2DFunction.BACKGROUND] =
-            params[Gaussian2DFunction.BACKGROUND] + (params[Gaussian2DFunction.BACKGROUND] - yMax);
+            params[Gaussian2DFunction.BACKGROUND] + (params[Gaussian2DFunction.BACKGROUND] - ymax);
       }
 
-      if (yMin < params[Gaussian2DFunction.BACKGROUND]) {
-        lower[Gaussian2DFunction.BACKGROUND] = yMin;
+      if (ymin < params[Gaussian2DFunction.BACKGROUND]) {
+        lower[Gaussian2DFunction.BACKGROUND] = ymin;
       } else {
         lower[Gaussian2DFunction.BACKGROUND] =
-            params[Gaussian2DFunction.BACKGROUND] - (yMin - params[Gaussian2DFunction.BACKGROUND]);
+            params[Gaussian2DFunction.BACKGROUND] - (ymin - params[Gaussian2DFunction.BACKGROUND]);
       }
 
       if (lower[Gaussian2DFunction.BACKGROUND] < 0) {
@@ -808,9 +793,9 @@ public class Gaussian2DFitter {
         sum += y[i];
       }
       // Increase sum by 2 to allow for error
-      upper[Gaussian2DFunction.SIGNAL] = 2 * sum - yMin * ySize;
+      upper[Gaussian2DFunction.SIGNAL] = 2 * sum - ymin * ySize;
     } else {
-      final double height = yMax - yMin;
+      final double height = ymax - ymin;
       // Signal = height * 2 * pi * sd0 * sd1
       // Allow a maximum using the width factor that defines the bounds on the width.
       // Increase the height by 2 to allow for error.
@@ -981,17 +966,17 @@ public class Gaussian2DFitter {
     // If the bias is subtracted then we may have negative data and a background estimate that is
     // negative
     if (params[Gaussian2DFunction.BACKGROUND] < 0) {
-      double yMin = 0;
+      double ymin = 0;
       for (int i = 0; i < ySize; i++) {
-        if (yMin > y[i]) {
-          yMin = y[i];
+        if (ymin > y[i]) {
+          ymin = y[i];
         }
       }
-      if (yMin < params[Gaussian2DFunction.BACKGROUND]) {
-        lower[Gaussian2DFunction.BACKGROUND] = yMin;
+      if (ymin < params[Gaussian2DFunction.BACKGROUND]) {
+        lower[Gaussian2DFunction.BACKGROUND] = ymin;
       } else {
         lower[Gaussian2DFunction.BACKGROUND] =
-            params[Gaussian2DFunction.BACKGROUND] - (yMin - params[Gaussian2DFunction.BACKGROUND]);
+            params[Gaussian2DFunction.BACKGROUND] - (ymin - params[Gaussian2DFunction.BACKGROUND]);
       }
     }
 
@@ -1005,12 +990,12 @@ public class Gaussian2DFitter {
    * Swap the axes so that the major axis is the X axis. Correct the fit angle to lie within the
    * 0-180 degree domain from the major-axis.
    *
-   * @param i The angle position within the parameter array
+   * @param index The angle position within the parameter array
    * @param params the params
    * @param paramsDev the params deveations
    */
-  protected void correctAngle(final int i, final double[] params, final double[] paramsDev) {
-    double angle = params[i];
+  protected void correctAngle(final int index, final double[] params, final double[] paramsDev) {
+    double angle = params[index];
 
     final double twicePI = 2 * Math.PI;
     double fixed = (angle + Math.PI) % twicePI;
@@ -1026,16 +1011,16 @@ public class Gaussian2DFitter {
     // }
 
     // Commented out as this interferes with the PSF Estimator
-    final int ix = i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE;
-    final int iy = i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE;
+    final int ix = index + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE;
+    final int iy = index + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE;
     final double xWidth = params[ix];
     final double yWidth = params[iy];
     // The fit will compute the angle from the major axis.
     // Standardise so it is always from the X-axis
     if (yWidth > xWidth) {
-      swap(ix, iy, params);
+      SimpleArrayUtils.swap(params, ix, iy);
       if (paramsDev != null) {
-        swap(ix, iy, paramsDev);
+        SimpleArrayUtils.swap(paramsDev, ix, iy);
       }
 
       // Rotate 90 degrees
@@ -1048,13 +1033,7 @@ public class Gaussian2DFitter {
 
     // Return in 0 - 180 degrees domain since the Gaussian has 2-fold symmetry,
     // i.e. angle -10 == 170
-    params[i] = (angle < 0) ? angle + Math.PI : angle;
-  }
-
-  private static void swap(final int i, final int j, final double[] params) {
-    final double tmp = params[i];
-    params[i] = params[j];
-    params[j] = tmp;
+    params[index] = (angle < 0) ? angle + Math.PI : angle;
   }
 
   /**
@@ -1078,20 +1057,26 @@ public class Gaussian2DFitter {
   }
 
   /**
-   * @return the residuals from the last successful fit. If fitting failed then this is null.
+   * Gets the residuals from the last successful fit. If fitting failed then this is null.
+   *
+   * @return the residuals
    */
   public double[] getResiduals() {
     return residuals;
   }
 
   /**
-   * @return the computeResiduals.
+   * Checks if computing the residuals.
+   *
+   * @return true, if computing the residuals
    */
   public boolean isComputeResiduals() {
     return computeResiduals;
   }
 
   /**
+   * Sets whether to compute the residuals.
+   *
    * @param computeResiduals Set to true to compute the residuals
    */
   public void setComputeResiduals(final boolean computeResiduals) {
@@ -1142,6 +1127,8 @@ public class Gaussian2DFitter {
   }
 
   /**
+   * Gets the optimised function value for the last fit.
+   *
    * @return the optimised function value for the last fit.
    */
   public double getValue() {

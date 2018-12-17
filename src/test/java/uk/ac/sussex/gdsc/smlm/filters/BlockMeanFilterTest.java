@@ -356,11 +356,13 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final float boxSize : boxSizes) {
       final int iter = (boxSize == 1) ? ITER3 : ITER;
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           dataSet = getSpeedData(seed, iter);
@@ -430,11 +432,13 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final float boxSize : boxSizes) {
       final int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           dataSet = getSpeedData(seed, iter);

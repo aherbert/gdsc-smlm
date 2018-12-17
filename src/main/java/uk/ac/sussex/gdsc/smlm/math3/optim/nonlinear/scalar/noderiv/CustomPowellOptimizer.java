@@ -110,6 +110,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     private final double[] step;
 
     /**
+     * Instantiates a new basis step.
+     *
      * @param step Initial step for the bracket search.
      */
     public BasisStep(double[] step) {
@@ -531,8 +533,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
   }
 
   /**
-   * @throws MathUnsupportedOperationException if bounds were passed to the
-   *         {@link #optimize(OptimizationData[]) optimize} method and the lower is above the upper.
+   * Check the parameters.
+   *
    * @throws MathUnsupportedOperationException if the basis step passed to the
    *         {@link #optimize(OptimizationData[]) optimize} method is zero for any dimension
    */

@@ -35,7 +35,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
  */
 public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction {
   /** The number of peaks. */
-  protected final int npeaks;
+  protected final int numberOfPeaks;
 
   /** The gradient indices. */
   protected final int[] gradientIndices;
@@ -43,22 +43,22 @@ public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction {
   /**
    * Instantiates a new multi peak gaussian 2D function.
    *
-   * @param npeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    */
-  public MultiPeakGaussian2DFunction(int npeaks, int maxx, int maxy) {
+  public MultiPeakGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
     super(maxx, maxy);
-    this.npeaks = npeaks;
-    this.gradientIndices = createGradientIndices(npeaks);
+    this.numberOfPeaks = numberOfPeaks;
+    this.gradientIndices = createGradientIndices(numberOfPeaks);
   }
 
   /** {@inheritDoc} */
   @Override
   public int getNPeaks() {
-    return npeaks;
+    return numberOfPeaks;
   }
 
   /** {@inheritDoc} */

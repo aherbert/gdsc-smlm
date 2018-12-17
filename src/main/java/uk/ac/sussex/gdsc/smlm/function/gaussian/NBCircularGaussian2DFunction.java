@@ -37,20 +37,20 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction {
   /**
    * Constructor.
    *
-   * @param npeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    */
-  public NBCircularGaussian2DFunction(int npeaks, int maxx, int maxy) {
-    super(npeaks, maxx, maxy);
+  public NBCircularGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
+    super(numberOfPeaks, maxx, maxy);
   }
 
   /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
-    return new NBCircularGaussian2DFunction(npeaks, maxx, maxy);
+    return new NBCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
   /**
@@ -71,7 +71,7 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction {
     final int x1 = x / maxx;
     final int x0 = x % maxx;
 
-    for (int j = 0; j < npeaks; j++) {
+    for (int j = 0; j < numberOfPeaks; j++) {
       y += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
       apos += PARAMETERS_PER_PEAK;
       dydapos += GRADIENT_PARAMETERS_PER_PEAK;

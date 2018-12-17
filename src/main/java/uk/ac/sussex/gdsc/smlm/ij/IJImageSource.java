@@ -126,19 +126,17 @@ public class IJImageSource extends ImageSource {
    */
   public static int[] getOrigin(ImagePlus imp) {
     final Calibration cal = imp.getLocalCalibration();
-    if (cal != null) {
-      if (cal.xOrigin != 0 || cal.yOrigin != 0) {
-        // Origin must be in integer pixels
-        final double ox = Math.round(cal.xOrigin);
-        final double oy = Math.round(cal.yOrigin);
-        if (ox != cal.xOrigin || oy != cal.yOrigin) {
-          throw new IllegalArgumentException("Origin must be in integer pixels");
-        }
-        // ImageJ has a negative origin to indicate 0,0 of the image
-        // is greater than the actual origin. The ImageSource convention is
-        // to have the origin represent the shift of the 0,0 pixel from the origin.
-        return new int[] {(int) -ox, (int) -oy};
+    if (cal != null && (cal.xOrigin != 0 || cal.yOrigin != 0)) {
+      // Origin must be in integer pixels
+      final double ox = Math.round(cal.xOrigin);
+      final double oy = Math.round(cal.yOrigin);
+      if (ox != cal.xOrigin || oy != cal.yOrigin) {
+        throw new IllegalArgumentException("Origin must be in integer pixels");
       }
+      // ImageJ has a negative origin to indicate 0,0 of the image
+      // is greater than the actual origin. The ImageSource convention is
+      // to have the origin represent the shift of the 0,0 pixel from the origin.
+      return new int[] {(int) -ox, (int) -oy};
     }
     return new int[2];
   }
@@ -240,7 +238,9 @@ public class IJImageSource extends ImageSource {
   }
 
   /**
-   * @return True is the image array or any part of it is null.
+   * Check if the image array or any part of it is null.
+   *
+   * @return True if the image array or any part of it is null.
    */
   private boolean nullImageArray() {
     if (imageArray == null) {
@@ -281,11 +281,10 @@ public class IJImageSource extends ImageSource {
       if (frame > 0 && frame <= imageArray.length) {
         return imageArray[frame - 1];
       }
-    } else if (imageStack != null) {
-      // This is a virtual stack so access the image processor through the virtual stack object
-      if (frame > 0 && frame <= imageStack.getSize()) {
-        return imageStack.getPixels(frame);
-      }
+    } else if (imageStack != null
+        // This is a virtual stack so access the image processor through the virtual stack object
+        && frame > 0 && frame <= imageStack.getSize()) {
+      return imageStack.getPixels(frame);
     }
     return null;
   }
@@ -301,10 +300,10 @@ public class IJImageSource extends ImageSource {
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    String s = super.toString();
+    String string = super.toString();
     if (path != null) {
-      s += String.format(" (%s)", path);
+      string += String.format(" (%s)", path);
     }
-    return s;
+    return string;
   }
 }

@@ -571,7 +571,8 @@ public class FIRE implements PlugIn {
         MathUtils.rounded(nmPerUnit / result.getNmPerPixel(), 3)));
     if (Double.isNaN(result.fireNumber)) {
       ImageJUtils.log(
-          "%s Warning: NaN result possible if the resolution is below the pixel size of the input Fourier image (%s %s).",
+          "%s Warning: NaN result possible if the resolution is below the pixel size of the"
+              + " input Fourier image (%s %s).",
           TITLE, MathUtils.rounded(result.getNmPerPixel()), units);
     }
   }
@@ -818,8 +819,8 @@ public class FIRE implements PlugIn {
       CalibrationReader cal2 = results.getCalibrationReader();
       if (unit == null) {
         if (cal2 != null) {
-          IJ.log(TITLE
-              + " Warning: Ignoring calibration for secondary results since no calibration exists for primary results");
+          IJ.log(TITLE + " Warning: Ignoring calibration for secondary results since no calibration"
+              + " exists for primary results");
         }
       } else {
         // The calibration must match
@@ -1369,7 +1370,8 @@ public class FIRE implements PlugIn {
     if (fireNumber > 0 && (images.nmPerPixel > fireNumber / 4)) {
       // Q. Should this be output somewhere else?
       ImageJUtils.log(
-          "%s Warning: The super-resolution pixel size (%s) should be smaller than 1/4 of R (the resolution %s)",
+          "%s Warning: The super-resolution pixel size (%s) should be smaller than 1/4 of R"
+              + " (the resolution %s)",
           TITLE, MathUtils.rounded(images.nmPerPixel), MathUtils.rounded(fireNumber));
     }
 

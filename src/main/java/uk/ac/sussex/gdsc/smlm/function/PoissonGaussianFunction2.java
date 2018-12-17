@@ -57,6 +57,8 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
   private final double logNormalisationNoPoisson;
 
   /**
+   * Instantiates a new poisson gaussian function 2.
+   *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param sigmasquared The variance of the Gaussian distribution at readout (must be positive)
    */
@@ -88,13 +90,13 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
    * Creates the with standard deviation.
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
-   * @param s The standard deviation of the Gaussian distribution at readout
+   * @param sd The standard deviation of the Gaussian distribution at readout
    * @return the poisson gaussian function 2
    * @throws IllegalArgumentException if the variance is zero or below
    */
   public static PoissonGaussianFunction2 createWithStandardDeviation(final double alpha,
-      final double s) {
-    return new PoissonGaussianFunction2(alpha, s * s);
+      final double sd) {
+    return new PoissonGaussianFunction2(alpha, sd * sd);
   }
 
   /**
@@ -130,39 +132,39 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 
   /** {@inheritDoc} */
   @Override
-  public double likelihood(double o, double e) {
+  public double likelihood(double x, double mu) {
     // convert to photons
-    o *= alpha;
-    if (e <= 0) {
+    x *= alpha;
+    if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return FastMath.exp(-0.5 * o * o / sigmasquared) * probabilityNormalisationNoPoisson;
+      return FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisationNoPoisson;
     }
 
     // e *= alpha;
     double saddlepoint =
-        (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
-            : PoissonGaussianFunction.pade(o, e, sigmasquared);
-    saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);
-    final double logP = PoissonGaussianFunction.sp_approx(o, e, sigmasquared, saddlepoint);
+        (usePicardApproximation) ? PoissonGaussianFunction.picard(x, mu, sigmasquared)
+            : PoissonGaussianFunction.pade(x, mu, sigmasquared);
+    saddlepoint = PoissonGaussianFunction.newton_iteration(x, mu, sigmasquared, saddlepoint);
+    final double logP = PoissonGaussianFunction.sp_approx(x, mu, sigmasquared, saddlepoint);
     return FastMath.exp(logP) * probabilityNormalisation;
   }
 
   /** {@inheritDoc} */
   @Override
-  public double logLikelihood(double o, double e) {
+  public double logLikelihood(double x, double mu) {
     // convert to photons
-    o *= alpha;
-    if (e <= 0) {
+    x *= alpha;
+    if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return (-0.5 * o * o / sigmasquared) + logNormalisationNoPoisson;
+      return (-0.5 * x * x / sigmasquared) + logNormalisationNoPoisson;
     }
 
     // e *= alpha;
     double saddlepoint =
-        (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
-            : PoissonGaussianFunction.pade(o, e, sigmasquared);
-    saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);
-    final double logP = PoissonGaussianFunction.sp_approx(o, e, sigmasquared, saddlepoint);
+        (usePicardApproximation) ? PoissonGaussianFunction.picard(x, mu, sigmasquared)
+            : PoissonGaussianFunction.pade(x, mu, sigmasquared);
+    saddlepoint = PoissonGaussianFunction.newton_iteration(x, mu, sigmasquared, saddlepoint);
+    final double logP = PoissonGaussianFunction.sp_approx(x, mu, sigmasquared, saddlepoint);
     return logP + logNormalisation;
   }
 }

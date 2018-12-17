@@ -620,9 +620,8 @@ public class CMOSAnalysis implements PlugIn {
     //@formatter:on
 
     gd.addNumericField("nThreads", getLastNThreads(), 0);
-    gd.addMessage(TextUtils.wrap(
-        "A rolling algorithm can handle any size of data but is slower. Otherwise the camera is assumed to produce a maximum of 16-bit unsigned data.",
-        80));
+    gd.addMessage(TextUtils.wrap("A rolling algorithm can handle any size of data but is slower. "
+        + "Otherwise the camera is assumed to produce a maximum of 16-bit unsigned data.", 80));
     gd.addCheckbox("Rolling_algorithm", rollingAlgorithm);
     gd.addCheckbox("Re-use_processed_data", reuseProcessedData);
     gd.showDialog();

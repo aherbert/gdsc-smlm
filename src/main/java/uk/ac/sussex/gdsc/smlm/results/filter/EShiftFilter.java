@@ -38,7 +38,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class EShiftFilter extends DirectFilter implements IMultiFilter {
   /**
    * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
-   */  public static final double DEFAULT_INCREMENT = 0.05;
+   */
+  public static final double DEFAULT_INCREMENT = 0.05;
   /**
    * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
    */
@@ -157,7 +158,8 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
   /** {@inheritDoc} */
   @Override
   public String getDescription() {
-    return "Filter results using a Euclidian shift factor. (Euclidian shift is relative to initial peak width.)";
+    return "Filter results using a Euclidian shift factor. (Euclidian shift is relative to "
+        + "initial peak width.)";
   }
 
   /** {@inheritDoc} */

@@ -34,9 +34,9 @@ public interface LikelihoodFunction {
    * <p>This is the probability mass function P(X=x|θ) or the probability density function f(x|θ)
    * depending on parameter θ.
    *
-   * @param o The observed value (x)
-   * @param t The parameter value (θ)
+   * @param x The observed value (x)
+   * @param theta The parameter value (θ)
    * @return The likelihood
    */
-  public double likelihood(final double o, final double t);
+  double likelihood(final double x, final double theta);
 }

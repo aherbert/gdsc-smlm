@@ -51,16 +51,16 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
   /**
    * Constructor.
    *
-   * @param nPeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param zModel the z model
    */
-  public MultiAstigmatismErfGaussian2DFunction(int nPeaks, int maxx, int maxy,
+  public MultiAstigmatismErfGaussian2DFunction(int numberOfPeaks, int maxx, int maxy,
       AstigmatismZModel zModel) {
-    super(nPeaks, maxx, maxy);
+    super(numberOfPeaks, maxx, maxy);
     this.zModel = zModel;
   }
 
@@ -98,14 +98,14 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
   @Override
   public ErfGaussian2DFunction copy() {
-    return new MultiAstigmatismErfGaussian2DFunction(nPeaks, maxx, maxy, zModel);
+    return new MultiAstigmatismErfGaussian2DFunction(numberOfPeaks, maxx, maxy, zModel);
   }
 
   /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -122,7 +122,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
   @Override
   public double integral(double[] a) {
     double sum = a[Gaussian2DFunction.BACKGROUND] * size();
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       final double tI = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -143,7 +143,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     create1Arrays();
     final double[] ds_dz = new double[1];
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -167,7 +167,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     create2Arrays();
     final double[] ds_dz = new double[2];
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -195,7 +195,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     createEx2Arrays();
     final double[] ds_dz = new double[2];
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -217,12 +217,12 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     }
     // Pre-apply the gradient mapping from width to z
     for (int x = 0; x < maxx; x++) {
-      for (int n = 0, xx = x; n < nPeaks; n++, xx += maxx) {
+      for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
         d2deltaEx_dtsxdx[xx] *= dtsx_dtz[n];
       }
     }
     for (int y = 0; y < maxy; y++) {
-      for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+      for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
         d2deltaEy_dtsydy[yy] *= dtsy_dtz[n];
       }
     }
@@ -239,7 +239,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     // Use pre-computed gradients
     duda[0] = 1.0;
     double I = tB;
-    for (int n = 0, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+    for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a++];
       duda[a++] = du_dtx[xx] * deltaEy[yy];
@@ -261,7 +261,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     duda[0] = 1.0;
     d2uda2[0] = 0;
     double I = tB;
-    for (int n = 0, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+    for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       final double du_dsx = du_dtsx[xx] * deltaEy[yy];
       final double du_dsy = du_dtsy[yy] * deltaEx[xx];
 
@@ -328,17 +328,17 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
     duda[0] = 1.0;
-    final double[] deltaEy_by_dtsx_dtz = new double[nPeaks];
-    final double[] du_dtsy_by_dtsy_dtz = new double[nPeaks];
+    final double[] deltaEy_by_dtsx_dtz = new double[numberOfPeaks];
+    final double[] du_dtsy_by_dtsy_dtz = new double[numberOfPeaks];
     for (int y = 0; y < maxy; y++) {
-      for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+      for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
         deltaEy_by_dtsx_dtz[n] = deltaEy[yy] * dtsx_dtz[n];
         du_dtsy_by_dtsy_dtz[n] = du_dtsy[yy] * dtsy_dtz[n];
       }
 
       for (int x = 0; x < maxx; x++) {
         double I = tB;
-        for (int n = 0, xx = x, yy = y, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+        for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
           duda[a++] = du_dtx[xx] * deltaEy[yy];
@@ -356,19 +356,19 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     final double[] duda = new double[getNumberOfGradients()];
     final double[] d2uda2 = new double[getNumberOfGradients()];
     duda[0] = 1.0;
-    final double[] dtsx_dtz_2 = new double[nPeaks];
-    final double[] dtsy_dtz_2 = new double[nPeaks];
-    final double[] two_dtsx_dtz_by_dtsy_dtz_tI = new double[nPeaks];
-    for (int n = 0; n < nPeaks; n++) {
+    final double[] dtsx_dtz_2 = new double[numberOfPeaks];
+    final double[] dtsy_dtz_2 = new double[numberOfPeaks];
+    final double[] two_dtsx_dtz_by_dtsy_dtz_tI = new double[numberOfPeaks];
+    for (int n = 0; n < numberOfPeaks; n++) {
       dtsx_dtz_2[n] = dtsx_dtz[n] * dtsx_dtz[n];
       dtsy_dtz_2[n] = dtsy_dtz[n] * dtsy_dtz[n];
       two_dtsx_dtz_by_dtsy_dtz_tI[n] = 2 * dtsx_dtz[n] * dtsy_dtz[n] / tI[n];
     }
-    final double[] deltaEy_by_dtsx_dtz_2 = new double[nPeaks];
-    final double[] d2u_dtsy2_by_dtsy_dtz_2 = new double[nPeaks];
-    final double[] two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI = new double[nPeaks];
+    final double[] deltaEy_by_dtsx_dtz_2 = new double[numberOfPeaks];
+    final double[] d2u_dtsy2_by_dtsy_dtz_2 = new double[numberOfPeaks];
+    final double[] two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI = new double[numberOfPeaks];
     for (int y = 0; y < maxy; y++) {
-      for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+      for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
         deltaEy_by_dtsx_dtz_2[n] = deltaEy[yy] * dtsx_dtz_2[n];
         d2u_dtsy2_by_dtsy_dtz_2[n] = d2u_dtsy2[yy] * dtsy_dtz_2[n];
         two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] = two_dtsx_dtz_by_dtsy_dtz_tI[n] * du_dtsy[yy];
@@ -376,7 +376,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
       for (int x = 0; x < maxx; x++) {
         double I = tB;
-        for (int n = 0, xx = x, yy = y, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+        for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           final double du_dsx = du_dtsx[xx] * deltaEy[yy];
           final double du_dsy = du_dtsy[yy] * deltaEx[xx];
 
@@ -414,23 +414,23 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     duda[0] = 1.0;
     final double[] du_dtsx_tI = new double[du_dtsx.length];
     for (int x = 0; x < maxx; x++) {
-      for (int n = 0, xx = x; n < nPeaks; n++, xx += maxx) {
+      for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
         du_dtsx_tI[xx] = du_dtsx[xx] / tI[n];
       }
     }
-    final double[] du_dty_tI = new double[nPeaks];
-    final double[] du_dtsy_by_dtsy_dtz_tI = new double[nPeaks];
-    final double[] du_dty_by_dtsx_dtz_tI = new double[nPeaks];
-    final double[] deltaEy_by_dtsx_dtz_2 = new double[nPeaks];
-    final double[] d2u_dtsy2_by_dtsy_dtz_2 = new double[nPeaks];
-    final double[] two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI = new double[nPeaks];
+    final double[] du_dty_tI = new double[numberOfPeaks];
+    final double[] du_dtsy_by_dtsy_dtz_tI = new double[numberOfPeaks];
+    final double[] du_dty_by_dtsx_dtz_tI = new double[numberOfPeaks];
+    final double[] deltaEy_by_dtsx_dtz_2 = new double[numberOfPeaks];
+    final double[] d2u_dtsy2_by_dtsy_dtz_2 = new double[numberOfPeaks];
+    final double[] two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI = new double[numberOfPeaks];
 
-    final double[] dtsx_dtz_2 = new double[nPeaks];
-    final double[] dtsy_dtz_2 = new double[nPeaks];
-    final double[] two_dtsx_dtz_by_dtsy_dtz_tI = new double[nPeaks];
-    final double[] dtsx_dtz_tI = new double[nPeaks];
-    final double[] dtsy_dtz_tI = new double[nPeaks];
-    for (int n = 0; n < nPeaks; n++) {
+    final double[] dtsx_dtz_2 = new double[numberOfPeaks];
+    final double[] dtsy_dtz_2 = new double[numberOfPeaks];
+    final double[] two_dtsx_dtz_by_dtsy_dtz_tI = new double[numberOfPeaks];
+    final double[] dtsx_dtz_tI = new double[numberOfPeaks];
+    final double[] dtsy_dtz_tI = new double[numberOfPeaks];
+    for (int n = 0; n < numberOfPeaks; n++) {
       dtsx_dtz_2[n] = dtsx_dtz[n] * dtsx_dtz[n];
       dtsy_dtz_2[n] = dtsy_dtz[n] * dtsy_dtz[n];
       two_dtsx_dtz_by_dtsy_dtz_tI[n] = 2 * dtsx_dtz[n] * dtsy_dtz[n] / tI[n];
@@ -439,7 +439,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     }
 
     for (int y = 0; y < maxy; y++) {
-      for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+      for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
         du_dty_tI[n] = du_dty[yy] / tI[n];
         du_dtsy_by_dtsy_dtz_tI[n] = du_dtsy[yy] * dtsy_dtz_tI[n];
         du_dty_by_dtsx_dtz_tI[n] = du_dty[yy] * dtsx_dtz_tI[n];
@@ -449,7 +449,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
       }
       for (int x = 0; x < maxx; x++) {
         double I = tB;
-        for (int n = 0, xx = x, yy = y, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+        for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           final double du_dsx = du_dtsx[xx] * deltaEy[yy];
           final double du_dsy = du_dtsy[yy] * deltaEx[xx];
 

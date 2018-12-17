@@ -540,9 +540,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(String.format("Rank candidate spots in the benchmark image created by "
-        + CreateData.TITLE + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
-        + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
+    gd.addMessage(String.format(
+        "Rank candidate spots in the benchmark image created by " + CreateData.TITLE
+            + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
+            + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \n"
+            + "Configure the fitting:",
         MathUtils.rounded(simulationParameters.s), MathUtils.rounded(getSa())));
 
     gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
@@ -758,8 +760,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * @param filterResults the filter results
    * @return The filter candidates
    */
-  private TIntObjectHashMap<FilterCandidates> subsetFilterResults(
-      TIntObjectHashMap<FilterResult> filterResults) {
+  private TIntObjectHashMap<FilterCandidates>
+      subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults) {
     // Convert fractions from percent
     final double f1 = Math.min(1, fractionPositives / 100.0);
     final double f2 = fractionNegativesAfterAllPositives / 100.0;

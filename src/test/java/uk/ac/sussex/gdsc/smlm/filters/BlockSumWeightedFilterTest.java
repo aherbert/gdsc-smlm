@@ -29,21 +29,21 @@ public class BlockSumWeightedFilterTest extends WeightedSumFilterTest {
   @Override
   DataFilter createDataFilter() {
     return new DataFilter("blockSum", true) {
-      BlockSumFilter f = new BlockSumFilter();
+      BlockSumFilter filter = new BlockSumFilter();
 
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, boxSize);
+        filter.blockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, boxSize);
+        filter.blockFilterInternal(data, width, height, boxSize);
       }
 
       @Override
-      public void setWeights(float[] w, int width, int height) {
-        f.setWeights(w, width, height);
+      public void setWeights(float[] weights, int width, int height) {
+        filter.setWeights(weights, width, height);
       }
     };
   }

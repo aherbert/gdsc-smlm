@@ -56,27 +56,27 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param maxRelativeError the max relative error
    * @param maxAbsoluteError the max absolute error
    * @throws NullPointerException if the function is null
    */
-  public BacktrackingFastMLESteppingFunctionSolver(Gradient2Function f, double maxRelativeError,
-      double maxAbsoluteError) {
-    super(f, maxRelativeError, maxAbsoluteError);
+  public BacktrackingFastMLESteppingFunctionSolver(Gradient2Function function,
+      double maxRelativeError, double maxAbsoluteError) {
+    super(function, maxRelativeError, maxAbsoluteError);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public BacktrackingFastMLESteppingFunctionSolver(Gradient2Function f, ToleranceChecker tc,
+  public BacktrackingFastMLESteppingFunctionSolver(Gradient2Function function, ToleranceChecker tc,
       ParameterBounds bounds) {
-    super(f, tc, bounds);
+    super(function, tc, bounds);
   }
 
   // Extend the Newton-Raphson method by implementing Line Search and Backtracking
@@ -146,7 +146,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
     }
 
     aOld = lineSearch.lineSearch(aOld, ll, gradientProcedure.d1, searchDirection);
-    ll = lineSearch.f;
+    ll = lineSearch.function;
 
     // Update the parameters to reflect any backtracking
     System.arraycopy(aOld, 0, a, 0, a.length);
@@ -176,7 +176,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
     /**
      * The function value at the new point.
      */
-    double f;
+    double function;
 
     /**
      * Given an n-dimension point, the function value and gradient at that point find a new point
@@ -219,7 +219,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 
       double slope = 0.0;
       final int[] gradientIndices =
-          BacktrackingFastMLESteppingFunctionSolver.this.f.gradientIndices();
+          BacktrackingFastMLESteppingFunctionSolver.this.function.gradientIndices();
       for (int i = 0; i < gradient.length; i++) {
         slope += gradient[i] * searchDirection[gradientIndices[i]];
       }
@@ -312,16 +312,18 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
         // Compute the pseudoLikelihood
         evaluations++;
         gradientProcedure.computeValue(x);
-        f = gradientProcedure.computePseudoLogLikelihood();
-        // System.out.printf("f=%f @ %f : %s\n", f, alam, java.util.Arrays.toString(x));
-        if (f >= fOld + ALF * alam * slope) {
+        function = gradientProcedure.computePseudoLogLikelihood();
+        // System.out.printf("function=%function @ %function : %s\n", function, alam,
+        // java.util.Arrays.toString(x));
+        if (function >= fOld + ALF * alam * slope) {
           // Sufficient function decrease
-          // System.out.printf("f=%f > %f\n", f, fOld + ALF * alam * slope);
+          // System.out.printf("function=%function > %function\n", function, fOld + ALF * alam *
+          // slope);
           return x;
         }
 
         // Check for bad function evaluation
-        if (!Double.isFinite(f)) {
+        if (!Double.isFinite(function)) {
           // Reset backtracking
           backtracking = 0;
 
@@ -333,14 +335,14 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
         double tmplam;
         if (backtracking++ == 0) {
           // First backtrack iteration
-          tmplam = -slope / (2.0 * (f - fOld - slope));
+          tmplam = -slope / (2.0 * (function - fOld - slope));
           // Ensure the lambda is reduced, i.e. we take a step smaller than last time
           if (tmplam > 0.9 * alam) {
             tmplam = 0.9 * alam;
           }
         } else {
           // Subsequent backtracks
-          final double rhs1 = f - fOld - alam * slope;
+          final double rhs1 = function - fOld - alam * slope;
           final double rhs2 = f2 - fOld - alam2 * slope;
           final double a = (rhs1 / (alam * alam) - rhs2 / (alam2 * alam2)) / (alam - alam2);
           final double b =
@@ -364,16 +366,16 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
         }
 
         alam2 = alam;
-        f2 = f;
+        f2 = function;
         // Ensure the lambda is >= 0.1 lambda1, i.e. we take reasonable step
         alam = max(tmplam, 0.1 * alam);
       }
     }
 
     private double[] setInsignificantStep(double[] xOld, final double fOld) {
-      // Since we use the old f and x then we do not need to compute the objective value
+      // Since we use the old function and x then we do not need to compute the objective value
       tc.setConverged();
-      f = fOld;
+      function = fOld;
       return xOld;
     }
   }

@@ -675,8 +675,8 @@ public class PSFDrift implements PlugIn {
         "Save the drift to the PSF?\n \nSlices %d (%s nm) - %d (%s nm) above recall limit",
         startSlice, MathUtils.rounded(zPosition[start]), endSlice,
         MathUtils.rounded(zPosition[end])));
-    gd.addMessage(
-        "Optionally average the end points to set drift outside the limits.\n(Select zero to ignore)");
+    gd.addMessage("Optionally average the end points to set drift outside the limits.\n"
+        + "(Select zero to ignore)");
     gd.addSlider("Number_of_points", 0, 10, positionsToAverage);
     gd.showDialog();
     if (gd.wasOKed()) {
@@ -1031,8 +1031,8 @@ public class PSFDrift implements PlugIn {
     }
 
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addMessage(
-        "Approximate the volume of the PSF as a Gaussian and\ncompute the equivalent Gaussian width.");
+    gd.addMessage("Approximate the volume of the PSF as a Gaussian and\n"
+        + "compute the equivalent Gaussian width.");
     gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
     gd.addCheckbox("Use_offset", useOffset);
     gd.addSlider("Smoothing", 0, 0.5, smoothing);

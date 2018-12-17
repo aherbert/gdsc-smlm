@@ -71,12 +71,12 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
    * <p>This is a PMF.
    */
   @Override
-  public double likelihood(double o, double e) {
-    if (e <= 0) {
+  public double likelihood(double observed, double mu) {
+    if (mu <= 0) {
       return 0;
     }
 
-    final int x = getX(o);
+    final int x = getX(observed);
     if (x < 0) {
       return 0;
     }
@@ -101,7 +101,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
         return 0;
       }
 
-      pd.setMeanUnsafe(e);
+      pd.setMeanUnsafe(mu);
       return pd.probability(imin);
     }
     // The PMF was contracted so 1 or more values fall in this range
@@ -113,58 +113,58 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
       imax--;
     }
 
-    pd.setMeanUnsafe(e);
+    pd.setMeanUnsafe(mu);
     if (imin == imax) {
       return pd.probability(imin);
     }
 
-    double p = 0;
+    double pvalue = 0;
     for (int i = imin; i <= imax; i++) {
-      p += pd.probability(i);
+      pvalue += pd.probability(i);
     }
-    return p;
+    return pvalue;
   }
 
-  private static int getX(double o) {
-    // This could throw an exception if o is not an integer
-    return (int) Math.round(o);
+  private static int getX(double observed) {
+    // XXX: Change to throw an exception if o is not an integer?
+    return (int) Math.round(observed);
   }
 
   /**
    * Return the log of the factorial for the given real number, using the gamma function.
    *
-   * @param k the number
+   * @param value the number
    * @return the log factorial
    */
-  public static double logFactorial(double k) {
-    if (k <= 1) {
+  public static double logFactorial(double value) {
+    if (value <= 1) {
       return 0;
     }
-    return Gamma.logGamma(k + 1);
+    return Gamma.logGamma(value + 1);
   }
 
   /**
    * Return the factorial for the given real number, using the gamma function.
    *
-   * @param k the number
+   * @param value the number
    * @return the factorial
    */
-  public static double factorial(double k) {
-    if (k <= 1) {
+  public static double factorial(double value) {
+    if (value <= 1) {
       return 1;
     }
-    return Gamma.gamma(k + 1);
+    return Gamma.gamma(value + 1);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double logLikelihood(double o, double e) {
+  public double logLikelihood(double observed, double mu) {
     // As above but with log output
-    if (e <= 0) {
+    if (mu <= 0) {
       return Double.NEGATIVE_INFINITY;
     }
 
-    final int x = getX(o);
+    final int x = getX(observed);
     if (x < 0) {
       return Double.NEGATIVE_INFINITY;
     }
@@ -182,7 +182,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
         return Double.NEGATIVE_INFINITY;
       }
 
-      pd.setMeanUnsafe(e);
+      pd.setMeanUnsafe(mu);
       return pd.logProbability(imin);
     }
 
@@ -191,15 +191,15 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
       imax--;
     }
 
-    pd.setMeanUnsafe(e);
+    pd.setMeanUnsafe(mu);
     if (imin == imax) {
       return pd.logProbability(imin);
     }
 
-    double p = 0;
+    double pvalue = 0;
     for (int i = imin; i <= imax; i++) {
-      p += pd.probability(i);
+      pvalue += pd.probability(i);
     }
-    return Math.log(p);
+    return Math.log(pvalue);
   }
 }

@@ -29,58 +29,63 @@ package uk.ac.sussex.gdsc.smlm.fitting;
  */
 public interface FunctionSolver {
   /**
-   * Gets the type.
+   * Gets the type of function solver.
    *
    * @return the type
    */
-  public FunctionSolverType getType();
+  FunctionSolverType getType();
 
   /**
-   * Fit a function with coefficients (a) for a set of data points (y).
+   * Fit a parameterised function using a set of data points, {@code f(x|parameters) = data}.
    *
-   * <p>It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
-   * zero.
+   * <p>Note: No input x data is specified. It can be assumed that the data points x[i]
+   * corresponding to observed data[i] are consecutive integers from zero.
    *
-   * @param y Set of data points to fit (input)
-   * @param f The evaluated function data points (output)
-   * @param a Set of m coefficients (input/output)
-   * @param aDev Variance of the set of m coefficients (output)
+   * @param data Set of data points to fit (input)
+   * @param fx The evaluated function data points (output)
+   * @param parameters The function parameters (input/output)
+   * @param parameterVariances Variance of the fitted parameters (output)
    * @return The fit status
    */
-  public FitStatus fit(final double[] y, final double[] f, final double[] a, final double[] aDev);
+  FitStatus fit(final double[] data, final double[] fx, final double[] parameters,
+      final double[] parameterVariances);
 
   /**
    * Gets the number of fitted parameters.
    *
    * @return the number of fitted parameters
    */
-  public int getNumberOfFittedParameters();
+  int getNumberOfFittedParameters();
 
   /**
    * Gets the number of fitted points.
    *
    * @return the number of fitted points
    */
-  public int getNumberOfFittedPoints();
+  int getNumberOfFittedPoints();
 
   /**
+   * Gets the number of iterations used to solve the function.
+   *
    * @return The number of iterations used to solve the function.
    */
-  public int getIterations();
+  int getIterations();
 
   /**
+   * Gets the number of function evaluations used to solve the function.
+   *
    * @return The number of function evaluations used to solve the function.
    */
-  public int getEvaluations();
+  int getEvaluations();
 
   /**
-   * Specifies if the function solver supports a bounded search (i.e. a search of parameter space
-   * within the total allowed space of valid parameters, or the parameter constraints). If true then
-   * the bounds can be set before a call to the fit(...) method.
+   * Specifies if the function solver supports a bounded search, that is a search of parameter space
+   * within the total allowed space of valid parameters. If true then the bounds can be set before a
+   * call to the fit(...) method.
    *
    * @return True if the function solver supports a bounded search
    */
-  public boolean isBounded();
+  boolean isBounded();
 
   /**
    * Specifies if the function solver supports constraints on the parameters. If true then the
@@ -93,21 +98,21 @@ public interface FunctionSolver {
    *
    * @return True if the function solver supports a constrained search
    */
-  public boolean isConstrained();
+  boolean isConstrained();
 
   /**
    * Specifies if the function solver supports per observation weights.
    *
    * @return True if the function solver supports per observation weights
    */
-  public boolean isWeighted();
+  boolean isWeighted();
 
   /**
    * Checks if the function solver requires a strictly positive function.
    *
    * @return true, if the function solver requires a strictly positive function
    */
-  public boolean isStrictlyPositiveFunction();
+  boolean isStrictlyPositiveFunction();
 
   /**
    * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the
@@ -118,7 +123,7 @@ public interface FunctionSolver {
    * @param lower the lower bounds
    * @param upper the upper bounds
    */
-  public void setBounds(double[] lower, double[] upper);
+  void setBounds(double[] lower, double[] upper);
 
   /**
    * Set the constraints for each of the parameters. If a subset of the parameters are fitted then
@@ -127,7 +132,7 @@ public interface FunctionSolver {
    * @param lower the lower bounds
    * @param upper the upper bounds
    */
-  public void setConstraints(double[] lower, double[] upper);
+  void setConstraints(double[] lower, double[] upper);
 
   /**
    * Sets the weights for each of the observations. The weights must match the length of the
@@ -137,50 +142,56 @@ public interface FunctionSolver {
    *
    * @param weights the new weights
    */
-  public void setWeights(double[] weights);
+  void setWeights(double[] weights);
 
   /**
    * The optimised function value for the solution.
    *
    * @return the value
    */
-  public double getValue();
+  double getValue();
 
   /**
-   * Evaluate a function with coefficients (a) for a set of data points (x, y).
+   * Evaluate a parameterised function using a set of data points, {@code f(x|parameters) = data}.
    *
-   * <p>It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
-   * zero.
+   * <p>Note: No input x data is specified. It can be assumed that the data points x[i]
+   * corresponding to observed data[i] are consecutive integers from zero.
    *
-   * @param y Set of data points (input)
-   * @param f The evaluated function data points (output)
-   * @param a Set of m coefficients (input)
+   * <p>The evaluated data points should be the same values as the result from the
+   * {@link #fit(double[], double[], double[], double[])} method if this is called with the fitted
+   * parameters.
+   *
+   * @param data Set of data points (input)
+   * @param fx The evaluated function data points (output)
+   * @param parameters The function parameters (input)
    * @return True if evaluation was performed
    */
-  public boolean evaluate(final double[] y, final double[] f, final double[] a);
+  boolean evaluate(final double[] data, final double[] fx, final double[] parameters);
 
   /**
-   * Compute the deviations for a function with coefficients (a) for a set of data points (x, y).
+   * Compute the deviations for a parameterised function using a set of data points,
+   * {@code f(x|parameters) = data}.
    *
-   * <p>It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from
-   * zero.
+   * <p>Note: No input x data is specified. It can be assumed that the data points x[i]
+   * corresponding to observed data[i] are consecutive integers from zero.
    *
    * <p>The deviations should be the same values as the result from the
-   * {@link #fit(double[], double[], double[], double[])} method if this is called with the output
-   * fit coefficients.
+   * {@link #fit(double[], double[], double[], double[])} method if this is called with the fitted
+   * parameters.
    *
-   * @param y Set of data points (input)
-   * @param a Set of m coefficients (input)
-   * @param aDev Variance of the set of m coefficients (output)
+   * @param data Set of data points (input)
+   * @param parameters The function parameters (input/output)
+   * @param parameterVariances Variance of the fitted parameters (output)
    * @return True if computation was performed
    */
-  public boolean computeDeviations(final double[] y, final double[] a, final double[] aDev);
+  boolean computeDeviations(final double[] data, final double[] parameters,
+      final double[] parameterVariances);
 
   /**
-   * Gets the name of the parameter i.
+   * Gets the name of the parameter for the specified index.
    *
-   * @param i the parameter i
+   * @param index the parameter index
    * @return the name
    */
-  public String getName(int i);
+  String getName(int index);
 }

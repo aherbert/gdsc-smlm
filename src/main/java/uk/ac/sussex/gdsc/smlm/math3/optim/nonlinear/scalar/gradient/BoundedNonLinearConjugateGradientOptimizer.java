@@ -139,6 +139,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     private final double initialStep;
 
     /**
+     * Instantiates a new bracketing step.
+     *
      * @param step Initial step for the bracket search.
      */
     public BracketingStep(double step) {
@@ -169,6 +171,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   }
 
   /**
+   * Instantiates a new bounded non linear conjugate gradient optimizer.
+   *
    * @param updateFormula formula to use for updating the &beta; parameter, must be one of
    *        {@link Formula#FLETCHER_REEVES} or {@link Formula#POLAK_RIBIERE}.
    * @param checker Convergence checker.
@@ -570,6 +574,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     private final double[] searchDirection;
 
     /**
+     * Instantiates a new line search function.
+     *
      * @param point Current point.
      * @param direction Search direction.
      */
@@ -719,14 +725,18 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   }
 
   /**
-   * @return the useGradientLineSearch.
+   * Checks if using gradient line search.
+   *
+   * @return true, if using gradient line search
    */
   public boolean isUseGradientLineSearch() {
     return useGradientLineSearch;
   }
 
   /**
-   * @param useGradientLineSearch the useGradientLineSearch to set
+   * Sets whether to use gradient line search.
+   *
+   * @param useGradientLineSearch the new use gradient line search
    */
   public void setUseGradientLineSearch(boolean useGradientLineSearch) {
     this.useGradientLineSearch = useGradientLineSearch;

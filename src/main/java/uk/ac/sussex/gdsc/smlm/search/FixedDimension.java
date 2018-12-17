@@ -47,7 +47,8 @@ public class FixedDimension implements Cloneable, Dimension {
 
   /**
    * Set to true if {@link #min} &lt; {@link #max}.
-   */  public final boolean active;
+   */
+  public final boolean active;
 
   /**
    * Instantiates a new inactive search dimension. The centre is set to zero.

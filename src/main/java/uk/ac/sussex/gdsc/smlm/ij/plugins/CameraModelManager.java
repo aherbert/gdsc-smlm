@@ -473,7 +473,7 @@ public class CameraModelManager implements PlugIn {
     }
 
     // Show normalised variance: var/g^2
-    final float[] var_g2 = new float[stack.getWidth() * stack.getHeight()];
+    final float[] varG2 = new float[stack.getWidth() * stack.getHeight()];
     try {
       final float[] gain = (float[]) stack.getPixels(2);
       final float[] variance = (float[]) stack.getPixels(3);
@@ -482,7 +482,7 @@ public class CameraModelManager implements PlugIn {
       final ExtendedStatistics stats2 = new ExtendedStatistics();
       for (int i = 0; i < gain.length; i++) {
         final double v1 = variance[i] / MathUtils.pow2(gain[i]);
-        var_g2[i] = (float) v1;
+        varG2[i] = (float) v1;
         stats1.add(Math.sqrt(v1));
         stats2.add(v1);
       }
@@ -492,7 +492,7 @@ public class CameraModelManager implements PlugIn {
       ImageJUtils.log("Failed to load camera model %s from file: %s. %s", name,
           resource.getFilename(), ex.getMessage());
     }
-    stack.addSlice("var/g^2", var_g2);
+    stack.addSlice("var/g^2", varG2);
 
     // Create as a hyper stack
     imp = new ImagePlus(name, stack);

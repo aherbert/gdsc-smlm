@@ -46,18 +46,18 @@ import java.util.List;
  */
 public abstract class ImageModel {
   /** Average on-state time. */
-  protected double tOn;
+  protected double onTime;
   /** Average off-state time for the first dark state. */
-  protected double tOff;
+  protected double offTime1;
   /** Average off-state time for the second dark state. */
-  protected double tOff2;
+  protected double offTime2;
   /**
    * Average number of blinks int the first dark state (used for each burst between second dark
    * states).
    */
-  protected double nBlinks;
+  protected double blinks1;
   /** Average number of blinks into the second dark state. */
-  protected double nBlinks2;
+  protected double blinks2;
 
   /**
    * Specifies the maximum number of frames that will be simulated in
@@ -80,30 +80,31 @@ public abstract class ImageModel {
   /**
    * Construct a new image model.
    *
-   * @param tOn Average on-state time
-   * @param tOff Average off-state time for the first dark state
-   * @param tOff2 Average off-state time for the second dark state
-   * @param nBlinks Average number of blinks int the first dark state (used for each burst between
+   * @param onTime Average on-state time
+   * @param offTime1 Average off-state time for the first dark state
+   * @param offTime2 Average off-state time for the second dark state
+   * @param blinks1 Average number of blinks in the first dark state (used for each burst between
    *        second dark states)
-   * @param nBlinks2 Average number of blinks into the second dark state
+   * @param blinks2 Average number of blinks in the second dark state
    */
-  public ImageModel(double tOn, double tOff, double tOff2, double nBlinks, double nBlinks2) {
-    init(tOn, tOff, tOff2, nBlinks, nBlinks2,
+  public ImageModel(double onTime, double offTime1, double offTime2, double blinks1,
+      double blinks2) {
+    init(onTime, offTime1, offTime2, blinks1, blinks2,
         new Well19937c(System.currentTimeMillis() + System.identityHashCode(this)));
   }
 
-  private void init(double tOn, double tOff, double tOff2, double nBlinks, double nBlinks2,
+  private void init(double onTime, double offTime1, double offTime2, double blinks1, double blinks2,
       RandomGenerator rand) {
-    checkParameter("tOn", tOn);
-    checkParameter("tOff", tOff);
-    checkParameter("tOff2", tOff2);
-    checkParameter("nBlinks", nBlinks);
-    checkParameter("nBlinks2", nBlinks2);
-    this.tOn = tOn;
-    this.tOff = tOff;
-    this.tOff2 = tOff2;
-    this.nBlinks = nBlinks;
-    this.nBlinks2 = nBlinks2;
+    checkParameter("onTime", onTime);
+    checkParameter("offTime1", offTime1);
+    checkParameter("offTime2", offTime2);
+    checkParameter("blinks1", blinks1);
+    checkParameter("blinks2", blinks2);
+    this.onTime = onTime;
+    this.offTime1 = offTime1;
+    this.offTime2 = offTime2;
+    this.blinks1 = blinks1;
+    this.blinks2 = blinks2;
     setRandomGenerator(rand);
   }
 
@@ -120,41 +121,54 @@ public abstract class ImageModel {
   }
 
   /**
-   * @return the tOn.
+   * Get the average on-state time.
+   *
+   * @return the on time
    */
-  public double gettOn() {
-    return tOn;
+  public double getOnTime() {
+    return onTime;
   }
 
   /**
-   * @return the tOff.
+   * Get the average off-state time for the first dark state.
+   *
+   * @return the off time 1
    */
-  public double gettOff() {
-    return tOff;
+  public double getOffTime1() {
+    return offTime1;
   }
 
   /**
-   * @return the tOff2.
+   * Get the average off-state time for the second dark state.
+   *
+   * @return the off time 2
    */
-  public double gettOff2() {
-    return tOff2;
+  public double getOffTime2() {
+    return offTime2;
   }
 
   /**
-   * @return the nBlinks.
+   * Get the average number of blinks in the first dark state (used for each burst between second
+   * dark states).
+   *
+   * @return the blinks
    */
-  public double getnBlinks() {
-    return nBlinks;
+  public double getBlinks1() {
+    return blinks1;
   }
 
   /**
-   * @return the nBlinks2.
+   * Get the average number of blinks in the second dark state.
+   *
+   * @return the blinks
    */
-  public double getnBlinks2() {
-    return nBlinks2;
+  public double getBlinks2() {
+    return blinks2;
   }
 
   /**
+   * Gets the random data generator.
+   *
    * @return The random data generator.
    */
   protected RandomDataGenerator getRandom() {
@@ -279,8 +293,8 @@ public abstract class ImageModel {
    * @param frames the frames
    * @return the fluorophores
    */
-  public List<? extends FluorophoreSequenceModel> createFluorophores(
-      List<CompoundMoleculeModel> molecules, int frames) {
+  public List<? extends FluorophoreSequenceModel>
+      createFluorophores(List<CompoundMoleculeModel> molecules, int frames) {
     frameLimit = frames;
     final ArrayList<FluorophoreSequenceModel> list = new ArrayList<>(molecules.size());
     for (int i = 0; i < molecules.size();) {
@@ -570,7 +584,7 @@ public abstract class ImageModel {
       }
 
       // Get the average on time from the correlated sample.
-      // Using the population value (tOn * (1+nBlinks)) over-estimates the on time.
+      // Using the population value (tOn * (1+blinks1)) over-estimates the on time.
       final double averageTotalTOn = correlatedOnTime.getMean();
 
       // Now create the localisations

@@ -135,27 +135,27 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param maxRelativeError the max relative error
    * @param maxAbsoluteError the max absolute error
    * @throws NullPointerException if the function is null
    */
-  public FastMLESteppingFunctionSolver(Gradient2Function f, double maxRelativeError,
+  public FastMLESteppingFunctionSolver(Gradient2Function function, double maxRelativeError,
       double maxAbsoluteError) {
-    this(f, new ToleranceChecker(maxRelativeError, maxAbsoluteError), null);
+    this(function, new ToleranceChecker(maxRelativeError, maxAbsoluteError), null);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public FastMLESteppingFunctionSolver(Gradient2Function f, ToleranceChecker tc,
+  public FastMLESteppingFunctionSolver(Gradient2Function function, ToleranceChecker tc,
       ParameterBounds bounds) {
-    super(FunctionSolverType.MLE, f, tc, bounds);
+    super(FunctionSolverType.MLE, function, tc, bounds);
   }
 
   /** {@inheritDoc} */
@@ -209,7 +209,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
   protected FastMLEGradient2Procedure createGradientProcedure(double[] y) {
     // We can handle per-observation variances as detailed in
     // Huang, et al. (2015) by simply adding the variances to the computed value.
-    f2 = (Gradient2Function) f;
+    f2 = (Gradient2Function) function;
     if (w != null) {
       f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
     }
@@ -234,7 +234,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
         }
 
         final double[] gradient = gradientProcedure.d1;
-        final int[] gradientIndices = f.gradientIndices();
+        final int[] gradientIndices = function.gradientIndices();
 
         double slope = 0.0;
         for (int i = 0; i < gradient.length; i++) {
@@ -347,18 +347,18 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
 
   /** {@inheritDoc} */
   @Override
-  protected boolean computeValue(double[] y, double[] yFit, double[] a) {
-    // This is over-ridden since the yFit values are computed
+  protected boolean computeValue(double[] y, double[] fx, double[] a) {
+    // This is over-ridden since the fx values are computed
     // and stored by the gradient procedure. The super-class SteppingFunctionSolver
     // wraps the function with a Gradient1FunctionStore to store the
-    // yFit. This is not a gradient 2 function so causes a run-time error
+    // fx. This is not a gradient 2 function so causes a run-time error
     // in createGradientProcedure(double[])
 
-    gradientIndices = f.gradientIndices();
+    gradientIndices = function.gradientIndices();
     lastY = prepareFunctionValue(y, a);
     value = computeFunctionValue(a);
-    if (yFit != null) {
-      copyFunctionValue(yFit);
+    if (fx != null) {
+      copyFunctionValue(fx);
     }
     return true;
   }
@@ -380,35 +380,35 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
   }
 
   /**
-   * Copy the function value into the yFit array.
+   * Copy the function value into the fx array.
    *
-   * @param yFit the function values
+   * @param fx the function values
    */
-  private void copyFunctionValue(double[] yFit) {
+  private void copyFunctionValue(double[] fx) {
     final double[] u = gradientProcedure.u;
     if (w != null) {
       // The function was wrapped to add the per-observation variances
       // to the computed value, these must be subtracted to get the actual value
       for (int i = 0, n = u.length; i < n; i++) {
-        yFit[i] = u[i] - w[i];
+        fx[i] = u[i] - w[i];
       }
     } else {
-      System.arraycopy(u, 0, yFit, 0, u.length);
+      System.arraycopy(u, 0, fx, 0, u.length);
     }
   }
 
   /** {@inheritDoc} */
   @Override
-  protected void computeValues(double[] yFit) {
-    copyFunctionValue(yFit);
+  protected void computeValues(double[] fx) {
+    copyFunctionValue(fx);
   }
 
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit) {
-    Gradient2Function f2 = (Gradient2Function) f;
+  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
+    Gradient2Function f2 = (Gradient2Function) function;
     // Capture the y-values if necessary
-    if (yFit != null && yFit.length == f2.size()) {
-      f2 = new Gradient2FunctionValueStore(f2, yFit);
+    if (fx != null && fx.length == f2.size()) {
+      f2 = new Gradient2FunctionValueStore(f2, fx);
     }
     // Add the weights if necessary
     if (w != null) {
@@ -443,7 +443,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
   protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a) {
     // The fisher information is that for a Poisson process.
     // We must wrap the gradient function if weights are present.
-    Gradient1Function f1 = (Gradient1Function) f;
+    Gradient1Function f1 = (Gradient1Function) function;
     if (w != null) {
       f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
     }

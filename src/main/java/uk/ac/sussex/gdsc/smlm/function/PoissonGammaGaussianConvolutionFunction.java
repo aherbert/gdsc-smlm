@@ -51,7 +51,7 @@ public class PoissonGammaGaussianConvolutionFunction
   final double g;
 
   private final double var;
-  private final double s;
+  private final double sd;
   private final double range;
   private final double var_by_2;
 
@@ -74,16 +74,16 @@ public class PoissonGammaGaussianConvolutionFunction
 
     this.g = 1.0 / alpha;
     if (isVariance) {
-      s = Math.sqrt(variance);
+      sd = Math.sqrt(variance);
       this.var = variance;
     } else {
-      s = variance;
-      this.var = s * s;
+      sd = variance;
+      this.var = sd * sd;
     }
     var_by_2 = var * 2;
 
     // Use a range to cover the Gaussian convolution
-    range = 5 * this.s;
+    range = 5 * this.sd;
 
     // Determine the normalisation factor A in the event that the probability
     // distribution is being used as a discrete distribution.
@@ -94,13 +94,13 @@ public class PoissonGammaGaussianConvolutionFunction
    * Creates the with standard deviation.
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
-   * @param s The standard deviation of the Gaussian distribution at readout
+   * @param sd The standard deviation of the Gaussian distribution at readout
    * @return the poisson gaussian function 2
    * @throws IllegalArgumentException if the variance is zero or below
    */
-  public static PoissonGammaGaussianConvolutionFunction createWithStandardDeviation(
-      final double alpha, final double s) {
-    return new PoissonGammaGaussianConvolutionFunction(alpha, s, false);
+  public static PoissonGammaGaussianConvolutionFunction
+      createWithStandardDeviation(final double alpha, final double sd) {
+    return new PoissonGammaGaussianConvolutionFunction(alpha, sd, false);
   }
 
   /**
@@ -118,10 +118,10 @@ public class PoissonGammaGaussianConvolutionFunction
 
   /** {@inheritDoc} */
   @Override
-  public double likelihood(final double o, final double e) {
-    if (e <= 0) {
+  public double likelihood(final double x, final double mu) {
+    if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return FastMath.exp((-o * o / var_by_2) + logNormalisationGaussian);
+      return FastMath.exp((-x * x / var_by_2) + logNormalisationGaussian);
     }
 
     // Note:
@@ -134,16 +134,16 @@ public class PoissonGammaGaussianConvolutionFunction
     // Poisson-Gamma distribution.
 
     // Use a range to cover the Gaussian convolution
-    final double max = o + range;
+    final double max = x + range;
     if (max < 0) {
       return 0;
     }
-    double min = o - range;
+    double min = x - range;
     if (min < 0) {
       min = 0;
     }
 
-    return computeP(o, e, max, min);
+    return computeP(x, mu, max, min);
   }
 
   private double computeP(final double o, final double e, double max, double min) {
@@ -159,7 +159,7 @@ public class PoissonGammaGaussianConvolutionFunction
               - (MathUtils.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
     }
 
-    double p = 0;
+    double pvalue = 0;
 
     // Overcome the problem with small variance using a set number of steps to
     // cover the range. This effectively makes the Poisson-Gamma a continuous
@@ -196,7 +196,7 @@ public class PoissonGammaGaussianConvolutionFunction
     // {
 
     for (int c = cmin; c <= cmax; c++) {
-      p += FastMath.exp(
+      pvalue += FastMath.exp(
           // Poisson-Gamma
           PoissonGammaFunction.logPoissonGamma(c, e, g)
               // Gaussian
@@ -205,26 +205,26 @@ public class PoissonGammaGaussianConvolutionFunction
 
     // }
 
-    return p;
+    return pvalue;
   }
 
   /** {@inheritDoc} */
   @Override
-  public double logLikelihood(double o, double e) {
-    if (e <= 0) {
+  public double logLikelihood(double x, double mu) {
+    if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return (-o * o / var_by_2) + logNormalisationGaussian;
+      return (-x * x / var_by_2) + logNormalisationGaussian;
     }
 
-    final double max = o + range;
+    final double max = x + range;
     if (max < 0) {
       return Double.NEGATIVE_INFINITY;
     }
-    double min = o - range;
+    double min = x - range;
     if (min < 0) {
       min = 0;
     }
 
-    return Math.log(computeP(o, e, max, min));
+    return Math.log(computeP(x, mu, max, min));
   }
 }

@@ -358,7 +358,8 @@ public class MultiPathFilter implements Cloneable {
   private void restoreFilterState() {
     if (filterSetupState == null) {
       throw new NullPointerException(
-          "Unknown initial filter state. setup(...) must be called before using the filter methods.");
+          "Unknown initial filter state. setup(...) must be called before using the "
+              + "filter methods.");
     }
     filterSetupState.restoreState();
   }

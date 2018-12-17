@@ -136,6 +136,8 @@ public class MedianDataProcessor extends DataProcessor {
   }
 
   /**
+   * Gets the smoothing width.
+   *
    * @return the smoothing width.
    */
   public int getSmooth() {

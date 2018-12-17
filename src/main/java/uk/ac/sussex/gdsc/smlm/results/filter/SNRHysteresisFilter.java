@@ -95,9 +95,9 @@ public class SNRHysteresisFilter extends HysteresisFilter {
 
   @Override
   public String getDescription() {
-    return "Filter results using a signal-to-noise (SNR) threshold. Any results above the upper SNR "
-        + "limit are included. Any results below the lower SNR limit are excluded. "
-        + super.getDescription();
+    return "Filter results using a signal-to-noise (SNR) threshold. "
+        + "Any results above the upper SNR limit are included. "
+        + "Any results below the lower SNR limit are excluded. " + super.getDescription();
   }
 
   /** {@inheritDoc} */

@@ -1180,7 +1180,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     final Gaussian2DFitter gf;
     final ResultFactory resultFactory;
     final double[] region;
-    final double[] region2; // ; final double[] var_g2;
+    final double[] region2; // ; final double[] varG2;
     final Rectangle regionBounds;
     final int candidateId;
     final int width;
@@ -1219,13 +1219,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     QuadrantAnalysis qaSingle;
 
     public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region,
-        double[] region2, double[] var_g2, Rectangle regionBounds, int candidateId,
+        double[] region2, double[] varG2, Rectangle regionBounds, int candidateId,
         FloatAreaSum area) {
       this.gf = gf;
       this.resultFactory = resultFactory;
       this.region = region;
       this.region2 = region2;
-      // this.var_g2 = var_g2;
+      // this.varG2 = varG2;
       this.regionBounds = regionBounds;
       this.candidateId = candidateId;
       this.area = area;
@@ -1236,7 +1236,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
       fitConfig.setFitRegion(width, height, 0.5);
       // The variance is always needed in each fit of the same data
-      fitConfig.setObservationWeights(var_g2);
+      fitConfig.setObservationWeights(varG2);
 
       // Analyse neighbours and include them in the fit if they are within a set height of this
       // peak.
@@ -4122,7 +4122,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     Rectangle regionBounds;
     double[] region;
     double[] region2;
-    double[] var_g2;
+    double[] varG2;
     CandidateSpotFitter spotFitter;
     FitType fitType;
     boolean isValid;
@@ -4181,11 +4181,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           final float[] v = (isFitCameraCounts) ? cameraModel.getVariance(bounds)
               : cameraModel.getNormalisedVariance(bounds);
           // Convert to double
-          if (var_g2 == null || var_g2.length != v.length) {
-            var_g2 = SimpleArrayUtils.toDouble(v);
+          if (varG2 == null || varG2.length != v.length) {
+            varG2 = SimpleArrayUtils.toDouble(v);
           } else {
             for (int i = 0; i < v.length; i++) {
-              var_g2[i] = v[i];
+              varG2[i] = v[i];
             }
           }
         }
@@ -4203,7 +4203,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         final ResultFactory factory = (dynamic) ? new DynamicResultFactory(offsetx, offsety)
             : new FixedResultFactory(offsetx, offsety);
-        spotFitter = new CandidateSpotFitter(gf, factory, region, region2, var_g2, regionBounds,
+        spotFitter = new CandidateSpotFitter(gf, factory, region, region2, varG2, regionBounds,
             candidateId, area);
       }
     }

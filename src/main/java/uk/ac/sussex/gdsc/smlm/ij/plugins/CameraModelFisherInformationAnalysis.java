@@ -756,8 +756,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     return fi;
   }
 
-  private static PoissonGaussianApproximationFisherInformation createPoissonGaussianApproximationFisherInformation(
-      double s) {
+  private static PoissonGaussianApproximationFisherInformation
+      createPoissonGaussianApproximationFisherInformation(double s) {
     if (s <= 0) {
       IJ.error(TITLE, "CCD noise must be positive");
       return null;
@@ -765,8 +765,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     return new PoissonGaussianApproximationFisherInformation(s);
   }
 
-  private static PoissonGammaGaussianFisherInformation createPoissonGammaGaussianFisherInformation(
-      double m, double s) {
+  private static PoissonGammaGaussianFisherInformation
+      createPoissonGammaGaussianFisherInformation(double m, double s) {
     if (s < 0) {
       IJ.error(TITLE, "EM CCD noise must be positive");
       return null;

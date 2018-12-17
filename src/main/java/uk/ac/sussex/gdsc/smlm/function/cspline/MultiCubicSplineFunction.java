@@ -138,14 +138,14 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
   /** {@inheritDoc} */
   @Override
   protected void initialise(double[] a, int order) {
-    tB = a[PeakResult.BACKGROUND];
+    tb = a[PeakResult.BACKGROUND];
     // Ensure we have enough room
     if (t.length < n) {
-      int m = t.length;
+      int index = t.length;
       t = Arrays.copyOf(t, n); // Preserve memory space
       final boolean sp = splines[0][0].isSinglePrecision();
-      while (m < n) {
-        t[m++] = (sp) ? new FloatTargetSpline() : new DoubleTargetSpline();
+      while (index < n) {
+        t[index++] = (sp) ? new FloatTargetSpline() : new DoubleTargetSpline();
       }
       working = new TargetSpline[n];
       workingY = new TargetSpline[n];
@@ -181,15 +181,15 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
 
       if (wY == 0) {
         for (int x = 0; x < maxx; x++) {
-          procedure.execute(tB);
+          procedure.execute(tb);
         }
       } else {
         for (int x = 0; x < maxx; x++) {
-          double I = tB;
+          double intensity = tb;
           for (int n = 0; n < wY; n++) {
-            I += workingY[n].value(x);
+            intensity += workingY[n].value(x);
           }
-          procedure.execute(I);
+          procedure.execute(intensity);
         }
       }
     }
@@ -216,15 +216,15 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
 
       if (wY == 0) {
         for (int x = 0; x < maxx; x++) {
-          procedure.execute(tB, duda);
+          procedure.execute(tb, duda);
         }
       } else {
         for (int x = 0; x < maxx; x++) {
-          double I = tB;
+          double intensity = tb;
           for (int n = 0; n < wY; n++) {
-            I += workingY[n].value(x, duda);
+            intensity += workingY[n].value(x, duda);
           }
-          procedure.execute(I, duda);
+          procedure.execute(intensity, duda);
         }
       }
     }
@@ -252,15 +252,15 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
 
       if (wY == 0) {
         for (int x = 0; x < maxx; x++) {
-          procedure.execute(tB, duda, d2uda2);
+          procedure.execute(tb, duda, d2uda2);
         }
       } else {
         for (int x = 0; x < maxx; x++) {
-          double I = tB;
+          double intensity = tb;
           for (int n = 0; n < wY; n++) {
-            I += workingY[n].value(x, duda, d2uda2);
+            intensity += workingY[n].value(x, duda, d2uda2);
           }
-          procedure.execute(I, duda, d2uda2);
+          procedure.execute(intensity, duda, d2uda2);
         }
       }
     }

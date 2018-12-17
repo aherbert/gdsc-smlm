@@ -326,8 +326,8 @@ public class PCPALMMolecules implements PlugIn {
     if (!resultsAvailable) {
       runMode = 3;
 
-      gd.addMessage(
-          "Simulate molecules for cluster analysis.\nComputes a binary image from localisation data");
+      gd.addMessage("Simulate molecules for cluster analysis.\n"
+          + "Computes a binary image from localisation data");
 
       gd.addNumericField("Molecules", nMolecules, 0);
       gd.addNumericField("Simulation_size (um)", simulationSize, 2);
@@ -345,8 +345,8 @@ public class PCPALMMolecules implements PlugIn {
 
       Recorder.recordOption("Run_mode", RUN_MODE[runMode]);
     } else {
-      gd.addMessage(
-          "Prepare molecules for cluster analysis.\nComputes a binary image from raw localisation data");
+      gd.addMessage("Prepare molecules for cluster analysis.\n"
+          + "Computes a binary image from raw localisation data");
       ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
       if (!titles.isEmpty()) {
         gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
@@ -531,8 +531,8 @@ public class PCPALMMolecules implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(
-        "Estimate the average localisation precision by fitting histograms.\nUse the precision to trace localisations into molecule pulses.");
+    gd.addMessage("Estimate the average localisation precision by fitting histograms.\n"
+        + "Use the precision to trace localisations into molecule pulses.");
 
     gd.addNumericField("Histogram_bins", histogramBins, 0);
     gd.addChoice("Singles_mode", singlesMode, singlesMode[singlesModeIndex]);
@@ -905,9 +905,9 @@ public class PCPALMMolecules implements PlugIn {
       singles.add(new Molecule(dc.convert(centroid[0]), dc.convert(centroid[1]), p,
           ic.convert(t.getSignal())));
     }
-    log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
-        results.size(), molecules.size() + singles.size(), singles.size(), molecules.size(),
-        distance, time,
+    log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm,"
+        + " t=%d frames (%s s)", results.size(), molecules.size() + singles.size(), singles.size(),
+        molecules.size(), distance, time,
         MathUtils.rounded(time * results.getCalibrationReader().getExposureTime() / 1000.0));
     return molecules;
   }
@@ -1440,9 +1440,9 @@ public class PCPALMMolecules implements PlugIn {
           p95--;
         }
 
-        log("  * Mean Intra-Molecule particle linkage distance = %s nm (95%% = %s, 99%% = %s, 100%% = %s)",
-            MathUtils.rounded(intraDistances.getMean(), 4), MathUtils.rounded(intraHist[0][p95], 4),
-            MathUtils.rounded(intraHist[0][p99], 4),
+        log("  * Mean Intra-Molecule particle linkage distance = %s nm"
+            + " (95%% = %s, 99%% = %s, 100%% = %s)", MathUtils.rounded(intraDistances.getMean(), 4),
+            MathUtils.rounded(intraHist[0][p95], 4), MathUtils.rounded(intraHist[0][p99], 4),
             MathUtils.rounded(intraHist[0][intraHist[0].length - 1], 4));
 
         if (distanceAnalysis) {
@@ -1823,8 +1823,8 @@ public class PCPALMMolecules implements PlugIn {
     nmPerPixel = Math.sqrt(dMin);
     log("Minimum distance between molecules = %g nm", nmPerPixel);
     if (nmPerPixel == 0 && nmPerPixelLimit == 0) {
-      IJ.error(TITLE,
-          "Zero minimum distance between molecules - please enter a nm/pixel limit for image reconstruction");
+      IJ.error(TITLE, "Zero minimum distance between molecules - please enter a nm/pixel limit "
+          + "for image reconstruction");
       return false;
     }
 

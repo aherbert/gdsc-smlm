@@ -49,6 +49,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Reads the fit results from file using the Tagged Spot File (TSF) format.
@@ -59,6 +61,8 @@ import java.util.Arrays;
  * @author Alex Herbert
  */
 public class TSFPeakResultsReader {
+  private static Logger logger = Logger.getLogger(TSFPeakResultsReader.class.getName());
+
   private String filename;
   private SpotList spotList;
   private boolean readHeader;
@@ -113,8 +117,7 @@ public class TSFPeakResultsReader {
         isMulti = isMulti(spotList);
       }
     } catch (final Exception ex) {
-      System.err.println("Failed to read SpotList message");
-      ex.printStackTrace();
+      logger.warning(() -> "Failed to read SpotList message: " + ex.getMessage());
     }
 
     return spotList;
@@ -137,10 +140,18 @@ public class TSFPeakResultsReader {
     if (spotList.getNrPos() > 1) {
       return true;
     }
-    if (spotList.getFluorophoreTypesCount() > 1) {
-      return true;
-    }
-    return false;
+    return (spotList.getFluorophoreTypesCount() > 1);
+  }
+
+  /**
+   * Checks if the header data in the SpotList contains multiple channels, slices, positions, or
+   * fluorophores. These are categories that can be use to filter the data when reading.
+   *
+   * @return true, if the data contains multiple categories of localisations
+   */
+  public boolean isMulti() {
+    readHeader();
+    return isMulti;
   }
 
   /**
@@ -168,7 +179,10 @@ public class TSFPeakResultsReader {
           // No offset record
           return false;
         }
-        fi.skip(offset);
+        if (fi.skip(offset) != offset) {
+          // Bad skip
+          return false;
+        }
         final SpotList spotList = SpotList.parseDelimitedFrom(fi);
         if (spotList != null) {
           return true;
@@ -256,15 +270,15 @@ public class TSFPeakResultsReader {
 
         if (spot.hasLocationUnits() && !locationUnitsWarning
             && spot.getLocationUnits() != locationUnits) {
-          System.err
-              .println("Spot message has different location units, the units will be ignored: "
+          logger.warning(
+              () -> "Spot message has different location units, the units will be ignored: "
                   + spot.getLocationUnits());
           locationUnitsWarning = true;
         }
         if (spot.hasIntensityUnits() && !intensityUnitsWarning
             && spot.getIntensityUnits() != intensityUnits) {
-          System.err
-              .println("Spot message has different intensity units, the units will be ignored: "
+          logger.warning(
+              () -> "Spot message has different intensity units, the units will be ignored: "
                   + spot.getIntensityUnits());
           intensityUnitsWarning = true;
         }
@@ -342,23 +356,22 @@ public class TSFPeakResultsReader {
         peakResult.setId(id);
         if (spot.hasXPrecision() || spot.hasYPrecision()) {
           // Use the average. Note this is not the Euclidean distance since we divide by n
-          double p = 0;
-          int n = 0;
+          double sumSq = 0;
+          int count = 0;
           if (spot.hasXPrecision()) {
-            p = spot.getXPrecision() * spot.getXPrecision();
-            n++;
+            sumSq = spot.getXPrecision() * spot.getXPrecision();
+            count++;
           }
           if (spot.hasYPrecision()) {
-            p += spot.getYPrecision() * spot.getYPrecision();
-            n++;
+            sumSq += spot.getYPrecision() * spot.getYPrecision();
+            count++;
           }
-          peakResult.setPrecision(Math.sqrt(p / n));
+          peakResult.setPrecision(Math.sqrt(sumSq / count));
         }
         results.add(peakResult);
       }
     } catch (final IOException ex) {
-      System.err.println("Failed to read TSF file: " + filename);
-      ex.printStackTrace();
+      logger.log(Level.WARNING, ex, () -> "Failed to read TSF file: " + filename);
 
       if (expectedSpots == -1) {
         // No attempt to read the spots was made.
@@ -370,8 +383,8 @@ public class TSFPeakResultsReader {
       // read until the EOF.
       // Only fail if there is a number of expected spots.
       if (expectedSpots != 0) {
-        System.err
-            .println("Unexpected error in reading Spot messages, no results will be returned");
+        logger.warning(
+            () -> "Unexpected error in reading Spot messages, no results will be returned");
         return null;
       }
     }
@@ -535,8 +548,7 @@ public class TSFPeakResultsReader {
           parser.merge(spotList.getPSF(), psfBuilder);
           results.setPSF(psfBuilder.build());
         } catch (final InvalidProtocolBufferException ex) {
-          // This should be OK
-          System.err.println("Unable to deserialise the PSF settings");
+          logger.warning("Unable to deserialise the PSF settings");
         }
       }
     }
@@ -544,8 +556,9 @@ public class TSFPeakResultsReader {
     if (spotList.hasLocationUnits()) {
       cal.setDistanceUnit(locationUnitsMap[spotList.getLocationUnits().ordinal()]);
       if (!spotList.hasPixelSize() && spotList.getLocationUnits() != LocationUnits.PIXELS) {
-        System.err.println(
-            "TSF location units are not pixels and no pixel size calibration is available. The dataset will be constructed in the native units: "
+        logger.warning(
+            () -> "TSF location units are not pixels and no pixel size calibration is available."
+                + " The dataset will be constructed in the native units: "
                 + spotList.getLocationUnits());
       }
     } else {
@@ -555,8 +568,9 @@ public class TSFPeakResultsReader {
     if (spotList.hasIntensityUnits()) {
       cal.setIntensityUnit(intensityUnitsMap[spotList.getIntensityUnits().ordinal()]);
       if (!spotList.hasGain() && spotList.getIntensityUnits() != IntensityUnits.COUNTS) {
-        System.err.println(
-            "TSF intensity units are not counts and no gain calibration is available. The dataset will be constructed in the native units: "
+        logger.warning(
+            () -> "TSF intensity units are not counts and no gain calibration is available."
+                + " The dataset will be constructed in the native units: "
                 + spotList.getIntensityUnits());
       }
     } else {
@@ -658,17 +672,6 @@ public class TSFPeakResultsReader {
   public boolean isGDSC() {
     readHeader();
     return isGDSC;
-  }
-
-  /**
-   * Checks if the header data in the SpotList contains multiple channels, slices, positions, or
-   * fluorophores. These are categories that can be use to filter the data when reading.
-   *
-   * @return true, if the data contains multiple categories of localisations
-   */
-  public boolean isMulti() {
-    readHeader();
-    return isMulti;
   }
 
   /**

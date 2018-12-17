@@ -122,6 +122,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Run the OPTICS algorithm on the peak results.
@@ -450,6 +451,8 @@ public class OPTICS implements PlugIn {
     public abstract String getName();
 
     /**
+     * Check if the profile should be highlighted for top-cluster regions.
+     *
      * @return True if the profile should be highlighted for top-cluster regions.
      */
     public boolean isHighlightProfile() {
@@ -457,6 +460,8 @@ public class OPTICS implements PlugIn {
     }
 
     /**
+     * Check if the profile should be coloured using the OPTICS results.
+     *
      * @return True if the profile should be coloured using the OPTICS results.
      */
     public boolean isColourProfile() {
@@ -464,6 +469,8 @@ public class OPTICS implements PlugIn {
     }
 
     /**
+     * Check if the profile should be coloured using the cluster Id.
+     *
      * @return True if the profile should be coloured using the cluster Id.
      */
     public boolean isColourProfileById() {
@@ -471,6 +478,8 @@ public class OPTICS implements PlugIn {
     }
 
     /**
+     * Check if the profile should be coloured using the cluster depth.
+     *
      * @return True if the profile should be coloured using the cluster depth.
      */
     public boolean isColourProfileByDepth() {
@@ -478,6 +487,8 @@ public class OPTICS implements PlugIn {
     }
 
     /**
+     * Check if the profile should be coloured using the cluster order.
+     *
      * @return True if the profile should be coloured using the cluster order.
      */
     public boolean isColourProfileByOrder() {
@@ -485,13 +496,17 @@ public class OPTICS implements PlugIn {
     }
 
     /**
-     * @return If clusters should be drawn on the plot.
+     * Checks if clusters should be drawn on the plot.
+     *
+     * @return True if clusters should be drawn on the plot.
      */
     public boolean isDrawClusters() {
       return false;
     }
 
     /**
+     * Checks if the clusters are needed.
+     *
      * @return True if the clusters are needed.
      */
     public boolean requiresClusters() {
@@ -551,6 +566,8 @@ public class OPTICS implements PlugIn {
     public abstract String getName();
 
     /**
+     * Checks if the outline should be displayed.
+     *
      * @return True if the outline should be displayed.
      */
     public boolean isOutline() {
@@ -558,6 +575,8 @@ public class OPTICS implements PlugIn {
     }
 
     /**
+     * Checks if the outline should be coloured using the cluster depth.
+     *
      * @return True if the outline should be coloured using the cluster depth.
      */
     public boolean isColourByDepth() {
@@ -625,6 +644,8 @@ public class OPTICS implements PlugIn {
     public abstract String getName();
 
     /**
+     * Check if the spanning tree should be displayed.
+     *
      * @return True if the spanning tree should be displayed.
      */
     public boolean isSpanningTree() {
@@ -831,8 +852,8 @@ public class OPTICS implements PlugIn {
       return work;
     }
 
-    void addHandler(ClusterSelectedHandler h) {
-      handlers.add(h);
+    void addHandler(ClusterSelectedHandler handler) {
+      handlers.add(handler);
     }
   }
 
@@ -841,7 +862,7 @@ public class OPTICS implements PlugIn {
   // The worker that will relay all the selected clusters
   private ClusterSelectedWorker clusterSelectedWorker;
 
-  private String TITLE;
+  private String pluginTitle;
 
   private OpticsSettings.Builder inputSettings;
 
@@ -852,13 +873,13 @@ public class OPTICS implements PlugIn {
   // Stack to which the work is first added
   private final Workflow<OpticsSettings, Settings> workflow = new Workflow<>();
 
-  private static int WORKER_ID;
+  private static final AtomicInteger workerId = new AtomicInteger();
 
   private abstract class BaseWorker extends WorkflowWorker<OpticsSettings, Settings> {
     final int id;
 
     BaseWorker() {
-      id = WORKER_ID++;
+      id = workerId.getAndIncrement();
       // When constructing the workflow automatically add any workers
       // that can handle cluster selections
       if (this instanceof ClusterSelectedHandler) {
@@ -1205,14 +1226,14 @@ public class OPTICS implements PlugIn {
           final double nmPerPixel = getNmPerPixel(results);
           if (nmPerPixel != 1) {
             final double newDistance = distance / nmPerPixel;
-            ImageJUtils.log(TITLE + ": Converting generating distance %s nm to %s pixels",
+            ImageJUtils.log(pluginTitle + ": Converting generating distance %s nm to %s pixels",
                 MathUtils.rounded(distance), MathUtils.rounded(newDistance));
             distance = newDistance;
           }
         } else {
           final double nmPerPixel = getNmPerPixel(results);
           if (nmPerPixel != 1) {
-            ImageJUtils.log(TITLE + ": Default generating distance %s nm",
+            ImageJUtils.log(pluginTitle + ": Default generating distance %s nm",
                 MathUtils.rounded(opticsManager.computeGeneratingDistance(minPts) * nmPerPixel));
           }
         }
@@ -1269,7 +1290,7 @@ public class OPTICS implements PlugIn {
       if (clusteringResult.isValid()) {
         final OpticsResult opticsResult = clusteringResult.getOPTICSResult();
 
-        int nClusters = 0;
+        int clusterCount = 0;
         synchronized (opticsResult) {
           final double nmPerPixel = getNmPerPixel(results);
 
@@ -1289,7 +1310,7 @@ public class OPTICS implements PlugIn {
                 distance =
                     opticsManager.computeGeneratingDistance(settings.getMinPoints()) * nmPerPixel;
                 if (nmPerPixel != 1) {
-                  ImageJUtils.log(TITLE + ": Default clustering distance %s nm",
+                  ImageJUtils.log(pluginTitle + ": Default clustering distance %s nm",
                       MathUtils.rounded(distance));
                 }
               }
@@ -1303,21 +1324,21 @@ public class OPTICS implements PlugIn {
 
             if (nmPerPixel != 1) {
               final double newDistance = distance / nmPerPixel;
-              ImageJUtils.log(TITLE + ": Converting clustering distance %s nm to %s pixels",
+              ImageJUtils.log(pluginTitle + ": Converting clustering distance %s nm to %s pixels",
                   MathUtils.rounded(distance), MathUtils.rounded(newDistance));
               distance = newDistance;
             }
 
             opticsResult.extractDbscanClustering((float) distance, settings.getCore());
           }
-          nClusters = opticsResult.getNumberOfClusters();
+          clusterCount = opticsResult.getNumberOfClusters();
           // We must scramble after extracting the clusters since the cluster Ids have been
           // rewritten
           scrambleClusters(opticsResult);
         }
 
         ImageJUtils.log("Clustering mode: %s = %s", settings.getClusteringMode(),
-            TextUtils.pleural(nClusters, "Cluster"));
+            TextUtils.pleural(clusterCount, "Cluster"));
 
         // We created a new clustering so create a new WorkerResult
         clusteringResult = new CachedClusteringResult(opticsResult);
@@ -1342,7 +1363,7 @@ public class OPTICS implements PlugIn {
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (!clusteringResult.isValid()) {
         // Only log here so it happens once
-        IJ.log(TITLE + ": No results to display");
+        IJ.log(pluginTitle + ": No results to display");
       }
       return work;
     }
@@ -1392,12 +1413,12 @@ public class OPTICS implements PlugIn {
 
       // Compare to previous results
       if (!queue.isEmpty()) {
-        int i = -queue.size();
+        int index = -queue.size();
         final StringBuilder sb = new StringBuilder();
         sb.append("Cluster comparison: RandIndex (AdjustedRandIndex)\n");
         for (final Iterator<ClusterResult> it = queue.iterator(); it.hasNext();) {
           final ClusterResult previous = it.next();
-          sb.append("[").append(i++).append("] ");
+          sb.append("[").append(index++).append("] ");
           compare(sb, "Clusters", current.c1, previous.c1);
           if (current.c2 != null) {
             sb.append(" : ");
@@ -1464,7 +1485,7 @@ public class OPTICS implements PlugIn {
             traces[clusters[counter.getAndIncrement()]].add(result);
           }
         });
-        TraceMolecules.saveResults(results, traces, TITLE);
+        TraceMolecules.saveResults(results, traces, pluginTitle);
       }
 
       // We have not created anything new so return the current object
@@ -1518,7 +1539,7 @@ public class OPTICS implements PlugIn {
         }
 
         final double[] order = SimpleArrayUtils.newArray(profile.length, 1.0, 1.0);
-        final String title = TITLE + " Reachability Distance";
+        final String title = pluginTitle + " Reachability Distance";
         final Plot2 plot = new Plot2(title, "Order", "Reachability" + units);
         final double[] limits = MathUtils.limits(profile);
         // plot to zero
@@ -1902,8 +1923,8 @@ public class OPTICS implements PlugIn {
   }
 
   private class OrderProvider {
-    int getOrder(int i) {
-      return i;
+    int getOrder(int index) {
+      return index;
     }
   }
 
@@ -1915,8 +1936,8 @@ public class OPTICS implements PlugIn {
     }
 
     @Override
-    int getOrder(int i) {
-      return order[i];
+    int getOrder(int index) {
+      return order[index];
     }
   }
 
@@ -2077,7 +2098,7 @@ public class OPTICS implements PlugIn {
           // Display the results ...
 
           final Rectangle bounds = results.getBounds();
-          image = new IJImagePeakResults(results.getName() + " " + TITLE, bounds,
+          image = new IJImagePeakResults(results.getName() + " " + pluginTitle, bounds,
               (float) settings.getImageScale());
           // Options to control rendering
           image.copySettings(results);
@@ -2619,9 +2640,9 @@ public class OPTICS implements PlugIn {
       }
     }
 
-    private Shape getShape(PolygonRoi r) {
+    private Shape getShape(PolygonRoi roi) {
       final Path2D.Float path = new Path2D.Float();
-      final FloatPolygon p = r.getFloatPolygon();
+      final FloatPolygon p = roi.getFloatPolygon();
       path.moveTo(p.xpoints[0], p.ypoints[0]);
       for (int i = 1; i < p.xpoints.length; i++) {
         path.lineTo(p.xpoints[i], p.ypoints[i]);
@@ -2869,7 +2890,7 @@ public class OPTICS implements PlugIn {
         final double toUnit = results.getDistanceConverter(unit).convert(1);
 
         if (tw == null || !tw.isVisible()) {
-          tw = new TextWindow2(TITLE + " Clusters", headings, "", 800, 400);
+          tw = new TextWindow2(pluginTitle + " Clusters", headings, "", 800, 400);
 
           // Add a mouse listener to allow double click on a cluster to draw
           // a polygon ROI of the convex hull, or point ROI if size <=2
@@ -3108,8 +3129,8 @@ public class OPTICS implements PlugIn {
 
       // Create the table if needed
       if (tw == null) {
-        table = new IJTablePeakResults(false, TITLE, true);
-        table.setTableTitle(TITLE + " Selected Clusters");
+        table = new IJTablePeakResults(false, pluginTitle, true);
+        table.setTableTitle(pluginTitle + " Selected Clusters");
         table.copySettings(results);
         table.setDistanceUnit(DistanceUnit.NM);
         table.setHideSourceText(true);
@@ -3118,7 +3139,7 @@ public class OPTICS implements PlugIn {
         tw = table.getResultsWindow();
         if (bounds == null) {
           // Position under the Clusters window
-          final String tableTitle = TITLE + " Clusters";
+          final String tableTitle = pluginTitle + " Clusters";
           for (final Frame f : WindowManager.getNonImageWindows()) {
             if (f != null && tableTitle.equals(f.getTitle())) {
               // Cascade
@@ -3229,7 +3250,7 @@ public class OPTICS implements PlugIn {
       final String units = (nmPerPixel != 1) ? " (nm)" : " (px)";
 
       final double[] order = SimpleArrayUtils.newArray(profile.length, 1.0, 1.0);
-      final String title = TITLE + " KNN Distance";
+      final String title = pluginTitle + " KNN Distance";
       final Plot2 plot = new Plot2(title, "Sample", k + "-NN Distance" + units);
       final double[] limits = new double[] {profile[profile.length - 1], profile[0]};
 
@@ -3324,7 +3345,7 @@ public class OPTICS implements PlugIn {
         final double nmPerPixel = getNmPerPixel(results);
         if (nmPerPixel != 1) {
           final double newGeneratingDistance = clusteringDistance / nmPerPixel;
-          ImageJUtils.log(TITLE + ": Converting clustering distance %s nm to %s pixels",
+          ImageJUtils.log(pluginTitle + ": Converting clustering distance %s nm to %s pixels",
               MathUtils.rounded(clusteringDistance), MathUtils.rounded(newGeneratingDistance));
           clusteringDistance = newGeneratingDistance;
         }
@@ -3334,7 +3355,7 @@ public class OPTICS implements PlugIn {
 
         final double nmPerPixel = getNmPerPixel(results);
         if (nmPerPixel != 1) {
-          ImageJUtils.log(TITLE + ": Default clustering distance %s nm",
+          ImageJUtils.log(pluginTitle + ": Default clustering distance %s nm",
               MathUtils.rounded(opticsManager.computeGeneratingDistance(minPts) * nmPerPixel));
         }
       }
@@ -3388,7 +3409,7 @@ public class OPTICS implements PlugIn {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (MemoryPeakResults.isMemoryEmpty()) {
-      IJ.error(TITLE, "No localisations in memory");
+      IJ.error(pluginTitle, "No localisations in memory");
       return;
     }
 
@@ -3404,14 +3425,14 @@ public class OPTICS implements PlugIn {
       runOPTICS();
     }
 
-    IJ.showStatus(TITLE + " finished");
+    IJ.showStatus(pluginTitle + " finished");
 
     // Update the settings
     SettingsManager.writeSettings(inputSettings.build());
   }
 
   private void runDBSCAN() {
-    TITLE = TITLE_DBSCAN;
+    pluginTitle = TITLE_DBSCAN;
 
     createEventWorkflow();
 
@@ -3448,7 +3469,7 @@ public class OPTICS implements PlugIn {
   }
 
   private void runOPTICS() {
-    TITLE = TITLE_OPTICS;
+    pluginTitle = TITLE_OPTICS;
 
     createEventWorkflow();
 
@@ -3491,7 +3512,7 @@ public class OPTICS implements PlugIn {
   private boolean showDialog(boolean isDBSCAN) {
     logReferences(isDBSCAN);
 
-    final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+    final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(pluginTitle);
     gd.addHelp(About.HELP_URL);
 
     ResultsManager.addInput(gd, inputSettings.getInputOption(), InputSource.MEMORY);
@@ -3502,7 +3523,7 @@ public class OPTICS implements PlugIn {
     if (isDBSCAN) {
       gd.addMessage("--- Nearest-Neighbour Analysis ---");
     } else {
-      gd.addMessage("--- " + TITLE + " ---");
+      gd.addMessage("--- " + pluginTitle + " ---");
     }
     gd.addNumericField("Min_points", inputSettings.getMinPoints(), 0);
     if (isDBSCAN) {
@@ -3533,9 +3554,9 @@ public class OPTICS implements PlugIn {
                   new ExtendedGenericDialog(mode.toString() + " options");
               final OpticsSettings oldSettings = inputSettings.build();
               if (mode == OpticsMode.FAST_OPTICS) {
-                egd.addMessage(TextUtils.wrap(
-                    "The number of splits to compute (if below 1 it will be auto-computed using the size of the data)",
-                    80));
+                egd.addMessage(TextUtils
+                    .wrap("The number of splits to compute (if below 1 it will be auto-computed "
+                        + "using the size of the data)", 80));
                 egd.addNumericField("Number_of_splits", inputSettings.getNumberOfSplitSets(), 0);
                 if (extraOptions) {
                   egd.addCheckbox("Random_vectors", inputSettings.getUseRandomVectors());
@@ -3597,8 +3618,8 @@ public class OPTICS implements PlugIn {
                   new ExtendedGenericDialog(mode.toString() + " options");
               final OpticsSettings oldSettings = inputSettings.build();
               if (mode == ClusteringMode.XI) {
-                egd.addMessage(
-                    "Xi controls the change in reachability (profile steepness) to define a cluster");
+                egd.addMessage("Xi controls the change in reachability (profile steepness) to "
+                    + "define a cluster");
                 egd.addNumericField("Xi", inputSettings.getXi(), 4);
                 egd.addCheckbox("Top_clusters", inputSettings.getTopLevel());
                 egd.addNumericField("Upper_limit", inputSettings.getUpperLimit(), 4, 10, "nm");
@@ -3867,25 +3888,31 @@ public class OPTICS implements PlugIn {
     if (isDBSCAN && (logged & LOG_DBSCAN) != LOG_DBSCAN) {
       logged |= LOG_DBSCAN;
       sb.append("DBSCAN: ");
-      sb.append(TextUtils.wrap(
-          "Ester, et al (1996). 'A density-based algorithm for discovering clusters in large spatial databases with noise'. Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.",
-          width)).append('\n');
+      sb.append(TextUtils
+          .wrap("Ester, et al (1996). 'A density-based algorithm for discovering clusters in large "
+              + "spatial databases with noise'. Proceedings of the Second International Conference "
+              + "on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.", width))
+          .append('\n');
     } else if ((logged & LOG_OPTICS) != LOG_OPTICS) {
       logged |= LOG_OPTICS;
       sb.append("OPTICS: ");
       sb.append(TextUtils.wrap(
-          "Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery. 1 (3): 231–240.",
+          "Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: "
+              + "Data Mining and Knowledge Discovery. 1 (3): 231–240.",
           width)).append('\n');
       sb.append("FastOPTICS: ");
-      sb.append(TextUtils.wrap(
-          "Schneider, et al (2013). 'Fast parameterless density-based clustering via random projections'. 22nd ACM International Conference on Information and Knowledge Management(CIKM). ACM. pp. 861-866.",
-          width)).append('\n');
+      sb.append(TextUtils
+          .wrap("Schneider, et al (2013). 'Fast parameterless density-based clustering via random "
+              + "projections'. 22nd ACM International Conference on Information and Knowledge "
+              + "Management(CIKM). ACM. pp. 861-866.", width))
+          .append('\n');
     }
     if ((logged & LOG_LOOP) != LOG_LOOP) {
       logged |= LOG_LOOP;
       sb.append("LoOP: ");
       sb.append(TextUtils.wrap(
-          "Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International Conference on Information and knowledge management(CIKM). ACM. pp. 1649-1652.",
+          "Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International "
+              + "Conference on Information and knowledge management(CIKM). ACM. pp. 1649-1652.",
           width)).append('\n');
     }
     if (sb.length() > 0) {
@@ -3937,7 +3964,7 @@ public class OPTICS implements PlugIn {
             DistanceUnit.PIXEL, null);
       }
       if (results == null || results.size() == 0) {
-        IJ.error(TITLE, "No results could be loaded");
+        IJ.error(pluginTitle, "No results could be loaded");
         return false;
       }
 
@@ -3994,7 +4021,8 @@ public class OPTICS implements PlugIn {
     public boolean collectOptions(Boolean value) {
       // Collect the options for the events
       final OpticsEventSettings old = inputSettings.getOpticsEventSettings();
-      final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE + " Preview Settings");
+      final ExtendedGenericDialog egd =
+          new ExtendedGenericDialog(pluginTitle + " Preview Settings");
       final boolean record = Recorder.record;
       Recorder.record = false;
       egd.addMessage("Configure the interactive preview");
@@ -4066,7 +4094,7 @@ public class OPTICS implements PlugIn {
               inputSettings.getLowerLimit());
         }
       } catch (final IllegalArgumentException ex) {
-        ImageJUtils.log(TITLE + ": " + ex.getMessage());
+        ImageJUtils.log(pluginTitle + ": " + ex.getMessage());
         return false;
       }
 

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -72,11 +73,30 @@ import java.util.logging.Logger;
 public class JumpDistanceAnalysis {
   private static final boolean DEBUG_OPTIMISER = false;
   private static final double THIRD = 1.0 / 3.0;
+
   private double s2;
   private boolean msdCorrection;
-  private int n;
+  private int numberOfFrames;
   private double deltaT;
   private boolean calibrated;
+
+  private final Logger logger;
+  private CurveLogger curveLogger;
+  private int fitRestarts = 3;
+  private double minFraction = 0.1;
+  private double minDifference = 2;
+  private double minD;
+  private int minN = 1;
+  private int maxN = 10;
+  private double significanceLevel = 0.05;
+
+  // Set by the last call to the doFit functions
+  private double ss;
+  private double ll;
+  private double fitValue;
+
+  // Set by any public fit call
+  private double lastFitValue;
 
   /**
    * Interface to logger to record a jump distance curve.
@@ -104,23 +124,6 @@ public class JumpDistanceAnalysis {
      */
     public void saveMixedPopulationCurve(double[][] curve);
   }
-
-  private final Logger logger;
-  private CurveLogger curveLogger;
-  private int fitRestarts = 3;
-  private double minFraction = 0.1;
-  private double minDifference = 2;
-  private double minD;
-  private int minN = 1;
-  private int maxN = 10;
-  private double significanceLevel = 0.05;
-
-  // Set by the last call to the doFit functions
-  private double ss;
-  private double ll;
-  private double fitValue;
-  // Set by any public fit call
-  private double lastFitValue;
 
   /**
    * Instantiates a new jump distance analysis.
@@ -171,6 +174,28 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Fit the jump distances using a fit to a cumulative histogram with the given number of species.
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
+   *
+   * @param jumpDistances The jump distances (in um^2)
+   * @param numberOfSpecies The number of species in the mixed population
+   * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
+   */
+  public @Nullable double[][] fitJumpDistances(double[] jumpDistances, int numberOfSpecies) {
+    resetFitResult();
+    if (jumpDistances == null || jumpDistances.length == 0) {
+      return null;
+    }
+    final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
+    if (meanJumpDistance == 0) {
+      return null;
+    }
+    final double[][] jdHistogram = cumulativeHistogram(jumpDistances);
+    return fitJumpDistanceHistogram(meanJumpDistance, jdHistogram, numberOfSpecies);
+  }
+
+  /**
    * Fit the jump distance histogram using a cumulative sum.
    *
    * <p>The histogram is fit repeatedly using a mixed population model with increasing number of
@@ -186,7 +211,8 @@ public class JumpDistanceAnalysis {
    *        probability. Must be monototic ascending.
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  public double[][] fitJumpDistanceHistogram(double meanJumpDistance, double[][] jdHistogram) {
+  public @Nullable double[][] fitJumpDistanceHistogram(double meanJumpDistance,
+      double[][] jdHistogram) {
     resetFitResult();
     // Guess the D
     final double estimatedD = meanJumpDistance / 4;
@@ -264,28 +290,6 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Fit the jump distances using a fit to a cumulative histogram with the given number of species.
-   *
-   * <p>Results are sorted by the diffusion coefficient ascending.
-   *
-   * @param jumpDistances The jump distances (in um^2)
-   * @param n The number of species in the mixed population
-   * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
-   */
-  public double[][] fitJumpDistances(double[] jumpDistances, int n) {
-    resetFitResult();
-    if (jumpDistances == null || jumpDistances.length == 0) {
-      return null;
-    }
-    final double meanJumpDistance = MathUtils.sum(jumpDistances) / jumpDistances.length;
-    if (meanJumpDistance == 0) {
-      return null;
-    }
-    final double[][] jdHistogram = cumulativeHistogram(jumpDistances);
-    return fitJumpDistanceHistogram(meanJumpDistance, jdHistogram, n);
-  }
-
-  /**
    * Fit the jump distance histogram using a cumulative sum with the given number of species.
    *
    * <p>Results are sorted by the diffusion coefficient ascending.
@@ -293,11 +297,11 @@ public class JumpDistanceAnalysis {
    * @param meanJumpDistance The mean jump distance (in um^2)
    * @param jdHistogram The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative
    *        probability. Must be Monotonic ascending.
-   * @param n The number of species in the mixed population
+   * @param numberOfSpecies The number of species in the mixed population
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  public double[][] fitJumpDistanceHistogram(double meanJumpDistance, double[][] jdHistogram,
-      int n) {
+  public @Nullable double[][] fitJumpDistanceHistogram(double meanJumpDistance,
+      double[][] jdHistogram, int numberOfSpecies) {
     resetFitResult();
     // Guess the D
     final double estimatedD = meanJumpDistance / 4;
@@ -306,7 +310,7 @@ public class JumpDistanceAnalysis {
     }
     LoggerUtils.log(logger, Level.INFO, "Estimated D = %s um^2", MathUtils.rounded(estimatedD, 4));
 
-    final double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n);
+    final double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, numberOfSpecies);
     if (fit != null) {
       saveFitCurve(fit, jdHistogram);
     }
@@ -588,12 +592,12 @@ public class JumpDistanceAnalysis {
     return null;
   }
 
-  private boolean isValid(double[] d, double[] f) {
+  private boolean isValid(double[] dc, double[] fractions) {
     int belowMinD = 0;
-    for (int i = 0; i < f.length; i++) {
+    for (int i = 0; i < fractions.length; i++) {
       // Check only one population has a diffusion coefficient below the
       // precision of the experiment
-      if (d[i] < minD) {
+      if (dc[i] < minD) {
         if (++belowMinD > 1) {
           LoggerUtils.log(logger, Level.INFO,
               "  Invalid: Multiple populations below minimum D (%s um^2)", MathUtils.rounded(minD));
@@ -601,27 +605,27 @@ public class JumpDistanceAnalysis {
         }
       }
       // Check the fractions and coefficients exist
-      if (f[i] <= 0) {
+      if (fractions[i] <= 0) {
         LoggerUtils.log(logger, Level.INFO, "  Invalid: Fraction is zero");
         return false;
       }
-      if (d[i] <= 0) {
+      if (dc[i] <= 0) {
         LoggerUtils.log(logger, Level.INFO, "  Invalid: Coefficient is zero");
         return false;
       }
       // Check the fit has fractions above the minimum fraction
-      if (f[i] < minFraction) {
+      if (fractions[i] < minFraction) {
         LoggerUtils.log(logger, Level.INFO,
             "  Invalid: Fraction is less than the minimum fraction: %s < %s",
-            MathUtils.rounded(f[i]), MathUtils.rounded(minFraction));
+            MathUtils.rounded(fractions[i]), MathUtils.rounded(minFraction));
         return false;
       }
       // Check the coefficients are different
-      if (i > 0 && d[i - 1] / d[i] < minDifference) {
+      if (i > 0 && dc[i - 1] / dc[i] < minDifference) {
         LoggerUtils.log(logger, Level.INFO,
             "  Invalid: Coefficients are not different: %s / %s = %s < %s",
-            MathUtils.rounded(d[i - 1]), MathUtils.rounded(d[i]),
-            MathUtils.rounded(d[i - 1] / d[i]), MathUtils.rounded(minDifference));
+            MathUtils.rounded(dc[i - 1]), MathUtils.rounded(dc[i]),
+            MathUtils.rounded(dc[i - 1] / dc[i]), MathUtils.rounded(minDifference));
         return false;
       }
     }
@@ -1113,12 +1117,12 @@ public class JumpDistanceAnalysis {
   /**
    * Sort the arrays by the size of the diffusion coefficient.
    *
-   * @param d The diffusion coefficient array
-   * @param f The fraction of the population array
+   * @param diffusionCoefficients The diffusion coefficient array
+   * @param fractions The fraction of the population array
    */
-  public static void sort(double[] d, double[] f) {
+  public static void sort(double[] diffusionCoefficients, double[] fractions) {
     // Sort by coefficient size
-    SortUtils.sortData(f, d, true, false);
+    SortUtils.sortData(fractions, diffusionCoefficients, true, false);
   }
 
   private void saveFitCurve(double[][] fit, double[][] jdHistogram) {
@@ -1184,114 +1188,118 @@ public class JumpDistanceAnalysis {
     double[] x;
     double[] y;
     double estimatedD;
-    int n;
+    int numberOfFractions;
 
-    public Function(double[] x, double[] y, double estimatedD, int n) {
+    public Function(double[] x, double[] y, double estimatedD, int numberOfFractions) {
       this.x = x;
       this.y = y;
       this.estimatedD = estimatedD;
-      this.n = n;
+      this.numberOfFractions = numberOfFractions;
     }
 
     /**
+     * Guess the parameters.
+     *
      * @return An estimate for the parameters.
      */
-    public double[] guess() {
-      if (n == 1) {
+    double[] guess() {
+      if (numberOfFractions == 1) {
         return new double[] {estimatedD};
       }
 
-      final double[] guess = new double[n * 2];
-      double d = estimatedD;
-      for (int i = 0; i < n; i++) {
+      final double[] guess = new double[numberOfFractions * 2];
+      double dc = estimatedD;
+      for (int i = 0; i < numberOfFractions; i++) {
         // Fraction are all equal
         guess[i * 2] = 1;
         // Diffusion coefficient gets smaller for each fraction
-        guess[i * 2 + 1] = d;
-        d *= 0.1;
+        guess[i * 2 + 1] = dc;
+        dc *= 0.1;
       }
       return guess;
     }
 
     /**
+     * Compute an estimate for the initial search step for the parameters.
+     *
      * @return An estimate for the initial search step for the parameters.
      */
-    public double[] step() {
-      if (n == 1) {
+    double[] step() {
+      if (numberOfFractions == 1) {
         return new double[] {estimatedD * 0.5};
       }
 
-      final double[] step = new double[n * 2];
-      double d = estimatedD;
-      for (int i = 0; i < n; i++) {
+      final double[] step = new double[numberOfFractions * 2];
+      double dc = estimatedD;
+      for (int i = 0; i < numberOfFractions; i++) {
         // Fraction are all equal
         step[i * 2] = 0.1;
         // Diffusion coefficient gets smaller for each fraction
-        step[i * 2 + 1] = d * 0.5;
-        d *= 0.1;
+        step[i * 2 + 1] = dc * 0.5;
+        dc *= 0.1;
       }
       return step;
     }
 
-    public double[] getUpperBounds() {
+    double[] getUpperBounds() {
       // Fraction guess is 1 so set the upper limit as 10
       // Diffusion coefficient could be 10x the estimated
       return getUpperBounds(10, estimatedD * 10);
     }
 
-    public double[] getUpperBounds(double fractionLimit, double dLimit) {
-      if (n == 1) {
-        return new double[] {dLimit};
+    double[] getUpperBounds(double fractionLimit, double dlimit) {
+      if (numberOfFractions == 1) {
+        return new double[] {dlimit};
       }
 
-      final double[] bounds = new double[n * 2];
-      for (int i = 0; i < n; i++) {
+      final double[] bounds = new double[numberOfFractions * 2];
+      for (int i = 0; i < numberOfFractions; i++) {
         bounds[i * 2] = fractionLimit;
-        bounds[i * 2 + 1] = dLimit;
+        bounds[i * 2 + 1] = dlimit;
       }
       return bounds;
     }
 
-    public double[] getLowerBounds() {
+    double[] getLowerBounds() {
       return getLowerBounds(0, 0);
     }
 
-    public double[] getLowerBounds(double fractionLimit, double dLimit) {
+    double[] getLowerBounds(double fractionLimit, double dlimit) {
       // Diffusion coefficient could be 0 but this is not practical for
       // testing a mixed population so set to a small value where the optimiser
       // will not be successfully anyway
       fractionLimit = Math.max(fractionLimit, 1e-5);
-      dLimit = Math.max(dLimit, 1e-16);
+      dlimit = Math.max(dlimit, 1e-16);
 
-      if (n == 1) {
-        return new double[] {dLimit};
+      if (numberOfFractions == 1) {
+        return new double[] {dlimit};
       }
 
-      final double[] bounds = new double[n * 2];
-      for (int i = 0; i < n; i++) {
+      final double[] bounds = new double[numberOfFractions * 2];
+      for (int i = 0; i < numberOfFractions; i++) {
         bounds[i * 2] = fractionLimit;
-        bounds[i * 2 + 1] = dLimit;
+        bounds[i * 2 + 1] = dlimit;
       }
       return bounds;
     }
 
-    public double[] getWeights() {
+    double[] getWeights() {
       final double[] w = new double[x.length];
       Arrays.fill(w, 1);
       return w;
     }
 
-    public double[] getX() {
+    double[] getX() {
       return x;
     }
 
-    public double[] getY() {
+    double[] getY() {
       return y;
     }
 
-    public abstract double evaluate(double x, double[] parameters);
+    abstract double evaluate(double x, double[] parameters);
 
-    public double[][] jacobian(double[] variables) {
+    double[][] jacobian(double[] variables) {
       final double[][] jacobian = new double[x.length][variables.length];
 
       final double delta = 0.001;
@@ -1365,18 +1373,18 @@ public class JumpDistanceAnalysis {
       // log(p) = log(1/4D * exp(-x/4D))
       // = log(1/4D) + log(exp(-x/4D))
       // = log(1/4D) + -x/4D
-      double l = 0;
+      double ll = 0;
       // final double one_fourD = 1 / (4 * getD(variables[0]));
       final double one_fourD = 1 / (4 * variables[0]);
       for (int i = 0; i < x.length; i++) {
-        l += -x[i] * one_fourD;
+        ll += -x[i] * one_fourD;
       }
-      l += Math.log(one_fourD) * x.length;
+      ll += Math.log(one_fourD) * x.length;
       // Debug the call from the optimiser
       if (DEBUG_OPTIMISER) {
-        System.out.printf("[1] : [%f] = %f\n", variables[0], l);
+        System.out.printf("[1] : [%f] = %f\n", variables[0], ll);
       }
-      return l;
+      return ll;
     }
 
     // This has not been tested. It could be used for LVM fitting of the p-values. However MLE
@@ -1434,7 +1442,7 @@ public class JumpDistanceAnalysis {
      * @param y the y
      * @param estimatedD the estimated D
      */
-    public JumpDistanceCumulFunction(double[] x, double[] y, double estimatedD) {
+    JumpDistanceCumulFunction(double[] x, double[] y, double estimatedD) {
       super(x, y, estimatedD, 1);
     }
 
@@ -1507,17 +1515,17 @@ public class JumpDistanceAnalysis {
      * @param estimatedD the estimated D
      * @param n the n
      */
-    public MixedJumpDistanceFunction(double[] x, double estimatedD, int n) {
+    MixedJumpDistanceFunction(double[] x, double estimatedD, int n) {
       super(x, null, estimatedD, n);
     }
 
     @Override
-    public double evaluate(double x, double[] params) {
+    double evaluate(double x, double[] params) {
       // Compute the probability:
       // p = sum [ Fj/4Dj * exp(-x/4Dj) ]
       double sum = 0;
       double total = 0;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfFractions; i++) {
         // final double f = getF(params[i * 2]);
         // final double fourD = 4 * getD(params[i * 2 + 1]);
         final double f = params[i * 2];
@@ -1534,17 +1542,17 @@ public class JumpDistanceAnalysis {
      * @param params the params
      * @return the values
      */
-    public double[] evaluateAll(double[] params) {
+    double[] evaluateAll(double[] params) {
       double total = 0;
-      final double[] f_d = new double[n];
-      for (int i = 0; i < n; i++) {
+      final double[] f_d = new double[numberOfFractions];
+      for (int i = 0; i < numberOfFractions; i++) {
         // f_d[i] = getF(params[i * 2]);
         f_d[i] = params[i * 2];
         total += f_d[i];
       }
 
-      final double[] fourD = new double[n];
-      for (int i = 0; i < n; i++) {
+      final double[] fourD = new double[numberOfFractions];
+      for (int i = 0; i < numberOfFractions; i++) {
         // fourD[i] = 4 * getD(params[i * 2 + 1]);
         fourD[i] = 4 * params[i * 2 + 1];
         f_d[i] = (f_d[i] / total) / fourD[i];
@@ -1555,7 +1563,7 @@ public class JumpDistanceAnalysis {
       final double[] values = new double[x.length];
       for (int i = 0; i < x.length; i++) {
         double sum = 0;
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < numberOfFractions; j++) {
           sum += f_d[j] * FastMath.exp(-x[i] / fourD[j]);
         }
         values[i] = sum;
@@ -1567,21 +1575,21 @@ public class JumpDistanceAnalysis {
     @Override
     public double value(double[] params) {
       // Compute the log-likelihood
-      double l = 0;
+      double ll = 0;
       for (final double p : evaluateAll(params)) {
-        l += Math.log(p);
+        ll += Math.log(p);
       }
       // Debug the call from the optimiser
       if (DEBUG_OPTIMISER) {
-        final double[] F = new double[n];
-        final double[] D = new double[n];
-        for (int i = 0; i < n; i++) {
+        final double[] F = new double[numberOfFractions];
+        final double[] D = new double[numberOfFractions];
+        for (int i = 0; i < numberOfFractions; i++) {
           F[i] = params[i * 2];
           D[i] = params[i * 2 + 1];
         }
-        System.out.printf("%s : %s = %f\n", Arrays.toString(F), Arrays.toString(D), l);
+        System.out.printf("%s : %s = %f\n", Arrays.toString(F), Arrays.toString(D), ll);
       }
-      return l;
+      return ll;
     }
   }
 
@@ -1608,7 +1616,7 @@ public class JumpDistanceAnalysis {
     public double evaluate(double x, double[] params) {
       double sum = 0;
       double total = 0;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfFractions; i++) {
         final double f = params[i * 2];
         sum += f * FastMath.exp(-x / (4 * params[i * 2 + 1]));
         total += f;
@@ -1624,13 +1632,13 @@ public class JumpDistanceAnalysis {
      */
     public double[] getValue(double[] variables) {
       double total = 0;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfFractions; i++) {
         total += variables[i * 2];
       }
 
-      final double[] fourD = new double[n];
-      final double[] f = new double[n];
-      for (int i = 0; i < n; i++) {
+      final double[] fourD = new double[numberOfFractions];
+      final double[] f = new double[numberOfFractions];
+      for (int i = 0; i < numberOfFractions; i++) {
         f[i] = variables[i * 2] / total;
         fourD[i] = 4 * variables[i * 2 + 1];
       }
@@ -1638,7 +1646,7 @@ public class JumpDistanceAnalysis {
       final double[] values = new double[x.length];
       for (int i = 0; i < values.length; i++) {
         double sum = 0;
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < numberOfFractions; j++) {
           sum += f[j] * FastMath.exp(-x[i] / fourD[j]);
         }
         values[i] = 1 - sum;
@@ -1706,19 +1714,19 @@ public class JumpDistanceAnalysis {
       // = f * a * b / D
       // = f * exp(b) * b / D
 
-      final double[] fourD = new double[n];
-      final double[] f = new double[n];
+      final double[] fourD = new double[numberOfFractions];
+      final double[] f = new double[numberOfFractions];
       double total = 0;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfFractions; i++) {
         f[i] = variables[i * 2];
         fourD[i] = 4 * variables[i * 2 + 1];
         total += f[i];
       }
 
-      final double[] fraction = new double[n];
-      final double[] total_f = new double[n];
-      final double[] f_total = new double[n];
-      for (int i = 0; i < n; i++) {
+      final double[] fraction = new double[numberOfFractions];
+      final double[] total_f = new double[numberOfFractions];
+      final double[] f_total = new double[numberOfFractions];
+      for (int i = 0; i < numberOfFractions; i++) {
         fraction[i] = f[i] / total;
         // Because we use y = 1 - sum(a) all coefficients are inverted
         total_f[i] = -1 * (total - f[i]) / (total * total);
@@ -1727,19 +1735,19 @@ public class JumpDistanceAnalysis {
 
       final double[][] jacobian = new double[x.length][variables.length];
 
-      final double[] b = new double[n];
+      final double[] b = new double[numberOfFractions];
       for (int i = 0; i < x.length; ++i) {
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < numberOfFractions; j++) {
           b[j] = -x[i] / fourD[j];
         }
 
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < numberOfFractions; j++) {
           // Gradient for the diffusion coefficient
           jacobian[i][j * 2 + 1] = fraction[j] * FastMath.exp(b[j]) * b[j] / variables[j * 2 + 1];
 
           // Gradient for the fraction f
           jacobian[i][j * 2] = total_f[j] * FastMath.exp(b[j]);
-          for (int k = 0; k < n; k++) {
+          for (int k = 0; k < numberOfFractions; k++) {
             if (j == k) {
               continue;
             }
@@ -1800,9 +1808,9 @@ public class JumpDistanceAnalysis {
       }
       // Debug the call from the optimiser
       if (DEBUG_OPTIMISER) {
-        final double[] F = new double[n];
-        final double[] D = new double[n];
-        for (int i = 0; i < n; i++) {
+        final double[] F = new double[numberOfFractions];
+        final double[] D = new double[numberOfFractions];
+        for (int i = 0; i < numberOfFractions; i++) {
           F[i] = parameters[i * 2];
           D[i] = parameters[i * 2 + 1];
         }
@@ -1813,6 +1821,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Gets the number restarts for fitting.
+   *
    * @return The number restarts for fitting.
    */
   public int getFitRestarts() {
@@ -1820,6 +1830,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Sets the number restarts for fitting.
+   *
    * @param fitRestarts The number restarts for fitting
    */
   public void setFitRestarts(int fitRestarts) {
@@ -1827,6 +1839,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Gets the min fraction for each population in a mixed population.
+   *
    * @return the min fraction for each population in a mixed population.
    */
   public double getMinFraction() {
@@ -1834,27 +1848,35 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * @param minFraction the min fraction for each population in a mixed population
+   * Sets the min fraction for each population in a mixed population.
+   *
+   * @param minFraction the new min fraction
    */
   public void setMinFraction(double minFraction) {
     this.minFraction = minFraction;
   }
 
   /**
-   * @return the min difference between diffusion coefficients in a mixed population.
+   * Gets the min difference between diffusion coefficients in a mixed population.
+   *
+   * @return the min difference
    */
   public double getMinDifference() {
     return minDifference;
   }
 
   /**
-   * @param minDifference the min difference between diffusion coefficients in a mixed population
+   * Sets the min difference between diffusion coefficients in a mixed population.
+   *
+   * @param minDifference the new min difference
    */
   public void setMinDifference(double minDifference) {
     this.minDifference = minDifference;
   }
 
   /**
+   * Gets the minimum number of different molecules to fit in a mixed population model.
+   *
    * @return the minimum number of different molecules to fit in a mixed population model.
    */
   public int getMinN() {
@@ -1862,6 +1884,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Sets the minimum number of different molecules to fit in a mixed population model.
+   *
    * @param n the minimum number of different molecules to fit in a mixed population model
    */
   public void setMinN(int n) {
@@ -1872,6 +1896,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Gets the maximum number of different molecules to fit in a mixed population model.
+   *
    * @return the maximum number of different molecules to fit in a mixed population model.
    */
   public int getMaxN() {
@@ -1879,6 +1905,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Sets the maximum number of different molecules to fit in a mixed population model.
+   *
    * @param n the maximum number of different molecules to fit in a mixed population model
    */
   public void setMaxN(int n) {
@@ -1908,23 +1936,23 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Gets the d.
+   * Gets the diffusion coefficient.
    *
-   * @param d the d
+   * @param dc the diffusion coefficient
    * @return Return d or minD whichever is larger
    */
-  public double getD(double d) {
-    return (d < minD) ? minD : d;
+  public double getD(double dc) {
+    return (dc < minD) ? minD : dc;
   }
 
   /**
-   * Gets the f.
+   * Gets the fraction.
    *
-   * @param f the f
-   * @return Return f or minFraction whichever is larger
+   * @param fraction the fraction
+   * @return Return fraction or minFraction whichever is larger
    */
-  public double getF(double f) {
-    return (f < minFraction) ? minFraction : f;
+  public double getF(double fraction) {
+    return (fraction < minFraction) ? minFraction : fraction;
   }
 
   /**
@@ -1953,11 +1981,11 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames
-   * into the actual MSD.
+   * Get the conversion factor to convert an observed mean-squared distance (MSD) between {@code n}
+   * frames into the actual MSD.
    *
    * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
-   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * an average within the frame. This leads to condensation of the observed distance travelled by
    * the particle between two frames. The start and end frame locations have condensed diffusion
    * within the frame to a single point. This condensation has the effect of reducing the effective
    * time that diffusion occurred in the start and end frame. The observed MSD can be converted to
@@ -1972,19 +2000,19 @@ public class JumpDistanceAnalysis {
    *
    * <p>Note this is only valid for {@code n>=1}.
    *
-   * @param n the n
+   * @param numberOfFrames the number of frames (n)
    * @return the conversion factor
    */
-  public static double getConversionfactor(int n) {
-    return n / (n - THIRD);
+  public static double getConversionfactor(int numberOfFrames) {
+    return numberOfFrames / (numberOfFrames - THIRD);
   }
 
   /**
-   * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames
-   * into the actual MSD.
+   * Get the conversion factor to convert an observed mean-squared distance (MSD) between {@code n}
+   * frames into the actual MSD.
    *
    * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
-   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * an average within the frame. This leads to condensation of the observed distance travelled by
    * the particle between two frames. The start and end frame locations have condensed diffusion
    * within the frame to a single point. This condensation has the effect of reducing the effective
    * time that diffusion occurred in the start and end frame and the total number of frames should
@@ -2013,24 +2041,24 @@ public class JumpDistanceAnalysis {
    *
    * <p>Note this is valid for {@code n>=0}.
    *
-   * @param n the n
+   * @param numberOfFrames the number of frames (n)
    * @return the conversion factor
    */
-  public static double getConversionfactor(double n) {
-    if (n > 1) {
-      return n / (n - THIRD);
+  public static double getConversionfactor(double numberOfFrames) {
+    if (numberOfFrames > 1) {
+      return numberOfFrames / (numberOfFrames - THIRD);
     }
-    if (n > 0) {
-      return 1 / (n - n * n / 3.0);
+    if (numberOfFrames > 0) {
+      return 1 / (numberOfFrames - numberOfFrames * numberOfFrames / 3.0);
     }
     return 0;
   }
 
   /**
-   * Get the corrected time between n frames for an observed mean-squared distance (MSD).
+   * Get the corrected time between {@code n} frames for an observed mean-squared distance (MSD).
    *
    * <p>Note that diffusion of a molecule within a frame means that the position of the molecule is
-   * an average within the frame. This leads to condensation of the observed distance traveled by
+   * an average within the frame. This leads to condensation of the observed distance travelled by
    * the particle between two frames. The start and end frame locations have condensed diffusion
    * within the frame to a single point. This condensation has the effect of reducing the effective
    * time that diffusion occurred in the start and end frame and the total number of frames should
@@ -2042,11 +2070,11 @@ public class JumpDistanceAnalysis {
    *
    * <p>Note this is only valid for {@code n>=1}.
    *
-   * @param n the n
+   * @param numberOfFrames the number of frames (n)
    * @return the corrected time
    */
-  public static double getCorrectedTime(int n) {
-    return n - THIRD;
+  public static double getCorrectedTime(int numberOfFrames) {
+    return numberOfFrames - THIRD;
   }
 
   /**
@@ -2104,6 +2132,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Gets the localisation error (s) of the start and end coordinates of the jump (in um).
+   *
    * @return The localisation error (s) of the start and end coordinates of the jump (in um).
    */
   public double getError() {
@@ -2125,6 +2155,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Checks if correcting MSD between frames.
+   *
    * @return True if correcting MSD between frames.
    */
   public boolean isMsdCorrection() {
@@ -2142,10 +2174,12 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Gets the number of frames between the start and end coordinates of the jump.
+   *
    * @return The number of frames between the start and end coordinates of the jump.
    */
   public int getN() {
-    return n;
+    return numberOfFrames;
   }
 
   /**
@@ -2154,7 +2188,7 @@ public class JumpDistanceAnalysis {
    * @param n The number of frames (must be strictly positive)
    */
   public void setN(int n) {
-    this.n = n;
+    this.numberOfFrames = n;
   }
 
   /**
@@ -2177,6 +2211,8 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Gets time difference between each frame.
+   *
    * @return The time difference between each frame.
    */
   public double getDeltaT() {
@@ -2194,15 +2230,17 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Checks if the number of frames and time delta have been set.
+   *
    * @return True if the number of frames and time delta have been set.
    */
   public boolean isCalibrated() {
-    return deltaT > 0 && n > 0;
+    return deltaT > 0 && numberOfFrames > 0;
   }
 
   /**
    * Convert the diffusion coefficients (um^2/jump) into apparent diffusion coefficients (um^2/s) if
-   * the time and frames are calibrated:
+   * the time and frames are calibrated.
    *
    * <pre>
    * D* = factor * (D - s2) / (n * deltaT)
@@ -2211,27 +2249,28 @@ public class JumpDistanceAnalysis {
    * <p>where factor is the conversion factor to increase the MSD to correct for diffusion within
    * the frame
    *
-   * @param d The fitted diffusion coefficients D (in um^2)
+   * @param diffusionCoefficients The fitted diffusion coefficients D (in um^2)
    * @return The apparent diffusion coefficients D* (in um^2/s)
    */
-  public double[] calculateApparentDiffusionCoefficient(double... d) {
+  public double[] calculateApparentDiffusionCoefficient(double... diffusionCoefficients) {
     if (isCalibrated()) {
-      d = d.clone();
-      final double f = ((msdCorrection) ? getConversionfactor(n) : 1) / (n * deltaT);
-      for (int i = 0; i < d.length; i++) {
-        d[i] = Math.max(0, d[i] - s2) * f;
+      diffusionCoefficients = diffusionCoefficients.clone();
+      final double f =
+          ((msdCorrection) ? getConversionfactor(numberOfFrames) : 1) / (numberOfFrames * deltaT);
+      for (int i = 0; i < diffusionCoefficients.length; i++) {
+        diffusionCoefficients[i] = Math.max(0, diffusionCoefficients[i] - s2) * f;
       }
     }
-    return d;
+    return diffusionCoefficients;
   }
 
   /**
-   * Get the fit value. This will be the Adjusted R^2 for least squares estimation or the
+   * Get the last fit value. This will be the Adjusted R^2 for least squares estimation or the
    * information criterion from maximum likelihood estimation.
    *
    * @return The fit value from the last successful fit
    */
-  public double getFitValue() {
+  public double getLastFitValue() {
     return lastFitValue;
   }
 }

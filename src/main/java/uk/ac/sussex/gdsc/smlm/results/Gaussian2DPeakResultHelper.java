@@ -486,7 +486,8 @@ public class Gaussian2DPeakResultHelper {
 
   /**
    * Flag for the {@link Gaussian2DPeakResultCalculator#getAmplitude(float[])} function.
-   */  public static final int AMPLITUDE = 0x00000001;
+   */
+  public static final int AMPLITUDE = 0x00000001;
   /**
    * Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[], float)} function.
    */
@@ -1295,7 +1296,11 @@ public class Gaussian2DPeakResultHelper {
    *
    * <pre>
    * HWHM = sqrt(2 * log(2))
-   * (F(r)=0.5 = sqrt(-2 * log(0.5)) = sqrt(-2 * log(1 / 2)) = sqrt(-2 * (log(1) - log(2))) = sqrt(-2 * -log(2))
+   * (F(r)= 0.5
+   *      = sqrt(-2 * log(0.5)
+   *      = sqrt(-2 * log(1 / 2))
+   *      = sqrt(-2 * (log(1) - log(2)))
+   *      = sqrt(-2 * -log(2))
    * </pre>
    *
    * <p>Thus this computes the mean signal within the HWHM of a 2D Gaussian.

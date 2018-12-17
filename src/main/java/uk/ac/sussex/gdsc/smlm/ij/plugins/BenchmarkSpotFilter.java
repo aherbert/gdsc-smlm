@@ -2469,9 +2469,10 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private static String createHeader() {
     final StringBuilder sb = new StringBuilder(
-        "Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tCamera\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
-    sb.append(
-        "Type\tSearch\tBorder\tWidth\tFilter\tAbs.Param\tRel.Param\tDescription\tA.Border\tMatching\tlower d\td\tlower sf\tsf");
+        "Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\t"
+            + "Fixed\tCamera\tB (photons)\tNoise (photons)\tSNR\ts (px)\t");
+    sb.append("Type\tSearch\tBorder\tWidth\tFilter\tAbs.Param\tRel.Param\tDescription\t"
+        + "A.Border\tMatching\tlower d\td\tlower sf\tsf");
     tablePrefix = sb.toString();
     sb.append("\tSlope\t");
     sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");

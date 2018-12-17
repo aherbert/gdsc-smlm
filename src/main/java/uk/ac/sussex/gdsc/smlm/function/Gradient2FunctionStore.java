@@ -34,7 +34,8 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore
 
   /**
    * The gradients from the last call to {@link #forEach(Gradient2Procedure)}.
-   */  public double[][] d2yda2;
+   */
+  public double[][] d2yda2;
 
   /**
    * Instantiates a new gradient 2 function store.

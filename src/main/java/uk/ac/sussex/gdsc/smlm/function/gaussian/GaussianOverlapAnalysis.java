@@ -211,11 +211,11 @@ public class GaussianOverlapAnalysis {
     }
 
     // Add the function to the overlap
-    final int nPeaks = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
+    final int numberOfPeaks = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
     final Gaussian2DFunction f =
-        GaussianFunctionFactory.create2D(nPeaks, maxx, maxy, flags, zModel);
+        GaussianFunctionFactory.create2D(numberOfPeaks, maxx, maxy, flags, zModel);
     params = params.clone();
-    for (int n = 0; n < nPeaks; n++) {
+    for (int n = 0; n < numberOfPeaks; n++) {
       params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] +=
           centrex - params0[Gaussian2DFunction.X_POSITION];
       params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] +=

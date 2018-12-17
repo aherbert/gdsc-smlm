@@ -25,16 +25,16 @@
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 /**
- * Solves (one) linear equation, a x = b
+ * Solves (one) linear equation, a x = b.
  */
 public class GaussJordan {
-  private int max_row;
-  private int max_col;
+  private int maxRow;
+  private int maxCol;
 
-  /**
-   * @return True if OK.
-   */
-  private boolean find_pivot(float[][] a, int[] piv) {
+  // Allow use of parameter names a and b
+  // @CHECKSTYLE.OFF: ParameterName
+
+  private boolean findPivot(float[][] a, int[] piv) {
     float max = 0;
 
     for (int i = 0; i < piv.length; i++) {
@@ -43,8 +43,8 @@ public class GaussJordan {
           if (piv[j] == 0) {
             if (Math.abs(a[i][j]) >= max) {
               max = Math.abs(a[i][j]);
-              max_row = i;
-              max_col = j;
+              maxRow = i;
+              maxCol = j;
             }
           } else if (piv[j] > 1) {
             // This should not happen, i.e. a second pivot around a column
@@ -54,54 +54,54 @@ public class GaussJordan {
       }
     }
 
-    piv[max_col]++;
+    piv[maxCol]++;
 
     return true;
   }
 
-  private void interchange_rows_vector(float[][] a, float[] b) {
-    for (int j = a[max_row].length; j-- > 0;) {
-      final float tmp = a[max_row][j];
-      a[max_row][j] = a[max_col][j];
-      a[max_col][j] = tmp;
+  private void interchangeRowsVector(float[][] a, float[] b) {
+    for (int j = a[maxRow].length; j-- > 0;) {
+      final float tmp = a[maxRow][j];
+      a[maxRow][j] = a[maxCol][j];
+      a[maxCol][j] = tmp;
     }
 
-    final float tmp = b[max_row];
-    b[max_row] = b[max_col];
-    b[max_col] = tmp;
+    final float tmp = b[maxRow];
+    b[maxRow] = b[maxCol];
+    b[maxCol] = tmp;
   }
 
-  private boolean pivot_vector(float[][] a, float[] b) {
-    if (a[max_col][max_col] == 0) {
+  private boolean pivotVector(float[][] a, float[] b) {
+    if (a[maxCol][maxCol] == 0) {
       return false;
     }
 
-    final float piv_inv = 1 / a[max_col][max_col];
+    final float piv_inv = 1 / a[maxCol][maxCol];
 
-    a[max_col][max_col] = 1;
+    a[maxCol][maxCol] = 1;
 
-    for (int i = 0; i < a[max_col].length; i++) {
-      a[max_col][i] *= piv_inv;
+    for (int i = 0; i < a[maxCol].length; i++) {
+      a[maxCol][i] *= piv_inv;
     }
-    b[max_col] *= piv_inv;
+    b[maxCol] *= piv_inv;
 
-    for (int i = 0; i < a[max_col].length; i++) {
-      if (i != max_col) {
-        final float x = a[i][max_col];
-        a[i][max_col] = 0;
+    for (int i = 0; i < a[maxCol].length; i++) {
+      if (i != maxCol) {
+        final float x = a[i][maxCol];
+        a[i][maxCol] = 0;
 
-        for (int j = 0; j < a[max_col].length; j++) {
-          a[i][j] -= x * a[max_col][j];
+        for (int j = 0; j < a[maxCol].length; j++) {
+          a[i][j] -= x * a[maxCol][j];
         }
 
-        b[i] -= x * b[max_col];
+        b[i] -= x * b[maxCol];
       }
     }
 
     return true;
   }
 
-  private static void unscramble_vector(float[][] a, int[] row, int[] col) {
+  private static void unscrambleVector(float[][] a, int[] row, int[] col) {
     for (int j = row.length; j-- > 0;) {
       if (row[j] != col[j]) {
         for (int i = row.length; i-- > 0;) {
@@ -144,38 +144,38 @@ public class GaussJordan {
    * @return False if the equation is singular (no solution)
    */
   private boolean solve(float[][] a, float[] b, int[] piv, int[] row, int[] col) {
-    max_row = 0;
-    max_col = 0;
+    maxRow = 0;
+    maxCol = 0;
 
     for (int i = 0; i < piv.length; i++) {
       piv[i] = 0;
     }
 
     for (int i = 0; i < piv.length; i++) {
-      if (!find_pivot(a, piv)) {
+      if (!findPivot(a, piv)) {
         return false;
       }
 
-      if (max_row != max_col) {
-        interchange_rows_vector(a, b);
+      if (maxRow != maxCol) {
+        interchangeRowsVector(a, b);
       }
 
-      row[i] = max_row;
-      col[i] = max_col;
+      row[i] = maxRow;
+      col[i] = maxCol;
 
-      if (!pivot_vector(a, b)) {
+      if (!pivotVector(a, b)) {
         return false;
       }
     }
 
-    unscramble_vector(a, row, col);
+    unscrambleVector(a, row, col);
     return true;
   }
 
-  /**
-   * @return True if OK.
-   */
-  private boolean find_pivot(double[][] a, int[] piv) {
+  // The above code is repeated for <double>
+  // @CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
+
+  private boolean findPivot(double[][] a, int[] piv) {
     double max = 0;
 
     for (int i = 0; i < piv.length; i++) {
@@ -184,8 +184,8 @@ public class GaussJordan {
           if (piv[j] == 0) {
             if (Math.abs(a[i][j]) >= max) {
               max = Math.abs(a[i][j]);
-              max_row = i;
-              max_col = j;
+              maxRow = i;
+              maxCol = j;
             }
           } else if (piv[j] > 1) {
             // This should not happen, i.e. a second pivot around a column
@@ -195,54 +195,54 @@ public class GaussJordan {
       }
     }
 
-    piv[max_col]++;
+    piv[maxCol]++;
 
     return true;
   }
 
-  private void interchange_rows_vector(double[][] a, double[] b) {
-    for (int j = a[max_row].length; j-- > 0;) {
-      final double tmp = a[max_row][j];
-      a[max_row][j] = a[max_col][j];
-      a[max_col][j] = tmp;
+  private void interchangeRowsVector(double[][] a, double[] b) {
+    for (int j = a[maxRow].length; j-- > 0;) {
+      final double tmp = a[maxRow][j];
+      a[maxRow][j] = a[maxCol][j];
+      a[maxCol][j] = tmp;
     }
 
-    final double tmp = b[max_row];
-    b[max_row] = b[max_col];
-    b[max_col] = tmp;
+    final double tmp = b[maxRow];
+    b[maxRow] = b[maxCol];
+    b[maxCol] = tmp;
   }
 
-  private boolean pivot_vector(double[][] a, double[] b) {
-    if (a[max_col][max_col] == 0) {
+  private boolean pivotVector(double[][] a, double[] b) {
+    if (a[maxCol][maxCol] == 0) {
       return false;
     }
 
-    final double piv_inv = 1 / a[max_col][max_col];
+    final double piv_inv = 1 / a[maxCol][maxCol];
 
-    a[max_col][max_col] = 1;
+    a[maxCol][maxCol] = 1;
 
-    for (int i = 0; i < a[max_col].length; i++) {
-      a[max_col][i] *= piv_inv;
+    for (int i = 0; i < a[maxCol].length; i++) {
+      a[maxCol][i] *= piv_inv;
     }
-    b[max_col] *= piv_inv;
+    b[maxCol] *= piv_inv;
 
-    for (int i = 0; i < a[max_col].length; i++) {
-      if (i != max_col) {
-        final double x = a[i][max_col];
-        a[i][max_col] = 0;
+    for (int i = 0; i < a[maxCol].length; i++) {
+      if (i != maxCol) {
+        final double x = a[i][maxCol];
+        a[i][maxCol] = 0;
 
-        for (int j = 0; j < a[max_col].length; j++) {
-          a[i][j] -= x * a[max_col][j];
+        for (int j = 0; j < a[maxCol].length; j++) {
+          a[i][j] -= x * a[maxCol][j];
         }
 
-        b[i] -= x * b[max_col];
+        b[i] -= x * b[maxCol];
       }
     }
 
     return true;
   }
 
-  private static void unscramble_vector(double[][] a, int[] row, int[] col) {
+  private static void unscrambleVector(double[][] a, int[] row, int[] col) {
     for (int j = row.length; j-- > 0;) {
       if (row[j] != col[j]) {
         for (int i = row.length; i-- > 0;) {
@@ -285,31 +285,31 @@ public class GaussJordan {
    * @return False if the equation is singular (no solution)
    */
   public boolean solve(double[][] a, double[] b, int[] piv, int[] row, int[] col) {
-    max_row = 0;
-    max_col = 0;
+    maxRow = 0;
+    maxCol = 0;
 
     for (int i = 0; i < piv.length; i++) {
       piv[i] = 0;
     }
 
     for (int i = 0; i < piv.length; i++) {
-      if (!find_pivot(a, piv)) {
+      if (!findPivot(a, piv)) {
         return false;
       }
 
-      if (max_row != max_col) {
-        interchange_rows_vector(a, b);
+      if (maxRow != maxCol) {
+        interchangeRowsVector(a, b);
       }
 
-      row[i] = max_row;
-      col[i] = max_col;
+      row[i] = maxRow;
+      col[i] = maxCol;
 
-      if (!pivot_vector(a, b)) {
+      if (!pivotVector(a, b)) {
         return false;
       }
     }
 
-    unscramble_vector(a, row, col);
+    unscrambleVector(a, row, col);
     return true;
   }
 }

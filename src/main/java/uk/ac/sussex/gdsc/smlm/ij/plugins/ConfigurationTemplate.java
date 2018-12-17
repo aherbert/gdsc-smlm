@@ -825,8 +825,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    *
    * @param settings the settings
    */
-  private static void loadSelectedStandardTemplates(
-      ConfigurationTemplateSettings.Builder settings) {
+  private static void
+      loadSelectedStandardTemplates(ConfigurationTemplateSettings.Builder settings) {
     final String[] inlineNames = listInlineTemplates();
     final TemplateResource[] templates = listTemplateResources();
     if (templates.length + inlineNames.length == 0) {
@@ -902,8 +902,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    *
    * @param settings the settings
    */
-  private static void loadSelectedCustomTemplatesFromDirectory(
-      ConfigurationTemplateSettings.Builder settings) {
+  private static void
+      loadSelectedCustomTemplatesFromDirectory(ConfigurationTemplateSettings.Builder settings) {
     // Allow the user to specify a configuration directory
     final String newDirectory =
         ImageJUtils.getDirectory("Template_directory", settings.getConfigurationDirectory());

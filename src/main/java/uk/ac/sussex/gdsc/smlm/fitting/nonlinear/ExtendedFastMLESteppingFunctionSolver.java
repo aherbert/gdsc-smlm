@@ -69,27 +69,27 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param maxRelativeError the max relative error
    * @param maxAbsoluteError the max absolute error
    * @throws NullPointerException if the function is null
    */
-  public ExtendedFastMLESteppingFunctionSolver(Gradient2Function f, double maxRelativeError,
+  public ExtendedFastMLESteppingFunctionSolver(Gradient2Function function, double maxRelativeError,
       double maxAbsoluteError) {
-    super(f, maxRelativeError, maxAbsoluteError);
+    super(function, maxRelativeError, maxAbsoluteError);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public ExtendedFastMLESteppingFunctionSolver(Gradient2Function f, ToleranceChecker tc,
+  public ExtendedFastMLESteppingFunctionSolver(Gradient2Function function, ToleranceChecker tc,
       ParameterBounds bounds) {
-    super(f, tc, bounds);
+    super(function, tc, bounds);
   }
 
   /**
@@ -124,7 +124,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
     // This method is defined at the package level for JUnit testing. It is not public
     // as the method does not work.
     if (enable) {
-      if (!(f instanceof ExtendedGradient2Function)) {
+      if (!(function instanceof ExtendedGradient2Function)) {
         throw new IllegalStateException(
             "Jacobian requires an " + ExtendedGradient2Function.class.getName());
       }
@@ -144,11 +144,11 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
   protected FastMLEGradient2Procedure createGradientProcedure(double[] y) {
     // We can handle per-observation variances as detailed in
     // Huang, et al. (2015) by simply adding the variances to the computed value.
-    f2 = (Gradient2Function) f;
+    f2 = (Gradient2Function) function;
     if (solver != null) {
       if (w != null) {
         f2 = OffsetExtendedGradient2Function
-            .wrapExtendedGradient2Function((ExtendedGradient2Function) f, w);
+            .wrapExtendedGradient2Function((ExtendedGradient2Function) function, w);
       }
       jacobian = new double[f2.size()];
       return jacobianGradientProcedure =

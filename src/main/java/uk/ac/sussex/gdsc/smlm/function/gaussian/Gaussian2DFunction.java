@@ -33,8 +33,6 @@ import uk.ac.sussex.gdsc.smlm.function.NoiseModel;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
-import java.util.Arrays;
-
 /**
  * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
  *
@@ -58,8 +56,6 @@ public abstract class Gaussian2DFunction
    */
   public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
 
-  private NoiseModel noiseModel;
-
   /** Constant for 1./2*pi */
   public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
 
@@ -82,6 +78,9 @@ public abstract class Gaussian2DFunction
 
   /** The number of parameters per Gaussian peak. */
   public static final int PARAMETERS_PER_PEAK = 7;
+
+  /** The noise model. */
+  private NoiseModel noiseModel;
 
   /**
    * Gets the name of the parameter assuming a 2D Gaussian function.
@@ -108,8 +107,8 @@ public abstract class Gaussian2DFunction
 
   /** {@inheritDoc} */
   @Override
-  public String getParameterName(int i) {
-    return getName(i);
+  public String getParameterName(int index) {
+    return getName(index);
   }
 
   /**
@@ -160,6 +159,8 @@ public abstract class Gaussian2DFunction
   }
 
   /**
+   * Gets the dimensions.
+   *
    * @return the dimensions.
    */
   public int[] getDimensions() {
@@ -167,6 +168,8 @@ public abstract class Gaussian2DFunction
   }
 
   /**
+   * Gets the maximum size in the first dimension (X).
+   *
    * @return the maximum size in the first dimension.
    */
   public int getMaxX() {
@@ -174,6 +177,8 @@ public abstract class Gaussian2DFunction
   }
 
   /**
+   * Gets the maximum size in the second dimension (Y).
+   *
    * @return the maximum size in the second dimension.
    */
   public int getMaxY() {
@@ -188,26 +193,36 @@ public abstract class Gaussian2DFunction
   public abstract Gaussian2DFunction copy();
 
   /**
+   * Gets the number of peaks.
+   *
    * @return the number of peaks.
    */
   public abstract int getNPeaks();
 
   /**
+   * Check if the function can evaluate the background gradient.
+   *
    * @return True if the function can evaluate the background gradient.
    */
   public abstract boolean evaluatesBackground();
 
   /**
+   * Check if the function can evaluate the signal gradient.
+   *
    * @return True if the function can evaluate the signal gradient.
    */
   public abstract boolean evaluatesSignal();
 
   /**
+   * Check if the function can evaluate the XY-position gradient.
+   *
    * @return True if the function can evaluate the XY-position gradient.
    */
   public abstract boolean evaluatesPosition();
 
   /**
+   * Check if the function can evaluate the Z-position gradient.
+   *
    * @return True if the function can evaluate the Z-position gradient.
    */
   public boolean evaluatesZ() {
@@ -216,23 +231,31 @@ public abstract class Gaussian2DFunction
   }
 
   /**
+   * Check if the function can evaluate the standard deviation gradient for the 1st dimension.
+   *
    * @return True if the function can evaluate the standard deviation gradient for the 1st
    *         dimension.
    */
   public abstract boolean evaluatesSD0();
 
   /**
+   * Check if the function can evaluate the standard deviation gradient for the 2nd dimension.
+   *
    * @return True if the function can evaluate the standard deviation gradient for the 2nd
    *         dimension.
    */
   public abstract boolean evaluatesSD1();
 
   /**
+   * Check if the function can evaluate the angle gradient.
+   *
    * @return True if the function can evaluate the angle gradient.
    */
   public abstract boolean evaluatesAngle();
 
   /**
+   * Gets the number of gradient parameters per peak.
+   *
    * @return The number of gradient parameters per peak.
    */
   public abstract int getGradientParametersPerPeak();
@@ -248,6 +271,7 @@ public abstract class Gaussian2DFunction
    * @param x Input predictor
    * @return The predicted value
    */
+  // Note: This is here for documentation
   @Override
   public abstract double eval(final int x);
 
@@ -263,22 +287,20 @@ public abstract class Gaussian2DFunction
    * @param dyda Partial gradient of function with respect to each coefficient
    * @return The predicted value
    */
+  // Note: This is here for documentation
   @Override
   public abstract double eval(final int x, final double[] dyda);
 
   /**
    * Execute the {@link #eval(int, double[])} method and set the expected variance using the noise
-   * model
+   * model.
    *
    * @throws NullPointerException if the noise model is null
    */
   @Override
-  public double eval(final int x, final double[] dyda, final double[] w)
-      throws NullPointerException {
+  public double eval(final int x, final double[] dyda, final double[] weight) {
     final double value = eval(x, dyda);
-    // w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
-    // Just throw a null pointer exception if noiseModel is null
-    w[0] = noiseModel.variance(value);
+    weight[0] = noiseModel.variance(value);
     return value;
   }
 
@@ -288,15 +310,15 @@ public abstract class Gaussian2DFunction
    * @throws NullPointerException if the noise model is null
    */
   @Override
-  public double evalw(int x, double[] w) {
+  public double evalw(int x, double[] weight) {
     final double value = eval(x);
-    // w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
-    // Just throw a null pointer exception if noiseModel is null
-    w[0] = noiseModel.variance(value);
+    weight[0] = noiseModel.variance(value);
     return value;
   }
 
   /**
+   * Gets the noise model.
+   *
    * @return the noise model.
    */
   public NoiseModel getNoiseModel() {
@@ -319,52 +341,55 @@ public abstract class Gaussian2DFunction
   }
 
   /**
-   * Build the index array that maps the gradient index back to the original parameter index so
-   * that:<br> a[indices[i]] += dy_da[i]
+   * Build the index array that maps the gradient index back to the original parameter index.
    *
-   * @param nPeaks the number of peaks
+   * <pre>
+   * a[indices[i]] += dy_da[i]
+   * </pre>
+   *
+   * @param numberOfPeaks the number of peaks
    * @return The indices
    */
-  protected int[] createGradientIndices(int nPeaks) {
-    return createGradientIndices(nPeaks, this);
+  protected int[] createGradientIndices(int numberOfPeaks) {
+    return createGradientIndices(numberOfPeaks, this);
   }
 
   /**
    * Creates the gradient indices.
    *
-   * @param nPeaks the number of peaks
+   * @param numberOfPeaks the number of peaks
    * @param gf the gradient function
    * @return the gradient indices.
    */
-  protected static int[] createGradientIndices(int nPeaks, Gaussian2DFunction gf) {
+  protected static int[] createGradientIndices(int numberOfPeaks, Gaussian2DFunction gf) {
     // Parameters are:
     // Background + n * { Signal, Shape, Xpos, Ypos, Xsd, Ysd }
     final int nparams =
-        (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getGradientParametersPerPeak();
+        (gf.evaluatesBackground() ? 1 : 0) + numberOfPeaks * gf.getGradientParametersPerPeak();
     final int[] indices = new int[nparams];
 
-    int p = 0;
+    int index = 0;
     if (gf.evaluatesBackground()) {
-      indices[p++] = 0;
+      indices[index++] = 0;
     }
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       if (gf.evaluatesSignal()) {
-        indices[p++] = i + SIGNAL;
+        indices[index++] = i + SIGNAL;
       }
       // All functions evaluate the position gradient
-      indices[p++] = i + X_POSITION;
-      indices[p++] = i + Y_POSITION;
+      indices[index++] = i + X_POSITION;
+      indices[index++] = i + Y_POSITION;
       if (gf.evaluatesZ()) {
-        indices[p++] = i + Z_POSITION;
+        indices[index++] = i + Z_POSITION;
       }
       if (gf.evaluatesSD0()) {
-        indices[p++] = i + X_SD;
+        indices[index++] = i + X_SD;
       }
       if (gf.evaluatesSD1()) {
-        indices[p++] = i + Y_SD;
+        indices[index++] = i + Y_SD;
       }
       if (gf.evaluatesAngle()) {
-        indices[p++] = i + ANGLE;
+        indices[index++] = i + ANGLE;
       }
     }
 
@@ -403,11 +428,11 @@ public abstract class Gaussian2DFunction
     initialise0(variables);
     final double[] values = new double[size()];
     forEach(new ValueProcedure() {
-      int i;
+      int index;
 
       @Override
       public void execute(double value) {
-        values[i++] = value;
+        values[index++] = value;
       }
     });
     return values;
@@ -443,12 +468,12 @@ public abstract class Gaussian2DFunction
     final double[][] jacobian = new double[n][];
     final double[] values = new double[n];
     forEach(new Gradient1Procedure() {
-      int i;
+      int index;
 
       @Override
-      public void execute(double value, double[] dy_da) {
-        values[i] = value;
-        jacobian[i++] = dy_da.clone();
+      public void execute(double value, double[] derivative) {
+        values[index] = value;
+        jacobian[index++] = derivative.clone();
       }
     });
     return new Pair<>(values, jacobian);
@@ -507,7 +532,6 @@ public abstract class Gaussian2DFunction
   protected static boolean invalidGradients(double[] a) {
     for (int i = 0; i < a.length; i++) {
       if (Double.isNaN(a[i])) {
-        System.out.println(Arrays.toString(a));
         return true;
       }
     }

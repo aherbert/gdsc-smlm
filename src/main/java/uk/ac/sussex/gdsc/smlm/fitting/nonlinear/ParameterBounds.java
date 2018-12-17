@@ -37,7 +37,7 @@ import java.util.Arrays;
  * when the search direction changes.
  */
 public class ParameterBounds {
-  private GradientFunction f;
+  private GradientFunction function;
   private int[] gradientIndices;
   private boolean isLower;
   private boolean isUpper;
@@ -52,10 +52,10 @@ public class ParameterBounds {
   /**
    * Instantiates a new parameter bounds.
    *
-   * @param f the function
+   * @param function the function
    */
-  public ParameterBounds(GradientFunction f) {
-    setGradientFunction(f);
+  public ParameterBounds(GradientFunction function) {
+    setGradientFunction(function);
   }
 
   /**
@@ -214,7 +214,7 @@ public class ParameterBounds {
       lower = null;
       isLower = false;
     } else {
-      final int[] indices = f.gradientIndices();
+      final int[] indices = function.gradientIndices();
       lower = new double[indices.length];
       for (int i = 0; i < indices.length; i++) {
         lower[i] = lowerBounds[indices[i]];
@@ -225,7 +225,7 @@ public class ParameterBounds {
       upper = null;
       isUpper = false;
     } else {
-      final int[] indices = f.gradientIndices();
+      final int[] indices = function.gradientIndices();
       upper = new double[indices.length];
       for (int i = 0; i < indices.length; i++) {
         upper[i] = upperBounds[indices[i]];
@@ -355,10 +355,10 @@ public class ParameterBounds {
    *
    * <p>Setting a new function removes the current bounds.
    *
-   * @param f the new gradient function
+   * @param function the new gradient function
    */
-  public void setGradientFunction(GradientFunction f) {
-    if (f == null) {
+  public void setGradientFunction(GradientFunction function) {
+    if (function == null) {
       throw new NullPointerException();
     }
 
@@ -366,8 +366,8 @@ public class ParameterBounds {
     // setClampValues(null);
 
     setBounds(null, null);
-    this.f = f;
-    gradientIndices = f.gradientIndices();
+    this.function = function;
+    gradientIndices = function.gradientIndices();
   }
 
   /**
@@ -376,7 +376,7 @@ public class ParameterBounds {
    * @return the gradient function
    */
   public GradientFunction getGradientFunction() {
-    return f;
+    return function;
   }
 
   /**

@@ -545,8 +545,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.hideCancelButton();
-      gd.addMessage(
-          "The results list contains a spot within the selected bounds\n \nDo you want to continue?");
+      gd.addMessage("The results list contains a spot within the selected bounds\n \n"
+          + "Do you want to continue?");
       gd.showDialog();
       if (!gd.wasOKed()) {
         return;
@@ -598,7 +598,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       gd.enableYesNoCancel();
       gd.hideCancelButton();
       gd.addMessage(
-          "The list contains unsaved selected frames. Creating a new profile will erase them.\n \nDo you want to continue?");
+          "The list contains unsaved selected frames. Creating a new profile will erase them.\n \n"
+              + "Do you want to continue?");
       gd.showDialog();
       if (!gd.wasOKed()) {
         return false;

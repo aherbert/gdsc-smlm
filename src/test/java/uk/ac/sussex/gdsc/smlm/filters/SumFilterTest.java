@@ -71,8 +71,8 @@ public class SumFilterTest extends AbstractFilterTest {
 
   // COPY CODE FROM HERE...
   @SeededTest
-  public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final SumFilter filter = new SumFilter();
 
@@ -99,8 +99,8 @@ public class SumFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final SumFilter filter = new SumFilter();
 
@@ -127,8 +127,8 @@ public class SumFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final SumFilter filter = new SumFilter();
 
@@ -152,8 +152,9 @@ public class SumFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(
-      RandomSeed seed) {
+  public void
+      floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(
+          RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final SumFilter filter = new SumFilter();
 
@@ -216,10 +217,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -240,7 +243,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "float blockSumNxNInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -292,10 +296,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -316,7 +322,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx",
+                "float blockSumNxNInternal [%dx%d] @ %d : %d => "
+                    + "stripedBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -335,8 +342,8 @@ public class SumFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal(
-      RandomSeed seed) {
+  public void
+      floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed) {
     // These test a deprecated filter
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
@@ -370,10 +377,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -394,7 +403,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "float stripedBlockSumNxNInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -466,10 +476,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -535,10 +547,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -604,10 +618,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -643,8 +659,8 @@ public class SumFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal(
-      RandomSeed seed) {
+  public void
+      floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal(RandomSeed seed) {
     // These test a deprecated filter
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
@@ -674,10 +690,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -698,7 +716,8 @@ public class SumFilterTest extends AbstractFilterTest {
         boxFastTotal += fastTime;
         if (debug) {
           logger.fine(() -> String.format(
-              "float stripedBlockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx",
+              "float stripedBlockSum3x3Internal [%dx%d] %d => "
+                  + "rollingBlockSum3x3Internal %d = %.2fx",
               width, height, time, fastTime, speedUpFactor(time, fastTime)));
           // if (ExtraAssertions.assert_SPEED_TESTS)
           // Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width,
@@ -739,8 +758,8 @@ public class SumFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal(
-      RandomSeed seed) {
+  public void
+      floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal(RandomSeed seed) {
     // These test a deprecated filter
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
@@ -770,10 +789,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -794,7 +815,8 @@ public class SumFilterTest extends AbstractFilterTest {
         boxFastTotal += fastTime;
         if (debug) {
           logger.fine(() -> String.format(
-              "float rollingBlockSumNxNInternal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx",
+              "float rollingBlockSumNxNInternal [%dx%d] %d => "
+                  + "rollingBlockSum3x3Internal %d = %.2fx",
               width, height, time, fastTime, speedUpFactor(time, fastTime)));
           // if (ExtraAssertions.assert_SPEED_TESTS)
           // Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width,
@@ -809,8 +831,8 @@ public class SumFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal(
-      RandomSeed seed) {
+  public void
+      floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal(RandomSeed seed) {
     // These test a deprecated filter
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
@@ -840,10 +862,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -864,7 +888,8 @@ public class SumFilterTest extends AbstractFilterTest {
         boxFastTotal += fastTime;
         if (debug) {
           logger.fine(() -> String.format(
-              "float stripedBlockSumNxNInternal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx",
+              "float stripedBlockSumNxNInternal [%dx%d] %d => "
+                  + "stripedBlockSum3x3Internal %d = %.2fx",
               width, height, time, fastTime, speedUpFactor(time, fastTime)));
           // if (ExtraAssertions.assert_SPEED_TESTS)
           // Assertions.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width,
@@ -914,10 +939,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -938,7 +965,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "float rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -951,7 +979,8 @@ public class SumFilterTest extends AbstractFilterTest {
         final long boxSlowTotal2 = boxSlowTotal;
         final long boxFastTotal2 = boxFastTotal;
         logger.fine(() -> String.format(
-            "float rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+            "float rollingBlockSumNxNInternalTransposed %d : %d => "
+                + "rollingBlockSumNxNInternal %d = %.2fx",
             boxSize, boxSlowTotal2, boxFastTotal2, speedUpFactor(boxSlowTotal2, boxFastTotal2)));
       }
       // if (ExtraAssertions.assert_SPEED_TESTS)
@@ -1049,10 +1078,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1124,10 +1155,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1200,10 +1233,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1224,7 +1259,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float stripedBlockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx",
+                "float stripedBlockSumNxN [%dx%d] @ %d : %d => "
+                    + "stripedBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -1275,10 +1311,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1351,10 +1389,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1375,7 +1415,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float rollingBlockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "float rollingBlockSumNxN [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -1446,10 +1487,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1537,10 +1580,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1629,10 +1674,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1698,10 +1745,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1767,10 +1816,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1836,10 +1887,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -1967,9 +2020,7 @@ public class SumFilterTest extends AbstractFilterTest {
   }
 
   private static void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
-      UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize)
-
-  {
+      UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize) {
     final int[] data1 = intCreateData(rg, width, height);
     final int[] data2 = intClone(data1);
 
@@ -2014,10 +2065,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2038,7 +2091,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "int blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "int blockSumNxNInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -2089,10 +2143,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2113,7 +2169,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "int blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx",
+                "int blockSumNxNInternal [%dx%d] @ %d : %d => "
+                    + "stripedBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -2164,10 +2221,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2188,7 +2247,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "int stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "int stripedBlockSumNxNInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -2259,10 +2319,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2328,10 +2390,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2397,10 +2461,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2466,10 +2532,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2504,8 +2572,8 @@ public class SumFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(
-      RandomSeed seed) {
+  public void
+      intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final SumFilter filter = new SumFilter();
 
@@ -2560,10 +2628,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2629,10 +2699,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2702,10 +2774,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2726,7 +2800,8 @@ public class SumFilterTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "int rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "int rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS)
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d",
@@ -2739,7 +2814,8 @@ public class SumFilterTest extends AbstractFilterTest {
         final long boxSlowTotal2 = boxSlowTotal;
         final long boxFastTotal2 = boxFastTotal;
         logger.fine(() -> String.format(
-            "int rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+            "int rollingBlockSumNxNInternalTransposed %d : %d => "
+                + "rollingBlockSumNxNInternal %d = %.2fx",
             boxSize, boxSlowTotal2, boxFastTotal2, speedUpFactor(boxSlowTotal2, boxFastTotal2)));
       }
       // if (ExtraAssertions.assert_SPEED_TESTS)
@@ -2837,10 +2913,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2912,10 +2990,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -2987,10 +3067,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3062,10 +3144,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3137,10 +3221,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3232,10 +3318,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3323,10 +3411,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3415,10 +3505,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3484,10 +3576,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3553,10 +3647,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
@@ -3622,10 +3718,12 @@ public class SumFilterTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     @SuppressWarnings("unused")
-    long boxSlowTotal = 0, boxFastTotal = 0;
+    long boxSlowTotal = 0;
+    long boxFastTotal = 0;
     for (final int width : primes) {
       for (final int height : primes) {
         final ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());

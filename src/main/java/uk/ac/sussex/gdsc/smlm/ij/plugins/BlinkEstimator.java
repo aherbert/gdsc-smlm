@@ -135,8 +135,8 @@ public class BlinkEstimator implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(
-        "Compute the blinking rate by fitting counts to dark-time.\nSee Annibale et al (2011) PLos ONE 6, e22678.");
+    gd.addMessage("Compute the blinking rate by fitting counts to dark-time.\n"
+        + "See Annibale et al (2011) PLos ONE 6, e22678.");
     ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
     gd.addNumericField("Max_dark_time (frames)", s_maxDarkTime, 0);
@@ -289,8 +289,8 @@ public class BlinkEstimator implements PlugIn {
     if (blinkingModel.evaluate(td[Ntd.length - 1], parameters) < Ntd[Ntd.length - 1]) {
       if (verbose) {
         ImageJUtils.log("  *** Warning ***");
-        ImageJUtils.log(
-            "  Fitted curve does not asymptote above real curve. Increase the number of fitted points to sample more of the overcounting regime");
+        ImageJUtils.log("  Fitted curve does not asymptote above real curve. Increase the number"
+            + " of fitted points to sample more of the overcounting regime");
         ImageJUtils.log("  ***************");
       }
       increaseNFittedPoints = true;
@@ -573,6 +573,8 @@ public class BlinkEstimator implements PlugIn {
   }
 
   /**
+   * Gets the coefficient of determination of the previous fit (R^2).
+   *
    * @return the coefficient of determination of the previous fit.
    */
   public double getR2() {
@@ -580,6 +582,8 @@ public class BlinkEstimator implements PlugIn {
   }
 
   /**
+   * Gets the adjusted coefficient of determination (adjusted R^2) of the previous fit.
+   *
    * @return the adjusted coefficient of determination of the previous fit.
    */
   public double getAdjustedR2() {
@@ -587,6 +591,9 @@ public class BlinkEstimator implements PlugIn {
   }
 
   /**
+   * Checks if the result of the previous fit recommended an increase in the number of fitted
+   * points.
+   *
    * @return the increaseNFittedPoints.
    */
   public boolean isIncreaseNFittedPoints() {

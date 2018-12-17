@@ -378,8 +378,8 @@ public final class FitProtosHelper {
    * @param searchMethod the search method
    * @return the search method
    */
-  public static MaximumLikelihoodFitter.SearchMethod convertSearchMethod(
-      SearchMethod searchMethod) {
+  public static MaximumLikelihoodFitter.SearchMethod
+      convertSearchMethod(SearchMethod searchMethod) {
     switch (searchMethod) {
       case BFGS:
         return MaximumLikelihoodFitter.SearchMethod.BFGS;
@@ -410,8 +410,8 @@ public final class FitProtosHelper {
    * @param lineSearchMethod the line search method
    * @return the line search method
    */
-  public static FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod(
-      LineSearchMethod lineSearchMethod) {
+  public static FastMLESteppingFunctionSolver.LineSearchMethod
+      convertLineSearchMethod(LineSearchMethod lineSearchMethod) {
     switch (lineSearchMethod) {
       case IGNORE:
         return FastMLESteppingFunctionSolver.LineSearchMethod.IGNORE;

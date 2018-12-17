@@ -32,7 +32,8 @@ public class StandardGradient1Procedure implements Gradient1Procedure {
 
   /**
    * The values from the last call to {@link #getValues(Gradient1Function, double[])}.
-   */  public double[] values;
+   */
+  public double[] values;
   /**
    * The gradients from the last call to {@link #getValues(Gradient1Function, double[])}.
    */

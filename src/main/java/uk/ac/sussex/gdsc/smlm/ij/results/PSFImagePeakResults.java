@@ -350,6 +350,8 @@ public class PSFImagePeakResults extends IJImagePeakResults {
   }
 
   /**
+   * Gets the width for a fixed-width Gaussian..
+   *
    * @return the width for a fixed-width Gaussian.
    */
   public float getWidth() {

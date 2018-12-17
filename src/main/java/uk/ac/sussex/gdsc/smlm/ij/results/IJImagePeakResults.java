@@ -152,7 +152,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
 
   /**
    * The xlimit. This is {@link #imageWidth} -1
-   */  protected final float xlimit;
+   */
+  protected final float xlimit;
 
   /**
    * The ylimit. This is {@link #imageHeight} -1
@@ -199,6 +200,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   private String lutName = "fire";
 
   /**
+   * Instantiates a new IJ image peak results.
+   *
    * @param title Title of the image (appended with a suffix)
    * @param bounds Define the bounding rectangle of the image coordinates. Any results outside this
    *        will not be displayed.
@@ -242,8 +245,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     return scale;
   }
 
-  private static int ceil(float f) {
-    return (int) Math.ceil(f);
+  private static int ceil(float value) {
+    return (int) Math.ceil(value);
   }
 
   /** {@inheritDoc} */
@@ -263,9 +266,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
       h = imageHeight;
     } else {
       if (IJ.getInstance() != null) {
-        ImageJUtils.log(
-            "ERROR: Unable to create image results '%s' due to invalid dimensions: width=%d, height=%d",
-            title, imageWidth, imageHeight);
+        ImageJUtils.log("ERROR: Unable to create image results '%s' due to invalid dimensions:"
+            + " width=%d, height=%d", title, imageWidth, imageHeight);
       }
       w = h = 1;
     }
@@ -1249,7 +1251,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
-   * @return the repaintInterval.
+   * Gets the repaint interval.
+   *
+   * @return the repaint interval
    */
   public double getRepaintInterval() {
     return repaintInterval;
@@ -1277,14 +1281,18 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
-   * @param displayFlags the displayFlags to set
+   * Sets the display flags.
+   *
+   * @param displayFlags the new display flags
    */
   public void setDisplayFlags(int displayFlags) {
     this.displayFlags = displayFlags;
   }
 
   /**
-   * @return the displayFlags.
+   * Gets the display flags.
+   *
+   * @return the display flags
    */
   public int getDisplayFlags() {
     return displayFlags;
@@ -1297,7 +1305,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
-   * @return the rollingWindowSize.
+   * Gets the rolling window size.
+   *
+   * @return the rolling window size
    */
   public int getRollingWindowSize() {
     return rollingWindowSize;
@@ -1324,6 +1334,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
+   * Check if the image should be displayed.
+   *
    * @return True if the image should be displayed.
    */
   public boolean isDisplayImage() {
@@ -1340,6 +1352,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
+   * Gets the image plus.
+   *
    * @return The IJ image.
    */
   public ImagePlus getImagePlus() {
@@ -1347,14 +1361,18 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   /**
-   * @return the lutName.
+   * Gets the lut name.
+   *
+   * @return the lut name
    */
   public String getLutName() {
     return lutName;
   }
 
   /**
-   * @param lutName the lutName to set
+   * Sets the lut name.
+   *
+   * @param lutName the new lut name
    */
   public void setLutName(String lutName) {
     this.lutName = lutName;

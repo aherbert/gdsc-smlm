@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
@@ -388,6 +389,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
         paramsDev, -1);
   }
 
+  @Override
+  public void add(PeakResult result) {
+    addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(),
+        result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
+        result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
+        result.getPrecision());
+  }
+
   private void addPeak(int frame, int endFrame, int id, int origX, int origY, float origValue,
       double error, float noise, float meanIntensity, float[] params, float[] paramsStdDev,
       double precision) {
@@ -400,18 +409,18 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     if (isShowDeviations()) {
       if (paramsStdDev != null) {
         for (int i = 0; i < outIndices.length; i++) {
-          add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
-          add(sb, converters[outIndices[i]].convert(paramsStdDev[outIndices[i]]));
+          addFloat(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
+          addFloat(sb, converters[outIndices[i]].convert(paramsStdDev[outIndices[i]]));
         }
       } else {
         for (int i = 0; i < outIndices.length; i++) {
-          add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
+          addFloat(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
           sb.append("\t0");
         }
       }
     } else {
       for (int i = 0; i < outIndices.length; i++) {
-        add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
+        addFloat(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
       }
     }
     if (isShowPrecision()) {
@@ -449,28 +458,28 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
     if (showFittingData) {
       sb.append('\t').append(origX).append('\t').append(origY);
-      add(sb, origValue);
-      add(sb, error);
+      addFloat(sb, origValue);
+      addDouble(sb, error);
     }
     if (showNoiseData) {
       // These should be converted
-      add(sb, ic.convert(noise));
-      add(sb, ic.convert(meanIntensity));
-      add(sb, meanIntensity / noise);
+      addFloat(sb, ic.convert(noise));
+      addFloat(sb, ic.convert(meanIntensity));
+      addFloat(sb, meanIntensity / noise);
     }
     return sb;
   }
 
-  private void add(StringBuilder sb, float value) {
+  private void addFloat(StringBuilder sb, float value) {
     sb.append('\t').append(rounder.toString(value));
   }
 
-  private void add(StringBuilder sb, double value) {
+  private void addDouble(StringBuilder sb, double value) {
     sb.append('\t').append(rounder.toString(value));
   }
 
   private void addPrecision(StringBuilder sb, double value, boolean computed) {
-    add(sb, value);
+    addDouble(sb, value);
     if (computed) {
       sb.append('*');
     }
@@ -495,7 +504,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
 
     if (!resultsWindow.isShowing()) {
-      // System.out.println("Table has been closed");
       tableActive = false;
       return;
     }
@@ -505,18 +513,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
   private void drawTable() {
     synchronized (tp) {
-      // System.out.printf("Refreshing table: size = %d\n", size);
       nextRepaintSize = (int) (size + size * repaintInterval);
       tp.updateDisplay();
     }
-  }
-
-  @Override
-  public void add(PeakResult result) {
-    addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(),
-        result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-        result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
-        result.getPrecision());
   }
 
   /** {@inheritDoc} */
@@ -525,17 +524,17 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     if (!tableActive) {
       return;
     }
-    int n = 0;
+    int counter = 0;
     for (final PeakResult result : results) {
       addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(),
           result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
           result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
           result.getPrecision());
-      if (n++ > 31) {
+      if (counter++ > 31) {
         if (!tableActive) {
           return;
         }
-        n = 0;
+        counter = 0;
       }
     }
   }
@@ -561,6 +560,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Gets the frame column name.
+   *
    * @return the name of the frame column.
    */
   public String getFrameColumnName() {
@@ -568,6 +569,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Sets the frame column name.
+   *
    * @param frameColumnName the name of the frame column
    */
   public void setFrameColumnName(String frameColumnName) {
@@ -581,6 +584,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Gets the table title.
+   *
    * @return the table title.
    */
   public String getTableTitle() {
@@ -600,6 +605,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Check if the deviations of the parameters should be shown.
+   *
    * @return True if the deviations of the parameters should be shown.
    */
   public boolean isShowDeviations() {
@@ -607,6 +614,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Set if the deviations of the parameters should be shown.
+   *
    * @param showDeviations True if the deviations of the parameters should be shown
    */
   public void setShowDeviations(boolean showDeviations) {
@@ -614,6 +623,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Check if the table should be cleared in {@link #begin()}.
+   *
    * @return True if the table should be cleared in {@link #begin()}
    */
   public boolean isClearAtStart() {
@@ -621,6 +632,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Set if the table should be cleared in {@link #begin()}.
+   *
    * @param clearAtStart True if the table should be cleared in {@link #begin()}
    */
   public void setClearAtStart(boolean clearAtStart) {
@@ -628,14 +641,18 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
-   * @return the addCounter.
+   * Checks if a counter will be displayed in the table.
+   *
+   * @return true, if a counter will be displayed in the table.
    */
   public boolean isAddCounter() {
     return addCounter;
   }
 
   /**
-   * @param addCounter the addCounter to set
+   * Set if a counter will be displayed in the table.
+   *
+   * @param addCounter True if a counter will be displayed in the table.
    */
   public void setAddCounter(boolean addCounter) {
     this.addCounter = addCounter;
@@ -660,6 +677,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
+   * Gets the results window.
+   *
    * @return the resultsWindow.
    */
   public TextWindow getResultsWindow() {
@@ -690,41 +709,53 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
-   * @return If true show the results end frame in the table.
+   * Check if showing the results end frame in the table.
+   *
+   * @return True if showing the results end frame in the table.
    */
   public boolean isShowEndFrame() {
     return showEndFrame;
   }
 
   /**
-   * @param showEndFrame If true show the results end frame in the table
+   * Set whether to show the results end frame in the table.
+   *
+   * @param showEndFrame True to show the results end frame in the table
    */
   public void setShowEndFrame(boolean showEndFrame) {
     this.showEndFrame = showEndFrame;
   }
 
   /**
-   * @return If true show the results Id in the table.
+   * Check if showing the results Id in the table.
+   *
+   * @return True if showing the results Id in the table.
    */
   public boolean isShowId() {
     return showId;
   }
 
   /**
-   * @param showId If true show the results Id in the table
+   * Set whether to show the results Id in the table.
+   *
+   * @param showId True to show the results Id in the table
    */
   public void setShowId(boolean showId) {
     this.showId = showId;
   }
 
   /**
-   * @return If true then show the fitting data (original pixel data and fit error) in the table.
+   * Check whether to show the fitting data (original pixel data and fit error) in the table.
+   *
+   * @return True to show the fitting data (original pixel data and fit error) in the table.
    */
   public boolean isShowFittingData() {
     return showFittingData;
   }
 
   /**
+   * Set whether to show the fitting data (original pixel data and fit error) in the table.
+   *
    * @param showFittingData If true then show the fitting data (original pixel data and fit error)
    *        in the table
    */
@@ -733,13 +764,17 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   }
 
   /**
-   * @return If true then show the noise and SNR in the table.
+   * Check if showing the noise and SNR in the table.
+   *
+   * @return True to show the noise and SNR in the table.
    */
   public boolean isShowNoiseData() {
     return showNoiseData;
   }
 
   /**
+   * Set whether to show the noise and SNR in the table.
+   *
    * @param showNoiseData If true then show the noise and SNR in the table
    */
   public void setShowNoiseData(boolean showNoiseData) {
@@ -767,21 +802,16 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
   /**
    * Image will be repainted when a fraction of new results have been added.
    *
-   * @param repaintInterval the repaintInterval to set (range 0.001-1)
+   * @param repaintInterval the repaint interval to set (range 0.001-1)
    */
   public void setRepaintInterval(double repaintInterval) {
-    if (repaintInterval < 0.001) {
-      repaintInterval = 0.001;
-    }
-    if (repaintInterval > 1) {
-      repaintInterval = 1;
-    }
-
-    this.repaintInterval = repaintInterval;
+    this.repaintInterval = MathUtils.clip(0.001, 1.0, repaintInterval);
   }
 
   /**
-   * @return the repaintInterval.
+   * Gets the repaint interval.
+   *
+   * @return the repaint interval
    */
   public double getRepaintInterval() {
     return repaintInterval;

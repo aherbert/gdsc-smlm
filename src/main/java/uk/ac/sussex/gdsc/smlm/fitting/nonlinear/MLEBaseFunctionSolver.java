@@ -40,11 +40,11 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver
   /**
    * Default constructor.
    *
-   * @param f the function
+   * @param function the function
    * @throws NullPointerException if the function is null
    */
-  public MLEBaseFunctionSolver(GradientFunction f) {
-    super(FunctionSolverType.MLE, f);
+  public MLEBaseFunctionSolver(GradientFunction function) {
+    super(FunctionSolverType.MLE, function);
   }
 
   @Override

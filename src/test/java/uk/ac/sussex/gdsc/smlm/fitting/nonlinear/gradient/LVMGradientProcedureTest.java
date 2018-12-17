@@ -1147,9 +1147,7 @@ public class LVMGradientProcedureTest {
         params[j + Gaussian2DFunction.Y_POSITION] =
             random(r, params[j + Gaussian2DFunction.Y_POSITION]);
         params[j + Gaussian2DFunction.X_SD] = random(r, params[j + Gaussian2DFunction.X_SD]);
-        params[j + Gaussian2DFunction.Y_SD] = random(r, params[j + Gaussian2DFunction.Y_SD]); // params[j
-                                                                                              // +
-                                                                                              // 4];
+        params[j + Gaussian2DFunction.Y_SD] = random(r, params[j + Gaussian2DFunction.Y_SD]);
       }
     }
 

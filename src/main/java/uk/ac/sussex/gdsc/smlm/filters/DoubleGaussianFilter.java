@@ -71,13 +71,17 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Use the default accuracy of 0.02
+   * Instantiates a new double gaussian filter.
+   *
+   * <p>Use the default accuracy of 0.02.
    */
   public DoubleGaussianFilter() {
     this(0.02);
   }
 
   /**
+   * Instantiates a new double gaussian filter.
+   *
    * @param accuracy Accuracy of kernel, should not be above 0.02. Better (lower) accuracy needs
    *        slightly more computing time.
    */
@@ -314,9 +318,9 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
         upscaleLine(cache2, pixels, upscaleKernel, reduceBy, pixel0, unscaled0, writeFrom, writeTo,
             pointInc);
       } else {
-        int p = pixel0 + readFrom * pointInc;
-        for (int i = readFrom; i < readTo; i++, p += pointInc) {
-          cache1[i] = pixels[p];
+        int pi = pixel0 + readFrom * pointInc;
+        for (int i = readFrom; i < readTo; i++, pi += pointInc) {
+          cache1[i] = pixels[pi];
         }
         convolveLine(cache1, pixels, gaussKernel, readFrom, readTo, writeFrom, writeTo, pixel0,
             pointInc);
@@ -351,14 +355,14 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   private static final void downscaleLine(final double[] pixels, final double[] cache,
       final double[] kernel, final int reduceBy, final int pixel0, final int unscaled0,
       final int length, final int pointInc, final int newLength) {
-    int p = pixel0 + pointInc * (unscaled0 - reduceBy * 3 / 2); // pointer in pixels array
+    int pi = pixel0 + pointInc * (unscaled0 - reduceBy * 3 / 2); // pointer in pixels array
     final int pLast = pixel0 + pointInc * (length - 1);
     for (int xout = -1; xout <= newLength; xout++) {
       double sum0 = 0;
       double sum1 = 0;
       double sum2 = 0;
-      for (int x = 0; x < reduceBy; x++, p += pointInc) {
-        final double v = pixels[p < pixel0 ? pixel0 : (p > pLast ? pLast : p)];
+      for (int x = 0; x < reduceBy; x++, pi += pointInc) {
+        final double v = pixels[pi < pixel0 ? pixel0 : (pi > pLast ? pLast : pi)];
         sum0 += v * kernel[x + 2 * reduceBy];
         sum1 += v * kernel[x + reduceBy];
         sum2 += v * kernel[x];
@@ -406,12 +410,12 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   private static final void upscaleLine(final double[] cache, final double[] pixels,
       final double[] kernel, final int reduceBy, final int pixel0, final int unscaled0,
       final int writeFrom, final int writeTo, final int pointInc) {
-    int p = pixel0 + pointInc * writeFrom;
-    for (int xout = writeFrom; xout < writeTo; xout++, p += pointInc) {
+    int pi = pixel0 + pointInc * writeFrom;
+    for (int xout = writeFrom; xout < writeTo; xout++, pi += pointInc) {
       // the corresponding point in the cache (if exact) or the one above
       final int xin = (xout - unscaled0 + reduceBy - 1) / reduceBy;
       final int x = reduceBy - 1 - (xout - unscaled0 + reduceBy - 1) % reduceBy;
-      pixels[p] = cache[xin - 2] * kernel[x] + cache[xin - 1] * kernel[x + reduceBy]
+      pixels[pi] = cache[xin - 2] * kernel[x] + cache[xin - 1] * kernel[x + reduceBy]
           + cache[xin] * kernel[x + 2 * reduceBy] + cache[xin + 1] * kernel[x + 3 * reduceBy];
     }
   }
@@ -444,7 +448,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
 
   /**
    * Convolve a line with a symmetric kernel and write to a separate array, possibly the pixels
-   * array of a FloatProcessor (as a row or column or part thereof)
+   * array of a FloatProcessor (as a row or column or part thereof).
    *
    * @param input Input array containing the line
    * @param pixels Float array for output, can be the pixels of a FloatProcessor
@@ -474,56 +478,56 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
     final double[] kernSum = kernel[1]; // the running sum over the kernel
     final int kRadius = kern.length;
     final int firstPart = kRadius < length ? kRadius : length;
-    int p = point0 + writeFrom * pointInc;
-    int i = writeFrom;
+    int pi = point0 + writeFrom * pointInc;
+    int index = writeFrom;
     // while the sum would include pixels < 0
-    for (; i < firstPart; i++, p += pointInc) {
-      double result = input[i] * kern0;
-      result += kernSum[i] * first;
-      if (i + kRadius > length) {
-        result += kernSum[length - i - 1] * last;
+    for (; index < firstPart; index++, pi += pointInc) {
+      double result = input[index] * kern0;
+      result += kernSum[index] * first;
+      if (index + kRadius > length) {
+        result += kernSum[length - index - 1] * last;
       }
       for (int k = 1; k < kRadius; k++) {
-        double v = 0;
-        if (i - k >= 0) {
-          v += input[i - k];
+        double value = 0;
+        if (index - k >= 0) {
+          value += input[index - k];
         }
-        if (i + k < length) {
-          v += input[i + k];
+        if (index + k < length) {
+          value += input[index + k];
         }
-        result += kern[k] * v;
+        result += kern[k] * value;
       }
-      pixels[p] = result;
+      pixels[pi] = result;
     }
     final int iEndInside = length - kRadius < writeTo ? length - kRadius : writeTo;
     // while only pixels within the line are be addressed (the easy case)
-    for (; i < iEndInside; i++, p += pointInc) {
-      double result = input[i] * kern0;
+    for (; index < iEndInside; index++, pi += pointInc) {
+      double result = input[index] * kern0;
       for (int k = 1; k < kRadius; k++) {
-        result += kern[k] * (input[i - k] + input[i + k]);
+        result += kern[k] * (input[index - k] + input[index + k]);
       }
-      pixels[p] = result;
+      pixels[pi] = result;
     }
     // while the sum would include pixels >= length
-    for (; i < writeTo; i++, p += pointInc) {
-      double result = input[i] * kern0;
-      if (i < kRadius) {
-        result += kernSum[i] * first;
+    for (; index < writeTo; index++, pi += pointInc) {
+      double result = input[index] * kern0;
+      if (index < kRadius) {
+        result += kernSum[index] * first;
       }
-      if (i + kRadius >= length) {
-        result += kernSum[length - i - 1] * last;
+      if (index + kRadius >= length) {
+        result += kernSum[length - index - 1] * last;
       }
       for (int k = 1; k < kRadius; k++) {
-        double v = 0;
-        if (i - k >= 0) {
-          v += input[i - k];
+        double value = 0;
+        if (index - k >= 0) {
+          value += input[index - k];
         }
-        if (i + k < length) {
-          v += input[i + k];
+        if (index + k < length) {
+          value += input[index + k];
         }
-        result += kern[k] * v;
+        result += kern[k] * value;
       }
-      pixels[p] = result;
+      pixels[pi] = result;
     }
   }
 
@@ -554,40 +558,38 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
       return kernel;
     }
 
-    int kRadius = getHalfWidth(sigma) + 1;
-    if (kRadius > maxRadius) {
-      kRadius = maxRadius;
+    int kradius = getHalfWidth(sigma) + 1;
+    if (kradius > maxRadius) {
+      kradius = maxRadius;
     }
-    kernel = new double[2][kRadius];
+    kernel = new double[2][kradius];
     lastSigma = sigma;
     lastMaxRadius = maxRadius;
 
-    for (int i = 0; i < kRadius; i++) {
+    for (int i = 0; i < kradius; i++) {
       // Gaussian function
       kernel[0][i] = (Math.exp(-0.5 * i * i / sigma / sigma));
     }
-    if (kRadius < maxRadius && kRadius > 3) { // edge correction
+    if (kradius < maxRadius && kradius > 3) { // edge correction
       double sqrtSlope = Double.MAX_VALUE;
-      int r = kRadius;
-      while (r > kRadius / 2) {
-        r--;
-        final double a = Math.sqrt(kernel[0][r]) / (kRadius - r);
+      int radius = kradius;
+      while (radius > kradius / 2) {
+        radius--;
+        final double a = Math.sqrt(kernel[0][radius]) / (kradius - radius);
         if (a < sqrtSlope) {
           sqrtSlope = a;
         } else {
           break;
         }
       }
-      // System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma,
-      // kRadius, r, sqrtSlope);
-      for (int r1 = r + 2; r1 < kRadius; r1++) {
-        kernel[0][r1] = (kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope;
+      for (int r1 = radius + 2; r1 < kradius; r1++) {
+        kernel[0][r1] = (kradius - r1) * (kradius - r1) * sqrtSlope * sqrtSlope;
       }
     }
     double sum; // sum over all kernel elements for normalization
-    if (kRadius < maxRadius) {
+    if (kradius < maxRadius) {
       sum = kernel[0][0];
-      for (int i = 1; i < kRadius; i++) {
+      for (int i = 1; i < kradius; i++) {
         sum += 2 * kernel[0][i];
       }
     } else {
@@ -595,7 +597,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
     }
 
     double rsum = 0.5 + 0.5 * kernel[0][0] / sum;
-    for (int i = 0; i < kRadius; i++) {
+    for (int i = 0; i < kradius; i++) {
       final double v = (kernel[0][i] / sum);
       kernel[0][i] = v;
       rsum -= v;

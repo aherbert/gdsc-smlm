@@ -316,12 +316,12 @@ public class PeakResultTableModel extends AbstractTableModel {
     }
 
     if (tableSettings.getShowPrecision()) {
-      PeakResultDataPrecision p = null;
+      PeakResultDataPrecision precision = null;
 
       try {
         final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper
             .create(getPSF(), calibration, Gaussian2DPeakResultHelper.LSE_PRECISION);
-        p = new PeakResultDataPrecision() {
+        precision = new PeakResultDataPrecision() {
           @Override
           public Double getValue(PeakResult result) {
             if (result.hasPrecision()) {
@@ -333,15 +333,13 @@ public class PeakResultTableModel extends AbstractTableModel {
             return 0.0;
           }
         };
-      } catch (final ConfigurationException ex) {
-        // Ignore
-      } catch (final ConversionException ex) {
+      } catch (final ConfigurationException | ConversionException ex) {
         // Ignore
       }
-      if (p == null) {
-        p = new PeakResultDataPrecision();
+      if (precision == null) {
+        precision = new PeakResultDataPrecision();
       }
-      valuesList.add(p);
+      valuesList.add(precision);
       namesList.add("Precision (nm)");
     }
 
@@ -696,6 +694,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
+   * Checks if showing the results deviations in the table.
+   *
    * @return If true show the results deviations in the table.
    */
   public boolean isShowDeviations() {
@@ -703,6 +703,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
+   * Set whether to show the results deviations in the table.
+   *
    * @param showDeviations If true show the results deviations in the table
    */
   public void setShowDeviations(boolean showDeviations) {
@@ -712,6 +714,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
+   * Checks if showing the results end frame in the table.
+   *
    * @return If true show the results end frame in the table.
    */
   public boolean isShowEndFrame() {
@@ -719,6 +723,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
+   * Set whether to show the results end frame in the table.
+   *
    * @param showEndFrame If true show the results end frame in the table
    */
   public void setShowEndFrame(boolean showEndFrame) {
@@ -728,6 +734,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
+   * Checks if showing the results Id in the table.
+   *
    * @return If true show the results Id in the table.
    */
   public boolean isShowId() {
@@ -735,6 +743,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
+   * Set whether to show the results Id in the table.
+   *
    * @param showId If true show the results Id in the table
    */
   public void setShowId(boolean showId) {
@@ -753,7 +763,7 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
-   * Set to true to show the Z column.
+   * Set whether to show the Z column.
    *
    * @param showZ the new show Z
    */

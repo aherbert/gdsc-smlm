@@ -125,6 +125,8 @@ public abstract class SpotFilter {
   public abstract boolean isAbsoluteIntensity();
 
   /**
+   * Gets the description of the filter and parameters.
+   *
    * @return A description of the filter and parameters.
    */
   public String getDescription() {
@@ -132,11 +134,15 @@ public abstract class SpotFilter {
   }
 
   /**
+   * Gets the name of the filter.
+   *
    * @return The name of the filter.
    */
   public abstract String getName();
 
   /**
+   * Gets the parameters of the filter.
+   *
    * @return The parameters of the filter.
    */
   public abstract List<String> getParameters();

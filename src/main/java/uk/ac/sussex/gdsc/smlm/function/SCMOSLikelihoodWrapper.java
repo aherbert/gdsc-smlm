@@ -48,11 +48,12 @@ import org.apache.commons.math3.util.FastMath;
  * it is also set to zero. This occurs when true signal readout from the sCMOS camera is low enough
  * to be negated by readout noise. In this case the noise can be ignored.
  *
- * @see "Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658."
+ * <p>See: Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule
+ * localization algorithms. Nature Methods 10, 653–658.
  */
 public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
   private final double logNormalisation;
-  private final double[] var_g2;
+  private final double[] varG2;
   private final double[] x;
   private final double[] logG;
 
@@ -77,15 +78,15 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
       float[] g, float[] o) {
     super(f, a, k, n);
 
-    var_g2 = new double[n];
+    varG2 = new double[n];
     x = new double[n];
     logG = new double[n];
 
     // Pre-compute the sum over the data
     double sum = 0;
     for (int i = 0; i < n; i++) {
-      var_g2[i] = var[i] / (g[i] * g[i]);
-      x[i] = FastMath.max(0, (k[i] - o[i]) / g[i] + var_g2[i]);
+      varG2[i] = var[i] / (g[i] * g[i]);
+      x[i] = FastMath.max(0, (k[i] - o[i]) / g[i] + varG2[i]);
       logG[i] = Math.log(g[i]);
 
       sum += logGamma1(x[i]) + logG[i];
@@ -103,13 +104,13 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
    * @param g the gain of each pixel
    * @return the variance divided by the gain squared
    */
-  public static double[] compute_var_g2(float[] var, float[] g) {
+  public static double[] compute_varg2(float[] var, float[] g) {
     final int n = Math.min(var.length, g.length);
-    final double[] var_g2 = new double[n];
+    final double[] varG2 = new double[n];
     for (int i = 0; i < n; i++) {
-      var_g2[i] = var[i] / (g[i] * g[i]);
+      varG2[i] = var[i] / (g[i] * g[i]);
     }
-    return var_g2;
+    return varG2;
   }
 
   /**
@@ -131,17 +132,17 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
    * Compute X (the mapped observed values from the sCMOS camera).
    *
    * @param k The observed values from the sCMOS camera
-   * @param var_g2 the variance divided by the gain squared
+   * @param varG2 the variance divided by the gain squared
    * @param g the gain of each pixel
    * @param o the offset of each pixel
    * @return The observed values from the sCMOS camera mapped using [x=max(0, (k-o)/g + var/g^2)]
    *         per pixel
    */
-  public static double[] computeX(double[] k, float[] var_g2, float[] g, float[] o) {
+  public static double[] computeX(double[] k, float[] varG2, float[] g, float[] o) {
     final int n = k.length;
     final double[] x = new double[n];
     for (int i = 0; i < n; i++) {
-      x[i] = FastMath.max(0, (k[i] - o[i]) / g[i] + var_g2[i]);
+      x[i] = FastMath.max(0, (k[i] - o[i]) / g[i] + varG2[i]);
     }
     return x;
   }
@@ -160,15 +161,15 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
    * @param x The observed values from the sCMOS camera mapped using [x=max(0, (k-o)/g + var/g^2)]
    *        per pixel
    * @param n The number of observed values
-   * @param var_g2 the variance of each pixel divided by the gain squared
+   * @param varG2 the variance of each pixel divided by the gain squared
    * @param logG the log of the gain of each pixel
    * @throws IllegalArgumentException if the input observed values are not integers
    */
-  public SCMOSLikelihoodWrapper(NonLinearFunction f, double[] a, double[] x, int n, double[] var_g2,
+  public SCMOSLikelihoodWrapper(NonLinearFunction f, double[] a, double[] x, int n, double[] varG2,
       double[] logG) {
     super(f, a, x, n);
 
-    this.var_g2 = var_g2;
+    this.varG2 = varG2;
     this.x = x;
     this.logG = logG;
 
@@ -190,15 +191,15 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
    * @param x The observed values from the sCMOS camera mapped using [x=max(0, (k-o)/g + var/g^2)]
    *        per pixel
    * @param n The number of observed values
-   * @param var_g2 the variance of each pixel divided by the gain squared
+   * @param varG2 the variance of each pixel divided by the gain squared
    * @param logG the log of the gain of each pixel
    * @param logNormalisation the log normalisation
    * @throws IllegalArgumentException if the input observed values are not integers
    */
-  private SCMOSLikelihoodWrapper(NonLinearFunction f, double[] a, double[] x, int n,
-      double[] var_g2, double[] logG, double logNormalisation) {
+  private SCMOSLikelihoodWrapper(NonLinearFunction f, double[] a, double[] x, int n, double[] varG2,
+      double[] logG, double logNormalisation) {
     super(f, a, x, n);
-    this.var_g2 = var_g2;
+    this.varG2 = varG2;
     this.x = x;
     this.logG = logG;
     this.logNormalisation = logNormalisation;
@@ -213,7 +214,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
    * @return the SCMOS likelihood wrapper
    */
   public SCMOSLikelihoodWrapper build(NonLinearFunction f, double[] a) {
-    return new SCMOSLikelihoodWrapper(f, a, x, n, var_g2, logG, logNormalisation);
+    return new SCMOSLikelihoodWrapper(f, a, x, n, varG2, logG, logNormalisation);
   }
 
   /** {@inheritDoc} */
@@ -229,7 +230,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
         u = 0;
       }
 
-      final double l = u + var_g2[i];
+      final double l = u + varG2[i];
 
       ll += l;
       if (x[i] != 0) {
@@ -253,18 +254,18 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
       for (int i = 0; i < n; i++) {
         // We need to input the observed value as the expected value.
         // So we need (k-o)/g as the expected value. We did not store this so
-        // compute it by subtracting var_g2 from x.
+        // compute it by subtracting varG2 from x.
         // Then perform the same likelihood computation.
 
-        // double u = x[i] - var_g2[i];
+        // double u = x[i] - varG2[i];
         //
         // if (u < 0)
         // u = 0;
         //
-        // double l = u + var_g2[i];
+        // double l = u + varG2[i];
 
         // We can do this in one step ...
-        final double l = (x[i] < var_g2[i]) ? var_g2[i] : x[i];
+        final double l = (x[i] < varG2[i]) ? varG2[i] : x[i];
 
         ll += l;
         if (x[i] != 0) {
@@ -345,7 +346,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
         u = 0;
       }
 
-      final double l = u + var_g2[i];
+      final double l = u + varG2[i];
 
       ll += l;
       if (x[i] != 0) {
@@ -370,7 +371,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
       u = 0;
     }
 
-    final double l = u + var_g2[i];
+    final double l = u + varG2[i];
 
     double ll = l + logG[i];
     if (x[i] != 0) {
@@ -394,7 +395,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
       u = 0;
     }
 
-    final double l = u + var_g2[i];
+    final double l = u + varG2[i];
 
     final double factor = (1 - x[i] / l);
     for (int j = 0; j < gradient.length; j++) {
@@ -427,12 +428,12 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
    * @return the negative log likelihood
    */
   public static double negativeLogLikelihood(double u, float var, float g, float o, double k) {
-    final double var_g2 = var / (g * g);
-    final double x = Math.max(0, (k - o) / g + var_g2);
+    final double varG2 = var / (g * g);
+    final double x = Math.max(0, (k - o) / g + varG2);
     if (u < 0) {
       u = 0;
     }
-    final double l = u + var_g2;
+    final double l = u + varG2;
     // Note we need the Math.log(g) to normalise the Poisson distribution to 1
     // since the observed values (k) are scaled by the gain
     double ll = l + Math.log(g);
@@ -454,9 +455,9 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
    * @return the likelihood
    */
   public static double likelihood(double u, float var, float g, float o, double k) {
-    // double var_g2 = var / (g * g);
-    // double x = FastMath.max(0, (k - o) / g + var_g2);
-    // double l = u + var_g2;
+    // double varG2 = var / (g * g);
+    // double x = FastMath.max(0, (k - o) / g + varG2);
+    // double l = u + varG2;
     // double v = FastMath.exp(-l) * Math.pow(l, x) / gamma1(x);
     // if (v != v)
     // throw new RuntimeException("Failed computation");
@@ -492,7 +493,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
 
     for (int k = 0; k < n; k++) {
       final double uk = f.eval(k, du_da);
-      final double yk = 1 / (uk + var_g2[k]);
+      final double yk = 1 / (uk + varG2[k]);
       for (int i = 0; i < nVariables; i++) {
         final double du_dai = yk * du_da[i];
         for (int j = 0; j <= i; j++) {

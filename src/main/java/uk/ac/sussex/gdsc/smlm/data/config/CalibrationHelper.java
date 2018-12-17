@@ -135,8 +135,8 @@ public final class CalibrationHelper {
    * @param toDistanceUnit the distance unit
    * @return the distance converter
    */
-  public static TypeConverter<DistanceUnit> getDistanceConverterSafe(
-      CalibrationOrBuilder calibration, DistanceUnit toDistanceUnit) {
+  public static TypeConverter<DistanceUnit>
+      getDistanceConverterSafe(CalibrationOrBuilder calibration, DistanceUnit toDistanceUnit) {
     try {
       return getDistanceConverter(calibration, toDistanceUnit);
     } catch (final ConversionException ex) {
@@ -158,8 +158,8 @@ public final class CalibrationHelper {
    * @param toIntensityUnit the intensity unit
    * @return the intensity converter
    */
-  public static TypeConverter<IntensityUnit> getIntensityConverterSafe(
-      CalibrationOrBuilder calibration, IntensityUnit toIntensityUnit) {
+  public static TypeConverter<IntensityUnit>
+      getIntensityConverterSafe(CalibrationOrBuilder calibration, IntensityUnit toIntensityUnit) {
     try {
       return getIntensityConverter(calibration, toIntensityUnit);
     } catch (final ConversionException ex) {

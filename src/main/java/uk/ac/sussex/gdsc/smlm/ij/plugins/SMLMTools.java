@@ -43,8 +43,6 @@ import java.awt.Insets;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.ScrollPane;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,7 +57,7 @@ import java.util.HashMap;
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in
  * /uk/ac/sussex/gdsc/smlm/plugins.config. Also add these commands to the plugins menu.
  */
-public class SMLMTools extends PlugInFrame implements ActionListener {
+public class SMLMTools extends PlugInFrame {
   private static final long serialVersionUID = -5457127382849923056L;
   private static final String TITLE = "GDSC SMLM ImageJ Plugins";
   private static final String OPT_LOCATION = "SMLM_Plugins.location";
@@ -124,6 +122,8 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
   }
 
   /**
+   * Checks if the instance of the SMLM Tools Frame is visible.
+   *
    * @return True if the instance of the SMLM Tools Frame is visible.
    */
   public static boolean isFrameVisible() {
@@ -302,6 +302,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
     return readmeStream;
   }
 
+  @SuppressWarnings("unused")
   private int addPlugin(Panel mainPanel, GridBagLayout grid, String commandName,
       final String command, int col, int row) {
     // Disect the ImageJ plugins.config string, e.g.:
@@ -335,7 +336,13 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
 
     // Store the command to be invoked when the button is clicked
     plugins.put(commandName, new String[] {className, arg});
-    button.addActionListener(this);
+    button.addActionListener(event -> {
+      // Get the plugin from the button label and run it
+      final Button source = (Button) event.getSource();
+      final String label = source.getLabel();
+      // Use the IJ executer to run in a background thread
+      new Executer(label, null);
+    });
 
     if (addSpacer) {
       addSpacer = false;
@@ -360,20 +367,5 @@ public class SMLMTools extends PlugInFrame implements ActionListener {
     grid.setConstraints(comp, c);
     mainPanel.add(comp);
     return row;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public void actionPerformed(ActionEvent event) {
-    // Get the plugin from the button label and run it
-    final Button button = (Button) event.getSource();
-    final String commandName = button.getLabel();
-
-    // String[] args = plugins.get(commandName);
-    // IJ.runPlugIn(commandName, args[0], args[1]); // Only in IJ 1.47+
-    // IJ.runPlugIn(args[0], args[1]);
-
-    // Use the IJ executer to run in a background thread
-    new Executer(commandName, null);
   }
 }

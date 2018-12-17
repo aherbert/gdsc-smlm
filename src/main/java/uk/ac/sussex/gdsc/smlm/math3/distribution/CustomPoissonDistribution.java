@@ -83,7 +83,8 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   private NormalDistribution normal;
   /**
    * Distribution needed for the {@link #sample()} method.
-   */  private final ExponentialDistribution exponential;
+   */
+  private final ExponentialDistribution exponential;
   /** Mean of the distribution. */
   private double mean;
   /**
@@ -378,6 +379,8 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
   }
 
   /**
+   * Compute the next poisson value.
+   *
    * @param meanPoisson Mean of the Poisson distribution.
    * @return the next sample.
    */

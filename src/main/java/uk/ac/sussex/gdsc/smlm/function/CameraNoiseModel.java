@@ -89,10 +89,13 @@ public abstract class CameraNoiseModel implements NoiseModel {
    * applied to the signal noise standard deviation. Applying it directly to the signal variance
    * uses a factor of sqrt(2)^2 = 2.
    */
+  // Note: This method is here for documentation. It is defined in the NoiseModel interface.
   @Override
   public abstract double variance(final double value);
 
   /**
+   * Gets the bias.
+   *
    * @return the bias.
    */
   public double getBias() {
@@ -100,6 +103,8 @@ public abstract class CameraNoiseModel implements NoiseModel {
   }
 
   /**
+   * Sets the bias.
+   *
    * @param bias the bias to set
    */
   public void setBias(double bias) {
@@ -107,6 +112,8 @@ public abstract class CameraNoiseModel implements NoiseModel {
   }
 
   /**
+   * Gets the read noise.
+   *
    * @return the read noise.
    */
   public double getReadNoise() {
@@ -114,6 +121,8 @@ public abstract class CameraNoiseModel implements NoiseModel {
   }
 
   /**
+   * Sets the read noise.
+   *
    * @param readNoise the read noise to set
    */
   public void setReadNoise(double readNoise) {
@@ -121,6 +130,8 @@ public abstract class CameraNoiseModel implements NoiseModel {
   }
 
   /**
+   * Checks if an Electron Multiplying CCD camera.
+   *
    * @return true if the camera is an Electron Multiplying CCD camera.
    */
   public abstract boolean isEmCCD();

@@ -102,13 +102,13 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
   /**
    * Check if the sequence has converged.
    *
-   * @param p Previous
-   * @param c Current
+   * @param previous Previous
+   * @param current Current
    * @return True if converged
    */
-  private boolean converged(final double[] p, final double[] c) {
-    for (int i = 0; i < p.length; ++i) {
-      if (!converged(p[i], c[i])) {
+  private boolean converged(final double[] previous, final double[] current) {
+    for (int i = 0; i < previous.length; ++i) {
+      if (!converged(previous[i], current[i])) {
         return false;
       }
     }
@@ -118,17 +118,17 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
   /**
    * Check if the value has converged.
    *
-   * @param p Previous
-   * @param c Current
+   * @param previous Previous
+   * @param current Current
    * @return True if converged
    */
-  public boolean converged(final double p, final double c) {
-    final double difference = Math.abs(p - c);
-    final double size = FastMath.max(Math.abs(p), Math.abs(c));
-    if (difference > size * relative && difference > absolute) {
-      return false;
+  public boolean converged(final double previous, final double current) {
+    final double difference = Math.abs(previous - current);
+    if (difference <= absolute) {
+      return true;
     }
-    return true;
+    final double size = FastMath.max(Math.abs(previous), Math.abs(current));
+    return (difference <= size * relative);
   }
 
   @Override
@@ -140,10 +140,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
     if (checkFitness && converged(previous.getFitness(), current.getFitness())) {
       return true;
     }
-    if (checkSequence && converged(previous.sequence(), current.sequence())) {
-      return true;
-    }
-    return false;
+    return (checkSequence && converged(previous.sequence(), current.sequence()));
   }
 
   /**
@@ -156,6 +153,8 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
   protected abstract boolean converged(T previous, T current);
 
   /**
+   * Gets the iterations.
+   *
    * @return the iterations.
    */
   public int getIterations() {

@@ -77,7 +77,8 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter {
   @Override
   protected String generateName() {
     return String.format(
-        "Multi Hysteresis2: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision2=%.1f+%.1f (%s)",
+        "Multi Hysteresis2: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, "
+            + "MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision2=%.1f+%.1f (%s)",
         strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth,
         strictMaxWidth, rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision,
         getTraceParameters());
@@ -106,7 +107,8 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter {
 
   @Override
   public String getDescription() {
-    return "Filter results using a multiple thresholds: Signal, SNR, width, shift, precision (uses fitted background to set noise). Any results within the "
+    return "Filter results using a multiple thresholds: Signal, SNR, width, shift, precision"
+        + " (uses fitted background to set noise). Any results within the "
         + "strict limits are included. Any results outside the weak limits are excluded. "
         + super.getDescription();
   }

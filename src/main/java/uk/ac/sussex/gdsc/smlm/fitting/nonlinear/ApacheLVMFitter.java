@@ -65,7 +65,8 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
   }
 
   @Override
-  public FitStatus computeFit(double[] y, final double[] yFit, double[] a, double[] aDev) {
+  public FitStatus computeFit(double[] y, final double[] fx, double[] a,
+      double[] parametersVariance) {
     final int n = y.length;
     try {
       // Different convergence thresholds seem to have no effect on the resulting fit, only the
@@ -104,11 +105,11 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
           //.weight(new DiagonalMatrix(w));
       //@formatter:on
 
-      if (f instanceof ExtendedNonLinearFunction
-          && ((ExtendedNonLinearFunction) f).canComputeValuesAndJacobian()) {
+      if (function instanceof ExtendedNonLinearFunction
+          && ((ExtendedNonLinearFunction) function).canComputeValuesAndJacobian()) {
         // Compute together, or each individually
         builder.model(new ValueAndJacobianFunction() {
-          final ExtendedNonLinearFunction fun = (ExtendedNonLinearFunction) f;
+          final ExtendedNonLinearFunction fun = (ExtendedNonLinearFunction) function;
 
           @Override
           public Pair<RealVector, RealMatrix> value(RealVector point) {
@@ -131,8 +132,8 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
         });
       } else {
         // Compute separately
-        builder.model(new MultivariateVectorFunctionWrapper((NonLinearFunction) f, a, n),
-            new MultivariateMatrixFunctionWrapper((NonLinearFunction) f, a, n));
+        builder.model(new MultivariateVectorFunctionWrapper((NonLinearFunction) function, a, n),
+            new MultivariateMatrixFunctionWrapper((NonLinearFunction) function, a, n));
       }
 
       final LeastSquaresProblem problem = builder.build();
@@ -143,7 +144,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
       setSolution(a, parameters);
       iterations = optimum.getIterations();
       evaluations = optimum.getEvaluations();
-      if (aDev != null) {
+      if (parametersVariance != null) {
         // Set up the Jacobian.
         final RealMatrix j = optimum.getJacobian();
 
@@ -154,18 +155,18 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
             (jTj instanceof Array2DRowRealMatrix) ? ((Array2DRowRealMatrix) jTj).getDataRef()
                 : jTj.getData();
         final FisherInformationMatrix m = new FisherInformationMatrix(data);
-        setDeviations(aDev, m);
+        setDeviations(parametersVariance, m);
       }
       // Compute function value
-      if (yFit != null) {
-        final Gaussian2DFunction f = (Gaussian2DFunction) this.f;
-        f.initialise0(a);
-        f.forEach(new ValueProcedure() {
+      if (fx != null) {
+        final Gaussian2DFunction function = (Gaussian2DFunction) this.function;
+        function.initialise0(a);
+        function.forEach(new ValueProcedure() {
           int i;
 
           @Override
           public void execute(double value) {
-            yFit[i] = value;
+            fx[i] = value;
           }
         });
       }
@@ -190,12 +191,12 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
   }
 
   @Override
-  public boolean computeValue(double[] y, double[] yFit, double[] a) {
+  public boolean computeValue(double[] y, double[] fx, double[] a) {
     final GradientCalculator calculator =
-        GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
+        GradientCalculatorFactory.newCalculator(function.getNumberOfGradients(), false);
 
     // Since we know the function is a Gaussian2DFunction from the constructor
-    value = calculator.findLinearised(y.length, y, yFit, a, (NonLinearFunction) f);
+    value = calculator.findLinearised(y.length, y, fx, a, (NonLinearFunction) function);
 
     return true;
   }
@@ -203,9 +204,9 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver {
   @Override
   protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a) {
     final GradientCalculator c =
-        GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
+        GradientCalculatorFactory.newCalculator(function.getNumberOfGradients(), false);
     // Since we know the function is a Gaussian2DFunction from the constructor
-    final double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
+    final double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) function);
     if (c.isNaNGradients()) {
       throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
     }

@@ -122,22 +122,23 @@ public class PoissonGaussianConvolutionFunction
    *
    * <p>The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true
    * the function does not error if the input x is non-integer.
+   *
    * @see #isComputePMF()
    */
   @Override
-  public double likelihood(double o, double e) {
-    if (e <= 0) {
+  public double likelihood(double observed, double mu) {
+    if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
       if (computePMF) {
-        final double x = Math.round(o);
+        final double x = Math.round(observed);
         return (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
       }
-      return FastMath.exp((-0.5 * o * o / var) + logNormalisationGaussian);
+      return FastMath.exp((-0.5 * observed * observed / var) + logNormalisationGaussian);
     }
     // Use same nomenclature as Huang et al
 
-    final double u = e; // expected photoelectrons
-    final double D = o; // Camera counts
+    final double u = mu; // expected photoelectrons
+    final double D = observed; // Camera counts
     // g == gain
     // var = readout variance
 
@@ -224,19 +225,19 @@ public class PoissonGaussianConvolutionFunction
    * @see #isComputePMF()
    */
   @Override
-  public double logLikelihood(double o, double e) {
+  public double logLikelihood(double observed, double mu) {
     // As above but return the log
 
-    if (e <= 0) {
+    if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
       if (computePMF) {
-        final double x = Math.round(o);
+        final double x = Math.round(observed);
         return Math.log((gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5);
       }
-      return (-0.5 * o * o / var) + logNormalisationGaussian;
+      return (-0.5 * observed * observed / var) + logNormalisationGaussian;
     }
-    final double u = e; // expected photoelectrons
-    final double D = o; // Camera counts
+    final double u = mu; // expected photoelectrons
+    final double D = observed; // Camera counts
     int qmax = (int) Math.ceil((D + 5 * s) / g);
     if (qmax < 0) {
       return Double.NEGATIVE_INFINITY;

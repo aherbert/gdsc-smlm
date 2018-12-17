@@ -77,27 +77,27 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver {
    * Create a new stepping function solver.
    *
    * @param type the type
-   * @param f the function
+   * @param function the function
    * @throws NullPointerException if the function is null
    */
-  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f) {
-    this(type, f, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function function) {
+    this(type, function, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
   }
 
   /**
    * Create a new stepping function solver.
    *
    * @param type the type
-   * @param f the function
+   * @param function the function
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum relative error
    * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum absolute error
    * @throws NullPointerException if the function is null
    */
-  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f,
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function function,
       double maxRelativeError, double maxAbsoluteError) {
-    super(type, f);
+    super(type, function);
     solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
   }
 
@@ -105,21 +105,21 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver {
    * Create a new stepping function solver.
    *
    * @param type the type
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f,
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function function,
       ToleranceChecker tc, ParameterBounds bounds) {
-    this(type, f, tc, bounds, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
+    this(type, function, tc, bounds, DEFAULT_MAX_RELATIVE_ERROR, DEFAULT_MAX_ABSOLUTE_ERROR);
   }
 
   /**
    * Create a new stepping function solver.
    *
    * @param type the type
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
@@ -128,10 +128,10 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver {
    *        maximum absolute error
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function f,
+  public LVMSteppingFunctionSolver(FunctionSolverType type, Gradient1Function function,
       ToleranceChecker tc, ParameterBounds bounds, double maxRelativeError,
       double maxAbsoluteError) {
-    super(type, f, tc, bounds);
+    super(type, function, tc, bounds);
     solver.setEqual(new DoubleEquality(maxRelativeError, maxAbsoluteError));
   }
 
@@ -264,6 +264,8 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver {
   }
 
   /**
+   * Sets the the initial lambda for the Levenberg-Marquardt fitting routine.
+   *
    * @param initialLambda the initial lambda for the Levenberg-Marquardt fitting routine
    */
   public void setInitialLambda(double initialLambda) {
@@ -271,15 +273,17 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver {
   }
 
   /**
-   * @return the initialLambda.
+   * Gets the the initial lambda for the Levenberg-Marquardt fitting routine.
+   *
+   * @return the initial lambda
    */
   public double getInitialLambda() {
     return initialLambda;
   }
 
   @Override
-  public void setGradientFunction(GradientFunction f) {
-    super.setGradientFunction(f);
+  public void setGradientFunction(GradientFunction function) {
+    super.setGradientFunction(function);
     gradientProcedure = null;
   }
 }

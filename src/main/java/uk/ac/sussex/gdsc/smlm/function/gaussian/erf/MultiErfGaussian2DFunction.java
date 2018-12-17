@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
  */
 public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   /** The number of peaks. */
-  protected final int nPeaks;
+  protected final int numberOfPeaks;
 
   /** The gradient indices. */
   protected final int[] gradientIndices;
@@ -49,23 +49,23 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   /**
    * Instantiates a new multi-peak erf gaussian 2D function.
    *
-   * @param nPeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    */
-  public MultiErfGaussian2DFunction(int nPeaks, int maxx, int maxy) {
-    super(nPeaks, maxx, maxy);
-    this.nPeaks = nPeaks;
+  public MultiErfGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
+    super(numberOfPeaks, maxx, maxy);
+    this.numberOfPeaks = numberOfPeaks;
     this.gradientIndices = createGradientIndices();
-    tI = new double[nPeaks];
+    tI = new double[numberOfPeaks];
   }
 
   /** {@inheritDoc} */
   @Override
   public int getNPeaks() {
-    return nPeaks;
+    return numberOfPeaks;
   }
 
   /**
@@ -84,12 +84,12 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   protected int[] replicateGradientIndices(int[] singleGradientIndices) {
     final int start = (evaluatesBackground() ? 1 : 0);
     final int m = singleGradientIndices.length;
-    final int[] indices = new int[start + nPeaks * (m - start)];
+    final int[] indices = new int[start + numberOfPeaks * (m - start)];
     int p = 0;
     if (evaluatesBackground()) {
       indices[p++] = 0;
     }
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       for (int j = start; j < m; j++) {
         indices[p++] = i + singleGradientIndices[j];
       }
@@ -122,7 +122,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
     int xx = i % maxx;
 
     double I = tB;
-    for (int n = 0; n < nPeaks; n++, xx += maxx, yy += maxy) {
+    for (int n = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       I += tI[n] * deltaEx[xx] * deltaEy[yy];
     }
     return I;
@@ -153,7 +153,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   @Override
   public void forEach(ValueProcedure procedure) {
     // Unroll for the number of peaks
-    if (nPeaks == 2) {
+    if (numberOfPeaks == 2) {
       if (tB == 0) {
         for (int y = 0; y < maxy; y++) {
           // Pre-compute
@@ -176,16 +176,16 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         }
       }
     } else {
-      final double[] tI_deltaEy = new double[nPeaks];
+      final double[] tI_deltaEy = new double[numberOfPeaks];
       for (int y = 0; y < maxy; y++) {
         // Pre-compute
-        for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+        for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
           tI_deltaEy[n] = tI[n] * deltaEy[yy];
         }
 
         for (int x = 0; x < maxx; x++) {
           double I = tB;
-          for (int n = 0, xx = x; n < nPeaks; n++, xx += maxx) {
+          for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
             I += tI_deltaEy[n] * deltaEx[xx];
           }
           procedure.execute(I);
@@ -195,7 +195,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         // for (int x = 0; x < maxx; x++)
         // {
         // double I = tB;
-        // for (int n = 0, xx = x, yy = y; n < nPeaks; n++, xx += maxx, yy += maxy)
+        // for (int n = 0, xx = x, yy = y; n < numberOfPeaks; n++, xx += maxx, yy += maxy)
         // I += tI[n] * deltaEx[xx] * deltaEy[yy];
         // procedure.execute(I);
         // }
@@ -208,7 +208,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
     initialise0(variables);
     final double[] values = new double[size()];
     // Unroll for the number of peaks
-    if (nPeaks == 2) {
+    if (numberOfPeaks == 2) {
       if (tB == 0) {
         for (int y = 0, i = 0; y < maxy; y++) {
           // Pre-compute
@@ -231,16 +231,16 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         }
       }
     } else {
-      final double[] tI_deltaEy = new double[nPeaks];
+      final double[] tI_deltaEy = new double[numberOfPeaks];
       for (int y = 0, i = 0; y < maxy; y++) {
         // Pre-compute
-        for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+        for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
           tI_deltaEy[n] = tI[n] * deltaEy[yy];
         }
 
         for (int x = 0; x < maxx; x++) {
           double I = tB;
-          for (int n = 0, xx = x; n < nPeaks; n++, xx += maxx) {
+          for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
             I += tI_deltaEy[n] * deltaEx[xx];
           }
           values[i++] = I;

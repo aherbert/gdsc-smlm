@@ -71,7 +71,7 @@ public class PoissonGammaFunction
     return new PoissonGammaFunction(1.0 / alpha);
   }
 
-  private static final double twoPi = 2 * Math.PI;
+  private static final double TWO_PI = 2 * Math.PI;
 
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
@@ -97,7 +97,7 @@ public class PoissonGammaFunction
       if (x > 709 || _c_m_p < -709) {
         // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi *
         // x));
-        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
+        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
       }
       // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
       return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
@@ -135,7 +135,7 @@ public class PoissonGammaFunction
       if (x > 709 || _c_m_p < -709) {
         // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi *
         // x));
-        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
+        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
       }
       // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
       return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
@@ -168,13 +168,13 @@ public class PoissonGammaFunction
    * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
-   * @param dG_dp the gradient of the function G(c) with respect to parameter p
+   * @param gradient the gradient of the function G(c) with respect to parameter p
    * @return The probability function for observed Poisson counts
    * @see #poissonGamma(double, double, double)
    */
-  public static double dirac(double p, double[] dG_dp) {
+  public static double dirac(double p, double[] gradient) {
     final double exp_p = FastMath.exp(-p);
-    dG_dp[0] = -exp_p;
+    gradient[0] = -exp_p;
     return exp_p;
   }
 
@@ -189,10 +189,10 @@ public class PoissonGammaFunction
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
    * @param m The multiplication factor (gain)
-   * @param dG_dp the gradient of the function G(c) with respect to parameter p
+   * @param gradient the gradient of the function G(c) with respect to parameter p
    * @return The probability
    */
-  public static double poissonGamma(double c, double p, double m, double[] dG_dp) {
+  public static double poissonGamma(double c, double p, double m, double[] gradient) {
     // Any observed count above zero
     if (c > 0.0) {
       // The observed count converted to photons
@@ -206,9 +206,9 @@ public class PoissonGammaFunction
       if (x > 709 || _c_m_p < -709) {
         // Approximate Bessel function i0(x)/i1(x) when using large x:
         // In(x) ~ exp(x)/sqrt(2*pi*x)
-        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
+        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
-        dG_dp[0] = exp_transform / m - G;
+        gradient[0] = exp_transform / m - G;
         return G;
       }
 
@@ -228,17 +228,17 @@ public class PoissonGammaFunction
       final double exp_c_m_p = FastMath.exp(_c_m_p);
       // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
-      dG_dp[0] = exp_c_m_p * Bessel.i0(x) / m - G;
+      gradient[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
     } else if (c == 0.0) {
       // f(p) = exp(-p) * (1 + p / m)
       // df/dp = (-exp(-p) * (1 + p / m)) + (exp(-p) / m)
       final double exp_p = FastMath.exp(-p);
       final double G = exp_p * (1 + p / m);
-      dG_dp[0] = exp_p / m - G;
+      gradient[0] = exp_p / m - G;
       return G;
     } else {
-      dG_dp[0] = 0;
+      gradient[0] = 0;
       return 0;
     }
   }
@@ -256,12 +256,12 @@ public class PoissonGammaFunction
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
    * @param m The multiplication factor (gain)
-   * @param dG_dp the gradient of the function G(c) with respect to parameter p
+   * @param gradient the gradient of the function G(c) with respect to parameter p
    * @return The probability function for observed Poisson counts
    * @see #poissonGamma(double, double, double)
    * @see #dirac(double)
    */
-  public static double poissonGammaN(double c, double p, double m, double[] dG_dp) {
+  public static double poissonGammaN(double c, double p, double m, double[] gradient) {
     // As above with no Dirac delta function at c=0
 
     if (c > 0.0) {
@@ -270,23 +270,23 @@ public class PoissonGammaFunction
       final double x = 2 * Math.sqrt(cp_m);
       final double _c_m_p = -c_m - p;
       if (x > 709 || _c_m_p < -709) {
-        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
+        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
-        dG_dp[0] = exp_transform / m - G;
+        gradient[0] = exp_transform / m - G;
         return G;
       }
       final double exp_c_m_p = FastMath.exp(_c_m_p);
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
-      dG_dp[0] = exp_c_m_p * Bessel.i0(x) / m - G;
+      gradient[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
     } else if (c == 0.0) {
       // No Dirac delta function
       final double exp_p_m = FastMath.exp(-p) / m;
       final double G = exp_p_m * p;
-      dG_dp[0] = exp_p_m - G;
+      gradient[0] = exp_p_m - G;
       return G;
     } else {
-      dG_dp[0] = 0;
+      gradient[0] = 0;
       return 0;
     }
   }
@@ -302,10 +302,10 @@ public class PoissonGammaFunction
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
    * @param m The multiplication factor (gain)
-   * @param dG_dp the partial gradient of the function G(c) with respect to parameter p
+   * @param gradient the partial gradient of the function G(c) with respect to parameter p
    * @return The probability
    */
-  static double poissonGammaPartial(double c, double p, double m, double[] dG_dp) {
+  static double poissonGammaPartial(double c, double p, double m, double[] gradient) {
     // As above but do not subtract the function value G from the gradient.
     if (c > 0.0) {
       final double c_m = c / m;
@@ -313,23 +313,23 @@ public class PoissonGammaFunction
       final double x = 2 * Math.sqrt(cp_m);
       final double _c_m_p = -c_m - p;
       if (x > 709 || _c_m_p < -709) {
-        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
+        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
-        dG_dp[0] = exp_transform / m;
+        gradient[0] = exp_transform / m;
         return G;
       }
       final double exp_c_m_p = FastMath.exp(_c_m_p);
       // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
-      dG_dp[0] = exp_c_m_p * Bessel.i0(x) / m;
+      gradient[0] = exp_c_m_p * Bessel.i0(x) / m;
       return G;
     } else if (c == 0.0) {
       final double exp_p = FastMath.exp(-p);
       final double G = exp_p * (1 + p / m);
-      dG_dp[0] = exp_p / m;
+      gradient[0] = exp_p / m;
       return G;
     } else {
-      dG_dp[0] = 0;
+      gradient[0] = 0;
       return 0;
     }
   }
@@ -349,10 +349,10 @@ public class PoissonGammaFunction
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
    * @param m The multiplication factor (gain)
-   * @param dG_dp the partial gradient of the function G(c) with respect to parameter p
+   * @param gradient the partial gradient of the function G(c) with respect to parameter p
    * @return The unscaled probability
    */
-  static double unscaledPoissonGammaPartial(double c, double p, double m, double[] dG_dp) {
+  static double unscaledPoissonGammaPartial(double c, double p, double m, double[] gradient) {
     // As above but:
     // - do not multiply by exp^-p
     // - do not subtract the function value G from the gradient.
@@ -361,21 +361,21 @@ public class PoissonGammaFunction
       final double cp_m = p * c_m;
       final double x = 2 * Math.sqrt(cp_m);
       if (x > 709 || -c_m < -709) {
-        final double exp_transform = FastMath.exp(-c_m + x - 0.5 * Math.log(twoPi * x));
+        final double exp_transform = FastMath.exp(-c_m + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
-        dG_dp[0] = exp_transform / m;
+        gradient[0] = exp_transform / m;
         return G;
       }
       final double exp_c_m = FastMath.exp(-c_m);
       final double G = (x / (2 * c)) * exp_c_m * Bessel.i1(x);
-      dG_dp[0] = exp_c_m * Bessel.i0(x) / m;
+      gradient[0] = exp_c_m * Bessel.i0(x) / m;
       return G;
     } else if (c == 0.0) {
       final double G = 1 + p / m;
-      dG_dp[0] = 1 / m;
+      gradient[0] = 1 / m;
       return G;
     } else {
-      dG_dp[0] = 0;
+      gradient[0] = 0;
       return 0;
     }
   }
@@ -398,7 +398,7 @@ public class PoissonGammaFunction
       final double cp_m = p * c_m;
       final double x = 2 * Math.sqrt(cp_m);
       if (x > 709) {
-        return 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x);
+        return 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(TWO_PI * x);
       }
       return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.i1(x));
     } else if (c == 0.0) {
@@ -411,19 +411,19 @@ public class PoissonGammaFunction
 
   /** {@inheritDoc} */
   @Override
-  public double likelihood(final double o, final double e) {
-    return poissonGamma(o, e, m);
+  public double likelihood(final double count, final double photoelectrons) {
+    return poissonGamma(count, photoelectrons, m);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double logLikelihood(double o, double e) {
-    return logPoissonGamma(o, e, m);
+  public double likelihood(double count, double photoelectrons, double[] gradient) {
+    return poissonGamma(count, photoelectrons, m, gradient);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double likelihood(double o, double t, double[] dp_dt) {
-    return poissonGamma(o, t, m, dp_dt);
+  public double logLikelihood(double count, double photoelectrons) {
+    return logPoissonGamma(count, photoelectrons, m);
   }
 }

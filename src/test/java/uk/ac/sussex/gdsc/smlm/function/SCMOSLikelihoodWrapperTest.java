@@ -626,9 +626,9 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     final double[] a = new double[0];
     final double[] gradient = new double[0];
 
-    final float var[] = newArray(n, VAR);
-    final float g[] = newArray(n, G);
-    final float o[] = newArray(n, O);
+    final float[] var = newArray(n, VAR);
+    final float[] g = newArray(n, G);
+    final float[] o = newArray(n, O);
 
     final NonLinearFunction nlf = new NonLinearFunction() {
       @Override

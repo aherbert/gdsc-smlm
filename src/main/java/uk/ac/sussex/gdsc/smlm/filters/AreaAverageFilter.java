@@ -92,16 +92,16 @@ public class AreaAverageFilter extends BaseWeightedFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The width
+   * @param width The width
    */
   public void areaAverageUsingSumsInternal(float[] data, final int maxx, final int maxy,
-      final double w) {
-    if (w <= 0) {
+      final double width) {
+    if (width <= 0) {
       return;
     }
 
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+    final int n = (int) width;
+    final int n1 = (n == width) ? n : n + 1;
     final int blockSize = 2 * n1 + 1;
     if (maxx < blockSize || maxy < blockSize) {
       return;
@@ -125,12 +125,12 @@ public class AreaAverageFilter extends BaseWeightedFilter {
     sumFilter2.rollingBlockFilterInternal(sum2, maxx, maxy, n1);
 
     // Get the average by adding the inner sum to the weighted edge pixels.
-    final double area = (2 * w + 1) * (2 * w + 1);
+    final double area = (2 * width + 1) * (2 * width + 1);
 
     final float edgeWeight;
 
     if (simpleInterpolation) {
-      edgeWeight = (float) (w - n);
+      edgeWeight = (float) (width - n);
     } else {
       // Use the area to produce the weighting
       final int inner = (2 * n + 1) * (2 * n + 1);
@@ -156,15 +156,16 @@ public class AreaAverageFilter extends BaseWeightedFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The width
+   * @param width The width
    */
-  public void areaAverageUsingSums(float[] data, final int maxx, final int maxy, final double w) {
-    if (w <= 0) {
+  public void areaAverageUsingSums(float[] data, final int maxx, final int maxy,
+      final double width) {
+    if (width <= 0) {
       return;
     }
 
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+    final int n = (int) width;
+    final int n1 = (n == width) ? n : n + 1;
 
     if (n == n1 || (maxx < n1 && maxy < n1)) {
       // There is no edge
@@ -184,12 +185,12 @@ public class AreaAverageFilter extends BaseWeightedFilter {
     sumFilter2.rollingBlockFilter(sum2, maxx, maxy, n1);
 
     // Get the average by adding the inner sum to the weighted edge pixels.
-    final double area = (2 * w + 1) * (2 * w + 1);
+    final double area = (2 * width + 1) * (2 * width + 1);
 
     final float edgeWeight;
 
     if (simpleInterpolation) {
-      edgeWeight = (float) (w - n);
+      edgeWeight = (float) (width - n);
     } else {
       // Use the area to produce the weighting
       final int inner = (2 * n + 1) * (2 * n + 1);
@@ -213,16 +214,16 @@ public class AreaAverageFilter extends BaseWeightedFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The width
+   * @param width The width
    */
   public void areaAverageUsingAveragesInternal(float[] data, final int maxx, final int maxy,
-      final double w) {
-    if (w <= 0) {
+      final double width) {
+    if (width <= 0) {
       return;
     }
 
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+    final int n = (int) width;
+    final int n1 = (n == width) ? n : n + 1;
     final int blockSize = 2 * n1 + 1;
     if (maxx < blockSize || maxy < blockSize) {
       return;
@@ -249,12 +250,12 @@ public class AreaAverageFilter extends BaseWeightedFilter {
     final float outerWeight;
 
     if (simpleInterpolation) {
-      outerWeight = (float) (w - n);
+      outerWeight = (float) (width - n);
     } else {
       // Use the area to produce the weighting
       final int inner = (2 * n + 1) * (2 * n + 1);
       final int outer = (2 * n1 + 1) * (2 * n1 + 1);
-      final double area = (2 * w + 1) * (2 * w + 1);
+      final double area = (2 * width + 1) * (2 * width + 1);
       outerWeight = (float) ((area - inner) / (outer - inner));
     }
 
@@ -276,16 +277,16 @@ public class AreaAverageFilter extends BaseWeightedFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The width
+   * @param width The width
    */
   public void areaAverageUsingAverages(float[] data, final int maxx, final int maxy,
-      final double w) {
-    if (w <= 0) {
+      final double width) {
+    if (width <= 0) {
       return;
     }
 
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+    final int n = (int) width;
+    final int n1 = (n == width) ? n : n + 1;
 
     if (n == n1 || (maxx < n1 && maxy < n1)) {
       // There is no edge
@@ -308,12 +309,12 @@ public class AreaAverageFilter extends BaseWeightedFilter {
     final float outerWeight;
 
     if (simpleInterpolation) {
-      outerWeight = (float) (w - n);
+      outerWeight = (float) (width - n);
     } else {
       // Use the area to produce the weighting
       final int inner = (2 * n + 1) * (2 * n + 1);
       final int outer = (2 * n1 + 1) * (2 * n1 + 1);
-      final double area = (2 * w + 1) * (2 * w + 1);
+      final double area = (2 * width + 1) * (2 * width + 1);
       outerWeight = (float) ((area - inner) / (outer - inner));
     }
 
@@ -325,6 +326,8 @@ public class AreaAverageFilter extends BaseWeightedFilter {
   }
 
   /**
+   * Checks if using simple interpolation.
+   *
    * @return true for simple interpolation.
    */
   public boolean isSimpleInterpolation() {

@@ -130,7 +130,7 @@ public abstract class StoppingCriteria {
 
   /**
    * Called after each {@link #evaluate(double, double, double[]) } method to check if the fitting
-   * should continue
+   * should continue.
    *
    * @return True if the stopping criteria have not been met (i.e. fitting should continue)
    */
@@ -149,6 +149,8 @@ public abstract class StoppingCriteria {
   }
 
   /**
+   * Gets the iteration.
+   *
    * @return the iteration.
    */
   public int getIteration() {
@@ -156,14 +158,18 @@ public abstract class StoppingCriteria {
   }
 
   /**
-   * @param maximumIterations the maximumIterations to set
+   * Sets the maximum iterations.
+   *
+   * @param maximumIterations the new maximum iterations
    */
   public void setMaximumIterations(int maximumIterations) {
     this.maximumIterations = maximumIterations;
   }
 
   /**
-   * @return the maximumIterations.
+   * Gets the maximum iterations.
+   *
+   * @return the maximum iterations
    */
   public int getMaximumIterations() {
     return maximumIterations;
@@ -181,21 +187,27 @@ public abstract class StoppingCriteria {
   }
 
   /**
-   * @return the minimumIterations.
+   * Gets the minimum iterations.
+   *
+   * @return the minimum iterations
    */
   public int getMinimumIterations() {
     return minimumIterations;
   }
 
   /**
-   * @param log the log to set. Used to output fit evaluations for each iteration
+   * Sets the log. Used to output fit evaluations for each iteration.
+   *
+   * @param log the log to set
    */
   public void setLog(Logger log) {
     this.log = log;
   }
 
   /**
-   * @return the log.
+   * Gets the logger.
+   *
+   * @return the logger.
    */
   public Logger getLog() {
     return log;

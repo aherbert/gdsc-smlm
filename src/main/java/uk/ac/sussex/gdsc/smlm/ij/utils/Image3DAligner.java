@@ -968,10 +968,8 @@ public class Image3DAligner {
         for (int c = ix, i = 0; c < ixw; c++, i++) {
           final double sumXy = buffer[base + c];
 
-          compute(rx1[i], ry1[j], rz_1, rxw1[i], ryh1[j], rz_d_1, width[i], h[j], d, rs, rss,
-              rsum);
-          compute(tx1[i], ty1[j], tz_1, txw1[i], tyh1[j], tz_d_1, width[i], h[j], d, ts, tss,
-              tsum);
+          compute(rx1[i], ry1[j], rz_1, rxw1[i], ryh1[j], rz_d_1, width[i], h[j], d, rs, rss, rsum);
+          compute(tx1[i], ty1[j], tz_1, txw1[i], tyh1[j], tz_d_1, width[i], h[j], d, ts, tss, tsum);
 
           // Compute the correlation
           // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )

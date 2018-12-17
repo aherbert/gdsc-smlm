@@ -184,13 +184,13 @@ public class MLEGradientCalculator extends GradientCalculator {
    * @return The MLE chi-squared value
    */
   @Override
-  public double findLinearised(final int[] x, final double[] y, double[] yFit, final double[] a,
+  public double findLinearised(final int[] x, final double[] y, double[] fx, final double[] a,
       final NonLinearFunction func) {
     double chisq = 0;
 
     func.initialise(a);
 
-    if (yFit == null || yFit.length < x.length) {
+    if (fx == null || fx.length < x.length) {
       for (int i = 0; i < x.length; i++) {
         // Function must produce a positive output.
         final double xi = y[i];
@@ -229,7 +229,7 @@ public class MLEGradientCalculator extends GradientCalculator {
         // penalise the chisq value.
         // Optimally the function should be bounded to always produce a positive number.
         final double fi = func.eval(i);
-        yFit[i] = fi;
+        fx[i] = fi;
 
         if (fi <= 0) {
           // We assume xi is positive
@@ -301,7 +301,8 @@ public class MLEGradientCalculator extends GradientCalculator {
       // checkGradients(alpha, beta, nparams, 0);
       // if (isNaNGradients())
       // {
-      // System.out.printf("Bad gradients generated: %s / %f : %s\n", Double.toString(fi), xi,
+      // System.out.printf("Bad gradients generated: %s / %function : %s\n", Double.toString(fi),
+      // xi,
       // Arrays.toString(dfi_da));
       // return 0;
       // }
@@ -373,7 +374,8 @@ public class MLEGradientCalculator extends GradientCalculator {
       // checkGradients(alpha, beta, nparams, 0);
       // if (isNaNGradients())
       // {
-      // System.out.printf("Bad gradients generated: %s / %f : %s\n", Double.toString(fi), xi,
+      // System.out.printf("Bad gradients generated: %s / %function : %s\n", Double.toString(fi),
+      // xi,
       // Arrays.toString(dfi_da));
       // return 0;
       // }
@@ -390,19 +392,19 @@ public class MLEGradientCalculator extends GradientCalculator {
    *
    * @param n the n
    * @param y Data to fit (must be strictly positive Poisson data)
-   * @param yFit the y fit
+   * @param fx the y fit
    * @param a the a
    * @param func the func
    * @return The MLE chi-squared value
    */
   @Override
-  public double findLinearised(final int n, final double[] y, double[] yFit, final double[] a,
+  public double findLinearised(final int n, final double[] y, double[] fx, final double[] a,
       final NonLinearFunction func) {
     double chisq = 0;
 
     func.initialise(a);
 
-    if (yFit == null || yFit.length < n) {
+    if (fx == null || fx.length < n) {
       for (int i = 0; i < n; i++) {
         // Function must produce a positive output.
         final double xi = y[i];
@@ -441,7 +443,7 @@ public class MLEGradientCalculator extends GradientCalculator {
         // penalise the chisq value.
         // Optimally the function should be bounded to always produce a positive number.
         final double fi = func.eval(i);
-        yFit[i] = fi;
+        fx[i] = fi;
 
         if (fi <= 0) {
           // We assume xi is positive

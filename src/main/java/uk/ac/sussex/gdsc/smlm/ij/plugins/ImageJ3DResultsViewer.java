@@ -687,8 +687,9 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
   // No ned to store this in settings as when the plugin is first run there are no windows
   private static String lastWindow = "";
 
-  private static HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables =
-      new HashMap<>();
+  private static HashMap<PeakResultsDigest,
+      Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables =
+          new HashMap<>();
   private static ResultsTableSettings.Builder resultsTableSettings;
   private static boolean addToSelection;
   private static Color3f highlightColor;
@@ -859,10 +860,10 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
         if (mode == SortMode.NONE) {
           return false;
         }
-        egd.addMessage(TextUtils.wrap(
-            "Note: The sort mode is used to correctly render transparent objects. For non-transparent objects "
-                + "faster rendering is achieved with a reverse sort to put close objects at the front.",
-            80));
+        egd.addMessage(
+            TextUtils.wrap("Note: The sort mode is used to correctly render transparent objects. "
+                + "For non-transparent objects faster rendering is achieved with a reverse "
+                + "sort to put close objects at the front.", 80));
         egd.addMessage(TextUtils.wrap(mode.getDetails(), 80));
         egd.addMessage("Define the direction of the view");
         egd.addNumericField("Direction_x", settings.getSortDirectionX(), 3, 10, "");

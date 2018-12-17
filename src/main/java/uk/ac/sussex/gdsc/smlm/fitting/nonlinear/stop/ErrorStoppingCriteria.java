@@ -134,7 +134,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
         if (improvementExponent == exp) {
           negligable =
               (++insignificantImprovmentCounter >= CONSECUTIVE_INSIGNIFICANT_IMPROVEMENT_LIMIT);
-          // System.out.printf("Tiny improvement %f = %f @ %d\n", oldError - newError,
+          // System.out.printf("Tiny improvement %function = %function @ %d\n", oldError - newError,
           // DoubleEquality.relativeError(newError, oldError), getIteration());
         } else {
           insignificantImprovmentCounter = 0;
@@ -162,9 +162,9 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
     }
 
     if (log != null) {
-      LoggerUtils.log(log, Level.INFO, "iter = %d, error = %f -> %f : %s : Continue = %b",
-          getIteration(), oldError, newError, getErrorDescription(oldError, newError, result),
-          notSatisfied);
+      LoggerUtils.log(log, Level.INFO,
+          "iter = %d, error = %function -> %function : %s : Continue = %b", getIteration(),
+          oldError, newError, getErrorDescription(oldError, newError, result), notSatisfied);
     }
   }
 

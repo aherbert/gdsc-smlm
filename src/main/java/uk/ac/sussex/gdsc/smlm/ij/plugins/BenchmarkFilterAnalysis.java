@@ -1853,7 +1853,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     final double pMLE = Gaussian2DPeakResultHelper.getMLPrecision(simulationParameters.a,
         simulationParameters.s, signal, simulationParameters.noise, simulationParameters.isEMCCD());
     String msg = String.format(
-        "Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
+        "Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\n"
+            + "Expected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
         fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE,
         notDuplicateCount, newResultCount, (100.0 * notDuplicateCount) / newResultCount);
 
@@ -2875,8 +2876,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
   private static String createComponentAnalysisHeader() {
     String header = createResultsHeader(false);
-    header +=
-        "\tSize\tName\tValue\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J\tNames";
+    header += "\tSize\tName\tValue\tLimit\t% Criteria\t% Score\tTime\tOverlap P\t"
+        + "Overlap R\tOverlap J\tNames";
     return header;
   }
 
@@ -2930,8 +2931,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     if (summary) {
-      sb.append(
-          "\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tEvolve\tTime\tSearch\tTime");
+      sb.append("\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tEvolve\t"
+          + "Time\tSearch\tTime");
     }
     return sb.toString();
   }
@@ -4920,7 +4921,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
         // For the dialog
         final String msg = String.format(
-            "Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\nLower density = %d\nHigher density = %d\n",
+            "Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\n"
+                + "Lower density = %d\nHigher density = %d\n",
             sampler.getNumberOfEmptySamples(), sampler.getNumberOfLowDensitySamples(),
             sampler.getNumberOfHighDensitySamples());
 
@@ -5074,8 +5076,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * @param filter the filter
    * @return the assignments
    */
-  private ArrayList<FractionalAssignment[]> depthAnalysis(
-      ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter) {
+  private ArrayList<FractionalAssignment[]>
+      depthAnalysis(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter) {
     // TODO : This analysis ignores the partial match distance.
     // Use the score for each result to get a weighted histogram.
 
@@ -5233,8 +5235,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * @param filter the filter
    * @return the assignments
    */
-  private ArrayList<FractionalAssignment[]> scoreAnalysis(
-      ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter) {
+  private ArrayList<FractionalAssignment[]>
+      scoreAnalysis(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter) {
     if (!scoreAnalysis) {
       return null;
     }
@@ -6501,8 +6503,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         scoreFilters(setStrength(new FilterSet(populationToFilters(individuals))), false);
   }
 
-  private static ArrayList<Filter> populationToFilters(
-      List<? extends Chromosome<FilterScore>> individuals) {
+  private static ArrayList<Filter>
+      populationToFilters(List<? extends Chromosome<FilterScore>> individuals) {
     final ArrayList<Filter> filters = new ArrayList<>(individuals.size());
     for (final Chromosome<FilterScore> c : individuals) {
       filters.add((DirectFilter) c);

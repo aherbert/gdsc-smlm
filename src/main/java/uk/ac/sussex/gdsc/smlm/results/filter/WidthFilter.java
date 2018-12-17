@@ -39,7 +39,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class WidthFilter extends DirectFilter implements IMultiFilter {
   /**
    * The default increment. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
-   */  public static final double DEFAULT_INCREMENT = 0.05;
+   */
+  public static final double DEFAULT_INCREMENT = 0.05;
   /**
    * The default range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
    */

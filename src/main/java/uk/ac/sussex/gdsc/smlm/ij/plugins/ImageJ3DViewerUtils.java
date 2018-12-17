@@ -46,8 +46,8 @@ final class ImageJ3DViewerUtils {
     // Try setting -Dj3d.sortShape3DBounds for faster centroid computation.
     // See org.scijava.java3d.MasterControl.sortShape3DBounds.
     // This only works if the VirtualUniverse has not been created, i.e. no java3d has been loaded.
-    AccessController.doPrivileged((PrivilegedAction<String>) () -> System
-        .setProperty("j3d.sortShape3DBounds", Boolean.toString(true)));
+    AccessController.doPrivileged((PrivilegedAction<
+        String>) () -> System.setProperty("j3d.sortShape3DBounds", Boolean.toString(true)));
 
     // Support gracefully handling missing dependencies for the 3D viewer
     String version = null;

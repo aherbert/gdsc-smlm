@@ -135,8 +135,8 @@ public class TraceExporter implements PlugIn {
     gd.addMessage("Export traces to a directory");
     gd.addDirectoryField("Directory", directory, 30);
     gd.addNumericField("Min_length", minLength, 0);
-    gd.addMessage(
-        "Specify the maximum jump allowed within a trace.\nTraces with larger jumps will be split.");
+    gd.addMessage("Specify the maximum jump allowed within a trace.\n"
+        + "Traces with larger jumps will be split.");
     gd.addNumericField("Max_jump", maxJump, 0);
     gd.addMessage("Specify localistion precision (wobble) to add");
     gd.addNumericField("Wobble", wobble, 0, 6, "nm");

@@ -635,7 +635,8 @@ public class TraceMolecules implements PlugIn {
 
   private static String createHeader() {
     final StringBuilder sb = new StringBuilder(
-        "Dataset\tAlgorithm\tExposure time (ms)\tD-threshold (nm)\tT-threshold (s)\t(Frames)\tMolecules\tFiltered\tSingles\tClusters");
+        "Dataset\tAlgorithm\tExposure time (ms)\tD-threshold (nm)\tT-threshold (s)\t"
+            + "(Frames)\tMolecules\tFiltered\tSingles\tClusters");
     for (int i = 0; i < NAMES.length; i++) {
       sb.append('\t').append(NAMES[i]);
     }

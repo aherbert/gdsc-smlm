@@ -40,7 +40,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
   private final float[] gain;
   private final float[] variance;
   // This is computed when required
-  private float[] var_g2;
+  private float[] varG2;
 
   /**
    * Instantiates a new per pixel camera model.
@@ -155,22 +155,22 @@ public class PerPixelCameraModel extends BaseCameraModel {
    * @param bias the bias
    * @param gain the gain
    * @param variance the variance array
-   * @param var_g2 the normalised variance array
+   * @param varG2 the normalised variance array
    */
   private PerPixelCameraModel(boolean duplicate, Rectangle bounds, float[] bias, float[] gain,
-      float[] variance, float[] var_g2) {
+      float[] variance, float[] varG2) {
     if (duplicate) {
       cameraBounds = new Rectangle(bounds);
       this.bias = bias.clone();
       this.gain = gain.clone();
       this.variance = variance.clone();
-      this.var_g2 = (var_g2 == null) ? null : var_g2.clone();
+      this.varG2 = (varG2 == null) ? null : varG2.clone();
     } else {
       cameraBounds = bounds;
       this.bias = bias;
       this.gain = gain;
       this.variance = variance;
-      this.var_g2 = var_g2;
+      this.varG2 = varG2;
     }
   }
 
@@ -325,18 +325,18 @@ public class PerPixelCameraModel extends BaseCameraModel {
   }
 
   private float[] getNormalisedVarianceInternal() {
-    if (var_g2 == null) {
+    if (varG2 == null) {
       createNormalisedVariance();
     }
-    return var_g2;
+    return varG2;
   }
 
   private synchronized void createNormalisedVariance() {
-    if (var_g2 == null) {
+    if (varG2 == null) {
       final int size = variance.length;
-      var_g2 = new float[size];
+      varG2 = new float[size];
       for (int i = 0; i < size; i++) {
-        var_g2[i] = variance[i] / (gain[i] * gain[i]);
+        varG2[i] = variance[i] / (gain[i] * gain[i]);
       }
     }
   }
@@ -732,15 +732,15 @@ public class PerPixelCameraModel extends BaseCameraModel {
     final float[] bias = getData(this.bias, intersection, true);
     final float[] gain = getData(this.gain, intersection, true);
     final float[] variance = getData(this.variance, intersection, true);
-    final float[] var_g2 = (this.var_g2 == null) ? null : getData(this.var_g2, intersection, true);
-    return new PerPixelCameraModel(false, bounds, bias, gain, variance, var_g2);
+    final float[] varG2 = (this.varG2 == null) ? null : getData(this.varG2, intersection, true);
+    return new PerPixelCameraModel(false, bounds, bias, gain, variance, varG2);
   }
 
   /** {@inheritDoc} */
   @Override
   public PerPixelCameraModel copy() {
     // Deep copy
-    return new PerPixelCameraModel(true, cameraBounds, bias, gain, variance, var_g2);
+    return new PerPixelCameraModel(true, cameraBounds, bias, gain, variance, varG2);
   }
 
   /** {@inheritDoc} */

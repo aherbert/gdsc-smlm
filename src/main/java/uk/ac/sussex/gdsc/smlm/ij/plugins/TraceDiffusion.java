@@ -532,8 +532,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * @param msdPerMoleculeAdjacent the MSD per molecule adjacent
    * @return The D per molecule
    */
-  private static StoredDataStatistics calculateDiffusionCoefficient(
-      StoredDataStatistics msdPerMoleculeAdjacent) {
+  private static StoredDataStatistics
+      calculateDiffusionCoefficient(StoredDataStatistics msdPerMoleculeAdjacent) {
     final StoredDataStatistics dPerMolecule = new StoredDataStatistics();
     final double diffusionCoefficientConversion = 1.0 / 4.0;
     for (final double msd : msdPerMoleculeAdjacent.getValues()) {
@@ -559,7 +559,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
             MathUtils.rounded(precision, 4), MathUtils.rounded(exposureTime, 4)));
         out.newLine();
         out.write(String.format(
-            "#TraceId\tMSD all-vs-all (um^2/s)\tMSD adjacent (um^2/s)\tD all-vs-all(um^2/s)\tD adjacent(um^2/s)\tDistances (um^2) per %ss ... ",
+            "#TraceId\tMSD all-vs-all (um^2/s)\tMSD adjacent (um^2/s)\tD all-vs-all(um^2/s)\t"
+                + "D adjacent(um^2/s)\tDistances (um^2) per %ss ... ",
             MathUtils.rounded(exposureTime, 4)));
         out.newLine();
         for (int i = 0; i < msd.length; i++) {
@@ -1197,7 +1198,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       D = gradient / 4;
 
       ImageJUtils.log(
-          "Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
+          "Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, "
+              + "IC = %s (%d evaluations)",
           function.getY().length, MathUtils.rounded(gradient, 4), MathUtils.rounded(D, 4),
           MathUtils.rounded(ss), MathUtils.rounded(ic), lvmSolution.getEvaluations());
     } catch (final TooManyIterationsException ex) {
@@ -1247,7 +1249,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       if (ic2 < ic || debugFitting) {
         // Convert fitted precision in um to nm
         ImageJUtils.log(
-            "Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
+            "Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, "
+                + "D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
             function.getY().length, MathUtils.rounded(gradient, 4),
             MathUtils.rounded(intercept2, 4), MathUtils.rounded(gradient / 4, 4),
             MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss), MathUtils.rounded(ic2),
@@ -1322,7 +1325,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         if (ic2 < ic || debugFitting) {
           // Convert fitted precision in um to nm
           ImageJUtils.log(
-              "Linear fit with MSD corrected intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
+              "Linear fit with MSD corrected intercept (%d points) : Gradient = %s, "
+                  + "Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, "
+                  + "IC = %s (%d evaluations)",
               function.getY().length, MathUtils.rounded(gradient, 4),
               MathUtils.rounded(intercept2, 4), MathUtils.rounded(gradient / 4, 4),
               MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss), MathUtils.rounded(ic2),
@@ -1387,6 +1392,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     // Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 
     /**
+     * Guess the gradient.
+     *
      * @return An estimate for the linear gradient.
      */
     private double guess() {
@@ -1452,6 +1459,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
 
     /**
+     * Guess the gradient and intercept.
+     *
      * @return An estimate for the linear gradient and intercept.
      */
     public double[] guess() {
@@ -1513,7 +1522,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   }
 
   private class LinearFunctionWithMSDCorrectedIntercept implements MultivariateVectorFunction {
-    final double THIRD = 1 / 3.0;
+    static final double THIRD = 1 / 3.0;
     final double[] x;
     final double[] y;
     final boolean fitIntercept;
@@ -1529,6 +1538,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
 
     /**
+     * Guess the gradient and intercept.
+     *
      * @return An estimate for the linear gradient and intercept.
      */
     public double[] guess() {
@@ -1624,7 +1635,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     // D = (precision/2)^2
     final double minD = MathUtils.pow2(precision / 2000.0); // Extra 1000 factor to convert nm to um
     ImageJUtils.log(
-        "Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s, minD = %s um^2/jump",
+        "Jump Distance analysis : N = %d, Time = %d frames (%s seconds). "
+            + "MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, "
+            + "Beta = %s, minD = %s um^2/jump",
         jumpDistances.getN(), settings.getJumpDistance(),
         MathUtils.rounded(settings.getJumpDistance() * exposureTime, 4), MathUtils.rounded(msd, 4),
         MathUtils.rounded(meanDistance, 4), MathUtils.rounded(precision, 4),
@@ -1665,7 +1678,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       fit[0] = jd.calculateApparentDiffusionCoefficient(fit[0]);
       // Check the largest D
       checkTraceDistance(fit[0][0]);
-      fitValue = jd.getFitValue();
+      fitValue = jd.getLastFitValue();
     }
 
     return fit;

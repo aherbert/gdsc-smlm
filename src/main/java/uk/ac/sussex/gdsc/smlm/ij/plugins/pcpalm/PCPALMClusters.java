@@ -536,8 +536,8 @@ public class PCPALMClusters implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.enableYesNoCancel();
     gd.hideCancelButton();
-    gd.addMessage(
-        "The histogram is calibrated.\n \nDo you want to subtract a noise histogram before fitting?");
+    gd.addMessage("The histogram is calibrated.\n \n"
+        + "Do you want to subtract a noise histogram before fitting?");
     final boolean allowSave = new File(histogramData.filename).exists();
     if (allowSave) {
       gd.addCheckbox("Auto_save noise-subtracted histogram", sAutoSave);
@@ -589,8 +589,8 @@ public class PCPALMClusters implements PlugIn {
       final GenericDialog gd = new GenericDialog(TITLE);
       final String[] items = {"Clustering", "File"};
 
-      gd.addMessage(
-          "Fit a Binomial distribution to a histogram of cluster sizes.\n \nSelect the method to generate the histogram:");
+      gd.addMessage("Fit a Binomial distribution to a histogram of cluster sizes.\n \n"
+          + "Select the method to generate the histogram:");
       gd.addChoice("Method", items, items[runMode]);
       gd.showDialog();
       if (gd.wasCanceled()) {
@@ -685,6 +685,8 @@ public class PCPALMClusters implements PlugIn {
   }
 
   /**
+   * Check if all the molecules have weights (allowing weighted clustering).
+   *
    * @return True if all the molecules have weights (allowing weighted clustering).
    */
   private static boolean checkForWeights() {

@@ -750,9 +750,11 @@ public class PulseActivationAnalysis
   private boolean showCrossTalkAnalysisDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(title);
 
-    gd.addMessage(TextUtils.wrap(
-        "Crosstalk analysis requires a sample singly labelled with only one photo-switchable probe and imaged with the full pulse lifecycle. The probe should be activated by the pulse in the target channel. Activations from the pulse in other channels is crosstalk.",
-        80));
+    gd.addMessage(TextUtils
+        .wrap("Crosstalk analysis requires a sample singly labelled with only one photo-switchable"
+            + " probe and imaged with the full pulse lifecycle. The probe should be activated by"
+            + " the pulse in the target channel. Activations from the pulse in other channels"
+            + " is crosstalk.", 80));
 
     final String[] ch = new String[channels];
     for (int i = 0; i < ch.length; i++) {

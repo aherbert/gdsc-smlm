@@ -39,7 +39,7 @@ public class LogFactorial {
    *
    * <p>This should only ever be modified when holding the lock!
    */
-  private static volatile double[] MASTER_TABLE;
+  private static volatile double[] masterTable;
 
   /** All long-representable factorials. */
   static final long[] FACTORIALS = {1L, 1L, 2L, 6L, 24L, 120L, 720L, 5040L, 40320L, 362880L,
@@ -47,15 +47,15 @@ public class LogFactorial {
       355687428096000L, 6402373705728000L, 121645100408832000L, 2432902008176640000L};
 
   static {
-    MASTER_TABLE = new double[FACTORIALS.length];
+    masterTable = new double[FACTORIALS.length];
     // Since log(1) == 0 ignore the first two values
-    for (int k = 0; k < FACTORIALS.length; k++) {
-      MASTER_TABLE[k] = Math.log(FACTORIALS[k]);
+    for (int k = 2; k < FACTORIALS.length; k++) {
+      masterTable[k] = Math.log(FACTORIALS[k]);
     }
   }
 
   /**
-   * Main lock guarding all access to {@link #MASTER_TABLE}.
+   * Main lock guarding all access to {@link #masterTable}.
    */
   private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -69,7 +69,7 @@ public class LogFactorial {
   public static int getTableMaxN() {
     final ReadWriteLock rwl = LogFactorial.lock;
     rwl.readLock().lock();
-    final int maxN = MASTER_TABLE.length - 1;
+    final int maxN = masterTable.length - 1;
     // Unlock read
     rwl.readLock().unlock();
     return maxN;
@@ -87,15 +87,15 @@ public class LogFactorial {
 
     final ReadWriteLock rwl = LogFactorial.lock;
     rwl.readLock().lock();
-    if (MASTER_TABLE.length <= n) {
+    if (masterTable.length <= n) {
       // Must release read lock before acquiring write lock
       rwl.readLock().unlock();
       rwl.writeLock().lock();
       try {
         // Recheck state because another thread might have
         // acquired write lock and changed state before we did.
-        if (MASTER_TABLE.length <= n) {
-          MASTER_TABLE = changeSize(MASTER_TABLE, n);
+        if (masterTable.length <= n) {
+          masterTable = changeSize(masterTable, n);
         }
         // Downgrade by acquiring read lock before releasing write lock
         rwl.readLock().lock();
@@ -118,10 +118,10 @@ public class LogFactorial {
     final double[] newTable = Arrays.copyOf(table, n + 1);
 
     // Using gamma for consistency with non-tabulated values
-    int k = table.length - 1;
-    while (k < n) {
-      k++;
-      newTable[k] = Gamma.logGamma(k + 1);
+    int ki = table.length - 1;
+    while (ki < n) {
+      ki++;
+      newTable[ki] = Gamma.logGamma(ki + 1.0);
     }
 
     return newTable;
@@ -139,15 +139,15 @@ public class LogFactorial {
 
     final ReadWriteLock rwl = LogFactorial.lock;
     rwl.readLock().lock();
-    if (MASTER_TABLE.length > n1) {
+    if (masterTable.length > n1) {
       // Must release read lock before acquiring write lock
       rwl.readLock().unlock();
       rwl.writeLock().lock();
       try {
         // Recheck state because another thread might have
         // acquired write lock and changed state before we did.
-        if (MASTER_TABLE.length > n1) {
-          MASTER_TABLE = changeSize(MASTER_TABLE, n);
+        if (masterTable.length > n1) {
+          masterTable = changeSize(masterTable, n);
         }
         // Downgrade by acquiring read lock before releasing write lock
         rwl.readLock().lock();
@@ -175,34 +175,34 @@ public class LogFactorial {
    *
    * <p>Note: This has no synchronisation overhead.
    *
-   * @param n the n (must be positive)
+   * @param n the value n (must be positive)
    * @return log(n!)
-   * @throws ArrayIndexOutOfBoundsException if n is negative
+   * @if n is negative
    */
-  public static double logF(int n) throws ArrayIndexOutOfBoundsException {
+  public static double logF(int n) {
     // This is not synchronized.
     // We read a copy of the table from main memory.
     // If it is too small then just compute using the Gamma function.
-    final double[] logF = MASTER_TABLE;
+    final double[] logF = masterTable;
     if (n < logF.length) {
       return logF[n];
     }
-    return Gamma.logGamma(n + 1);
+    return Gamma.logGamma(n + 1.0);
   }
 
   /**
-   * Compute the log of k!. Uses the gamma function.
+   * Compute the log of n!. Uses the gamma function.
    *
    * <p>Note: This has no synchronisation overhead.
    *
-   * @param k the k
-   * @return log(k!)
+   * @param n the value n
+   * @return log(n!)
    */
-  public static double logF(double k) {
-    if (k <= 1) {
+  public static double logF(double n) {
+    if (n <= 1) {
       return 0;
     }
-    return Gamma.logGamma(k + 1);
+    return Gamma.logGamma(n + 1);
   }
 
   /////////////////////////////////////
@@ -213,7 +213,8 @@ public class LogFactorial {
 
   /**
    * Main lock guarding all access to {@link #objectTable}.
-   */  private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
+   */
+  private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
 
   /**
    * Instantiates a new log factorial using the current static table.
@@ -224,7 +225,7 @@ public class LogFactorial {
    */
   public LogFactorial() {
     // Copy the static values already present
-    objectTable = LogFactorial.MASTER_TABLE;
+    objectTable = LogFactorial.masterTable;
   }
 
   /**
@@ -243,7 +244,7 @@ public class LogFactorial {
    */
   public LogFactorial(int n) {
     // Copy the static values already present
-    objectTable = changeSize(LogFactorial.MASTER_TABLE, getLowerLimitN(n));
+    objectTable = changeSize(LogFactorial.masterTable, getLowerLimitN(n));
   }
 
   /**
@@ -283,9 +284,9 @@ public class LogFactorial {
         // acquired write lock and changed state before we did.
         if (objectTable.length <= n) {
           // Use the master table if it is bigger as that has all values pre-computed.
-          final double[] masterTable = LogFactorial.MASTER_TABLE;
-          if (masterTable.length > objectTable.length) {
-            objectTable = Arrays.copyOf(masterTable, Math.min(n + 1, masterTable.length));
+          final double[] mtable = LogFactorial.masterTable;
+          if (mtable.length > objectTable.length) {
+            objectTable = Arrays.copyOf(mtable, Math.min(n + 1, mtable.length));
           }
 
           if (objectTable.length <= n) {
@@ -335,16 +336,16 @@ public class LogFactorial {
         // acquired write lock and changed state before we did.
         if (objectTable.length <= maxN) {
           // Use the master table if it is bigger as that has all values pre-computed.
-          final double[] masterTable = LogFactorial.MASTER_TABLE;
-          objectTable = Arrays.copyOf(
-              (masterTable.length > objectTable.length) ? masterTable : objectTable, maxN + 1);
+          final double[] mtable = LogFactorial.masterTable;
+          objectTable =
+              Arrays.copyOf((mtable.length > objectTable.length) ? mtable : objectTable, maxN + 1);
         }
 
         // Check range has pre-computed values
         for (int n = Math.max(2, minN); n <= maxN; n++) {
           if (objectTable[n] == 0) {
             // Already hold the write lock so just write the values
-            objectTable[n] = Gamma.logGamma(n + 1);
+            objectTable[n] = Gamma.logGamma(n + 1.0);
           }
         }
 
@@ -384,10 +385,10 @@ public class LogFactorial {
    *
    * @param n the n (must be positive)
    * @return log(n!)
-   * @throws ArrayIndexOutOfBoundsException if n is outside the table bounds
+   * @if n is outside the table bounds
    * @see #getMaxN()
    */
-  public double getLogF(int n) throws ArrayIndexOutOfBoundsException {
+  public double getLogF(int n) {
     final double value = objectTable[n];
     return (value == 0) ? LogFactorial.logF(n) : value;
   }
@@ -403,10 +404,10 @@ public class LogFactorial {
    *
    * @param n the n (must be positive)
    * @return log(n!)
-   * @throws ArrayIndexOutOfBoundsException if n is outside the table bounds
+   * @if n is outside the table bounds
    * @see #getMaxN()
    */
-  public double getLogFUnsafe(int n) throws ArrayIndexOutOfBoundsException {
+  public double getLogFUnsafe(int n) {
     return objectTable[n];
   }
 
@@ -429,11 +430,11 @@ public class LogFactorial {
    */
   public LogFactorial withN(int n) {
     // Copy the values already present
-    final double[] masterTable = LogFactorial.MASTER_TABLE;
-    double[] objectTable = this.objectTable;
-    if (masterTable.length > objectTable.length) {
-      objectTable = masterTable;
+    final double[] mtable = LogFactorial.masterTable;
+    double[] otable = this.objectTable;
+    if (mtable.length > otable.length) {
+      otable = mtable;
     }
-    return new LogFactorial(changeSize(objectTable, getLowerLimitN(n)));
+    return new LogFactorial(changeSize(otable, getLowerLimitN(n)));
   }
 }

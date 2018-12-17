@@ -31,7 +31,8 @@ public class StandardFloatValueProcedure implements ValueProcedure {
   private int index;
   /**
    * The values from the last call to {@link #getValues(ValueFunction, double[])}.
-   */  public float[] values;
+   */
+  public float[] values;
 
   /**
    * Gets the values.

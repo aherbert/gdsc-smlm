@@ -707,7 +707,7 @@ public class BinomialFitter {
   }
 
   /**
-   * Gets the number of  fit restarts.
+   * Gets the number of fit restarts.
    *
    * @return the number of restarts for fitting.
    */

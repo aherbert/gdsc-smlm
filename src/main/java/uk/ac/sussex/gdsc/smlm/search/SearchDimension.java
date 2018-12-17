@@ -46,7 +46,8 @@ public class SearchDimension implements Cloneable, Dimension {
 
   /**
    * Set to true if {@link #min} &lt; {@link #max}.
-   */  public final boolean active;
+   */
+  public final boolean active;
 
   private double centre;
   private double increment;

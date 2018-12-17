@@ -1324,7 +1324,9 @@ public class BenchmarkFit implements PlugIn {
   }
 
   private static String createParameterHeader() {
-    return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tCamera model\tB (photons)\tNoise (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
+    return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tCamera model\t"
+        + "B (photons)\tNoise (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\t"
+        + "Method\tOptions";
   }
 
   private void runAnalysis() {

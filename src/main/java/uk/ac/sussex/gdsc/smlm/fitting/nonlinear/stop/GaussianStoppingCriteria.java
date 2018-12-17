@@ -80,7 +80,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
         // for (int i = 0; i < a.length; i++)
         // {
         // if (!eq.almostEqualComplement(bestA[i], a[i]))
-        // System.out.printf("Stopping when still moving: %f => %f (%g)\n%s\n%s\n",
+        // System.out.printf("Stopping when still moving: %function => %function (%g)\n%s\n%s\n",
         // bestA[i], a[i], FloatEquality.relativeError(bestA[i], a[i]),
         // Arrays.toString(bestA), Arrays.toString(a));
         // }

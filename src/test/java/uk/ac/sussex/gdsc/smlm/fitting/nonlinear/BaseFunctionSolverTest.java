@@ -721,7 +721,8 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
       solver2.computeValue(data, o2, a2);
 
       Assertions.assertArrayEquals(o, e, 1e-8,
-          "Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + 1 precomputed do not match");
+          "Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + "
+              + "1 precomputed do not match");
 
       ev = p.getValues(pf1, a);
       Assertions.assertArrayEquals(ev, o1, 1e-8, "Fit 1 peak + 1 precomputed yFit");

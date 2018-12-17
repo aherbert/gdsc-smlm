@@ -42,7 +42,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
   protected final float variance;
 
   /** The variance divided by the squared gain (variance./gain^2). */
-  protected final float var_g2;
+  protected final float varG2;
 
   /**
    * Instantiates a new fixed pixel camera model.
@@ -78,7 +78,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     this.bias = bias;
     this.gain = gain;
     this.variance = variance;
-    this.var_g2 = variance / (gain * gain);
+    this.varG2 = variance / (gain * gain);
   }
 
   /**
@@ -90,7 +90,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
    */
   public FixedPixelCameraModel(double bias, double gain, double variance) {
     // Re-implement the constructor (rather than chaining)
-    // to take advantage of double precision computation of var_g2.
+    // to take advantage of double precision computation of varG2.
 
     // Cast to float then check
     this.bias = (float) bias;
@@ -99,7 +99,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     checkGain(this.gain);
     this.variance = (float) variance;
     checkVariance(this.variance);
-    this.var_g2 = (float) (variance / (gain * gain));
+    this.varG2 = (float) (variance / (gain * gain));
   }
 
   /** {@inheritDoc} */
@@ -147,7 +147,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
   /** {@inheritDoc} */
   @Override
   public float[] getNormalisedVariance(Rectangle bounds) {
-    return newArray(bounds, var_g2);
+    return newArray(bounds, varG2);
   }
 
   @Override
@@ -167,7 +167,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
 
   @Override
   public float getNormalisedVariance(int x, int y) {
-    return var_g2;
+    return varG2;
   }
 
   /** {@inheritDoc} */
@@ -179,7 +179,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
   /** {@inheritDoc} */
   @Override
   public double getMeanNormalisedVariance(Rectangle bounds) {
-    return var_g2;
+    return varG2;
   }
 
   /** {@inheritDoc} */

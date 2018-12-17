@@ -54,6 +54,8 @@ public class Spot implements Comparable<Spot>, Cloneable {
   }
 
   /**
+   * Instantiates a new spot.
+   *
    * @param x The x-coordinate
    * @param y The y-coordinate
    * @param intensity The intensity of the spot
@@ -69,29 +71,29 @@ public class Spot implements Comparable<Spot>, Cloneable {
   /**
    * Get the distance between the two spots.
    *
-   * @param o the other spot
+   * @param other the other spot
    * @return The distance
    */
-  public double distance(Spot o) {
-    return Math.sqrt(distance2(o));
+  public double distance(Spot other) {
+    return Math.sqrt(distance2(other));
   }
 
   /**
    * Get the squared distance between the two spots.
    *
-   * @param o the other spot
+   * @param other the other spot
    * @return The squared distance
    */
-  public double distance2(Spot o) {
-    final int dx = x - o.x;
-    final int dy = y - o.y;
+  public double distance2(Spot other) {
+    final int dx = x - other.x;
+    final int dy = y - other.y;
     return dx * dx + dy * dy;
   }
 
   /** {@inheritDoc} */
   @Override
-  public int compareTo(Spot o) {
-    return Double.compare(o.score, score);
+  public int compareTo(Spot other) {
+    return Double.compare(other.score, score);
   }
 
   /** {@inheritDoc} */
@@ -106,14 +108,18 @@ public class Spot implements Comparable<Spot>, Cloneable {
   }
 
   /**
-   * @return the score used for sorting the spots.
+   * Gets the score used for sorting the spots.
+   *
+   * @return the score.
    */
   public float getScore() {
     return score;
   }
 
   /**
-   * @param score the score to set for sorting the spots
+   * Sets the score used for sorting the spots.
+   *
+   * @param score the score
    */
   public void setScore(float score) {
     this.score = score;

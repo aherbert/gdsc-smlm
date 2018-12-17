@@ -51,6 +51,68 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   public static final int PARAMETERS_PER_PEAK = 4;
 
   /**
+   * The scale to reduce the size of the spline before mapping to the target range (maxx * maxy).
+   */
+  protected int scale = 1;
+
+  /** The scale squared (stored for convenience). */
+  private int scale2;
+
+  /** The x centre of the spline (unscaled). */
+  protected double cx;
+
+  /** The y centre of the spline (unscaled). */
+  protected double cy;
+
+  /** The z centre of the spline (unscaled). */
+  protected double cz;
+
+  /**
+   * The scaled lower x bound of the spline function with the centre at x=0,y=0 in the target
+   * region.
+   */
+  protected double lx;
+
+  /**
+   * The scaled lower y bound of the spline function with the centre at x=0,y=0 in the target
+   * region.
+   */
+  protected double ly;
+
+  /**
+   * The scaled upper x bound of the spline function with the centre at x=0,y=0 in the target
+   * region.
+   */
+  protected double ux;
+
+  /**
+   * The scaled upper y bound of the spline function with the centre at x=0,y=0 in the target
+   * region.
+   */
+  protected double uy;
+
+  /** Max size of spline data in the x-dimension. */
+  protected final int maxSx;
+
+  /** Max size of spline data in the y-dimension. */
+  protected final int maxSy;
+
+  /** Max size of spline data in the z-dimension. */
+  protected final int maxSz;
+
+  /** The tricubic spline packed as Z * YX arrays. */
+  protected final CustomTricubicFunction[][] splines;
+
+  /** The target range in the x-dimension. */
+  protected final int maxx;
+
+  /** The target range in the y-dimension. */
+  protected final int maxy;
+
+  /** The target background. */
+  protected double tb;
+
+  /**
    * Gets the name of the parameter assuming a 2D Gaussian function.
    *
    * @param index the index (zero or above)
@@ -170,14 +232,14 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     boolean[] activeX = new boolean[maxx];
 
     /** The target intensity multiplied by the scale^2 to normalise the integral. */
-    double tI_by_s2;
+    double tiByS2;
     /**
      * The target intensity multiplied by the scale^3 and negated. Used to scale the first order
      * gradients.
      */
-    double neg_tI_by_s3;
+    double negtiByS3;
     /** The target intensity multiplied by the scale^4. Used to scale the second order gradients. */
-    double tI_by_s4;
+    double tiByS4;
 
     /**
      * Initialise the target. This checks if the spline, shifted to centre at the given XYZ
@@ -255,13 +317,13 @@ public abstract class CubicSplineFunction implements Gradient2Function {
 
       // The scale is the increment we sample the PSF.
       // In order to have the same integral we adjust the intensity.
-      this.tI_by_s2 = tI * scale2;
+      this.tiByS2 = tI * scale2;
       this.id = id;
       if (order > 0) {
         this.offset = 1 + id * 4;
-        this.neg_tI_by_s3 = -tI_by_s2 * scale;
+        this.negtiByS3 = -tiByS2 * scale;
         if (order == 2) {
-          this.tI_by_s4 = tI_by_s2 * scale2;
+          this.tiByS4 = tiByS2 * scale2;
         }
       }
 
@@ -368,7 +430,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      */
     public double value(int x) {
       yxindex += scale; // pre-increment
-      return (activeX[x]) ? tI_by_s2 * computeValue(xySplines[yxindex]) : 0;
+      return (activeX[x]) ? tiByS2 * computeValue(xySplines[yxindex]) : 0;
     }
 
     /**
@@ -395,10 +457,10 @@ public abstract class CubicSplineFunction implements Gradient2Function {
         // Negate the gradients as a shift of the position moves the spline the
         // other direction. Also scale the gradients appropriately.
         df_da[offset] = scale2 * v;
-        df_da[offset + 1] = neg_tI_by_s3 * dfda[0];
-        df_da[offset + 2] = neg_tI_by_s3 * dfda[1];
-        df_da[offset + 3] = neg_tI_by_s3 * -dfda[2];
-        return tI_by_s2 * v;
+        df_da[offset + 1] = negtiByS3 * dfda[0];
+        df_da[offset + 2] = negtiByS3 * dfda[1];
+        df_da[offset + 3] = negtiByS3 * -dfda[2];
+        return tiByS2 * v;
       }
       // Zero gradients
       df_da[offset] = 0;
@@ -434,13 +496,13 @@ public abstract class CubicSplineFunction implements Gradient2Function {
         // Negate the gradients as a shift of the position moves the spline the
         // other direction. Also scale the gradients appropriately.
         df_da[offset] = scale2 * v;
-        df_da[offset + 1] = neg_tI_by_s3 * dfda[0];
-        df_da[offset + 2] = neg_tI_by_s3 * dfda[1];
-        df_da[offset + 3] = neg_tI_by_s3 * -dfda[2];
-        d2f_da2[offset + 1] = tI_by_s4 * d2fda2[0];
-        d2f_da2[offset + 2] = tI_by_s4 * d2fda2[1];
-        d2f_da2[offset + 3] = tI_by_s4 * d2fda2[2];
-        return tI_by_s2 * v;
+        df_da[offset + 1] = negtiByS3 * dfda[0];
+        df_da[offset + 2] = negtiByS3 * dfda[1];
+        df_da[offset + 3] = negtiByS3 * -dfda[2];
+        d2f_da2[offset + 1] = tiByS4 * d2fda2[0];
+        d2f_da2[offset + 2] = tiByS4 * d2fda2[1];
+        d2f_da2[offset + 3] = tiByS4 * d2fda2[2];
+        return tiByS2 * v;
       }
       // Zero gradients
       df_da[offset] = 0;
@@ -622,64 +684,6 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   }
 
   /**
-   * The scale to reduce the size of the spline before mapping to the target range (maxx * maxy).
-   */
-  protected int scale = 1;
-
-  /** The scale squared (stored for convenience). */
-  private int scale2;
-
-  /** The x centre of the spline (unscaled). */
-  protected double cx;
-
-  /** The y centre of the spline (unscaled). */
-  protected double cy;
-
-  /** The z centre of the spline (unscaled). */
-  protected double cz;
-
-  /**
-   * The scaled lower x bound of the spline function with the centre at x=0,y=0 in the target region
-   */
-  protected double lx;
-
-  /**
-   * The scaled lower y bound of the spline function with the centre at x=0,y=0 in the target region
-   */
-  protected double ly;
-
-  /**
-   * The scaled upper x bound of the spline function with the centre at x=0,y=0 in the target region
-   */
-  protected double ux;
-
-  /**
-   * The scaled upper y bound of the spline function with the centre at x=0,y=0 in the target region
-   */
-  protected double uy;
-
-  /** Max size of spline data in the x-dimension. */
-  protected final int maxSx;
-
-  /** Max size of spline data in the y-dimension. */
-  protected final int maxSy;
-
-  /** Max size of spline data in the z-dimension. */
-  protected final int maxSz;
-
-  /** The tricubic spline packed as Z * YX arrays. */
-  protected final CustomTricubicFunction[][] splines;
-
-  /** The target range in the x-dimension. */
-  protected final int maxx;
-
-  /** The target range in the y-dimension. */
-  protected final int maxy;
-
-  /** The target background. */
-  protected double tB;
-
-  /**
    * Instantiates a new cubic spline function.
    *
    * @param splineData the spline data
@@ -856,6 +860,8 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   // computation)
 
   /**
+   * Check if the function can evaluate the background gradient.
+   *
    * @return True if the function can evaluate the background gradient.
    */
   public boolean evaluatesBackground() {
@@ -863,6 +869,8 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   }
 
   /**
+   * Check if the function can evaluate the signal gradient.
+   *
    * @return True if the function can evaluate the signal gradient.
    */
   public boolean evaluatesSignal() {
@@ -870,6 +878,8 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   }
 
   /**
+   * Check if the function can evaluate the XY-position gradient.
+   *
    * @return True if the function can evaluate the XY-position gradient.
    */
   public boolean evaluatesPosition() {
@@ -877,6 +887,8 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   }
 
   /**
+   * Check if the function can evaluate the X-position gradient.
+   *
    * @return True if the function can evaluate the X-position gradient.
    */
   public boolean evaluatesX() {
@@ -884,6 +896,8 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   }
 
   /**
+   * Check if the function can evaluate the Y-position gradient.
+   *
    * @return True if the function can evaluate the Y-position gradient.
    */
   public boolean evaluatesY() {
@@ -891,6 +905,8 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   }
 
   /**
+   * Check if the function can evaluate the Z-position gradient.
+   *
    * @return True if the function can evaluate the Z-position gradient.
    */
   public boolean evaluatesZ() {
@@ -909,6 +925,14 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     initialise(a, 0);
   }
 
+  /**
+   * Initialise.
+   *
+   * @param a the a
+   * @param order the order
+   */
+  protected abstract void initialise(double[] a, int order);
+
   /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
@@ -926,14 +950,6 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   public void initialise2(double[] a) {
     initialise(a, 2);
   }
-
-  /**
-   * Initialise.
-   *
-   * @param a the a
-   * @param order the order
-   */
-  protected abstract void initialise(double[] a, int order);
 
   /**
    * Checks if the gradient parameter is on a cubic spline node boundary. If true then the second

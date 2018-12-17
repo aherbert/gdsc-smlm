@@ -49,22 +49,22 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
   /**
    * Constructor.
    *
-   * @param npeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    */
-  public FreeCircularGaussian2DFunction(int npeaks, int maxx, int maxy) {
-    super(npeaks, maxx, maxy);
-    zeroAngle = new boolean[npeaks];
-    peakFactors = new double[npeaks][13];
+  public FreeCircularGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
+    super(numberOfPeaks, maxx, maxy);
+    zeroAngle = new boolean[numberOfPeaks];
+    peakFactors = new double[numberOfPeaks][13];
   }
 
   /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
-    return new FreeCircularGaussian2DFunction(npeaks, maxx, maxy);
+    return new FreeCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
   /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
@@ -99,7 +99,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
   public void initialise(double[] a) {
     this.a = a;
     // Precalculate multiplication factors
-    for (int j = 0; j < npeaks; j++) {
+    for (int j = 0; j < numberOfPeaks; j++) {
       final double theta = a[j * PARAMETERS_PER_PEAK + ANGLE];
       final double sx = a[j * PARAMETERS_PER_PEAK + X_SD];
       final double sy = a[j * PARAMETERS_PER_PEAK + Y_SD];
@@ -180,7 +180,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
     final int x1 = x / maxx;
     final int x0 = x % maxx;
 
-    for (int j = 0; j < npeaks; j++) {
+    for (int j = 0; j < numberOfPeaks; j++) {
       y += gaussian(x0, x1, dyda, apos, dydapos, zeroAngle[j], peakFactors[j]);
       apos += PARAMETERS_PER_PEAK;
       dydapos += GRADIENT_PARAMETERS_PER_PEAK;
@@ -262,7 +262,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
     final int x1 = x / maxx;
     final int x0 = x % maxx;
 
-    for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK) {
+    for (int j = 0; j < numberOfPeaks; j++, apos += PARAMETERS_PER_PEAK) {
       y += gaussian(x0, x1, apos, zeroAngle[j], peakFactors[j]);
     }
 

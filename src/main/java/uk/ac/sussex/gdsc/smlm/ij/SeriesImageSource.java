@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.io.BigEndianFastTiffDecoder;
@@ -118,18 +119,18 @@ public class SeriesImageSource extends ImageSource {
     /**
      * Gets the frame.
      *
-     * @param i the frame number
+     * @param index the frame number
      * @return the frame
      * @throws Exception the exception
      */
-    abstract Object getFrame(int i) throws Exception;
+    abstract Object getFrame(int index) throws Exception;
 
     /**
      * Close the image.
      *
      * @param freeMemory Set to true to free any cached memory
      */
-    public void close(boolean freeMemory) {
+    void close(boolean freeMemory) {
       // Do nothing
     }
   }
@@ -152,8 +153,8 @@ public class SeriesImageSource extends ImageSource {
     }
 
     @Override
-    Object getFrame(int i) throws Exception {
-      return imageArray[i];
+    Object getFrame(int index) throws Exception {
+      return imageArray[index];
     }
   }
 
@@ -453,7 +454,7 @@ public class SeriesImageSource extends ImageSource {
     }
 
     @Override
-    synchronized Object getFrame(int i) throws Exception {
+    synchronized Object getFrame(int index) throws Exception {
       if (!openInputStream()) {
         throw new IllegalStateException("Cannot read the TIFF image");
       }
@@ -467,22 +468,22 @@ public class SeriesImageSource extends ImageSource {
         // The first frame we know the exact offset
         offset = fi.getOffset();
 
-        if (i != 0) {
+        if (index != 0) {
           // Skip ahead
-          offset += (bytesPerFrame + fi.gapBetweenImages) * i;
+          offset += (bytesPerFrame + fi.gapBetweenImages) * index;
         }
       } else {
         // Adapted from ij.io.Opener.openTiffStack(...)
 
         // Each image offset is described by a separate ExtendedFileInfo object
         // We may have to read it first.
-        offset = getInfo(i).getOffset();
-        fi.stripOffsets = info[i].stripOffsets;
-        fi.stripLengths = info[i].stripLengths;
+        offset = getInfo(index).getOffset();
+        fi.stripOffsets = info[index].stripOffsets;
+        fi.stripLengths = info[index].stripLengths;
       }
 
       // Store the number of frames that have been read
-      frameCount = i + 1;
+      frameCount = index + 1;
 
       try {
         // long t = System.nanoTime();
@@ -499,9 +500,9 @@ public class SeriesImageSource extends ImageSource {
       }
     }
 
-    private ExtendedFileInfo getInfo(int i) throws NullPointerException, IOException {
-      if (info[i] != null) {
-        return info[i];
+    private ExtendedFileInfo getInfo(int index) throws IOException {
+      if (info[index] != null) {
+        return info[index];
       }
       // We have to read it
       if (td == null) {
@@ -513,14 +514,14 @@ public class SeriesImageSource extends ImageSource {
         }
       }
       // If this throws a NullPointerException then it will be handled in getFrame()
-      info[i] = td.getTiffInfo(indexMap, i, true);
-      if (!sameSizeAndType(info[i])) {
+      info[index] = td.getTiffInfo(indexMap, index, true);
+      if (!sameSizeAndType(info[index])) {
         throw new IOException("Not same size and type");
       }
-      return info[i];
+      return info[index];
     }
 
-    public void readTiffInfo(ByteArraySeekableStream ss) throws NullPointerException, IOException {
+    public void readTiffInfo(ByteArraySeekableStream ss) throws IOException {
       if (isCompleteTiffInfo()) {
         return;
       }
@@ -581,13 +582,12 @@ public class SeriesImageSource extends ImageSource {
     /**
      * Adapted from ij.io.FileOpener.validateFileInfo
      *
-     * @param f the file
+     * @param file the file
      * @param fi the file info
      * @return true, if successful
      */
-    boolean validateFileInfo(File f, ExtendedFileInfo fi) {
+    boolean validateFileInfo(File file, ExtendedFileInfo fi) {
       final long offset = fi.getOffset();
-      long length = 0;
       if (fi.width <= 0 || fi.height <= 0) {
         return false;
       }
@@ -600,16 +600,12 @@ public class SeriesImageSource extends ImageSource {
       if (fi.fileType == FileInfo.BITMAP || fi.compression != FileInfo.COMPRESSION_NONE) {
         return true;
       }
-      length = f.length();
-      long size = fi.width * fi.height * fi.getBytesPerPixel();
+      long size = (long) fi.width * fi.height * fi.getBytesPerPixel();
       size = fi.nImages > 1 ? size : size / 4;
       if (fi.height == 1) {
         size = 0; // allows plugins to read info of unknown length at end of file
       }
-      if (offset + size > length) {
-        return false;
-      }
-      return true;
+      return (offset + size <= file.length());
     }
 
     /**
@@ -1032,8 +1028,7 @@ public class SeriesImageSource extends ImageSource {
    * @param path the path
    * @return the seekable stream
    */
-  private static SeekableStream createSeekableStream(String path)
-      throws FileNotFoundException, SecurityException {
+  private static SeekableStream createSeekableStream(String path) throws FileNotFoundException {
     return new FileSeekableStream(path);
   }
 
@@ -1054,6 +1049,15 @@ public class SeriesImageSource extends ImageSource {
 
   private boolean belowBufferLimit(long size) {
     return (size > 0 && size <= bufferLimit);
+  }
+
+  private boolean belowBufferLimit() {
+    for (int i = 0; i < imageData.length; i++) {
+      if (!belowBufferLimit(imageData[i].fileSize)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private static long getSize(File file) {
@@ -1505,8 +1509,8 @@ public class SeriesImageSource extends ImageSource {
     }
   }
 
-  private int getImageSize(int i) {
-    return (i == 0) ? imageSize[i] : imageSize[i] - imageSize[i - 1];
+  private int getImageSize(int index) {
+    return (index == 0) ? imageSize[index] : imageSize[index] - imageSize[index - 1];
   }
 
   /** {@inheritDoc} */
@@ -1714,15 +1718,6 @@ public class SeriesImageSource extends ImageSource {
     thread.start();
   }
 
-  private boolean belowBufferLimit() {
-    for (int i = 0; i < imageData.length; i++) {
-      if (!belowBufferLimit(imageData[i].fileSize)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   /**
    * Close the background thread.
    */
@@ -1809,11 +1804,11 @@ public class SeriesImageSource extends ImageSource {
     return true;
   }
 
-  private void setError(DataException e) {
+  private void setError(DataException ex) {
     if (error != null) {
       System.err.println("Encountered a second error during sequential read!");
     }
-    error = e;
+    error = ex;
   }
 
   /**
@@ -1976,14 +1971,16 @@ public class SeriesImageSource extends ImageSource {
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    String s = super.toString();
+    String string = super.toString();
     if (!images.isEmpty()) {
-      s += String.format(" (%d images: %s ...)", images.size(), images.get(0));
+      string += String.format(" (%d images: %s ...)", images.size(), images.get(0));
     }
-    return s;
+    return string;
   }
 
   /**
+   * Gets the number of threads to use for opening images.
+   *
    * @return The number of background threads to use for opening images
    * @deprecated Currently only 1 thread is used for opening images
    */
@@ -2062,10 +2059,10 @@ public class SeriesImageSource extends ImageSource {
   /**
    * Sets the track progress used for monitoring the progress of method execution.
    *
-   * @param p the new track progress
+   * @param trackProgress the new track progress
    */
-  public void setTrackProgress(TrackProgress p) {
-    this.trackProgress = NullTrackProgress.createIfNull(p);
+  public void setTrackProgress(TrackProgress trackProgress) {
+    this.trackProgress = NullTrackProgress.createIfNull(trackProgress);
   }
 
   /**
@@ -2074,7 +2071,7 @@ public class SeriesImageSource extends ImageSource {
    * @param index the image index
    * @return the file info
    */
-  public ExtendedFileInfo[] getFileInfo(int index) {
+  public @Nullable ExtendedFileInfo[] getFileInfo(int index) {
     if (imageData != null && index >= 0 && index < imageData.length) {
       final TiffImage image = imageData[index].tiffImage;
       if (image != null) {

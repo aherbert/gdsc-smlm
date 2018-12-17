@@ -209,7 +209,8 @@ public class PSFCombiner implements PlugIn {
       } else {
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.addMessage(String.format(
-            "The range of the PSFs is different:\nStart %d to %d\nEnd %d to %d\nSize %d to %d\n \nCrop to the smallest?",
+            "The range of the PSFs is different:\nStart %d to %d\nEnd %d to %d\n"
+                + "Size %d to %d\n \nCrop to the smallest?",
             minStart, maxStart, minEnd, maxEnd, minSize, maxSize));
         gd.enableYesNoCancel();
         gd.showDialog();

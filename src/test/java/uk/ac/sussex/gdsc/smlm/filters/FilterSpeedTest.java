@@ -15,8 +15,8 @@ import java.util.ArrayList;
 public class FilterSpeedTest extends AbstractFilterTest {
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal(
-      RandomSeed seed) {
+  public void
+      floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final BlockSumFilter filter = new BlockSumFilter();
@@ -51,10 +51,12 @@ public class FilterSpeedTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
@@ -75,7 +77,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float rollingBlockMeanNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx",
+                "float rollingBlockMeanNxNInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
@@ -127,10 +130,12 @@ public class FilterSpeedTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
@@ -151,7 +156,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float blockMedianNxNInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx",
+                "float blockMedianNxNInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockMeanNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
@@ -169,8 +175,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockMeanNxNInternalIsFasterThanRollingMedianNxNInternal(
-      RandomSeed seed) {
+  public void
+      floatRollingBlockMeanNxNInternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final BlockMeanFilter filter1 = new BlockMeanFilter();
@@ -204,10 +210,12 @@ public class FilterSpeedTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
@@ -228,7 +236,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float rollingMedianNxNInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx",
+                "float rollingMedianNxNInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockMeanNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
@@ -280,10 +289,12 @@ public class FilterSpeedTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
@@ -304,7 +315,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float convolveInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx",
+                "float convolveInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockMeanNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
@@ -361,10 +373,12 @@ public class FilterSpeedTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
@@ -389,7 +403,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float areaFilterInternal [%dx%d] @ %d : %d => rollingBlockMeanNxNInternal %d = %.2fx",
+                "float areaFilterInternal [%dx%d] @ %d : %d => "
+                    + "rollingBlockMeanNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
@@ -447,10 +462,12 @@ public class FilterSpeedTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<float[]> dataSet2 = new ArrayList<>(iter);
@@ -475,7 +492,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "float areaFilterInternal [%dx%d] @ %d : %d => stripedBlockMeanNxNInternal %d = %.2fx",
+                "float areaFilterInternal [%dx%d] @ %d : %d => "
+                    + "stripedBlockMeanNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
@@ -494,8 +512,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
   @SuppressWarnings("deprecation")
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockSumNxNInternalIsFasterThanIntRollingBlockSumNxNInternal(
-      RandomSeed seed) {
+  public void
+      floatRollingBlockSumNxNInternalIsFasterThanIntRollingBlockSumNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final SumFilter filter = new SumFilter();
@@ -529,10 +547,12 @@ public class FilterSpeedTest extends AbstractFilterTest {
       }
     }
 
-    long slowTotal = 0, fastTotal = 0;
+    long slowTotal = 0;
+    long fastTotal = 0;
     int index = 0;
     for (final int boxSize : boxSizes) {
-      long boxSlowTotal = 0, boxFastTotal = 0;
+      long boxSlowTotal = 0;
+      long boxFastTotal = 0;
       for (final int width : primes) {
         for (final int height : primes) {
           final ArrayList<int[]> dataSet2 = new ArrayList<>(iter);
@@ -553,7 +573,8 @@ public class FilterSpeedTest extends AbstractFilterTest {
           boxFastTotal += fastTime;
           if (debug) {
             logger.fine(() -> String.format(
-                "int rollingBlockSumNxNInternal [%dx%d] @ %d : %d => float rollingBlockSumNxNInternal %d = %.2fx",
+                "int rollingBlockSumNxNInternal [%dx%d] @ %d : %d => "
+                    + "float rollingBlockSumNxNInternal %d = %.2fx",
                 width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,

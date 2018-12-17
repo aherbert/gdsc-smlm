@@ -578,8 +578,8 @@ public class DensityImage implements PlugIn {
     gd.addNumericField("Square_resolution", resolution, 0);
     gd.addChoice("Score", ScoreMethods, ScoreMethods[scoreMethodIndex]);
 
-    gd.addMessage(
-        "Filter localisations using the L-score / Relative density.\nFiltered results will be added to memory:");
+    gd.addMessage("Filter localisations using the L-score / Relative density.\n"
+        + "Filtered results will be added to memory:");
     gd.addCheckbox("Filter_localisations", filterLocalisations);
     gd.addNumericField("Filter_threshold", filterThreshold, 2);
 

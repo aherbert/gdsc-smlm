@@ -54,7 +54,8 @@ public class TraceFilter extends Filter {
   private static final double DEFAULT_DISTANCE_RANGE = 2;
   /**
    * The default time range. Used for {@link uk.ac.sussex.gdsc.smlm.ga.Chromosome} interface.
-   */  private static final int DEFAULT_TIME_RANGE = 10;
+   */
+  private static final int DEFAULT_TIME_RANGE = 10;
 
   @XStreamAsAttribute
   private final double d;

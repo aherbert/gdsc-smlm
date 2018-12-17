@@ -888,9 +888,10 @@ public class PCPALMFitting implements PlugIn {
     valid1 = true;
     if (fittingTolerance > 0
         && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance)) {
-      log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%), average protein density = %g um^-2 (%s%%)",
-          randomModel.getName(), MathUtils.rounded(fittingTolerance, 4), fitSigmaS,
-          MathUtils.rounded(e1, 4), fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
+      log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%),"
+          + " average protein density = %g um^-2 (%s%%)", randomModel.getName(),
+          MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+          fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
       valid1 = false;
     }
 
@@ -1088,9 +1089,10 @@ public class PCPALMFitting implements PlugIn {
     valid2 = true;
     if (fittingTolerance > 0
         && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance)) {
-      log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%), average protein density = %g um^-2 (%s%%)",
-          clusteredModel.getName(), MathUtils.rounded(fittingTolerance, 4), fitSigmaS,
-          MathUtils.rounded(e1, 4), fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
+      log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%),"
+          + " average protein density = %g um^-2 (%s%%)", clusteredModel.getName(),
+          MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+          fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
       valid2 = false;
     }
 
@@ -1392,9 +1394,10 @@ public class PCPALMFitting implements PlugIn {
     valid2 = true;
     if (fittingTolerance > 0
         && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance)) {
-      log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%), average protein density = %g um^-2 (%s%%)",
-          emulsionModel.getName(), MathUtils.rounded(fittingTolerance, 4), fitSigmaS,
-          MathUtils.rounded(e1, 4), fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
+      log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%),"
+          + " average protein density = %g um^-2 (%s%%)", emulsionModel.getName(),
+          MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+          fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
       valid2 = false;
     }
 
@@ -1851,23 +1854,6 @@ public class PCPALMFitting implements PlugIn {
         for (int j = 0; j < gradient.length; j++) {
           final double g1 = twodx * jacobian[i][j];
           gradient[j] += g1;
-
-          //// Check this is correct
-          // final double[] p = parameters.clone();
-          // final double h = 0.01 * p[j]; // p[j] is unlikely to be zero
-          // p[j] += h;
-          // final double dx1 = f.evaluate(x[i], p) - y[i];
-          // final double ss1 = dx1 * dx1;
-          // double delta = p[j];
-          // p[j] -= h;
-          // delta -= p[j];
-          // final double dx2 = f.evaluate(x[i], p) - y[i];
-          // final double ss2 = dx2 * dx2;
-          // final double g2 = (ss1 - ss2) / delta;
-          // if
-          //// (!uk.ac.sussex.gdsc.smlm.fitting.utils.DoubleEquality.almostEqualRelativeOrAbsolute(g1,
-          //// g2, 1e-2, 1e-5))
-          // System.out.printf("[%d][%d] %f == %f\n", i, j, g1, g2);
         }
       }
       return gradient;
@@ -1875,28 +1861,28 @@ public class PCPALMFitting implements PlugIn {
   }
 
   private class SumOfSquaresMultivariateFunction implements MultivariateFunction {
-    SumOfSquaresModelFunction f;
+    SumOfSquaresModelFunction function;
 
-    public SumOfSquaresMultivariateFunction(SumOfSquaresModelFunction f) {
-      this.f = f;
+    public SumOfSquaresMultivariateFunction(SumOfSquaresModelFunction function) {
+      this.function = function;
     }
 
     @Override
     public double value(double[] point) {
-      return f.evaluate(point);
+      return function.evaluate(point);
     }
   }
 
   private class SumOfSquaresMultivariateVectorFunction implements MultivariateVectorFunction {
-    SumOfSquaresModelFunction f;
+    SumOfSquaresModelFunction function;
 
-    public SumOfSquaresMultivariateVectorFunction(SumOfSquaresModelFunction f) {
-      this.f = f;
+    public SumOfSquaresMultivariateVectorFunction(SumOfSquaresModelFunction function) {
+      this.function = function;
     }
 
     @Override
     public double[] value(double[] point) {
-      return f.gradient(point);
+      return function.gradient(point);
     }
   }
 

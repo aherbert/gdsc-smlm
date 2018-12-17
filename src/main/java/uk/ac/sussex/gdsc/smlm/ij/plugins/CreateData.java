@@ -622,21 +622,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     public void setPhotons(MemoryPeakResults results) {
       molecules = results.size();
       // Get the signal and background in photons
-      results.forEach(IntensityUnit.PHOTON, new BIRResultProcedure() {
-        @Override
-        public void executeBIR(float bg, float intensity, PeakResult result) {
-          final int i = result.getFrame() - 1;
-          if (p[i] != 0) {
-            throw new RuntimeException("Multiple peaks on the same frame: " + result.getFrame());
-          }
-          p[i] = intensity;
-          background[i] = bg;
+      results.forEach(IntensityUnit.PHOTON, (BIRResultProcedure) (bg, intensity, result) -> {
+        final int i = result.getFrame() - 1;
+        if (p[i] != 0) {
+          throw new IllegalArgumentException(
+              "Multiple peaks on the same frame: " + result.getFrame());
         }
+        p[i] = intensity;
+        background[i] = bg;
       });
       final double av = MathUtils.sum(p) / molecules;
       final double av2 = MathUtils.sum(background) / molecules;
       ImageJUtils.log(
-          "Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
+          "Created %d frames, %d molecules. Simulated signal %s : average %s. "
+              + "Simulated background %s : average %s",
           frames, molecules, MathUtils.rounded(averageSignal), MathUtils.rounded(av),
           MathUtils.rounded(b), MathUtils.rounded(av2));
       // Reset the average signal and background (in photons)
@@ -645,6 +644,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     }
 
     /**
+     * Gets the average number of photons per frame (signal).
+     *
      * @return The average number of photons per frame.
      */
     public double getSignal() {
@@ -652,13 +653,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     }
 
     /**
-     * @return The number of frames with a simulated photon count
+     * Gets the number of molecules. There should be 0 or 1 molecule per frame.
+     *
+     * @return The number of molecules
      */
     public int getMolecules() {
       return molecules;
     }
 
     /**
+     * Gets the average number of background photons per frame.
+     *
      * @return the average number of background photons per frame.
      */
     public double getBackground() {
@@ -1110,9 +1115,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     if (settings.getCameraType() == CameraType.SCMOS) {
       ImageJUtils.log("sCMOS camera background estimate uses an average read noise");
     }
-    ImageJUtils.log(
-        "Effective background noise = %s photo-electron [includes read noise and background photons]",
-        MathUtils.rounded(noise));
+    ImageJUtils.log("Effective background noise = %s photo-electron "
+        + "[includes read noise and background photons]", MathUtils.rounded(noise));
     ImageJUtils.log("Localisation precision (LSE): %s - %s nm : %s - %s px",
         MathUtils.rounded(lowerP), MathUtils.rounded(upperP), MathUtils.rounded(lowerP / a),
         MathUtils.rounded(upperP / a));
@@ -1177,7 +1181,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           MathUtils.rounded(scale * u / noise), MathUtils.rounded(u0 / noise),
           MathUtils.rounded(scale * u0 / noise));
       ImageJUtils.log(
-          "Warning: Benchmark settings are only stored in memory when the number of photons is fixed. Min %s != Max %s",
+          "Warning: Benchmark settings are only stored in memory when the number of photons is "
+              + "fixed. Min %s != Max %s",
           MathUtils.rounded(settings.getPhotonsPerSecond()),
           MathUtils.rounded(settings.getPhotonsPerSecondMaximum()));
     }
@@ -1327,7 +1332,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         final int totalFrames =
             (int) Math.ceil(settings.getSeconds() * 1000 / settings.getExposureTime());
         gd.addMessage(String.format(
-            "Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
+            "Require %d (%s%%) additional frames to draw all fluorophores.\n"
+                + "Do you want to add extra frames?",
             newFrames - totalFrames,
             MathUtils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
       } else {
@@ -1770,8 +1776,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
    * @param localisationSets the localisation sets
    * @return the list
    */
-  private List<LocalisationModelSet> filterToImageBounds(
-      List<LocalisationModelSet> localisationSets) {
+  private List<LocalisationModelSet>
+      filterToImageBounds(List<LocalisationModelSet> localisationSets) {
     final List<LocalisationModelSet> newLocalisations = new ArrayList<>(localisationSets.size());
     final SpatialDistribution bounds = createUniformDistribution(0);
     for (final LocalisationModelSet s : localisationSets) {
@@ -1783,6 +1789,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   }
 
   /**
+   * Creates the photon distribution.
+   *
    * @return A photon distribution loaded from a file of floating-point values with the specified
    *         population mean.
    */
@@ -3298,8 +3306,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return fromIndex - 1;
   }
 
-  private static List<LocalisationModel> toLocalisations(
-      List<LocalisationModelSet> localisationSets) {
+  private static List<LocalisationModel>
+      toLocalisations(List<LocalisationModelSet> localisationSets) {
     final ArrayList<LocalisationModel> localisations = new ArrayList<>(localisationSets.size());
     for (final LocalisationModelSet s : localisationSets) {
       localisations.add(s.toLocalisation());
@@ -3784,7 +3792,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
   private static String createHeader() {
     final StringBuilder sb = new StringBuilder(
-        "Dataset\tCamera\tPSF\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
+        "Dataset\tCamera\tPSF\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\t"
+            + "Density (mol/um^2)\tHWHM\tS\tSa");
     for (int i = 0; i < NAMES.length; i++) {
       sb.append('\t').append(NAMES[i]);
     }
@@ -4493,7 +4502,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       final int size = settings.getSize();
       if (modelBounds.width < size || modelBounds.height < size) {
         throw new IllegalArgumentException(String.format(
-            "Camera model bounds [x=%d,y=%d,width=%d,height=%d] are smaller than simulation size [%d]",
+            "Camera model bounds [x=%d,y=%d,width=%d,height=%d] are smaller than "
+                + "simulation size [%d]",
             modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, size));
       }
 
@@ -4502,7 +4512,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         final GenericDialog gd = new GenericDialog(TITLE);
         //@formatter:off
         gd.addMessage(String.format(
-            "WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the simulation size [=%d].\n \nCrop the model?",
+            "WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\n"
+            + "are larger than the simulation size [=%d].\n \nCrop the model?",
             modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, size
             ));
         //@formatter:on
@@ -4660,11 +4671,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         } else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM])) {
           type = 1;
           egd.addChoice("Astigmatism_model", astigmatismModels, settings.getAstigmatismModel());
-          egd.addMessage(
-              TextUtils.wrap("Note: The pixel size of the astigmatism model should match "
-                  + "the pixel pitch if fitting of the data is to be performed (i.e. fitting requires the "
-                  + "astigmatism model to be calibrated to the image). If not then the model will be "
-                  + "optionally converted before the simulation.", 80));
+          egd.addMessage(TextUtils.wrap("Note: The pixel size of the astigmatism model should match"
+              + " the pixel pitch if fitting of the data is to be performed (i.e. fitting requires"
+              + " the astigmatism model to be calibrated to the image). If not then the model will"
+              + " be optionally converted before the simulation.", 80));
         } else {
           // Get the width of the model
           type = 2;
@@ -5210,8 +5220,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     comment("Missing fields are initialised to the default (0).");
     comment("Multiple compounds can be combined using fractional ratios.");
     comment("Coordinates are specified in nanometres.");
-    comment(
-        "Coordinates describe the relative positions of atoms in the molecule; the molcule will have a randomly assigned XYZ position for its centre-of-mass. Rotation will be about the centre-of-mass.");
+    comment("Coordinates describe the relative positions of atoms in the molecule;"
+        + " the molcule will have a randomly assigned XYZ position for its centre-of-mass."
+        + " Rotation will be about the centre-of-mass.");
     IJ.log("");
 
     final Molecule.Builder mb = Molecule.newBuilder();
@@ -5850,8 +5861,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     gd.addFilenameField("Results_file", benchmarkFile);
     gd.addMessage(TextUtils
         .wrap("Specify if the results are preprocessed. This is true only if the simulation was "
-            + "previously loaded and then saved to a GDSC SMLM file format from memory. Set to false "
-            + "to load using a universal results loader.", 80));
+            + "previously loaded and then saved to a GDSC SMLM file format from memory. Set to "
+            + "false to load using a universal results loader.", 80));
     gd.addCheckbox("Preprocessed_results", benchmarkAuto);
 
     gd.showDialog();

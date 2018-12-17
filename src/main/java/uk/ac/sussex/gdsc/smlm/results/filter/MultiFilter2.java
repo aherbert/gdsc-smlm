@@ -60,7 +60,8 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter {
   @Override
   protected String generateName() {
     return String.format(
-        "Multi2: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f, Width=%.2f-%.2f",
+        "Multi2: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, "
+            + "Precision=%.1f, Width=%.2f-%.2f",
         signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
   }
 
@@ -93,7 +94,8 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter {
   /** {@inheritDoc} */
   @Override
   public String getDescription() {
-    return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift, precision (uses fitted background to set noise) and Z-depth";
+    return "Filter results using multiple thresholds: Signal, SNR, width, shift, "
+        + "Euclidian shift, precision (uses fitted background to set noise) and Z-depth";
   }
 
   @Override

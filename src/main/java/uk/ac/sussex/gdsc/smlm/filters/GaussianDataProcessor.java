@@ -50,7 +50,6 @@ public class GaussianDataProcessor extends DataProcessor {
     filter = new GaussianFilter(0.02);
   }
 
-
   /**
    * Copy constructor.
    *
@@ -79,6 +78,15 @@ public class GaussianDataProcessor extends DataProcessor {
       return 0;
     }
     return smooth;
+  }
+
+  /**
+   * Gets the Gaussian standard deviation (sigma).
+   *
+   * @return the Gaussian standard deviation.
+   */
+  public double getSigma() {
+    return sigma;
   }
 
   /** {@inheritDoc} */
@@ -113,13 +121,6 @@ public class GaussianDataProcessor extends DataProcessor {
       }
     }
     return smoothData;
-  }
-
-  /**
-   * @return the Gaussian standard deviation.
-   */
-  public double getSigma() {
-    return sigma;
   }
 
   /** {@inheritDoc} */

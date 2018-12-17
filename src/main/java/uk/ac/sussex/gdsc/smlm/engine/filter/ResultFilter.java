@@ -47,7 +47,7 @@ public abstract class ResultFilter {
   protected float d2;
 
   /** The number of maxima. */
-  protected int nMaxima;
+  protected int numberOfMaxima;
 
   /** The filtered count. */
   protected int filteredCount;
@@ -65,10 +65,10 @@ public abstract class ResultFilter {
    * Instantiates a new result filter.
    *
    * @param filter The list of target coordinates (relative to the fitting region bounds)
-   * @param d The distance
-   * @param nMaxima The potential number of maxima that will be fitted
+   * @param distance The distance
+   * @param numberOfMaxima The potential number of maxima that will be fitted
    */
-  public ResultFilter(List<float[]> filter, float d, int nMaxima) {
+  public ResultFilter(List<float[]> filter, float distance, int numberOfMaxima) {
     if (filter == null) {
       throw new IllegalArgumentException("null filter list");
     }
@@ -78,8 +78,8 @@ public abstract class ResultFilter {
       }
     }
     this.filter = filter;
-    d2 = d * d;
-    this.nMaxima = nMaxima;
+    d2 = distance * distance;
+    this.numberOfMaxima = numberOfMaxima;
   }
 
   /**
@@ -108,6 +108,8 @@ public abstract class ResultFilter {
   public abstract void finalise();
 
   /**
+   * Gets the filtered count (number of results that pass the filter).
+   *
    * @return The number of results that pass the filter.
    */
   public int getFilteredCount() {
@@ -115,6 +117,8 @@ public abstract class ResultFilter {
   }
 
   /**
+   * Gets the maxima indices (the indices that were fitted that pass the filter).
+   *
    * @return The indices that were fitted that pass the filter.
    */
   public int[] getMaxIndices() {
@@ -122,15 +126,20 @@ public abstract class ResultFilter {
   }
 
   /**
-   * @return The output from the fitting routine of any positions that pass the filter. This can
-   *         includes positions that were within distance of the target coordinates but that were
-   *         not fitted (e.g. due to failure to converge, etc)
+   * Gets the output from the fitting routine of any positions that pass the filter.
+   *
+   * <p>This can includes positions that were within distance of the target coordinates but that
+   * were not fitted (e.g. due to failure to converge, etc).
+   *
+   * @return the fit results
    */
   public FitResult[] getFitResults() {
     return filteredFitResults;
   }
 
   /**
+   * Gets the fitted peaks that pass the filter.
+   *
    * @return The fitted peaks that pass the filter.
    */
   public List<PeakResult> getResults() {

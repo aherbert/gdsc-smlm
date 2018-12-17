@@ -45,16 +45,16 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
    * @param tOn Average on-state time
    * @param tOff Average off-state time for the first dark state
    * @param tOff2 Average off-state time for the second dark state
-   * @param nBlinks Average number of blinks int the first dark state (used for each burst between
+   * @param blinks1 Average number of blinks int the first dark state (used for each burst between
    *        second dark states)
-   * @param nBlinks2 Average number of blinks into the second dark state
+   * @param blinks2 Average number of blinks into the second dark state
    * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
    *        is Poisson)
    */
   public StandardFluorophoreSequenceModel(double tAct, int id, double[] xyz, double tOn,
-      double tOff, double tOff2, double nBlinks, double nBlinks2,
+      double tOff, double tOff2, double blinks1, double blinks2,
       boolean useGeometricBlinkingDistribution) {
-    this(tAct, id, xyz, tOn, tOff, tOff2, nBlinks, nBlinks2, useGeometricBlinkingDistribution,
+    this(tAct, id, xyz, tOn, tOff, tOff2, blinks1, blinks2, useGeometricBlinkingDistribution,
         new RandomDataGenerator());
   }
 
@@ -67,18 +67,18 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
    * @param tOn Average on-state time
    * @param tOff Average off-state time for the first dark state
    * @param tOff2 Average off-state time for the second dark state
-   * @param nBlinks Average number of blinks int the first dark state (used for each burst between
+   * @param blinks1 Average number of blinks int the first dark state (used for each burst between
    *        second dark states)
-   * @param nBlinks2 Average number of blinks into the second dark state
+   * @param blinks2 Average number of blinks into the second dark state
    * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
    *        is Poisson)
    * @param randomGenerator the random generator
    */
   public StandardFluorophoreSequenceModel(double tAct, int id, double[] xyz, double tOn,
-      double tOff, double tOff2, double nBlinks, double nBlinks2,
+      double tOff, double tOff2, double blinks1, double blinks2,
       boolean useGeometricBlinkingDistribution, RandomDataGenerator randomGenerator) {
     super(id, xyz);
-    init(randomGenerator.nextExponential(tAct), tOn, tOff, tOff2, nBlinks, nBlinks2,
+    init(randomGenerator.nextExponential(tAct), tOn, tOff, tOff2, blinks1, blinks2,
         useGeometricBlinkingDistribution, randomGenerator);
   }
 
@@ -91,17 +91,17 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
    * @param tOn Average on-state time
    * @param tOff Average off-state time for the first dark state
    * @param tOff2 Average off-state time for the second dark state
-   * @param nBlinks Average number of blinks int the first dark state (used for each burst between
+   * @param blinks1 Average number of blinks int the first dark state (used for each burst between
    *        second dark states)
-   * @param nBlinks2 Average number of blinks into the second dark state
+   * @param blinks2 Average number of blinks into the second dark state
    * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
    *        is Poisson)
    */
   public StandardFluorophoreSequenceModel(int id, double[] xyz, double startT, double tOn,
-      double tOff, double tOff2, double nBlinks, double nBlinks2,
+      double tOff, double tOff2, double blinks1, double blinks2,
       boolean useGeometricBlinkingDistribution) {
     super(id, xyz);
-    init(startT, tOn, tOff, tOff2, nBlinks, nBlinks2, useGeometricBlinkingDistribution,
+    init(startT, tOn, tOff, tOff2, blinks1, blinks2, useGeometricBlinkingDistribution,
         new RandomDataGenerator());
   }
 
@@ -114,24 +114,24 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
    * @param tOn Average on-state time
    * @param tOff Average off-state time for the first dark state
    * @param tOff2 Average off-state time for the second dark state
-   * @param nBlinks Average number of blinks int the first dark state (used for each burst between
+   * @param blinks1 Average number of blinks int the first dark state (used for each burst between
    *        second dark states)
-   * @param nBlinks2 Average number of blinks into the second dark state
+   * @param blinks2 Average number of blinks into the second dark state
    * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
    *        is Poisson)
    * @param randomGenerator the random generator
    */
   public StandardFluorophoreSequenceModel(int id, double[] xyz, double startT, double tOn,
-      double tOff, double tOff2, double nBlinks, double nBlinks2,
+      double tOff, double tOff2, double blinks1, double blinks2,
       boolean useGeometricBlinkingDistribution, RandomDataGenerator randomGenerator) {
     super(id, xyz);
-    init(startT, tOn, tOff, tOff2, nBlinks, nBlinks2, useGeometricBlinkingDistribution,
+    init(startT, tOn, tOff, tOff2, blinks1, blinks2, useGeometricBlinkingDistribution,
         randomGenerator);
   }
 
-  private void init(double t, double tOn, double tOff, double tOff2, double nBlinks,
-      double nBlinks2, boolean useGeometricBlinkingDistribution, RandomDataGenerator rand) {
-    // Model two dark states: short and long. The second tOff and nBlinks is for the long dark
+  private void init(double t, double tOn, double tOff, double tOff2, double blinks1,
+      double blinks2, boolean useGeometricBlinkingDistribution, RandomDataGenerator rand) {
+    // Model two dark states: short and long. The second tOff and blinks1 is for the long dark
     // state:
     //
     // ++-+-+++-+.................+-+--++-+................................+--+++-+
@@ -140,15 +140,15 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
     // - = Short dark state
     // . = Long dark state
 
-    // Note: 1+nBlinks is the number of on-states
+    // Note: 1+blinks1 is the number of on-states
 
     final TDoubleArrayList sequence = new TDoubleArrayList();
 
     // Perform a set number of long blinks
-    final int nLongBlinks = getBlinks(useGeometricBlinkingDistribution, rand, nBlinks2);
+    final int nLongBlinks = getBlinks(useGeometricBlinkingDistribution, rand, blinks2);
     for (int n = 0; n <= nLongBlinks; n++) {
       // For each burst between long blinks perform a number of short blinks
-      final int nShortBlinks = getBlinks(useGeometricBlinkingDistribution, rand, nBlinks);
+      final int nShortBlinks = getBlinks(useGeometricBlinkingDistribution, rand, blinks1);
 
       // Starts on the current time
       sequence.add(t);

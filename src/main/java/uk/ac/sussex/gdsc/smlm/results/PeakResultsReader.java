@@ -1773,65 +1773,12 @@ public class PeakResultsReader {
           // The latest table results have dynamic columns so these must be loaded manually
           // as guessing the column format is not supported.
           return null;
-
-          // This code functioned when the table was not dynamic ...
-
-          // // Get the number of data fields by counting the standard fields
-          // String[] columns = header.split("\t");
-          // int field = 0;
-          // if (readId)
-          // field++; // ID #
-          // if (readSource)
-          // field++; // Source
-          // field++; // Frame
-          // if (readEndFrame)
-          // field++; // End frame
-          // field++; // origX
-          // field++; // origY
-          // field++; // origValue
-          // field++; // error
-          // field++; // noise
-          // field++; // SNR
-          //
-          // // The remaining fields are PSF parameters with the exception of the final precision
-          // field
-          //
-          // nFields = columns.length - field;
-          // if (columns[columns.length - 1].contains("Precision"))
-          // nFields--;
-          // if (deviations)
-          // {
-          // nFields /= 2;
-          // }
-          //
-          // // We can guess part of the calibration.
-          // if (calibration == null)
-          // calibration = new Calibration();
-          // int jump = (deviations) ? 2 : 1;
-          // // field is currently on Background
-          // calibration.setIntensityUnit(UnitHelper.guessIntensityUnitFromShortName(extractUnit(columns[field])));
-          // field += jump; // Move to Intensity
-          // field += jump; // Move to X
-          // calibration.setDistanceUnit(UnitHelper.guessDistanceUnitFromShortName(extractUnit(columns[field])));
-          // field += jump; // Move to Y
-          // field += jump; // Move to Z
-          // // The angle may be used in fields above the standard ones
-          // while (field < columns.length)
-          // {
-          // field += jump;
-          // AngleUnit u = UnitHelper.guessAngleUnitFromShortName(extractUnit(columns[field]));
-          // if (u != null)
-          // {
-          // calibration.setAngleUnit(u);
-          // break;
-          // }
-          // }
         }
 
         @SuppressWarnings("resource")
         final FileChannel channel = fis.getChannel();
 
-        int c = 0;
+        int count = 0;
         while ((line = input.readLine()) != null) {
           if (line.length() == 0) {
             continue;
@@ -1843,7 +1790,7 @@ public class PeakResultsReader {
             }
           }
 
-          if (++c % 512 == 0) {
+          if (++count % 512 == 0) {
             showProgress(channel);
           }
         }

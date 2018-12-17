@@ -47,21 +47,21 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
   /**
    * Constructor.
    *
-   * @param npeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    */
-  public NSNBFixedGaussian2DFunction(int npeaks, int maxx, int maxy) {
-    super(npeaks, maxx, maxy);
-    peakFactors = new double[npeaks][4];
+  public NSNBFixedGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
+    super(numberOfPeaks, maxx, maxy);
+    peakFactors = new double[numberOfPeaks][4];
   }
 
   /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
-    return new NSNBFixedGaussian2DFunction(npeaks, maxx, maxy);
+    return new NSNBFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
   /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
@@ -78,7 +78,7 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
   public void initialise(double[] a) {
     this.a = a;
     // Precalculate multiplication factors
-    for (int j = 0; j < npeaks; j++) {
+    for (int j = 0; j < numberOfPeaks; j++) {
       final double sx = a[j * PARAMETERS_PER_PEAK + X_SD];
       final double sx2 = sx * sx;
 
@@ -111,7 +111,7 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
     final int x1 = x / maxx;
     final int x0 = x % maxx;
 
-    for (int j = 0; j < npeaks; j++) {
+    for (int j = 0; j < numberOfPeaks; j++) {
       y += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
       apos += PARAMETERS_PER_PEAK;
       dydapos += GRADIENT_PARAMETERS_PER_PEAK;
@@ -164,7 +164,7 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
     final int x1 = x / maxx;
     final int x0 = x % maxx;
 
-    for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK) {
+    for (int j = 0; j < numberOfPeaks; j++, apos += PARAMETERS_PER_PEAK) {
       y += gaussian(x0, x1, apos, peakFactors[j]);
     }
 

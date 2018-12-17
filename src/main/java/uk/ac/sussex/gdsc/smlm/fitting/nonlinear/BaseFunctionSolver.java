@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
@@ -40,7 +41,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
   private FunctionSolverType type;
 
   /** The gradient function. */
-  protected GradientFunction f;
+  protected GradientFunction function;
 
   private int maxEvaluations = 20;
 
@@ -68,15 +69,12 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    * Default constructor.
    *
    * @param type the type
-   * @param f the f
+   * @param function the function
    * @throws NullPointerException if the function or type is null
    */
-  public BaseFunctionSolver(FunctionSolverType type, GradientFunction f) {
-    if (f == null) {
-      throw new NullPointerException("Function must not be null");
-    }
-    this.f = f;
-    setType(type);
+  public BaseFunctionSolver(FunctionSolverType type, GradientFunction function) {
+    this.function = ValidationUtils.checkNotNull(function, "Function must not be null");
+    this.type = ValidationUtils.checkNotNull(type, "Type must not be null");
   }
 
   /**
@@ -85,10 +83,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    * @param type the new type
    */
   protected void setType(FunctionSolverType type) {
-    if (type == null) {
-      throw new NullPointerException("Type must not be null");
-    }
-    this.type = type;
+    this.type = ValidationUtils.checkNotNull(type, "Type must not be null");
   }
 
   /** {@inheritDoc} */
@@ -99,7 +94,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
 
   /** {@inheritDoc} */
   @Override
-  public FitStatus fit(double[] y, double[] yFit, double[] a, double[] aDev) {
+  public FitStatus fit(double[] y, double[] fx, double[] a, double[] parametersVariance) {
     // Reset the results
     numberOfFittedPoints = y.length;
     iterations = 0;
@@ -108,7 +103,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     lastY = null;
     lastA = null;
     preProcess();
-    final FitStatus status = computeFit(y, yFit, a, aDev);
+    final FitStatus status = computeFit(y, fx, a, parametersVariance);
     if (status == FitStatus.OK) {
       if (lastY == null) {
         lastY = y;
@@ -122,22 +117,22 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
   }
 
   /**
-   * Run before fit/evaluate
+   * Run before fit/evaluate.
    */
   protected void preProcess() {
-    // To be over-ridden
+    // To be optionally over-ridden
   }
 
   /**
-   * Run if the fit/evaluate was successful
+   * Run if the fit/evaluate was successful.
    */
   protected void postProcess() {
-    // To be over-ridden
+    // To be optionally over-ridden
   }
 
   /** {@inheritDoc} */
   @Override
-  public boolean evaluate(double[] y, double[] yFit, double[] a) {
+  public boolean evaluate(double[] y, double[] fx, double[] a) {
     // Reset the results
     numberOfFittedPoints = y.length;
     iterations = 0;
@@ -146,7 +141,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     lastY = null;
     lastA = null;
     preProcess();
-    final boolean status = computeValue(y, yFit, a);
+    final boolean status = computeValue(y, fx, a);
     if (status) {
       if (lastY == null) {
         lastY = y;
@@ -161,11 +156,11 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
 
   /** {@inheritDoc} */
   @Override
-  public boolean computeDeviations(double[] y, double[] a, double[] aDev) {
+  public boolean computeDeviations(double[] y, double[] a, double[] parametersVariance) {
     // Use a dedicated solver optimised for inverting the matrix diagonal.
     final FisherInformationMatrix m = computeFisherInformationMatrix(y, a);
 
-    setDeviations(aDev, m);
+    setDeviations(parametersVariance, m);
 
     return true;
   }
@@ -174,22 +169,23 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    * Compute fit.
    *
    * @param y the y values to fit
-   * @param yFit the final fitted y values
+   * @param fx the final fitted y values
    * @param a the parameters a
-   * @param aDev the deviations for the parameters a
+   * @param parametersVariance the deviations for the parameters a
    * @return the fit status
    */
-  protected abstract FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev);
+  protected abstract FitStatus computeFit(double[] y, double[] fx, double[] a,
+      double[] parametersVariance);
 
   /**
    * Evaluate the function.
    *
    * @param y the y values to fit
-   * @param yFit the final fitted y values
+   * @param fx the final fitted y values
    * @param a the parameters a
    * @return true if evaluated
    */
-  protected abstract boolean computeValue(double[] y, double[] yFit, double[] a);
+  protected abstract boolean computeValue(double[] y, double[] fx, double[] a);
 
   /**
    * Compute the Fisher Information matrix. This can be used to set the deviations for each of the
@@ -213,7 +209,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    * @return the initial solution
    */
   public double[] getInitialSolution(double[] params) {
-    final int[] indices = f.gradientIndices();
+    final int[] indices = function.gradientIndices();
     final double[] initialSolution = new double[indices.length];
     for (int i = 0; i < indices.length; i++) {
       initialSolution[i] = params[indices[i]];
@@ -229,7 +225,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    * @param solution the solution
    */
   public void setSolution(double[] params, double[] solution) {
-    final int[] indices = f.gradientIndices();
+    final int[] indices = function.gradientIndices();
     for (int i = 0; i < indices.length; i++) {
       params[indices[i]] = solution[i];
     }
@@ -244,7 +240,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    */
   public void setDeviationsFromMatrix(double[] deviations, double[][] covar) {
     Arrays.fill(deviations, 0);
-    final int[] indices = f.gradientIndices();
+    final int[] indices = function.gradientIndices();
     for (int i = 0; i < indices.length; i++) {
       deviations[indices[i]] = checkVariance(covar[i][i]);
     }
@@ -259,7 +255,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    */
   public void setDeviationsFromLinearMatrix(double[] deviations, double[] covar) {
     Arrays.fill(deviations, 0);
-    final int[] indices = f.gradientIndices();
+    final int[] indices = function.gradientIndices();
     final int n = indices.length;
     for (int i = 0, j = 0; i < n; i++, j += (n + 1)) {
       deviations[indices[i]] = checkVariance(covar[j]);
@@ -275,7 +271,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    */
   public void setDeviations(double[] deviations, double[] covar) {
     Arrays.fill(deviations, 0);
-    final int[] indices = f.gradientIndices();
+    final int[] indices = function.gradientIndices();
     final int n = indices.length;
     for (int i = 0; i < n; i++) {
       deviations[indices[i]] = checkVariance(covar[i]);
@@ -288,27 +284,21 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    * {@link GradientFunction#gradientIndices()}.
    *
    * @param deviations the deviations
-   * @param m the Fisher information matrix
+   * @param fim the Fisher information matrix
    */
-  public void setDeviations(double[] deviations, FisherInformationMatrix m) {
-    //// This may fail if the matrix cannot be inverted
-    // final double[] crlb = m.crlb();
-    // if (crlb == null)
-    // throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-    // setDeviations(aDev, crlb);
-
+  public void setDeviations(double[] deviations, FisherInformationMatrix fim) {
     // Use this method for robustness, i.e. it will not fail
-    setDeviations(deviations, m.crlb(true));
+    setDeviations(deviations, fim.crlb(true));
   }
 
-  private static double checkVariance(double d) {
-    return (d > 0) ? d : 0;
+  private static double checkVariance(double value) {
+    return (value > 0) ? value : 0;
   }
 
   /** {@inheritDoc} */
   @Override
   public int getNumberOfFittedParameters() {
-    return f.getNumberOfGradients();
+    return function.getNumberOfGradients();
   }
 
   /** {@inheritDoc} */
@@ -330,14 +320,18 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
   }
 
   /**
-   * @return the maxEvaluations.
+   * Gets the max evaluations.
+   *
+   * @return the max evaluations
    */
   public int getMaxEvaluations() {
     return maxEvaluations;
   }
 
   /**
-   * @param maxEvaluations the maxEvaluations to set
+   * Sets the max evaluations.
+   *
+   * @param maxEvaluations the new max evaluations
    */
   public void setMaxEvaluations(int maxEvaluations) {
     this.maxEvaluations = maxEvaluations;
@@ -410,28 +404,30 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
   /**
    * Update the function.
    *
-   * @param f the new function
+   * @param function the new function
    * @throws NullPointerException if the function is null
    */
-  public void setGradientFunction(GradientFunction f) {
-    if (f == null) {
+  public void setGradientFunction(GradientFunction function) {
+    if (function == null) {
       throw new NullPointerException("Function must not be null");
     }
-    this.f = f;
+    this.function = function;
   }
 
   /**
+   * Gets the gradient function.
+   *
    * @return The function.
    */
   public GradientFunction getGradientFunction() {
-    return f;
+    return function;
   }
 
   /** {@inheritDoc} */
   @Override
-  public String getName(int i) {
-    if (f instanceof NamedFunction) {
-      return ((NamedFunction) f).getParameterName(i);
+  public String getName(int index) {
+    if (function instanceof NamedFunction) {
+      return ((NamedFunction) function).getParameterName(index);
     }
     return "Unknown";
   }
@@ -464,12 +460,11 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
           System.arraycopy(y, 0, y2, 0, i);
         }
 
-        // Note that java initialises the array to zero so only copy the positives
-
-        // y2[i] = 0; // We know this was not positive so skip it
+        // Note that java initialises the array to zero so only copy the positives.
+        // Skip current index i as it was not positive.
         while (++i < n) {
-          // y2[i] = (y[i] < 0) ? 0 : y[i];
           if (y[i] > 0) {
+            // Copy positive values
             y2[i] = y[i];
           }
         }

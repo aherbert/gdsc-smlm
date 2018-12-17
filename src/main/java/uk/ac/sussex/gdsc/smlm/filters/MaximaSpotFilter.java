@@ -77,9 +77,6 @@ public abstract class MaximaSpotFilter extends SpotFilter {
   protected Spot[] find(final float[] data, final int width, final int height) {
     data2 = preprocessData(data, width, height);
 
-    // uk.ac.sussex.gdsc.core.ij.Utils.display("Spot Filter", new FloatProcessor(width, height,
-    // data2));
-
     final int[] maxIndices = getMaxima(data2, width, height);
     if (maxIndices.length == 0) {
       return null;
@@ -124,19 +121,23 @@ public abstract class MaximaSpotFilter extends SpotFilter {
   protected int[] getMaxima(float[] data, int width, int height) {
     // Check upper limits are safe
     final int n = FastMath.min(search, FastMath.min(width, height));
-    final int border = FastMath.min(this.border, FastMath.min(width, height) / 2);
-    return nms.blockFindInternal(data, width, height, n, border);
+    final int validBorder = FastMath.min(this.border, FastMath.min(width, height) / 2);
+    return nms.blockFindInternal(data, width, height, n, validBorder);
   }
 
   /**
-   * @return the search width for maxima (maximum must be the highest point in a 2n+1 region)
+   * Gets the search width for maxima (maximum must be the highest point in a 2n+1 region).
+   *
+   * @return the search width for maxima
    */
   public int getSearch() {
     return search;
   }
 
   /**
-   * @return the border at the edge to ignore for maxima.
+   * Gets the border at the edge to ignore for maxima.
+   *
+   * @return the border.
    */
   public int getBorder() {
     return border;

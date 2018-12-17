@@ -52,45 +52,45 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @throws NullPointerException if the function is null
    */
-  public WLSELVMSteppingFunctionSolver(Gradient1Function f) {
-    super(FunctionSolverType.WLSE, f);
+  public WLSELVMSteppingFunctionSolver(Gradient1Function function) {
+    super(FunctionSolverType.WLSE, function);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum relative error
    * @param maxAbsoluteError Validate the Levenberg-Marquardt fit solution using the specified
    *        maximum absolute error
    * @throws NullPointerException if the function is null
    */
-  public WLSELVMSteppingFunctionSolver(Gradient1Function f, double maxRelativeError,
+  public WLSELVMSteppingFunctionSolver(Gradient1Function function, double maxRelativeError,
       double maxAbsoluteError) {
-    super(FunctionSolverType.WLSE, f, maxRelativeError, maxAbsoluteError);
+    super(FunctionSolverType.WLSE, function, maxRelativeError, maxAbsoluteError);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public WLSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+  public WLSELVMSteppingFunctionSolver(Gradient1Function function, ToleranceChecker tc,
       ParameterBounds bounds) {
-    super(FunctionSolverType.WLSE, f, tc, bounds);
+    super(FunctionSolverType.WLSE, function, tc, bounds);
   }
 
   /**
    * Create a new stepping function solver.
    *
-   * @param f the function
+   * @param function the function
    * @param tc the tolerance checker
    * @param bounds the bounds
    * @param maxRelativeError Validate the Levenberg-Marquardt fit solution using the specified
@@ -99,23 +99,24 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
    *        maximum absolute error
    * @throws NullPointerException if the function or tolerance checker is null
    */
-  public WLSELVMSteppingFunctionSolver(Gradient1Function f, ToleranceChecker tc,
+  public WLSELVMSteppingFunctionSolver(Gradient1Function function, ToleranceChecker tc,
       ParameterBounds bounds, double maxRelativeError, double maxAbsoluteError) {
-    super(FunctionSolverType.WLSE, f, tc, bounds, maxRelativeError, maxAbsoluteError);
+    super(FunctionSolverType.WLSE, function, tc, bounds, maxRelativeError, maxAbsoluteError);
   }
 
   /** {@inheritDoc} */
   @Override
   protected LVMGradientProcedure createGradientProcedure(double[] y) {
-    return WLSQLVMGradientProcedureFactory.create(y, getWeights(y.length), (Gradient1Function) f);
+    return WLSQLVMGradientProcedureFactory.create(y, getWeights(y.length),
+        (Gradient1Function) function);
   }
 
   /** {@inheritDoc} */
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit) {
+  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
     // Get the values if necessary
-    if (yFit != null && yFit.length == ((Gradient1Function) f).size()) {
-      computeValues(yFit);
+    if (fx != null && fx.length == ((Gradient1Function) function).size()) {
+      computeValues(fx);
     }
 
     // TODO. Check if these deviations are correct.
@@ -134,8 +135,8 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a) {
     // Compute using the scaled Hessian as per the above method.
     // Use a dedicated procedure that omits computing beta.
-    final WPoissonGradientProcedure p =
-        WPoissonGradientProcedureFactory.create(y, getWeights(y.length), (Gradient1Function) f);
+    final WPoissonGradientProcedure p = WPoissonGradientProcedureFactory.create(y,
+        getWeights(y.length), (Gradient1Function) function);
     p.computeFisherInformation(a);
     if (p.isNaNGradients()) {
       throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);

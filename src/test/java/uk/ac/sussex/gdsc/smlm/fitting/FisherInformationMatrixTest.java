@@ -44,7 +44,7 @@ public class FisherInformationMatrixTest {
   public void canComputeCRLB(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 1; n < 10; n++) {
-      canComputeCRLB(rg, n, 0, true);
+      testComputeCRLB(rg, n, 0, true);
     }
   }
 
@@ -52,8 +52,8 @@ public class FisherInformationMatrixTest {
   public void canComputeCRLBWithZeros(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 2; n < 10; n++) {
-      canComputeCRLB(rg, n, 1, true);
-      canComputeCRLB(rg, n, n / 2, true);
+      testComputeCRLB(rg, n, 1, true);
+      testComputeCRLB(rg, n, n / 2, true);
     }
   }
 
@@ -61,7 +61,7 @@ public class FisherInformationMatrixTest {
   public void canComputeCRLBWithReciprocal(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 1; n < 10; n++) {
-      canComputeCRLB(rg, n, 0, false);
+      testComputeCRLB(rg, n, 0, false);
     }
   }
 
@@ -69,8 +69,8 @@ public class FisherInformationMatrixTest {
   public void canComputeCRLBWithReciprocalWithZeros(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 2; n < 10; n++) {
-      canComputeCRLB(rg, n, 1, false);
-      canComputeCRLB(rg, n, n / 2, false);
+      testComputeCRLB(rg, n, 1, false);
+      testComputeCRLB(rg, n, n / 2, false);
     }
   }
 
@@ -95,7 +95,7 @@ public class FisherInformationMatrixTest {
     }
   }
 
-  private double[] canComputeCRLB(UniformRandomProvider rg, int n, int k, boolean invert) {
+  private double[] testComputeCRLB(UniformRandomProvider rg, int n, int k, boolean invert) {
     final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, k);
 
     // Invert for CRLB
@@ -115,10 +115,10 @@ public class FisherInformationMatrixTest {
     // Use a real Gaussian function here to compute the Fisher information.
     // The matrix may be sensitive to the type of equation used.
     int npeaks = 1;
-    Gaussian2DFunction f = createFunction(maxx, npeaks);
-    while (f.getNumberOfGradients() < n) {
+    Gaussian2DFunction fun = createFunction(maxx, npeaks);
+    while (fun.getNumberOfGradients() < n) {
       npeaks++;
-      f = createFunction(maxx, npeaks);
+      fun = createFunction(maxx, npeaks);
     }
 
     final double[] a = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -131,29 +131,24 @@ public class FisherInformationMatrixTest {
       a[j + Gaussian2DFunction.X_SD] = nextUniform(rg, 1.5, 2);
       a[j + Gaussian2DFunction.Y_SD] = nextUniform(rg, 1.5, 2);
     }
-    f.initialise(a);
+    fun.initialise(a);
 
-    final GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
-    double[][] I = c.fisherInformationMatrix(size, a, f);
-
-    // TestLog.fine(logger,"n=%d, k=%d, I=", n, k);
-    // for (int i = 0; i < I.length; i++)
-    // TestLog.fine(logger,Arrays.toString(I[i]));
+    final GradientCalculator calc =
+        GradientCalculatorFactory.newCalculator(fun.getNumberOfGradients());
+    double[][] matrixI = calc.fisherInformationMatrix(size, a, fun);
 
     // Reduce to the desired size
-    I = Arrays.copyOf(I, n);
+    matrixI = Arrays.copyOf(matrixI, n);
     for (int i = 0; i < n; i++) {
-      I[i] = Arrays.copyOf(I[i], n);
+      matrixI[i] = Arrays.copyOf(matrixI[i], n);
     }
 
     // Zero selected columns
     if (k > 0) {
-      final int[] zero = RandomUtils.sample(k, n, rg); // new
-                                                       // RandomDataGenerator(UniformRandomProvider).nextPermutation(n,
-                                                       // k);
+      final int[] zero = RandomUtils.sample(k, n, rg);
       for (final int i : zero) {
         for (int j = 0; j < n; j++) {
-          I[i][j] = I[j][i] = 0;
+          matrixI[i][j] = matrixI[j][i] = 0;
         }
       }
     }
@@ -163,11 +158,11 @@ public class FisherInformationMatrixTest {
     // TestLog.fine(logger,Arrays.toString(I[i]));
 
     // Create matrix
-    return new FisherInformationMatrix(I, 1e-3);
+    return new FisherInformationMatrix(matrixI, 1e-3);
   }
 
-  private static double nextUniform(UniformRandomProvider r, double min, double max) {
-    return min + r.nextDouble() * (max - min);
+  private static double nextUniform(UniformRandomProvider rng, double min, double max) {
+    return min + rng.nextDouble() * (max - min);
   }
 
   private static Gaussian2DFunction createFunction(int maxx, int npeaks) {
@@ -204,13 +199,13 @@ public class FisherInformationMatrixTest {
     }
   }
 
-  private static FisherInformationMatrix createRandomMatrix(
-      UniformRandomProvider UniformRandomProvider, int n) {
-    final double[] data = new double[n * n];
+  private static FisherInformationMatrix
+      createRandomMatrix(UniformRandomProvider rng, int size) {
+    final double[] data = new double[size * size];
     for (int i = 0; i < data.length; i++) {
-      data[i] = UniformRandomProvider.nextDouble();
+      data[i] = rng.nextDouble();
     }
-    return new FisherInformationMatrix(data, n);
+    return new FisherInformationMatrix(data, size);
   }
 
   @SeededTest

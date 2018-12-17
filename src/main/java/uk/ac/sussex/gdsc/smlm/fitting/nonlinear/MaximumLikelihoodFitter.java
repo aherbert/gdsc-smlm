@@ -60,6 +60,9 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Uses Maximum Likelihood Estimation (MLE) to fit a nonlinear model with coefficients (a) for a set
  * of data points (x, y).
@@ -150,7 +153,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     public double[] unmap(double[] point) {
       point = point.clone();
       for (final int i : map) {
-        // point[i] = point[i] * point[i] * FastMath.signum(point[i]);
         if (point[i] > 0) {
           point[i] = point[i] * point[i];
         } else {
@@ -189,16 +191,17 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
    */
   public enum SearchMethod {
     /**
-     * Search using Powell's conjugate direction method using hard limits to ensure a bounded search
+     * Search using Powell's conjugate direction method using hard limits to ensure a bounded
+     * search.
      */
     POWELL_BOUNDED("Powell (bounded)", false),
     /**
-     * Search using Powell's conjugate direction method
+     * Search using Powell's conjugate direction method.
      */
     POWELL("Powell", false),
     /**
      * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded
-     * search
+     * search.
      */
     POWELL_ADAPTER("Powell (adapter)", false),
     /**
@@ -251,6 +254,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     }
 
     /**
+     * Check if the search method uses the gradient of the likelihood function.
+     *
      * @return True if the search method uses the gradient of the likelihood function.
      */
     public boolean usesGradients() {
@@ -307,18 +312,18 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   /**
    * Default constructor.
    *
-   * @param f The function
+   * @param function The function
    */
-  public MaximumLikelihoodFitter(NonLinearFunction f) {
-    super(f);
+  public MaximumLikelihoodFitter(NonLinearFunction function) {
+    super(function);
   }
 
   /** {@inheritDoc} */
   @Override
-  public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev) {
+  public FitStatus computeFit(double[] y, double[] fx, double[] a, double[] parametersVariance) {
     final int n = y.length;
     final LikelihoodWrapper maximumLikelihoodFunction =
-        createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+        createLikelihoodWrapper((NonLinearFunction) function, n, y, a);
 
     @SuppressWarnings("rawtypes")
     BaseOptimizer baseOptimiser = null;
@@ -417,7 +422,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // CMAESOptimiser based on Matlab code:
         // https://www.lri.fr/~hansen/cmaes.m
         // Take the defaults from the Matlab documentation
-        final double stopFitness = 0; // Double.NEGATIVE_INFINITY;
+        final double stopFitness = 0;
         final boolean isActiveCMA = true;
         final int diagonalOnly = 0;
         final int checkFeasableCount = 1;
@@ -461,9 +466,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
           final PointValuePair result = o.optimize(data);
           iterations += o.getIterations();
           evaluations += o.getEvaluations();
-          // System.out.printf("CMAES [%d] i=%d [%d], e=%d [%d]\n", repeat, o.getIterations(),
-          // iterations,
-          // o.getEvaluations(), totalEvaluations);
           if (optimum == null || result.getValue() < optimum.getValue()) {
             optimum = result;
           }
@@ -472,14 +474,12 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         baseOptimiser = null;
       } else if (searchMethod == SearchMethod.BFGS) {
         // BFGS can use an approximate line search minimisation where as Powell and conjugate
-        // gradient
-        // methods require a more accurate line minimisation. The BFGS search does not do a full
-        // minimisation but takes appropriate steps in the direction of the current gradient.
+        // gradient methods require a more accurate line minimisation. The BFGS search does not do a
+        // full minimisation but takes appropriate steps in the direction of the current gradient.
 
         // Do not use the convergence checker on the value of the function. Use the convergence on
-        // the
-        // point coordinate and gradient
-        // BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs));
+        // the point coordinate and gradient.
+        // BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs))
         final BFGSOptimizer o = new BFGSOptimizer();
         baseOptimiser = o;
 
@@ -505,11 +505,10 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
       } else {
         // The line search algorithm often fails. This is due to searching into a region where the
         // function evaluates to a negative so has been clipped. This means the upper bound of the
-        // line
-        // cannot be found.
+        // line cannot be found.
         // Note that running it on an easy problem (200 photons with fixed fitting (no background))
-        // the algorithm
-        // does sometimes produces results better than the Powell algorithm but it is slower.
+        // the algorithm does sometimes produces results better than the Powell algorithm but it is
+        // slower.
 
         final BoundedNonLinearConjugateGradientOptimizer o =
             new BoundedNonLinearConjugateGradientOptimizer(
@@ -519,13 +518,10 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         baseOptimiser = o;
 
         // Note: The gradients may become unstable at the edge of the bounds. Or they will not
-        // change
-        // direction if the true solution is on the bounds since the gradient will always continue
-        // towards the bounds. This is key to the conjugate gradient method. It searches along a
-        // vector
-        // until the direction of the gradient is in the opposite direction (using dot products,
-        // i.e.
-        // cosine of angle between them)
+        // change direction if the true solution is on the bounds since the gradient will always
+        // continue towards the bounds. This is key to the conjugate gradient method. It searches
+        // along a vector until the direction of the gradient is in the opposite direction (using
+        // dot products, i.e. cosine of angle between them)
 
         // NR 10.7 states there is no advantage of the variable metric DFP or BFGS methods over
         // conjugate gradient methods. So I will try these first.
@@ -533,8 +529,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // Try this:
         // Adapt the conjugate gradient optimiser to use the gradient to pick the search direction
         // and then for the line minimisation. However if the function is out of bounds then clip
-        // the
-        // variables at the bounds and continue.
+        // the variables at the bounds and continue.
         // If the current point is at the bounds and the gradient is to continue out of bounds then
         // clip the gradient too.
 
@@ -543,19 +538,14 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
 
         // I tried a Bounded conjugate gradient optimiser with clipped variables:
         // This sometimes works. However when the variables go a long way out of the expected range
-        // the gradients
-        // can have vastly different magnitudes. This results in the algorithm stalling since the
-        // gradients
-        // can be close to zero and the some of the parameters are no longer adjusted.
-        // Perhaps this can be looked for and the algorithm then gives up and resorts to a Powell
-        // optimiser from
-        // the current point.
+        // the gradients can have vastly different magnitudes. This results in the algorithm
+        // stalling since the gradients can be close to zero and the some of the parameters are no
+        // longer adjusted. Perhaps this can be looked for and the algorithm then gives up and
+        // resorts to a Powell optimiser from the current point.
 
         // Changed the bracketing step to very small (default is 1, changed to 0.001). This improves
-        // the
-        // performance. The gradient direction is very sensitive to small changes in the coordinates
-        // so a
-        // tighter bracketing of the line search helps.
+        // the performance. The gradient direction is very sensitive to small changes in the
+        // coordinates so a tighter bracketing of the line search helps.
 
         // Tried using a non-gradient method for the line search copied from the Powell optimiser:
         // This also works when the bracketing step is small but the number of iterations is higher.
@@ -570,34 +560,27 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // Gradient based PR (bounded): n=948, signal=161, x=0.533, y=0.473 (2.67s)
         // Non-gradient based : n=1000, signal=151.47, x=0.535, y=0.474 (1.626s)
         // The conjugate optimisers are slower, under predict the signal by the most and in the case
-        // of
-        // the gradient based optimiser, fail to converge on some problems. This is worse when
-        // constrained
-        // fitting is used and not tightly bounded fitting.
+        // of the gradient based optimiser, fail to converge on some problems. This is worse when
+        // constrained fitting is used and not tightly bounded fitting.
         // I will leave the code in as an option but would not recommend using it. I may remove it
-        // in the
-        // future.
+        // in the future.
 
         // Note: It is strange that the non-gradient based line minimisation is more successful.
         // It may be that the gradient function is not accurate (due to round off error) or that it
-        // is
-        // simply wrong when far from the optimum. My JUnit tests only evaluate the function within
-        // the
-        // expected range of the answer.
+        // is simply wrong when far from the optimum. My JUnit tests only evaluate the function
+        // within the expected range of the answer.
 
         // Note the default step size on the Powell optimiser is 1 but the initial directions are
         // unit vectors.
         // So our bracketing step should be a minimum of 1 / average length of the first gradient
-        // vector to prevent
-        // the first step being too large when bracketing.
+        // vector to prevent the first step being too large when bracketing.
         final double[] gradient = new double[startPoint.length];
         maximumLikelihoodFunction.likelihood(startPoint, gradient);
-        double l = 0;
+        double length = 0;
         for (final double d : gradient) {
-          l += d * d;
+          length += d * d;
         }
-        final double bracketingStep = FastMath.min(0.001, ((l > 1) ? 1.0 / l : 1));
-        // System.out.printf("Bracketing step = %f (length=%f)\n", bracketingStep, l);
+        final double bracketingStep = FastMath.min(0.001, ((length > 1) ? 1.0 / length : 1));
 
         o.setUseGradientLineSearch(gradientLineMinimisation);
 
@@ -608,10 +591,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
             GoalType.MINIMIZE, new InitialGuess(startPoint),
             new SimpleBounds(lowerConstraint, upperConstraint),
             new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(bracketingStep));
-
-        // maximumLikelihoodFunction.value(solution, gradient);
-        // System.out.printf("Iter = %d, %g @ %s : %s\n", iterations, ll, Arrays.toString(solution),
-        // Arrays.toString(gradient));
       }
 
       if (optimum == null) {
@@ -622,11 +601,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
 
       setSolution(a, solution);
 
-      // System.out.printf("Iter = %d, Eval = %d, %g @ %s\n", iterations, evaluations,
-      // optimum.getValue(),
-      // java.util.Arrays.toString(solution));
-
-      if (aDev != null) {
+      if (parametersVariance != null) {
         // Compute assuming a Poisson process.
         // Note:
         // If using a Poisson-Gamma-Gaussian model then these will be incorrect.
@@ -635,30 +610,22 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // Since the type of function is unknown this cannot be done here.
         final FisherInformationMatrix m =
             new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(solution));
-        setDeviations(aDev, m);
+        setDeviations(parametersVariance, m);
       }
 
       // Reverse negative log likelihood for maximum likelihood score
       value = -optimum.getValue();
     } catch (final TooManyIterationsException ex) {
-      // System.out.printf("Too many iterations = %d\n", ex.getMax());
-      // ex.printStackTrace();
       return FitStatus.TOO_MANY_ITERATIONS;
     } catch (final TooManyEvaluationsException ex) {
-      // System.out.printf("Too many evaluations = %d\n", ex.getMax());
-      // ex.printStackTrace();
       return FitStatus.TOO_MANY_EVALUATIONS;
     } catch (final ConvergenceException ex) {
       // Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
-      // System.out.printf("Singular non linear model = %s\n", ex.getMessage());
       return FitStatus.SINGULAR_NON_LINEAR_MODEL;
     } catch (final BFGSOptimizer.LineSearchRoundoffException ex) {
-      // System.out.println("BFGS error: " + ex.getMessage());
-      // ex.printStackTrace();
       return FitStatus.FAILED_TO_CONVERGE;
     } catch (final Exception ex) {
-      // System.out.printf("Unknown error = %s\n", ex.getMessage());
-      ex.printStackTrace();
+      Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Failed to fit", ex);
       return FitStatus.UNKNOWN;
     } finally {
       if (baseOptimiser != null) {
@@ -675,7 +642,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     return FitStatus.OK;
   }
 
-  private LikelihoodWrapper createLikelihoodWrapper(NonLinearFunction f, int n, double[] y,
+  private LikelihoodWrapper createLikelihoodWrapper(NonLinearFunction function, int n, double[] y,
       double[] a) {
     LikelihoodWrapper maximumLikelihoodFunction = null;
 
@@ -686,7 +653,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
       case POISSON_GAMMA_GAUSSIAN:
         // Poisson-Gamma-Gaussian - EM-CCD data
         maximumLikelihoodFunction =
-            new PoissonGammaGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
+            new PoissonGammaGaussianLikelihoodWrapper(function, a, y, n, myAlpha, sigma);
         break;
 
       case POISSON_GAUSSIAN:
@@ -694,13 +661,13 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // Sigma must be positive, otherwise fall back to a Poisson likelihood function
         if (sigma > 0) {
           maximumLikelihoodFunction =
-              new PoissonGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
-          break;
+              new PoissonGaussianLikelihoodWrapper(function, a, y, n, myAlpha, sigma);
         }
+        break;
 
-      case POISSON:
       default:
         // Poisson - most counting data
+        break;
     }
 
     // Check if the method requires the gradient but it cannot be computed
@@ -717,18 +684,21 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
           y2[i] = y[i];
         }
       }
-      final PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n, myAlpha);
+      final PoissonLikelihoodWrapper mlFunction =
+          new PoissonLikelihoodWrapper(function, a, y2, n, myAlpha);
       // This will allow Powell searches. The effect on the gradient search algorithms may be weird
       // so leave alone.
       if (!searchMethod.usesGradient) {
-        function.setAllowNegativeExpectedValues(true);
+        mlFunction.setAllowNegativeExpectedValues(true);
       }
-      maximumLikelihoodFunction = function;
+      maximumLikelihoodFunction = mlFunction;
     }
     return maximumLikelihoodFunction;
   }
 
   /**
+   * Gets the max iterations for the Powell search method.
+   *
    * @return the max iterations for the Powell search method.
    */
   public int getMaxIterations() {
@@ -736,6 +706,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
+   * Sets the max iterations for the Powell search method.
+   *
    * @param maxIterations the max iterations for the Powell search method
    */
   public void setMaxIterations(int maxIterations) {
@@ -743,6 +715,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
+   * Gets the search method.
+   *
    * @return the search method.
    */
   public SearchMethod getSearchMethod() {
@@ -750,6 +724,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
+   * Sets the search method.
+   *
    * @param searchMethod the search method
    */
   public void setSearchMethod(SearchMethod searchMethod) {
@@ -757,20 +733,26 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
-   * @return the likelihood function to model the count.
+   * Gets the likelihood function.
+   *
+   * @return the likelihood function
    */
   public LikelihoodFunction getLikelihoodFunction() {
     return likelihoodFunction;
   }
 
   /**
-   * @param likelihoodFunction the likelihood function to model the count
+   * Sets the likelihood function.
+   *
+   * @param likelihoodFunction the likelihood function
    */
   public void setLikelihoodFunction(LikelihoodFunction likelihoodFunction) {
     this.likelihoodFunction = likelihoodFunction;
   }
 
   /**
+   * Gets the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood function.
+   *
    * @return the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood function.
    */
   public double getAlpha() {
@@ -778,6 +760,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
+   * Sets the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood function.
+   *
    * @param alpha the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood
    *        function
    */
@@ -786,6 +770,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
+   * Gets the sigma for the Gaussian component of the Poisson-Gaussian/Poisson-Gamma-Gaussian
+   * likelihood function.
+   *
    * @return the sigma for the Gaussian component of the Poisson-Gaussian/Poisson-Gamma-Gaussian
    *         likelihood function
    */
@@ -794,6 +781,9 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   /**
+   * Sets the sigma for the Gaussian component of the Poisson-Gaussian/Poisson-Gamma-Gaussian
+   * likelihood function.
+   *
    * @param sigma the sigma for the Gaussian component of the
    *        Poisson-Gaussian/Poisson-Gamma-Gaussian likelihood function
    */
@@ -897,7 +887,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   @Override
   public void setBounds(double[] lowerB, double[] upperB) {
     // Extract the bounds for the parameters we are fitting
-    final int[] indices = f.gradientIndices();
+    final int[] indices = function.gradientIndices();
 
     lower = new double[indices.length];
     upper = new double[indices.length];
@@ -911,7 +901,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   @Override
   public void setConstraints(double[] lowerB, double[] upperB) {
     // Extract the bounds for the parameters we are fitting
-    final int[] indices = f.gradientIndices();
+    final int[] indices = function.gradientIndices();
 
     lowerConstraint = new double[indices.length];
     upperConstraint = new double[indices.length];
@@ -922,10 +912,10 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   }
 
   @Override
-  public boolean computeValue(double[] y, double[] yFit, double[] a) {
+  public boolean computeValue(double[] y, double[] fx, double[] a) {
     final int n = y.length;
     final LikelihoodWrapper maximumLikelihoodFunction =
-        createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+        createLikelihoodWrapper((NonLinearFunction) function, n, y, a);
 
     final double l = maximumLikelihoodFunction.likelihood(a);
     if (l == Double.POSITIVE_INFINITY) {
@@ -942,7 +932,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
   protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a) {
     final int n = y.length;
     final LikelihoodWrapper maximumLikelihoodFunction =
-        createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+        createLikelihoodWrapper((NonLinearFunction) function, n, y, a);
     final double[] solution = getInitialSolution(a);
     // Compute assuming a Poisson process.
     // Note:

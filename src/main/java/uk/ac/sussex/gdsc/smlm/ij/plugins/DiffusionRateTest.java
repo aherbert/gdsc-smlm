@@ -386,7 +386,8 @@ public class DiffusionRateTest implements PlugIn {
     final double msd3D = (jumpDistances3D.getMean() / conversionFactor)
         / (results.getCalibrationReader().getExposureTime() / 1000);
     ImageJUtils.log(
-        "Raw data D=%s um^2/s, Precision = %s nm, N=%d, step=%s s, mean2D=%s um^2, MSD 2D = %s um^2/s, mean3D=%s um^2, MSD 3D = %s um^2/s",
+        "Raw data D=%s um^2/s, Precision = %s nm, N=%d, step=%s s, mean2D=%s um^2, "
+            + "MSD 2D = %s um^2/s, mean3D=%s um^2, MSD 3D = %s um^2/s",
         MathUtils.rounded(settings.getDiffusionRate()), MathUtils.rounded(myPrecision),
         jumpDistances2D.getN(),
         MathUtils.rounded(results.getCalibrationReader().getExposureTime() / 1000),
@@ -991,7 +992,8 @@ public class DiffusionRateTest implements PlugIn {
     final double msd = sum / count;
     // Convert to um^2/second
     ImageJUtils.log(
-        "Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
+        "Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, "
+            + "MSD = %s um^2/s",
         MathUtils.rounded(settings.getDiffusionRate()), MathUtils.rounded(myPrecision), count,
         MathUtils.rounded(results.getCalibrationReader().getExposureTime() / 1000),
         MathUtils.rounded(msd / conversionFactor), MathUtils.rounded(
@@ -1130,7 +1132,8 @@ public class DiffusionRateTest implements PlugIn {
     exposureTime = myAggregateSteps / settings.getStepsPerSecond();
     sb.append(MathUtils.rounded(exposureTime)).append('\t');
     prefix = sb.toString();
-    return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tn\tN\tMSD (um^2)\tD (um^2/s)";
+    return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\t"
+        + "Frame (s)\tt (s)\tn\tN\tMSD (um^2)\tD (um^2/s)";
   }
 
   private String addResult(int step, double sum, int count) {

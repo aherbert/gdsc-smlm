@@ -152,8 +152,8 @@ public class MedianFilter implements PlugInFilter {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(
-        "Compute the median using a rolling window at set intervals.\nBlocks of pixels are processed on separate threads.");
+    gd.addMessage("Compute the median using a rolling window at set intervals.\n"
+        + "Blocks of pixels are processed on separate threads.");
 
     gd.addSlider("Radius", 10, 100, radius);
     gd.addSlider("Interval", 10, 30, interval);
@@ -182,8 +182,8 @@ public class MedianFilter implements PlugInFilter {
 
     // Check the window size is smaller than the stack size
     if (imp.getStackSize() < 2 * radius + 1) {
-      IJ.error(TITLE,
-          "The window size is larger than the stack size.\nThis is equal to a z-stack median projection.");
+      IJ.error(TITLE, "The window size is larger than the stack size.\n"
+          + "This is equal to a z-stack median projection.");
       return DONE;
     }
 

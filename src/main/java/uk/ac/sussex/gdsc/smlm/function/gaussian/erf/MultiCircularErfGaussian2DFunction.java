@@ -36,14 +36,14 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
   /**
    * Constructor.
    *
-   * @param nPeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    */
-  public MultiCircularErfGaussian2DFunction(int nPeaks, int maxx, int maxy) {
-    super(nPeaks, maxx, maxy);
+  public MultiCircularErfGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
+    super(numberOfPeaks, maxx, maxy);
   }
 
   @Override
@@ -53,13 +53,13 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 
   @Override
   public ErfGaussian2DFunction copy() {
-    return new MultiCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
+    return new MultiCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
   @Override
   public void initialise0(double[] a) {
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -75,7 +75,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
   @Override
   public double integral(double[] a) {
     double sum = a[Gaussian2DFunction.BACKGROUND] * size();
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       final double tI = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -91,7 +91,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
   public void initialise1(double[] a) {
     create1Arrays();
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -118,7 +118,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
   public void initialise2(double[] a) {
     create2Arrays();
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -152,7 +152,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
   public void initialiseExtended2(double[] a) {
     createEx2Arrays();
     tB = a[Gaussian2DFunction.BACKGROUND];
-    for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK) {
+    for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
@@ -193,7 +193,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
     // Use pre-computed gradients
     duda[0] = 1.0;
     double I = tB;
-    for (int n = 0, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+    for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a++];
       duda[a++] = du_dtx[xx] * deltaEy[yy];
@@ -215,7 +215,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
     duda[0] = 1.0;
     d2uda2[0] = 0;
     double I = tB;
-    for (int n = 0, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+    for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a];
       d2uda2[a++] = 0;
@@ -276,7 +276,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
     for (int y = 0; y < maxy; y++) {
       for (int x = 0; x < maxx; x++) {
         double I = tB;
-        for (int n = 0, xx = x, yy = y, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+        for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
           duda[a++] = du_dtx[xx] * deltaEy[yy];
@@ -294,15 +294,15 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
     final double[] d2uda2 = new double[getNumberOfGradients()];
-    final double[] two_du_dtsy_tI = new double[nPeaks];
+    final double[] two_du_dtsy_tI = new double[numberOfPeaks];
     duda[0] = 1.0;
     for (int y = 0; y < maxy; y++) {
-      for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+      for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
         two_du_dtsy_tI[n] = 2 * this.du_dtsy[yy] / tI[n];
       }
       for (int x = 0; x < maxx; x++) {
         double I = tB;
-        for (int n = 0, xx = x, yy = y, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+        for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
           duda[a] = du_dtx[xx] * deltaEy[yy];
@@ -330,22 +330,22 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
     duda[0] = 1.0;
     final double[] du_dtsx_tI = new double[du_dtsx.length];
     for (int x = 0; x < maxx; x++) {
-      for (int n = 0, xx = x; n < nPeaks; n++, xx += maxx) {
+      for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
         du_dtsx_tI[xx] = du_dtsx[xx] / tI[n];
       }
     }
-    final double[] du_dty_tI = new double[nPeaks];
-    final double[] du_dtsy_tI = new double[nPeaks];
-    final double[] two_du_dtsy_tI = new double[nPeaks];
+    final double[] du_dty_tI = new double[numberOfPeaks];
+    final double[] du_dtsy_tI = new double[numberOfPeaks];
+    final double[] two_du_dtsy_tI = new double[numberOfPeaks];
     for (int y = 0; y < maxy; y++) {
-      for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy) {
+      for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
         du_dty_tI[n] = du_dty[yy] / tI[n];
         du_dtsy_tI[n] = du_dtsy[yy] / tI[n];
         two_du_dtsy_tI[n] = 2 * du_dtsy[yy] / tI[n];
       }
       for (int x = 0; x < maxx; x++) {
         double I = tB;
-        for (int n = 0, xx = x, yy = y, a = 1; n < nPeaks; n++, xx += maxx, yy += maxy) {
+        for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a];
           duda[a + 1] = du_dtx[xx] * deltaEy[yy];

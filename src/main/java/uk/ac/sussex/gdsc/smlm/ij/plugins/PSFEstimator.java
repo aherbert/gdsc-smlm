@@ -343,7 +343,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
           + "Start = The first frame that contains data\n"
           + "Block = The number of continuous frames containing data\n"
           + "Skip = The number of continuous frames to ignore before the next data\n \n"
-          + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+          + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore,"
+          + " then repeat.");
       gd.addNumericField("Start", optionDataStart, 0);
       gd.addNumericField("Block", optionDataBlock, 0);
       gd.addNumericField("Skip", optionDataSkip, 0);
@@ -545,8 +546,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   private boolean checkXYSignificance(boolean[] identical) {
     boolean tryAgain = false;
     if (identical[XY]) {
-      log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => Re-run with circular function",
-          sampleNew[X].getMean(), sampleNew[Y].getMean());
+      log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => "
+          + "Re-run with circular function", sampleNew[X].getMean(), sampleNew[Y].getMean());
       config.getFitConfiguration().setPSFType(PSFType.ONE_AXIS_GAUSSIAN_2D);
       tryAgain = true;
     }
@@ -752,7 +753,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     resultsWindow.append(sb.toString());
 
     if (params[X] > imp.getWidth() || params[Y] > imp.getWidth()) {
-      log("ERROR: Bad width estimation (try altering the peak validation parameters), terminating ...");
+      log("ERROR: Bad width estimation (try altering the peak validation parameters),"
+          + " terminating ...");
       return false;
     }
     return true;

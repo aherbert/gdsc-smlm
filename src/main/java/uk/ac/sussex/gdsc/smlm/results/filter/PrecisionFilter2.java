@@ -96,7 +96,8 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter {
   /** {@inheritDoc} */
   @Override
   public String getDescription() {
-    return "Filter results using an upper precision threshold (uses fitted background to set noise).";
+    return "Filter results using an upper precision threshold (uses fitted background"
+        + " to set noise).";
   }
 
   /** {@inheritDoc} */

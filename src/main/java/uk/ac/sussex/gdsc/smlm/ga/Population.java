@@ -69,6 +69,8 @@ public class Population<T extends Comparable<T>> {
   }
 
   /**
+   * Gets the individuals.
+   *
    * @return the individuals.
    */
   public List<? extends Chromosome<T>> getIndividuals() {
@@ -225,11 +227,12 @@ public class Population<T extends Comparable<T>> {
    * Check for duplicates in the current and new populations.
    *
    * @param newIndividuals The new population
-   * @param c The chromosome
+   * @param chromsome The chromosome
    * @return true if a duplicate
    */
-  private boolean isDuplicate(ArrayList<? extends Chromosome<T>> newIndividuals, Chromosome<T> c) {
-    final double[] s = c.sequence();
+  private boolean isDuplicate(ArrayList<? extends Chromosome<T>> newIndividuals,
+      Chromosome<T> chromsome) {
+    final double[] s = chromsome.sequence();
     for (final Chromosome<T> i : this.individuals) {
       if (match(i, s)) {
         return true;
@@ -246,14 +249,14 @@ public class Population<T extends Comparable<T>> {
   /**
    * Check if a chromosome matches the sequence.
    *
-   * @param c The chromosome
-   * @param s The sequence
+   * @param chromosome The chromosome
+   * @param sequence The sequence
    * @return True if a match
    */
-  private boolean match(Chromosome<T> c, double[] s) {
-    final double[] s2 = c.sequence();
-    for (int i = 0; i < s.length; i++) {
-      if (s[i] != s2[i]) {
+  private boolean match(Chromosome<T> chromosome, double[] sequence) {
+    final double[] s2 = chromosome.sequence();
+    for (int i = 0; i < sequence.length; i++) {
+      if (sequence[i] != s2[i]) {
         return false;
       }
     }
@@ -343,7 +346,7 @@ public class Population<T extends Comparable<T>> {
 
   /**
    * Get the number of failed recombinations/mutations to allow before the stopping attempts to grow
-   * the population
+   * the population.
    *
    * @return the failure limit
    */
@@ -353,7 +356,7 @@ public class Population<T extends Comparable<T>> {
 
   /**
    * Set the number of failed recombinations/mutations to allow before the stopping attempts to grow
-   * the population
+   * the population.
    *
    * @param failureLimit the failure limit
    */
@@ -362,6 +365,8 @@ public class Population<T extends Comparable<T>> {
   }
 
   /**
+   * Gets the tracker.
+   *
    * @return the tracker.
    */
   public TrackProgress getTracker() {

@@ -91,8 +91,8 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
    * @param b Baseline pre-computed y-values
    * @return the wrapped function (or the original if pre-computed values are null or wrong length)
    */
-  public static ExtendedGradient2Function wrapExtendedGradient2Function(
-      final ExtendedGradient2Function func, final double[] b) {
+  public static ExtendedGradient2Function
+      wrapExtendedGradient2Function(final ExtendedGradient2Function func, final double[] b) {
     if (b != null && b.length == func.size()) {
       // Avoid multiple wrapping
       if (func instanceof OffsetExtendedGradient2Function) {

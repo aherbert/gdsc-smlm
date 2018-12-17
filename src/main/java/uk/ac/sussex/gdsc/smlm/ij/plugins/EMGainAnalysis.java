@@ -798,7 +798,8 @@ public class EMGainAnalysis implements PlugInFilter {
 
     gd.addMessage(
         "Analyse the white-light histogram of an image stack to determine EM-gain parameters.\n \n"
-            + "See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321 (Supplementary Information).");
+            + "See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321"
+            + " (Supplementary Information).");
 
     if (extraOptions) {
       gd.addCheckbox("Simulate", _simulate);

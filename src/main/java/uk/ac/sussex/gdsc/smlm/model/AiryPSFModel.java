@@ -80,6 +80,8 @@ public class AiryPSFModel extends PSFModel {
   }
 
   /**
+   * Instantiates a new airy PSF model.
+   *
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
    */
@@ -147,7 +149,7 @@ public class AiryPSFModel extends PSFModel {
   }
 
   /**
-   * Private constructor used in the {@link #copy()} method
+   * Private constructor used in the {@link #copy()} method.
    */
   private AiryPSFModel() {
     super();
@@ -483,7 +485,7 @@ public class AiryPSFModel extends PSFModel {
 
   /**
    * Calculate the intensity of the Airy pattern between the specified ranges using the composite
-   * Simpson's rule
+   * Simpson's rule.
    *
    * @param ax Lower limit of x
    * @param bx Upper limit of x
@@ -493,31 +495,31 @@ public class AiryPSFModel extends PSFModel {
    * @param samplesPerPixel The number of samples per pixel of the pattern
    * @param intensity The Airy intensity at the provided radii
    * @param radius The radii
-   * @param N The number of subintervals
+   * @param subIntervals The number of subintervals
    * @return the integral
    */
   private static double integral(final double ax, final double bx, final double ay, final double by,
       final double limit, final double samplesPerPixel, final double[] intensity,
-      final double[] radius, final int N) {
-    final double h = (bx - ax) / N;
+      final double[] radius, final int subIntervals) {
+    final double h = (bx - ax) / subIntervals;
     // TODO - The upper and lower bounds can be pre-computed since they are used for each pixel
     // boundary
-    double s = integral(ax * ax, ay, by, limit, samplesPerPixel, intensity, radius, N)
-        + integral(bx * bx, ay, by, limit, samplesPerPixel, intensity, radius, N);
-    for (int n = 1; n < N; n += 2) {
+    double sum = integral(ax * ax, ay, by, limit, samplesPerPixel, intensity, radius, subIntervals)
+        + integral(bx * bx, ay, by, limit, samplesPerPixel, intensity, radius, subIntervals);
+    for (int n = 1; n < subIntervals; n += 2) {
       final double x = ax + n * h;
-      s += 4 * integral(x * x, ay, by, limit, samplesPerPixel, intensity, radius, N);
+      sum += 4 * integral(x * x, ay, by, limit, samplesPerPixel, intensity, radius, subIntervals);
     }
-    for (int n = 2; n < N; n += 2) {
+    for (int n = 2; n < subIntervals; n += 2) {
       final double x = ax + n * h;
-      s += 2 * integral(x * x, ay, by, limit, samplesPerPixel, intensity, radius, N);
+      sum += 2 * integral(x * x, ay, by, limit, samplesPerPixel, intensity, radius, subIntervals);
     }
-    return s * h / 3;
+    return sum * h / 3;
   }
 
   /**
    * Calculate the intensity of the Airy pattern between the specified ranges using the composite
-   * Simpson's rule
+   * Simpson's rule.
    *
    * @param x2 The squared x distance
    * @param ay Lower limit of y
@@ -526,26 +528,26 @@ public class AiryPSFModel extends PSFModel {
    * @param samplesPerPixel The number of samples per pixel of the pattern
    * @param intensity The Airy intensity at the provided radii
    * @param radius The radii
-   * @param N The number of subintervals
+   * @param subIntervals The number of subintervals
    * @return the integral
    */
   private static double integral(final double x2, final double ay, final double by,
       final double limit, final double samplesPerPixel, final double[] intensity,
-      final double[] radius, final int N) {
-    final double h = (by - ay) / N;
+      final double[] radius, final int subIntervals) {
+    final double h = (by - ay) / subIntervals;
     // TODO - The upper and lower bounds can be pre-computed since they are used for each pixel
     // boundary
-    double s = intensity(x2, ay * ay, limit, samplesPerPixel, intensity, radius)
+    double sum = intensity(x2, ay * ay, limit, samplesPerPixel, intensity, radius)
         + intensity(x2, by * by, limit, samplesPerPixel, intensity, radius);
-    for (int n = 1; n < N; n += 2) {
+    for (int n = 1; n < subIntervals; n += 2) {
       final double y = ay + n * h;
-      s += 4 * intensity(x2, y * y, limit, samplesPerPixel, intensity, radius);
+      sum += 4 * intensity(x2, y * y, limit, samplesPerPixel, intensity, radius);
     }
-    for (int n = 2; n < N; n += 2) {
+    for (int n = 2; n < subIntervals; n += 2) {
       final double y = ay + n * h;
-      s += 2 * intensity(x2, y * y, limit, samplesPerPixel, intensity, radius);
+      sum += 2 * intensity(x2, y * y, limit, samplesPerPixel, intensity, radius);
     }
-    return s * h / 3;
+    return sum * h / 3;
   }
 
   private static int clip(int x, int max) {
@@ -559,6 +561,8 @@ public class AiryPSFModel extends PSFModel {
   }
 
   /**
+   * Gets the z depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM).
+   *
    * @return the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
    */
   public double getzDepth() {
@@ -566,6 +570,8 @@ public class AiryPSFModel extends PSFModel {
   }
 
   /**
+   * Sets the z depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM).
+   *
    * @param zDepth the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
    */
   public void setzDepth(double zDepth) {
@@ -573,6 +579,8 @@ public class AiryPSFModel extends PSFModel {
   }
 
   /**
+   * Gets width in dimension 0 for the last drawn Airy pattern.
+   *
    * @return The width in dimension 0 for the last drawn Airy pattern.
    */
   public double getW0() {
@@ -580,6 +588,8 @@ public class AiryPSFModel extends PSFModel {
   }
 
   /**
+   * Gets the width in dimension 1 for the last drawn Airy pattern.
+   *
    * @return The width in dimension 1 for the last drawn Airy pattern.
    */
   public double getW1() {
@@ -727,7 +737,7 @@ public class AiryPSFModel extends PSFModel {
 
     final RandomGenerator random = rand.getRandomGenerator();
     final UnitSphereRandomVectorGenerator vg = new UnitSphereRandomVectorGenerator(2, random);
-    int c = 0;
+    int count = 0;
     for (int i = 0; i < n; i++) {
       final double p = random.nextDouble();
       if (p > POWER[SAMPLE_RINGS]) {
@@ -738,14 +748,14 @@ public class AiryPSFModel extends PSFModel {
 
       // Convert to xy using a random vector generator
       final double[] v = vg.nextVector();
-      x[c] = v[0] * r * w0 + x0;
-      y[c] = v[1] * r * w1 + x1;
-      c++;
+      x[count] = v[0] * r * w0 + x0;
+      y[count] = v[1] * r * w1 + x1;
+      count++;
     }
 
-    if (c < n) {
-      x = Arrays.copyOf(x, c);
-      y = Arrays.copyOf(y, c);
+    if (count < n) {
+      x = Arrays.copyOf(x, count);
+      y = Arrays.copyOf(y, count);
     }
     return new double[][] {x, y};
   }

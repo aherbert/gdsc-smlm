@@ -118,8 +118,9 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndMediumOnOffTimesWithFixedMolecules(
-      RandomSeed seed) {
+  public void
+      canEstimateBlinkingFromSimulationWithMediumNBlinksAndMediumOnOffTimesWithFixedMolecules(
+          RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
     estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[MEDIUM], tOn[MEDIUM],
@@ -218,12 +219,11 @@ public class BlinkEstimatorTest {
         }
       }
       logger.info(FunctionUtils.getSupplier("Time@LowerBound = %b", timeAtLowerBound));
-      for (int nFittedPoints =
-          MIN_FITTED_POINTS; nFittedPoints <= MAX_FITTED_POINTS; nFittedPoints++) {
+      for (int n = MIN_FITTED_POINTS; n <= MAX_FITTED_POINTS; n++) {
         if (logger.isLoggable(Level.INFO)) {
           final StringBuilder sb = new StringBuilder();
-          sb.append(String.format("%2d = %2d/%2d |", nFittedPoints, count[nFittedPoints], tests));
-          for (int i = 0; i < count[nFittedPoints]; i++) {
+          sb.append(String.format("%2d = %2d/%2d |", n, count[n], tests));
+          for (int i = 0; i < count[n]; i++) {
             sb.append('-');
           }
           logger.info(sb.toString());
@@ -381,8 +381,8 @@ public class BlinkEstimatorTest {
 
     // See if any fitting regime gets a correct answer
     final TIntHashSet ok = new TIntHashSet();
-    for (int nFittedPoints =
-        MIN_FITTED_POINTS; nFittedPoints <= MAX_FITTED_POINTS; nFittedPoints++) {
+    for (int nFittedPoints = MIN_FITTED_POINTS; nFittedPoints <= MAX_FITTED_POINTS;
+        nFittedPoints++) {
       be.nFittedPoints = nFittedPoints;
       be.computeBlinkingRate(results, true);
 

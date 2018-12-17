@@ -82,7 +82,8 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter {
   /** {@inheritDoc} */
   @Override
   public String getDescription() {
-    return "Filter results using an upper XY width factor. (Width is relative to initial peak width.)";
+    return "Filter results using an upper XY width factor."
+        + " (Width is relative to initial peak width.)";
   }
 
   /** {@inheritDoc} */

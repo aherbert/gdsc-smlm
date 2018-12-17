@@ -57,7 +57,8 @@ import org.apache.commons.math3.util.FastMath;
  * it is also set to zero. This occurs when true signal readout from the sCMOS camera is low enough
  * to be negated by readout noise. In this case the noise can be ignored.
  *
- * @see "Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658."
+ * <p>See Huang, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule
+ * localization algorithms. Nature Methods 10, 653–658.
  */
 public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihoodFunction {
   /**
@@ -71,7 +72,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
   final double logAlpha;
 
   /** The variance divided by the gain squared (i.e. variance in electron units) */
-  final double var_g2;
+  final double varG2;
 
   /**
    * Instantiates a new poisson poisson function.
@@ -85,20 +86,20 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     }
     this.alpha = Math.abs(alpha);
     logAlpha = Math.log(this.alpha);
-    var_g2 = variance * MathUtils.pow2(this.alpha);
+    varG2 = variance * MathUtils.pow2(this.alpha);
   }
 
   /**
    * Creates the with standard deviation.
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
-   * @param s The standard deviation of the Gaussian distribution at readout
+   * @param sd The standard deviation of the Gaussian distribution at readout
    * @return the poisson poisson function
    * @throws IllegalArgumentException if the variance is zero or below
    */
   public static PoissonPoissonFunction createWithStandardDeviation(final double alpha,
-      final double s) {
-    return new PoissonPoissonFunction(alpha, s * s);
+      final double sd) {
+    return new PoissonPoissonFunction(alpha, sd * sd);
   }
 
   /**
@@ -115,11 +116,11 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 
   /** {@inheritDoc} */
   @Override
-  public double likelihood(double o, double e) {
+  public double likelihood(double x, double mu) {
     // convert to photons
-    e = e + var_g2;
-    o = o * alpha + var_g2;
-    if (o < 0 || e <= 0) {
+    mu = mu + varG2;
+    x = x * alpha + varG2;
+    if (x < 0 || mu <= 0) {
       return 0;
     }
 
@@ -134,9 +135,9 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     // LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
     // = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
 
-    double ll = -e;
-    if (o > 0) {
-      ll += o * Math.log(e) - logFactorial(o);
+    double ll = -mu;
+    if (x > 0) {
+      ll += x * Math.log(mu) - logFactorial(x);
     }
 
     // Scale the output so the cumulative probability is 1
@@ -146,36 +147,36 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
   /**
    * Return the log of the factorial for the given real number, using the gamma function.
    *
-   * @param k the number
+   * @param value the number
    * @return the log factorial
    */
-  public static double logFactorial(double k) {
-    if (k <= 1) {
+  public static double logFactorial(double value) {
+    if (value <= 1) {
       return 0;
     }
-    return Gamma.logGamma(k + 1);
+    return Gamma.logGamma(value + 1);
   }
 
   /**
    * Return the factorial for the given real number, using the gamma function.
    *
-   * @param k the number
+   * @param value the number
    * @return the factorial
    */
-  public static double factorial(double k) {
-    if (k <= 1) {
+  public static double factorial(double value) {
+    if (value <= 1) {
       return 1;
     }
-    return Gamma.gamma(k + 1);
+    return Gamma.gamma(value + 1);
   }
 
   /** {@inheritDoc} */
   @Override
-  public double logLikelihood(double o, double e) {
+  public double logLikelihood(double x, double mu) {
     // convert to photons
-    e = e + var_g2;
-    o = o * alpha + var_g2;
-    if (o < 0 || e <= 0) {
+    mu = mu + varG2;
+    x = x * alpha + varG2;
+    if (x < 0 || mu <= 0) {
       return Double.NEGATIVE_INFINITY;
     }
 
@@ -190,9 +191,9 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     // LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
     // = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
 
-    double ll = -e;
-    if (o > 0) {
-      ll += o * Math.log(e) - logFactorial(o);
+    double ll = -mu;
+    if (x > 0) {
+      ll += x * Math.log(mu) - logFactorial(x);
     }
 
     // Scale the output so the cumulative probability is 1

@@ -35,6 +35,8 @@ public abstract class DataProcessor {
   private final int border;
 
   /**
+   * Instantiates a new data processor.
+   *
    * @param border The border that can be ignored
    */
   public DataProcessor(int border) {
@@ -87,6 +89,8 @@ public abstract class DataProcessor {
   public abstract float[] process(final float[] data, final int width, final int height);
 
   /**
+   * Gets the border.
+   *
    * @return the border.
    */
   public int getBorder() {
@@ -101,6 +105,8 @@ public abstract class DataProcessor {
   public abstract DataProcessor copy();
 
   /**
+   * Gets the description of the processor and parameters.
+   *
    * @return A description of the processor and parameters.
    */
   public String getDescription() {
@@ -108,11 +114,15 @@ public abstract class DataProcessor {
   }
 
   /**
+   * Gets the name of the filter.
+   *
    * @return The name of the filter.
    */
   public abstract String getName();
 
   /**
+   * Gets the parameters of the filter.
+   *
    * @return The parameters of the filter.
    */
   public List<String> getParameters() {

@@ -457,12 +457,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
     if (index > -1) {
       name = name.substring(index + 1);
     }
-    //// Remove suffix
-    // index = name.lastIndexOf('.');
-    // if (index > 0)
-    // {
-    // name = name.substring(0, index);
-    // }
     return "Series " + name;
   }
 
@@ -473,35 +467,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
     final Roi roi = imp.getRoi();
     if (roi != null && roi.isArea()) {
       return roi.getBounds();
-    }
-    return null;
-  }
-
-  /**
-   * @return An input directory containing a series of images.
-   */
-  @SuppressWarnings("unused")
-  private static String getInputDirectory(String title) {
-    final JFileChooser chooser = new JFileChooser() {
-      private static final long serialVersionUID = 275144634537614122L;
-
-      @Override
-      public void approveSelection() {
-        if (getSelectedFile().isFile()) {
-          return;
-        }
-        super.approveSelection();
-      }
-    };
-    if (System.getProperty("os.name").startsWith("Mac OS X")) {
-      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    } else {
-      chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    }
-    chooser.setDialogTitle(title);
-    final int returnVal = chooser.showOpenDialog(IJ.getInstance());
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-      return chooser.getSelectedFile().getPath();
     }
     return null;
   }
@@ -1452,7 +1417,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
     FitEngineConfigurationProvider fitEngineConfigurationProvider;
     /**
      * Set to true to include the value in {@link #getMin()} and {@link #getMax()}.
-     */    boolean includeValue;
+     */
+    boolean includeValue;
 
     /**
      * Instantiates a new relative parameter provider.
@@ -2005,8 +1971,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private static boolean getPixelPitch(CalibrationWriter calibration) {
     final ExtendedGenericDialog gd = newWizardDialog(
-        "Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
-        "E.g. a camera with a 6.45um pixel size and a 60x objective will have a pitch of 6450/60 = 107.5nm.");
+        "Enter the size of each pixel. This is required to ensure the dimensions of the image"
+            + " are calibrated.",
+        "E.g. a camera with a 6.45um pixel size and a 60x objective will have a pitch of"
+            + " 6450/60 = 107.5nm.");
     // TODO - Add a pop-up calculator...
     gd.addNumericField("Calibration", calibration.getNmPerPixel(), 2, 6, "nm/px");
     gd.showDialog();
@@ -2019,8 +1987,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private static boolean getGain(CalibrationWriter calibration) {
     final ExtendedGenericDialog gd = newWizardDialog("Enter the bias and total gain.",
-        "This is usually supplied with your camera certificate. The bias is a fixed offset added to the camera counts. The gain indicates how many Analogue-to-Digital-Units (Count) are recorded at the pixel for each photon registered on the sensor.",
-        "The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
+        "This is usually supplied with your camera certificate. The bias is a fixed offset added"
+            + " to the camera counts. The gain indicates how many Analogue-to-Digital-Units (Count)"
+            + " are recorded at the pixel for each photon registered on the sensor.",
+        "The gain is usually expressed using the product of the EM-gain (if applicable), the"
+            + " camera gain and the sensor quantum efficiency.",
         "A value of 1 means no conversion to photons will occur.");
     // TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
     gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
@@ -2036,7 +2007,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private static boolean getExposureTime(CalibrationWriter calibration) {
     final ExtendedGenericDialog gd = newWizardDialog(
-        "Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
+        "Enter the exposure time. Calibration of the exposure time allows correct reporting of on"
+            + " and off times.",
         "This is the length of time for each frame in the image.");
     gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
     gd.showDialog();
@@ -2049,9 +2021,16 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private boolean getPeakWidth(final CalibrationWriter calibration) {
     final ExtendedGenericDialog gd = newWizardDialog("Enter the expected peak width in pixels.",
-        "A point source of light will not be focussed perfectly by the microscope but will appear as a spread out peak. This Point Spread Function (PSF) can be modelled using a 2D Gaussian curve.",
-        "An optimised optical system (lens and camera sensor) should have a peak standard deviation of approximately 1 pixel when in focus. This allows the fitting routine to have enough data to identify the centre of the peak without spreading the light over too many pixels (which increases noise).",
-        "The peak width can be estimated using the wavelength of light emitted by the single molecules and the parameters of the microscope. Use a PSF calculator by clicking the checkbox below:");
+        "A point source of light will not be focussed perfectly by the microscope but will appear"
+            + " as a spread out peak. This Point Spread Function (PSF) can be modelled using a"
+            + " 2D Gaussian curve.",
+        "An optimised optical system (lens and camera sensor) should have a peak standard"
+            + " deviation of approximately 1 pixel when in focus. This allows the fitting routine"
+            + " to have enough data to identify the centre of the peak without spreading the light"
+            + " over too many pixels (which increases noise).",
+        "The peak width can be estimated using the wavelength of light emitted by the single"
+            + " molecules and the parameters of the microscope. Use a PSF calculator by clicking"
+            + " the checkbox below:");
     // Add ability to run the PSF Calculator to get the width
     gd.addCheckbox("Run_PSF_calculator", false);
     gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSD(), 3);
@@ -2335,7 +2314,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
           + "Start = The first frame that contains data\n"
           + "Block = The number of continuous frames containing data\n"
           + "Skip = The number of continuous frames to ignore before the next data\n \n"
-          + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+          + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore,"
+          + " then repeat.");
       gd.addNumericField("Start", optionDataStart, 0);
       gd.addNumericField("Block", optionDataBlock, 0);
       gd.addNumericField("Skip", optionDataSkip, 0);
@@ -3684,6 +3664,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
+   * Gets the total fitting time in nanoseconds.
+   *
    * @return The total fitting time in nanoseconds.
    */
   public long getTime() {
@@ -3691,6 +3673,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
+   * Gets the total number of localisations.
+   *
    * @return The total number of localisations.
    */
   public int getSize() {
@@ -3701,14 +3685,19 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   /**
-   * @return If true, do not output any log messages (e.g. the final time and count)
+   * Checks if is silent. If true, do not output any log messages (e.g. the final time and count).
+   *
+   * @return true, if is silent
    */
   public boolean isSilent() {
     return silent;
   }
 
   /**
-   * @param silent If true, do not output any log messages (e.g. the final time and count)
+   * Sets the silent option. If true, do not output any log messages (e.g. the final time and
+   * count).
+   *
+   * @param silent the new silent
    */
   public void setSilent(boolean silent) {
     this.silent = silent;

@@ -124,16 +124,16 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
   /**
    * Instantiates a new erf gaussian 2D function.
    *
-   * @param nPeaks The number of peaks
+   * @param numberOfPeaks The number of peaks
    * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
    *        coordinates)
    */
-  public ErfGaussian2DFunction(int nPeaks, int maxx, int maxy) {
+  public ErfGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
     super(maxx, maxy);
-    deltaEx = new double[nPeaks * this.maxx];
-    deltaEy = new double[nPeaks * this.maxy];
+    deltaEx = new double[numberOfPeaks * this.maxx];
+    deltaEy = new double[numberOfPeaks * this.maxy];
   }
 
   /**

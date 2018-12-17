@@ -41,11 +41,11 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
   /**
    * Default constructor.
    *
-   * @param f the function
+   * @param function the function
    * @throws NullPointerException if the function is null
    */
-  public LSEBaseFunctionSolver(GradientFunction f) {
-    super(FunctionSolverType.LSE, f);
+  public LSEBaseFunctionSolver(GradientFunction function) {
+    super(FunctionSolverType.LSE, function);
   }
 
   @Override

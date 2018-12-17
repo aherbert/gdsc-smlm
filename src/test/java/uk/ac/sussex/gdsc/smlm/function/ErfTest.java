@@ -460,7 +460,7 @@ public class ErfTest {
       final double o2 = erf.erf(x2);
       final double delta2 = x1 - x2;
       final double g = (o1 - o2) / delta2;
-      final double e = uk.ac.sussex.gdsc.smlm.function.Erf.dErf_dx(x);
+      final double e = uk.ac.sussex.gdsc.smlm.function.Erf.erfDerivative(x);
       if (!eq.almostEqualRelativeOrAbsolute(e, g)) {
         Assertions.fail(x + " : " + e + " != " + g);
       }
