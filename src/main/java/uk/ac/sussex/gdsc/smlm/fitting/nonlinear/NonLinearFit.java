@@ -462,7 +462,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
       lastY = y;
       if (fx == null) {
         // Re-use space
-        lastFx = SimpleArrayUtils.getBuffer(lastFx, y.length);
+        lastFx = SimpleArrayUtils.ensureSize(lastFx, y.length);
         fx = lastFx;
         // We will not need to copy fx later since lastFx is used direct
         copyYfit = false;
@@ -474,7 +474,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
 
     // Ensure we have a private copy of fx since the any calling code may modify it
     if (isMLE() && copyYfit) {
-      lastFx = SimpleArrayUtils.getBuffer(lastFx, y.length);
+      lastFx = SimpleArrayUtils.ensureSize(lastFx, y.length);
       System.arraycopy(fx, 0, lastFx, 0, y.length);
     }
 

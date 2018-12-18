@@ -75,9 +75,10 @@ public class PoissonGammaFunctionTest {
     if (pdf) {
       Assertions.assertEquals(1, p2, 0.02,
           () -> String.format("g=%f, mu=%f, pdf=%b", gain, mu, pdf));
-    } else // This is not actually a PMF but is a PDF so requires integration.
-    // This only works when the mean is above 2 if the gain is low
-    if (mu > 2 || gain > 20) {
+
+      // This is not actually a PMF but is a PDF so requires integration.
+      // This only works when the mean is above 2 if the gain is low
+    } else if (mu > 2 || gain > 20) {
       Assertions.assertEquals(1, p2, 0.02,
           () -> String.format("g=%f, mu=%f, pdf=%b", gain, mu, pdf));
     }
