@@ -43,26 +43,25 @@ public class SettingsManagerTest {
 
     final Calibration.Builder builder = Calibration.newBuilder();
     builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());
-    final Calibration e = builder.build();
-    Calibration o;
+    final Calibration exp = builder.build();
 
     final String dir = SettingsManager.getSettingsDirectory();
     // System.out.println(dir);
     final File tmp = createTempDirectory(false);
     try {
       SettingsManager.setSettingsDirectory(tmp.getPath());
-      o = SettingsManager
+      Calibration obs = SettingsManager
           .readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
-      Assertions.assertTrue(o == null, "Failed to read null");
-      o = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT);
-      Assertions.assertTrue(e.getDefaultInstanceForType().equals(o), "Failed to read default");
-      Assertions.assertTrue(SettingsManager.writeSettings(e), "Failed to write");
-      o = SettingsManager.readCalibration(0);
-      Assertions.assertTrue(e.equals(o), "Not equal");
-      SettingsManager.clearSettings(e.getClass());
-      o = SettingsManager
+      Assertions.assertTrue(obs == null, "Failed to read null");
+      obs = SettingsManager.readCalibration(SettingsManager.FLAG_SILENT);
+      Assertions.assertTrue(exp.getDefaultInstanceForType().equals(obs), "Failed to read default");
+      Assertions.assertTrue(SettingsManager.writeSettings(exp), "Failed to write");
+      obs = SettingsManager.readCalibration(0);
+      Assertions.assertTrue(exp.equals(obs), "Not equal");
+      SettingsManager.clearSettings(exp.getClass());
+      obs = SettingsManager
           .readCalibration(SettingsManager.FLAG_SILENT | SettingsManager.FLAG_NO_DEFAULT);
-      Assertions.assertTrue(o == null, "Failed to clear");
+      Assertions.assertTrue(obs == null, "Failed to clear");
     } finally {
       // Reset
       tmp.delete(); // Will work if the directory is empty
@@ -70,7 +69,7 @@ public class SettingsManagerTest {
     }
   }
 
-  public static File createTempDirectory(boolean create) throws IOException {
+  private static File createTempDirectory(boolean create) throws IOException {
     final File temp;
 
     temp = File.createTempFile(SettingsManagerTest.class.getSimpleName(), ".tmp");

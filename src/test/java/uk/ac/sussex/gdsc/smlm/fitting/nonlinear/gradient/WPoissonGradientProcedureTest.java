@@ -28,18 +28,21 @@ import java.util.logging.Logger;
 @SuppressWarnings({"javadoc"})
 public class WPoissonGradientProcedureTest implements Function<RandomSeed, double[]> {
   private static Logger logger;
-  private static ConcurrentHashMap<RandomSeed, double[]> ConcurrentHashMap;
+  private static ConcurrentHashMap<RandomSeed, double[]> dataCache;
 
   @BeforeAll
   public static void beforeAll() {
     logger = Logger.getLogger(WPoissonGradientProcedureTest.class.getName());
-    ConcurrentHashMap = new ConcurrentHashMap<>();
+    dataCache = new ConcurrentHashMap<>();
   }
 
+  /**
+   * Clear the data cache after all tests.
+   */
   @AfterAll
   public static void afterAll() {
-    ConcurrentHashMap.clear();
-    ConcurrentHashMap = null;
+    dataCache.clear();
+    dataCache = null;
     logger = null;
   }
 
@@ -69,7 +72,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
   @SeededTest
   public void gradientProcedureFactoryCreatesOptimisedProcedures(RandomSeed seed) {
-    final double[] var = ConcurrentHashMap.computeIfAbsent(seed, this);
+    final double[] var = dataCache.computeIfAbsent(seed, this);
     final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
     Assertions.assertEquals(
         WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
@@ -93,7 +96,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
   private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed,
       int nparams) {
-    final double[] var = ConcurrentHashMap.computeIfAbsent(seed, this);
+    final double[] var = dataCache.computeIfAbsent(seed, this);
 
     final int iter = 10;
 
@@ -187,7 +190,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     createFakeParams(r, nparams, iter, paramsList);
     final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
-    final double[] v = (precomputed) ? ConcurrentHashMap.computeIfAbsent(seed, this) : null;
+    final double[] v = (precomputed) ? dataCache.computeIfAbsent(seed, this) : null;
 
     final IntArrayFormatSupplier msg =
         getMessage(nparams, "[%d] Observations: Not same linear @ %d");
@@ -234,7 +237,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
     // Remove the timing of the function call by creating a dummy function
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
-    final double[] v = (precomputed) ? ConcurrentHashMap.computeIfAbsent(seed, this) : null;
+    final double[] v = (precomputed) ? dataCache.computeIfAbsent(seed, this) : null;
     final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("M [%d]", 1);
 
     for (int i = 0; i < paramsList.size(); i++) {
@@ -302,7 +305,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final double[] var = ConcurrentHashMap.computeIfAbsent(seed, this);
+    final double[] var = dataCache.computeIfAbsent(seed, this);
     createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function

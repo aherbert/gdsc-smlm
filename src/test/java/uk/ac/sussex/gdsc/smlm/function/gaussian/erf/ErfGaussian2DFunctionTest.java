@@ -34,6 +34,10 @@ import java.util.logging.Level;
 
 @SuppressWarnings({"javadoc"})
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
+
+  /**
+   * Instantiates a new erf gaussian 2 D function test.
+   */
   public ErfGaussian2DFunctionTest() {
     super();
     // The derivative check can be tighter with the ERF since it is a true integration
@@ -762,8 +766,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
                                       jacobian[i], dy_da, 1e-10,
                                       "du_da ExtendedGradient2Procedure");
-                                  for (int j = 0, k = 0; j < d2u_da2.length; j++, k +=
-                                      d2u_da2.length + 1) {
+                                  for (int j = 0, k = 0; j < d2u_da2.length;
+                                      j++, k += d2u_da2.length + 1) {
                                     d2u_da2[j] = d2y_dadb[k];
                                   }
                                   Assertions.assertArrayEquals(jacobian2[i], d2u_da2, 1e-10,

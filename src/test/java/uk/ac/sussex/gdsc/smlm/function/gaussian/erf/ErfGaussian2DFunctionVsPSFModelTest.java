@@ -81,8 +81,8 @@ public class ErfGaussian2DFunctionVsPSFModelTest {
     // when the model is not zero (and there is a reasonable amount of signal)
 
     for (int i = 0; i < e.length; i++) {
-      if (e[i] > 1e-2) // Only check where there is a reasonable amount of signal
-      {
+      // Only check where there is a reasonable amount of signal
+      if (e[i] > 1e-2) {
         final double error = DoubleEquality.relativeError(e[i], o[i]);
         // We expect a small error since the ErfGaussian2DFunction uses a
         // fast approximation of the Erf(..) (the error function). The PSFModel

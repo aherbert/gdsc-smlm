@@ -190,6 +190,7 @@ public class CoordinateStoreTest {
     }
   }
 
+  @Test
   public void cannotAddOutsideGrid1XLow() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
@@ -197,6 +198,7 @@ public class CoordinateStoreTest {
     });
   }
 
+  @Test
   public void cannotAddOutsideGridXHigh() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
@@ -204,6 +206,7 @@ public class CoordinateStoreTest {
     });
   }
 
+  @Test
   public void cannotAddOutsideGrid1YLow() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
@@ -211,6 +214,7 @@ public class CoordinateStoreTest {
     });
   }
 
+  @Test
   public void cannotAddOutsideGridYHigh() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);

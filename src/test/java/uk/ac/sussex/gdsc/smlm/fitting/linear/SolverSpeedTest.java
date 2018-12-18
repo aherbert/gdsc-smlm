@@ -33,18 +33,21 @@ import java.util.logging.Logger;
 @SuppressWarnings({"javadoc"})
 public class SolverSpeedTest implements Function<RandomSeed, Object> {
   private static Logger logger;
-  private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
+  private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
   @BeforeAll
   public static void beforeAll() {
     logger = Logger.getLogger(SolverSpeedTest.class.getName());
-    ConcurrentHashMap = new ConcurrentHashMap<>();
+    dataCache = new ConcurrentHashMap<>();
   }
 
+  /**
+   * Clear the data cache after all tests.
+   */
   @AfterAll
   public static void afterAll() {
-    ConcurrentHashMap.clear();
-    ConcurrentHashMap = null;
+    dataCache.clear();
+    dataCache = null;
     logger = null;
   }
 
@@ -60,7 +63,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
 
   private SolverSpeedTestData ensureData(RandomSeed seed, int size) {
     final SolverSpeedTestData data =
-        (SolverSpeedTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+        (SolverSpeedTestData) dataCache.computeIfAbsent(seed, this);
     final ArrayList<float[][]> Adata = data.Adata;
     final ArrayList<float[]> Bdata = data.Bdata;
     if (Adata.size() < size) {

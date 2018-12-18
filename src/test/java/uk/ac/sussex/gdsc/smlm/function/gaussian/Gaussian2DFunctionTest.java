@@ -70,6 +70,9 @@ public abstract class Gaussian2DFunctionTest {
   protected int flags;
   protected AstigmatismZModel zModel = null;
 
+  /**
+   * Instantiates a new gaussian 2 D function test.
+   */
   public Gaussian2DFunctionTest() {
     init();
 

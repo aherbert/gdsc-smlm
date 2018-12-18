@@ -748,9 +748,7 @@ public class FastLogTest {
     final TimingService ts = new TimingService(5);
     ts.execute(new FloatTimingTask(new TestLog(new MathLog()), 0, x));
     ts.execute(new FloatTimingTask(new TestLog(new FastMathLog()), 0, x));
-    for (final int q : new int[] {11})
-    // for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
-    {
+    for (final int q : new int[] {11}) {
       final int n = 23 - q;
       final ICSIFastLog f = ICSIFastLog.create(n, DataType.FLOAT);
       ts.execute(new FloatTimingTask(new TestLog(f), q, x));
@@ -837,9 +835,7 @@ public class FastLogTest {
     // TurboLog2 tf3 = new TurboLog2(8);
     // ts.execute(new DoubleTimingTask(new TestLog(tf3), 15, x));
     // ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
-    for (final int q : new int[] {11})
-    // for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
-    {
+    for (final int q : new int[] {11}) {
       final int n = 23 - q;
       final ICSIFastLog f = ICSIFastLog.create(n, DataType.DOUBLE);
       ts.execute(new DoubleTimingTask(new TestLog(f), q, x));
@@ -916,9 +912,7 @@ public class FastLogTest {
     final TimingService ts = new TimingService(5);
     ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
     ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
-    for (final int q : new int[] {11})
-    // for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
-    {
+    for (final int q : new int[] {11}) {
       final int n = 23 - q;
       final ICSIFastLog ff = ICSIFastLog.create(n, DataType.FLOAT);
       final ICSIFastLog fd = ICSIFastLog.create(n, DataType.DOUBLE);

@@ -90,8 +90,9 @@ public class GaussianPSFModelTest {
             if (e[ii] == 0) {
               // Same insertion into the blank data region
               Assertions.assertTrue(o[ii] == 0);
-            } else if (e[ii] > 1e-8) // Only check where there is a reasonable amount of signal
-            {
+
+              // Only check where there is a reasonable amount of signal
+            } else if (e[ii] > 1e-8) {
               final double error = DoubleEquality.relativeError(e[ii], o[ii]);
               // logger.fine(FunctionUtils.getSupplier("[%d,%d] %g == %g %g", ii/maxx, ii%maxx,
               // e[ii], o[ii], error);

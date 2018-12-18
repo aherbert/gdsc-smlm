@@ -138,6 +138,9 @@ public abstract class CubicSplineFunctionTest {
     splineDataFloat = new CubicSplineData(function);
   }
 
+  /**
+   * Instantiates a new cubic spline function test.
+   */
   public CubicSplineFunctionTest() {
     init();
 

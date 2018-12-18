@@ -51,14 +51,14 @@ public class PulseActivationAnalysisTest {
     }
   }
 
-  private static void canLinearlyUnmix2Channels(UniformRandomProvider r, int n, int m) {
+  private static void canLinearlyUnmix2Channels(UniformRandomProvider rng, int n, int m) {
     try {
       for (int loop = 0; loop < 10; loop++) {
         // A rough mix of each channel
-        final double[] d = create(2, r, 1, 100);
+        final double[] d = createData(2, rng, 1, 100);
 
         // Crosstalk should be below 50%
-        final double[] c = create(2, r, 0, 0.5);
+        final double[] c = createData(2, rng, 0, 0.5);
 
         // Enumerate
         final Iterator<int[]> it = CombinatoricsUtils.combinationsIterator(2, n);
@@ -85,14 +85,6 @@ public class PulseActivationAnalysisTest {
       TestUtils.wrapAssertionFailedError(ex,
           () -> String.format("channels=%d, crosstalk=%d", n, m));
     }
-  }
-
-  private static double[] create(int size, UniformRandomProvider r, double min, double range) {
-    final double[] d = new double[size];
-    for (int i = 0; i < size; i++) {
-      d[i] = min + r.nextDouble() * range;
-    }
-    return d;
   }
 
   private static void canLinearlyUnmix2Channels(double d1, double d2, double C21, double C12) {
@@ -128,14 +120,14 @@ public class PulseActivationAnalysisTest {
     }
   }
 
-  private void canLinearlyUnmix3Channels(UniformRandomProvider r, int n, int m) {
+  private static void canLinearlyUnmix3Channels(UniformRandomProvider rng, int n, int m) {
     try {
       for (int loop = 0; loop < 10; loop++) {
         // A rough mix of each channel
-        final double[] d = create(6, r, 100, 100);
+        final double[] d = createData(6, rng, 100, 100);
 
         // Total crosstalk per channel should be below 50%
-        final double[] c = create(6, r, 0, 0.25);
+        final double[] c = createData(6, rng, 0, 0.25);
 
         // Enumerate
         final Iterator<int[]> it = CombinatoricsUtils.combinationsIterator(3, n);
@@ -165,8 +157,8 @@ public class PulseActivationAnalysisTest {
     }
   }
 
-  public void canLinearlyUnmix3Channels(double d1, double d2, double d3, double C21, double C31,
-      double C12, double C32, double C13, double C23) {
+  private static void canLinearlyUnmix3Channels(double d1, double d2, double d3, double C21,
+      double C31, double C12, double C32, double C13, double C23) {
     // Solving:
     // D1 = d1 + C21 * d2 + C31 * d3
     // D2 = d2 + C12 * d1 + C32 * d3
@@ -181,5 +173,14 @@ public class PulseActivationAnalysisTest {
     Assertions.assertEquals(d1, d[0], delta(d1), "d1");
     Assertions.assertEquals(d2, d[1], delta(d2), "d2");
     Assertions.assertEquals(d3, d[2], delta(d3), "d3");
+  }
+
+  private static double[] createData(int size, UniformRandomProvider rng, double min,
+      double range) {
+    final double[] data = new double[size];
+    for (int i = 0; i < size; i++) {
+      data[i] = min + rng.nextDouble() * range;
+    }
+    return data;
   }
 }

@@ -28,18 +28,21 @@ import java.util.logging.Logger;
 @SuppressWarnings({"javadoc"})
 public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object> {
   private static Logger logger;
-  private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
+  private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
   @BeforeAll
   public static void beforeAll() {
     logger = Logger.getLogger(Gaussian2DFunctionSpeedTest.class.getName());
-    ConcurrentHashMap = new ConcurrentHashMap<>();
+    dataCache = new ConcurrentHashMap<>();
   }
 
+  /**
+   * Clear the data cache after all tests.
+   */
   @AfterAll
   public static void afterAll() {
-    ConcurrentHashMap.clear();
-    ConcurrentHashMap = null;
+    dataCache.clear();
+    dataCache = null;
     logger = null;
   }
 
@@ -86,7 +89,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
 
   private Gaussian2DFunctionSpeedTestData ensureDataSingle(RandomSeed seed, int size) {
     final Gaussian2DFunctionSpeedTestData data =
-        (Gaussian2DFunctionSpeedTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+        (Gaussian2DFunctionSpeedTestData) dataCache.computeIfAbsent(seed, this);
     if (data.paramsListSinglePeak.size() < size) {
       synchronized (data.paramsListSinglePeak) {
         if (data.paramsListSinglePeak.size() < size) {
@@ -99,7 +102,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
 
   private Gaussian2DFunctionSpeedTestData ensureDataMulti(RandomSeed seed, int size) {
     final Gaussian2DFunctionSpeedTestData data =
-        (Gaussian2DFunctionSpeedTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+        (Gaussian2DFunctionSpeedTestData) dataCache.computeIfAbsent(seed, this);
     if (data.paramsListMultiPeak.size() < size) {
       synchronized (data.paramsListMultiPeak) {
         if (data.paramsListMultiPeak.size() < size) {

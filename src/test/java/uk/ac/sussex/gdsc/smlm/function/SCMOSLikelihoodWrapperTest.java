@@ -46,18 +46,21 @@ import java.util.logging.Logger;
 @SuppressWarnings({"javadoc"})
 public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> {
   private static Logger logger;
-  private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
+  private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
   @BeforeAll
   public static void beforeAll() {
     logger = Logger.getLogger(SCMOSLikelihoodWrapperTest.class.getName());
-    ConcurrentHashMap = new ConcurrentHashMap<>();
+    dataCache = new ConcurrentHashMap<>();
   }
 
+  /**
+   * Clear the data cache after all tests.
+   */
   @AfterAll
   public static void afterAll() {
-    ConcurrentHashMap.clear();
-    ConcurrentHashMap = null;
+    dataCache.clear();
+    dataCache = null;
     logger = null;
   }
 
@@ -251,7 +254,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     int count = 0, total = 0;
 
     final SCMOSLikelihoodWrapperTestData testData =
-        (SCMOSLikelihoodWrapperTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+        (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
     final float[] var = testData.var;
     final float[] g = testData.g;
     final float[] o = testData.o;
@@ -459,7 +462,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     int count = 0, total = 0;
 
     final SCMOSLikelihoodWrapperTestData testData =
-        (SCMOSLikelihoodWrapperTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+        (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
     final float[] var = testData.var;
     final float[] g = testData.g;
     final float[] o = testData.o;
@@ -819,7 +822,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     nlf.initialise(a);
 
     final SCMOSLikelihoodWrapperTestData testData =
-        (SCMOSLikelihoodWrapperTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+        (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
     final float[] var = testData.var;
     final float[] g = testData.g;
     final float[] o = testData.o;

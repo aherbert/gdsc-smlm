@@ -169,9 +169,7 @@ public class SumFilterTest extends AbstractFilterTest {
   }
 
   private static void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
-      UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize)
-
-  {
+      UniformRandomProvider rg, SumFilter filter, int width, int height, int boxSize) {
     final float[] data1 = floatCreateData(rg, width, height);
     final float[] data2 = floatClone(data1);
 
