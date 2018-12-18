@@ -36,7 +36,7 @@ public class MemoryPeakResultsTest {
     final int parameters = PeakResult.STANDARD_PARAMETERS;
     final long size = MemoryUtils.measureSize(1000,
         () -> new PeakResult(0, 0, 0, 0, 0, 0, 0, new float[parameters], null));
-    Assertions.assertEquals(size, MemoryPeakResults.PEAK_RESULT_SIZE);
+    Assertions.assertEquals(size, MemoryPeakResults.PEAK_RESULT_SIZE, size * 0.1);
   }
 
   @Test
@@ -45,6 +45,6 @@ public class MemoryPeakResultsTest {
     final long size = MemoryUtils.measureSize(1000,
         () -> new PeakResult(0, 0, 0, 0, 0, 0, 0, new float[parameters], new float[parameters]));
     System.out.println(size);
-    Assertions.assertEquals(size, MemoryPeakResults.PEAK_RESULT_SIZE_WITH_DEVIATIONS);
+    Assertions.assertEquals(size, MemoryPeakResults.PEAK_RESULT_SIZE_WITH_DEVIATIONS, size * 0.1);
   }
 }
