@@ -160,7 +160,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         }
         sb.append(fields[i]);
       }
-      sb.append("%n");
+      sb.append(System.lineSeparator());
     }
 
     addComment(sb, getHeaderEnd());
@@ -186,7 +186,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 
   private static void addComment(StringBuilder sb, String comment) {
     if (comment != null) {
-      sb.append("#").append(comment).append("%n");
+      sb.append("#").append(comment).append(System.lineSeparator());
     }
   }
 
