@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 import java.util.Arrays;
 
 /**
- * Utility functions for {@link MultiFilterComponentSet}. 
+ * Utility functions for {@link MultiFilterComponentSet}.
  */
 public final class MultiFilterComponentSetUtils {
   /**
