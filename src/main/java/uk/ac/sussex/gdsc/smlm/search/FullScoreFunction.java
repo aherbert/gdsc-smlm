@@ -36,7 +36,7 @@ public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunctio
    * @param points the points
    * @return the scores
    */
-  public SearchResult<T>[] score(double[][] points);
+  SearchResult<T>[] score(double[][] points);
 
   /**
    * Cut the list of scores down to the given size by selecting only the best results. The input
@@ -47,5 +47,5 @@ public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunctio
    * @param size The size
    * @return The reduced list
    */
-  public SearchResult<T>[] cut(SearchResult<T>[] scores, int size);
+  SearchResult<T>[] cut(SearchResult<T>[] scores, int size);
 }

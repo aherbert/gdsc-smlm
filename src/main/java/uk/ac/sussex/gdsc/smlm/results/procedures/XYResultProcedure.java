@@ -34,5 +34,5 @@ public interface XYResultProcedure {
    * @param x the x
    * @param y the y
    */
-  public void executeXY(float x, float y);
+  void executeXY(float x, float y);
 }

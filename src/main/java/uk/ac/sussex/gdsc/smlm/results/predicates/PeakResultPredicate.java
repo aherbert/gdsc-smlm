@@ -36,5 +36,5 @@ public interface PeakResultPredicate {
    * @param peakResult the input argument
    * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
    */
-  public boolean test(PeakResult peakResult);
+  boolean test(PeakResult peakResult);
 }

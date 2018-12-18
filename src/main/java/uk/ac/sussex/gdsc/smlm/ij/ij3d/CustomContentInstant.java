@@ -668,6 +668,8 @@ public class CustomContentInstant extends ContentInstant {
       case CUSTOM:
         mesh = ((CustomMeshNode) contentNode).getMesh();
         break;
+      default:
+        break;
     }
     if (mesh == null) {
       return;

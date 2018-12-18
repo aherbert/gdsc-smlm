@@ -44,6 +44,14 @@ import java.util.List;
  * used by default but this can be changed by setting a custom uniform distribution.
  */
 public class MaskDistribution3D implements SpatialDistribution {
+  // Used for a particle search
+  private static final int[] DIR_X_OFFSET =
+      {0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 0, 1, 1, 1, 0, -1, -1, -1, 0};
+  private static final int[] DIR_Y_OFFSET =
+      {-1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, 0, -1, -1, 0, 1, 1, 1, 0, -1, 0};
+  private static final int[] DIR_Z_OFFSET =
+      {0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
   private final RandomGenerator randomGenerator;
   private UniformDistribution uniformDistribution;
   private final int[] mask;
@@ -51,7 +59,7 @@ public class MaskDistribution3D implements SpatialDistribution {
   private final int maxx;
   private final int maxy;
   private final int maxz;
-  private final int maxx_maxy;
+  private final int maxxMaxy;
   private final double halfWidth;
   private final double halfHeight;
   private final double minDepth;
@@ -62,6 +70,12 @@ public class MaskDistribution3D implements SpatialDistribution {
 
   private final double sliceDepth;
   private MaskDistribution projection;
+
+  // Used for a particle search
+  private int xlimit = -1;
+  private int ylimit;
+  private int zlimit;
+  private int[] offset;
 
   /**
    * Create a distribution from the stack of mask images (packed in YX order).
@@ -135,17 +149,17 @@ public class MaskDistribution3D implements SpatialDistribution {
     depth = sliceDepth * maxz;
     minDepth = depth * -0.5;
 
-    maxx_maxy = maxx * maxy;
-    mask = new int[maxz * maxx_maxy];
+    maxxMaxy = maxx * maxy;
+    mask = new int[maxz * maxxMaxy];
     indices = new int[mask.length];
 
     int count = 0;
     int index = 0;
     for (final int[] mask : masks) {
-      if (mask.length < maxx_maxy) {
+      if (mask.length < maxxMaxy) {
         throw new IllegalArgumentException("Masks must be the same size");
       }
-      for (int i = 0; i < maxx_maxy; i++) {
+      for (int i = 0; i < maxxMaxy; i++) {
         this.mask[index] = mask[i];
         if (mask[i] != 0) {
           indices[count++] = index;
@@ -195,6 +209,18 @@ public class MaskDistribution3D implements SpatialDistribution {
     return getIndex(x, y, z);
   }
 
+  /**
+   * Return the single index associated with the x,y,z coordinates.
+   *
+   * @param x the x
+   * @param y the y
+   * @param z the z
+   * @return The index
+   */
+  private int getIndex(int x, int y, int z) {
+    return (maxxMaxy) * z + maxx * y + x;
+  }
+
   /** {@inheritDoc} */
   @Override
   public boolean isWithin(double[] xyz) {
@@ -221,9 +247,9 @@ public class MaskDistribution3D implements SpatialDistribution {
   private void createProjection() {
     // Create a projection of the masks
     if (projection == null) {
-      final int[] mask2 = new int[maxx_maxy];
+      final int[] mask2 = new int[maxxMaxy];
       for (int z = 0, index = 0; z < maxz; z++) {
-        for (int j = 0; j < maxx_maxy; j++) {
+        for (int j = 0; j < maxxMaxy; j++) {
           if (mask[index++] != 0) {
             mask2[j] = 1;
           }
@@ -247,18 +273,6 @@ public class MaskDistribution3D implements SpatialDistribution {
     createProjection();
     projection.initialise(xyz);
   }
-
-  // Used for a particle search
-  private final int[] DIR_X_OFFSET = new int[] {0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, -1,
-      -1, 0, 0, 1, 1, 1, 0, -1, -1, -1, 0};
-  private final int[] DIR_Y_OFFSET = new int[] {-1, -1, 0, 1, 1, 1, 0, -1, -1, -1, 0, 1, 1, 1, 0,
-      -1, 0, -1, -1, 0, 1, 1, 1, 0, -1, 0};
-  private final int[] DIR_Z_OFFSET = new int[] {0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1,
-      -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-  private int xlimit = -1;
-  private int ylimit;
-  private int zlimit;
-  private int[] offset;
 
   /**
    * Convert the mask to connected particles, each with a unique number. This allows the within
@@ -296,31 +310,8 @@ public class MaskDistribution3D implements SpatialDistribution {
       }
     }
 
-    //// Debug
-    // ImageStack stack = new ImageStack(maxx, maxy, maxz);
-    // for (int i=0, index=0; i<maxz; i++)
-    // {
-    // short[] pixels = new short[maxx_maxy];
-    // for (int j=0; j<maxx_maxy; j++)
-    // pixels[j] = (short) mask[index++];
-    // stack.setPixels(pixels, i+1);
-    // }
-    // Utils.display("objects", stack);
-
     // Free memory
     offset = null;
-  }
-
-  /**
-   * Return the single index associated with the x,y,z coordinates.
-   *
-   * @param x the x
-   * @param y the y
-   * @param z the z
-   * @return The index
-   */
-  private int getIndex(int x, int y, int z) {
-    return (maxx_maxy) * z + maxx * y + x;
   }
 
   /**
@@ -331,8 +322,8 @@ public class MaskDistribution3D implements SpatialDistribution {
    * @return The xyz array
    */
   private int[] getXyz(int index, int[] xyz) {
-    xyz[2] = index / (maxx_maxy);
-    final int mod = index % (maxx_maxy);
+    xyz[2] = index / (maxxMaxy);
+    final int mod = index % (maxxMaxy);
     xyz[1] = mod / maxx;
     xyz[0] = mod % maxx;
     return xyz;
@@ -450,8 +441,9 @@ public class MaskDistribution3D implements SpatialDistribution {
         return (z < zlimit && y > 0 && x > 0);
       case 25:
         return (z < zlimit);
+      default:
+        return false;
     }
-    return false;
   }
 
   /**
@@ -477,6 +469,8 @@ public class MaskDistribution3D implements SpatialDistribution {
   }
 
   /**
+   * Gets the number of non-zero pixels in the mask.
+   *
    * @return The number of non-zero pixels in the mask.
    */
   public int getSize() {
@@ -484,27 +478,26 @@ public class MaskDistribution3D implements SpatialDistribution {
   }
 
   /**
-   * @return The width of the mask in pixels.
+   * Gets the width of the mask in pixels.
+   *
+   * @return The width
    */
   public int getWidth() {
     return maxx;
   }
 
   /**
-   * @return The height of the mask in pixels.
+   * Gets the height of the mask in pixels.
+   *
+   * @return The height
    */
   public int getHeight() {
     return maxy;
   }
 
   /**
-   * @return The depth of the mask in pixels.
-   */
-  public int getDepth() {
-    return maxz;
-  }
-
-  /**
+   * Gets the X-scale.
+   *
    * @return The X-scale.
    */
   public double getScaleX() {
@@ -512,6 +505,8 @@ public class MaskDistribution3D implements SpatialDistribution {
   }
 
   /**
+   * Gets the Y-scale.
+   *
    * @return The Y-scale.
    */
   public double getScaleY() {
@@ -519,6 +514,8 @@ public class MaskDistribution3D implements SpatialDistribution {
   }
 
   /**
+   * Gets the mask.
+   *
    * @return The mask (packed in ZYX order).
    */
   protected int[] getMask() {

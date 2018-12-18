@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
@@ -109,7 +111,7 @@ public class MemoryImageSource extends ImageSource {
 
   /** {@inheritDoc} */
   @Override
-  protected float[] nextRawFrame() {
+  protected @Nullable float[] nextRawFrame() {
     if (counter < data.length) {
       return getRawFrame(++counter);
     }
@@ -118,7 +120,7 @@ public class MemoryImageSource extends ImageSource {
 
   /** {@inheritDoc} */
   @Override
-  protected float[] getRawFrame(int frame) {
+  protected @Nullable float[] getRawFrame(int frame) {
     if (frame > 0 && frame <= data.length) {
       return data[frame - 1];
     }
@@ -132,6 +134,8 @@ public class MemoryImageSource extends ImageSource {
   }
 
   /**
+   * Checks if freeing the memory on calling {@link #close()}.
+   *
    * @return Set to true if freeing the memory on calling {@link #close()}
    */
   public boolean isFreeMemoryOnClose() {

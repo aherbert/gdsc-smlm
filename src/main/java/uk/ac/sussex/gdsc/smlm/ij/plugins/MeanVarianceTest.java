@@ -164,19 +164,20 @@ public class MeanVarianceTest implements PlugIn {
         case 32:
           // float images cannot be saturated
           return Float.NaN;
+        default:
+          throw new IllegalArgumentException(
+              "Cannot determine saturation level for image: " + imp.getTitle());
       }
-      throw new IllegalArgumentException(
-          "Cannot determine saturation level for image: " + imp.getTitle());
     }
 
-    private void checkSaturation(int i, float[] data, float saturated) {
+    private void checkSaturation(int slice, float[] data, float saturated) {
       if (saturated == Float.NaN) {
         return;
       }
       for (final float f : data) {
         if (f >= saturated) {
           throw new IllegalArgumentException(
-              "Image " + title + " has saturated pixels in slice: " + i);
+              "Image " + title + " has saturated pixels in slice: " + slice);
         }
       }
     }
@@ -539,14 +540,14 @@ public class MeanVarianceTest implements PlugIn {
     final double nImages = series.getNumberOfImages();
     final List<ImageSample> images = new ArrayList<>((int) nImages);
     ImagePlus imp = series.nextImage();
-    int c = 0;
+    int count = 0;
     while (imp != null) {
       try {
-        images.add(new ImageSample(imp, c / nImages, (c + 1) / nImages));
+        images.add(new ImageSample(imp, count / nImages, (count + 1) / nImages));
       } catch (final IllegalArgumentException ex) {
         ImageJUtils.log(ex.getMessage());
       }
-      c++;
+      count++;
       imp.close();
       imp = series.nextImage();
     }

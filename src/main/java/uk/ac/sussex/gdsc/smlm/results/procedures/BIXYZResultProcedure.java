@@ -37,5 +37,5 @@ public interface BIXYZResultProcedure {
    * @param y the y
    * @param z the z
    */
-  public void executeBIXYZ(float background, float intensity, float x, float y, float z);
+  void executeBIXYZ(float background, float intensity, float x, float y, float z);
 }

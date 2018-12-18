@@ -25,31 +25,29 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Specifies a the result of fitting a frame using different fitting methods.
+ * Specifies the result of fitting a frame using different fitting methods.
  *
  * <p>The multi-path results can be evaluated by the MultiPathFilter to determine which result from
  * the different paths should be accepted.
  *
  * <p>This class is used for benchmarking the fitting path options in the PeakFit algorithm.
  */
-public class MultiPathFitResults implements IMultiPathFitResults, Cloneable {
+public class MultiPathFitResults implements IMultiPathFitResults {
   /** The frame containing the results. */
-  public final int frame;
+  private final int frame;
 
-  /** The multi-path results. */
-  public final MultiPathFitResult[] multiPathFitResults;
-
-  /**
-   * The total number of candidates. This may be greater than the size of the
-   * {@link #multiPathFitResults} array if this is a subset of the results, i.e. has been
-   * prefiltered.
-   */
-  public final int totalCandidates;
+  /** The list of multi-path results. */
+  private final MultiPathFitResult[] multiPathFitResultList;
 
   /**
-   * The number of actual results in the frame. Used during filter scoring.
+   * The total number of candidates.
    */
-  public final int nActual;
+  private final int totalCandidates;
+
+  /**
+   * The number of actual results in the frame.
+   */
+  private final int numberOfActualResults;
 
   /**
    * Instantiates a new multi path fit results.
@@ -68,14 +66,45 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable {
    * @param frame the frame
    * @param multiPathFitResults the multi path fit results
    * @param totalCandidates the total candidates
-   * @param nActual the number of actual results in the frame
+   * @param numberOfActualResults the number of actual results in the frame
    */
   public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults,
-      int totalCandidates, int nActual) {
+      int totalCandidates, int numberOfActualResults) {
     this.frame = frame;
-    this.multiPathFitResults = multiPathFitResults;
+    this.multiPathFitResultList = multiPathFitResults;
     this.totalCandidates = totalCandidates;
-    this.nActual = nActual;
+    this.numberOfActualResults = numberOfActualResults;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected MultiPathFitResults(MultiPathFitResults source) {
+    frame = source.frame;
+    totalCandidates = source.totalCandidates;
+    numberOfActualResults = source.numberOfActualResults;
+
+    final MultiPathFitResult[] list = source.multiPathFitResultList;
+    if (list != null) {
+      multiPathFitResultList = new MultiPathFitResult[list.length];
+      for (int i = 0; i < list.length; i++) {
+        // Do a shallow copy. This matches the previous clone() functionality.
+        multiPathFitResultList[i] = list[i].copy(false);
+      }
+    } else {
+      multiPathFitResultList = null;
+    }
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public MultiPathFitResults copy() {
+    return new MultiPathFitResults(this);
   }
 
   /** {@inheritDoc} */
@@ -87,13 +116,13 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable {
   /** {@inheritDoc} */
   @Override
   public int getNumberOfResults() {
-    return multiPathFitResults.length;
+    return multiPathFitResultList.length;
   }
 
   /** {@inheritDoc} */
   @Override
   public MultiPathFitResult getResult(int index) {
-    return multiPathFitResults[index];
+    return multiPathFitResultList[index];
   }
 
   /** {@inheritDoc} */
@@ -108,13 +137,21 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable {
     return totalCandidates;
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public MultiPathFitResults clone() {
-    final MultiPathFitResult[] list = new MultiPathFitResult[multiPathFitResults.length];
-    for (int i = 0; i < list.length; i++) {
-      list[i] = multiPathFitResults[i].clone();
-    }
-    return new MultiPathFitResults(frame, list, totalCandidates, nActual);
+  /**
+   * Gets the multi path fit results.
+   *
+   * @return the multi path fit results
+   */
+  public MultiPathFitResult[] getMultiPathFitResults() {
+    return multiPathFitResultList;
+  }
+
+  /**
+   * Gets the number of actual results in the frame. Used during filter scoring.
+   *
+   * @return the number of actual results
+   */
+  public int getNumberOfActualResults() {
+    return numberOfActualResults;
   }
 }

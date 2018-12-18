@@ -32,8 +32,12 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Saves the fit results to file.
@@ -68,8 +72,8 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
       openOutput();
       write(createResultsHeader());
     } catch (final Exception ex) {
-      // TODO - Add better handling of errors
-      ex.printStackTrace();
+      Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Failed to create output results",
+          ex);
       closeOutput();
     }
   }
@@ -113,29 +117,29 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     final StringBuilder sb = new StringBuilder();
 
     addComment(sb, getHeaderTitle());
-    sb.append(String.format("#FileVersion %s\n", getVersion()));
+    sb.append(String.format("#FileVersion %s%n", getVersion()));
 
     Printer printer = null;
 
     // Add the standard details
     if (!TextUtils.isNullOrEmpty(getName())) {
-      sb.append(String.format("#Name %s\n", singleLine(getName())));
+      sb.append(String.format("#Name %s%n", singleLine(getName())));
     }
     if (getSource() != null) {
-      sb.append(String.format("#Source %s\n", singleLine(getSource().toXML())));
+      sb.append(String.format("#Source %s%n", singleLine(getSource().toXML())));
     }
     if (getBounds() != null) {
-      sb.append(String.format("#Bounds x%d y%d w%d h%d\n", getBounds().x, getBounds().y,
+      sb.append(String.format("#Bounds x%d y%d w%d h%d%n", getBounds().x, getBounds().y,
           getBounds().width, getBounds().height));
     }
     if (getCalibration() != null) {
       printer = addMessage(sb, printer, "Calibration", getCalibration());
     }
     if (!TextUtils.isNullOrEmpty(getConfiguration())) {
-      sb.append(String.format("#Configuration %s\n", singleLine(getConfiguration())));
+      sb.append(String.format("#Configuration %s%n", singleLine(getConfiguration())));
     }
     if (getPSF() != null) {
-      printer = addMessage(sb, printer, "PSF", getPSF());
+      addMessage(sb, printer, "PSF", getPSF());
     }
 
     // Add any extra comments
@@ -156,7 +160,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         }
         sb.append(fields[i]);
       }
-      sb.append('\n');
+      sb.append("%n");
     }
 
     addComment(sb, getHeaderEnd());
@@ -172,7 +176,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         // .includingDefaultValueFields()
         ;
       }
-      sb.append(String.format("#%s %s\n", name, printer.print(msg)));
+      sb.append(String.format("#%s %s%n", name, printer.print(msg)));
     } catch (final InvalidProtocolBufferException ex) {
       // This shouldn't happen so throw it
       throw new NotImplementedException("Unable to serialise the " + name + " settings", ex);
@@ -182,11 +186,13 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 
   private static void addComment(StringBuilder sb, String comment) {
     if (comment != null) {
-      sb.append("#").append(comment).append('\n');
+      sb.append("#").append(comment).append("%n");
     }
   }
 
   /**
+   * Gets the header title. This is the first line added to the header.
+   *
    * @return The first line added to the header.
    */
   protected String getHeaderTitle() {
@@ -194,6 +200,8 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
   }
 
   /**
+   * Get the last line added to the header (e.g. a header end tag).
+   *
    * @return The last line added to the header (e.g. a header end tag)
    */
   protected String getHeaderEnd() {
@@ -201,20 +209,26 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
   }
 
   /**
+   * Get a line containing the file format version.
+   *
    * @return A line containing the file format version.
    */
   protected abstract String getVersion();
 
   /**
-   * @return Any comment lines to add to the header after the standard output of source, name,
-   *         bounds, etc.
+   * Gets the header comments. This is any comment lines to add to the header after the standard
+   * output of source, name, bounds, etc.
+   *
+   * @return the header comments
    */
   protected String[] getHeaderComments() {
-    return null;
+    return ArrayUtils.EMPTY_STRING_ARRAY;
   }
 
   /**
-   * @return The names of the fields in each record. Will be the last comment of the header
+   * Gets the names of the fields in each record. Will be the last comment of the header.
+   *
+   * @return the field names
    */
   protected abstract String[] getFieldNames();
 
@@ -282,14 +296,18 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
   protected abstract void sort() throws IOException;
 
   /**
-   * @param sortAfterEnd True if the results should be sorted after the {@link #end()} method
+   * Set if the results should be sorted after the {@link #end()} method.
+   *
+   * @param sortAfterEnd true if the results should be sorted after the {@link #end()} method
    */
   public void setSortAfterEnd(boolean sortAfterEnd) {
     this.sortAfterEnd = sortAfterEnd;
   }
 
   /**
-   * @return True if the results should be sorted after the {@link #end()} method
+   * Check if the results should be sorted after the {@link #end()} method.
+   *
+   * @return true if the results should be sorted after the {@link #end()} method
    */
   public boolean isSortAfterEnd() {
     return sortAfterEnd;
@@ -302,6 +320,8 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
   }
 
   /**
+   * Check if the records are stored as binary data.
+   *
    * @return true if the records are stored as binary data.
    */
   public boolean isBinary() {

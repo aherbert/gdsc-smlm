@@ -59,6 +59,8 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
   }
 
   /**
+   * Get the number of outputs contained in the list.
+   *
    * @return The number of outputs contained in the list.
    */
   public int numberOfOutputs() {
@@ -76,6 +78,8 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
   }
 
   /**
+   * Convert the list of outputs to an array.
+   *
    * @return The outputs.
    */
   public PeakResults[] toArray() {

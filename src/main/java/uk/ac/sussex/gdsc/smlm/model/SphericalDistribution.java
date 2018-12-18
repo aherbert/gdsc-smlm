@@ -125,16 +125,20 @@ public class SphericalDistribution implements SpatialDistribution {
   }
 
   /**
-   * @return If true then sample from the distribution using the rejection method. The alternative
-   *         is a transformation method.
+   * Checks if is using the rejection method. If true then sample from the distribution using the
+   * rejection method. The alternative is a transformation method.
+   *
+   * @return true, if is use rejection method
    */
   public boolean isUseRejectionMethod() {
     return useRejectionMethod;
   }
 
   /**
-   * @param useRejectionMethod If true then sample from the distribution using the rejection method.
-   *        The alternative is a transformation method.
+   * Sets whether to use the rejection method. If true then sample from the distribution using the
+   * rejection method. The alternative is a transformation method.
+   *
+   * @param useRejectionMethod the new use rejection method
    */
   public void setUseRejectionMethod(boolean useRejectionMethod) {
     this.useRejectionMethod = useRejectionMethod;

@@ -411,7 +411,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     // Use the fit configuration to generate a Gaussian function to test what is being evaluated
     final Gaussian2DFunction gf = config.getFitConfiguration().createGaussianFunction(1, 1, 1);
     createResultsWindow();
-    int iteration = 0;
     ignore[ANGLE] = !gf.evaluatesAngle();
     ignore[X] = !gf.evaluatesSD0();
     ignore[Y] = !gf.evaluatesSD1();
@@ -423,18 +422,19 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     final boolean[] identical = new boolean[4];
     final double[] p = new double[] {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 
-    addToResultTable(iteration++, 0, params, params_dev, p);
+    addToResultTable(0, 0, params, params_dev, p);
 
     if (!calculateStatistics(fitter, params, params_dev)) {
       return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
     }
 
-    if (!addToResultTable(iteration++, size(), params, params_dev, p)) {
+    if (!addToResultTable(1, size(), params, params_dev, p)) {
       return BAD_ESTIMATE;
     }
 
     boolean tryAgain = false;
 
+    int iteration = 2;
     do {
       if (!calculateStatistics(fitter, params, params_dev)) {
         return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;

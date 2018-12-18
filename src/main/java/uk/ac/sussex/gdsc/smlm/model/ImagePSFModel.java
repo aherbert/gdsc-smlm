@@ -99,7 +99,7 @@ public class ImagePSFModel extends PSFModel {
   }
 
   /**
-   * Private constructor used in the {@link #copy()} method
+   * Private constructor used in the {@link #copy()} method.
    */
   private ImagePSFModel() {
     super();
@@ -1035,6 +1035,8 @@ public class ImagePSFModel extends PSFModel {
   }
 
   /**
+   * Gets the half-width at half-maximum (HWHM) in dimension 0 for the last drawn image.
+   *
    * @return The half-width at half-maximum (HWHM) in dimension 0 for the last drawn image.
    */
   public double getHWHM0() {
@@ -1046,6 +1048,8 @@ public class ImagePSFModel extends PSFModel {
   }
 
   /**
+   * Gets the half-width at half-maximum (HWHM) in dimension 1 for the last drawn image.
+   *
    * @return The half-width at half-maximum (HWHM) in dimension 1 for the last drawn image.
    */
   public double getHWHM1() {
@@ -1057,6 +1061,8 @@ public class ImagePSFModel extends PSFModel {
   }
 
   /**
+   * Gets the HWHM table for dimension 0 for all the slices.
+   *
    * @return The HWHM table for dimension 0 for all the slices.
    */
   public double[] getAllHWHM0() {
@@ -1065,6 +1071,8 @@ public class ImagePSFModel extends PSFModel {
   }
 
   /**
+   * Gets the HWHM table for dimension 1 for all the slices.
+   *
    * @return The HWHM table for dimension 1 for all the slices.
    */
   public double[] getAllHWHM1() {
@@ -1090,7 +1098,7 @@ public class ImagePSFModel extends PSFModel {
     final double integral = Erf.erf(Gaussian2DFunction.SD_TO_HWHM_FACTOR / Math.sqrt(2));
 
     if (integral < 0 || integral > 1) {
-      throw new RuntimeException("Target integral for HWHM calculation is not valid");
+      throw new IllegalArgumentException("Target integral for HWHM calculation is not valid");
     }
 
     // This is a simple version which deals with X & Y the same.
@@ -1117,46 +1125,41 @@ public class ImagePSFModel extends PSFModel {
       // Compute the sum around the centre until we reach half
       final double[] sumPsf = sumImage[slice];
 
-      int lowerU;
-      int upperU;
-      int lowerV;
-      int upperV;
-      double s;
-      double lastS;
-      double fraction;
-
       // x0 direction
-      lowerU = cx;
-      upperU = cx + 1;
-      lowerV = 0;
-      upperV = psfWidth - 1;
-      lastS = s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
-      while (s < target) {
-        lastS = s;
+      int lowerU = cx;
+      int upperU = cx + 1;
+      int lowerV = 0;
+      int upperV = psfWidth - 1;
+      double lastSum = 0;
+      double sum = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+      while (sum < target) {
+        lastSum = sum;
         lowerU--;
         upperU++;
-        s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+        sum = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
       }
 
-      // Interpolate to half-width
-      fraction = (target - s) / (lastS - s);
+      // Interpolate to half-width.
+      // Note sum is bigger than target and last sum.
+      double fraction = (target - sum) / (lastSum - sum);
       hwhm0[slice] = unitsPerPixel * ((upperU - lowerU) / 2.0 - fraction);
 
-      // x0 direction
+      // x1 direction
       lowerU = 0;
       upperU = psfWidth - 1;
       lowerV = cy;
       upperV = cy + 1;
-      lastS = s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
-      while (s < target) {
-        lastS = s;
+      lastSum = 0;
+      sum = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+      while (sum < target) {
+        lastSum = sum;
         lowerV--;
         upperV++;
-        s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+        sum = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
       }
 
       // Interpolate
-      fraction = (target - s) / (lastS - s);
+      fraction = (target - sum) / (lastSum - sum);
       hwhm1[slice] = unitsPerPixel * ((upperV - lowerV) / 2.0 - fraction);
     }
   }

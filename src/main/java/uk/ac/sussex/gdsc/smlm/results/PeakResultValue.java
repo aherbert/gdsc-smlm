@@ -34,5 +34,5 @@ public interface PeakResultValue {
    * @param result the result
    * @return the value
    */
-  public float getValue(PeakResult result);
+  float getValue(PeakResult result);
 }

@@ -94,7 +94,6 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
 
         int minU = x - radius - 1;
         final int maxU = FastMath.min(x + radius, maxx - 1);
-        int minV = y - radius - 1;
         final int maxV = FastMath.min(y + radius, maxy - 1);
 
         // Compute sum from rolling sum using:
@@ -121,6 +120,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
           sum -= s[index];
           sumSquares -= ss[index];
         }
+        int minV = y - radius - 1;
         if (minV >= 0) {
           // - s(u+N-1,v-1)
           index = minV * maxx + maxU;

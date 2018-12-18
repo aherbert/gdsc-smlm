@@ -37,5 +37,5 @@ public interface XYRResultProcedure {
    * @param y the y
    * @param result the result
    */
-  public void executeXYR(float x, float y, PeakResult result);
+  void executeXYR(float x, float y, PeakResult result);
 }

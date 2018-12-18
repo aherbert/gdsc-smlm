@@ -90,7 +90,7 @@ public class MultiDialog extends Dialog
      *
      * @return the size
      */
-    public int size();
+    int size();
 
     /**
      * Gets the formatted name of the result for display in the dialog.
@@ -98,7 +98,7 @@ public class MultiDialog extends Dialog
      * @param index the result index
      * @return the formatted name
      */
-    public String getFormattedName(int index);
+    String getFormattedName(int index);
 
     /**
      * Removes the formatting from the name. The plain name will be in the list returned by
@@ -107,7 +107,7 @@ public class MultiDialog extends Dialog
      * @param formattedName the formatted name
      * @return the plain name string
      */
-    public String removeFormatting(String formattedName);
+    String removeFormatting(String formattedName);
   }
 
   /**
@@ -133,7 +133,7 @@ public class MultiDialog extends Dialog
      * @param results the results
      * @return true, if successful
      */
-    public boolean accept(MemoryPeakResults results);
+    boolean accept(MemoryPeakResults results);
   }
 
   private static class NullMemoryResultsFilter implements MemoryResultsFilter {

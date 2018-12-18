@@ -139,7 +139,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   MultiFilterComponentSet components_Width_NoShift;
   /**
    * The components for width and no shift copied into a larger array so that the shift component
-   * can be set at position 0
+   * can be set at position 0.
    */
   @XStreamOmitField
   MultiFilterComponentSet components_Shift0;
@@ -300,17 +300,17 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       final MultiFilterComponent[] components4 =
           MultiFilter.remove(components2, components2.length, shiftComponentClass);
 
-      components_Width_Shift = MultiFilterComponentSetFactory.create(components1, s1);
+      components_Width_Shift = MultiFilterComponentSetUtils.create(components1, s1);
       components_NoWidth_Shift =
-          MultiFilterComponentSetFactory.create(components2, components2.length);
+          MultiFilterComponentSetUtils.create(components2, components2.length);
       components_Width_NoShift =
-          MultiFilterComponentSetFactory.create(components3, components3.length);
+          MultiFilterComponentSetUtils.create(components3, components3.length);
       components_NoWidth_NoShift =
-          MultiFilterComponentSetFactory.create(components4, components4.length);
+          MultiFilterComponentSetUtils.create(components4, components4.length);
 
       final MultiFilterComponent[] data = new MultiFilterComponent[components3.length + 1];
       System.arraycopy(components3, 0, data, 1, components3.length);
-      components_Shift0 = MultiFilterComponentSetFactory.create(data, data.length);
+      components_Shift0 = MultiFilterComponentSetUtils.create(data, data.length);
     }
 
     if (widthEnabled) {

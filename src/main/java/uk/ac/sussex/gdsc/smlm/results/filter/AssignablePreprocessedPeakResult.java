@@ -35,7 +35,7 @@ public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
    *
    * @param assignments The assignments
    */
-  public void setAssignments(ResultAssignment[] assignments);
+  void setAssignments(ResultAssignment[] assignments);
 
   /**
    * Sets the ignore flag. If true then the result should be ignored from the total counts when
@@ -43,5 +43,5 @@ public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
    *
    * @param ignore the new ignore flag
    */
-  public void setIgnore(boolean ignore);
+  void setIgnore(boolean ignore);
 }

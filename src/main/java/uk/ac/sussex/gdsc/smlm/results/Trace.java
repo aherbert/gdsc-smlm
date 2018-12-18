@@ -30,7 +30,7 @@ import gnu.trove.list.linked.TIntLinkedList;
  * Define a cluster of localisations from different frames that represent a single molecule trace.
  */
 public class Trace extends Cluster {
-  private int nBlinks = -1;
+  private int blinks = -1;
   private int[] onTimes;
   private int[] offTimes;
 
@@ -53,18 +53,18 @@ public class Trace extends Cluster {
   @Override
   public void add(PeakResult result) {
     super.add(result);
-    nBlinks = -1; // Invalidate the analysis
+    blinks = -1; // Invalidate the analysis
   }
 
   private void analyse() {
-    if (nBlinks == -1) {
+    if (blinks == -1) {
       if (isEmpty()) {
-        nBlinks = 0;
+        blinks = 0;
         onTimes = offTimes = null;
         return;
       }
       if (results.size() == 1) {
-        nBlinks = 1;
+        blinks = 1;
         onTimes = new int[] {1};
         offTimes = null;
         return;
@@ -75,7 +75,7 @@ public class Trace extends Cluster {
       final TIntLinkedList on = new TIntLinkedList();
       final TIntLinkedList off = new TIntLinkedList();
 
-      nBlinks = 1;
+      blinks = 1;
       int t1 = results.get(0).getFrame();
       int onStart = t1;
       for (int i = 0; i < results.size() - 1; i++) {
@@ -84,7 +84,7 @@ public class Trace extends Cluster {
         if (diff > 1) {
           off.add(diff - 1);
           on.add(t1 - onStart + 1);
-          nBlinks++;
+          blinks++;
           onStart = t2;
         }
         t1 = t2;
@@ -97,14 +97,18 @@ public class Trace extends Cluster {
   }
 
   /**
+   * Gets the number of times the molecule blinked.
+   *
    * @return The number of times the molecule blinked.
    */
-  public int getNBlinks() {
+  public int getBlinks() {
     analyse();
-    return nBlinks;
+    return blinks;
   }
 
   /**
+   * Gets the average on time for the molecule.
+   *
    * @return The average on time for the molecule.
    */
   public double getOnTime() {
@@ -113,6 +117,8 @@ public class Trace extends Cluster {
   }
 
   /**
+   * Gets the average off time for the molecule.
+   *
    * @return The average off time for the molecule.
    */
   public double getOffTime() {
@@ -132,6 +138,8 @@ public class Trace extends Cluster {
   }
 
   /**
+   * Gets the on times.
+   *
    * @return the on-times.
    */
   public int[] getOnTimes() {
@@ -140,6 +148,8 @@ public class Trace extends Cluster {
   }
 
   /**
+   * Gets the off times.
+   *
    * @return the off-times.
    */
   public int[] getOffTimes() {
@@ -150,6 +160,6 @@ public class Trace extends Cluster {
   @Override
   public void removeEnds() {
     super.removeEnds();
-    nBlinks = -1; // Invalidate the analysis
+    blinks = -1; // Invalidate the analysis
   }
 }

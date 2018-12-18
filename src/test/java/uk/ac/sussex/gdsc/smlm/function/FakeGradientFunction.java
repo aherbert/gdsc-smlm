@@ -32,29 +32,51 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 @SuppressWarnings({"javadoc"})
 public class FakeGradientFunction
     implements ExtendedGradient2Function, Gradient2Function, Gradient1Function, NonLinearFunction {
-  private final int maxx, n, nparams;
-  private final PseudoRandomSequence r;
-  private final double[] dy_da;
+  private final int maxx;
+  private final int size;
+  private final int nparams;
+  private final PseudoRandomSequence rng;
 
+  /**
+   * Instantiates a new fake gradient function.
+   *
+   * @param maxx the maxx
+   * @param nparams the nparams
+   */
   public FakeGradientFunction(int maxx, int nparams) {
     this(maxx, nparams, 1000, 30051977, 10.0);
   }
 
+  /**
+   * Instantiates a new fake gradient function.
+   *
+   * @param maxx the maxx
+   * @param nparams the nparams
+   * @param scale the scale
+   */
   public FakeGradientFunction(int maxx, int nparams, double scale) {
     this(maxx, nparams, 1000, 30051977, scale);
   }
 
+  /**
+   * Instantiates a new fake gradient function.
+   *
+   * @param maxx the maxx
+   * @param nparams the nparams
+   * @param randomSize the random size
+   * @param randomSeed the random seed
+   * @param scale the scale
+   */
   public FakeGradientFunction(int maxx, int nparams, int randomSize, int randomSeed, double scale) {
     this.maxx = maxx;
-    this.n = maxx * maxx;
+    this.size = maxx * maxx;
     this.nparams = nparams;
-    this.r = new PseudoRandomSequence(randomSize, RngUtils.create(randomSeed), scale);
-    this.dy_da = new double[nparams];
+    this.rng = new PseudoRandomSequence(randomSize, RngUtils.create(randomSeed), scale);
   }
 
   @Override
   public int size() {
-    return n;
+    return size;
   }
 
   @Override
@@ -64,7 +86,7 @@ public class FakeGradientFunction
       seed += Double.hashCode(a[i]);
     }
     // logger.fine(FunctionUtils.getSupplier("seed = %d", seed);
-    r.setSeed(seed);
+    rng.setSeed(seed);
   }
 
   @Override
@@ -102,86 +124,90 @@ public class FakeGradientFunction
     // Simulate a 2D forEach
     for (int y = 0; y < maxx; y++) {
       for (int x = 0; x < maxx; x++) {
-        procedure.execute(r.nextDouble());
+        procedure.execute(rng.nextDouble());
       }
     }
   }
 
   @Override
   public void forEach(Gradient1Procedure procedure) {
+    final double[] gradient = new double[nparams];
+
     // Simulate a 2D forEach
     for (int y = 0; y < maxx; y++) {
       for (int x = 0; x < maxx; x++) {
         for (int j = nparams; j-- > 0;) {
-          dy_da[j] = r.nextDouble() * x + y;
+          gradient[j] = rng.nextDouble() * x + y;
         }
         // System.out.println(Arrays.toString(dy_da));
-        procedure.execute(r.nextDouble(), dy_da);
+        procedure.execute(rng.nextDouble(), gradient);
       }
     }
   }
 
   @Override
   public void forEach(Gradient2Procedure procedure) {
-    final double[] d2y_da2 = new double[nparams];
+    final double[] gradient1 = new double[nparams];
+    final double[] gradient2 = new double[nparams];
 
     // Simulate a 2D forEach
     for (int y = 0; y < maxx; y++) {
       for (int x = 0; x < maxx; x++) {
         for (int j = nparams; j-- > 0;) {
-          dy_da[j] = r.nextDouble() * x + y;
-          d2y_da2[j] = r.nextDouble() * x + y;
+          gradient1[j] = rng.nextDouble() * x + y;
+          gradient2[j] = rng.nextDouble() * x + y;
         }
         // System.out.println(Arrays.toString(dy_da));
-        procedure.execute(r.nextDouble(), dy_da, d2y_da2);
+        procedure.execute(rng.nextDouble(), gradient1, gradient2);
       }
     }
   }
 
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
-    final double[] d2y_dadb = new double[nparams * nparams];
+    final double[] gradient1 = new double[nparams];
+    final double[] gradient2 = new double[nparams * nparams];
 
     // Simulate a 2D forEach
     for (int y = 0; y < maxx; y++) {
       for (int x = 0; x < maxx; x++) {
         for (int j = nparams; j-- > 0;) {
-          dy_da[j] = r.nextDouble() * x + y;
+          gradient1[j] = rng.nextDouble() * x + y;
         }
-        for (int j = d2y_dadb.length; j-- > 0;) {
-          d2y_dadb[j] = r.nextDouble() * x + y;
+        for (int j = gradient2.length; j-- > 0;) {
+          gradient2[j] = rng.nextDouble() * x + y;
         }
 
         // System.out.println(Arrays.toString(dy_da));
-        procedure.executeExtended(r.nextDouble(), dy_da, d2y_dadb);
+        procedure.executeExtended(rng.nextDouble(), gradient1, gradient2);
       }
     }
   }
 
   @Override
-  public double eval(int i, double[] dy_da) {
+  public double eval(int index, double[] dyda) {
     // Unpack the predictor to the 2D coordinates
-    final int y = i / maxx;
-    final int x = i % maxx;
+    final int y = index / maxx;
+    final int x = index % maxx;
     for (int j = nparams; j-- > 0;) {
-      dy_da[j] = r.nextDouble() * x + y;
+      dyda[j] = rng.nextDouble() * x + y;
     }
     // System.out.println(Arrays.toString(dy_da));
-    return r.nextDouble();
+    return rng.nextDouble();
   }
 
   @Override
   public double eval(int x) {
-    return r.nextDouble();
+    return rng.nextDouble();
   }
 
   @Override
-  public double eval(int x, double[] dyda, double[] w) {
+  public double eval(int x, double[] dyda, double[] weight) {
     throw new NotImplementedException();
   }
 
   @Override
-  public double evalw(int x, double[] w) {
+  public double evalw(int x, double[] weight) {
     throw new NotImplementedException();
   }
 

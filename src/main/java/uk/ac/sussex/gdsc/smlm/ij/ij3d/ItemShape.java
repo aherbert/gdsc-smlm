@@ -36,7 +36,7 @@ public interface ItemShape {
    *
    * @return the size
    */
-  public int size();
+  int size();
 
   /**
    * Gets the coordinate of the specified item.
@@ -44,14 +44,14 @@ public interface ItemShape {
    * @param i the index
    * @return the coordinate
    */
-  public Point3f getCoordinate(int i);
+  Point3f getCoordinate(int i);
 
   /**
    * Sets the color for each item.
    *
    * @param color the new color
    */
-  public void setItemColor(final Color3f color);
+  void setItemColor(final Color3f color);
 
   /**
    * Sets the color for each item.
@@ -59,5 +59,5 @@ public interface ItemShape {
    * @param color the new color
    * @throws IllegalArgumentException if the number of colours is incorrect
    */
-  public void setItemColor(final Color3f[] color) throws IllegalArgumentException;
+  void setItemColor(final Color3f[] color) throws IllegalArgumentException;
 }

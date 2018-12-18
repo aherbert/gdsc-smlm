@@ -367,11 +367,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
      */
     final double bias;
     /**
-     * Total gain (ADUs/photon)
+     * Total gain (ADUs/photon).
      */
     final double gain;
     /**
-     * Quantum efficiency (electron/photon)
+     * Quantum efficiency (electron/photon).
      */
     final double qe;
     /**
@@ -5229,14 +5229,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     addAtom(mb, 10, 1, 1, 1);
     mb.setDiffusionRate(0.5);
     mb.setDiffusionType(DiffusionType.RANDOM_WALK.toString());
-    Molecule m1 = mb.build();
+    final Molecule m1 = mb.build();
 
     mb.clear();
     addAtom(mb, 30, 0, 0, 0);
     addAtom(mb, 20, 1000, 0, 0);
     mb.setDiffusionRate(1);
     mb.setDiffusionType(DiffusionType.GRID_WALK.toString());
-    Molecule m2 = mb.build();
+    final Molecule m2 = mb.build();
 
     // Create a hexamer big enough to see with the default pixel pitch
     mb.clear();
@@ -5260,9 +5260,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     comment("Mixtures of molecules");
     IJ.log("");
     comment("Two molecules with a ratio of 2:1");
-    m1 = m1.toBuilder().setFraction(2).build();
-    m2 = m2.toBuilder().setFraction(1).build();
-    demo(m1, m2);
+    final Molecule m1a = m1.toBuilder().setFraction(2).build();
+    final Molecule m2a = m2.toBuilder().setFraction(1).build();
+    demo(m1a, m2a);
   }
 
   private static void addAtom(Molecule.Builder mb, double mass, double x, double y, double z) {
@@ -5611,9 +5611,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     sp.getBIXYZ();
     final float[] signal = sp.intensity;
     float[] limits = MathUtils.limits(signal);
-    double minSignal = limits[0];
-    double maxSignal = limits[1];
-    double signalPerFrame = MathUtils.sum(signal) / molecules;
+    final double minSignal = limits[0];
+    final double maxSignal = limits[1];
+    final double signalPerFrame = MathUtils.sum(signal) / molecules;
 
     final float[] depths = sp.z;
     limits = MathUtils.limits(depths);
@@ -5814,12 +5814,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     // Note: The calibration will throw an exception if the converter cannot be created.
     // This is OK as the data will be invalid.
 
-    // Convert values to photons
-    final TypeConverter<IntensityUnit> ic = cal.getIntensityConverter(IntensityUnit.PHOTON);
-    minSignal = ic.convert(minSignal);
-    maxSignal = ic.convert(maxSignal);
-    signalPerFrame = ic.convert(signalPerFrame);
-
     // Convert +/- depth to total depth in nm
     depth = cal.getDistanceConverter(DistanceUnit.NM).convert(depth * 2);
 
@@ -5837,9 +5831,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     // is equal to the total variance at the pixel.
     final double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
 
+    // Convert values to photons
+    final TypeConverter<IntensityUnit> ic = cal.getIntensityConverter(IntensityUnit.PHOTON);
+
     final SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a,
-        minSignal, maxSignal, signalPerFrame, depth, fixedDepth, bias, gain, qe, readNoise,
-        cal.getCameraType(), cal.getCameraModelName(), modelBounds, b, b2, createPSF(s / a));
+        ic.convert(minSignal), ic.convert(maxSignal), ic.convert(signalPerFrame), depth, fixedDepth,
+        bias, gain, qe, readNoise, cal.getCameraType(), cal.getCameraModelName(), modelBounds, b,
+        b2, createPSF(s / a));
     p.loaded = true;
     return p;
   }

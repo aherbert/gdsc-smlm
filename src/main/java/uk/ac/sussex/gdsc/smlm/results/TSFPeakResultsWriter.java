@@ -51,6 +51,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Saves the fit results to file using the Tagged Spot File (TSF) format.
@@ -66,6 +68,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Alex Herbert
  */
 public class TSFPeakResultsWriter extends AbstractPeakResults {
+  private static Logger logger = Logger.getLogger(TSFPeakResultsWriter.class.getName());
+
   /**
    * Application ID assigned to GDSC SMLM ImageJ plugins.
    */
@@ -102,7 +106,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
 
     // Only support Gaussian 2D data
     if (getPSF() == null || !PSFHelper.isGaussian2D(getPSF())) {
-      System.err.println("TSF format requires a Gaussian 2D PSF");
+      logger.log(Level.SEVERE, "TSF format requires a Gaussian 2D PSF");
       closeOutput();
       return;
     }
@@ -121,8 +125,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     try {
       out = new FileOutputStream(filename);
     } catch (final Exception ex) {
-      System.err.println("Failed to write open TSF file: " + filename);
-      ex.printStackTrace();
+      logger.log(Level.SEVERE, ex, () -> "Failed to write open TSF file: " + filename);
       closeOutput();
       return;
     }
@@ -133,8 +136,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
       dos.writeInt(0);
       dos.writeLong(0);
     } catch (final IOException ex) {
-      System.err.println("Failed to write TSF offset fields");
-      ex.printStackTrace();
+      logger.log(Level.SEVERE, "Failed to write TSF offset fields", ex);
       closeOutput();
     }
   }
@@ -147,7 +149,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     try {
       out.close();
     } catch (final Exception ex) {
-      // Ignore exception
+      logger.log(Level.SEVERE, "Failed to close output file", ex);
     } finally {
       out = null;
     }
@@ -256,7 +258,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
         builder.setA(params[isx] / params[isy]);
         break;
 
-      case TWOAXISANDTHETA:
+      default:
+        // Fit mode is validated as a 2D gaussian in the begin() method
+        // TWOAXISANDTHETA
         builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR
             * Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isy])));
         builder.setA(params[isx] / params[isy]);
@@ -374,7 +378,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
         spots[i].writeDelimitedTo(out);
       }
     } catch (final IOException ex) {
-      System.err.println("Failed to write Spot message");
+      logger.log(Level.SEVERE, "Failed to write Spot message", ex);
       closeOutput();
     }
   }
@@ -431,12 +435,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     try {
       // The offset is the amount to skip forward after reading the int
       // magic number (4 bytes) and long offset (8 bytes)
-      // out.flush();
       offset = out.getChannel().position() - 12;
     } catch (final IOException ex) {
       // This is bad.
-      System.err.println("Failed to determine offset for SpotList message");
-      ex.printStackTrace();
+      logger.log(Level.SEVERE, "Failed to determine offset for SpotList message", ex);
       closeOutput();
       return;
     }
@@ -538,8 +540,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     try {
       spotList.writeDelimitedTo(out);
     } catch (final IOException ex) {
-      System.err.println("Failed to write SpotList message");
-      ex.printStackTrace();
+      logger.log(Level.SEVERE, "Failed to write SpotList message", ex);
       return;
     } finally {
       closeOutput();
@@ -555,8 +556,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
       f.seek(4);
       f.writeLong(offset);
     } catch (final Exception ex) {
-      System.err.println("Failed to record offset for SpotList message");
-      ex.printStackTrace();
+      logger.log(Level.SEVERE, "Failed to record offset for SpotList message", ex);
     }
   }
 

@@ -35,5 +35,5 @@ public interface RandomGeneratorFactory {
    *
    * @return a new random generator
    */
-  public RandomGenerator createRandomGenerator();
+  RandomGenerator createRandomGenerator();
 }

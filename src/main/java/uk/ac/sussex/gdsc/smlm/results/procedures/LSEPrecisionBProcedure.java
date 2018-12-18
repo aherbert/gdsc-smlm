@@ -37,5 +37,5 @@ public interface LSEPrecisionBProcedure {
    *
    * @param precision the precision
    */
-  public void executeLSEPrecisionB(double precision);
+  void executeLSEPrecisionB(double precision);
 }

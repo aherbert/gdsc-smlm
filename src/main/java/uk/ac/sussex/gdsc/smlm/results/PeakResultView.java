@@ -34,7 +34,7 @@ public interface PeakResultView {
    * @param frame the frame
    * @return the results
    */
-  public PeakResult[] getResultsByFrame(int frame);
+  PeakResult[] getResultsByFrame(int frame);
 
   /**
    * Gets the results by id.
@@ -42,5 +42,5 @@ public interface PeakResultView {
    * @param id the id
    * @return the results
    */
-  public PeakResult[] getResultsById(int id);
+  PeakResult[] getResultsById(int id);
 }

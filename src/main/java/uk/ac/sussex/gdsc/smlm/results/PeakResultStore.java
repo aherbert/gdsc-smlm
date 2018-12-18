@@ -38,7 +38,7 @@ public interface PeakResultStore {
    *
    * @return the size
    */
-  public int size();
+  int size();
 
   /**
    * Add a result. Not synchronized.
@@ -46,7 +46,7 @@ public interface PeakResultStore {
    * @param result the result
    * @return true if the store is changed
    */
-  public boolean add(PeakResult result);
+  boolean add(PeakResult result);
 
   /**
    * Add all results.
@@ -54,7 +54,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean addCollection(Collection<PeakResult> results);
+  boolean addCollection(Collection<PeakResult> results);
 
   /**
    * Add all results.
@@ -62,7 +62,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean addArray(PeakResult[] results);
+  boolean addArray(PeakResult[] results);
 
   /**
    * Adds the results.
@@ -70,7 +70,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean addStore(PeakResultStore results);
+  boolean addStore(PeakResultStore results);
 
   /**
    * Remove a result. Not synchronized.
@@ -78,7 +78,7 @@ public interface PeakResultStore {
    * @param result the result
    * @return true if the store is changed
    */
-  public boolean remove(PeakResult result);
+  boolean remove(PeakResult result);
 
   /**
    * Remove all results.
@@ -86,7 +86,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean removeCollection(Collection<PeakResult> results);
+  boolean removeCollection(Collection<PeakResult> results);
 
   /**
    * Remove all results.
@@ -94,7 +94,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean removeArray(PeakResult[] results);
+  boolean removeArray(PeakResult[] results);
 
   /**
    * Removes the results.
@@ -102,7 +102,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean removeStore(PeakResultStore results);
+  boolean removeStore(PeakResultStore results);
 
   /**
    * Retain all results.
@@ -110,7 +110,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean retainCollection(Collection<PeakResult> results);
+  boolean retainCollection(Collection<PeakResult> results);
 
   /**
    * Retain all results.
@@ -118,7 +118,7 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean retainArray(PeakResult[] results);
+  boolean retainArray(PeakResult[] results);
 
   /**
    * Retains the results.
@@ -126,32 +126,32 @@ public interface PeakResultStore {
    * @param results the results
    * @return true if the store is changed
    */
-  public boolean retainStore(PeakResultStore results);
+  boolean retainStore(PeakResultStore results);
 
   /**
    * Clear the results.
    */
-  public void clear();
+  void clear();
 
   /**
    * Trims the capacity of this instance to be the current size. An application can use this
    * operation to minimize the storage of an instance.
    */
-  public void trimToSize();
+  void trimToSize();
 
   /**
    * Convert to an array. This is a new allocation of storage space.
    *
    * @return the peak result array
    */
-  public PeakResult[] toArray();
+  PeakResult[] toArray();
 
   /**
    * Copy the results.
    *
    * @return the copy
    */
-  public PeakResultStore copy();
+  PeakResultStore copy();
 
   /**
    * Copy the results.
@@ -159,7 +159,7 @@ public interface PeakResultStore {
    * @param deepCopy Set to true to perform a deep copy
    * @return the copy
    */
-  public PeakResultStore copy(boolean deepCopy);
+  PeakResultStore copy(boolean deepCopy);
 
   /**
    * Removes the result if it matches the filter. If objects are removed then the order of elements
@@ -168,14 +168,14 @@ public interface PeakResultStore {
    * @param filter the filter
    * @return true, if any were removed
    */
-  public boolean removeIf(PeakResultPredicate filter);
+  boolean removeIf(PeakResultPredicate filter);
 
   /**
    * Execute the procedure on each result in the store.
    *
    * @param procedure the procedure
    */
-  public void forEach(PeakResultProcedure procedure);
+  void forEach(PeakResultProcedure procedure);
 
   /**
    * Get a subset of the results if they match the filter.
@@ -183,7 +183,7 @@ public interface PeakResultStore {
    * @param filter the filter
    * @return the results
    */
-  public PeakResult[] subset(PeakResultPredicate filter);
+  PeakResult[] subset(PeakResultPredicate filter);
 
   /**
    * Returns <tt>true</tt> if this store contains the specified result. More formally, returns
@@ -193,5 +193,5 @@ public interface PeakResultStore {
    * @param result the result
    * @return <tt>true</tt> if this list contains the specified result true, if successful
    */
-  public boolean contains(PeakResult result);
+  boolean contains(PeakResult result);
 }

@@ -73,23 +73,23 @@ public class PrecisionTest {
   }
 
   public interface DoublePrecision {
-    public void setMaxX(int maxx);
+    void setMaxX(int maxx);
 
-    public void initialise(double[] a);
+    void initialise(double[] a);
 
-    public double eval(final int x, final double[] dyda);
+    double eval(final int x, final double[] dyda);
 
-    public double eval(final int x);
+    double eval(final int x);
   }
 
   public interface SinglePrecision {
-    public void setMaxX(int maxx);
+    void setMaxX(int maxx);
 
-    public void initialise(float[] a);
+    void initialise(float[] a);
 
-    public float eval(final int x, final float[] dyda);
+    float eval(final int x, final float[] dyda);
 
-    public float eval(final int x);
+    float eval(final int x);
   }
 
   public class DoubleCircularGaussian extends Gaussian implements DoublePrecision {

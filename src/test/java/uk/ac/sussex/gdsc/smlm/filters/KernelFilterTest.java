@@ -65,7 +65,8 @@ public class KernelFilterTest {
 
   private abstract class FilterWrapper {
     final float[] kernel;
-    final int kw, kh;
+    final int kw;
+    final int kh;
     String name;
 
     FilterWrapper(String name, float[] kernel, int kw, int kh) {

@@ -54,10 +54,10 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   /**
    * Adds the localisation.
    *
-   * @param l the localisation
+   * @param localisation the localisation
    */
-  public void add(LocalisationModel l) {
-    localisations.add(l);
+  public void add(LocalisationModel localisation) {
+    localisations.add(localisation);
   }
 
   /**
@@ -79,6 +79,8 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   }
 
   /**
+   * Gets the id.
+   *
    * @return The Id.
    */
   public int getId() {
@@ -95,6 +97,8 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   }
 
   /**
+   * Gets the time.
+   *
    * @return The time.
    */
   public int getTime() {
@@ -103,11 +107,13 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
 
   /** {@inheritDoc} */
   @Override
-  public int compareTo(LocalisationModelSet o) {
-    return Integer.compare(time, o.time);
+  public int compareTo(LocalisationModelSet other) {
+    return Integer.compare(time, other.time);
   }
 
   /**
+   * Checks if this localisation is on for the entire duration of the time interval.
+   *
    * @return True if this localisation is on for the entire duration of the time interval.
    */
   public boolean isContinuous() {
@@ -117,9 +123,9 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
 
     // All localisations must be continuous and consecutive in time
     final int[] t = new int[localisations.size()];
-    int c = 0;
+    int count = 0;
     for (final LocalisationModel l : localisations) {
-      t[c++] = l.getTime();
+      t[count++] = l.getTime();
       if (!l.isContinuous()) {
         return false;
       }
@@ -128,15 +134,12 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
     // Check consecutive in time
     Arrays.sort(t);
 
-    if ((t[t.length - 1] - t[0] + 1) > c) {
-      return false;
-    }
-
-    // System.out.printf("continuous size = %d\n", localisations.size());
-    return true;
+    return ((t[t.length - 1] - t[0] + 1) <= count);
   }
 
   /**
+   * Gets the data.
+   *
    * @return the data.
    */
   public double[] getData() {
@@ -144,6 +147,8 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   }
 
   /**
+   * Sets the data.
+   *
    * @param data the data to set
    */
   public void setData(double[] data) {
@@ -180,6 +185,8 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   }
 
   /**
+   * Gets the total intensity.
+   *
    * @return The total intensity.
    */
   public double getIntensity() {
@@ -191,13 +198,17 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   }
 
   /**
-   * @return the previous.
+   * Gets the previous model set.
+   *
+   * @return the previous model set
    */
   public LocalisationModelSet getPrevious() {
     return previous;
   }
 
   /**
+   * Sets the previous model set.
+   *
    * @param previous the previous to set
    */
   public void setPrevious(LocalisationModelSet previous) {
@@ -208,13 +219,17 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   }
 
   /**
-   * @return the next.
+   * Gets the next model set.
+   *
+   * @return the next model set
    */
   public LocalisationModelSet getNext() {
     return next;
   }
 
   /**
+   * Sets the next model set.
+   *
    * @param next the next to set
    */
   public void setNext(LocalisationModelSet next) {
@@ -225,6 +240,8 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
   }
 
   /**
+   * Checks if either of the previous/next pointers are not null.
+   *
    * @return True if either of the previous/next pointers are not null
    */
   public boolean hasNeighbour() {

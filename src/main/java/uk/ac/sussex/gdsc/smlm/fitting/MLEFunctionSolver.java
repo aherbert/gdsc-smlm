@@ -33,14 +33,14 @@ public interface MLEFunctionSolver extends FunctionSolver {
    *
    * @return the log likelihood
    */
-  public double getLogLikelihood();
+  double getLogLikelihood();
 
   /**
    * Gets the log likelihood ratio.
    *
    * @return the log likelihood ratio
    */
-  public double getLogLikelihoodRatio();
+  double getLogLikelihoodRatio();
 
   /**
    * Gets the probability Q that a value of the log likelihood ratio as poor as the value should
@@ -53,5 +53,5 @@ public interface MLEFunctionSolver extends FunctionSolver {
    *
    * @return the q-value
    */
-  public double getQ();
+  double getQ();
 }

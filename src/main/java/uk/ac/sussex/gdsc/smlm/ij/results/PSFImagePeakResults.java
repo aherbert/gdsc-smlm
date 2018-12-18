@@ -228,37 +228,35 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     x -= 0.5 / scale;
     y -= 0.5 / scale;
 
-    int xmin = (int) Math.floor(x - width * scale);
+    int xmin = FastMath.max(0, (int) Math.floor(x - width * scale));
     int xmax = (int) Math.ceil(x + width * scale);
-    int ymin = (int) Math.floor(y - height * scale);
+    int ymin = FastMath.max(0, (int) Math.floor(y - height * scale));
     int ymax = (int) Math.ceil(y + height * scale);
 
     // Clip range
-    xmin = FastMath.max(xmin, 0);
     xmax = (int) FastMath.min(xmax, xlimit);
-    ymin = FastMath.max(ymin, 0);
     ymax = (int) FastMath.min(ymax, ylimit);
 
     // Compute Gaussian PSF
     final int[] index = new int[(xmax - xmin + 1) * (ymax - ymin + 1)];
     final float[] value = new float[index.length];
-    int i = 0;
+    int i1 = 0;
     for (int y0 = ymin; y0 <= ymax; y0++) {
       for (int x0 = xmin; x0 <= xmax; x0++) {
-        final int ii = y0 * imageWidth + x0;
-        index[i] = ii;
+        final int i2 = y0 * imageWidth + x0;
+        index[i1] = i2;
         final float dx = (x0 - x) / scale;
         final float dy = (y0 - y) / scale;
-        value[i] = (float) (amplitude * FastMath.exp(a * dx * dx + b * dx * dy + c * dy * dy));
-        i++;
+        value[i1] = (float) (amplitude * FastMath.exp(a * dx * dx + b * dx * dy + c * dy * dy));
+        i1++;
       }
     }
 
     // Now add the values to the configured indices
     synchronized (data) {
       size++;
-      while (i-- > 0) {
-        data[index[i]] += value[i];
+      while (i1-- > 0) {
+        data[index[i1]] += value[i1];
       }
     }
   }
@@ -272,9 +270,13 @@ public class PSFImagePeakResults extends IJImagePeakResults {
    * @return the parameters
    */
   private static double[] getPSFParameters(double t, double sx, double sy) {
+    // abc are defined factors for xx, xy and yy:
+    // https://en.wikipedia.org/wiki/Gaussian_function#Two-dimensional_Gaussian_function
+    // @CHECKSTYLE.OFF: LocalVariableName
     double a;
     double b;
     double c;
+    // @CHECKSTYLE.ON: LocalVariableName
     double height;
     double width;
 
@@ -296,8 +298,7 @@ public class PSFImagePeakResults extends IJImagePeakResults {
           + Math.cos(t) * Math.cos(t) / (2.0 * sy * sy));
 
       // Note that the Gaussian2DFitter returns the angle of the major axis (sx) relative to the
-      // x-axis.
-      // The angle is in the range -pi/2 to pi/2
+      // x-axis. The angle is in the range -pi/2 to pi/2
 
       // The width and height for the range to be plotted can be derived from the general parametric
       // form of the ellipse.
@@ -336,10 +337,10 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     }
 
     // TODO - Make this more efficient. It could use worker threads to increase speed.
-    int i = 0;
+    int counter = 0;
     for (final PeakResult result : results) {
       addPeak(result.getFrame(), result.getNoise(), result.getParameters());
-      if (++i % 64 == 0) {
+      if (++counter % 64 == 0) {
         updateImage();
         if (!imageActive) {
           return;

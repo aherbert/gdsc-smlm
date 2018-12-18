@@ -36,21 +36,21 @@ public interface PreprocessedPeakResult {
    *
    * @return The frame
    */
-  public int getFrame();
+  int getFrame();
 
   /**
    * Gets the unique id. This should be unique within the entire set of results.
    *
    * @return the unique id
    */
-  public int getUniqueId();
+  int getUniqueId();
 
   /**
    * Gets the id.
    *
    * @return the id
    */
-  public int getId();
+  int getId();
 
   /**
    * Return the candidate Id of this result (i.e. the candidate used to identify this position for
@@ -58,14 +58,14 @@ public interface PreprocessedPeakResult {
    *
    * @return the candidate Id (-1 for no candidate)
    */
-  public int getCandidateId();
+  int getCandidateId();
 
   /**
    * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
    *
    * @return The signal (in photons)
    */
-  public float getSignal();
+  float getSignal();
 
   /**
    * Get the mean signal.
@@ -76,7 +76,7 @@ public interface PreprocessedPeakResult {
    *
    * @return The mean signal (in photons)
    */
-  public float getMeanSignal();
+  float getMeanSignal();
 
   /**
    * Get the signal-to-noise ratio (SNR). This is ratio of the average signal value to the standard
@@ -87,7 +87,7 @@ public interface PreprocessedPeakResult {
    *
    * @return The SNR
    */
-  public default float getSNR() {
+  default float getSNR() {
     return getMeanSignal() / getNoise();
   }
 
@@ -96,21 +96,21 @@ public interface PreprocessedPeakResult {
    *
    * @return The noise (in photons)
    */
-  public float getNoise();
+  float getNoise();
 
   /**
    * The localisation variance using the noise estimate for the data to approximate the local noise.
    *
    * @return The location variance in nm
    */
-  public double getLocationVariance();
+  double getLocationVariance();
 
   /**
    * The localisation variance using the local background estimate for the local noise.
    *
    * @return The location variance in nm
    */
-  public double getLocationVariance2();
+  double getLocationVariance2();
 
   /**
    * The localisation variance using the fitted parameter variance. This is computed using the
@@ -119,44 +119,56 @@ public interface PreprocessedPeakResult {
    *
    * @return The location variance in nm
    */
-  public double getLocationVarianceCRLB();
+  double getLocationVarianceCRLB();
 
   /**
+   * Gets the average peak standard deviation in the X and Y dimension.
+   *
    * @return The average peak standard deviation in the X and Y dimension.
    */
-  public float getSD();
+  float getSD();
 
   /**
+   * Gets the background.
+   *
    * @return The background.
    */
-  public float getBackground();
+  float getBackground();
 
   /**
    * Get the amplitude. Amplitude = Signal / (2*pi*sd0*sd1).
    *
    * @return The amplitude
    */
-  public float getAmplitude();
+  float getAmplitude();
 
   /**
+   * Gets the angle (for an elliptical Gaussian peak).
+   *
    * @return The angle (for an elliptical Gaussian peak).
    */
-  public float getAngle();
+  float getAngle();
 
   /**
+   * Gets the x position.
+   *
    * @return The x position.
    */
-  public float getX();
+  float getX();
 
   /**
+   * Gets the y position.
+   *
    * @return The y position.
    */
-  public float getY();
+  float getY();
 
   /**
+   * Gets the z position.
+   *
    * @return The z position.
    */
-  public float getZ();
+  float getZ();
 
   /**
    * Return the squared shift between the initial and the final x-position, i.e. how much the
@@ -164,7 +176,7 @@ public interface PreprocessedPeakResult {
    *
    * @return The relative x position shift squared
    */
-  public float getXRelativeShift2();
+  float getXRelativeShift2();
 
   /**
    * Return the squared shift between the initial and the final y-position, i.e. how much the
@@ -172,17 +184,21 @@ public interface PreprocessedPeakResult {
    *
    * @return The relative y position shift squared
    */
-  public float getYRelativeShift2();
+  float getYRelativeShift2();
 
   /**
+   * Gets the x-dimension standard deviation.
+   *
    * @return The x-dimension standard deviation.
    */
-  public float getXSD();
+  float getXSD();
 
   /**
+   * Gets the y-dimension standard deviation.
+   *
    * @return The y-dimension standard deviation.
    */
-  public float getYSD();
+  float getYSD();
 
   /**
    * Return the ratio between the initial and the final x-dimension standard deviation, i.e. how
@@ -190,7 +206,7 @@ public interface PreprocessedPeakResult {
    *
    * @return The x-dimension width factor
    */
-  public float getXSDFactor();
+  float getXSDFactor();
 
   /**
    * Return the ratio between the initial and the final y-dimension standard deviation, i.e. how
@@ -198,14 +214,14 @@ public interface PreprocessedPeakResult {
    *
    * @return The y-dimension width factor
    */
-  public float getYSDFactor();
+  float getYSDFactor();
 
   /**
    * Return true if this is a result that has previously been fitted.
    *
    * @return True if this result is an existing fit result
    */
-  public boolean isExistingResult();
+  boolean isExistingResult();
 
   /**
    * Return true if this is a new result. It is expected that this can then be classified for use in
@@ -214,7 +230,7 @@ public interface PreprocessedPeakResult {
    *
    * @return True if this result is a new fit result
    */
-  public boolean isNewResult();
+  boolean isNewResult();
 
   /**
    * Get the assignments between this result and the true data.
@@ -225,7 +241,7 @@ public interface PreprocessedPeakResult {
    * @param predictedId The predicted Id
    * @return The assignments
    */
-  public FractionalAssignment[] getAssignments(int predictedId);
+  FractionalAssignment[] getAssignments(int predictedId);
 
   /**
    * Ignore this result during assignment scoring. It is expected that the result will return null
@@ -233,28 +249,28 @@ public interface PreprocessedPeakResult {
    *
    * @return true, if this should be ignored (i.e. not counted as a false positive)
    */
-  public boolean ignore();
+  boolean ignore();
 
   /**
    * Convert this to the parameters for a Gaussian2DFunction.
    *
    * @return the parameters
    */
-  public double[] toGaussian2DParameters();
+  double[] toGaussian2DParameters();
 
   /**
    * Sets the validation result.
    *
    * @param result the new validation result
    */
-  public void setValidationResult(int result);
+  void setValidationResult(int result);
 
   /**
    * Gets the validation result.
    *
    * @return the validation result
    */
-  public int getValidationResult();
+  int getValidationResult();
 
   /**
    * Returns true if this result is not a duplicate. The default value should be false.
@@ -264,5 +280,5 @@ public interface PreprocessedPeakResult {
    *
    * @return true, if is not duplicate.
    */
-  public boolean isNotDuplicate();
+  boolean isNotDuplicate();
 }

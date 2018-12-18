@@ -57,7 +57,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
   protected double height;
   /** x0 position pre-factor. */
   protected double aa;
-  /** x0*x1 position pre-factor (for rotation) */
+  /** x0*x1 position pre-factor (for rotation). */
   protected double bb;
   /** x1 position pre-factor. */
   protected double cc;

@@ -37,5 +37,5 @@ public interface MLEPrecisionBProcedure {
    *
    * @param precision the precision
    */
-  public void executeMLEPrecisionB(double precision);
+  void executeMLEPrecisionB(double precision);
 }

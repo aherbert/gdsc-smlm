@@ -41,6 +41,10 @@ import org.apache.commons.math3.random.Well19937c;
  * used by default but this can be changed by setting a custom uniform distribution.
  */
 public class MaskDistribution implements SpatialDistribution {
+  // Used for a particle search
+  private static final int[] DIR_X_OFFSET = {0, 1, 1, 1, 0, -1, -1, -1};
+  private static final int[] DIR_Y_OFFSET = {-1, -1, 0, 1, 1, 1, 0, -1};
+
   private final RandomGenerator randomGenerator;
   private UniformDistribution uniformDistribution;
   private final int[] mask;
@@ -54,6 +58,11 @@ public class MaskDistribution implements SpatialDistribution {
   private int particle;
   private final double scaleX;
   private final double scaleY;
+
+  // Used for a particle search
+  private int xlimit = -1;
+  private int ylimit;
+  private int[] offset;
 
   /**
    * Create a distribution from the mask image (packed in YX order).
@@ -102,9 +111,6 @@ public class MaskDistribution implements SpatialDistribution {
   }
 
   private static int[] convert(byte[] mask) {
-    if (mask == null) {
-      return null;
-    }
     final int[] newMask = new int[mask.length];
     for (int i = 0; i < mask.length; i++) {
       if (mask[i] != 0) {
@@ -240,10 +246,7 @@ public class MaskDistribution implements SpatialDistribution {
     if (!isWithinXy(xyz)) {
       return false;
     }
-    if (xyz[2] < minDepth || xyz[2] > minDepth + depth) {
-      return false;
-    }
-    return true;
+    return (xyz[2] >= minDepth && xyz[2] <= minDepth + depth);
   }
 
   /** {@inheritDoc} */
@@ -269,8 +272,7 @@ public class MaskDistribution implements SpatialDistribution {
     if (x < 0 || x >= maxx || y < 0 || y >= maxy) {
       return -1;
     }
-    final int index = y * maxx + x;
-    return index;
+    return y * maxx + x;
   }
 
   /** {@inheritDoc} */
@@ -282,13 +284,6 @@ public class MaskDistribution implements SpatialDistribution {
     final int index = getIndex(xyz);
     particle = (index < 0 || index >= mask.length) ? 0 : mask[index];
   }
-
-  // Used for a particle search
-  private static final int[] DIR_X_OFFSET = new int[] {0, 1, 1, 1, 0, -1, -1, -1};
-  private static final int[] DIR_Y_OFFSET = new int[] {-1, -1, 0, 1, 1, 1, 0, -1};
-  private int xlimit = -1;
-  private int ylimit;
-  private int[] offset;
 
   /**
    * Convert the mask to connected particles, each with a unique number. This allows the within
@@ -364,7 +359,7 @@ public class MaskDistribution implements SpatialDistribution {
         }
       } else {
         for (int d = 8; d-- > 0;) {
-          if (isWithin(x1, y1, d)) {
+          if (isWithinDirection(x1, y1, d)) {
             final int index2 = index1 + offset[d];
             if (binaryMask[index2]) {
               binaryMask[index2] = false; // mark as processed
@@ -391,7 +386,7 @@ public class MaskDistribution implements SpatialDistribution {
    * @param direction the direction from the pixel towards the neighbour
    * @return true if the neighbour is within the image (provided that x, y is within)
    */
-  private boolean isWithin(int x, int y, int direction) {
+  private boolean isWithinDirection(int x, int y, int direction) {
     switch (direction) {
       case 0:
         return (y > 0);
@@ -409,11 +404,14 @@ public class MaskDistribution implements SpatialDistribution {
         return (x > 0);
       case 7:
         return (y > 0 && x > 0);
+      default:
+        return false;
     }
-    return false;
   }
 
   /**
+   * Gets the number of non-zero pixels in the mask.
+   *
    * @return The number of non-zero pixels in the mask.
    */
   public int getSize() {
@@ -421,20 +419,26 @@ public class MaskDistribution implements SpatialDistribution {
   }
 
   /**
-   * @return The width of the mask in pixels.
+   * Gets the width of the mask in pixels.
+   *
+   * @return The width
    */
   public int getWidth() {
     return maxx;
   }
 
   /**
-   * @return The height of the mask in pixels.
+   * Gets the height of the mask in pixels.
+   *
+   * @return The height
    */
   public int getHeight() {
     return maxy;
   }
 
   /**
+   * Gets the X-scale.
+   *
    * @return The X-scale.
    */
   public double getScaleX() {
@@ -442,6 +446,8 @@ public class MaskDistribution implements SpatialDistribution {
   }
 
   /**
+   * Gets the Y-scale.
+   *
    * @return The Y-scale.
    */
   public double getScaleY() {
@@ -449,6 +455,8 @@ public class MaskDistribution implements SpatialDistribution {
   }
 
   /**
+   * Gets the mask.
+   *
    * @return The mask (packed in YX order).
    */
   protected int[] getMask() {

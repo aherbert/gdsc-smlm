@@ -79,6 +79,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.EShiftFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterSet;
+import uk.ac.sussex.gdsc.smlm.results.filter.FilterXStreamUtils;
 import uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter;
@@ -95,7 +96,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.SignalFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter2;
-import uk.ac.sussex.gdsc.smlm.results.filter.XStreamWrapper;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
@@ -1658,14 +1658,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     int failcFP = 0;
     int cTP = 0;
     int cFP = 0;
-    int[] singleStatus = null;
-    int[] multiStatus = null;
-    int[] doubletStatus = null;
-    int[] multiDoubletStatus = null;
-    singleStatus = new int[FitStatus.values().length];
-    multiStatus = new int[singleStatus.length];
-    doubletStatus = new int[singleStatus.length];
-    multiDoubletStatus = new int[singleStatus.length];
+    int[] singleStatus = new int[FitStatus.values().length];
+    int[] multiStatus = new int[singleStatus.length];
+    int[] doubletStatus = new int[singleStatus.length];
+    int[] multiDoubletStatus = new int[singleStatus.length];
 
     // Easier to materialise the values since we have a lot of non final variables to manipulate
     final int[] frames = new int[filterCandidates.size()];
@@ -2197,7 +2193,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     filterList.add(new FilterSet("Range", filters));
     try (FileOutputStream fos = new FileOutputStream(filename)) {
       // Use the instance (not .toXML() method) to allow the exception to be caught
-      XStreamWrapper.getInstance().toXML(filterList, fos);
+      FilterXStreamUtils.getXStreamInstance().toXML(filterList, fos);
       return true;
     } catch (final Exception ex) {
       IJ.log("Unable to save the filter set to file: " + ex.getMessage());

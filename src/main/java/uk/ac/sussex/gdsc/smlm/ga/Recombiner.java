@@ -37,5 +37,5 @@ public interface Recombiner<T extends Comparable<T>> {
    * @param chromosome2 the chromosome 2
    * @return one or more new sequences
    */
-  public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2);
+  Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2);
 }

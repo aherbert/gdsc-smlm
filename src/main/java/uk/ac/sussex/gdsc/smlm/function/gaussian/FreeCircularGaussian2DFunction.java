@@ -73,7 +73,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
   protected static final int HEIGHT = 1;
   /** The index for the x0 position pre-factor. */
   protected static final int AA = 2;
-  /** The index for the x0*x1 position pre-factor (for rotation) */
+  /** The index for the x0*x1 position pre-factor (for rotation). */
   protected static final int BB = 3;
   /** The index for the x1 position pre-factor. */
   protected static final int CC = 4;

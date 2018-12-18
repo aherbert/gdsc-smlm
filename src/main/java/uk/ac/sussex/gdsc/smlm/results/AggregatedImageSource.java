@@ -310,6 +310,8 @@ public class AggregatedImageSource extends ImageSource {
   }
 
   /**
+   * Gets number of frames to aggregate.
+   *
    * @return The number of frames to aggregate.
    */
   public int getAggregate() {

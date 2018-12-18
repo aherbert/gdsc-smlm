@@ -420,6 +420,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
         ip.drawString("Error opening frame " + n, size, size * 2);
         depthThisImage = 8;
       }
+      // Convert to the corect bit depth
       if (depthThisImage != getBitDepth()) {
         switch (getBitDepth()) {
           case 8:
@@ -434,15 +435,12 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
           case 32:
             ip = ip.convertToFloat();
             break;
+          default:
+            // Unknown bit depth. Leave as is.
+            break;
         }
       }
-      // This will not happen as the source checks the dimensions
-      // if (ip.getWidth() != getWidth() || ip.getHeight() != getHeight())
-      // {
-      // ImageProcessor ip2 = ip.createProcessor(getWidth(), getHeight());
-      // ip2.insert(ip, 0, 0);
-      // ip = ip2;
-      // }
+      // Note: width/height checks are not required as the source checks the dimensions
       return ip;
     }
 

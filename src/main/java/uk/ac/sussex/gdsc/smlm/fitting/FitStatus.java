@@ -24,15 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+// TODO: Auto-generated Javadoc
 /**
  * Define the status of a fit result.
  */
 public enum FitStatus {
   /** OK. */
   OK("OK"),
-  /** Singular non-linear model */
+  /** Singular non-linear model. */
   SINGULAR_NON_LINEAR_MODEL("Singular non-linear model"),
-  /** Singular non-linear solution */
+  /** Singular non-linear solution. */
   SINGULAR_NON_LINEAR_SOLUTION("Singular non-linear solution"),
   /** Invalid gradients. */
   INVALID_GRADIENTS("Invalid gradients"),
@@ -54,11 +55,11 @@ public enum FitStatus {
   OUTSIDE_FIT_REGION("Outside fit region"),
   /** Insufficient signal. */
   INSUFFICIENT_SIGNAL("Insufficient signal"),
-  /** Insufficient Signal-to-Noise Ratio (SNR) */
+  /** Insufficient Signal-to-Noise Ratio (SNR). */
   INSUFFICIENT_SNR("Insufficient SNR"),
   /** Width diverged. */
   WIDTH_DIVERGED("Width diverged"),
-  /** Z-coordinate moved */
+  /** Z-coordinate moved. */
   Z_MOVED("Z-coordinate moved"),
   /** Insufficient precision. */
   INSUFFICIENT_PRECISION("Insufficient precision"),
@@ -77,8 +78,14 @@ public enum FitStatus {
   /** Unknown. */
   UNKNOWN("Unknown");
 
+  /** The nice name. */
   private String niceName;
 
+  /**
+   * Instantiates a new fit status.
+   *
+   * @param name the name
+   */
   FitStatus(String name) {
     niceName = name;
   }

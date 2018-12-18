@@ -35,7 +35,7 @@ public interface Normaliser {
    * @param index the index
    * @return the normalised value
    */
-  public float normalise(double sum, int index);
+  float normalise(double sum, int index);
 
   /**
    * Normalise the sum.
@@ -44,7 +44,7 @@ public interface Normaliser {
    * @param index the index
    * @return the normalised value
    */
-  public float normalise(float sum, int index);
+  float normalise(float sum, int index);
 
   /**
    * Normalise the sum of the data (in-place) for all indices.
@@ -52,7 +52,7 @@ public interface Normaliser {
    * @param data the data
    * @param size the size of the data
    */
-  public void normalise(float[] data, int size);
+  void normalise(float[] data, int size);
 
   /**
    * Normalise the sum of the data for all indices to the out data.
@@ -61,7 +61,7 @@ public interface Normaliser {
    * @param out the out data
    * @param size the size of the data
    */
-  public void normalise(float[] data, float[] out, int size);
+  void normalise(float[] data, float[] out, int size);
 
   /**
    * Normalise the sum of the data (in-place) ignoring the border.
@@ -71,7 +71,7 @@ public interface Normaliser {
    * @param maxy the maxy
    * @param border the border
    */
-  public void normalise(float[] data, int maxx, int maxy, int border);
+  void normalise(float[] data, int maxx, int maxy, int border);
 
   /**
    * Normalise the sum of the data ignoring the border to the out data.
@@ -82,7 +82,7 @@ public interface Normaliser {
    * @param maxy the maxy
    * @param border the border
    */
-  public void normalise(float[] data, float[] out, int maxx, int maxy, int border);
+  void normalise(float[] data, float[] out, int maxx, int maxy, int border);
 
   /**
    * Normalise the sum of the data for all indices to the out data.
@@ -91,7 +91,7 @@ public interface Normaliser {
    * @param out the out data
    * @param size the size of the data
    */
-  public void normalise(double[] data, float[] out, int size);
+  void normalise(double[] data, float[] out, int size);
 
   /**
    * Normalise the sum of the data ignoring the border to the out data.
@@ -102,5 +102,5 @@ public interface Normaliser {
    * @param maxy the maxy
    * @param border the border
    */
-  public void normalise(double[] data, float[] out, int maxx, int maxy, int border);
+  void normalise(double[] data, float[] out, int maxx, int maxy, int border);
 }

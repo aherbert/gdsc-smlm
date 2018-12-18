@@ -250,13 +250,13 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
     IJ.showStatus("Creating points ...");
     final Point3f[] points = pointList.toArray(new Point3f[pointList.size()]);
     final Point3f[] sizes = new Point3f[] {new Point3f(scale, scale, scale)};
-    ItemGeometryGroup pointGroup;
     final Appearance appearance = new Appearance();
     final TransparencyAttributes ta = new TransparencyAttributes();
     ta.setTransparency(0.5f);
     ta.setTransparencyMode(TransparencyAttributes.FASTEST);
     appearance.setTransparencyAttributes(ta);
-    pointGroup = new ItemGeometryGroup(points, null, appearance, sizes, null, null);
+    ItemGeometryGroup pointGroup =
+        new ItemGeometryGroup(points, null, appearance, sizes, null, null);
     // pointGroup = new OrderedItemGeometryGroup(points, null, appearance, sizes, null, null);
 
     // // This supports transparency sorting

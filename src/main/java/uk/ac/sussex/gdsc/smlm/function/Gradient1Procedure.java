@@ -35,5 +35,5 @@ public interface Gradient1Procedure {
    * @param gradient Partial first derivative of function with respect to each coefficient
    *        identified by {@link GradientFunction#gradientIndices()}
    */
-  public void execute(double value, double[] gradient);
+  void execute(double value, double[] gradient);
 }

@@ -339,7 +339,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   }
 
   /**
-   * Allow recording the pass/fail events sent to the FailCounter from the MultiPathFilter
+   * Allow recording the pass/fail events sent to the FailCounter from the MultiPathFilter.
    */
   private class RecordingFailCounter implements FailCounter {
     final boolean[] pass;
@@ -358,7 +358,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     @Override
     public void pass() {
       // We record that this candidate generated new fit results
-      pass[dynamicMultiPathFitResult.candidateId] = true;
+      pass[dynamicMultiPathFitResult.getCandidateId()] = true;
       failCounter.pass();
     }
 
@@ -4131,17 +4131,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     final FloatAreaSum area;
 
     public DynamicMultiPathFitResult(ImageExtractor ie, ImageExtractor ie2, boolean dynamic) {
-      this.frame = FitWorker.this.slice;
-      this.width = cc.dataBounds.width;
-      this.height = cc.dataBounds.height;
-      area = FloatAreaSum.wrap(data, width, height);
+      this.setFrame(FitWorker.this.slice);
+      this.setWidth(cc.dataBounds.width);
+      this.setHeight(cc.dataBounds.height);
+      area = FloatAreaSum.wrap(data, getWidth(), getHeight());
       this.ie = ie;
       this.ie2 = ie2;
       this.dynamic = dynamic;
     }
 
     public void reset(int candidateId) {
-      this.candidateId = candidateId;
+      this.setCandidateId(candidateId);
       fitType = new FitType();
 
       // Reset results
@@ -4365,7 +4365,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     final PreprocessedPeakResult[] results = selectedResult.results;
     if (results == null) {
       if (logger != null) {
-        final int candidateId = dynamicMultiPathFitResult.candidateId;
+        final int candidateId = dynamicMultiPathFitResult.getCandidateId();
         //@formatter:off
         LoggerUtils.log(logger, Level.INFO, "Not fit %d (%d,%d) %s", candidateId,
             cc.fromDataToGlobalX(candidates.get(candidateId).x),
@@ -4377,7 +4377,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       return;
     }
 
-    final int candidateId = dynamicMultiPathFitResult.candidateId;
+    final int candidateId = dynamicMultiPathFitResult.getCandidateId();
 
     final FitResult fitResult = (FitResult) selectedResult.fitResult.data;
 

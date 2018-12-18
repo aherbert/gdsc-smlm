@@ -34,5 +34,5 @@ public interface CoordinateProvider {
    * @param line the line
    * @return The coordinates (or null)
    */
-  public double[] getCoordinates(String line);
+  double[] getCoordinates(String line);
 }

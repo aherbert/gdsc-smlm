@@ -784,7 +784,6 @@ public class PoissonGammaGaussianFunctionTest {
   }
 
   private double[] closelyMatchesPMFIntegration(double error, ConvolutionMode convolutionMode) {
-    // DoubleEquality eq = new DoubleEquality(error, 1e-7);
     final double[] maxError = new double[2];
     for (final double s : noise) {
       for (final double g : totalGain) {
@@ -813,8 +812,7 @@ public class PoissonGammaGaussianFunctionTest {
 
             final double relativeError = DoubleEquality.relativeError(p1, p2);
             final double absError = Math.abs(p1 - p2);
-            final boolean equal = relativeError <= error; // eq.almostEqualRelativeOrAbsolute(p1,
-                                                          // p2);
+            final boolean equal = relativeError <= error;
             if (!equal) {
               // Ignore small probabilities
               if (p1 < 1e-3) {

@@ -41,7 +41,7 @@ public interface PeakResultStoreList extends PeakResultStore {
    * @param index the index
    * @return the peak result
    */
-  public PeakResult get(int index);
+  PeakResult get(int index);
 
   /**
    * Removes the result.
@@ -50,7 +50,7 @@ public interface PeakResultStoreList extends PeakResultStore {
    * @return the peak result removed
    * @throws IndexOutOfBoundsException If the index is invalid
    */
-  public PeakResult remove(int index);
+  PeakResult remove(int index);
 
   /**
    * Removes a range of results.
@@ -59,12 +59,12 @@ public interface PeakResultStoreList extends PeakResultStore {
    * @param toIndex the to index (inclusive)
    * @throws IndexOutOfBoundsException If the index is invalid
    */
-  public void remove(int fromIndex, int toIndex);
+  void remove(int fromIndex, int toIndex);
 
   /**
    * Sort the results.
    */
-  public default void sort() {
+  default void sort() {
     sort(FrameIdPeakResultComparator.INSTANCE);
   }
 
@@ -73,21 +73,21 @@ public interface PeakResultStoreList extends PeakResultStore {
    *
    * @param comparator the comparator
    */
-  public void sort(Comparator<PeakResult> comparator);
+  void sort(Comparator<PeakResult> comparator);
 
   /**
    * Shuffle the results.
    *
    * @param randomSource the random source
    */
-  public void shuffle(final RandomGenerator randomSource);
+  void shuffle(final RandomGenerator randomSource);
 
   /**
    * Shuffle the results.
    *
    * @param randomSource the random source
    */
-  public void shuffle(final UniformRandomProvider randomSource);
+  void shuffle(final UniformRandomProvider randomSource);
 
   /**
    * Returns the index of the first occurrence of the specified result in this store, or -1 if this
@@ -98,7 +98,7 @@ public interface PeakResultStoreList extends PeakResultStore {
    * @param result the result
    * @return the index (or -1)
    */
-  public int indexOf(PeakResult result);
+  int indexOf(PeakResult result);
 
   /**
    * Returns the index of the last occurrence of the specified result in this store, or -1 if this
@@ -109,5 +109,5 @@ public interface PeakResultStoreList extends PeakResultStore {
    * @param result the result
    * @return the index (or -1)
    */
-  public int lastIndexOf(PeakResult result);
+  int lastIndexOf(PeakResult result);
 }

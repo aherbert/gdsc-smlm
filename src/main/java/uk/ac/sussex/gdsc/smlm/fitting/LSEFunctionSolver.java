@@ -33,29 +33,29 @@ public interface LSEFunctionSolver extends FunctionSolver {
    *
    * @return the total sum of squares
    */
-  public double getTotalSumOfSquares();
+  double getTotalSumOfSquares();
 
   /**
    * Gets the residual sum of squares.
    *
    * @return the residual sum of squares
    */
-  public double getResidualSumOfSquares();
+  double getResidualSumOfSquares();
 
   /**
    * Gets the coefficient of determination (R^2 = 1 - SSresiduals / SStotal).
    *
    * @return the coefficient of determination
    */
-  public double getCoefficientOfDetermination();
+  double getCoefficientOfDetermination();
 
   /**
    * Gets the adjusted coefficient of determination (Adjusted R^2 = 1 - [SSresiduals / SStotal] *
-   * [[n - 1] / [n - p - 1]])
+   * [[n - 1] / [n - p - 1]]).
    *
    * @return the adjusted coefficient of determination
    */
-  public double getAdjustedCoefficientOfDetermination();
+  double getAdjustedCoefficientOfDetermination();
 
   /**
    * Gets the mean squared error. This is the residual sum of squares divided by the degrees of
@@ -63,5 +63,5 @@ public interface LSEFunctionSolver extends FunctionSolver {
    *
    * @return the mean squared error
    */
-  public double getMeanSquaredError();
+  double getMeanSquaredError();
 }

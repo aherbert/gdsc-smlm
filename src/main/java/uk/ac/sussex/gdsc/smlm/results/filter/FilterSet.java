@@ -102,6 +102,8 @@ public class FilterSet {
   }
 
   /**
+   * Gets the filters.
+   *
    * @return the filters.
    */
   public List<Filter> getFilters() {
@@ -109,10 +111,12 @@ public class FilterSet {
   }
 
   /**
+   * Convert to an XML representation.
+   *
    * @return An XML representation of this object.
    */
   public String toXML() {
-    return XStreamWrapper.toXML(this);
+    return FilterXStreamUtils.toXML(this);
   }
 
   /**
@@ -123,7 +127,7 @@ public class FilterSet {
    */
   public static FilterSet fromXML(String xml) {
     try {
-      return (FilterSet) XStreamWrapper.fromXML(xml);
+      return (FilterSet) FilterXStreamUtils.fromXML(xml);
     } catch (final ClassCastException ex) {
       // ex.printStackTrace();
     }
@@ -169,6 +173,8 @@ public class FilterSet {
   }
 
   /**
+   * Check if all the filters are the same type.
+   *
    * @return True if all the filters are the same type.
    */
   public boolean allSameType() {
@@ -179,18 +185,19 @@ public class FilterSet {
   }
 
   /**
+   * Check the filters are the same type.
+   *
    * @return 1 if all the filters are the same type, -1 otherwise.
    */
   private int checkAllSameType() {
-    if (size() == 0) {
-      return -1;
+    if (size() <= 1) {
+      // If only 1 filter then it will be the same type
+      return 1;
     }
 
     // Check for the same type
     final String type = filters.get(0).getType();
     for (final Filter f : filters) {
-      // Use the != since the Strings should be immutable
-      // if (f.getType() != type)
       if (!f.getType().equals(type)) {
         return -1;
       }

@@ -33,12 +33,12 @@ public interface FailCounter {
    *
    * @return the description (including any parameter values)
    */
-  public String getDescription();
+  String getDescription();
 
   /**
    * Called when the most recent event passed.
    */
-  public void pass();
+  void pass();
 
   /**
    * Called when the n most recent events passed.
@@ -47,13 +47,13 @@ public interface FailCounter {
    *
    * @param n the n
    */
-  public void pass(int n);
+  void pass(int n);
 
   /**
    * Called when the most recent event failed. It is expected that the result of {@link #isOK()} may
    * change after calling this method.
    */
-  public void fail();
+  void fail();
 
   /**
    * Called when the n most recent event failed. It is expected that the result of {@link #isOK()}
@@ -63,7 +63,7 @@ public interface FailCounter {
    *
    * @param n the n
    */
-  public void fail(int n);
+  void fail(int n);
 
   /**
    * Checks if it is ok to continue the analysis. This is set to false when the analysis should
@@ -71,17 +71,17 @@ public interface FailCounter {
    *
    * @return true, if is ok to continue
    */
-  public boolean isOK();
+  boolean isOK();
 
   /**
    * Create a duplicate fail counter reset to the initialised state.
    *
    * @return the fail counter
    */
-  public FailCounter newCounter();
+  FailCounter newCounter();
 
   /**
    * Reset the counter.
    */
-  public void reset();
+  void reset();
 }

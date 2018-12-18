@@ -35,7 +35,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return the single Gaussian 2D standard deviation
    */
-  public float getStandardDeviation(float[] params);
+  float getStandardDeviation(float[] params);
 
   /**
    * Gets the single Gaussian 2D standard deviation squared from independent x and y standard
@@ -44,7 +44,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return the single Gaussian 2D standard deviation squared
    */
-  public float getStandardDeviation2(float[] params);
+  float getStandardDeviation2(float[] params);
 
   /**
    * Get the amplitude of a Gaussian 2D PSF. Amplitude = intensity / (2*pi*sx*sy).
@@ -52,7 +52,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return the amplitude
    */
-  public float getAmplitude(float[] params);
+  float getAmplitude(float[] params);
 
   /**
    * Get the height of the central pixel of a Gaussian 2D PSF. The integral of the pixel containing
@@ -61,7 +61,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return the pixel amplitude
    */
-  public float getPixelAmplitude(float[] params);
+  float getPixelAmplitude(float[] params);
 
   /**
    * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D
@@ -75,7 +75,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param noise the noise
    * @return The location precision in nm in each dimension (X/Y)
    */
-  public double getLSEPrecision(float[] params, float noise);
+  double getLSEPrecision(float[] params, float noise);
 
   /**
    * Calculate the localisation precision for least squares fitting a Gaussian2D PSF to a Gaussian2D
@@ -85,7 +85,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return The location precision in nm in each dimension (X/Y)
    */
-  public double getLSEPrecision(float[] params);
+  double getLSEPrecision(float[] params);
 
   /**
    * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D
@@ -99,7 +99,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param noise the noise
    * @return The location variance in nm in each dimension (X/Y)
    */
-  public double getLSEVariance(float[] params, float noise);
+  double getLSEVariance(float[] params, float noise);
 
   /**
    * Calculate the localisation variance for least squares fitting a Gaussian2D PSF to a Gaussian2D
@@ -109,7 +109,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return The location variance in nm in each dimension (X/Y)
    */
-  public double getLSEVariance(float[] params);
+  double getLSEVariance(float[] params);
 
   /**
    * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a
@@ -124,7 +124,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param noise the noise
    * @return The location precision in nm in each dimension (X/Y)
    */
-  public double getMLEPrecision(float[] params, float noise);
+  double getMLEPrecision(float[] params, float noise);
 
   /**
    * Calculate the localisation precision for maximum likelihood fitting a Gaussian2D PSF to a
@@ -135,7 +135,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return The location precision in nm in each dimension (X/Y)
    */
-  public double getMLEPrecision(float[] params);
+  double getMLEPrecision(float[] params);
 
   /**
    * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a
@@ -150,7 +150,7 @@ public interface Gaussian2DPeakResultCalculator {
    * @param noise the noise
    * @return The location variance in nm in each dimension (X/Y)
    */
-  public double getMLEVariance(float[] params, float noise);
+  double getMLEVariance(float[] params, float noise);
 
   /**
    * Calculate the localisation variance for maximum likelihood fitting a Gaussian2D PSF to a
@@ -161,5 +161,5 @@ public interface Gaussian2DPeakResultCalculator {
    * @param params the params
    * @return The location variance in nm in each dimension (X/Y)
    */
-  public double getMLEVariance(float[] params);
+  double getMLEVariance(float[] params);
 }

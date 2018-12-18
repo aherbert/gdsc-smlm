@@ -28,6 +28,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
@@ -39,6 +40,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -454,7 +456,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         case INLINE:
           defaultTemplate.setTemplateType(GUIProtos.TemplateType.INLINE_TEMPLATE);
           break;
-        case RESOURCE:
+        default:
+          ValidationUtils.checkArgument(t.templateType == TemplateType.RESOURCE, t.templateType);
           defaultTemplate.setTemplateType(GUIProtos.TemplateType.RESOURCE_TEMPLATE);
           break;
       }

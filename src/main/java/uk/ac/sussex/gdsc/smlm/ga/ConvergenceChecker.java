@@ -37,5 +37,5 @@ public interface ConvergenceChecker<T extends Comparable<T>> {
    * @param current the current
    * @return true if the chromosome has converged
    */
-  public boolean converged(Chromosome<T> previous, Chromosome<T> current);
+  boolean converged(Chromosome<T> previous, Chromosome<T> current);
 }

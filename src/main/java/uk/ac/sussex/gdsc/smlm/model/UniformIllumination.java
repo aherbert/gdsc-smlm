@@ -33,6 +33,8 @@ public class UniformIllumination implements SpatialIllumination {
   private final int pulseInterval;
 
   /**
+   * Instantiates a new uniform illumination.
+   *
    * @param photons The number of photons in a time frame
    */
   public UniformIllumination(double photons) {
@@ -40,6 +42,8 @@ public class UniformIllumination implements SpatialIllumination {
   }
 
   /**
+   * Instantiates a new uniform illumination.
+   *
    * @param photons The number of photons in a time frame
    * @param pulsePhotons The number of photons in a pulse
    * @param pulseInterval The interval between pulses (t=1 is the first pulse). Must be above 1.
@@ -58,10 +62,10 @@ public class UniformIllumination implements SpatialIllumination {
 
   /** {@inheritDoc} */
   @Override
-  public double[] getPulsedPhotons(double[] xyz, int t) {
+  public double[] getPulsedPhotons(double[] xyz, int time) {
 
     if (pulseInterval > 1) {
-      return new double[] {(t % pulseInterval == 1) ? pulsePhotons : 0, photons};
+      return new double[] {(time % pulseInterval == 1) ? pulsePhotons : 0, photons};
     }
     return new double[] {0, photons};
   }

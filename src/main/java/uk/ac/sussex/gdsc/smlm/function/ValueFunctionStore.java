@@ -28,11 +28,11 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Wrap a function and store the values from the procedure.
  */
 public class ValueFunctionStore implements ValueFunction, ValueProcedure {
-  private final ValueFunction f;
+  private final ValueFunction function;
   private ValueProcedure procedure;
 
-  /** The counter i. */
-  protected int i;
+  /** The counter to use as a result index during the procedure. */
+  protected int index;
   /**
    * The values from the last call to {@link #forEach(ValueProcedure)}.
    */
@@ -41,57 +41,57 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure {
   /**
    * Instantiates a new value function store.
    *
-   * @param f the f
+   * @param function the function
    */
-  public ValueFunctionStore(ValueFunction f) {
-    this(f, null);
+  public ValueFunctionStore(ValueFunction function) {
+    this(function, null);
   }
 
   /**
    * Instantiates a new value function store with storage.
    *
-   * @param f the f
+   * @param function the function
    * @param values the values
    */
-  public ValueFunctionStore(ValueFunction f, double[] values) {
-    this.f = f;
+  public ValueFunctionStore(ValueFunction function, double[] values) {
+    this.function = function;
     this.values = values;
   }
 
   /** {@inheritDoc} */
   @Override
   public int size() {
-    return f.size();
+    return function.size();
   }
 
   /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
-    f.initialise0(a);
+    function.initialise0(a);
   }
 
   /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
-    i = 0;
+    index = 0;
     createValues();
     this.procedure = procedure;
-    f.forEach(this);
+    function.forEach(this);
   }
 
   /**
    * Creates the {@link #values} array.
    */
   protected void createValues() {
-    if (values == null || values.length != f.size()) {
-      values = new double[f.size()];
+    if (values == null || values.length != function.size()) {
+      values = new double[function.size()];
     }
   }
 
   /** {@inheritDoc} */
   @Override
   public void execute(double value) {
-    values[i++] = value;
+    values[index++] = value;
     procedure.execute(value);
   }
 }

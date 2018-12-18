@@ -36,56 +36,56 @@ public interface Gaussian2DFitConfiguration {
    * @param maxy the maxy
    * @param params The Gaussian parameters
    */
-  public void initialise(int npeaks, int maxx, int maxy, double[] params);
+  void initialise(int npeaks, int maxx, int maxy, double[] params);
 
   /**
    * True if the fit residuals should be computed.
    *
    * @return true if the fit residuals should be computed
    */
-  public boolean isComputeResiduals();
+  boolean isComputeResiduals();
 
   /**
    * Gets the function solver.
    *
    * @return the function solver
    */
-  public FunctionSolver getFunctionSolver();
+  FunctionSolver getFunctionSolver();
 
   /**
    * True if the fit parameter deviations should be computed.
    *
    * @return true if the fit parameter deviations should be computed
    */
-  public boolean isComputeDeviations();
+  boolean isComputeDeviations();
 
   /**
    * Checks if is background fitting.
    *
    * @return true, if is background fitting
    */
-  public boolean isBackgroundFitting();
+  boolean isBackgroundFitting();
 
   /**
    * Checks if is XSD fitting.
    *
    * @return true, if is XSD fitting
    */
-  public boolean isXSDFitting();
+  boolean isXSDFitting();
 
   /**
    * Checks if is YSD fitting.
    *
    * @return true, if is YSD fitting
    */
-  public boolean isYSDFitting();
+  boolean isYSDFitting();
 
   /**
    * Checks if is angle fitting.
    *
    * @return true, if is angle fitting
    */
-  public boolean isAngleFitting();
+  boolean isAngleFitting();
 
   /**
    * Checks if is z fitting.
@@ -98,49 +98,49 @@ public interface Gaussian2DFitConfiguration {
    *
    * @return true, if is z fitting
    */
-  public boolean isZFitting();
+  boolean isZFitting();
 
   /**
    * Gets the initial guess for the XSD parameter.
    *
    * @return the initial XSD
    */
-  public double getInitialXSD();
+  double getInitialXSD();
 
   /**
    * Gets the initial guess for the YSD parameter.
    *
    * @return the initial YSD
    */
-  public double getInitialYSD();
+  double getInitialYSD();
 
   /**
    * Gets the initial guess for the angle parameter.
    *
    * @return the initial angle
    */
-  public double getInitialAngle();
+  double getInitialAngle();
 
   /**
    * Gets the minimum width factor. This is used to limit the bounds of width fitting.
    *
    * @return the minimum width factor
    */
-  public double getMinWidthFactor();
+  double getMinWidthFactor();
 
   /**
    * Gets the maximum width factor. This is used to limit the bounds of width fitting.
    *
    * @return the maximum width factor
    */
-  public double getMaxWidthFactor();
+  double getMaxWidthFactor();
 
   /**
    * Checks if fit validation should be performed using validateFit.
    *
    * @return true, if fit validation should be performed
    */
-  public boolean isFitValidation();
+  boolean isFitValidation();
 
   /**
    * Check peaks to see if the fit was sensible. This is called after fitting so that the parameters
@@ -152,13 +152,12 @@ public interface Gaussian2DFitConfiguration {
    * @param paramDevs the fitted peak parameters variances (can be null)
    * @return the fit status
    */
-  public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params,
-      double[] paramDevs);
+  FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramDevs);
 
   /**
    * Gets the validation data. This can be set within the validateFit function.
    *
    * @return Data associated with the validation result
    */
-  public Object getValidationData();
+  Object getValidationData();
 }

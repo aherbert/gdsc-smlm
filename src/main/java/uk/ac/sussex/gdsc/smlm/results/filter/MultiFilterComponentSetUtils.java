@@ -27,9 +27,14 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 import java.util.Arrays;
 
 /**
- * Contains a set of components of the multi filter.
+ * Utility functions for {@link MultiFilterComponentSet}. 
  */
-public class MultiFilterComponentSetFactory {
+public final class MultiFilterComponentSetUtils {
+  /**
+   * No public constructor.
+   */
+  private MultiFilterComponentSetUtils() {}
+
   /**
    * Creates the multi filter component set.
    *
@@ -49,7 +54,8 @@ public class MultiFilterComponentSetFactory {
       case 6: return new MultiFilterComponentSet6(components);
       case 7: return new MultiFilterComponentSet7(components);
       //@formatter:on
+      default:
+        return new MultiFilterComponentSetDefault(Arrays.copyOf(components, size));
     }
-    return new MultiFilterComponentSetDefault(Arrays.copyOf(components, size));
   }
 }

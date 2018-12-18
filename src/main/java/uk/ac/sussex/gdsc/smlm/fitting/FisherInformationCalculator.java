@@ -46,5 +46,5 @@ public interface FisherInformationCalculator {
    * @param parameters the parameters (θ)
    * @return the fisher information matrix
    */
-  public FisherInformationMatrix compute(double[] parameters);
+  FisherInformationMatrix compute(double[] parameters);
 }

@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class Gradient1FunctionStore extends ValueFunctionStore
     implements Gradient1Function, Gradient1Procedure {
-  private final Gradient1Function f;
+  private final Gradient1Function function1;
   private Gradient1Procedure procedure;
 
   /** The number of gradients. */
@@ -43,65 +43,65 @@ public class Gradient1FunctionStore extends ValueFunctionStore
   /**
    * Instantiates a new gradient 1 function store.
    *
-   * @param f the f
+   * @param function the function
    */
-  public Gradient1FunctionStore(Gradient1Function f) {
-    this(f, null, null);
+  public Gradient1FunctionStore(Gradient1Function function) {
+    this(function, null, null);
   }
 
   /**
    * Instantiates a new gradient 1 function store with storage.
    *
-   * @param f the f
+   * @param function the function
    * @param values the values
    * @param dyda the dyda
    */
-  public Gradient1FunctionStore(Gradient1Function f, double[] values, double[][] dyda) {
-    super(f, values);
-    this.f = f;
+  public Gradient1FunctionStore(Gradient1Function function, double[] values, double[][] dyda) {
+    super(function, values);
+    this.function1 = function;
     this.dyda = dyda;
-    length = f.getNumberOfGradients();
+    length = function.getNumberOfGradients();
   }
 
   /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
-    f.initialise(a);
+    function1.initialise(a);
   }
 
   /** {@inheritDoc} */
   @Override
   public void initialise1(double[] a) {
-    f.initialise(a);
+    function1.initialise(a);
   }
 
   /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
-    return f.gradientIndices();
+    return function1.gradientIndices();
   }
 
   /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
-    return f.getNumberOfGradients();
+    return function1.getNumberOfGradients();
   }
 
   /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
-    i = 0;
+    index = 0;
     createValues();
     createDYDA();
     this.procedure = procedure;
-    f.forEach((Gradient1Procedure) this);
+    function1.forEach((Gradient1Procedure) this);
   }
 
   /**
    * Creates the {@link #dyda} matrix.
    */
   protected void createDYDA() {
-    if (dyda == null || dyda.length != f.size()) {
+    if (dyda == null || dyda.length != function1.size()) {
       dyda = new double[values.length][length];
     }
   }
@@ -109,9 +109,9 @@ public class Gradient1FunctionStore extends ValueFunctionStore
   /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da) {
-    values[i] = value;
-    System.arraycopy(dy_da[i], 0, dyda[i], 0, length);
-    i++;
+    values[index] = value;
+    System.arraycopy(dy_da[index], 0, dyda[index], 0, length);
+    index++;
     procedure.execute(value, dy_da);
   }
 }

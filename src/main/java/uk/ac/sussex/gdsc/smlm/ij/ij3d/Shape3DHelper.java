@@ -273,37 +273,55 @@ public class Shape3DHelper {
    * @return the list of triangle vertices for the object
    */
   public static List<Point3f> createLocalisationObject(Rendering rendering) {
-    int subdivisions = 0;
     switch (rendering) {
       case CUBE:
         return createCube();
       case SQUARE:
         return createSquare();
-      case HIGH_RES_CIRCLE:
-        subdivisions += 8;
-      case LOW_RES_CIRCLE:
-        subdivisions += 6;
       case HEXAGON:
-        subdivisions += 6;
-        return createDisc(0, 0, 0, 0, 0, 1, 1, subdivisions);
+      case LOW_RES_CIRCLE:
+      case HIGH_RES_CIRCLE:
+        return createDisc(0, 0, 0, 0, 0, 1, 1, getDiscSubdivisions(rendering));
 
       // All handle the same way
-      case SUPER_HIGH_RES_SPHERE:
-        subdivisions++;
-      case HIGH_RES_SPHERE:
-        subdivisions++;
-      case LOW_RES_SPHERE:
-        subdivisions++;
       case ICOSAHEDRON:
-        break;
+      case LOW_RES_SPHERE:
+      case HIGH_RES_SPHERE:
+      case SUPER_HIGH_RES_SPHERE:
+        return customnode.MeshMaker.createIcosahedron(getIcosahedronSubdivisions(rendering), 1f);
 
       case POINT:
       default:
         throw new IllegalStateException("Unknown rendering " + rendering);
     }
+  }
 
-    // All spheres based on icosahedron for speed
-    return customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
+  private static int getDiscSubdivisions(Rendering rendering) {
+    switch (rendering) {
+      case HIGH_RES_CIRCLE:
+        return 20;
+      case LOW_RES_CIRCLE:
+        return 12;
+      case HEXAGON:
+        return 6;
+      default:
+        throw new IllegalStateException("Unsupporterd rendering: " + rendering);
+    }
+  }
+
+  private static int getIcosahedronSubdivisions(Rendering rendering) {
+    switch (rendering) {
+      case ICOSAHEDRON:
+        return 0;
+      case LOW_RES_SPHERE:
+        return 1;
+      case HIGH_RES_SPHERE:
+        return 2;
+      case SUPER_HIGH_RES_SPHERE:
+        return 3;
+      default:
+        throw new IllegalStateException("Unsupporterd rendering: " + rendering);
+    }
   }
 
   /**
@@ -388,8 +406,8 @@ public class Shape3DHelper {
   // For polygons we check the handedness is
   // facing away from the centre so back-face cull can be on.
 
-  private static float sqrt(double d) {
-    return (float) Math.sqrt(d);
+  private static float sqrt(double value) {
+    return (float) Math.sqrt(value);
   }
 
   private static final float[][] triVertices =
@@ -505,17 +523,13 @@ public class Shape3DHelper {
    * @return the list of triangle vertices for the object
    */
   public static List<Point3f> createLocalisationObjectOutline(Rendering rendering) {
-    int subdivisions = 0;
     switch (rendering) {
       case SQUARE:
         return createSquareOutline();
-      case HIGH_RES_CIRCLE:
-        subdivisions += 8;
-      case LOW_RES_CIRCLE:
-        subdivisions += 6;
       case HEXAGON:
-        subdivisions += 6;
-        return createDiscOutline(0, 0, 0, 0, 0, 1, 1, subdivisions);
+      case LOW_RES_CIRCLE:
+      case HIGH_RES_CIRCLE:
+        return createDiscOutline(0, 0, 0, 0, 0, 1, 1, getDiscSubdivisions(rendering));
 
       default:
         return createLocalisationObject(rendering);
@@ -696,7 +710,6 @@ public class Shape3DHelper {
    * @return the geometry info
    */
   public static GeometryInfo createGeometryInfo(Rendering rendering, int colorDepth) {
-    int subdivisions = 0;
     GeometryInfo gi;
     List<Point3f> coords;
     int primitive = GeometryInfo.TRIANGLE_ARRAY;
@@ -715,14 +728,11 @@ public class Shape3DHelper {
         normal.set(0, 0, 1);
         break;
 
-      case HIGH_RES_CIRCLE:
-        subdivisions += 8;
-      case LOW_RES_CIRCLE:
-        subdivisions += 6;
       case HEXAGON:
-        subdivisions += 6;
+      case LOW_RES_CIRCLE:
+      case HIGH_RES_CIRCLE:
         primitive = GeometryInfo.TRIANGLE_FAN_ARRAY;
-        coords = createDiscFan(0, 0, 0, 0, 0, 1, 1, subdivisions);
+        coords = createDiscFan(0, 0, 0, 0, 0, 1, 1, getDiscSubdivisions(rendering));
         stripsCounts = new int[] {coords.size()};
         normal.set(0, 0, 1);
         break;
@@ -744,14 +754,11 @@ public class Shape3DHelper {
         break;
 
       // All spheres based on icosahedron for speed
-      case SUPER_HIGH_RES_SPHERE:
-        subdivisions++;
-      case HIGH_RES_SPHERE:
-        subdivisions++;
-      case LOW_RES_SPHERE:
-        subdivisions++;
       case ICOSAHEDRON:
-        coords = customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
+      case LOW_RES_SPHERE:
+      case HIGH_RES_SPHERE:
+      case SUPER_HIGH_RES_SPHERE:
+        coords = customnode.MeshMaker.createIcosahedron(getIcosahedronSubdivisions(rendering), 1f);
         break;
 
       case POINT:

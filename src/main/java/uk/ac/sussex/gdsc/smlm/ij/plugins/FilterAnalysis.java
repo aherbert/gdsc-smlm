@@ -39,6 +39,7 @@ import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.filter.AndFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterSet;
+import uk.ac.sussex.gdsc.smlm.results.filter.FilterXStreamUtils;
 import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionHysteresisFilter;
@@ -46,7 +47,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.SNRFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.SNRHysteresisFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.TraceFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.XStreamWrapper;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import ij.IJ;
@@ -209,8 +209,9 @@ public class FilterAnalysis implements PlugIn {
 
       try (BufferedReader input = new BufferedReader(
           new UnicodeReader(new FileInputStream(filterSettings.getFilterSetFilename()), null))) {
-        final Object o = XStreamWrapper.getInstance().fromXML(input);
-        if (o != null && o instanceof List<?>) {
+        // Use the instance so we can catch the exception
+        final Object o = FilterXStreamUtils.getXStreamInstance().fromXML(input);
+        if (o instanceof List<?>) {
           SettingsManager.writeSettings(filterSettings.build());
           return (List<FilterSet>) o;
         }
@@ -235,7 +236,8 @@ public class FilterAnalysis implements PlugIn {
       filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
       try (OutputStreamWriter out = new OutputStreamWriter(
           new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8")) {
-        XStreamWrapper.getInstance().toXML(filterSets, out);
+        // Use the instance so we can catch the exception
+        FilterXStreamUtils.getXStreamInstance().toXML(filterSets, out);
         SettingsManager.writeSettings(filterSettings.build());
       } catch (final Exception ex) {
         IJ.log("Unable to save the filter sets to file: " + ex.getMessage());

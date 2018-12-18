@@ -97,8 +97,11 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
     switch (clamp) {
       case DYNAMIC_CLAMP:
         bounds.setDynamicClamp(true);
+        bounds.setClampValues(defaultClampValues);
+        break;
       case CLAMP:
         bounds.setClampValues(defaultClampValues);
+        break;
       case NO_CLAMP:
       default:
         break;

@@ -38,5 +38,5 @@ public interface XYZRResultProcedure {
    * @param z the z
    * @param result the result
    */
-  public void executeXYZR(float x, float y, float z, PeakResult result);
+  void executeXYZR(float x, float y, float z, PeakResult result);
 }

@@ -37,5 +37,5 @@ public interface ScoreFunction<T extends Comparable<T>> {
    * @param points the points
    * @return the result for the optimum of the points
    */
-  public SearchResult<T> findOptimum(double[][] points);
+  SearchResult<T> findOptimum(double[][] points);
 }

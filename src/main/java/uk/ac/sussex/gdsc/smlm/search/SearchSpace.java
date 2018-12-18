@@ -734,6 +734,8 @@ public class SearchSpace {
   }
 
   /**
+   * Gets the tracker.
+   *
    * @return the tracker.
    */
   public TrackProgress getTracker() {

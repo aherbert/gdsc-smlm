@@ -29,10 +29,10 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public interface NamedFunction {
   /**
-   * Gets the name of parameter i.
+   * Gets the name of the parameter.
    *
-   * @param i the index
+   * @param indeex the index
    * @return the name
    */
-  public String getParameterName(int i);
+  String getParameterName(int indeex);
 }

@@ -34,7 +34,7 @@ public interface SpatialIllumination {
    * @param xyz the xyz
    * @return The photons
    */
-  public double getPhotons(double[] xyz);
+  double getPhotons(double[] xyz);
 
   /**
    * Get the number of photons for the position at the specified time.
@@ -44,15 +44,15 @@ public interface SpatialIllumination {
    * illumination source where the pulse is modelled as a zero time event.
    *
    * @param xyz the xyz
-   * @param t the t
+   * @param time the time
    * @return The photons [before,during]
    */
-  public double[] getPulsedPhotons(double[] xyz, int t);
+  double[] getPulsedPhotons(double[] xyz, int time);
 
   /**
    * Gets the average photons.
    *
    * @return An estimate of the average photons per time frame
    */
-  public double getAveragePhotons();
+  double getAveragePhotons();
 }

@@ -37,5 +37,5 @@ public interface Mutator<T extends Comparable<T>> {
    * @param chromosome the chromosome
    * @return a new sequence
    */
-  public Chromosome<T> mutate(Chromosome<T> chromosome);
+  Chromosome<T> mutate(Chromosome<T> chromosome);
 }

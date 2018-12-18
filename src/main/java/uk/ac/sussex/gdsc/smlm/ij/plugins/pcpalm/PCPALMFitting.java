@@ -976,7 +976,6 @@ public class PCPALMFitting implements PlugIn {
     double[] parameters;
     // The model is: sigma, density, range, amplitude
     final double[] initialSolution = new double[] {sigmaS, proteinDensity, sigmaS * 5, 1};
-    int evaluations = 0;
 
     // Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
     // LVM fitting does not support constrained fitting so use a bounded optimiser.
@@ -1002,7 +1001,7 @@ public class PCPALMFitting implements PlugIn {
     }
 
     parameters = constrainedSolution.getPointRef();
-    evaluations = boundedEvaluations;
+    int evaluations = boundedEvaluations;
 
     // Refit using a LVM
     if (useLSE) {
@@ -1019,8 +1018,7 @@ public class PCPALMFitting implements PlugIn {
             .weight(new DiagonalMatrix(function.getWeights()))
             .model(function, new MultivariateMatrixFunction() {
               @Override
-              public double[][] value(double[] point) throws IllegalArgumentException
-              {
+              public double[][] value(double[] point) {
                 return function.jacobian(point);
               }} )
             .build();
@@ -1266,11 +1264,9 @@ public class PCPALMFitting implements PlugIn {
       }
     }
 
-    double[] parameters;
     // The model is: sigma, density, range, amplitude, alpha
     final double[] initialSolution =
         new double[] {sigmaS, proteinDensity, sigmaS * 5, 1, sigmaS * 5};
-    int evaluations = 0;
 
     // Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
     // LVM fitting does not support constrained fitting so use a bounded optimiser.
@@ -1306,8 +1302,8 @@ public class PCPALMFitting implements PlugIn {
       return null;
     }
 
-    parameters = constrainedSolution.getPointRef();
-    evaluations = boundedEvaluations;
+    double[] parameters = constrainedSolution.getPointRef();
+    int evaluations = boundedEvaluations;
 
     // Refit using a LVM
     if (useLSE) {
@@ -1324,8 +1320,7 @@ public class PCPALMFitting implements PlugIn {
             .weight(new DiagonalMatrix(function.getWeights()))
             .model(function, new MultivariateMatrixFunction() {
               @Override
-              public double[][] value(double[] point) throws IllegalArgumentException
-              {
+              public double[][] value(double[] point) {
                 return function.jacobian(point);
               }} )
             .build();
@@ -1455,7 +1450,7 @@ public class PCPALMFitting implements PlugIn {
 
     /**
      * Get the value of the function for all data points corresponding to the last call to
-     * {@link #jacobian(double[])}
+     * {@link #jacobian(double[])}.
      *
      * @return The corresponding value
      */

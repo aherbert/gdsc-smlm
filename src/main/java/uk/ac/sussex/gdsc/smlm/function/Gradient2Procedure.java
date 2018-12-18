@@ -37,5 +37,5 @@ public interface Gradient2Procedure {
    * @param gradient2 Partial second derivative of function with respect to each coefficient
    *        identified by {@link GradientFunction#gradientIndices()}
    */
-  public void execute(double value, double[] gradient1, double[] gradient2);
+  void execute(double value, double[] gradient1, double[] gradient2);
 }

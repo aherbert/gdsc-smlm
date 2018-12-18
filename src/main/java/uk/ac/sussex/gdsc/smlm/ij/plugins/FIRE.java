@@ -145,7 +145,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Bernd Reiger.
  */
 public class FIRE implements PlugIn {
-  private String TITLE = "Fourier Image REsolution (FIRE)";
+  private String pluginTitle = "Fourier Image REsolution (FIRE)";
   private static String inputOption = "";
   private static String inputOption2 = "";
 
@@ -198,7 +198,7 @@ public class FIRE implements PlugIn {
 
   /**
    * Specify the method to use to determine the parameters for the distribution of the localisation
-   * precision (assumed to be Gaussian)
+   * precision (assumed to be Gaussian).
    */
   private enum PrecisionMethod {
     //@formatter:off
@@ -387,17 +387,17 @@ public class FIRE implements PlugIn {
     // Require some fit results and selected regions
     final int size = MemoryPeakResults.countMemorySize();
     if (size == 0) {
-      IJ.error(TITLE, "There are no fitting results in memory");
+      IJ.error(pluginTitle, "There are no fitting results in memory");
       return;
     }
 
     if ("q".equals(arg)) {
-      TITLE += " Q estimation";
+      pluginTitle += " Q estimation";
       runQEstimation();
       return;
     }
 
-    IJ.showStatus(TITLE + " ...");
+    IJ.showStatus(pluginTitle + " ...");
 
     if (!showInputDialog()) {
       return;
@@ -405,20 +405,20 @@ public class FIRE implements PlugIn {
 
     MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
     if (results == null || results.size() == 0) {
-      IJ.error(TITLE, "No results could be loaded");
+      IJ.error(pluginTitle, "No results could be loaded");
       return;
     }
     MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
 
     results = cropToRoi(results);
     if (results.size() < 2) {
-      IJ.error(TITLE, "No results within the crop region");
+      IJ.error(pluginTitle, "No results within the crop region");
       return;
     }
     if (results2 != null) {
       results2 = cropToRoi(results2);
       if (results2.size() < 2) {
-        IJ.error(TITLE, "No results2 within the crop region");
+        IJ.error(pluginTitle, "No results2 within the crop region");
         return;
       }
     }
@@ -473,7 +473,7 @@ public class FIRE implements PlugIn {
         final TurboList<FIREWorker> workers = new TurboList<>(repeats);
         setProgress(repeats);
         IJ.showProgress(0);
-        IJ.showStatus(TITLE + " computing ...");
+        IJ.showStatus(pluginTitle + " computing ...");
         for (int i = 1; i <= repeats; i++) {
           final FIREWorker w = new FIREWorker(i, fourierImageScale, imageSize);
           workers.add(w);
@@ -542,7 +542,7 @@ public class FIRE implements PlugIn {
 
         if (oom) {
           //@formatter:off
-          IJ.error(TITLE,
+          IJ.error(pluginTitle,
               "ERROR - Parallel computation out-of-memory.\n \n" +
           TextUtils.wrap("The number of results will be reduced. " +
                   "Please reduce the size of the Fourier image " +
@@ -561,8 +561,8 @@ public class FIRE implements PlugIn {
       }
     }
 
-    IJ.showStatus(
-        TITLE + " complete : " + TextUtils.millisToString(System.currentTimeMillis() - start));
+    IJ.showStatus(pluginTitle + " complete : "
+        + TextUtils.millisToString(System.currentTimeMillis() - start));
   }
 
   private void logResult(String name, FireResult result) {
@@ -573,7 +573,7 @@ public class FIRE implements PlugIn {
       ImageJUtils.log(
           "%s Warning: NaN result possible if the resolution is below the pixel size of the"
               + " input Fourier image (%s %s).",
-          TITLE, MathUtils.rounded(result.getNmPerPixel()), units);
+          pluginTitle, MathUtils.rounded(result.getNmPerPixel()), units);
     }
   }
 
@@ -619,7 +619,7 @@ public class FIRE implements PlugIn {
   }
 
   private boolean showInputDialog() {
-    ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addMessage("Compute the resolution using Fourier Ring Correlation");
     gd.addHelp(About.HELP_URL);
 
@@ -658,7 +658,7 @@ public class FIRE implements PlugIn {
         Recorder.recordOption("Image", roiImage);
       } else {
         final String[] items = titles.toArray(new String[titles.size()]);
-        gd = new ExtendedGenericDialog(TITLE);
+        gd = new ExtendedGenericDialog(pluginTitle);
         gd.addMessage("Select the source image for the ROI");
         gd.addChoice("Image", items, roiImage);
         gd.showDialog();
@@ -680,7 +680,7 @@ public class FIRE implements PlugIn {
   }
 
   private boolean showDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addMessage("Compute the resolution using Fourier Ring Correlation");
     gd.addHelp(About.HELP_URL);
 
@@ -776,7 +776,7 @@ public class FIRE implements PlugIn {
         setCorrectionParameters(qValue, mean, sigma);
       }
     } catch (final IllegalArgumentException ex) {
-      IJ.error(TITLE, ex.getMessage());
+      IJ.error(pluginTitle, ex.getMessage());
       return false;
     }
 
@@ -808,10 +808,10 @@ public class FIRE implements PlugIn {
         units = UnitHelper.getShortName(DistanceUnit.NM);
         unit = DistanceUnit.NM;
       } catch (final ConversionException ex) {
-        IJ.log(TITLE + " Warning: Ignoring invalid distance calibration for primary results");
+        IJ.log(pluginTitle + " Warning: Ignoring invalid distance calibration for primary results");
       }
     } else {
-      IJ.log(TITLE + " Warning: No calibration exists for primary results");
+      IJ.log(pluginTitle + " Warning: No calibration exists for primary results");
     }
 
     // Calibration must match between datasets
@@ -819,7 +819,8 @@ public class FIRE implements PlugIn {
       CalibrationReader cal2 = results.getCalibrationReader();
       if (unit == null) {
         if (cal2 != null) {
-          IJ.log(TITLE + " Warning: Ignoring calibration for secondary results since no calibration"
+          IJ.log(pluginTitle
+              + " Warning: Ignoring calibration for secondary results since no calibration"
               + " exists for primary results");
         }
       } else {
@@ -836,7 +837,8 @@ public class FIRE implements PlugIn {
         } finally {
           if (cal2 == null) {
             this.results = null;
-            IJ.error(TITLE, "Error: Calibration between the two input datasets does not match");
+            IJ.error(pluginTitle,
+                "Error: Calibration between the two input datasets does not match");
             return;
           }
         }
@@ -1024,7 +1026,7 @@ public class FIRE implements PlugIn {
         return null;
       }
       if (blockSize != FIRE.blockSize) {
-        IJ.log(TITLE + " Warning: Changed block size to " + blockSize);
+        IJ.log(pluginTitle + " Warning: Changed block size to " + blockSize);
       }
 
       final Counter i = new Counter();
@@ -1372,7 +1374,7 @@ public class FIRE implements PlugIn {
       ImageJUtils.log(
           "%s Warning: The super-resolution pixel size (%s) should be smaller than 1/4 of R"
               + " (the resolution %s)",
-          TITLE, MathUtils.rounded(images.nmPerPixel), MathUtils.rounded(fireNumber));
+          pluginTitle, MathUtils.rounded(images.nmPerPixel), MathUtils.rounded(fireNumber));
     }
 
     return new FireResult(fireNumber, result.correlation, frcCurve, originalCorrelationCurve);
@@ -1380,7 +1382,7 @@ public class FIRE implements PlugIn {
 
   @SuppressWarnings("null")
   private void runQEstimation() {
-    IJ.showStatus(TITLE + " ...");
+    IJ.showStatus(pluginTitle + " ...");
 
     if (!showQEstimationInputDialog()) {
       return;
@@ -1388,17 +1390,17 @@ public class FIRE implements PlugIn {
 
     MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
     if (results == null || results.size() == 0) {
-      IJ.error(TITLE, "No results could be loaded");
+      IJ.error(pluginTitle, "No results could be loaded");
       return;
     }
     if (results.getCalibration() == null) {
-      IJ.error(TITLE, "The results are not calibrated");
+      IJ.error(pluginTitle, "The results are not calibrated");
       return;
     }
 
     results = cropToRoi(results);
     if (results.size() < 2) {
-      IJ.error(TITLE, "No results within the crop region");
+      IJ.error(pluginTitle, "No results within the crop region");
       return;
     }
 
@@ -1409,7 +1411,7 @@ public class FIRE implements PlugIn {
     // Get the initial mean and SD and plot as a Gaussian.
     final PrecisionHistogram histogram = calculatePrecisionHistogram();
     if (histogram == null) {
-      IJ.error(TITLE, "No localisation precision available.\n \nPlease choose "
+      IJ.error(pluginTitle, "No localisation precision available.\n \nPlease choose "
           + PrecisionMethod.FIXED + " and enter a precision mean and SD.");
       return;
     }
@@ -1436,7 +1438,7 @@ public class FIRE implements PlugIn {
     frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
     final FRCCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2, images.nmPerPixel);
     if (frcCurve == null) {
-      IJ.error(TITLE, "Failed to compute FRC curve");
+      IJ.error(pluginTitle, "Failed to compute FRC curve");
       return;
     }
 
@@ -1480,7 +1482,7 @@ public class FIRE implements PlugIn {
     }
     // Require we fit at least 10% of the curve
     if (high - low < q.length * 0.1) {
-      IJ.error(TITLE, "Not enough points for Q estimation");
+      IJ.error(pluginTitle, "Not enough points for Q estimation");
       return;
     }
 
@@ -1550,7 +1552,7 @@ public class FIRE implements PlugIn {
         final LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
         smooth = loess.smooth(q, l);
       } catch (final Exception ex) {
-        IJ.error(TITLE, "LOESS smoothing failed");
+        IJ.error(pluginTitle, "LOESS smoothing failed");
         return;
       }
     } else {
@@ -1595,7 +1597,7 @@ public class FIRE implements PlugIn {
       for (int i = 0; i < q.length; i++) {
         line[i] = curve.value(q[i], estimate);
       }
-      final String title = TITLE + " Initial fit";
+      final String title = pluginTitle + " Initial fit";
       final Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
       final String label = String.format("Q = %.3f", qValue);
       plot.addPoints(qScaled, smooth, Plot.LINE);
@@ -1694,7 +1696,7 @@ public class FIRE implements PlugIn {
     // sliders for the mean and standard deviation of the localisation precision.
     showQEstimationDialog(histogram, qplot, images.nmPerPixel);
 
-    IJ.showStatus(TITLE + " complete");
+    IJ.showStatus(pluginTitle + " complete");
   }
 
   private static double[] scale(double[] a, double f) {
@@ -1925,7 +1927,7 @@ public class FIRE implements PlugIn {
   }
 
   private boolean showQEstimationInputDialog() {
-    ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addHelp(About.HELP_URL);
 
     // Build a list of all images with a region ROI
@@ -2023,7 +2025,7 @@ public class FIRE implements PlugIn {
       }
       Parameters.isAbove("MaxQ", maxQ, minQ);
     } catch (final IllegalArgumentException ex) {
-      IJ.error(TITLE, ex.getMessage());
+      IJ.error(pluginTitle, ex.getMessage());
       return false;
     }
 
@@ -2033,7 +2035,7 @@ public class FIRE implements PlugIn {
         Recorder.recordOption("Image", roiImage);
       } else {
         final String[] items = titles.toArray(new String[titles.size()]);
-        gd = new ExtendedGenericDialog(TITLE);
+        gd = new ExtendedGenericDialog(pluginTitle);
         gd.addMessage("Select the source image for the ROI");
         gd.addChoice("Image", items, roiImage);
         gd.showDialog();
@@ -2405,7 +2407,7 @@ public class FIRE implements PlugIn {
       // If the user selected a method not available then log a warning
       if (m != null && precisionMethod != PrecisionMethod.FIXED) {
         IJ.log(String.format("%s : Selected precision method '%s' not available, switching to '%s'",
-            TITLE, precisionMethod, m.getName()));
+            pluginTitle, precisionMethod, m.getName()));
       }
 
       if (m == null) {
@@ -2780,7 +2782,7 @@ public class FIRE implements PlugIn {
       workflow.run(new WorkSettings(histogram.mean, histogram.sigma, qplot.qValue));
 
       // Build the dialog
-      final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+      final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(pluginTitle);
       gd.addHelp(About.HELP_URL);
 
       final double mu = histogram.mean / nmPerPixel;

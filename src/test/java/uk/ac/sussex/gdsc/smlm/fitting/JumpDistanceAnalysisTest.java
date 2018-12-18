@@ -123,13 +123,13 @@ public class JumpDistanceAnalysisTest {
         final MixedJumpDistanceFunction fp = new MixedJumpDistanceFunction(null, d, 2);
         final MixedJumpDistanceCumulFunction fc =
             new MixedJumpDistanceCumulFunction(null, null, d, 2);
-        double x = d / 8;
         final UnivariateFunction func = new UnivariateFunction() {
           @Override
           public double value(double x) {
             return fp.evaluate(x, params);
           }
         };
+        double x = d / 8;
         for (int i = 1; i < 10; i++, x *= 2) {
           final double e = fc.evaluate(x, params);
           // Integrate

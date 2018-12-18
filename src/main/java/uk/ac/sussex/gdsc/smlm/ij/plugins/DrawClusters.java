@@ -229,7 +229,7 @@ public class DrawClusters implements PlugIn {
           values[i] = -traces[i].getMSD();
           break;
         case 6: // Mean / Frame
-          values[i] = -traces[i].getMeanPerFrame();
+          values[i] = -traces[i].getMeanDistance();
           break;
         case 0: // No sort
         default:

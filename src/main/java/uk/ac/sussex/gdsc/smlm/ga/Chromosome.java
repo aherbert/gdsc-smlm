@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+
 /**
  * Define the genetic sequence that can evolve.
  *
@@ -35,14 +37,14 @@ public interface Chromosome<T extends Comparable<T>> {
    *
    * @return The chromosome length
    */
-  public int length();
+  int length();
 
   /**
    * Get the chromosome sequence.
    *
    * @return the chromosome sequence (must equal the length)
    */
-  public double[] sequence();
+  double[] sequence();
 
   /**
    * Create a new chromosome.
@@ -50,7 +52,7 @@ public interface Chromosome<T extends Comparable<T>> {
    * @param sequence the chromosome sequence (must equal the current length)
    * @return A new chromosome with the given sequence
    */
-  public Chromosome<T> newChromosome(double[] sequence);
+  Chromosome<T> newChromosome(double[] sequence);
 
   /**
    * Get the range for mutation at each position in the sequence. This defines how far each position
@@ -58,7 +60,7 @@ public interface Chromosome<T extends Comparable<T>> {
    *
    * @return The range for mutation at each position in the sequence (must equal length)
    */
-  public double[] mutationStepRange();
+  double[] mutationStepRange();
 
   /**
    * Get the lower limit at each position in the sequence. It is valid to return negative infinity
@@ -66,7 +68,8 @@ public interface Chromosome<T extends Comparable<T>> {
    *
    * @return The lower limit for each position in the sequence (must equal length)
    */
-  public double[] lowerLimit();
+  @Nullable
+  double[] lowerLimit();
 
   /**
    * Get the upper limit at each position in the sequence. It is valid to return positive infinity
@@ -74,7 +77,8 @@ public interface Chromosome<T extends Comparable<T>> {
    *
    * @return The upper limit for each position in the sequence (must equal length)
    */
-  public double[] upperLimit();
+  @Nullable
+  double[] upperLimit();
 
   // Note: Default implementation of the getter/setter to store the double would require using Java
   // 8.
@@ -84,7 +88,7 @@ public interface Chromosome<T extends Comparable<T>> {
    *
    * @param fitness The fitness of the sequence
    */
-  public void setFitness(T fitness);
+  void setFitness(T fitness);
 
   /**
    * Get the fitness.
@@ -94,7 +98,7 @@ public interface Chromosome<T extends Comparable<T>> {
    *
    * @return The fitness of the sequence
    */
-  public T getFitness();
+  T getFitness();
 
   /**
    * Calculate the distance to another chromosome.
@@ -102,7 +106,7 @@ public interface Chromosome<T extends Comparable<T>> {
    * @param other the other chromosome
    * @return the distance (zero is a match)
    */
-  public double distance(Chromosome<T> other);
+  double distance(Chromosome<T> other);
 
   /**
    * Calculate if equal to another chromosome.
@@ -110,5 +114,5 @@ public interface Chromosome<T extends Comparable<T>> {
    * @param other the other chromosome
    * @return true if the same
    */
-  public boolean equals(Chromosome<T> other);
+  boolean equalTo(Chromosome<T> other);
 }

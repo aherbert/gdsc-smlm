@@ -52,6 +52,7 @@ import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -178,38 +179,38 @@ public class Configuration
       final Vector<Checkbox> checkboxes = gd.getCheckboxes();
       final Vector<Choice> choices = gd.getChoices();
 
-      int n = 0;
-      int b = 0;
-      int ch = 0;
+      final Iterator<TextField> nu = numerics.iterator();
+      final Iterator<Checkbox> cb = checkboxes.iterator();
+      final Iterator<Choice> ch = choices.iterator();
 
-      final Choice textTemplate = choices.get(ch++);
+      final Choice textTemplate = ch.next();
       textTemplate.addItemListener(this);
 
-      textCameraType = choices.get(ch++);
-      textNmPerPixel = numerics.get(n++);
-      textExposure = numerics.get(n++);
-      textPSF = choices.get(ch++);
-      textDataFilterType = choices.get(ch++);
-      textDataFilterMethod = choices.get(ch++);
-      textSmooth = numerics.get(n++);
-      textSearch = numerics.get(n++);
-      textBorder = numerics.get(n++);
-      textFitting = numerics.get(n++);
-      textFitSolver = choices.get(ch++);
-      textFailuresLimit = numerics.get(n++);
-      textPassRate = numerics.get(n++);
-      textIncludeNeighbours = checkboxes.get(b++);
-      textNeighbourHeightThreshold = numerics.get(n++);
-      textResidualsThreshold = numerics.get(n++);
-      textDuplicateDistance = numerics.get(n++);
-      textSmartFilter = checkboxes.get(b++);
-      textDisableSimpleFilter = checkboxes.get(b++);
-      textCoordinateShiftFactor = numerics.get(n++);
-      textSignalStrength = numerics.get(n++);
-      textMinPhotons = numerics.get(n++);
-      textMinWidthFactor = numerics.get(n++);
-      textWidthFactor = numerics.get(n++);
-      textPrecisionThreshold = numerics.get(n++);
+      textCameraType = ch.next();
+      textNmPerPixel = nu.next();
+      textExposure = nu.next();
+      textPSF = ch.next();
+      textDataFilterType = ch.next();
+      textDataFilterMethod = ch.next();
+      textSmooth = nu.next();
+      textSearch = nu.next();
+      textBorder = nu.next();
+      textFitting = nu.next();
+      textFitSolver = ch.next();
+      textFailuresLimit = nu.next();
+      textPassRate = nu.next();
+      textIncludeNeighbours = cb.next();
+      textNeighbourHeightThreshold = nu.next();
+      textResidualsThreshold = nu.next();
+      textDuplicateDistance = nu.next();
+      textSmartFilter = cb.next();
+      textDisableSimpleFilter = cb.next();
+      textCoordinateShiftFactor = nu.next();
+      textSignalStrength = nu.next();
+      textMinPhotons = nu.next();
+      textMinWidthFactor = nu.next();
+      textWidthFactor = nu.next();
+      textPrecisionThreshold = nu.next();
 
       updateFilterInput();
       textSmartFilter.addItemListener(this);

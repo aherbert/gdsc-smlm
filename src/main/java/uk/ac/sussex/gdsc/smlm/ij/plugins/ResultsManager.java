@@ -31,6 +31,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
@@ -92,6 +93,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -1058,12 +1060,8 @@ public class ResultsManager implements PlugIn {
    * @param source the source
    * @param input the input
    */
-  public static void addInputSource(ArrayList<String> source, InputSource input) {
+  public static void addInputSource(List<String> source, InputSource input) {
     switch (input) {
-      case NONE:
-        source.add(INPUT_NONE);
-        break;
-
       case FILE:
         source.add(INPUT_FILE);
         break;
@@ -1075,6 +1073,11 @@ public class ResultsManager implements PlugIn {
         for (final String name : MemoryPeakResults.getResultNames()) {
           addInputSource(source, MemoryPeakResults.getResults(name), input);
         }
+        break;
+
+      default:
+        ValidationUtils.checkArgument(input == InputSource.NONE, input);
+        source.add(INPUT_NONE);
         break;
     }
   }
@@ -1088,7 +1091,7 @@ public class ResultsManager implements PlugIn {
    *        frames, MEMORY_CLUSTERED : Select only those results which have at least some IDs above
    *        zero (allowing zero to be a valid cluster Id for no cluster)
    */
-  public static void addInputSource(ArrayList<String> source, MemoryPeakResults memoryResults,
+  public static void addInputSource(List<String> source, MemoryPeakResults memoryResults,
       InputSource input) {
     if (memoryResults.size() > 0) {
       switch (input) {

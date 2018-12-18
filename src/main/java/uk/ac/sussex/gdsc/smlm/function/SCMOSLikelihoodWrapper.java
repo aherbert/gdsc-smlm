@@ -474,7 +474,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
   }
 
   /**
-   * Compute the Fisher's Information Matrix (I) for fitted variables:
+   * Compute the Fisher's Information Matrix (I) for fitted variables.
    *
    * <pre>
    * Iab = sum(k) 1/(uk+vark/gk^2)  (duk da) * (duk db)

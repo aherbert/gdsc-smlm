@@ -2090,7 +2090,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
      * @param params The fitted peak parameters
      * @param paramDevs the fitted peak parameter variances (can be null)
      */
-    public void setResult(int peakNumber, double[] initialParams, double[] params,
+    void setResult(int peakNumber, double[] initialParams, double[] params,
         double[] paramDevs);
 
     /**
@@ -2098,14 +2098,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
      *
      * @return the local background
      */
-    public double getLocalBackground();
+    double getLocalBackground();
 
     /**
      * Gets the noise.
      *
      * @return the noise
      */
-    public double getNoise();
+    double getNoise();
   }
 
   private FitStatus result;

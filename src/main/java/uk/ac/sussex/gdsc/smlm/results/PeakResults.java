@@ -37,7 +37,7 @@ public interface PeakResults {
   /**
    * Should be called at the start of fitting to prepare the output.
    */
-  public void begin();
+  void begin();
 
   /**
    * Add a fitted peak result.
@@ -52,7 +52,7 @@ public interface PeakResults {
    * @param params The peak parameters
    * @param paramsStdDev The peak parameters standard deviations
    */
-  public void add(int peak, int origX, int origY, float origValue, double error, float noise,
+  void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanSignal, float[] params, float[] paramsStdDev);
 
   /**
@@ -60,53 +60,61 @@ public interface PeakResults {
    *
    * @param result the result
    */
-  public void add(PeakResult result);
+  void add(PeakResult result);
 
   /**
    * Add a series of fitted peak results.
    *
    * @param results the results
    */
-  public void addAll(Collection<PeakResult> results);
+  void addAll(Collection<PeakResult> results);
 
   /**
    * Add a series of fitted peak results.
    *
    * @param results the results
    */
-  public void addAll(PeakResult[] results);
+  void addAll(PeakResult[] results);
 
   /**
    * Add a series of fitted peak results.
    *
    * @param results the results
    */
-  public void addAll(PeakResultStore results);
+  void addAll(PeakResultStore results);
 
   /**
-   * @return The number of results added since begin().
+   * Get the number of results added since {@link #begin()}.
+   *
+   * @return The number of results added
    */
-  public int size();
+  int size();
 
   /**
    * Called at the end of fitting to finalise the output.
    */
-  public void end();
+  void end();
 
   /**
+   * Checks if still accepting results using the add methods.
+   *
    * @return True if still accepting results using the add methods.
    */
-  public boolean isActive();
+  boolean isActive();
 
   /**
+   * Sets the source used to create the results.
+   *
    * @param source The source used to create the results
    */
-  public void setSource(ImageSource source);
+  void setSource(ImageSource source);
 
   /**
+   * Gets the source used to create the results.
+   *
    * @return The source used to create the results.
    */
-  public ImageSource getSource();
+  ImageSource getSource();
 
   /**
    * Set the bounds of the results. All fitting results are expected to be within the bounds, i.e.
@@ -117,7 +125,7 @@ public interface PeakResults {
    *
    * @param bounds The bounds of the image source used to create the results
    */
-  public void setBounds(Rectangle bounds);
+  void setBounds(Rectangle bounds);
 
   /**
    * Get the bounds of the rectangle taken from the image source that encapsulates all the fitting
@@ -128,56 +136,68 @@ public interface PeakResults {
    *
    * @return The bounds used to create the results
    */
-  public Rectangle getBounds();
+  Rectangle getBounds();
 
   /**
+   * Sets the calibration used to obtain the results.
+   *
    * @param calibration The calibration used to obtain the results
    */
-  public void setCalibration(Calibration calibration);
+  void setCalibration(Calibration calibration);
 
   /**
+   * Gets the calibration used to obtain the results.
+   *
    * @return The calibration used to obtain the results.
    */
-  public Calibration getCalibration();
+  Calibration getCalibration();
 
   /**
    * Gets the Point Spread Function (PSF) used when fitting the results.
    *
-   * @return the psf
+   * @return the PSF
    */
-  public PSF getPSF();
+  PSF getPSF();
 
   /**
    * Sets the Point Spread Function (PSF) used when fitting the results.
    *
-   * @param psf the new psf
+   * @param psf the new PSF
    */
-  public void setPSF(PSF psf);
+  void setPSF(PSF psf);
 
   /**
+   * Sets the configuration used to obtain the results.
+   *
    * @param configuration The configuration used to create the results
    */
-  public void setConfiguration(String configuration);
+  void setConfiguration(String configuration);
 
   /**
+   * Gets the configuration used to obtain the results.
+   *
    * @return The configuration used to create the results.
    */
-  public String getConfiguration();
+  String getConfiguration();
 
   /**
+   * Gets the name of the results set.
+   *
    * @return The name of the results set.
    */
-  public String getName();
+  String getName();
 
   /**
+   * Sets the name of the results set.
+   *
    * @param name The name of the results set
    */
-  public void setName(String name);
+  void setName(String name);
 
   /**
    * Copy the settings (source, bounds, configuration) from the given results.
    *
    * @param peakResults the peak results
    */
-  public void copySettings(PeakResults peakResults);
+  void copySettings(PeakResults peakResults);
 }

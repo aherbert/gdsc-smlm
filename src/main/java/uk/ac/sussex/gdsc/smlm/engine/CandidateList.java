@@ -41,7 +41,7 @@ class CandidateList {
      * @param candidate the candidate
      * @return true, if successful
      */
-    public boolean test(Candidate candidate);
+    boolean test(Candidate candidate);
   }
 
   private static class CandidateComparator implements Comparator<Candidate> {

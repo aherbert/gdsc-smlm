@@ -38,7 +38,7 @@ public interface SpatialDistribution {
    *
    * @return The next position [x,y,z]
    */
-  public double[] next();
+  double[] next();
 
   /**
    * Check if the coordinates are within the distribution bounds.
@@ -46,7 +46,7 @@ public interface SpatialDistribution {
    * @param xyz the xyz
    * @return True if the coordinates are within the distribution bounds
    */
-  public boolean isWithin(double[] xyz);
+  boolean isWithin(double[] xyz);
 
   /**
    * Check if the coordinates are within the distribution bounds in the XY dimensions. If the
@@ -56,7 +56,7 @@ public interface SpatialDistribution {
    * @param xyz the xyz
    * @return True if the coordinates are within the distribution bounds in the XY dimensions
    */
-  public boolean isWithinXy(double[] xyz);
+  boolean isWithinXy(double[] xyz);
 
   /**
    * Initialise the distribution with a set of coordinates. This can be used before calls to
@@ -65,5 +65,5 @@ public interface SpatialDistribution {
    *
    * @param xyz the xyz
    */
-  public void initialise(double[] xyz);
+  void initialise(double[] xyz);
 }

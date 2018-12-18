@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
@@ -52,7 +53,6 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.procedure.TObjectProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -63,6 +63,8 @@ import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -72,6 +74,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Attempt to classify the spot candidates into those that do match a result and those that do not.
@@ -871,28 +875,30 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     return subset;
   }
 
-  private static void put(BlockingQueue<Integer> jobs, int i) {
+  private static void put(BlockingQueue<Integer> jobs, int index) {
     try {
-      jobs.put(i);
+      jobs.put(index);
     } catch (final InterruptedException ex) {
-      throw new RuntimeException("Unexpected interruption", ex);
+      Logger.getLogger(BenchmarkSmartSpotRanking.class.getName()).log(Level.WARNING,
+          "Unexpected interruption", ex);
+      Thread.currentThread().interrupt();
     }
   }
 
-  private class ScoredResult implements Comparable<ScoredResult> {
-    int i;
+  private static class ScoredResult implements Comparable<ScoredResult> {
+    int index;
     double score;
     String result;
 
-    public ScoredResult(int i, double score, String result) {
-      this.i = i;
+    public ScoredResult(int index, double score, String result) {
+      this.index = index;
       this.score = score;
       this.result = result;
     }
 
     @Override
-    public int compareTo(ScoredResult o) {
-      return Double.compare(o.score, score);
+    public int compareTo(ScoredResult other) {
+      return Double.compare(other.score, score);
     }
   }
 
@@ -911,39 +917,15 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     final double[] counter1 = new double[2];
     final int[] counter2 = new int[2];
-    filterCandidates.forEachValue(new TObjectProcedure<FilterCandidates>() {
-      @Override
-      public boolean execute(FilterCandidates result) {
-        counter1[0] += result.np;
-        counter1[1] += result.nn;
-        counter2[0] += result.p;
-        counter2[1] += result.n;
-        return true;
-      }
+    filterCandidates.forEachValue(result -> {
+      counter1[0] += result.np;
+      counter1[1] += result.nn;
+      counter2[0] += result.p;
+      counter2[1] += result.n;
+      return true;
     });
-    double tp = counter1[0];
-    double fp = counter1[1];
     final int cTP = counter2[0];
     final int cFP = counter2[2];
-
-    // // This should be the same
-    // double tp2 = 0;
-    // double fp2 = 0;
-    // int cTP2 = 0, cFP2 = 0;
-    // for (RankResults rr : rankResults.values())
-    // {
-    // for (ScoredSpot spot : rr.spots)
-    // {
-    // if (spot.match)
-    // cTP2++;
-    // else
-    // cFP2++;
-    // tp2 += spot.getScore();
-    // fp2 += spot.antiScore();
-    // }
-    // }
-    // if (tp != tp2 || fp != fp2 || cTP != cTP2 || cFP != cFP2)
-    // System.out.println("Error counting");
 
     // The fraction of positive and negative candidates that were included
     add(sb, (100.0 * cTP) / nP);
@@ -955,6 +937,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     add(sb, cFP);
 
     // Add fractional counts of the the candidates
+    double tp = counter1[0];
+    double fp = counter1[1];
     add(sb, tp + fp);
     add(sb, tp);
     add(sb, fp);
@@ -1101,7 +1085,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
 
     if (showOverlay) {
-      final int bestMethod = list.get(0).i;
+      final int bestMethod = list.get(0).index;
       final Overlay o = new Overlay();
       for (int j = 0; j < results.length; j++) {
         final int frame = frames[j];

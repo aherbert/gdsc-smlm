@@ -33,5 +33,5 @@ public interface ValueProcedure {
    *
    * @param value the value of the function
    */
-  public void execute(double value);
+  void execute(double value);
 }

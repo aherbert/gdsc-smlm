@@ -87,6 +87,7 @@ import ij.process.ImageProcessor;
 import ij.process.LUT;
 
 import java.awt.AWTEvent;
+import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Label;
@@ -96,6 +97,7 @@ import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -264,23 +266,23 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
       final Vector<TextField> numerics = gd.getNumericFields();
       final Vector<Choice> choices = gd.getChoices();
 
-      int n = 0;
-      int ch = 0;
+      final Iterator<TextField> nu = numerics.iterator();
+      final Iterator<Choice> ch = choices.iterator();
 
-      final Choice textTemplate = choices.get(ch++);
+      final Choice textTemplate = ch.next();
       textTemplate.removeItemListener(gd);
       textTemplate.removeKeyListener(gd);
       textTemplate.addItemListener(this);
 
-      textCameraModelName = choices.get(ch++);
-      textPSF = choices.get(ch++);
-      textDataFilterType = choices.get(ch++);
-      textDataFilterMethod = choices.get(ch++);
-      textSmooth = numerics.get(n++);
-      textDataFilterMethod2 = choices.get(ch++);
-      textSmooth2 = numerics.get(n++);
-      textSearch = numerics.get(n++);
-      textBorder = numerics.get(n++);
+      textCameraModelName = ch.next();
+      textPSF = ch.next();
+      textDataFilterType = ch.next();
+      textDataFilterMethod = ch.next();
+      textSmooth = nu.next();
+      textDataFilterMethod2 = ch.next();
+      textSmooth2 = nu.next();
+      textSearch = nu.next();
+      textBorder = nu.next();
     }
 
     gd.addPreviewCheckbox(pfr);

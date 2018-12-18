@@ -97,7 +97,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
   /**
    * Constructor with default {@link BrentSolver line search solver} and
-   * {@link IdentityPreconditioner preconditioner}
+   * {@link IdentityPreconditioner preconditioner}.
    *
    * @param updateFormula formula to use for updating the &beta; parameter, must be one of
    *        {@link Formula#FLETCHER_REEVES} or {@link Formula#POLAK_RIBIERE}.

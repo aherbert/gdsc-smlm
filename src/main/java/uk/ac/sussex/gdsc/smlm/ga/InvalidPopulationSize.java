@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ga;
 
 /**
- * Exception to throw if the population size is invalid ({@code <2} individuals)
+ * Exception to throw if the population size is invalid ({@code <2} individuals).
  */
 public class InvalidPopulationSize extends RuntimeException {
   private static final long serialVersionUID = -7425196200200953611L;

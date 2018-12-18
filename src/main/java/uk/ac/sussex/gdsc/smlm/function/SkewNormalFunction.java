@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Calculate the value of the Skew Normal distribution
+ * Calculate the value of the Skew Normal distribution.
  *
  * @see <a href= "http://en.wikipedia.org/wiki/Skew_normal_distribution">Skew Normal
  *      distribution</a>

@@ -4636,13 +4636,13 @@ public class PSFCreator implements PlugInFilter {
       return com;
     }
 
-    private static double[] centreOfMass(float[] data, int w, int h) {
+    private static double[] centreOfMass(float[] data, int width, int height) {
       double cx = 0;
       double cy = 0;
       double sum = 0;
-      for (int v = 0, j = 0; v < h; v++) {
+      for (int v = 0, j = 0; v < height; v++) {
         double sumU = 0;
-        for (int u = 0; u < w; u++) {
+        for (int u = 0; u < width; u++) {
           final float f = data[j++];
           sumU += f;
           cx += f * u;
@@ -4656,87 +4656,52 @@ public class PSFCreator implements PlugInFilter {
       return new double[] {cx, cy};
     }
 
-    FloatProcessor getProjection(int i, int minz, int maxz) {
-      FloatProcessor fp = getProjection(i);
-      if (i < Z) {
+    FloatProcessor getProjection(int axis, int minz, int maxz) {
+      FloatProcessor fp = getProjection(axis);
+      if (axis < Z) {
         final int range = maxz - minz + 1;
-        switch (i) {
-          case X:
-            fp.setRoi(minz, 0, range, y);
-            break;
-          case Y:
-            fp.setRoi(0, minz, x, range);
-          default:
-            break;
+        if (axis == X) {
+          fp.setRoi(minz, 0, range, y);
+        } else {
+          fp.setRoi(0, minz, x, range);
         }
         fp = (FloatProcessor) fp.crop();
       }
       return fp;
     }
 
-    FloatProcessor getProjection(int i) {
-      switch (i) {
+    FloatProcessor getProjection(int axis) {
+      switch (axis) {
         case X:
           return new FloatProcessor(z, y, xp);
         case Y:
           return new FloatProcessor(x, z, yp);
-        case Z:
+        default:
           return new FloatProcessor(x, y, zp);
       }
-      return null;
     }
 
-    static int getXDimension(int i) {
-      switch (i) {
+    static int getXDimension(int axis) {
+      switch (axis) {
         case X:
           return Z;
         case Y:
           return X;
-        case Z:
+        default:
           return X;
       }
-      return -1;
     }
 
-    static int getYDimension(int i) {
-      switch (i) {
+    static int getYDimension(int axis) {
+      switch (axis) {
         case X:
           return Y;
         case Y:
           return Z;
-        case Z:
+        default:
           return Y;
       }
-      return -1;
     }
-
-    // static int getXShiftDirection(int i)
-    // {
-    // switch (i)
-    // {
-    // case X:
-    // return -1;
-    // case Y:
-    // return -1;
-    // case Z:
-    // return -1;
-    // }
-    // return 0;
-    // }
-    //
-    // static int getYShiftDirection(int i)
-    // {
-    // switch (i)
-    // {
-    // case X:
-    // return -1;
-    // case Y:
-    // return -1;
-    // case Z:
-    // return -1;
-    // }
-    // return 0;
-    // }
   }
 
   private class ExtractedPSF {
@@ -5070,7 +5035,7 @@ public class PSFCreator implements PlugInFilter {
           c.pixelWidth = nmPerPixel / magnification;
           c.pixelHeight = settings.getNmPerSlice() / magnification;
           break;
-        case Projection.Z:
+        default:
           c.pixelWidth = nmPerPixel / magnification;
           c.pixelHeight = nmPerPixel / magnification;
           c.pixelDepth = settings.getNmPerSlice() / magnification;

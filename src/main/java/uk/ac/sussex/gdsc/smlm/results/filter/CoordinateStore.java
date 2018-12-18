@@ -34,7 +34,7 @@ public interface CoordinateStore {
    *
    * @return the XY resolution
    */
-  public double getXYResolution();
+  double getXYResolution();
 
   /**
    * Gets the Z resolution of the store. If negative then this is ignored and the store behaves as
@@ -42,7 +42,7 @@ public interface CoordinateStore {
    *
    * @return the Z resolution
    */
-  public double getZResolution();
+  double getZResolution();
 
   /**
    * Queue a coordinate to the store.
@@ -53,12 +53,12 @@ public interface CoordinateStore {
    * @param y the y
    * @param z the z
    */
-  public void addToQueue(double x, double y, double z);
+  void addToQueue(double x, double y, double z);
 
   /**
    * Flush the queue to the store.
    */
-  public void flush();
+  void flush();
 
   /**
    * Add a coordinate to the store. Assumes that the coordinates are within the size of the grid
@@ -68,12 +68,12 @@ public interface CoordinateStore {
    * @param y the y
    * @param z the z
    */
-  public void add(double x, double y, double z);
+  void add(double x, double y, double z);
 
   /**
    * Clear to the store.
    */
-  public void clear();
+  void clear();
 
   /**
    * Check if the store contains the coordinates within the configured resolution.
@@ -83,7 +83,7 @@ public interface CoordinateStore {
    * @param z the z
    * @return true, if the store contains another coordinate closer than the resolution
    */
-  public boolean contains(double x, double y, double z);
+  boolean contains(double x, double y, double z);
 
   /**
    * Find the closest coordinate within the configured resolution.
@@ -93,14 +93,14 @@ public interface CoordinateStore {
    * @param z the z
    * @return the coordinate closer than the resolution (or null)
    */
-  public double[] find(double x, double y, double z);
+  double[] find(double x, double y, double z);
 
   /**
    * Create a new instance.
    *
    * @return the new coordinate store
    */
-  public CoordinateStore newInstance();
+  CoordinateStore newInstance();
 
   /**
    * Resize to the given dimensions. If these match the existing dimensions the current store is
@@ -112,33 +112,33 @@ public interface CoordinateStore {
    * @param height the height
    * @return the coordinate store
    */
-  public CoordinateStore resize(int minx, int miny, int width, int height);
+  CoordinateStore resize(int minx, int miny, int width, int height);
 
   /**
    * Gets the the min x coordinate value.
    *
    * @return the min X
    */
-  public int getMinX();
+  int getMinX();
 
   /**
    * Gets the the min y coordinate value.
    *
    * @return the min Y
    */
-  public int getMinY();
+  int getMinY();
 
   /**
    * Gets the width.
    *
    * @return the width
    */
-  public int getWidth();
+  int getWidth();
 
   /**
    * Gets the height.
    *
    * @return the height
    */
-  public int getHeight();
+  int getHeight();
 }

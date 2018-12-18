@@ -490,9 +490,7 @@ public class LSQLVMGradientProcedureTest {
         // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, k, s,
         // func.getName(k), a[k], d, beta[j],
         // gradient);
-        failCounter.run(j, () -> {
-          return eq.almostEqualRelativeOrAbsolute(beta[jj], gradient);
-        }, () -> {
+        failCounter.run(j, () -> eq.almostEqualRelativeOrAbsolute(beta[jj], gradient), () -> {
           Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii,
               jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
         });

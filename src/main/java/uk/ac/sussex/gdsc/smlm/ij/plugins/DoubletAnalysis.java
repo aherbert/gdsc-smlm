@@ -97,6 +97,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -1598,25 +1599,26 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     if (ImageJUtils.isShowGenericDialog()) {
       final Vector<TextField> numerics = gd.getNumericFields();
       final Vector<Choice> choices = gd.getChoices();
-      int n = 0;
-      int ch = 0;
 
-      choices.get(ch++).addItemListener(this);
+      final Iterator<TextField> nu = numerics.iterator();
+      final Iterator<Choice> ch = choices.iterator();
+
+      ch.next().addItemListener(this);
       final Checkbox b = (Checkbox) gd.getCheckboxes().get(0);
       b.addItemListener(this);
-      textPSF = choices.get(ch++);
-      textDataFilterType = choices.get(ch++);
-      textDataFilter = choices.get(ch++);
-      textSmooth = numerics.get(n++);
-      textSearch = numerics.get(n++);
-      textBorder = numerics.get(n++);
-      textFitting = numerics.get(n++);
-      textFitSolver = choices.get(ch++);
-      n++; // Iteration increase
-      textMatchDistance = numerics.get(n++);
-      textLowerDistance = numerics.get(n++);
-      textSignalFactor = numerics.get(n++);
-      textLowerFactor = numerics.get(n++);
+      textPSF = ch.next();
+      textDataFilterType = ch.next();
+      textDataFilter = ch.next();
+      textSmooth = nu.next();
+      textSearch = nu.next();
+      textBorder = nu.next();
+      textFitting = nu.next();
+      textFitSolver = ch.next();
+      nu.next(); // Iteration increase
+      textMatchDistance = nu.next();
+      textLowerDistance = nu.next();
+      textSignalFactor = nu.next();
+      textLowerFactor = nu.next();
     }
 
     gd.showDialog();
@@ -1822,7 +1824,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     }
 
     // Fit the frames
-    long runTime = System.nanoTime();
+    final long startTime = System.nanoTime();
     totalProgress = actualCoordinates.size();
     stepProgress = ImageJUtils.getProgressInterval(totalProgress);
     progress = 0;
@@ -1851,7 +1853,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     IJ.showProgress(1);
     IJ.showStatus("Collecting results ...");
-    runTime = System.nanoTime() - runTime;
+    final long runTime = System.nanoTime() - startTime;
 
     // Collect the results
     int cic = 0;
@@ -2815,9 +2817,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       case 2:  return result.bic2  < result.bic1;
       case 3:  return result.maic2 < result.maic1;
       case 4:  return result.mbic2 < result.mbic1;
+      // This should not happen
+      default: throw new IllegalStateException("Unknown selection criteria: " + selectionCriteria);
       //@formatter:on
     }
-    return false;
   }
 
   private void addJaccardScores(StringBuilder sb) {
@@ -2991,16 +2994,17 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       final Vector<TextField> numerics = gd.getNumericFields();
       final Vector<Checkbox> checkboxes = gd.getCheckboxes();
       final Vector<Choice> choices = gd.getChoices();
-      int n = 0;
       choices.get(1).addItemListener(this);
       checkboxes.get(0).addItemListener(this);
       cbSmartFilter = checkboxes.get(1);
-      textCoordinateShiftFactor = numerics.get(n++);
-      textSignalStrength = numerics.get(n++);
-      textMinPhotons = numerics.get(n++);
-      textMinWidthFactor = numerics.get(n++);
-      textWidthFactor = numerics.get(n++);
-      textPrecisionThreshold = numerics.get(n++);
+
+      final Iterator<TextField> nu = numerics.iterator();
+      textCoordinateShiftFactor = nu.next();
+      textSignalStrength = nu.next();
+      textMinPhotons = nu.next();
+      textMinWidthFactor = nu.next();
+      textWidthFactor = nu.next();
+      textPrecisionThreshold = nu.next();
       textPrecisionMethod = choices.get(2);
     }
 

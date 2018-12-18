@@ -131,10 +131,8 @@ public class FunctionHelperTest {
         final int size = 1 + 2 * (int) Math.ceil(Math.max(sx, sy) * 4);
         final float[] a = Gaussian2DPeakResultHelper.createParams(0.f, intensity, size / 2f,
             size / 2f, 0.f, sx, sy, 0);
-        final Gaussian2DFunction f =
-            GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_FREE_CIRCLE
-            // | GaussianFunctionFactory.FIT_SIMPLE
-                , null);
+        final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
+            GaussianFunctionFactory.FIT_FREE_CIRCLE, null);
         final double[] values = f.computeValues(SimpleArrayUtils.toDouble(a));
         // ImagePlus imp = new ImagePlus("gauss", new FloatProcessor(size, size, values));
         // double cx = size / 2.;

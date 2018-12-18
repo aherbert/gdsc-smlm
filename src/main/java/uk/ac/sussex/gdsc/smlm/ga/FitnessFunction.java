@@ -39,7 +39,7 @@ public interface FitnessFunction<T extends Comparable<T>> {
    *
    * @param individuals The population of individuals that will be assessed
    */
-  public void initialise(List<? extends Chromosome<T>> individuals);
+  void initialise(List<? extends Chromosome<T>> individuals);
 
   /**
    * Calculate the fitness.
@@ -47,11 +47,11 @@ public interface FitnessFunction<T extends Comparable<T>> {
    * @param chromosome the chromosome
    * @return the fitness
    */
-  public T fitness(Chromosome<T> chromosome);
+  T fitness(Chromosome<T> chromosome);
 
   /**
    * Shutdown the fitness function. This can be used to post-process the population after the
    * {@link #fitness(Chromosome)} method is run on each individual.
    */
-  public void shutdown();
+  void shutdown();
 }

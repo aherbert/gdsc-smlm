@@ -34,117 +34,118 @@ public interface IDirectFilter {
   /**
    * Validation flag for the signal in photons.
    */
-  public static final int V_PHOTONS = 0x000000001;
+  static final int V_PHOTONS = 0x000000001;
 
   /**
    * Validation flag for the SNR.
    */
-  public static final int V_SNR = 0x000000002;
+  static final int V_SNR = 0x000000002;
 
   /**
    * Validation flag for the noise.
    */
-  public static final int V_NOISE = 0x000000004;
+  static final int V_NOISE = 0x000000004;
 
   /**
    * Validation flag for the location variance.
    */
-  public static final int V_LOCATION_VARIANCE = 0x000000008;
+  static final int V_LOCATION_VARIANCE = 0x000000008;
 
   /**
    * Validation flag for the location variance using the local background.
    */
-  public static final int V_LOCATION_VARIANCE2 = 0x000000010;
+  static final int V_LOCATION_VARIANCE2 = 0x000000010;
 
   /**
    * Validation flag for the average peak standard deviation in the X and Y dimension.
    */
-  public static final int V_SD = 0x000000020;
+  static final int V_SD = 0x000000020;
 
   /**
    * Validation flag for the background.
    */
-  public static final int V_BACKGROUND = 0x000000040;
+  static final int V_BACKGROUND = 0x000000040;
 
   /**
    * Validation flag for the amplitude.
    */
-  public static final int V_AMPLITUDE = 0x000000080;
+  static final int V_AMPLITUDE = 0x000000080;
 
   /**
    * Validation flag for the angle (for an elliptical Gaussian peak).
    */
-  public static final int V_ANGLE = 0x000000100;
+  static final int V_ANGLE = 0x000000100;
 
   /**
    * Validation flag for the x position.
    */
-  public static final int V_X = 0x000000200;
+  static final int V_X = 0x000000200;
 
   /**
    * Validation flag for the y position.
    */
-  public static final int V_Y = 0x000000400;
+  static final int V_Y = 0x000000400;
 
   /**
    * Validation flag for the relative x position shift squared.
    */
-  public static final int V_X_RELATIVE_SHIFT = 0x000000800;
+  static final int V_X_RELATIVE_SHIFT = 0x000000800;
 
   /**
    * Validation flag for the relative y position shift squared.
    */
-  public static final int V_Y_RELATIVE_SHIFT = 0x000001000;
+  static final int V_Y_RELATIVE_SHIFT = 0x000001000;
 
   /**
    * Validation flag for the x-dimension standard deviation.
    */
-  public static final int V_X_SD = 0x000002000;
+  static final int V_X_SD = 0x000002000;
 
   /**
    * Validation flag for the y-dimension standard deviation.
    */
-  public static final int V_Y_SD = 0x000004000;
+  static final int V_Y_SD = 0x000004000;
 
   /**
    * Validation flag for the x-dimension width factor.
    */
-  public static final int V_X_SD_FACTOR = 0x000008000;
+  static final int V_X_SD_FACTOR = 0x000008000;
 
   /**
    * Validation flag for the y-dimension width factor.
    */
-  public static final int V_Y_SD_FACTOR = 0x000010000;
+  static final int V_Y_SD_FACTOR = 0x000010000;
 
   /**
-   * Validation flag for the location variance using the fitted x/y parameter Cramér-Rao lower bound
+   * Validation flag for the location variance using the fitted x/y parameter Cramér-Rao lower
+   * bound.
    */
-  public static final int V_LOCATION_VARIANCE_CRLB = 0x000020000;
+  static final int V_LOCATION_VARIANCE_CRLB = 0x000020000;
 
   /**
    * Validation flag for the z position.
    */
-  public static final int V_Z = 0x000040000;
+  static final int V_Z = 0x000040000;
 
   /**
    * Disable filtering using the width of the result.
    */
-  public static final int NO_WIDTH = 0x000000001;
+  static final int NO_WIDTH = 0x000000001;
 
   /**
    * Disable filtering using the shift of the result.
    */
-  public static final int NO_SHIFT = 0x000000002;
+  static final int NO_SHIFT = 0x000000002;
 
   /**
    * Enable filtering both X and Y widths.
    */
-  public static final int XY_WIDTH = 0x000000004;
+  static final int XY_WIDTH = 0x000000004;
 
   /**
    * Disable Z filtering (use when not fitting in 3D).
    */
-  public static final int NO_Z = 0x000000008;
+  static final int NO_Z = 0x000000008;
 
   /**
    * Gets the flags indicating all the fields that are used during validation. These flags may be
@@ -153,7 +154,7 @@ public interface IDirectFilter {
    *
    * @return the validation flags
    */
-  public int getValidationFlags();
+  int getValidationFlags();
 
   /**
    * Called before the accept method is called for PreprocessedPeakResult.
@@ -162,7 +163,7 @@ public interface IDirectFilter {
    *
    * @see #validate(PreprocessedPeakResult)
    */
-  public void setup();
+  void setup();
 
   /**
    * Called before the accept method is called for PreprocessedPeakResult. The flags can control the
@@ -173,7 +174,7 @@ public interface IDirectFilter {
    * @param flags Flags used to control the filter
    * @see #validate(PreprocessedPeakResult)
    */
-  public void setup(final int flags);
+  void setup(final int flags);
 
   /**
    * Called before the accept method is called for PreprocessedPeakResult. The filter data can
@@ -185,25 +186,25 @@ public interface IDirectFilter {
    * @param filterSetupData Data used to control the filter
    * @see #validate(PreprocessedPeakResult)
    */
-  public void setup(final int flags, final FilterSetupData... filterSetupData);
+  void setup(final int flags, final FilterSetupData... filterSetupData);
 
   /**
    * Gets the flags required to reinitialise the current filter state using {@link #setup(int)} or
-   * {@link #setup(int, FilterSetupData...)}
+   * {@link #setup(int, FilterSetupData...)}.
    *
    * @return the flags
    * @throws IllegalStateException If setup has not been called and the flags cannot be created
    */
-  public int getFilterSetupFlags() throws IllegalStateException;
+  int getFilterSetupFlags();
 
   /**
    * Gets the filter setup data required to reinitialise the current filter state using
-   * {@link #setup(int, FilterSetupData...)}
+   * {@link #setup(int, FilterSetupData...)}.
    *
    * @return the filter setup data (can be null)
    * @throws IllegalStateException If setup has not been called and the data cannot be created
    */
-  public FilterSetupData[] getFilterSetupData() throws IllegalStateException;
+  FilterSetupData[] getFilterSetupData();
 
   /**
    * Filter the peak result.
@@ -214,7 +215,7 @@ public interface IDirectFilter {
    * @param peak The peak result
    * @return true if the peak should be accepted
    */
-  public boolean accept(final PreprocessedPeakResult peak);
+  boolean accept(final PreprocessedPeakResult peak);
 
   /**
    * Filter the peak result.
@@ -223,14 +224,14 @@ public interface IDirectFilter {
    * @return zero if the peak should be accepted, otherwise set to flags indicating the field that
    *         failed validation.
    */
-  public int validate(final PreprocessedPeakResult peak);
+  int validate(final PreprocessedPeakResult peak);
 
   /**
    * Return the type of filter. This should be a DirectFilter.
    *
    * @return Should return DirectFilter
    */
-  public FilterType getFilterType();
+  FilterType getFilterType();
 
   /**
    * Return the result flag generated during the last call to
@@ -238,12 +239,12 @@ public interface IDirectFilter {
    *
    * @return the validation result from the last call to {@link #accept(PreprocessedPeakResult)}
    */
-  public int getResult();
+  int getResult();
 
   /**
    * Copy this filter.
    *
    * @return the copy
    */
-  public IDirectFilter copy();
+  IDirectFilter copy();
 }

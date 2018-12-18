@@ -151,7 +151,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
         new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
   }
 
-  private void gradientCalculatorComputesGradient(RandomSeed seed, int nPeaks,
+  private void gradientCalculatorComputesGradient(RandomSeed seed, int npeaks,
       ErfGaussian2DFunction func) {
     // Check the first and second derivatives
     final int nparams = func.getNumberOfGradients();
@@ -162,7 +162,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeedAsLong()), nPeaks, iter, paramsList, yList, true);
+    createData(RngUtils.create(seed.getSeedAsLong()), npeaks, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
@@ -192,11 +192,11 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
         a2[k] = a[k] + d;
         final double llh = p.computeLogLikelihood(a2);
         p.computeFirstDerivative(a2);
-        double[] d1h = p.d1.clone();
+        final double[] d1h = p.d1.clone();
         a2[k] = a[k] - d;
         final double lll = p.computeLogLikelihood(a2);
         p.computeFirstDerivative(a2);
-        double[] d1l = p.d1.clone();
+        final double[] d1l = p.d1.clone();
         a2[k] = a[k];
 
         final double gradient1 = (llh - lll) / (2 * d);
@@ -204,18 +204,15 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
         // logger.fine(FunctionUtils.getSupplier("[%d,%d] ll - %f (%s %f+/-%f) d1 %f ?= %f : d2 %f
         // ?= %f", i, k, ll, func.getName(k), a[k], d,
         // gradient1, d1[j], gradient2, d2[j]);
-        failCounter.run(j, () -> {
-          return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
-        }, () -> {
+        failCounter.run(j, () -> eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]), () -> {
           Assertions.fail(() -> String.format("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii,
               j_, gradient1, d1[j_], DoubleEquality.relativeError(gradient1, d1[j_])));
         });
-        failCounter.run(nparams + j, () -> {
-          return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
-        }, () -> {
-          Assertions.fail(() -> String.format("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii,
-              j_, gradient2, d2[j_], DoubleEquality.relativeError(gradient2, d2[j_])));
-        });
+        failCounter.run(nparams + j, () -> eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]),
+            () -> {
+              Assertions.fail(() -> String.format("Not same gradient2 @ %d,%d: %s != %s (error=%s)",
+                  ii, j_, gradient2, d2[j_], DoubleEquality.relativeError(gradient2, d2[j_])));
+            });
 
         // Test the Jacobian ...
 
@@ -232,10 +229,10 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
               Precision.representableDelta(a[kk], (a[kk] == 0) ? delta : a[kk] * delta);
           a2[kk] = a[kk] + dd;
           p.computeFirstDerivative(a2);
-          d1h = p.d1.clone();
+          System.arraycopy(p.d1, 0, d1h, 0, d1h.length);
           a2[kk] = a[kk] - dd;
           p.computeFirstDerivative(a2);
-          d1l = p.d1.clone();
+          System.arraycopy(p.d1, 0, d1l, 0, d1l.length);
           a2[kk] = a[kk];
 
           // Use index j even though we adjusted index jj
@@ -248,9 +245,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
           // {
           // ExtraAssertions.fail("Not same gradientJ @ [%d,%d]", j, jj);
           // }
-          failCounter2.run(nparams * j_ + jj_, () -> {
-            return ok;
-          }, () -> {
+          failCounter2.run(nparams * j_ + jj_, () -> ok, () -> {
             Assertions
                 .fail(() -> String.format("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)",
                     ii, j_, jj_, gradient3, J.get(j_, jj_),

@@ -34,5 +34,5 @@ public interface WxWyResultProcedure {
    * @param wx the x width
    * @param wy the y width
    */
-  public void executeWxWy(float wx, float wy);
+  void executeWxWy(float wx, float wy);
 }

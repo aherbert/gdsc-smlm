@@ -25,8 +25,6 @@ import org.junit.jupiter.api.BeforeAll;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import pl.edu.icm.jlargearrays.ConcurrencyUtils;
-
 @SuppressWarnings({"javadoc"})
 public class ConvolutionTest {
   private static Logger logger;
@@ -46,7 +44,7 @@ public class ConvolutionTest {
 
   static {
     // Compare speeds when single threaded
-    ConcurrencyUtils.setNumberOfThreads(1);
+    pl.edu.icm.jlargearrays.ConcurrencyUtils.setNumberOfThreads(1);
   }
 
   @SeededTest

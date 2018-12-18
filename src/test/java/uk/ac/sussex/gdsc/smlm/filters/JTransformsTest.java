@@ -103,8 +103,8 @@ public class JTransformsTest {
       final float a = data1[i];
       final float b = data1[i + 1];
       final float c = data2[i];
-      final float d = (convolution) ? data2[i + 1] : -data2[i + 1]; // Get the conjugate for
-                                                                    // correlation
+      // Get the conjugate for correlation
+      final float d = (convolution) ? data2[i + 1] : -data2[i + 1];
       data1[i] = a * c - b * d;
       data1[i + 1] = b * c + a * d;
     }

@@ -33,42 +33,42 @@ public interface Dimension {
    *
    * @return the current lower bound of the range
    */
-  public double getLower();
+  double getLower();
 
   /**
    * Gets the current upper bound of the range.
    *
    * @return the current upper bound of the range
    */
-  public double getUpper();
+  double getUpper();
 
   /**
    * Gets the current centre of the range.
    *
    * @return the current centre of the range
    */
-  public double getCentre();
+  double getCentre();
 
   /**
    * Gets the minimum allowed value of the range.
    *
    * @return the minimum
    */
-  public double getMin();
+  double getMin();
 
   /**
    * Gets the maximum allowed value of the range.
    *
    * @return the maximum
    */
-  public double getMax();
+  double getMax();
 
   /**
    * Checks if is active.
    *
    * @return true, if is active
    */
-  public boolean isActive();
+  boolean isActive();
 
   /**
    * Checks if the value is at (or beyond) the lower/upper bounds of the current dimension range.
@@ -76,7 +76,7 @@ public interface Dimension {
    * @param v the value
    * @return true, if is at bounds
    */
-  public boolean isAtBounds(double v);
+  boolean isAtBounds(double v);
 
   /**
    * Creates a new dimension with the given bounds. The current min/max and other settings should be
@@ -86,7 +86,7 @@ public interface Dimension {
    * @param upper the upper
    * @return the dimension
    */
-  public Dimension create(double lower, double upper);
+  Dimension create(double lower, double upper);
 
   /**
    * Round the value to the working resolution of the dimension. The resolution defines the minimum
@@ -95,12 +95,12 @@ public interface Dimension {
    * @param value the value
    * @return the rounded value
    */
-  public double round(double value);
+  double round(double value);
 
   /**
    * True if the dimension can round values.
    *
    * @return true, if can round
    */
-  public boolean canRound();
+  boolean canRound();
 }

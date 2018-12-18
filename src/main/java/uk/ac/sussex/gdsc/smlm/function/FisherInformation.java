@@ -42,7 +42,7 @@ public interface FisherInformation {
    * @return the fisher information
    * @throws IllegalArgumentException if the parameter is not in the valid range
    */
-  public double getFisherInformation(double t) throws IllegalArgumentException;
+  double getFisherInformation(double t) throws IllegalArgumentException;
 
   /**
    * Checks if the parameter θ is in a valid range to compute a representable value.
@@ -53,5 +53,5 @@ public interface FisherInformation {
    * @param t parameter θ of a distribution that models X
    * @return true, if a representable value can be computed
    */
-  public boolean isValid(double t);
+  boolean isValid(double t);
 }

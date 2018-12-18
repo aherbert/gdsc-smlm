@@ -346,7 +346,7 @@ public class EMGainAnalysis implements PlugInFilter {
   }
 
   /**
-   * Fit the EM-gain distribution (Gaussian * Gamma)
+   * Fit the EM-gain distribution (Gaussian * Gamma).
    *
    * @param h The distribution
    */
@@ -856,33 +856,25 @@ public class EMGainAnalysis implements PlugInFilter {
 
     final PDF pdf = pdf(0, step, _photons, _gain, _noise);
     double[] pmf = pdf.p;
-    double[] x = pdf.x;
     double yMax = MathUtils.max(pmf);
 
     // Get the approximation
     LikelihoodFunction fun;
-    double myNoise = _noise;
     switch (approximation) {
       case 3:
-        // fun = new InterpolatedPoissonFunction(1.0 / _gain, true);
         fun = new PoissonFunction(1.0 / _gain);
         break;
       case 2:
-        // The mean does not matter (as normalisation is done dynamically for
-        // PoissonGaussianFunction.likelihood(double, double) so just use zero
-        // fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / _gain, 0, _noise);
-
         // Use adaptive normalisation
         fun = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / _gain, _noise);
         break;
       case 1:
-        myNoise = 0;
+        // Create Poisson-Gamma (no Gaussian noise)
+        fun = createPoissonGammaGaussianFunction(0);
+        break;
       case 0:
       default:
-        final PoissonGammaGaussianFunction myFun =
-            new PoissonGammaGaussianFunction(1.0 / _gain, myNoise);
-        myFun.setMinimumProbability(0);
-        fun = myFun;
+        fun = createPoissonGammaGaussianFunction(_noise);
     }
     double expected = _photons;
     if (offset != 0) {
@@ -904,6 +896,7 @@ public class EMGainAnalysis implements PlugInFilter {
     double sum2 = 0;
     double prev = 0;
     double prev2 = 0;
+    double[] x = pdf.x;
     double[] f = new double[x.length];
     double[] cdf1 = new double[pmf.length];
     double[] cdf2 = new double[pmf.length];
@@ -1047,6 +1040,12 @@ public class EMGainAnalysis implements PlugInFilter {
       p2.x += win1.getWidth();
       win3.setLocation(p2);
     }
+  }
+
+  private static LikelihoodFunction createPoissonGammaGaussianFunction(double noise) {
+    final PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / _gain, noise);
+    fun.setMinimumProbability(0);
+    return fun;
   }
 
   /**

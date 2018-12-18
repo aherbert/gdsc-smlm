@@ -37,5 +37,5 @@ public interface ConvergenceChecker<T extends Comparable<T>> {
    * @param current the current
    * @return true if the point has converged
    */
-  public boolean converged(SearchResult<T> previous, SearchResult<T> current);
+  boolean converged(SearchResult<T> previous, SearchResult<T> current);
 }

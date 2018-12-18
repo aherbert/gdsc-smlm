@@ -382,8 +382,9 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void readTextWithNonScannerIsFasterThanScannerWithDeviationsWithEndFrameWithIdWithPrecision(
-      RandomSeed seed) {
+  public void
+      readTextWithNonScannerIsFasterThanScannerWithDeviationsWithEndFrameWithIdWithPrecision(
+          RandomSeed seed) {
     readWith2IsFasterThan1(seed, true, true, true, true, ResultsFileFormat.TEXT, true,
         ResultsFileFormat.TEXT, false, 1);
   }
@@ -728,8 +729,7 @@ public class PeakResultsReaderTest {
     checkEqual(fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, in, in2);
   }
 
-  private static void checkScannerMatchesNonScannerWithCombinations(RandomSeed seed,
-      boolean sort) {
+  private static void checkScannerMatchesNonScannerWithCombinations(RandomSeed seed, boolean sort) {
     for (final boolean showDeviations : onOff) {
       for (final boolean showEndFrame : onOff) {
         for (final boolean showId : onOff) {
@@ -737,8 +737,8 @@ public class PeakResultsReaderTest {
             if (count(showDeviations, showEndFrame, showId, showPrecision) < 2) {
               continue;
             }
-            checkScannerMatchesNonScanner(seed, showDeviations, showEndFrame, showId,
-                showPrecision, sort);
+            checkScannerMatchesNonScanner(seed, showDeviations, showEndFrame, showId, showPrecision,
+                sort);
           }
         }
       }
@@ -1014,8 +1014,7 @@ public class PeakResultsReaderTest {
     final PeakResultsReader reader = new PeakResultsReader(filename);
     reader.setUseScanner(useScanner);
     reader.setRawResults(rawResults);
-    final MemoryPeakResults in = reader.getResults();
-    return in;
+    return reader.getResults();
   }
 
   private static long getReadTime(String filename, final boolean useScanner, final int loops) {

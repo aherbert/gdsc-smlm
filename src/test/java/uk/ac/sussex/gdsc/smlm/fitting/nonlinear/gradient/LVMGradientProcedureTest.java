@@ -400,14 +400,14 @@ public class LVMGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.LSQ, true);
   }
 
   @SeededTest
-  public void gradientProcedureMLEUnrolledComputesSameAsGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureMLEUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.MLE, true);
   }
 
@@ -418,8 +418,8 @@ public class LVMGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureWLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureWLSQUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.WLSQ, true);
   }
 
@@ -517,15 +517,15 @@ public class LVMGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.LSQ, true);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureMLEIsFasterUnrolledThanGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureMLEIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.MLE, true);
   }
 
@@ -538,8 +538,8 @@ public class LVMGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureWLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureWLSQIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.WLSQ, true);
   }
 
@@ -773,9 +773,7 @@ public class LVMGradientProcedureTest {
         // Gaussian2DFunction.getName(k),
         // a[k], d, beta[j], gradient);
 
-        failCounter.run(j, () -> {
-          return eq.almostEqualRelativeOrAbsolute(beta[jj], gradient);
-        }, () -> {
+        failCounter.run(j, () -> eq.almostEqualRelativeOrAbsolute(beta[jj], gradient), () -> {
           Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii,
               jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
         });
@@ -965,9 +963,7 @@ public class LVMGradientProcedureTest {
           // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
           // Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
           // DoubleEquality.relativeError(gradient, beta[j]));
-          failCounter.run(j, () -> {
-            return eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient);
-          }, () -> {
+          failCounter.run(j, () -> eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient), () -> {
             Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)",
                 ii, jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
           });
@@ -1078,12 +1074,11 @@ public class LVMGradientProcedureTest {
         // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
         // Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
         // DoubleEquality.relativeError(gradient, beta[j]));
-        failCounter.run(nparams + j, () -> {
-          return eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient);
-        }, () -> {
-          Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii,
-              jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
-        });
+        failCounter.run(nparams + j, () -> eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient),
+            () -> {
+              Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)",
+                  ii, jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
+            });
       }
     }
   }

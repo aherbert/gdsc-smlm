@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -53,10 +54,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,20 +67,20 @@ import java.util.regex.Pattern;
  */
 public class PeakResultsReader {
   // Set up to read two-axis (and theta) Gaussian 2D data into the current format
-  private static final int isx;
-  private static final int isy;
-  private static final int ia;
-  private static final int nTwoAxis;
-  private static final int nTwoAxisAndTheta;
+  private static final int INDEX_SX;
+  private static final int INDEX_SY;
+  private static final int INDEX_ANGLE;
+  private static final int SIZE_TWO_AXIS;
+  private static final int SIZE_TWO_AXIS_AND_THETA;
 
   static {
     final PSF psf = PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
     final int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
-    isx = indices[0];
-    isy = indices[1];
-    ia = PSFHelper.getGaussian2DAngleIndex(psf);
-    nTwoAxis = PeakResult.STANDARD_PARAMETERS + 2;
-    nTwoAxisAndTheta = PeakResult.STANDARD_PARAMETERS + 3;
+    INDEX_SX = indices[0];
+    INDEX_SY = indices[1];
+    INDEX_ANGLE = PSFHelper.getGaussian2DAngleIndex(psf);
+    SIZE_TWO_AXIS = PeakResult.STANDARD_PARAMETERS + 2;
+    SIZE_TWO_AXIS_AND_THETA = PeakResult.STANDARD_PARAMETERS + 3;
   }
 
   /** Index of the background in the parameters array in the legacy GDSC file format. */
@@ -100,7 +102,8 @@ public class PeakResultsReader {
    * The columns to recognise in the ImageJ table results header for version 1/2. Version 3+ may
    * also have this but we can distinguish because V1/2 had Amplitude/Signal and V3+ does not.
    */
-  private static String IMAGEJ_TABLE_RESULTS_HEADER_V1_V2 = "origX\torigY\torigValue\tError\tNoise";
+  private static final String IMAGEJ_TABLE_RESULTS_HEADER_V1_V2 =
+      "origX\torigY\torigValue\tError\tNoise";
 
   /** The space pattern. */
   private static Pattern spacePattern = Pattern.compile(" ");
@@ -159,20 +162,20 @@ public class PeakResultsReader {
             // The NSTORM file format does not have comment characters but does have a single header
             // line
             if (line.startsWith("Channel Name")) {
-              sb.append(line).append("\n");
+              sb.append(line).append('\n');
               break;
             }
             // User may try and load the text saved directly from the ImageJ Table Results
             if (line.contains(IMAGEJ_TABLE_RESULTS_HEADER_V1_V2)) {
-              sb.append(line).append("\n");
+              sb.append(line).append('\n');
               break;
             }
           }
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
           if (line.charAt(0) == '#') {
-            sb.append(line).append("\n");
+            sb.append(line).append('\n');
           } else {
             break;
           }
@@ -212,9 +215,14 @@ public class PeakResultsReader {
       }
 
       if (smlmVersion == 1) {
-        // The original files did not have the version tag
-        deviations =
-            header.contains((format == FileFormat.SMLM_BINARY) ? "iiiifdfffffffffffffff" : "+/-");
+        // The original files did not have the version tag.
+        // Determine if the deviations are present using the binary specification string
+        // or the text header column names.
+        deviations = header.contains((format == FileFormat.SMLM_BINARY)
+            // Look for binary specification string with lots of columns (i.e. deviations)
+            ? "iiiifdfffffffffffffff"
+            // Look for text header +/- deviations columns
+            : "+/-");
         readEndFrame = readId = readPrecision = false;
       } else {
         deviations = version.contains(".D1");
@@ -287,6 +295,8 @@ public class PeakResultsReader {
   }
 
   /**
+   * Check if the results file is binary.
+   *
    * @return True if the results file is binary.
    */
   public boolean isBinary() {
@@ -295,6 +305,8 @@ public class PeakResultsReader {
   }
 
   /**
+   * Gets the file format.
+   *
    * @return The file format.
    */
   public FileFormat getFormat() {
@@ -305,6 +317,8 @@ public class PeakResultsReader {
   }
 
   /**
+   * Gets the bounds specified in the results header..
+   *
    * @return The bounds specified in the results header.
    */
   public Rectangle getBounds() {
@@ -326,6 +340,8 @@ public class PeakResultsReader {
   }
 
   /**
+   * Gets the name specified in the results header..
+   *
    * @return The name specified in the results header.
    */
   public String getName() {
@@ -337,6 +353,8 @@ public class PeakResultsReader {
   }
 
   /**
+   * Gets the source specified in the results header..
+   *
    * @return The source specified in the results header.
    */
   public ImageSource getSource() {
@@ -354,6 +372,8 @@ public class PeakResultsReader {
   }
 
   /**
+   * Gets the calibration specified in the results header..
+   *
    * @return The calibration specified in the results header.
    */
   @SuppressWarnings("deprecation")
@@ -383,8 +403,6 @@ public class PeakResultsReader {
           final String calibrationString = getField("Calibration");
           if (calibrationString != null && calibrationString.length() > 0) {
             // Older formats used XML
-            // TODO - Test this still works using older code, e.g. that
-            // released to Fiji.
             if (calibrationString.startsWith("<")) {
               // Convert the XML back
               try {
@@ -575,9 +593,11 @@ public class PeakResultsReader {
         getSource();
         getBounds();
         getConfiguration();
-        // RapidSTORM has calibration too
+        getCalibration();
+        break;
       case RAPID_STORM:
         getCalibration();
+        break;
       default:
         break;
     }
@@ -658,13 +678,8 @@ public class PeakResultsReader {
     final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
 
     // Determine if the angle is non-zero with asymmetric widths
-    if (results.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult peakResult) {
-        return (peakResult.getParameter(ia) != 0
-            && peakResult.getParameter(isx) != peakResult.getParameter(isy));
-      }
-    })) {
+    if (results.forEach((PeakResultProcedureX) peakResult -> peakResult.getParameter(ia) != 0
+        && peakResult.getParameter(isx) != peakResult.getParameter(isy))) {
       // Nothing to simplify
       return;
     }
@@ -689,12 +704,8 @@ public class PeakResultsReader {
     PSFType psfType;
 
     // Determine if sy is redundant
-    if (results.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult peakResult) {
-        return (peakResult.getParameter(isx) != peakResult.getParameter(isy));
-      }
-    })) {
+    if (results.forEach((PeakResultProcedureX) peakResult -> peakResult
+        .getParameter(isx) != peakResult.getParameter(isy))) {
       if (!removeTheta) {
         // Already a TwoAxis Gaussian
         return;
@@ -712,26 +723,19 @@ public class PeakResultsReader {
     // Update the PSF
     final PSF.Builder builder = psf.toBuilder();
     builder.setPsfType(psfType);
-    results.setPSF(psf = builder.build());
+    psf = builder.build();
+    results.setPSF(psf);
 
     // Update the results.
     // We can directly manipulate the params array
     final int newLength = results.getf(0).getNumberOfParameters() - remove;
-    if (!deviations) {
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult peakResult) {
-          peakResult.resizeParameters(newLength);
-        }
+    if (deviations) {
+      results.forEach((PeakResultProcedure) peakResult -> {
+        peakResult.resizeParameters(newLength);
+        peakResult.resizeParameterDeviations(newLength);
       });
     } else {
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult peakResult) {
-          peakResult.resizeParameters(newLength);
-          peakResult.resizeParameterDeviations(newLength);
-        }
-      });
+      results.forEach((PeakResultProcedure) peakResult -> peakResult.resizeParameters(newLength));
     }
   }
 
@@ -746,14 +750,11 @@ public class PeakResultsReader {
       final int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
       final int isx = indices[0];
       final int isy = indices[1];
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult peakResult) {
-          final float[] p = peakResult.getParameters();
-          final float u = (float) Gaussian2DPeakResultHelper
-              .getMeanSignalUsingP05(p[PeakResult.INTENSITY], p[isx], p[isy]);
-          peakResult.setMeanIntensity(u);
-        }
+      results.forEach((PeakResultProcedure) peakResult -> {
+        final float[] p = peakResult.getParameters();
+        final float u = (float) Gaussian2DPeakResultHelper
+            .getMeanSignalUsingP05(p[PeakResult.INTENSITY], p[isx], p[isy]);
+        peakResult.setMeanIntensity(u);
       });
     }
   }
@@ -764,11 +765,11 @@ public class PeakResultsReader {
     final MemoryPeakResults results = createResults();
 
     // Units were added in version 3
-    int nFields;
+    int fieldCount;
     boolean gaussian2Dformat;
     boolean readMeanIntensity = false;
     if (smlmVersion < 3) {
-      nFields = 7;
+      fieldCount = 7;
       gaussian2Dformat = true;
       calibration.setIntensityUnit(IntensityUnit.COUNT);
       calibration.setDistanceUnit(DistanceUnit.PIXEL);
@@ -778,7 +779,7 @@ public class PeakResultsReader {
       readMeanIntensity = smlmVersion > 3;
       gaussian2Dformat = false;
       // The number of fields should be within the PSF object
-      nFields = new PeakResultConversionHelper(null, psf).getNames().length;
+      fieldCount = new PeakResultConversionHelper(null, psf).getNames().length;
     }
 
     try (FileInputStream fis = new FileInputStream(filename)) {
@@ -801,13 +802,13 @@ public class PeakResultsReader {
         if (readPrecision) {
           flags += SMLMFilePeakResults.FLAG_PRECISION;
         }
-        int length = BinaryFilePeakResults.getDataSize(deviations, flags, nFields);
+        int length = BinaryFilePeakResults.getDataSize(deviations, flags, fieldCount);
         if (!readMeanIntensity) {
           length -= 4; // No float field for mean signal
         }
         final byte[] buffer = new byte[length];
 
-        int c = 0;
+        int counter = 0;
         final boolean convert = smlmVersion == 1;
         // Halted by the EOFException
         while (true) {
@@ -829,8 +830,8 @@ public class PeakResultsReader {
           final double error = readDouble(buffer);
           final float noise = readFloat(buffer);
           final float meanSignal = (readMeanIntensity) ? readFloat(buffer) : 0;
-          float[] params = readData(buffer, new float[nFields]);
-          float[] paramsStdDev = (deviations) ? readData(buffer, new float[nFields]) : null;
+          float[] params = readData(buffer, new float[fieldCount]);
+          float[] paramsStdDev = (deviations) ? readData(buffer, new float[fieldCount]) : null;
 
           // Convert format which had the full Gaussian2D parameters array
           if (gaussian2Dformat) {
@@ -851,7 +852,7 @@ public class PeakResultsReader {
                 params, paramsStdDev, endPeak, id));
           }
 
-          if (++c % 512 == 0) {
+          if (++counter % 512 == 0) {
             showProgress(channel);
           }
         }
@@ -860,7 +861,7 @@ public class PeakResultsReader {
       // Ignore. Binary data does not have a size so it is read until the EOF.
     } catch (final IOException ex) {
       // Log this but still return the results that have been read
-      ex.printStackTrace();
+      Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Failed to read binary data", ex);
     }
     return results;
   }
@@ -918,14 +919,14 @@ public class PeakResultsReader {
   }
 
   private static float[] mapGaussian2DFormat(float[] params) {
-    final float[] p = new float[nTwoAxisAndTheta];
+    final float[] p = new float[SIZE_TWO_AXIS_AND_THETA];
     p[PeakResult.BACKGROUND] = params[LEGACY_FORMAT_BACKGROUND];
     p[PeakResult.INTENSITY] = params[LEGACY_FORMAT_SIGNAL];
     p[PeakResult.X] = params[LEGACY_FORMAT_X_POSITION];
     p[PeakResult.Y] = params[LEGACY_FORMAT_Y_POSITION];
-    p[isx] = params[LEGACY_FORMAT_X_SD];
-    p[isy] = params[LEGACY_FORMAT_Y_SD];
-    p[ia] = params[LEGACY_FORMAT_ANGLE];
+    p[INDEX_SX] = params[LEGACY_FORMAT_X_SD];
+    p[INDEX_SY] = params[LEGACY_FORMAT_Y_SD];
+    p[INDEX_ANGLE] = params[LEGACY_FORMAT_ANGLE];
     return p;
   }
 
@@ -990,9 +991,9 @@ public class PeakResultsReader {
     final MemoryPeakResults results = createResults();
 
     // Units were added in version 3
-    int nFields;
+    int fieldCount;
     if (smlmVersion < 3) {
-      nFields = 7;
+      fieldCount = 7;
       calibration.setIntensityUnit(IntensityUnit.COUNT);
       calibration.setDistanceUnit(DistanceUnit.PIXEL);
       calibration.setAngleUnit(AngleUnit.DEGREE);
@@ -1002,7 +1003,7 @@ public class PeakResultsReader {
       // add this manually. They will also have to add the gain.
     } else {
       // The number of fields should be within the PSF object
-      nFields = new PeakResultConversionHelper(null, psf).getNames().length;
+      fieldCount = new PeakResultConversionHelper(null, psf).getNames().length;
     }
 
     try (FileInputStream fis = new FileInputStream(filename)) {
@@ -1013,11 +1014,11 @@ public class PeakResultsReader {
         String line;
         int errors = 0;
 
-        final LineReader reader = createLineReader(results, smlmVersion, nFields);
+        final LineReader reader = createLineReader(results, smlmVersion, fieldCount);
 
         // Skip the header
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
 
@@ -1030,9 +1031,9 @@ public class PeakResultsReader {
           }
         }
 
-        int c = 0;
+        int counter = 0;
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
           if (line.charAt(0) == '#') {
@@ -1045,7 +1046,7 @@ public class PeakResultsReader {
             }
           }
 
-          if (++c % 512 == 0) {
+          if (++counter % 512 == 0) {
             showProgress(channel);
           }
         }
@@ -1080,35 +1081,35 @@ public class PeakResultsReader {
 
   //@formatter:off
   private class LineReaderV4 extends LineReader {
-    int nFields;
-    LineReaderV4(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+    int fieldCount;
+    LineReaderV4(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
     @Override
     PeakResult read(String line) {
-      return createPeakResultV4(line, nFields);
+      return createPeakResultV4(line, fieldCount);
     }
   }
   private class LineReaderDV4 extends LineReader {
-    int nFields;
-    LineReaderDV4(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+    int fieldCount;
+    LineReaderDV4(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
     @Override
     PeakResult read(String line) {
-      return createPeakResultDeviationsV4(line, nFields);
+      return createPeakResultDeviationsV4(line, fieldCount);
     }
   }
   private class LineReaderV3 extends LineReader {
-    int nFields;
-    LineReaderV3(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+    int fieldCount;
+    LineReaderV3(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
     @Override
     PeakResult read(String line) {
-      return createPeakResultV3(line, nFields);
+      return createPeakResultV3(line, fieldCount);
     }
   }
   private class LineReaderDV3 extends LineReader {
-    int nFields;
-    LineReaderDV3(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+    int fieldCount;
+    LineReaderDV3(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
     @Override
     PeakResult read(String line) {
-      return createPeakResultDeviationsV3(line, nFields);
+      return createPeakResultDeviationsV3(line, fieldCount);
     }
   }
   private class LineReaderV2 extends LineReader {
@@ -1141,15 +1142,15 @@ public class PeakResultsReader {
   }
   //@formatter:on
 
-  private LineReader createLineReader(MemoryPeakResults results, int version, int nFields) {
+  private LineReader createLineReader(MemoryPeakResults results, int version, int fieldCount) {
     switch (version) {
       case 4:
-        return (deviations) ? new LineReaderDV4(results, nFields)
-            : new LineReaderV4(results, nFields);
+        return (deviations) ? new LineReaderDV4(results, fieldCount)
+            : new LineReaderV4(results, fieldCount);
 
       case 3:
-        return (deviations) ? new LineReaderDV3(results, nFields)
-            : new LineReaderV3(results, nFields);
+        return (deviations) ? new LineReaderDV3(results, fieldCount)
+            : new LineReaderV3(results, fieldCount);
 
       case 2:
         return (deviations) ? new LineReaderDV2(results) : new LineReaderV2(results);
@@ -1187,7 +1188,6 @@ public class PeakResultsReader {
           for (int i = 0; i < params.length; i++) {
             params[i] = scanner.nextFloat();
           }
-          scanner.close();
           params[LEGACY_FORMAT_SIGNAL] = signal;
           params = mapGaussian2DFormatParams(params);
           if (readId || readEndFrame) {
@@ -1199,18 +1199,18 @@ public class PeakResultsReader {
       }
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
-      final float signal = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
+      final float signal = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
       }
       params[LEGACY_FORMAT_SIGNAL] = signal;
       params = mapGaussian2DFormatParams(params);
@@ -1219,13 +1219,7 @@ public class PeakResultsReader {
             endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1275,19 +1269,19 @@ public class PeakResultsReader {
 
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
-      final float signal = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
+      final float signal = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
-        paramsStdDev[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
+        paramsStdDev[i] = Float.parseFloat(fields[fi++]);
       }
       params[LEGACY_FORMAT_SIGNAL] = signal;
       params = mapGaussian2DFormatParams(params);
@@ -1297,13 +1291,7 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1345,17 +1333,17 @@ public class PeakResultsReader {
       }
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
       }
       params = mapGaussian2DFormatParams(params);
       if (readId || readEndFrame) {
@@ -1363,13 +1351,7 @@ public class PeakResultsReader {
             endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1416,18 +1398,18 @@ public class PeakResultsReader {
 
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
-        paramsStdDev[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
+        paramsStdDev[i] = Float.parseFloat(fields[fi++]);
       }
       params = mapGaussian2DFormatParams(params);
       paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
@@ -1436,21 +1418,15 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultV3(String line, int nFields) {
+  private PeakResult createPeakResultV3(String line, int fieldCount) {
     try {
-      final float[] params = new float[nFields];
+      final float[] params = new float[fieldCount];
 
       if (isUseScanner()) {
         // Code using a Scanner
@@ -1487,43 +1463,37 @@ public class PeakResultsReader {
       }
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
       }
       // The format appends a * to computed precision. We ignore these.
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
             id,
             // Read precision here because it is the final field
-            Float.parseFloat(fields[j]));
+            Float.parseFloat(fields[fi]));
       }
       return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
           id);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultDeviationsV3(String line, int nFields) {
+  private PeakResult createPeakResultDeviationsV3(String line, int fieldCount) {
     try {
-      final float[] params = new float[nFields];
-      final float[] paramsStdDev = new float[nFields];
+      final float[] params = new float[fieldCount];
+      final float[] paramsStdDev = new float[fieldCount];
 
       if (isUseScanner()) {
         // Code using a Scanner
@@ -1561,42 +1531,36 @@ public class PeakResultsReader {
 
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
-        paramsStdDev[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
+        paramsStdDev[i] = Float.parseFloat(fields[fi++]);
       }
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
             endPeak, id,
             // Read precision here because it is the final field
-            Float.parseFloat(fields[j]));
+            Float.parseFloat(fields[fi]));
       }
       return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
           endPeak, id);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultV4(String line, int nFields) {
+  private PeakResult createPeakResultV4(String line, int fieldCount) {
     try {
-      final float[] params = new float[nFields];
+      final float[] params = new float[fieldCount];
 
       if (isUseScanner()) {
         // Code using a Scanner
@@ -1634,44 +1598,38 @@ public class PeakResultsReader {
       }
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
-      final float meanIntensity = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
+      final float meanIntensity = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
       }
       // The format appends a * to computed precision. We ignore these.
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
             null, endPeak, id,
             // Read precision here because it is the final field
-            Float.parseFloat(fields[j]));
+            Float.parseFloat(fields[fi]));
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
           endPeak, id);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultDeviationsV4(String line, int nFields) {
+  private PeakResult createPeakResultDeviationsV4(String line, int fieldCount) {
     try {
-      final float[] params = new float[nFields];
-      final float[] paramsStdDev = new float[nFields];
+      final float[] params = new float[fieldCount];
+      final float[] paramsStdDev = new float[fieldCount];
 
       if (isUseScanner()) {
         // Code using a Scanner
@@ -1710,35 +1668,29 @@ public class PeakResultsReader {
 
       // Code using split and parse
       final String[] fields = tabPattern.split(line);
-      int j = 0;
-      final int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
-      final int peak = Integer.parseInt(fields[j++]);
-      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[j++]) : 0;
-      final int origX = Integer.parseInt(fields[j++]);
-      final int origY = Integer.parseInt(fields[j++]);
-      final float origValue = Float.parseFloat(fields[j++]);
-      final double error = Double.parseDouble(fields[j++]);
-      final float noise = Float.parseFloat(fields[j++]);
-      final float meanIntensity = Float.parseFloat(fields[j++]);
+      int fi = 0;
+      final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int peak = Integer.parseInt(fields[fi++]);
+      final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
+      final int origX = Integer.parseInt(fields[fi++]);
+      final int origY = Integer.parseInt(fields[fi++]);
+      final float origValue = Float.parseFloat(fields[fi++]);
+      final double error = Double.parseDouble(fields[fi++]);
+      final float noise = Float.parseFloat(fields[fi++]);
+      final float meanIntensity = Float.parseFloat(fields[fi++]);
       for (int i = 0; i < params.length; i++) {
-        params[i] = Float.parseFloat(fields[j++]);
-        paramsStdDev[i] = Float.parseFloat(fields[j++]);
+        params[i] = Float.parseFloat(fields[fi++]);
+        paramsStdDev[i] = Float.parseFloat(fields[fi++]);
       }
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
             paramsStdDev, endPeak, id,
             // Read precision here because it is the final field
-            Float.parseFloat(fields[j]));
+            Float.parseFloat(fields[fi]));
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
           paramsStdDev, endPeak, id);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -1761,7 +1713,7 @@ public class PeakResultsReader {
         // V3: Has variable columns with units for the PSF parameters. Signal was renamed to
         // Intensity.
         int version;
-        final int nFields = 0;
+        final int fieldCount = 0;
         if (header.contains("Signal")) {
           version = 1;
         } else if (header.contains("Amplitude")) {
@@ -1778,19 +1730,19 @@ public class PeakResultsReader {
         @SuppressWarnings("resource")
         final FileChannel channel = fis.getChannel();
 
-        int count = 0;
+        int counter = 0;
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
 
-          if (!addTableResult(results, line, version, nFields)) {
+          if (!addTableResult(results, line, version, fieldCount)) {
             if (++errors >= 10) {
               break;
             }
           }
 
-          if (++count % 512 == 0) {
+          if (++counter % 512 == 0) {
             showProgress(channel);
           }
         }
@@ -1822,11 +1774,12 @@ public class PeakResultsReader {
     return null;
   }
 
-  private boolean addTableResult(MemoryPeakResults results, String line, int version, int nFields) {
+  private boolean addTableResult(MemoryPeakResults results, String line, int version,
+      int fieldCount) {
     final PeakResult result;
     switch (version) {
       case 3:
-        result = createTableResultV3(line, nFields);
+        result = createTableResultV3(line, fieldCount);
         break;
 
       case 2:
@@ -1954,8 +1907,6 @@ public class PeakResultsReader {
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
       }
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
     } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
@@ -2035,15 +1986,13 @@ public class PeakResultsReader {
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
       }
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
     } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createTableResultV3(String line, int nFields) {
+  private PeakResult createTableResultV3(String line, int fieldCount) {
     // Text file with fields:
     // [#]
     // [Source]
@@ -2092,7 +2041,7 @@ public class PeakResultsReader {
         final float noise = scanner.nextFloat();
         @SuppressWarnings("unused")
         final float snr = scanner.nextFloat(); // Ignored but must be read
-        final float[] params = new float[nFields];
+        final float[] params = new float[fieldCount];
         float[] paramsStdDev;
         if (deviations) {
           paramsStdDev = new float[params.length];
@@ -2112,8 +2061,6 @@ public class PeakResultsReader {
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
       }
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
     } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
@@ -2134,7 +2081,7 @@ public class PeakResultsReader {
 
         // Skip the header
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
           if (line.charAt(0) != '#') {
@@ -2146,9 +2093,9 @@ public class PeakResultsReader {
           }
         }
 
-        int c = 0;
+        int counter = 0;
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
           if (line.charAt(0) == '#') {
@@ -2161,7 +2108,7 @@ public class PeakResultsReader {
             }
           }
 
-          if (++c % 512 == 0) {
+          if (++counter % 512 == 0) {
             showProgress(channel);
           }
         }
@@ -2210,18 +2157,16 @@ public class PeakResultsReader {
         final float sx = (float) (Math.sqrt(sx2) * 1000);
         final float sy = (float) (Math.sqrt(sy2) * 1000);
 
-        final float[] params = new float[nTwoAxis];
+        final float[] params = new float[SIZE_TWO_AXIS];
         params[PeakResult.INTENSITY] = signal;
         params[PeakResult.X] = x;
         params[PeakResult.Y] = y;
-        params[isx] = sx;
-        params[isy] = sy;
+        params[INDEX_SX] = sx;
+        params[INDEX_SY] = sy;
 
         // Store the signal as the original value
         return new PeakResult(peak, (int) x, (int) y, signal, error, 0.0f, 0, params, null);
       }
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
     } catch (final NoSuchElementException ex) {
       // Ignore and return null
     }
@@ -2243,9 +2188,9 @@ public class PeakResultsReader {
         // Skip the single line header
         input.readLine();
 
-        int c = 0;
+        int counter = 0;
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
 
@@ -2255,7 +2200,7 @@ public class PeakResultsReader {
             }
           }
 
-          if (++c % 512 == 0) {
+          if (++counter % 512 == 0) {
             showProgress(channel);
           }
         }
@@ -2270,16 +2215,16 @@ public class PeakResultsReader {
     // Try and create a calibration
     final Statistics pixelPitch = new Statistics();
     results.forEach(new PeakResultProcedureX() {
-      final double twoPi = 2 * Math.PI;
+      static final double TWO_PI = 2 * Math.PI;
 
       @Override
-      public boolean execute(PeakResult p) {
-        if (p.getFrame() == p.getEndFrame()) {
-          final float height = p.getOrigValue();
-          final float intensity = p.getParameter(PeakResult.INTENSITY);
-          final float sd0 = p.getParameter(isx);
-          final float sd1 = p.getParameter(isy);
-          pixelPitch.add(Math.sqrt(height * twoPi * sd0 * sd1 / intensity));
+      public boolean execute(PeakResult peakResult) {
+        if (peakResult.getFrame() == peakResult.getEndFrame()) {
+          final float height = peakResult.getOrigValue();
+          final float intensity = peakResult.getParameter(PeakResult.INTENSITY);
+          final float sd0 = peakResult.getParameter(INDEX_SX);
+          final float sd1 = peakResult.getParameter(INDEX_SY);
+          pixelPitch.add(Math.sqrt(height * TWO_PI * sd0 * sd1 / intensity));
           // Stop when we have enough for a good guess
           return (pixelPitch.getN() > 100);
         }
@@ -2321,7 +2266,7 @@ public class PeakResultsReader {
 
   // So that the fields can be named
   @SuppressWarnings("unused")
-  private static PeakResult createNSTORMResult(String line) {
+  private static @Nullable PeakResult createNSTORMResult(String line) {
     // Note that the NSTORM file contains traced molecules hence the Frame
     // and Length fields.
 
@@ -2374,18 +2319,18 @@ public class PeakResultsReader {
         final float yc = scanner.nextFloat();
         final float height = scanner.nextFloat();
         final float area = scanner.nextFloat();
-        float width = scanner.nextFloat();
+        final float width = scanner.nextFloat();
         final float phi = scanner.nextFloat();
-        float ax = scanner.nextFloat();
+        final float ax = scanner.nextFloat();
         final float bg = scanner.nextFloat();
-        final float i = scanner.nextFloat();
+        final float intensity = scanner.nextFloat();
         final int frame = scanner.nextInt();
         final int length = scanner.nextInt();
         // These are not needed
-        // float link = scanner.nextFloat();
-        // float valid = scanner.nextFloat();
-        // float z = scanner.nextFloat();
-        // float zc = scanner.nextFloat();
+        // float link = scanner.nextFloat()
+        // float valid = scanner.nextFloat()
+        // float z = scanner.nextFloat()
+        // float zc = scanner.nextFloat()
 
         // The coordinates are in nm
         // The values are in ADUs. The area value is the signal.
@@ -2394,37 +2339,31 @@ public class PeakResultsReader {
         // Area = Height * 2 * pi * (Width / (pixel_pitch*2) )^2
         // => Pixel_pitch = 0.5 * Width / sqrt(Area / (Height * 2 * pi))
 
-        final float[] params = new float[nTwoAxis];
+        final float[] params = new float[SIZE_TWO_AXIS];
         params[PeakResult.BACKGROUND] = bg;
-        // params[ia] = ax;
         params[PeakResult.INTENSITY] = area;
         params[PeakResult.X] = xc;
         params[PeakResult.Y] = yc;
 
         // Convert width (2*SD) to SD
-        width /= 2f;
+        final float sd = width / 2f;
 
         // Convert to separate XY widths using the axial ratio
         if (ax == 1) {
-          params[isx] = width;
-          params[isy] = width;
+          params[INDEX_SX] = sd;
+          params[INDEX_SY] = sd;
         } else {
           // Ensure the axial ratio is long/short
-          if (ax < 1) {
-            ax = 1.0f / ax;
-          }
-          final double a = Math.sqrt(ax);
+          final double a = Math.sqrt((ax < 1) ? 1.0 / ax : ax);
 
-          params[isx] = (float) (width * a);
-          params[isy] = (float) (width / a);
+          params[INDEX_SX] = (float) (sd * a);
+          params[INDEX_SY] = (float) (sd / a);
         }
 
         // Store the signal as the original value
         return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, 0.0, 0.0f, 0, params, null,
             frame + length - 1, 0);
       }
-    } catch (final InputMismatchException ex) {
-      // Ignore
     } catch (final NoSuchElementException ex) {
       // Ignore
     }
@@ -2447,7 +2386,7 @@ public class PeakResultsReader {
 
         // Skip the header
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
 
@@ -2460,9 +2399,9 @@ public class PeakResultsReader {
           }
         }
 
-        int c = 0;
+        int counter = 0;
         while ((line = input.readLine()) != null) {
-          if (line.length() == 0) {
+          if (line.isEmpty()) {
             continue;
           }
           if (line.charAt(0) == '#') {
@@ -2475,7 +2414,7 @@ public class PeakResultsReader {
             }
           }
 
-          if (++c % 512 == 0) {
+          if (++counter % 512 == 0) {
             showProgress(channel);
           }
         }
@@ -2546,13 +2485,7 @@ public class PeakResultsReader {
       params[PeakResult.INTENSITY] = Float.parseFloat(fields[3]);
 
       return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
-    } catch (final InputMismatchException ex) {
-      // Ignore and return null
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    } catch (final IndexOutOfBoundsException ex) {
-      // Ignore and return null
-    } catch (final NumberFormatException ex) {
+    } catch (final NoSuchElementException | IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
     return null;
@@ -2629,13 +2562,13 @@ public class PeakResultsReader {
   public ResultOption[] getOptions() {
     getHeader();
     if (header == null || format == null) {
-      return null;
+      return ResultOption.EMPTY_ARRAY;
     }
     if (format == FileFormat.TSF_BINARY) {
       final TSFPeakResultsReader reader = new TSFPeakResultsReader(filename);
       return reader.getOptions();
     }
-    return null;
+    return ResultOption.EMPTY_ARRAY;
   }
 
   /**

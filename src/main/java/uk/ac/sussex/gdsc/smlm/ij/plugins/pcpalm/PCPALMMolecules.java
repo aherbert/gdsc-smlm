@@ -260,6 +260,7 @@ public class PCPALMMolecules implements PlugIn {
         runInMemoryResults();
         break;
       case 3:
+      default:
         runSimulation(resultsAvailable);
         area = simulationSize * simulationSize;
         seconds = 100; // Use an arbitrary lifetime

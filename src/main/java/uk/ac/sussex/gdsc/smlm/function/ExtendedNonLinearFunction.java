@@ -36,7 +36,7 @@ public interface ExtendedNonLinearFunction extends NonLinearFunction {
    * @param variables the variables
    * @return The values
    */
-  public double[] computeValues(double[] variables);
+  double[] computeValues(double[] variables);
 
   /**
    * Compute the Jacobian of the gradients of all the data points.
@@ -44,14 +44,14 @@ public interface ExtendedNonLinearFunction extends NonLinearFunction {
    * @param variables the variables
    * @return The Jacobian
    */
-  public double[][] computeJacobian(double[] variables);
+  double[][] computeJacobian(double[] variables);
 
   /**
    * Return true if the function can compute the values and the Jacobian.
    *
    * @return true, if the function can compute the values and the Jacobian.
    */
-  public boolean canComputeValuesAndJacobian();
+  boolean canComputeValuesAndJacobian();
 
   /**
    * Compute the values and the Jacobian of the gradients of all the data points.
@@ -59,5 +59,5 @@ public interface ExtendedNonLinearFunction extends NonLinearFunction {
    * @param variables the variables
    * @return The values and the Jacobian
    */
-  public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables);
+  Pair<double[], double[][]> computeValuesAndJacobian(double[] variables);
 }

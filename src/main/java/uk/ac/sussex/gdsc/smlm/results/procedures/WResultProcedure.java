@@ -33,5 +33,5 @@ public interface WResultProcedure {
    *
    * @param width the width
    */
-  public void executeW(float width);
+  void executeW(float width);
 }

@@ -42,7 +42,7 @@ public class SearchDimension implements Cloneable, Dimension {
   public final double minIncrement;
 
   /** The number of increments to use around the centre. */
-  public final int nIncrement;
+  public final int increments;
 
   /**
    * Set to true if {@link #min} &lt; {@link #max}.
@@ -79,10 +79,10 @@ public class SearchDimension implements Cloneable, Dimension {
    * @param min the minimum of the range
    * @param max the maximum of the range
    * @param minIncrement the min increment to use around the centre
-   * @param nIncrement the number of increments to use around the centre
+   * @param increments the number of increments to use around the centre
    */
-  public SearchDimension(double min, double max, double minIncrement, int nIncrement) {
-    this(min, max, minIncrement, nIncrement, min, max);
+  public SearchDimension(double min, double max, double minIncrement, int increments) {
+    this(min, max, minIncrement, increments, min, max);
   }
 
   /**
@@ -91,11 +91,11 @@ public class SearchDimension implements Cloneable, Dimension {
    * @param min the minimum of the range
    * @param max the maximum of the range
    * @param minIncrement the min increment to use around the centre
-   * @param nIncrement the number of increments to use around the centre
+   * @param increments the number of increments to use around the centre
    * @param lower the current lower bound of the range (will be clipped to min/max)
    * @param upper the current upper bound of the range (will be clipped to min/max)
    */
-  public SearchDimension(double min, double max, double minIncrement, int nIncrement, double lower,
+  public SearchDimension(double min, double max, double minIncrement, int increments, double lower,
       double upper) {
     if (isInvalid(min)) {
       throw new IllegalArgumentException("Min is not a valid number: " + min);
@@ -116,18 +116,14 @@ public class SearchDimension implements Cloneable, Dimension {
       throw new IllegalArgumentException("Max is less than min");
     }
     this.active = min < max;
-    if (active && nIncrement < 1) {
-      throw new IllegalArgumentException("Steps must be more than 0: " + nIncrement);
+    if (active && increments < 1) {
+      throw new IllegalArgumentException("Steps must be more than 0: " + increments);
     }
     if (minIncrement < 0) {
       throw new IllegalArgumentException("Min increment is negative: " + minIncrement);
     }
     if (upper < lower) {
       throw new IllegalArgumentException("Upper is less than lower");
-      // if (upper < min || upper > max)
-      // throw new IllegalArgumentException("Upper is outside min/max range");
-      // if (lower < min || lower > max)
-      // throw new IllegalArgumentException("Lower is outside min/max range");
     }
 
     // We round to the min increment so that the values returned should be identical if the centre
@@ -135,14 +131,14 @@ public class SearchDimension implements Cloneable, Dimension {
     this.minIncrement = minIncrement;
     this.min = round(min);
     this.max = round(max);
-    this.nIncrement = nIncrement;
+    this.increments = increments;
 
     // Rounding changes the range so bring the upper and lower back within
     lower = MathUtils.clip(this.min, this.max, lower);
     upper = MathUtils.clip(this.min, this.max, upper);
 
     setCentre((upper + lower) / 2);
-    setIncrement((upper - lower) / (2 * nIncrement));
+    setIncrement((upper - lower) / (2 * increments));
   }
 
   /**
@@ -165,22 +161,28 @@ public class SearchDimension implements Cloneable, Dimension {
     if (upper > max) {
       upper = max;
     }
-    return new SearchDimension(min, max, minIncrement, nIncrement, lower, upper);
+    return new SearchDimension(min, max, minIncrement, increments, lower, upper);
   }
 
   /**
    * Creates a new search dimension, respecting the current settings and changing the number of
    * increments.
    *
-   * @param nIncrement the number of increments to use around the centre
+   * @param increments the number of increments to use around the centre
    * @return the search dimension
    */
-  public SearchDimension create(int nIncrement) {
-    return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
+  public SearchDimension create(int increments) {
+    return new SearchDimension(min, max, minIncrement, increments, getLower(), getUpper());
   }
 
-  private static boolean isInvalid(double d) {
-    return Double.isNaN(d) || Double.isInfinite(d);
+  /**
+   * Checks if an invalid number (NaN or infinite).
+   *
+   * @param value the value
+   * @return true, if is invalid
+   */
+  private static boolean isInvalid(double value) {
+    return Double.isNaN(value) || Double.isInfinite(value);
   }
 
   /**
@@ -274,9 +276,9 @@ public class SearchDimension implements Cloneable, Dimension {
 
   /** {@inheritDoc} */
   @Override
-  public boolean isAtBounds(double v) {
+  public boolean isAtBounds(double value) {
     values();
-    return (v <= values[0] || v >= values[values.length - 1]);
+    return (value <= values[0] || value >= values[values.length - 1]);
   }
 
   /**
@@ -301,12 +303,12 @@ public class SearchDimension implements Cloneable, Dimension {
     values = new double[getMaxLength()];
     int size = 0;
 
-    double value = round(centre - nIncrement * increment);
+    double value = round(centre - increments * increment);
     if (value < min) {
       values[size++] = min;
 
       // Avoid further values below the min
-      for (int i = nIncrement - 1; i >= 1; i--) {
+      for (int i = increments - 1; i >= 1; i--) {
         value = round(centre - i * increment);
         if (value < min) {
           continue;
@@ -319,14 +321,14 @@ public class SearchDimension implements Cloneable, Dimension {
       }
     } else {
       // Not at the limit
-      for (int i = nIncrement; i >= 1; i--) {
+      for (int i = increments; i >= 1; i--) {
         values[size++] = round(centre - i * increment);
       }
 
       values[size++] = centre; // Already rounded and within range
     }
 
-    for (int i = 1; i <= nIncrement; i++) {
+    for (int i = 1; i <= increments; i++) {
       value = round(centre + i * increment);
       if (value > max) {
         if (centre != max) {
@@ -351,7 +353,7 @@ public class SearchDimension implements Cloneable, Dimension {
         if (values[0] == min) {
           if (values[size - 1] != max) {
             // Pad up
-            for (int i = nIncrement + 1; size < values.length; i++) {
+            for (int i = increments + 1; size < values.length; i++) {
               value = round(centre + i * increment);
               if (value > max) {
                 values[size++] = max;
@@ -362,7 +364,7 @@ public class SearchDimension implements Cloneable, Dimension {
           }
         } else {
           // Pad down
-          for (int i = nIncrement + 1; size < values.length; i++) {
+          for (int i = increments + 1; size < values.length; i++) {
             value = round(centre - i * increment);
             if (value < min) {
               values[size++] = min;
@@ -394,11 +396,13 @@ public class SearchDimension implements Cloneable, Dimension {
    * @return the max length
    */
   public int getMaxLength() {
-    return 2 * nIncrement + 1;
+    return 2 * increments + 1;
   }
 
   /**
-   * @return the reduceFactor.
+   * Gets the reduce factor.
+   *
+   * @return the reduce factor
    */
   public double getReduceFactor() {
     return reduceFactor;
@@ -426,7 +430,7 @@ public class SearchDimension implements Cloneable, Dimension {
 
   /**
    * Checks if the {@link #reduce()} method will result in a change to the range returned by
-   * {@link #values()}
+   * {@link #values()}.
    *
    * @return true, if the range can be reduced
    */
@@ -466,7 +470,7 @@ public class SearchDimension implements Cloneable, Dimension {
   }
 
   /**
-   * Enumerate from the lower to the upper value using the configured nIncrement (n) to define the
+   * Enumerate from the lower to the upper value using the configured increments (n) to define the
    * number of steps (2*n+1).
    *
    * <p>No range check is performed against the current min/max so the returned values can be
@@ -478,7 +482,7 @@ public class SearchDimension implements Cloneable, Dimension {
    * @return the double[]
    */
   public double[] enumerate(double lower, double upper) {
-    return enumerate(lower, upper, 2 * nIncrement + 1);
+    return enumerate(lower, upper, 2 * increments + 1);
   }
 
   /**

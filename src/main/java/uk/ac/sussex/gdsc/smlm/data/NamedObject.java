@@ -33,12 +33,12 @@ public interface NamedObject {
    *
    * @return the name
    */
-  public String getName();
+  String getName();
 
   /**
    * Gets the short name. This may be the same as {@link #getName()}.
    *
    * @return the short name
    */
-  public String getShortName();
+  String getShortName();
 }

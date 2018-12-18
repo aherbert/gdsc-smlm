@@ -33,5 +33,5 @@ public interface StoredPrecisionProcedure {
    *
    * @param precision the precision
    */
-  public void executeStoredPrecision(double precision);
+  void executeStoredPrecision(double precision);
 }

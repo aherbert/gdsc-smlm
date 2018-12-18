@@ -35,7 +35,7 @@ public interface AstigmatismZModel {
    * @param z the z
    * @return the standard deviation in dimension x
    */
-  public double getSx(double z);
+  double getSx(double z);
 
   /**
    * Gets the standard deviation and partial derivative in dimension x for the given z-depth.
@@ -46,7 +46,7 @@ public interface AstigmatismZModel {
    * @param dsdz the first derivative of s given z
    * @return the standard deviation in dimension x
    */
-  public double getSx(double z, double[] dsdz);
+  double getSx(double z, double[] dsdz);
 
   /**
    * Gets the standard deviation and partial derivatives in dimension x for the given z-depth.
@@ -57,7 +57,7 @@ public interface AstigmatismZModel {
    * @param dsdz the first and second derivative of s given z
    * @return the standard deviation in dimension x
    */
-  public double getSx2(double z, double[] dsdz);
+  double getSx2(double z, double[] dsdz);
 
   /**
    * Gets the standard deviation in dimension y for the given z-depth.
@@ -65,7 +65,7 @@ public interface AstigmatismZModel {
    * @param z the z
    * @return the standard deviation in dimension y
    */
-  public double getSy(double z);
+  double getSy(double z);
 
   /**
    * Gets the standard deviation and partial derivative in dimension y for the given z-depth.
@@ -76,7 +76,7 @@ public interface AstigmatismZModel {
    * @param dsdz the first derivative of s given z
    * @return the standard deviation in dimension y
    */
-  public double getSy(double z, double[] dsdz);
+  double getSy(double z, double[] dsdz);
 
   /**
    * Gets the standard deviation and partial derivatives in dimension y for the given z-depth.
@@ -87,5 +87,5 @@ public interface AstigmatismZModel {
    * @param dsdz the first and second derivative of s given z
    * @return the standard deviation in dimension y
    */
-  public double getSy2(double z, double[] dsdz);
+  double getSy2(double z, double[] dsdz);
 }

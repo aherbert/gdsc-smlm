@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
@@ -52,7 +53,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import ij.IJ;
-import ij.ImageListener;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Menus;
@@ -91,8 +91,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -119,11 +119,77 @@ import javax.swing.event.ListSelectionListener;
 /**
  * Allows analysis of the signal and on/off times for fixed fluorophore spots in an image stack.
  */
-public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemListener, Runnable,
-    ImageListener, ListSelectionListener, KeyListener {
+public class SpotAnalysis extends PlugInFrame
+    implements ActionListener, ItemListener, Runnable, ListSelectionListener {
   private static final long serialVersionUID = 1L;
 
-  private static final String TITLE = "Spot Analysis";
+  private static final String PLUGIN_TITLE = "Spot Analysis";
+
+  // Image titles
+  private static final String rawMeanTitle = PLUGIN_TITLE + " Raw mean";
+  private static final String rawSDTitle = PLUGIN_TITLE + " Raw SD";
+  private static final String rawSpotTitle = PLUGIN_TITLE + " Raw spot";
+  private static final String blurSpotTitle = PLUGIN_TITLE + " Blur spot";
+  private static final String avgSpotTitle = PLUGIN_TITLE + " Average spot";
+  private static final String[] resultsTitles =
+      new String[] {rawMeanTitle, rawSDTitle, rawSpotTitle, blurSpotTitle, avgSpotTitle};
+
+  private static Frame instance;
+  private static TextWindow resultsWindow;
+
+  private Choice inputChoice;
+  private TextField widthTextField;
+  private TextField blurTextField;
+  private TextField gainTextField;
+  private TextField exposureTextField;
+  private TextField smoothingTextField;
+  private Button profileButton;
+  private Button addButton;
+  private Button deleteButton;
+  private Button saveButton;
+  private Button saveTracesButton;
+  private Label currentLabel;
+  private Label rawFittedLabel;
+  private Label blurFittedLabel;
+  @SuppressWarnings("rawtypes")
+  private DefaultListModel listModel;
+  @SuppressWarnings("rawtypes")
+  private JList onFramesList;
+
+  // private final int fontWidth = 12;
+  // private final Font monoFont = new Font("Monospaced", 0, fontWidth);
+
+  private static final String OPT_LOCATION = "CT.location";
+
+  // private ImageJ ij;
+  private int runMode;
+  private ImagePlus imp;
+  private ImagePlus rawImp;
+  private ImagePlus blurImp;
+
+  private double gain;
+  private double msPerFrame;
+  private double[] xValues;
+  private double[] rawMean;
+  private double[] smoothMean;
+  private double[] rawSd;
+  private double[] smoothSd;
+  private int area;
+  private int currentSlice;
+  private Rectangle areaBounds;
+
+  private final TreeSet<Spot> onFrames = new TreeSet<>();
+  private final TIntArrayList candidateFrames = new TIntArrayList();
+
+  private final TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<>();
+  private int id;
+  private boolean updated;
+  private int blurCount;
+
+  private final Object runLock = new Object();
+
+  // Stores the list of images last used in the selection options
+  private ArrayList<String> imageList = new ArrayList<>();
 
   private class Spot implements Comparable<Spot> {
     int frame;
@@ -136,23 +202,19 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
     @Override
     public String toString() {
-      // return String.format("%d : %.2f", frame, signal);
       return String.format("%d : %.2f", frame, getSignal(frame));
     }
 
     /** {@inheritDoc} */
     @Override
-    public int compareTo(Spot o) {
-      if (o == null) {
-        throw new NullPointerException();
-      }
-      return Integer.compare(frame, o.frame);
+    public int compareTo(Spot other) {
+      return Integer.compare(frame, other.frame);
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
-      if (obj == null || !(obj instanceof Spot)) {
+      if (!(obj instanceof Spot)) {
         return false;
       }
       final Spot o = (Spot) obj;
@@ -162,7 +224,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     /** {@inheritDoc} */
     @Override
     public int hashCode() {
-      return new Integer(frame).hashCode();
+      return Integer.hashCode(frame);
     }
   }
 
@@ -217,77 +279,11 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     }
   }
 
-  // Image titles
-  private static final String rawMeanTitle = TITLE + " Raw mean";
-  private static final String rawSDTitle = TITLE + " Raw SD";
-  private static final String rawSpotTitle = TITLE + " Raw spot";
-  private static final String blurSpotTitle = TITLE + " Blur spot";
-  private static final String avgSpotTitle = TITLE + " Average spot";
-  private static final String[] resultsTitles =
-      new String[] {rawMeanTitle, rawSDTitle, rawSpotTitle, blurSpotTitle, avgSpotTitle};
-
-  private static Frame instance;
-  private static TextWindow resultsWindow;
-
-  private Choice inputChoice;
-  private TextField widthTextField;
-  private TextField blurTextField;
-  private TextField gainTextField;
-  private TextField exposureTextField;
-  private TextField smoothingTextField;
-  private Button profileButton;
-  private Button addButton;
-  private Button deleteButton;
-  private Button saveButton;
-  private Button saveTracesButton;
-  private Label currentLabel;
-  private Label rawFittedLabel;
-  private Label blurFittedLabel;
-  @SuppressWarnings("rawtypes")
-  private DefaultListModel listModel;
-  @SuppressWarnings("rawtypes")
-  private JList onFramesList;
-
-  // private final int fontWidth = 12;
-  // private final Font monoFont = new Font("Monospaced", 0, fontWidth);
-
-  private final String OPT_LOCATION = "CT.location";
-
-  // private ImageJ ij;
-  private int runMode;
-  private ImagePlus imp;
-  private ImagePlus rawImp;
-  private ImagePlus blurImp;
-
-  private double gain;
-  private double msPerFrame;
-  private double[] xValues;
-  private double[] rawMean;
-  private double[] smoothMean;
-  private double[] rawSd;
-  private double[] smoothSd;
-  private int area;
-  private int currentSlice;
-  private Rectangle areaBounds;
-
-  private final TreeSet<Spot> onFrames = new TreeSet<>();
-  private final TIntArrayList candidateFrames = new TIntArrayList();
-
-  private final TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<>();
-  private int id;
-  private boolean updated;
-  private int blurCount;
-
-  private final Object runLock = new Object();
-
-  // Stores the list of images last used in the selection options
-  private ArrayList<String> imageList = new ArrayList<>();
-
   /**
    * Instantiates a new spot analysis.
    */
   public SpotAnalysis() {
-    super(TITLE);
+    super(PLUGIN_TITLE);
   }
 
   @Override
@@ -295,7 +291,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (WindowManager.getImageCount() == 0) {
-      IJ.showMessage(TITLE, "No images opened.");
+      IJ.showMessage(PLUGIN_TITLE, "No images opened.");
       return;
     }
 
@@ -314,14 +310,35 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     instance = this;
     IJ.register(SpotAnalysis.class);
     WindowManager.addWindow(this);
-    ImagePlus.addImageListener(this);
-    // ij = IJ.getInstance();
+    ImagePlus.addImageListener(new ImageAdapter() {
+      @Override
+      public void imageUpdated(ImagePlus imp) {
+        SpotAnalysis.this.imageUpdated(imp);
+      }
+    });
 
     createFrame();
     setup();
 
-    // addKeyListener(ij);
-    addKeyListener(this);
+    addKeyListener(new KeyAdapter() {
+      @Override
+      public void keyTyped(KeyEvent event) {
+        switch (event.getKeyChar()) {
+          case 'a':
+            addFrame();
+            break;
+          case ',':
+            rawImp.setSlice(rawImp.getSlice() + 1);
+            break;
+          case '.':
+            rawImp.setSlice(rawImp.getSlice() - 1);
+            break;
+          default:
+            break;
+        }
+      }
+    });
+
     pack();
     final Point loc = Prefs.getLocation(OPT_LOCATION);
     if (loc != null) {
@@ -430,7 +447,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     }
 
     if (runMode > 0) {
-      final Thread thread = new Thread(this, TITLE);
+      final Thread thread = new Thread(this, PLUGIN_TITLE);
       thread.start();
     }
     super.notify();
@@ -486,6 +503,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
           case 5:
             saveTraces();
             break;
+          default:
+            // Do nothing
+            break;
         }
       } finally {
         runMode = 0;
@@ -493,7 +513,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     }
 
     synchronized (this) {
-      super.notify();
+      super.notifyAll();
     }
   }
 
@@ -512,7 +532,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       gain = Double.parseDouble(gainTextField.getText());
       msPerFrame = Double.parseDouble(exposureTextField.getText());
     } catch (final NumberFormatException ex) {
-      IJ.error(TITLE, "Invalid numbers in the input parameters");
+      IJ.error(PLUGIN_TITLE, "Invalid numbers in the input parameters");
       return;
     }
 
@@ -521,20 +541,20 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     // This should not be a problem but leave it in for now
     if (imp == null || (imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16
         && imp.getType() != ImagePlus.GRAY32)) {
-      IJ.showMessage(TITLE, "Images must be grayscale.");
+      IJ.showMessage(PLUGIN_TITLE, "Images must be grayscale.");
       return;
     }
 
     final Roi roi = imp.getRoi();
     if (roi == null || !roi.isArea()) {
-      IJ.showMessage(TITLE, "Image must have an area ROI");
+      IJ.showMessage(PLUGIN_TITLE, "Image must have an area ROI");
       return;
     }
 
     final int recommendedSize = (int) Math.ceil(8 * psfWidth);
     final Rectangle bounds = roi.getBounds();
     if (bounds.width < recommendedSize || bounds.height < recommendedSize) {
-      IJ.showMessage(TITLE,
+      IJ.showMessage(PLUGIN_TITLE,
           String.format("Recommend using an ROI of at least %d x %d for the PSF width",
               recommendedSize, recommendedSize));
       return;
@@ -542,7 +562,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
     // Check no existing spots are within the ROI
     if (resultsWithinBounds(bounds)) {
-      final GenericDialog gd = new GenericDialog(TITLE);
+      final GenericDialog gd = new GenericDialog(PLUGIN_TITLE);
       gd.enableYesNoCancel();
       gd.hideCancelButton();
       gd.addMessage("The results list contains a spot within the selected bounds\n \n"
@@ -589,12 +609,13 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
   private boolean parametersReady() {
     if (inputChoice.getItemCount() == 0) {
-      IJ.showMessage(TITLE, "No available images. Images must be 8-bit or 16-bit grayscale.");
+      IJ.showMessage(PLUGIN_TITLE,
+          "No available images. Images must be 8-bit or 16-bit grayscale.");
       return false;
     }
 
     if (!onFrames.isEmpty() && updated) {
-      final GenericDialog gd = new GenericDialog(TITLE);
+      final GenericDialog gd = new GenericDialog(PLUGIN_TITLE);
       gd.enableYesNoCancel();
       gd.hideCancelButton();
       gd.addMessage(
@@ -961,7 +982,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     final Statistics tOff = Statistics.create(trace.getOffTimes());
     resultsWindow.append(String.format("%d\t%.1f\t%.1f\t%s\t%s\t%s\t%d\t%s\t%s\t%s", id, cx, cy,
         MathUtils.rounded(signal, 4), MathUtils.rounded(tOn.getSum() * msPerFrame, 3),
-        MathUtils.rounded(tOff.getSum() * msPerFrame, 3), trace.getNBlinks() - 1,
+        MathUtils.rounded(tOff.getSum() * msPerFrame, 3), trace.getBlinks() - 1,
         MathUtils.rounded(tOn.getMean() * msPerFrame, 3),
         MathUtils.rounded(tOff.getMean() * msPerFrame, 3), imp.getTitle()));
 
@@ -974,7 +995,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
   private static void createResultsWindow() {
     if (!resultsWindowShowing()) {
-      resultsWindow = new TextWindow(TITLE + " Results",
+      resultsWindow = new TextWindow(PLUGIN_TITLE + " Results",
           "Id\tcx\tcy\tSignal\tt-On (ms)\tt-Off (ms)\tBlinks\tAv.t-On\tAv.t-Off\tSource", "", 600,
           200);
       resultsWindow.setVisible(true);
@@ -983,7 +1004,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
   private void saveTraces() {
     if (!onFrames.isEmpty() && updated) {
-      final GenericDialog gd = new GenericDialog(TITLE);
+      final GenericDialog gd = new GenericDialog(PLUGIN_TITLE);
       gd.enableYesNoCancel();
       gd.hideCancelButton();
       gd.addMessage("The list contains unsaved selected frames.\n \nDo you want to continue?");
@@ -1000,7 +1021,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
     // Create a results set in memory
     final MemoryPeakResults results = new MemoryPeakResults();
-    results.setName(TITLE);
+    results.setName(PLUGIN_TITLE);
     results.begin();
     MemoryPeakResults.addResults(results);
 
@@ -1044,7 +1065,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
   }
 
   private void saveTracesToFile(ArrayList<TraceResult> traceResults) {
-    final String resultsDirectory = IJ.getDirectory(TITLE);
+    final String resultsDirectory = IJ.getDirectory(PLUGIN_TITLE);
     if (resultsDirectory == null) {
       return;
     }
@@ -1067,7 +1088,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
         sb.append(traceResult.trace.getHead().getXPosition()).append('\t');
         sb.append(traceResult.trace.getHead().getYPosition()).append('\t');
         sb.append(traceResult.spot.signal).append('\t');
-        final int nBlinks = traceResult.trace.getNBlinks() - 1;
+        final int nBlinks = traceResult.trace.getBlinks() - 1;
         sb.append(nBlinks);
 
         final int[] on = traceResult.trace.getOnTimes();
@@ -1239,21 +1260,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
     return panel;
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public void imageOpened(ImagePlus imp) {
-    // Ignore
-  }
 
-  /** {@inheritDoc} */
-  @Override
-  public void imageClosed(ImagePlus imp) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void imageUpdated(ImagePlus imp) {
+  private void imageUpdated(ImagePlus imp) {
     ImagePlus from = null;
     ImagePlus to = null;
     if (imp == rawImp) {
@@ -1290,8 +1298,6 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       drawProfiles();
 
       // Fit the PSF using a Gaussian
-      float[] data2 = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
-      double[] data = SimpleArrayUtils.toDouble(data2);
       final FitConfiguration fitConfiguration = new FitConfiguration();
       fitConfiguration.setPSF(PSFProtosHelper.defaultOneAxisGaussian2DPSF);
       fitConfiguration.setFixedPSF(true);
@@ -1308,8 +1314,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
       params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
       params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-      FitResult fitResult =
-          gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, new boolean[1]);
+      float[] data = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
+      FitResult fitResult = gf.fit(SimpleArrayUtils.toDouble(data), rawImp.getWidth(),
+          rawImp.getHeight(), 1, params, new boolean[1]);
       if (fitResult.getStatus() == FitStatus.OK) {
         params = fitResult.getParameters();
         final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
@@ -1327,8 +1334,6 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
         return;
       }
 
-      data2 = (float[]) blurImp.getImageStack().getProcessor(slice).getPixels();
-      data = SimpleArrayUtils.toDouble(data2);
       params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
       // float psfWidth = Float.parseFloat(widthTextField.getText());
       params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];
@@ -1336,7 +1341,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
       params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
       params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
       params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-      fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, new boolean[1]);
+      data = (float[]) blurImp.getImageStack().getProcessor(slice).getPixels();
+      fitResult = gf.fit(SimpleArrayUtils.toDouble(data), rawImp.getWidth(), rawImp.getHeight(), 1,
+          params, new boolean[1]);
       if (fitResult.getStatus() == FitStatus.OK) {
         params = fitResult.getParameters();
         final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
@@ -1362,31 +1369,5 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
         rawImp.setSlice(spot.frame);
       }
     }
-  }
-
-  @Override
-  public void keyTyped(KeyEvent event) {
-    System.out.println("keyTyped");
-    switch (event.getKeyChar()) {
-      case 'a':
-        addFrame();
-        break;
-      case ',':
-        rawImp.setSlice(rawImp.getSlice() + 1);
-        break;
-      case '.':
-        rawImp.setSlice(rawImp.getSlice() - 1);
-        break;
-    }
-  }
-
-  @Override
-  public void keyPressed(KeyEvent event) {
-    System.out.println("keyPressed");
-  }
-
-  @Override
-  public void keyReleased(KeyEvent event) {
-    System.out.println("keyReleased");
   }
 }

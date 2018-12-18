@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class Gradient2FunctionStore extends Gradient1FunctionStore
     implements Gradient2Function, Gradient2Procedure {
-  private final Gradient2Function f;
+  private final Gradient2Function function2;
   private Gradient2Procedure procedure;
 
   /**
@@ -40,49 +40,49 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore
   /**
    * Instantiates a new gradient 2 function store.
    *
-   * @param f the f
+   * @param function the function
    */
-  public Gradient2FunctionStore(Gradient2Function f) {
-    this(f, null, null, null);
+  public Gradient2FunctionStore(Gradient2Function function) {
+    this(function, null, null, null);
   }
 
   /**
    * Instantiates a new gradient 2 function store with storage.
    *
-   * @param f the f
+   * @param function the function
    * @param values the values
    * @param dyda the dyda
    * @param d2yda2 the d2yda2
    */
-  public Gradient2FunctionStore(Gradient2Function f, double[] values, double[][] dyda,
+  public Gradient2FunctionStore(Gradient2Function function, double[] values, double[][] dyda,
       double[][] d2yda2) {
-    super(f, values, dyda);
-    this.f = f;
+    super(function, values, dyda);
+    this.function2 = function;
     this.d2yda2 = d2yda2;
   }
 
   /** {@inheritDoc} */
   @Override
   public void initialise2(double[] a) {
-    f.initialise2(a);
+    function2.initialise2(a);
   }
 
   /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
-    i = 0;
+    index = 0;
     createValues();
     createDYDA();
     createD2YDA2();
     this.procedure = procedure;
-    f.forEach((Gradient2Procedure) this);
+    function2.forEach((Gradient2Procedure) this);
   }
 
   /**
-   * Creates the {@link #d2yda2} matrix;
+   * Creates the {@link #d2yda2} matrix.
    */
   protected void createD2YDA2() {
-    if (d2yda2 == null || d2yda2.length != f.size()) {
+    if (d2yda2 == null || d2yda2.length != function2.size()) {
       d2yda2 = new double[values.length][length];
     }
   }
@@ -90,10 +90,10 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore
   /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da, double[] d2y_da2) {
-    values[i] = value;
-    System.arraycopy(dy_da[i], 0, dyda[i], 0, length);
-    System.arraycopy(d2y_da2[i], 0, d2yda2[i], 0, length);
-    i++;
+    values[index] = value;
+    System.arraycopy(dy_da[index], 0, dyda[index], 0, length);
+    System.arraycopy(d2y_da2[index], 0, d2yda2[index], 0, length);
+    index++;
     procedure.execute(value, dy_da, d2y_da2);
   }
 }

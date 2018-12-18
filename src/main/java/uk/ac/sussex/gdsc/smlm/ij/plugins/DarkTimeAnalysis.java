@@ -196,7 +196,7 @@ public class DarkTimeAnalysis implements PlugIn {
     final int[] times = new int[range];
     final StoredData stats = new StoredData();
     for (final Trace trace : traces) {
-      if (trace.getNBlinks() > 1) {
+      if (trace.getBlinks() > 1) {
         for (final int t : trace.getOffTimes()) {
           times[t]++;
         }

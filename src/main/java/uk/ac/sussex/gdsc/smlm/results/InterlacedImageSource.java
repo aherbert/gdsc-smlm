@@ -213,6 +213,8 @@ public class InterlacedImageSource extends ImageSource {
   }
 
   /**
+   * Gets the first frame that contains data.
+   *
    * @return The first frame that contains data.
    */
   public int getStart() {
@@ -220,6 +222,8 @@ public class InterlacedImageSource extends ImageSource {
   }
 
   /**
+   * Gets the number of continuous frames containing data.
+   *
    * @return The number of continuous frames containing data.
    */
   public int getSize() {
@@ -227,6 +231,8 @@ public class InterlacedImageSource extends ImageSource {
   }
 
   /**
+   * Gets the number of continuous frames to ignore before the next data.
+   *
    * @return The number of continuous frames to ignore before the next data.
    */
   public int getSkip() {

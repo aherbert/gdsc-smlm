@@ -33,5 +33,5 @@ public interface IResultProcedure {
    *
    * @param intensity the intensity
    */
-  public void executeI(float intensity);
+  void executeI(float intensity);
 }

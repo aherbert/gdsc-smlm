@@ -186,7 +186,9 @@ public abstract class AbstractPeakResults implements PeakResults {
   }
 
   /**
-   * @return The name of the results set (or the source if empty).
+   * Gets the name of the results set (or the source if empty).
+   *
+   * @return the name
    */
   @Override
   public String getName() {
@@ -196,9 +198,6 @@ public abstract class AbstractPeakResults implements PeakResults {
     return (getSource() != null) ? getSource().getName() : "";
   }
 
-  /**
-   * @param name The name of the results set
-   */
   @Override
   public void setName(String name) {
     if (name == null) {
@@ -210,7 +209,7 @@ public abstract class AbstractPeakResults implements PeakResults {
 
   /**
    * Get the nm-per-pixel from the calibration, or if not available, return the
-   * {@link #DEFAULT_NM_PER_PIXEL}
+   * {@link #DEFAULT_NM_PER_PIXEL}.
    *
    * @return the nmPerPixel
    */
@@ -219,7 +218,7 @@ public abstract class AbstractPeakResults implements PeakResults {
   }
 
   /**
-   * Get the gain from the calibration, or if not available, return the {@link #DEFAULT_GAIN}
+   * Get the gain from the calibration, or if not available, return the {@link #DEFAULT_GAIN}.
    *
    * @return the gain
    */
@@ -233,11 +232,12 @@ public abstract class AbstractPeakResults implements PeakResults {
    * @return true, if successful
    */
   public boolean isCCDCamera() {
-    return (calibration != null) ? calibrationReader.isCCDCamera() : false;
+    return (calibration != null && calibrationReader.isCCDCamera());
   }
 
   /**
-   * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
+   * Get the EMCCD flag from the calibration, or if not available, return the
+   * {@link #DEFAULT_EMCCD}.
    *
    * @return the EMCCD flag
    * @deprecated Replaced by the camera type

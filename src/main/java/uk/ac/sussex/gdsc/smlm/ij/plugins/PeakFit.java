@@ -138,12 +138,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.JFileChooser;
 
 /**
  * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits fail
@@ -886,72 +885,72 @@ public class PeakFit implements PlugInFilter, ItemListener {
       final Vector<Checkbox> checkboxes = gd.getCheckboxes();
       final Vector<Choice> choices = gd.getChoices();
 
-      int n = 0;
-      int t = 0;
-      int b = 0;
-      int ch = 0;
+      final Iterator<TextField> te = texts.iterator();
+      final Iterator<TextField> nu = numerics.iterator();
+      final Iterator<Checkbox> cb = checkboxes.iterator();
+      final Iterator<Choice> ch = choices.iterator();
 
-      final Choice textTemplate = choices.get(ch++);
+      final Choice textTemplate = ch.next();
       textTemplate.addItemListener(this);
 
-      textCameraType = choices.get(ch++);
-      textNmPerPixel = numerics.get(n++);
-      textExposure = numerics.get(n++);
+      textCameraType = ch.next();
+      textNmPerPixel = nu.next();
+      textExposure = nu.next();
       if (isCrop) {
-        b++;
+        cb.next();
       }
-      textPSF = choices.get(ch++);
-      textDataFilterType = choices.get(ch++);
-      textDataFilterMethod = choices.get(ch++);
-      textSmooth = numerics.get(n++);
-      textSearch = numerics.get(n++);
-      textBorder = numerics.get(n++);
-      textFitting = numerics.get(n++);
+      textPSF = ch.next();
+      textDataFilterType = ch.next();
+      textDataFilterMethod = ch.next();
+      textSmooth = nu.next();
+      textSearch = nu.next();
+      textBorder = nu.next();
+      textFitting = nu.next();
       if (extraOptions && !fitMaxima) {
-        b++; // Skip over the interlaced data option
-        n++; // Skip over the integrate frames option
+        cb.next(); // Skip over the interlaced data option
+        nu.next(); // Skip over the integrate frames option
       }
       if (!maximaIdentification) {
-        textFitSolver = choices.get(ch++);
+        textFitSolver = ch.next();
         if (extraOptions) {
-          textFitBackground = checkboxes.get(b++);
+          textFitBackground = cb.next();
         }
-        textFailuresLimit = numerics.get(n++);
-        textPassRate = numerics.get(n++);
-        textIncludeNeighbours = checkboxes.get(b++);
-        textNeighbourHeightThreshold = numerics.get(n++);
-        textResidualsThreshold = numerics.get(n++);
-        textDuplicateDistance = numerics.get(n++);
-        textSmartFilter = checkboxes.get(b++);
-        textDisableSimpleFilter = checkboxes.get(b++);
-        textCoordinateShiftFactor = numerics.get(n++);
-        textSignalStrength = numerics.get(n++);
-        textMinPhotons = numerics.get(n++);
+        textFailuresLimit = nu.next();
+        textPassRate = nu.next();
+        textIncludeNeighbours = cb.next();
+        textNeighbourHeightThreshold = nu.next();
+        textResidualsThreshold = nu.next();
+        textDuplicateDistance = nu.next();
+        textSmartFilter = cb.next();
+        textDisableSimpleFilter = cb.next();
+        textCoordinateShiftFactor = nu.next();
+        textSignalStrength = nu.next();
+        textMinPhotons = nu.next();
         if (extraOptions) {
-          textNoise = numerics.get(n++);
-          textNoiseMethod = choices.get(ch++);
+          textNoise = nu.next();
+          textNoiseMethod = ch.next();
         }
-        textMinWidthFactor = numerics.get(n++);
-        textWidthFactor = numerics.get(n++);
-        textPrecisionThreshold = numerics.get(n++);
+        textMinWidthFactor = nu.next();
+        textWidthFactor = nu.next();
+        textPrecisionThreshold = nu.next();
 
         updateFilterInput();
         textSmartFilter.addItemListener(this);
         textDisableSimpleFilter.addItemListener(this);
       }
-      textLogProgress = checkboxes.get(b++);
+      textLogProgress = cb.next();
       if (!maximaIdentification) {
-        textShowDeviations = checkboxes.get(b++);
+        textShowDeviations = cb.next();
       }
-      textResultsTable = checkboxes.get(b++);
-      textResultsImage = choices.get(ch++);
+      textResultsTable = cb.next();
+      textResultsImage = ch.next();
       if (extraOptions) {
-        b++; // Skip over show processed frames option
+        cb.next(); // Skip over show processed frames option
       }
-      textResultsDirectory = texts.get(t++);
+      textResultsDirectory = te.next();
 
-      textFileFormat = choices.get(ch++);
-      textResultsInMemory = checkboxes.get(b++);
+      textFileFormat = ch.next();
+      textResultsInMemory = cb.next();
     }
 
     gd.showDialog();
@@ -1055,14 +1054,14 @@ public class PeakFit implements PlugInFilter, ItemListener {
      *
      * @return the calibration
      */
-    public Calibration getCalibration();
+    Calibration getCalibration();
 
     /**
      * Save the calibration. This is used to save changes to the calibration back to the provider.
      *
      * @param calibration the calibration
      */
-    public void saveCalibration(Calibration calibration);
+    void saveCalibration(Calibration calibration);
   }
 
   /**
@@ -1246,7 +1245,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
      *
      * @return the fitEngineConfiguration
      */
-    public FitEngineConfiguration getFitEngineConfiguration();
+    FitEngineConfiguration getFitEngineConfiguration();
   }
 
   /**
@@ -1258,7 +1257,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
      *
      * @return the fitConfiguration
      */
-    public FitConfiguration getFitConfiguration();
+    FitConfiguration getFitConfiguration();
   }
 
   /**

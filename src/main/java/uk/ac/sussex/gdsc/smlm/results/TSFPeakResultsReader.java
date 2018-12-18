@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -63,6 +64,44 @@ import java.util.logging.Logger;
 public class TSFPeakResultsReader {
   private static Logger logger = Logger.getLogger(TSFPeakResultsReader.class.getName());
 
+  private static uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType[] cameraTypeMap;
+  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit[] thetaUnitsMap;
+  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit[] locationUnitsMap;
+  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit[] intensityUnitsMap;
+
+  static {
+    // These should have 1:1 mapping. We can extends the TSF proto if necessary.
+    cameraTypeMap = new uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType[CameraType
+        .values().length];
+    cameraTypeMap[CameraType.CCD.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD;
+    cameraTypeMap[CameraType.EMCCD.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD;
+    cameraTypeMap[CameraType.SCMOS.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS;
+    thetaUnitsMap =
+        new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit[ThetaUnits.values().length];
+    thetaUnitsMap[ThetaUnits.RADIANS.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN;
+    thetaUnitsMap[ThetaUnits.DEGREES.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE;
+    locationUnitsMap = new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit[LocationUnits
+        .values().length];
+    locationUnitsMap[LocationUnits.NM.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM;
+    locationUnitsMap[LocationUnits.UM.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM;
+    locationUnitsMap[LocationUnits.PIXELS.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL;
+    intensityUnitsMap =
+        new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit[IntensityUnits
+            .values().length];
+    intensityUnitsMap[IntensityUnits.COUNTS.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT;
+    intensityUnitsMap[IntensityUnits.PHOTONS.ordinal()] =
+        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON;
+  }
+
   private String filename;
   private SpotList spotList;
   private boolean readHeader;
@@ -96,18 +135,19 @@ public class TSFPeakResultsReader {
 
     try (FileInputStream fi = new FileInputStream(filename)) {
       try (DataInputStream di = new DataInputStream(fi)) {
-        // the file has an initial 0, then the offset (as long)
-        // to the position of spotList
+        // The file has an initial 0, then the offset (as long)
+        // to the position of spotList.
         final int magic = di.readInt();
+        // Throw exceptions which are caught below
         if (magic != 0) {
-          throw new RuntimeException("Magic number is not 0 (required for a TSF file)");
+          throw new DataException("Magic number is not 0 (required for a TSF file)");
         }
         if (fi.available() == 0) {
-          throw new RuntimeException("Cannot read offset");
+          throw new DataException("Cannot read offset");
         }
         final long offset = di.readLong();
         if (offset == 0) {
-          throw new RuntimeException("Offset is 0, cannot find header data in this file");
+          throw new DataException("Offset is 0, cannot find header data in this file");
         }
         fi.skip(offset);
         spotList = SpotList.parseDelimitedFrom(fi);
@@ -221,10 +261,7 @@ public class TSFPeakResultsReader {
       final IntensityUnits intensityUnits = spotList.getIntensityUnits();
       boolean intensityUnitsWarning = false;
 
-      FitMode fitMode = FitMode.ONEAXIS;
-      if (spotList.hasFitMode()) {
-        fitMode = spotList.getFitMode();
-      }
+      final FitMode fitMode = (spotList.hasFitMode()) ? spotList.getFitMode() : FitMode.ONEAXIS;
 
       final boolean filterPosition = position > 0;
       final boolean filterSlice = slice > 0;
@@ -235,16 +272,20 @@ public class TSFPeakResultsReader {
       final int isx = indices[0];
       final int isy = indices[1];
       final int ia = PSFHelper.getGaussian2DAngleIndex(psf);
-      int nParams = PeakResult.STANDARD_PARAMETERS;
+      int nparams = PeakResult.STANDARD_PARAMETERS;
       switch (fitMode) {
-        case TWOAXISANDTHETA:
-          nParams++;
-        case TWOAXIS:
-          nParams++;
         case ONEAXIS:
-        default:
-          nParams++;
+          nparams += 1;
           break;
+        case TWOAXIS:
+          nparams += 2;
+          break;
+        case TWOAXISANDTHETA:
+          nparams += 3;
+          break;
+        default:
+          logger.log(Level.WARNING, () -> "Unknown fit mode: " + fitMode);
+          return null;
       }
 
       expectedSpots = getExpectedSpots();
@@ -286,7 +327,7 @@ public class TSFPeakResultsReader {
         // Required fields
         final int frame = spot.getFrame();
 
-        final float[] params = new float[nParams];
+        final float[] params = new float[nparams];
         params[PeakResult.X] = spot.getX();
         params[PeakResult.Y] = spot.getY();
         params[PeakResult.INTENSITY] = spot.getIntensity();
@@ -400,44 +441,6 @@ public class TSFPeakResultsReader {
       return spotList.getNrSpots();
     }
     return 0;
-  }
-
-  private static uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType[] cameraTypeMap;
-  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit[] thetaUnitsMap;
-  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit[] locationUnitsMap;
-  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit[] intensityUnitsMap;
-
-  static {
-    // These should have 1:1 mapping. We can extends the TSF proto if necessary.
-    cameraTypeMap = new uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType[CameraType
-        .values().length];
-    cameraTypeMap[CameraType.CCD.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD;
-    cameraTypeMap[CameraType.EMCCD.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD;
-    cameraTypeMap[CameraType.SCMOS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS;
-    thetaUnitsMap =
-        new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit[ThetaUnits.values().length];
-    thetaUnitsMap[ThetaUnits.RADIANS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN;
-    thetaUnitsMap[ThetaUnits.DEGREES.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE;
-    locationUnitsMap = new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit[LocationUnits
-        .values().length];
-    locationUnitsMap[LocationUnits.NM.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM;
-    locationUnitsMap[LocationUnits.UM.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM;
-    locationUnitsMap[LocationUnits.PIXELS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL;
-    intensityUnitsMap =
-        new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit[IntensityUnits
-            .values().length];
-    intensityUnitsMap[IntensityUnits.COUNTS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT;
-    intensityUnitsMap[IntensityUnits.PHOTONS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON;
   }
 
   private MemoryPeakResults createResults() {
@@ -681,7 +684,7 @@ public class TSFPeakResultsReader {
    */
   public ResultOption[] getOptions() {
     if (!isMulti()) {
-      return null;
+      return ResultOption.EMPTY_ARRAY;
     }
 
     final ResultOption[] options = new ResultOption[4];
@@ -722,7 +725,7 @@ public class TSFPeakResultsReader {
     for (int v = (allowZero) ? 0 : 1, i = 0; v <= total; v++) {
       values[i++] = v;
     }
-    return new ResultOption(id, name, new Integer(value), values);
+    return new ResultOption(id, name, Integer.valueOf(value), values);
   }
 
   /**
@@ -753,6 +756,9 @@ public class TSFPeakResultsReader {
             value = value.substring(0, index);
           }
           setFluorophoreType(Integer.parseInt(value));
+          break;
+        default:
+          // Unknown
           break;
       }
     }

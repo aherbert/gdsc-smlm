@@ -30,7 +30,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 public class IntegralValueProcedure implements ValueProcedure {
   /**
    * The integral (sum) or the values from the last call to
-   * {@link #getIntegral(ValueFunction, double[])}
+   * {@link #getIntegral(ValueFunction, double[])}.
    */
   public double integral;
 

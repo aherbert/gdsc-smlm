@@ -541,7 +541,7 @@ public class TraceMolecules implements PlugIn {
     }
     int singles = 0;
     for (final Trace trace : traces) {
-      final int nBlinks = trace.getNBlinks() - 1;
+      final int nBlinks = trace.getBlinks() - 1;
       stats[BLINKS].add(nBlinks);
       final int[] onTimes = trace.getOnTimes();
       final int[] offTimes = trace.getOffTimes();
@@ -1135,7 +1135,7 @@ public class TraceMolecules implements PlugIn {
   private static double getBlinkingRate(Trace[] traces) {
     final SummaryStatistics stats = new SummaryStatistics();
     for (final Trace trace : traces) {
-      stats.addValue(trace.getNBlinks());
+      stats.addValue(trace.getBlinks());
     }
     final double blinkingRate = stats.getMean();
     return blinkingRate;
@@ -1987,16 +1987,11 @@ public class TraceMolecules implements PlugIn {
 
     // Get the coordinates and the spot bounds
     final float[] centre = trace.getCentroid(CentroidMethod.SIGNAL_WEIGHTED);
-    int minX = (int) Math.floor(centre[0] - fitWidth);
-    int maxX = (int) Math.ceil(centre[0] + fitWidth);
-    int minY = (int) Math.floor(centre[1] - fitWidth);
-    int maxY = (int) Math.ceil(centre[1] + fitWidth);
-
     // Account for crops at the edge of the image
-    minX = FastMath.max(0, minX);
-    maxX = FastMath.min(w, maxX);
-    minY = FastMath.max(0, minY);
-    maxY = FastMath.min(h, maxY);
+    int minX = FastMath.max(0, (int) Math.floor(centre[0] - fitWidth));
+    int maxX = FastMath.min(w, (int) Math.ceil(centre[0] + fitWidth));
+    int minY = FastMath.max(0, (int) Math.floor(centre[1] - fitWidth));
+    int maxY = FastMath.min(h, (int) Math.ceil(centre[1] + fitWidth));
 
     final int width = maxX - minX;
     final int height = maxY - minY;

@@ -57,27 +57,36 @@ public class TraceFilter extends Filter {
    */
   private static final int DEFAULT_TIME_RANGE = 10;
 
+  // The old names must be preserved for XStream serialisation
+  // @CHECKSTYLE.OFF: MemberName
+
+  /**
+   * The distance.
+   */
   @XStreamAsAttribute
   private final double d;
+
+  /** The time. */
   @XStreamAsAttribute
   private final int t;
+
   @XStreamOmitField
   private Set<PeakResult> ok;
 
   /**
    * Instantiates a new trace filter.
    *
-   * @param d the d
-   * @param t the t
+   * @param distance the distance
+   * @param time the time
    */
-  public TraceFilter(double d, int t) {
-    this.d = Math.max(0, d);
-    this.t = Math.max(0, t);
+  public TraceFilter(double distance, int time) {
+    this.d = Math.max(0, distance);
+    this.t = Math.max(0, time);
   }
 
   @Override
   protected String generateName() {
-    return String.format("Trace d=%.2f, t=%d", d, t);
+    return String.format("Trace distance=%.2f, time=%d", d, t);
   }
 
   @Override
@@ -98,6 +107,8 @@ public class TraceFilter extends Filter {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @throws NullPointerException if not first initialised with a call to
    *         {@link #setup(MemoryPeakResults)}
    */

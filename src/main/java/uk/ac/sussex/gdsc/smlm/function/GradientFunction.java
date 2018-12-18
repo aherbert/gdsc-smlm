@@ -34,7 +34,7 @@ public interface GradientFunction {
    *
    * @param a An array of coefficients
    */
-  public void initialise(final double[] a);
+  void initialise(final double[] a);
 
   /**
    * The function will evaluate the gradient for up to {@code n} parameters where
@@ -42,12 +42,12 @@ public interface GradientFunction {
    *
    * @return The gradient indices
    */
-  public int[] gradientIndices();
+  int[] gradientIndices();
 
   /**
    * Gets the number of gradients. The function will evaluate this many partial derivatives.
    *
    * @return the number of gradients
    */
-  public int getNumberOfGradients();
+  int getNumberOfGradients();
 }

@@ -900,31 +900,21 @@ public class FitEngineConfiguration implements Cloneable {
 
     final DataProcessor processor0 = createDataProcessor(border, 0, hwhmMin);
     final DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
-    final int nFilters = f.getDataFiltersCount();
+    final int filterCount = f.getDataFiltersCount();
 
     final MaximaSpotFilter spotFilter;
-    switch (f.getDataFilterType()) {
-      case JURY:
-        if (nFilters > 1) {
-          final DataProcessor[] processors = new DataProcessor[nFilters];
-          processors[0] = processor0;
-          for (int i = 1; i < nFilters; i++) {
-            processors[i] = createDataProcessor(border, i, hwhmMin);
-          }
-          spotFilter = new JurySpotFilter(search, border, processors);
-          break;
-        }
-
-      case DIFFERENCE:
-        if (nFilters > 1) {
-          final DataProcessor processor1 = createDataProcessor(border, 1, hwhmMin);
-          spotFilter = new DifferenceSpotFilter(search, border, processor0, processor1);
-          break;
-        }
-
-      case SINGLE:
-      default:
-        spotFilter = new SingleSpotFilter(search, border, processor0);
+    if (f.getDataFilterType() == DataFilterType.JURY && filterCount > 1) {
+      final DataProcessor[] processors = new DataProcessor[filterCount];
+      processors[0] = processor0;
+      for (int i = 1; i < filterCount; i++) {
+        processors[i] = createDataProcessor(border, i, hwhmMin);
+      }
+      spotFilter = new JurySpotFilter(search, border, processors);
+    } else if (f.getDataFilterType() == DataFilterType.DIFFERENCE && filterCount > 1) {
+      final DataProcessor processor1 = createDataProcessor(border, 1, hwhmMin);
+      spotFilter = new DifferenceSpotFilter(search, border, processor0, processor1);
+    } else {
+      spotFilter = new SingleSpotFilter(search, border, processor0);
     }
 
     if (getFitConfiguration().isPerPixelCameraType()) {
@@ -1080,21 +1070,14 @@ public class FitEngineConfiguration implements Cloneable {
    */
   public int getNumberOfFilters() {
     final DataFilterSettings f = fitEngineSettings.getDataFilterSettings();
-    final int nFilters = f.getDataFiltersCount();
-    switch (f.getDataFilterType()) {
-      case JURY:
-        if (nFilters > 1) {
-          return nFilters;
-        }
-
-      case DIFFERENCE:
-        if (nFilters > 1) {
-          return 2;
-        }
-
-      case SINGLE:
-      default:
-        return 1;
+    final int filterCount = f.getDataFiltersCount();
+    if (f.getDataFilterType() == DataFilterType.JURY && filterCount > 1) {
+      return filterCount;
+    } else if (f.getDataFilterType() == DataFilterType.DIFFERENCE && filterCount > 1) {
+      return 2;
+    } else {
+      // Single filter
+      return 1;
     }
   }
 

@@ -16,8 +16,8 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"deprecation", "javadoc"})
 public class AreaAverageFilterTest extends AbstractFilterTest {
-  private final int ITER = 100;
-  private final int InternalITER = 300;
+  private static final int ITER = 100;
+  private static final int InternalITER = 300;
 
   @SeededTest
   public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal(RandomSeed seed) {
@@ -277,16 +277,16 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
     checkInterpolation(max, n, results, count);
   }
 
-  public void checkInterpolation(int max, int n, float[][] results, int count) {
+  private static void checkInterpolation(int max, int n, float[][] results, int count) {
     // Pick some points and see if they are monototically interpolated between integer blocks
     final int[] p = new int[] {10, 20, 30, 40};
     for (final int x : p) {
       for (final int y : p) {
         final int index = y * max + x;
         final double[] yy = new double[count];
-        int c = 0;
+        int i1 = 0;
         for (final float[] data1 : results) {
-          yy[c++] = data1[index];
+          yy[i1++] = data1[index];
         }
 
         //// Debugging

@@ -36,19 +36,19 @@ public interface PeakResultData<E> {
    * @param result the result
    * @return the value
    */
-  public E getValue(PeakResult result);
+  E getValue(PeakResult result);
 
   /**
    * Gets the name of the value.
    *
    * @return the name
    */
-  public String getValueName();
+  String getValueName();
 
   /**
    * Gets the class type of the value.
    *
    * @return the name
    */
-  public Class<?> getValueClass();
+  Class<?> getValueClass();
 }

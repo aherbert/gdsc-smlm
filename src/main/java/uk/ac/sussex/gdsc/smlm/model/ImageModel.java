@@ -888,6 +888,8 @@ public abstract class ImageModel {
   }
 
   /**
+   * Gets the photon distribution used for the fluorophore.
+   *
    * @return the photon distribution used for the fluorophore.
    */
   public RealDistribution getPhotonDistribution() {
@@ -904,20 +906,26 @@ public abstract class ImageModel {
   }
 
   /**
-   * @return the useGeometricDistribution.
+   * Checks whether to use geometric distribution.
+   *
+   * @return true, if using a geometric distribution
    */
   public boolean isUseGeometricDistribution() {
     return useGeometricDistribution;
   }
 
   /**
-   * @param useGeometricDistribution the useGeometricDistribution to set
+   * Sets whether to use geometric distribution.
+   *
+   * @param useGeometricDistribution true, if using a geometric distribution
    */
   public void setUseGeometricDistribution(boolean useGeometricDistribution) {
     this.useGeometricDistribution = useGeometricDistribution;
   }
 
   /**
+   * Checks if the image will be created using the photon budget per frame.
+   *
    * @return if true the image will be created using the photon budget per frame.
    */
   public boolean isPhotonBudgetPerFrame() {
@@ -944,7 +952,9 @@ public abstract class ImageModel {
   }
 
   /**
-   * @return the confinementAttempts.
+   * Gets the confinement attempts.
+   *
+   * @return the confinement attempts
    */
   public int getConfinementAttempts() {
     return confinementAttempts;

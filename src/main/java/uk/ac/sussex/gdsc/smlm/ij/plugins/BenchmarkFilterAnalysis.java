@@ -80,6 +80,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterScore;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterSet;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterType;
+import uk.ac.sussex.gdsc.smlm.results.filter.FilterXStreamUtils;
 import uk.ac.sussex.gdsc.smlm.results.filter.GridCoordinateStore;
 import uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter;
@@ -90,7 +91,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.ParameterType;
 import uk.ac.sussex.gdsc.smlm.results.filter.PeakFractionalAssignment;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ResultAssignment;
-import uk.ac.sussex.gdsc.smlm.results.filter.XStreamWrapper;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.search.ConvergenceChecker;
 import uk.ac.sussex.gdsc.smlm.search.ConvergenceToleranceChecker;
@@ -1139,10 +1139,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       setLastFile(null);
       try (BufferedReader input =
           new BufferedReader(new UnicodeReader(new FileInputStream(filename), null))) {
-        final Object o = XStreamWrapper.getInstance().fromXML(input);
+        // Use the instance so we can catch the exception
+        final Object o = FilterXStreamUtils.getXStreamInstance().fromXML(input);
         input.close();
 
-        if (o == null || !(o instanceof List<?>)) {
+        if (!(o instanceof List<?>)) {
           IJ.log("No filter sets defined in the specified file: " + filename);
           return null;
         }
@@ -1692,7 +1693,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       Arrays.sort(resultsList, new Comparator<MultiPathFitResults>() {
         @Override
         public int compare(MultiPathFitResults o1, MultiPathFitResults o2) {
-          return o1.frame - o2.frame;
+          return o1.getFrame() - o2.getFrame();
         }
       });
     }
@@ -4497,53 +4498,54 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return parameterName + " (" + type.getName() + ")";
   }
 
-  private double getCriteria(FractionClassificationResult s) {
-    return getScore(s, criteriaIndex, invertCriteria);
+  private double getCriteria(FractionClassificationResult result) {
+    return getScore(result, criteriaIndex, invertCriteria);
   }
 
-  private double getScore(FractionClassificationResult s) {
-    return getScore(s, scoreIndex, invertScore);
+  private double getScore(FractionClassificationResult result) {
+    return getScore(result, scoreIndex, invertScore);
   }
 
-  private static double getScore(FractionClassificationResult s, final int index,
+  private static double getScore(FractionClassificationResult result, final int index,
       final boolean invert) {
-    final double score = getScore(s, index);
+    final double score = getScore(result, index);
     return (invert) ? -score : score;
   }
 
-  private static double getScore(FractionClassificationResult r, final int index) {
+  private static double getScore(FractionClassificationResult result, final int index) {
     // This order must match the COLUMNS order
     switch (index) {
       case 0:
-        return r.getNumberOfPositives();
+        return result.getNumberOfPositives();
       case 1:
-        return r.getNumberOfNegatives();
+        return result.getNumberOfNegatives();
       case 2:
-        return (double) nActual - r.getNumberOfPositives();
+        return (double) nActual - result.getNumberOfPositives();
       case 3:
-        return createIntegerResult(r).getPrecision();
+        return createIntegerResult(result).getPrecision();
       case 4:
-        return createIntegerResult(r).getRecall();
+        return createIntegerResult(result).getRecall();
       case 5:
-        return createIntegerResult(r).getF1Score();
+        return createIntegerResult(result).getF1Score();
       case 6:
-        return createIntegerResult(r).getJaccard();
+        return createIntegerResult(result).getJaccard();
       case 7:
-        return r.getTruePositives();
+        return result.getTruePositives();
       case 8:
-        return r.getFalsePositives();
+        return result.getFalsePositives();
       case 9:
-        return r.getFalseNegatives();
+        return result.getFalseNegatives();
       case 10:
-        return r.getPrecision();
+        return result.getPrecision();
       case 11:
-        return r.getRecall();
+        return result.getRecall();
       case 12:
-        return r.getF1Score();
+        return result.getF1Score();
       case 13:
-        return r.getJaccard();
+        return result.getJaccard();
+      default:
+        return 0;
     }
-    return 0;
   }
 
   private static boolean requiresInversion(final int index) {
@@ -4777,8 +4779,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       final List<FilterSet> list = new ArrayList<>(1);
       list.add(filterSet);
       // Use the instance so we can catch the exception
-      out.write(uk.ac.sussex.gdsc.core.utils.XmlUtils
-          .prettyPrintXml(XStreamWrapper.getInstance().toXML(list)));
+      out.write(FilterXStreamUtils.getXStreamInstance().toXML(list));
     } catch (final Exception ex) {
       IJ.log("Unable to save the filter sets to file: " + ex.getMessage());
     }

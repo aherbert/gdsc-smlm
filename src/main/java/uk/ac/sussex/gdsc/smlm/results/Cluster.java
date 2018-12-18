@@ -267,8 +267,8 @@ public class Cluster implements Comparable<Cluster> {
     return sPeak;
   }
 
-  private static double checkPrecision(double p) {
-    return (p > 0 && p < Double.MAX_VALUE) ? p : 1;
+  private static double checkPrecision(double precision) {
+    return (precision > 0 && precision < Double.MAX_VALUE) ? precision : 1;
 
   }
 
@@ -299,11 +299,11 @@ public class Cluster implements Comparable<Cluster> {
   /**
    * Gets the result from the set.
    *
-   * @param i the index
+   * @param index the index
    * @return the peak result
    */
-  public PeakResult get(int i) {
-    return results.get(i);
+  public PeakResult get(int index) {
+    return results.get(index);
   }
 
   /**
@@ -415,40 +415,40 @@ public class Cluster implements Comparable<Cluster> {
   }
 
   /**
-   * @return The mean-squared displacement between adjacent localisations.
+   * Gets the mean-squared distance (MSD) between adjacent localisations.
+   *
+   * @return The mean squared-distance between adjacent localisations.
    */
   public double getMSD() {
     if (size() < 2) {
       return 0;
     }
-    double msd = 0;
-    PeakResult last = null;
-    for (int i = 0; i < results.size(); i++) {
+    double sum = 0;
+    PeakResult last = results.get(0);
+    for (int i = 1; i < results.size(); i++) {
       final PeakResult result = results.get(i);
-      if (last != null) {
-        msd += last.distance2(result);
-      }
+      sum += last.distance2(result);
       last = result;
     }
-    return msd / (size() - 1);
+    return sum / (size() - 1);
   }
 
   /**
-   * @return The mean displacement between adjacent localisations.
+   * Gets the mean distance between adjacent localisations.
+   *
+   * @return The mean distance between adjacent localisations.
    */
-  public double getMeanPerFrame() {
+  public double getMeanDistance() {
     if (size() < 2) {
       return 0;
     }
-    double msd = 0;
-    PeakResult last = null;
-    for (int i = 0; i < results.size(); i++) {
+    double sum = 0;
+    PeakResult last = results.get(0);
+    for (int i = 1; i < results.size(); i++) {
       final PeakResult result = results.get(i);
-      if (last != null) {
-        msd += last.distance(result);
-      }
+      sum += last.distance(result);
       last = result;
     }
-    return msd / (size() - 1);
+    return sum / (size() - 1);
   }
 }

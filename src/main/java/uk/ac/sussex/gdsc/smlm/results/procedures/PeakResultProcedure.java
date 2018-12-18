@@ -35,5 +35,5 @@ public interface PeakResultProcedure {
    *
    * @param peakResult the peak result
    */
-  public void execute(PeakResult peakResult);
+  void execute(PeakResult peakResult);
 }

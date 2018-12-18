@@ -40,14 +40,14 @@ public interface SelectionStrategy<T extends Comparable<T>> {
    * @param individuals the individuals
    * @return a selection of individuals
    */
-  public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals);
+  List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals);
 
   /**
    * Initialise the selection of pairs for breeding using the fitness.
    *
    * @param individuals the population of individuals
    */
-  public void initialiseBreeding(List<? extends Chromosome<T>> individuals);
+  void initialiseBreeding(List<? extends Chromosome<T>> individuals);
 
   /**
    * Get the next pair of individuals for breeding. Must be called after
@@ -55,12 +55,12 @@ public interface SelectionStrategy<T extends Comparable<T>> {
    *
    * @return The next pair
    */
-  public ChromosomePair<T> next();
+  ChromosomePair<T> next();
 
   /**
    * Finish selection of pairs for breeding.
    */
-  public void finishBreeding();
+  void finishBreeding();
 
   /**
    * Set the tracker used to track progress. This should be used in the {@link #select(List)}
@@ -69,5 +69,5 @@ public interface SelectionStrategy<T extends Comparable<T>> {
    *
    * @param tracker the new tracker
    */
-  public void setTracker(TrackProgress tracker);
+  void setTracker(TrackProgress tracker);
 }

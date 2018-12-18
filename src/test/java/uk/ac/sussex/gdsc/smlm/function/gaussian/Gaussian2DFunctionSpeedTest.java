@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector from
- * a Gaussian 2D Function
+ * a Gaussian 2D Function.
  */
 @SuppressWarnings({"javadoc"})
 public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object> {

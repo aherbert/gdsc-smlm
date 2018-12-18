@@ -24,18 +24,23 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
- * Wraps the XStream functionality for reading/writing package members as XML. Initialises XStream
- * for tidy XML.
+ * Uses {@link XStream} functionality for reading/writing {@link Filter} members as XML.
  */
-public abstract class XStreamWrapper {
+public final class FilterXStreamUtils {
+  private static final Logger logger = Logger.getLogger(FilterXStreamUtils.class.getName());
+
   @XStreamOmitField
-  private static XStream xs;
+  private static final XStream xs;
 
   static {
     xs = new XStream(new DomDriver());
@@ -80,19 +85,16 @@ public abstract class XStreamWrapper {
         addAlias(XYWidthFilter.class);
         addAlias(XYWidthFilter2.class);
         addAlias(ZCoordinateFilter.class);
-
-        // Removed dependency on reflections since this has other jar dependencies
-        // Reflections reflections = new Reflections("uk.ac.sussex.gdsc.smlm.results.filter");
-        // Set<Class<? extends DirectFilter>> subTypes = reflections.getSubTypesOf(Filter.class);
-        // for (Class<? extends DirectFilter> type : subTypes)
-        // addAlias(type);
-      } catch (final XStreamException ex) {
-        ex.printStackTrace();
       } catch (final Exception ex) {
-        ex.printStackTrace();
+        logger.log(Level.SEVERE, "Failed to initialise XStream", ex);
       }
     }
   }
+
+  /**
+   * No public construction.
+   */
+  private FilterXStreamUtils() {}
 
   /**
    * Add a class name alias to the global XStream object used for serialisation.
@@ -111,6 +113,8 @@ public abstract class XStreamWrapper {
   /**
    * Create an XML representation of this object.
    *
+   * <p>If conversion fails then an empty string is returned.
+   *
    * @param object the object
    * @return An XML representation of this object
    */
@@ -118,38 +122,39 @@ public abstract class XStreamWrapper {
     if (xs != null) {
       try {
         return xs.toXML(object);
-      } catch (final XStreamException ex) {
-        ex.printStackTrace();
       } catch (final Exception ex) {
-        ex.printStackTrace();
+        logger.log(Level.WARNING, "Failed to serialise to XML", ex);
       }
     }
     return "";
   }
 
   /**
-   * Create the filter from the XML representation.
+   * Create an object from the XML representation.
    *
    * @param xml the xml
-   * @return the filter
+   * @return the object
    */
-  public static Object fromXML(String xml) {
+  public static @Nullable Object fromXML(String xml) {
     if (xs != null) {
       try {
         return xs.fromXML(xml);
-      } catch (final XStreamException ex) {
-        ex.printStackTrace();
       } catch (final Exception ex) {
-        ex.printStackTrace();
+        logger.log(Level.WARNING, "Failed to deserialise from XML", ex);
       }
     }
     return null;
   }
 
   /**
-   * @return An XStream object for reading/writing package members
+   * Gets the single instance of {@link XStream}.
+   *
+   * <p>The instance has been initialised with the appropriate aliases for reading and writing
+   * {@link Filter} members as XML.
+   *
+   * @return An XStream object for reading/writing Filter objects
    */
-  public static XStream getInstance() {
+  public static XStream getXStreamInstance() {
     return xs;
   }
 }

@@ -121,7 +121,7 @@ public class GaussianPSFModel extends PSFModel {
   }
 
   /**
-   * Private constructor used in the {@link #copy()} method
+   * Private constructor used in the {@link #copy()} method.
    */
   private GaussianPSFModel() {
     super();
@@ -378,6 +378,8 @@ public class GaussianPSFModel extends PSFModel {
   }
 
   /**
+   * Gets the standard deviation dimension 0 for the last drawn Gaussian.
+   *
    * @return The standard deviation dimension 0 for the last drawn Gaussian.
    */
   public double getS0() {
@@ -385,6 +387,8 @@ public class GaussianPSFModel extends PSFModel {
   }
 
   /**
+   * Gets the standard deviation dimension 1 for the last drawn Gaussian.
+   *
    * @return The standard deviation dimension 1 for the last drawn Gaussian.
    */
   public double getS1() {

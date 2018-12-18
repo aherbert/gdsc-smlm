@@ -66,7 +66,7 @@ import java.util.List;
 public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Background Estimator";
   private List<double[]> results;
-  private final int FLAGS =
+  private static final int FLAGS =
       DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
   private PlugInFilterRunner pfr;
   private ImagePlus imp;
@@ -205,47 +205,47 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     IJ.showStatus("");
   }
 
-  private void plot(WindowOrganiser wo, double[] xValues, double[] data1, double[] data2,
+  private void plot(WindowOrganiser wo, double[] xvalues, double[] data1, double[] data2,
       double[] data3, String title, String title1, String title2, String title3) {
     // Get limits
-    final double[] a = MathUtils.limits(xValues);
-    double[] b = MathUtils.limits(data1);
-    b = MathUtils.limits(b, data2);
+    final double[] xlimits = MathUtils.limits(xvalues);
+    double[] ylimits = MathUtils.limits(data1);
+    ylimits = MathUtils.limits(ylimits, data2);
     if (data3 != null) {
-      b = MathUtils.limits(b, data3);
+      ylimits = MathUtils.limits(ylimits, data3);
     }
 
     title = imp.getTitle() + " " + title;
     final Plot2 plot = new Plot2(title, "Slice", title);
-    double range = b[1] - b[0];
+    double range = ylimits[1] - ylimits[0];
     if (range == 0) {
       range = 1;
     }
-    plot.setLimits(a[0], a[1], b[0] - 0.05 * range, b[1] + 0.05 * range);
+    plot.setLimits(xlimits[0], xlimits[1], ylimits[0] - 0.05 * range, ylimits[1] + 0.05 * range);
 
     plot.setColor(Color.blue);
-    plot.addPoints(xValues, data1, Plot.LINE);
+    plot.addPoints(xvalues, data1, Plot.LINE);
     plot.draw();
     Statistics stats = Statistics.create(data1);
-    String label = String.format("%s (Blue) = %s +/- %s", title1,
-        MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation()));
+    final StringBuffer label = new StringBuffer(String.format("%s (Blue) = %s +/- %s", title1,
+        MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation())));
 
     plot.setColor(Color.red);
-    plot.addPoints(xValues, data2, Plot.LINE);
+    plot.addPoints(xvalues, data2, Plot.LINE);
     stats = Statistics.create(data2);
-    label += String.format(", %s (Red) = %s +/- %s", title2, MathUtils.rounded(stats.getMean()),
-        MathUtils.rounded(stats.getStandardDeviation()));
+    label.append(String.format(", %s (Red) = %s +/- %s", title2, MathUtils.rounded(stats.getMean()),
+        MathUtils.rounded(stats.getStandardDeviation())));
 
     if (data3 != null) {
       plot.setColor(Color.green);
-      plot.addPoints(xValues, data3, Plot.LINE);
+      plot.addPoints(xvalues, data3, Plot.LINE);
       stats = Statistics.create(data3);
-      label += String.format(", %s (Green) = %s +/- %s", title3, MathUtils.rounded(stats.getMean()),
-          MathUtils.rounded(stats.getStandardDeviation()));
+      label.append(String.format(", %s (Green) = %s +/- %s", title3,
+          MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation())));
     }
 
     plot.setColor(Color.black);
-    plot.addLabel(0, 0, label);
+    plot.addLabel(0, 0, label.toString());
 
     ImageJUtils.display(title, plot, wo);
   }
@@ -255,8 +255,8 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
   public void run(ImageProcessor ip) {
     // Perform all methods and add to the results
     final double[] result = new double[8];
-    int i = 0;
-    result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
+    int index = 0;
+    result[index++] = (pfr == null) ? 1 : pfr.getSliceNumber();
     final Rectangle bounds = ip.getRoi();
     final float[] buffer =
         IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
@@ -264,13 +264,13 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     de.setFraction(fraction);
     de.setHistogramSize(histogramSize);
     de.setThresholdMethod(thresholdMethod);
-    result[i++] = de.isBackgroundRegion() ? 1 : 0;
-    result[i++] = de.getNoise();
-    result[i++] = de.getNoise(myNoiseMethod);
-    result[i++] = de.getBackground();
-    result[i++] = de.getThreshold();
-    result[i++] = de.getBackgroundSize();
-    result[i++] = de.getPercentile(percentile);
+    result[index++] = de.isBackgroundRegion() ? 1 : 0;
+    result[index++] = de.getNoise();
+    result[index++] = de.getNoise(myNoiseMethod);
+    result[index++] = de.getBackground();
+    result[index++] = de.getThreshold();
+    result[index++] = de.getBackgroundSize();
+    result[index++] = de.getPercentile(percentile);
     results.add(result);
   }
 

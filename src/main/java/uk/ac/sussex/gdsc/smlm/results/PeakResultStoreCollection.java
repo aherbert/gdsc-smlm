@@ -35,12 +35,12 @@ public interface PeakResultStoreCollection {
    *
    * @return the collection
    */
-  public Collection<PeakResult> getCollection();
+  Collection<PeakResult> getCollection();
 
   /**
    * Gets the collection by reference.
    *
    * @return the collection
    */
-  public Collection<PeakResult> getCollectionReference();
+  Collection<PeakResult> getCollectionReference();
 }

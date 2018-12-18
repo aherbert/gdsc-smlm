@@ -33,7 +33,7 @@ public interface WLSEFunctionSolver extends FunctionSolver {
    *
    * @return the chi squared
    */
-  public double getChiSquared();
+  double getChiSquared();
 
   /**
    * Gets the probability Q that a value of chi-square as poor as the value should occur by chance.
@@ -44,5 +44,5 @@ public interface WLSEFunctionSolver extends FunctionSolver {
    *
    * @return the q-value
    */
-  public double getQ();
+  double getQ();
 }

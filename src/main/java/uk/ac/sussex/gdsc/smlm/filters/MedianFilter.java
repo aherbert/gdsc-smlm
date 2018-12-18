@@ -40,9 +40,9 @@ public class MedianFilter {
   private float[] floatDataBuffer;
 
   /** The number of values above the guess. */
-  private int nAbove;
+  private int above;
   /** The number of values below the guess. */
-  private int nBelow;
+  private int below;
   /** Half of the total number of values that will be added to the data. */
   private int half;
   /** The guess for the median. */
@@ -99,17 +99,17 @@ public class MedianFilter {
 
     final float[] newData = floatBuffer(floatDataBuffer, data.length);
 
-    final int[] offset = new int[blockSize * blockSize - 1];
+    final int[] offsets = new int[blockSize * blockSize - 1];
     for (int y = -n, d = 0; y <= n; y++) {
       for (int x = -n; x <= n; x++) {
         if (x != 0 || y != 0) {
-          offset[d] = maxx * y + x;
+          offsets[d] = maxx * y + x;
           d++;
         }
       }
     }
 
-    init(offset.length + 1, data[n * maxx + n]);
+    init(offsets.length + 1, data[n * maxx + n]);
 
     for (int y = n; y < maxy - n; y++) {
       int index = y * maxx + n;
@@ -119,8 +119,8 @@ public class MedianFilter {
 
         // Sweep neighbourhood -
         // No check for boundaries as this should be an internal sweep.
-        for (final int offset_d : offset) {
-          add(data[index + offset_d]);
+        for (final int offset : offsets) {
+          add(data[index + offset]);
         }
 
         newData[index] = getMedian();
@@ -201,19 +201,19 @@ public class MedianFilter {
    * Reset the median buffer counters.
    */
   private void reset() {
-    nAbove = nBelow = 0;
+    above = below = 0;
   }
 
   /**
    * Add a value.
    *
-   * @param v the vakue
+   * @param value the vakue
    */
-  private void add(float v) {
-    if (v > guess) {
-      aboveBuf[nAbove++] = v;
-    } else if (v < guess) {
-      belowBuf[nBelow++] = v;
+  private void add(float value) {
+    if (value > guess) {
+      aboveBuf[above++] = value;
+    } else if (value < guess) {
+      belowBuf[below++] = value;
     }
   }
 
@@ -223,10 +223,10 @@ public class MedianFilter {
    * @return The median
    */
   private float getMedian() {
-    if (nAbove > half) {
-      guess = findNthLowestNumber(aboveBuf, nAbove, nAbove - half - 1);
-    } else if (nBelow > half) {
-      guess = findNthLowestNumber(belowBuf, nBelow, half);
+    if (above > half) {
+      guess = findNthLowestNumber(aboveBuf, above, above - half - 1);
+    } else if (below > half) {
+      guess = findNthLowestNumber(belowBuf, below, half);
     }
 
     // Debug. This is just a check and can be removed for production code
@@ -258,11 +258,13 @@ public class MedianFilter {
    */
   private static final float findNthLowestNumber(float[] buf, int bufLength, int n) {
     // Hoare's find, algorithm, based on http://www.geocities.com/zabrodskyvlada/3alg.html
-    // Contributed by Heinz Klar
+    // Contributed by Heinz Klar.
+    // @CHECKSTYLE.OFF: LocalVariableName
     int i;
     int j;
     int l = 0;
     int m = bufLength - 1;
+    // @CHECKSTYLE.ON: LocalVariableName
     float med = buf[n];
 
     while (l < m) {
@@ -338,13 +340,13 @@ public class MedianFilter {
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 
-    final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-    final int[] xoffset = new int[offset.length];
-    final int[] yoffset = new int[offset.length];
+    final int[] offsets = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+    final int[] xoffset = new int[offsets.length];
+    final int[] yoffset = new int[offsets.length];
     for (int y = -ywidth, d = 0; y <= ywidth; y++) {
       for (int x = -xwidth; x <= xwidth; x++) {
         if (x != 0 || y != 0) {
-          offset[d] = maxx * y + x;
+          offsets[d] = maxx * y + x;
           xoffset[d] = x;
           yoffset[d] = y;
           d++;
@@ -352,7 +354,7 @@ public class MedianFilter {
       }
     }
 
-    init(offset.length + 1, data[0]);
+    init(offsets.length + 1, data[0]);
 
     int index = 0;
     for (int y = 0; y < maxy; y++) {
@@ -365,11 +367,11 @@ public class MedianFilter {
 
         // Sweep neighbourhood
         if (isInnerXy) {
-          for (final int offset_d : offset) {
-            add(data[index + offset_d]);
+          for (final int offset : offsets) {
+            add(data[index + offset]);
           }
         } else {
-          for (int d = offset.length; d-- > 0;) {
+          for (int d = offsets.length; d-- > 0;) {
             // Get the pixel with boundary checking
             int yy = y + yoffset[d];
             int xx = x + xoffset[d];
@@ -413,8 +415,8 @@ public class MedianFilter {
     final int xlimit = maxx - 1;
     final int ylimit = maxy - 1;
 
-    final int[] xoffset = new int[] {-1, 0, 1, -1, 1, -1, 0, 1};
-    final int[] yoffset = new int[] {-1, -1, -1, 0, 0, 1, 1, 1};
+    final int[] xoffset = {-1, 0, 1, -1, 1, -1, 0, 1};
+    final int[] yoffset = {-1, -1, -1, 0, 0, 1, 1, 1};
 
     for (int y = 0; y < maxy; y++) {
       int index1 = y * maxx;
@@ -510,18 +512,18 @@ public class MedianFilter {
     final float[] values = new float[blockSize * blockSize];
     for (int y = n; y < maxy - n; y++) {
       // Set up the pointers to the image data at x=0, y=?
-      int i = 0;
+      int vi = 0;
       for (int yy = y - n; yy <= y + n; yy++) {
-        p[i] = maxx * yy;
+        p[vi] = maxx * yy;
         // zero the first column of the region
-        values[i++] = 0;
+        values[vi++] = 0;
       }
 
       // Fill the initial region
 
       for (int x = -n; x < n; x++) {
         for (int d = 0; d < p.length; d++) {
-          values[i++] = data[p[d]++];
+          values[vi++] = data[p[d]++];
         }
       }
 
@@ -654,17 +656,17 @@ public class MedianFilter {
     int index = 0;
     for (int y = 0; y < maxy; y++) {
       // Set up the pointers to the image data at x=0, y=?
-      int i = 0;
+      int vi = 0;
       for (int yy = y - ywidth; yy <= y + ywidth; yy++) {
         if (yy < 0) {
-          p[i] = 0;
+          p[vi] = 0;
         } else if (yy >= maxy) {
-          p[i] = length - maxx;
+          p[vi] = length - maxx;
         } else {
-          p[i] = maxx * yy;
+          p[vi] = maxx * yy;
         }
         // zero the first column of the region
-        values[i++] = 0;
+        values[vi++] = 0;
       }
 
       // Fill the initial region
@@ -672,13 +674,13 @@ public class MedianFilter {
       // The columns below x==0 use x=0
       for (int x = -xwidth; x < 0; x++) {
         for (final int pos : p) {
-          values[i++] = data[pos];
+          values[vi++] = data[pos];
         }
       }
       // The remaining columns increment. Do not include x==xwidth
       for (int x = 0; x < xwidth; x++) {
         for (int d = 0; d < p.length; d++) {
-          values[i++] = data[p[d]++];
+          values[vi++] = data[p[d]++];
         }
       }
 
@@ -728,16 +730,16 @@ public class MedianFilter {
 
     int index = 0;
     for (int y = 0; y < maxy; y++) {
-      // Set up the pointers to the image data at x=0, y=?
-      int p1 = maxx * y;
-      int p0 = (y > 0) ? p1 - maxx : p1;
-      int p2 = (y < ylimit) ? p1 + maxx : p1;
-
       values[0] = 0;
       values[1] = 0;
       values[2] = 0;
 
       // Fill the initial region
+
+      // Set up the pointers to the image data at x=0, y=?
+      int p1 = maxx * y;
+      int p0 = (y > 0) ? p1 - maxx : p1;
+      int p2 = (y < ylimit) ? p1 + maxx : p1;
 
       // The columns below x==0 use x=0
       values[3] = data[p0];

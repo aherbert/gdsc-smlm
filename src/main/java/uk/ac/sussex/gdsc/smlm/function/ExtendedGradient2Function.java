@@ -34,12 +34,12 @@ public interface ExtendedGradient2Function extends Gradient2Function {
    *
    * @param a An array of coefficients
    */
-  public void initialiseExtended2(final double[] a);
+  void initialiseExtended2(final double[] a);
 
   /**
    * Applies the procedure for the valid range of the function.
    *
    * @param procedure the procedure
    */
-  public void forEach(ExtendedGradient2Procedure procedure);
+  void forEach(ExtendedGradient2Procedure procedure);
 }

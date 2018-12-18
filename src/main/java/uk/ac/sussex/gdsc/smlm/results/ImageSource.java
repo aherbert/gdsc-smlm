@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
 
 import com.thoughtworks.xstream.XStream;
@@ -32,6 +33,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import java.awt.Rectangle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract base class for the image source for peak results.
@@ -202,7 +205,7 @@ public abstract class ImageSource {
 
   /**
    * Get the number of frames that can be extracted from the image source with calls to
-   * {@link #next()}
+   * {@link #next()}.
    *
    * @return The total number of frames
    */
@@ -256,7 +259,7 @@ public abstract class ImageSource {
    *
    * @return the next frame (or null if at the end)
    */
-  public float[] next() {
+  public @Nullable float[] next() {
     final Object pixels = nextRaw();
     if (pixels != null) {
       return imageConverter.getData(pixels, getWidth(), getHeight(), null, null);
@@ -277,7 +280,7 @@ public abstract class ImageSource {
    * @return the next frame (or null if at the end)
    * @throws IllegalArgumentException if the bounds do not fit in the image
    */
-  public float[] next(Rectangle bounds) {
+  public @Nullable float[] next(Rectangle bounds) {
     if (!checkBounds(bounds)) {
       bounds = null;
     }
@@ -296,7 +299,7 @@ public abstract class ImageSource {
    *
    * @return the next frame (or null if at the end)
    */
-  public Object nextRaw() {
+  public @Nullable Object nextRaw() {
     if (sequentialReadStatus == SequentialReadStatus.READY) {
       if (initialiseSequentialRead()) {
         sequentialReadStatus = SequentialReadStatus.RUNNING;
@@ -331,7 +334,7 @@ public abstract class ImageSource {
    *
    * @return the next frame (or null if at the end)
    */
-  protected abstract Object nextRawFrame();
+  protected abstract @Nullable Object nextRawFrame();
 
   /**
    * Get a specific frame from the results. Return null if the frame is not available and set the
@@ -343,7 +346,7 @@ public abstract class ImageSource {
    * @param frame the frame
    * @return the frame (or null)
    */
-  public float[] get(int frame) {
+  public @Nullable float[] get(int frame) {
     return get(frame, null);
   }
 
@@ -362,7 +365,7 @@ public abstract class ImageSource {
    * @return the frame (or null)
    * @throws IllegalArgumentException if the bounds do not fit in the image
    */
-  public float[] get(int frame, Rectangle bounds) {
+  public @Nullable float[] get(int frame, Rectangle bounds) {
     if (!checkBounds(bounds)) {
       bounds = null;
     }
@@ -385,7 +388,7 @@ public abstract class ImageSource {
    * @param frame the frame
    * @return the frame (or null)
    */
-  public Object getRaw(int frame) {
+  public @Nullable Object getRaw(int frame) {
     startFrame = endFrame = frame;
     final Object data = getRawFrame(frame);
     if (data == null) {
@@ -402,7 +405,7 @@ public abstract class ImageSource {
    * @param frame the frame
    * @return The frame data
    */
-  protected abstract Object getRawFrame(int frame);
+  protected abstract @Nullable Object getRawFrame(int frame);
 
   /**
    * Get the name of the results source.
@@ -478,7 +481,7 @@ public abstract class ImageSource {
       xs.autodetectAnnotations(true);
       return xs.toXML(this);
     } catch (final XStreamException ex) {
-      // ex.printStackTrace();
+      Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Failed to serialise to XML", ex);
     }
     return "";
   }
@@ -497,12 +500,9 @@ public abstract class ImageSource {
       xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
       xs.autodetectAnnotations(true);
       return (ImageSource) xs.fromXML(xml);
-    } catch (final ClassCastException ex) {
-      ex.printStackTrace();
-    } catch (final XStreamException ex) {
-      ex.printStackTrace();
     } catch (final Exception ex) {
-      ex.printStackTrace();
+      Logger.getLogger(ImageSource.class.getName()).log(Level.SEVERE,
+          "Failed to deserialise from XML", ex);
     }
     return null;
   }

@@ -215,11 +215,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         case CCD:
         case CCD_APPROXIMATION:
         case EM_CCD:
-          name += String.format(" g=%s,n=%s", gain, noise);
+          return name + String.format(" g=%s,n=%s", gain, noise);
         default:
-          break;
+          return name;
       }
-      return name;
     }
   }
 
@@ -734,11 +733,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       case CCD:
       case CCD_APPROXIMATION:
       case EM_CCD:
-        name += String.format(" g=%.1f,n=%.1f", key.gain, key.noise);
+        return name + String.format(" g=%.1f,n=%.1f", key.gain, key.noise);
       default:
-        break;
+        return name;
     }
-    return name;
   }
 
   private static PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(double s) {
@@ -932,8 +930,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         return Plot.BOX;
       case 4:
         return Plot.CROSS;
+      default:
+        return -1;
     }
-    return -1;
   }
 
   private static double[] limits(double[] limits, double[] f) {

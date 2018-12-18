@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 /**
- * Check if converged using a tolerance on the value, parameters, and/or the number of iterations
+ * Check if converged using a tolerance on the value, parameters, and/or the number of iterations.
  */
 public class ToleranceChecker {
   /** The constant to use for a tolerance that is ignored. */
