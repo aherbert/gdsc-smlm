@@ -34,15 +34,23 @@ import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.ValueFunction;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Abstract class for FunctionSolvers that use update steps to the current parameters.
  */
 public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
+  private static Logger logger = Logger.getLogger(SteppingFunctionSolver.class.getName());
+
+  /** The trace level for debugging the fit computation. */
+  private static Level traceLevel = Level.FINEST;
+
   /**
    * Simple class to allow the values to be computed.
    */
   private static class SimpleValueProcedure implements ValueProcedure {
-    int i;
+    int index;
     double[] fx;
 
     SimpleValueProcedure(double[] fx) {
@@ -51,7 +59,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
 
     @Override
     public void execute(double value) {
-      fx[i++] = value;
+      fx[index++] = value;
     }
   }
 
@@ -131,24 +139,30 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
 
       // First evaluation
       double currentValue = computeFitValue(a);
-      log("%s Value [%s] = %s : %s\n", name, tc.getIterations(), currentValue, a);
+      if (logger.isLoggable(traceLevel)) {
+        log("%s Value [%s] = %s : %s", name, tc.getIterations(), currentValue, a);
+      }
 
       int status = 0;
       while (true) {
         // Compute next step
         computeStep(step);
-        log("%s Step [%s] = %s\n", name, tc.getIterations(), step);
-
+        if (logger.isLoggable(traceLevel)) {
+          log("%s Step [%s] = %s", name, tc.getIterations(), step);
+        }
         // Apply bounds to the step
         bounds.applyBounds(a, step, newA);
 
         // Evaluate
         final double newValue = computeFitValue(newA);
-        log("%s Value [%s] = %s : %s\n", name, tc.getIterations(), newValue, newA);
-
+        if (logger.isLoggable(traceLevel)) {
+          log("%s Value [%s] = %s : %s", name, tc.getIterations(), newValue, newA);
+        }
         // Check stopping criteria
         status = tc.converged(currentValue, a, newValue, newA);
-        log("%s Status [%s] = %s\n", name, tc.getIterations(), status);
+        if (logger.isLoggable(traceLevel)) {
+          log("%s Status [%s] = %s", name, tc.getIterations(), status);
+        }
         if (status != 0) {
           value = newValue;
           System.arraycopy(newA, 0, a, 0, a.length);
@@ -157,17 +171,23 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
 
         // Check if the step was an improvement
         if (accept(currentValue, a, newValue, newA)) {
-          log("%s Accepted [%s]\n", name, tc.getIterations());
+          if (logger.isLoggable(traceLevel)) {
+            log("%s Accepted [%s]", name, tc.getIterations());
+          }
           currentValue = newValue;
           System.arraycopy(newA, 0, a, 0, a.length);
           bounds.accepted(a, newA);
         }
       }
 
-      log("%s End [%s] = %s\n", name, tc.getIterations(), status);
+      if (logger.isLoggable(traceLevel)) {
+        log("%s End [%s] = %s", name, tc.getIterations(), status);
+      }
 
       if (BitFlagUtils.anySet(status, ToleranceChecker.STATUS_CONVERGED)) {
-        log("%s Converged [%s]\n", name, tc.getIterations());
+        if (logger.isLoggable(traceLevel)) {
+          log("%s Converged [%s]", name, tc.getIterations());
+        }
         // A solver may compute both at the same time...
         if (parametersVariance != null) {
           computeDeviationsAndValues(parametersVariance, fx);
@@ -185,14 +205,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
       // We should not reach here unless we missed something
       return FitStatus.FAILED_TO_CONVERGE;
     } catch (final FunctionSolverException ex) {
-      // XXX - debugging
+      // Debugging
       final String msg = ex.getMessage();
-      if (msg != null) {
-        System.out.printf("%s failed: %s - %s\n", getClass().getSimpleName(),
-            ex.fitStatus.getName(), msg);
-      } else {
-        System.out.printf("%s failed: %s\n", getClass().getSimpleName(), ex.fitStatus.getName());
-      }
+      logger.log(Level.FINE, () -> String.format("%s failed: %s%s", getClass().getSimpleName(),
+          ex.fitStatus.getName(), (msg != null) ? " - " + msg : ""));
       return ex.fitStatus;
     } finally {
       iterations = tc.getIterations();
@@ -207,14 +223,16 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * Log progress from the solver.
    *
    * @param format the format
-   * @param args the args
+   * @param args the arguments
    */
-  private void log(String format, Object... args) {
-    // // Convert arrays to a single string
-    // for (int i=0; i<args.length; i++)
-    // if (args[i] instanceof double[])
-    // args[i] = java.util.Arrays.toString((double[])args[i]);
-    // System.out.printf(format, args);
+  private static void log(String format, Object... args) {
+    // Convert arrays to a single string
+    for (int i = 0; i < args.length; i++) {
+      if (args[i] instanceof double[]) {
+        args[i] = java.util.Arrays.toString((double[]) args[i]);
+      }
+    }
+    logger.log(traceLevel, () -> String.format(format, args));
   }
 
   /**
@@ -266,12 +284,12 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * {@link #computeFitValue(double[])}. Optionally store the function values.
    *
    * @param parametersVariance the parameter deviations
-   * @param fx the y fit (may be null)
+   * @param fx the function values f(x) (may be null)
    */
   protected void computeDeviationsAndValues(double[] parametersVariance, double[] fx) {
     // Use a dedicated solver optimised for inverting the matrix diagonal.
     // The last Hessian matrix should be stored in the working alpha.
-    final FisherInformationMatrix m = computeFisherInformationMatrix(fx);
+    final FisherInformationMatrix m = computeLastFisherInformationMatrix(fx);
 
     setDeviations(parametersVariance, m);
   }
@@ -285,10 +303,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * {@link #computeDeviationsAndValues(double[], double[])} directly and provide a dummy
    * implementation of this function as it will not be used, e.g. throw an exception.
    *
-   * @param fx the y fit (may be null)
+   * @param fx the function values f(x) (may be null)
    * @return the Fisher Information matrix
    */
-  protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] fx);
+  protected abstract FisherInformationMatrix computeLastFisherInformationMatrix(double[] fx);
 
   /**
    * Compute the function y-values using the y and parameters a from the last call to
@@ -301,7 +319,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    * <p>The base gradient function is used. If sub-classes wrap the function (e.g. with
    * per-observation weights) then these will be omitted.
    *
-   * @param fx the y fit values
+   * @param fx the function values f(x)
    */
   protected void computeValues(double[] fx) {
     final ValueFunction function = (ValueFunction) this.function;

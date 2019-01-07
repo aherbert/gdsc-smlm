@@ -535,7 +535,7 @@ public class FilterAnalysis implements PlugIn {
     int count = 0;
     for (final FilterSet filterSet : filterSets) {
       IJ.showStatus("Analysing " + filterSet.getName() + " ...");
-      count = run(filterSet, resultsList, count, total);
+      count = runAnalysis(filterSet, resultsList, count, total);
     }
     IJ.showProgress(1);
     IJ.showStatus("");
@@ -706,7 +706,7 @@ public class FilterAnalysis implements PlugIn {
     return sb.toString();
   }
 
-  private int run(FilterSet filterSet, List<MemoryPeakResults> resultsList, int count,
+  private int runAnalysis(FilterSet filterSet, List<MemoryPeakResults> resultsList, int count,
       final int total) {
     final double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
     final double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
@@ -726,7 +726,7 @@ public class FilterAnalysis implements PlugIn {
         IJ.showProgress(count, total);
       }
 
-      final ClassificationResult s = run(filter, resultsList);
+      final ClassificationResult s = runFilter(filter, resultsList);
 
       if (type == null) {
         type = filter.getType();
@@ -833,7 +833,7 @@ public class FilterAnalysis implements PlugIn {
     return max;
   }
 
-  private ClassificationResult run(Filter filter, List<MemoryPeakResults> resultsList) {
+  private ClassificationResult runFilter(Filter filter, List<MemoryPeakResults> resultsList) {
     final ClassificationResult s = filter.score(resultsList);
 
     if (showResultsTable) {

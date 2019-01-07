@@ -775,10 +775,10 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     // been checked at this point to be the smaller of new and old.
     final GeometryArray ga = (GeometryArray) getGeometry();
 
-    points = reorder(points, indices);
+    points = reorderPoints(points, indices);
     // Sizes could be null or a single size
     if (sizes != null && sizes.length == points.length) {
-      sizes = reorder(sizes, indices);
+      sizes = reorderPoints(sizes, indices);
     }
 
     // Reorder all things in the geometry: coordinates and colour.
@@ -853,7 +853,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
    * @param indices the indices
    * @return the new points
    */
-  static Point3f[] reorder(Point3f[] p, int[] indices) {
+  static Point3f[] reorderPoints(Point3f[] p, int[] indices) {
     final Point3f[] c = new Point3f[indices.length];
     for (int i = indices.length; i-- > 0;) {
       c[i] = p[indices[i]];

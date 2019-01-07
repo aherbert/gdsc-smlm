@@ -150,7 +150,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   }
 
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
+  protected FisherInformationMatrix computeLastFisherInformationMatrix(double[] fx) {
     // This solver directly implements computation of the deviations
     throw new NotImplementedException();
   }

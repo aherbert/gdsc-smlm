@@ -65,6 +65,19 @@ public class FastMLEGradient2Procedure6 extends FastMLEGradient2Procedure {
     d2[5] = 0;
   }
 
+  /**
+   * Reset the first derivative vector.
+   */
+  @Override
+  protected void reset1() {
+    d1[0] = 0;
+    d1[1] = 0;
+    d1[2] = 0;
+    d1[3] = 0;
+    d1[4] = 0;
+    d1[5] = 0;
+  }
+
   @Override
   public void execute(double uk, double[] duk_dt, double[] d2uk_dt2) {
     u[k] = uk;
@@ -83,19 +96,6 @@ public class FastMLEGradient2Procedure6 extends FastMLEGradient2Procedure {
     d2[3] += d2uk_dt2[3] * xk_uk_minus1 - duk_dt[3] * duk_dt[3] * xk_uk2;
     d2[4] += d2uk_dt2[4] * xk_uk_minus1 - duk_dt[4] * duk_dt[4] * xk_uk2;
     d2[5] += d2uk_dt2[5] * xk_uk_minus1 - duk_dt[5] * duk_dt[5] * xk_uk2;
-  }
-
-  /**
-   * Reset the first derivative vector.
-   */
-  @Override
-  protected void reset1() {
-    d1[0] = 0;
-    d1[1] = 0;
-    d1[2] = 0;
-    d1[3] = 0;
-    d1[4] = 0;
-    d1[5] = 0;
   }
 
   @Override

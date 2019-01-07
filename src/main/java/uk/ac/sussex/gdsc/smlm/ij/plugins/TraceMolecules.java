@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
@@ -1268,7 +1269,7 @@ public class TraceMolecules implements PlugIn {
     // Pass across all distance points
     boolean noZeroCrossingAtD0 = false;
     boolean noZeroCrossingAtDN = false;
-    final double[] tThresholdsD = toDouble(tThresholds);
+    final double[] tThresholdsD = SimpleArrayUtils.toDouble(tThresholds);
     for (int y = 0; y < maxy; y++) {
       // Find zero crossings on time points
       final double[] data = new double[maxx];
@@ -1501,16 +1502,8 @@ public class TraceMolecules implements PlugIn {
   }
 
   private static int[] createLookup(int[] values, int min, int scale) {
-    final double[] newValues = toDouble(values);
+    final double[] newValues = SimpleArrayUtils.toDouble(values);
     return createLookup(newValues, min, scale);
-  }
-
-  private static double[] toDouble(int[] values) {
-    final double[] newValues = new double[values.length];
-    for (int i = 0; i < values.length; i++) {
-      newValues[i] = values[i];
-    }
-    return newValues;
   }
 
   private static int[] createLookup(double[] values, double min, int scale) {

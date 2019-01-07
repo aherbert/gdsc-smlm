@@ -240,61 +240,6 @@ public class TurboLog extends FastLog {
     return logMantissa[m >>> q] + logExpF[e];
   }
 
-  /**
-   * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is
-   * no assumed leading 1.
-   *
-   * <p>Note that if the mantissa is zero this will fail!
-   *
-   * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
-   * significant digit is always 0.
-   *
-   * @param m the mantissa (already bit shifted by 1)
-   * @return the log(x)
-   */
-  protected float computeSubnormal(int m) {
-    // Normalize the subnormal number.
-    // The unbiased exponent starts at -127.
-    // Shift the mantissa until it is a binary number
-    // with a leading 1: 1.10101010...
-
-    int e = -127;
-    while ((m & 0x800000) == 0) {
-      --e;
-      m <<= 1;
-    }
-
-    // Remove the leading 1
-    return logMantissa[(m & 0x7fffff) >>> q] + e * LN2F;
-  }
-
-  /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive.
-   *
-   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
-   * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
-   * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
-   * incorrect ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
-   * zero, then the result is negative infinity. </ul>
-   *
-   * @param x the argument (must be strictly positive)
-   * @return log(x)
-   */
-  @Override
-  public float fastLog(float x) {
-    // As above but no checks for NaN or infinity
-    final int bits = Float.floatToRawIntBits(x);
-    final int e = ((bits >>> 23) & 0xff);
-    final int m = (bits & 0x7fffff);
-    if (e == 0) {
-      return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
-    }
-    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
-      return (float) Math.log(x);
-    }
-    return logMantissa[m >>> q] + logExpF[e];
-  }
-
   @Override
   public float log(double x) {
     final long bits = Double.doubleToRawLongBits(x);
@@ -357,6 +302,62 @@ public class TurboLog extends FastLog {
    * @param m the mantissa (already bit shifted by 1)
    * @return the log(x)
    */
+  protected float computeSubnormal(int m) {
+    // Normalize the subnormal number.
+    // The unbiased exponent starts at -127.
+    // Shift the mantissa until it is a binary number
+    // with a leading 1: 1.10101010...
+
+    int e = -127;
+    while ((m & 0x800000) == 0) {
+      --e;
+      m <<= 1;
+    }
+
+    // Remove the leading 1
+    return logMantissa[(m & 0x7fffff) >>> q] + e * LN2F;
+  }
+
+  /**
+   * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is
+   * no assumed leading 1.
+   *
+   * <p>Note that if the mantissa is zero this will fail!
+   *
+   * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
+   * significant digit is always 0.
+   *
+   * @param m the mantissa (already bit shifted by 1)
+   * @return the log(x)
+   */
+  protected double computeSubnormal(long m) {
+    // Normalize the subnormal number.
+    // The unbiased exponent starts at -1023.
+    // Shift the mantissa until it is a binary number
+    // with a leading 1: 1.10101010...
+
+    int e = -1023;
+    while ((m & 0x0010000000000000L) == 0) {
+      --e;
+      m <<= 1;
+    }
+
+    // Remove the leading 1
+    return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2;
+  }
+
+  /**
+   * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is
+   * no assumed leading 1.
+   *
+   * <p>Note that if the mantissa is zero this will fail!
+   *
+   * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
+   * significant digit is always 0.
+   *
+   * @param m the mantissa (already bit shifted by 1)
+   * @return the log(x)
+   */
   protected float computeSubnormalF(long m) {
     // Normalize the subnormal number.
     // The unbiased exponent starts at -1023.
@@ -372,6 +373,34 @@ public class TurboLog extends FastLog {
     // Remove the leading 1
     return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2F;
   }
+
+  /**
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
+   * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
+   * incorrect ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
+   * zero, then the result is negative infinity. </ul>
+   *
+   * @param x the argument (must be strictly positive)
+   * @return log(x)
+   */
+  @Override
+  public float fastLog(float x) {
+    // As above but no checks for NaN or infinity
+    final int bits = Float.floatToRawIntBits(x);
+    final int e = ((bits >>> 23) & 0xff);
+    final int m = (bits & 0x7fffff);
+    if (e == 0) {
+      return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
+    }
+    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
+      return (float) Math.log(x);
+    }
+    return logMantissa[m >>> q] + logExpF[e];
+  }
+
 
   /**
    * Calculate the natural logarithm. Requires the argument be finite and positive.
@@ -399,6 +428,7 @@ public class TurboLog extends FastLog {
     }
     return logMantissa[(int) (m >>> qd)] + logExpD[e];
   }
+
 
   @Override
   public double logD(double x) {
@@ -452,34 +482,6 @@ public class TurboLog extends FastLog {
   }
 
   /**
-   * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is
-   * no assumed leading 1.
-   *
-   * <p>Note that if the mantissa is zero this will fail!
-   *
-   * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
-   * significant digit is always 0.
-   *
-   * @param m the mantissa (already bit shifted by 1)
-   * @return the log(x)
-   */
-  protected double computeSubnormal(long m) {
-    // Normalize the subnormal number.
-    // The unbiased exponent starts at -1023.
-    // Shift the mantissa until it is a binary number
-    // with a leading 1: 1.10101010...
-
-    int e = -1023;
-    while ((m & 0x0010000000000000L) == 0) {
-      --e;
-      m <<= 1;
-    }
-
-    // Remove the leading 1
-    return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2;
-  }
-
-  /**
    * Calculate the natural logarithm. Requires the argument be finite and positive.
    *
    * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
@@ -507,35 +509,69 @@ public class TurboLog extends FastLog {
     return logMantissa[(int) (m >>> qd)] + (e - 1023) * LN2;
   }
 
-  // We don't support other bases so do a simple conversion for log2 for the super-class method
-
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Non-specialised version which calls the corresponding log function and divides by
+   * {@code Math.log(2)}.
+   */
   @Override
   public float log2(float x) {
     return log(x) / LN2F;
   }
 
-  @Override
-  public float fastLog2(float x) {
-    return fastLog(x) / LN2F;
-  }
-
-  @Override
-  public double log2D(double x) {
-    return log(x) / LN2;
-  }
-
-  @Override
-  public double fastLog2D(double x) {
-    return fastLog(x) / LN2;
-  }
-
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Non-specialised version which calls the corresponding log function and divides by
+   * {@code Math.log(2)}.
+   */
   @Override
   public float log2(double x) {
     return log(x) / LN2F;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Non-specialised version which calls the corresponding log function and divides by
+   * {@code Math.log(2)}.
+   */
+  @Override
+  public float fastLog2(float x) {
+    return fastLog(x) / LN2F;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Non-specialised version which calls the corresponding log function and divides by
+   * {@code Math.log(2)}.
+   */
   @Override
   public float fastLog2(double x) {
     return fastLog(x) / LN2F;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Non-specialised version which calls the corresponding log function and divides by
+   * {@code Math.log(2)}.
+   */
+  @Override
+  public double log2D(double x) {
+    return log(x) / LN2;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Non-specialised version which calls the corresponding log function and divides by
+   * {@code Math.log(2)}.
+   */
+  @Override
+  public double fastLog2D(double x) {
+    return fastLog(x) / LN2;
   }
 }

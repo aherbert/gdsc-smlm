@@ -497,6 +497,18 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
+   * Returns the location of <code>index</code> in terms of the underlying model. That is, for the
+   * row <code>index</code> in the coordinates of the view this returns the row index in terms of
+   * the underlying model.
+   *
+   * @param indices the indices (updated in-place)
+   * @throws IndexOutOfBoundsException if <code>index</code> is outside the range of the view
+   */
+  public void convertRowIndexToModel(int[] indices) {
+    table.convertRowIndexToModel(indices);
+  }
+
+  /**
    * Maps the index of the row in terms of the <code>TableModel</code> to the view. If the contents
    * of the model are not sorted the model and view indices are the same.
    *
@@ -509,18 +521,6 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
    */
   public int convertRowIndexToView(int modelRowIndex) {
     return table.convertRowIndexToView(modelRowIndex);
-  }
-
-  /**
-   * Returns the location of <code>index</code> in terms of the underlying model. That is, for the
-   * row <code>index</code> in the coordinates of the view this returns the row index in terms of
-   * the underlying model.
-   *
-   * @param indices the indices (updated in-place)
-   * @throws IndexOutOfBoundsException if <code>index</code> is outside the range of the view
-   */
-  public void convertRowIndexToModel(int[] indices) {
-    table.convertRowIndexToModel(indices);
   }
 
   /**

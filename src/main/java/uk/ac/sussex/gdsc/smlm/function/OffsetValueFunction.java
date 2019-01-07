@@ -30,25 +30,25 @@ package uk.ac.sussex.gdsc.smlm.function;
 public class OffsetValueFunction extends PrecomputedValueFunction
     implements ValueFunction, ValueProcedure, NamedFunction {
   /** The value function. */
-  protected final ValueFunction f;
+  protected final ValueFunction vf;
   /** The counter i. */
-  protected int i;
+  protected int index;
   /** The procedure. */
   protected ValueProcedure procedure;
 
   /**
    * Instantiates a new offset value function.
    *
-   * @param f the function
+   * @param function the function
    * @param values the precomputed values
    * @throws IllegalArgumentException if the values length does not match the function size
    */
-  protected OffsetValueFunction(ValueFunction f, double[] values) {
+  protected OffsetValueFunction(ValueFunction function, double[] values) {
     super(values);
-    if (f.size() != values.length) {
+    if (function.size() != values.length) {
       throw new IllegalArgumentException("Length of precomputed values must match function size");
     }
-    this.f = f;
+    this.vf = function;
   }
 
   /**
@@ -62,8 +62,8 @@ public class OffsetValueFunction extends PrecomputedValueFunction
   protected OffsetValueFunction(OffsetValueFunction pre, double[] values) {
     // Clone the values as they will be modified
     super(values.clone());
-    this.f = pre.f;
-    final int n = f.size();
+    this.vf = pre.vf;
+    final int n = vf.size();
     final double[] values1 = pre.values;
     for (int i = 0; i < n; i++) {
       this.values[i] += values1[i];
@@ -76,49 +76,49 @@ public class OffsetValueFunction extends PrecomputedValueFunction
    * @return the value function
    */
   public ValueFunction getValueFunction() {
-    return f;
+    return vf;
   }
 
   @Override
   public void initialise0(double[] a) {
-    f.initialise0(a);
+    vf.initialise0(a);
   }
 
   @Override
   public void forEach(ValueProcedure procedure) {
     this.procedure = procedure;
-    i = 0;
-    f.forEach(this);
+    index = 0;
+    vf.forEach(this);
   }
 
   @Override
   public void execute(double value) {
-    procedure.execute(value + values[i++]);
+    procedure.execute(value + values[index++]);
   }
 
   /**
    * Wrap a function with pre-computed values.
    *
    * @param func the function
-   * @param b Baseline pre-computed y-values
+   * @param baseline Baseline pre-computed y-values
    * @return the wrapped function (or the original if pre-computed values are null or wrong length)
    */
-  public static ValueFunction wrapValueFunction(final ValueFunction func, final double[] b) {
-    if (b != null && b.length == func.size()) {
+  public static ValueFunction wrapValueFunction(final ValueFunction func, final double[] baseline) {
+    if (baseline != null && baseline.length == func.size()) {
       // Avoid multiple wrapping
       if (func instanceof OffsetValueFunction) {
-        return new OffsetValueFunction((OffsetValueFunction) func, b);
+        return new OffsetValueFunction((OffsetValueFunction) func, baseline);
       }
-      return new OffsetValueFunction(func, b);
+      return new OffsetValueFunction(func, baseline);
     }
     return func;
   }
 
   /** {@inheritDoc} */
   @Override
-  public String getParameterName(int i) {
-    if (f instanceof NamedFunction) {
-      return ((NamedFunction) f).getParameterName(i);
+  public String getParameterName(int index) {
+    if (vf instanceof NamedFunction) {
+      return ((NamedFunction) vf).getParameterName(index);
     }
     return "Unknown";
   }

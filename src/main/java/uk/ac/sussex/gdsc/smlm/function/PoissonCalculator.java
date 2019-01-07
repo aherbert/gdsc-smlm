@@ -115,7 +115,7 @@ public class PoissonCalculator {
           // Note that the logGamma function uses only 1 Math.log() call when the input is
           // below 2.5. Above that it uses 2 calls. So the cost for this accuracy is an extra
           // Math.log() call.
-          // final double logXFactorial = Gamma.logGamma(x[i] + 1);
+          // final double logXFactorial = Gamma.logGamma(x[i] + 1)
           // Note Math.log1p is faster than FastMath.log1p.
           final double logXFactorial = -Math.log1p(Gamma.invGamma1pm1(x[i]));
           sumLogXFactorial += logXFactorial;
@@ -251,16 +251,6 @@ public class PoissonCalculator {
   }
 
   /**
-   * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive.
-   *
-   * @param u the mean
-   * @return the log likelihood
-   */
-  public double logLikelihood(double[] u) {
-    return pseudoLogLikelihood(u) - getLogXFactorialTerm();
-  }
-
-  /**
    * Gets the values x.
    *
    * @return the values x
@@ -290,6 +280,16 @@ public class PoissonCalculator {
     initialise();
     // The log likelihood should be below the maximum log likelihood
     return (logLikelihood > mll) ? 0 : -2.0 * (logLikelihood - mll);
+  }
+
+  /**
+   * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive.
+   *
+   * @param u the mean
+   * @return the log likelihood
+   */
+  public double logLikelihood(double[] u) {
+    return pseudoLogLikelihood(u) - getLogXFactorialTerm();
   }
 
   /**
@@ -335,7 +335,6 @@ public class PoissonCalculator {
    */
   public static double logFactorial(double x) {
     if (x > 1) {
-      // return Gamma.logGamma(1 + x);
       return logGamma(1 + x);
     }
     return 0.0;
@@ -359,15 +358,8 @@ public class PoissonCalculator {
    * @return the value of {@code log(Gamma(x))}, {@code Double.NaN} if {@code x <= 0.0}.
    */
   private static double logGamma(double x) {
-    // if (Double.isNaN(x) || (x <= 0.0))
-    // {
-    // return Double.NaN;
-    // }
-    // else if (x < 0.5)
-    // {
-    // return Gamma.logGamma1p(x) - Math.log(x);
-    // }
-    // else
+    // No support for x < 0.5
+
     if (x <= 2.5) {
       return Gamma.logGamma1p((x - 0.5) - 0.5);
     } else if (x <= 8.0) {
@@ -399,57 +391,6 @@ public class PoissonCalculator {
       return fastLogLikelihoodX(u, x);
     }
     return -u;
-  }
-
-  /**
-   * Get the Poisson log likelihood of value x given the mean. The mean and x must be strictly
-   * positive.
-   *
-   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
-   *
-   * @param u the mean
-   * @param x the x
-   * @return the log likelihood
-   */
-  private static double fastLogLikelihoodX(double u, double x) {
-    // The log-likelihood (ll) is:
-    // ll = x * Math.log(u) - u - logFactorial(x)
-
-    // Note that the logFactorial can be approximated as using Stirling's approximation:
-    // https://en.m.wikipedia.org/wiki/Stirling%27s_approximation
-    // log(x!) = x * log(x) - x + O(ln(x))
-    // O(ln(x)) is a final term that can be computed using a series expansion.
-
-    // This makes:
-    // ll = x * log(u) - u - x * log(x) + x - O(ln(x))
-
-    // Note: This can be rearranged:
-    // ll = x * (log(u) - log(x)) - u + x - O(ln(x))
-    // ll = x * log(u/x) - u + x - O(ln(x))
-    // However the log(x) is needed in the O(ln(x)) computation.
-
-    // Use the Stirling approximation when appropriate
-    if (x <= 1) {
-      // When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
-      // Compute the actual log likelihood
-      return x * Math.log(u) - u;
-    } else if (x <= APPROXIMATION_X) {
-      // At low values of log(n!) we use the gamma function as the relative error of the
-      // approximation is high.
-      // Note that the logGamma function uses only 1 Math.log() call when the input is
-      // below 2.5. Above that it uses 2 calls so we switch to the approximation.
-      // return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
-      // Note Math.log1p is faster than FastMath.log1p.
-      return x * Math.log(u) - u + Math.log1p(Gamma.invGamma1pm1(x));
-    } else {
-      // Approximate log(n!) using Stirling's approximation using the first 3 terms.
-      // This will have a maximum relative error of approximately 6.7e-5
-      // ll = x * log(u) - u - x * log(x) + x - O(ln(x))
-      // O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
-      return x * Math.log(u) - u - HALF_LOG_2_PI - (x + 0.5) * Math.log(x) + x - ONE_OVER_12 / x
-          + ONE_OVER_360 / pow3(x);
-    }
   }
 
   /**
@@ -494,6 +435,81 @@ public class PoissonCalculator {
   }
 
   /**
+   * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
+   * must be positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
+   *
+   * @param u the mean
+   * @param x the x
+   * @param fastLog the fast log function
+   * @return the log likelihood
+   */
+  public static double fastLogLikelihood(double[] u, double[] x, FastLog fastLog) {
+    double ll = 0.0;
+    for (int i = u.length; i-- > 0;) {
+      if (x[i] == 0.0) {
+        ll -= u[i];
+      } else {
+        ll += fastLogLikelihoodX(u[i], x[i], fastLog);
+      }
+    }
+    return ll;
+  }
+
+  /**
+   * Get the Poisson log likelihood of value x given the mean. The mean and x must be strictly
+   * positive.
+   *
+   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
+   * The number of calls to Math.log() is 2 for all x over 1.
+   *
+   * @param u the mean
+   * @param x the x
+   * @return the log likelihood
+   */
+  private static double fastLogLikelihoodX(double u, double x) {
+    // The log-likelihood (ll) is:
+    // ll = x * Math.log(u) - u - logFactorial(x)
+
+    // Note that the logFactorial can be approximated as using Stirling's approximation:
+    // https://en.m.wikipedia.org/wiki/Stirling%27s_approximation
+    // log(x!) = x * log(x) - x + O(ln(x))
+    // O(ln(x)) is a final term that can be computed using a series expansion.
+
+    // This makes:
+    // ll = x * log(u) - u - x * log(x) + x - O(ln(x))
+
+    // Note: This can be rearranged:
+    // ll = x * (log(u) - log(x)) - u + x - O(ln(x))
+    // ll = x * log(u/x) - u + x - O(ln(x))
+    // However the log(x) is needed in the O(ln(x)) computation.
+
+    // Use the Stirling approximation when appropriate
+    if (x <= 1) {
+      // When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
+      // Compute the actual log likelihood
+      return x * Math.log(u) - u;
+    } else if (x <= APPROXIMATION_X) {
+      // At low values of log(n!) we use the gamma function as the relative error of the
+      // approximation is high.
+      // Note that the logGamma function uses only 1 Math.log() call when the input is
+      // below 2.5. Above that it uses 2 calls so we switch to the approximation.
+      // return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1)
+      // Note Math.log1p is faster than FastMath.log1p.
+      return x * Math.log(u) - u + Math.log1p(Gamma.invGamma1pm1(x));
+    } else {
+      // Approximate log(n!) using Stirling's approximation using the first 3 terms.
+      // This will have a maximum relative error of approximately 6.7e-5
+      // ll = x * log(u) - u - x * log(x) + x - O(ln(x))
+      // O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
+      return x * Math.log(u) - u - HALF_LOG_2_PI - (x + 0.5) * Math.log(x) + x - ONE_OVER_12 / x
+          + ONE_OVER_360 / pow3(x);
+    }
+  }
+
+  /**
    * Get the Poisson log likelihood of value x given the mean. The mean and x must be strictly
    * positive.
    *
@@ -532,7 +548,7 @@ public class PoissonCalculator {
       // approximation is high.
       // Note that the logGamma function uses only 1 Math.log() call when the input is
       // below 2.5. Above that it uses 2 calls so we switch to the approximation.
-      // return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
+      // return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1)
       // Note Math.log1p is faster than FastMath.log1p.
       return x * fastLog.log(u) - u + Math.log1p(Gamma.invGamma1pm1(x));
     } else {
@@ -546,30 +562,6 @@ public class PoissonCalculator {
   }
 
   /**
-   * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive.
-   *
-   * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
-   *
-   * @param u the mean
-   * @param x the x
-   * @param fastLog the fast log function
-   * @return the log likelihood
-   */
-  public static double fastLogLikelihood(double[] u, double[] x, FastLog fastLog) {
-    double ll = 0.0;
-    for (int i = u.length; i-- > 0;) {
-      if (x[i] == 0.0) {
-        ll -= u[i];
-      } else {
-        ll += fastLogLikelihoodX(u[i], x[i], fastLog);
-      }
-    }
-    return ll;
-  }
-
-  /**
    * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x
    * must be positive.
    *
@@ -579,7 +571,7 @@ public class PoissonCalculator {
    */
   public static double likelihood(double u, double x) {
     // This has a smaller range before computation fails:
-    // return Math.pow(u, x) * FastMath.exp(-u) / factorial(x);
+    // return Math.pow(u, x) * FastMath.exp(-u) / factorial(x)
     return FastMath.exp(logLikelihood(u, x));
   }
 
@@ -830,9 +822,9 @@ public class PoissonCalculator {
     double ll = 0.0;
     for (int i = u.length; i-- > 0;) {
       if (x[i] > 0.0) {
-        // ll += (x[i] * Math.log(u[i]) - u[i]) - (x[i] * Math.log(x[i]) - x[i]);
-        // ll += x[i] * Math.log(u[i]) - u[i] - x[i] * Math.log(x[i]) + x[i];
-        // ll += x[i] * (Math.log(u[i]) - Math.log(x[i])) - u[i] + x[i];
+        // ll += (x[i] * Math.log(u[i]) - u[i]) - (x[i] * Math.log(x[i]) - x[i])
+        // ll += x[i] * Math.log(u[i]) - u[i] - x[i] * Math.log(x[i]) + x[i]
+        // ll += x[i] * (Math.log(u[i]) - Math.log(x[i])) - u[i] + x[i]
         ll += x[i] * Math.log(u[i] / x[i]) - u[i] + x[i];
       } else {
         ll -= u[i];

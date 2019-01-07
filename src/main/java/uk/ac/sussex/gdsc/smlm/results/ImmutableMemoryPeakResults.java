@@ -126,6 +126,17 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   }
 
   @Override
+  public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
+      float meanIntensity, float[] params, float[] paramsStdDev) {
+    throw new DataException("This results set is immutable");
+  }
+
+  @Override
+  public void add(MemoryPeakResults results) {
+    throw new DataException("This results set is immutable");
+  }
+
+  @Override
   public void addAll(Collection<PeakResult> results) {
     throw new DataException("This results set is immutable");
   }
@@ -141,11 +152,6 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   }
 
   @Override
-  public void add(MemoryPeakResults results) {
-    throw new DataException("This results set is immutable");
-  }
-
-  @Override
   public void removeNullResults() {
     throw new DataException("This results set is immutable");
   }
@@ -157,12 +163,6 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
 
   @Override
   public void begin() {
-    throw new DataException("This results set is immutable");
-  }
-
-  @Override
-  public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
-      float meanIntensity, float[] params, float[] paramsStdDev) {
     throw new DataException("This results set is immutable");
   }
 

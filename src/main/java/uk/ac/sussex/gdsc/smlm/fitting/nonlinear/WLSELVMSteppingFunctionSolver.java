@@ -113,7 +113,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
 
   /** {@inheritDoc} */
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
+  protected FisherInformationMatrix computeLastFisherInformationMatrix(double[] fx) {
     // Get the values if necessary
     if (fx != null && fx.length == ((Gradient1Function) function).size()) {
       computeValues(fx);

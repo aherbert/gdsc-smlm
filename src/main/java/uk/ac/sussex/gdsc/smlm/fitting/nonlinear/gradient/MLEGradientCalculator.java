@@ -523,21 +523,6 @@ public class MLEGradientCalculator extends GradientCalculator {
   }
 
   /**
-   * Compute the matrix alpha and vector beta when the data value is zero.
-   *
-   * @param beta the beta
-   * @param dfi_da the gradient of the function with respect to each parameter a
-   * @param fi the function value at index i
-   */
-  protected void compute0(final double[] beta, final double[] dfi_da, final double fi) {
-    // Assume xi is zero. This removes most of the computation
-
-    for (int k = 0; k < nparams; k++) {
-      beta[k] -= dfi_da[k];
-    }
-  }
-
-  /**
    * Compute the matrix alpha and vector beta.
    *
    * @param alpha the alpha
@@ -570,6 +555,21 @@ public class MLEGradientCalculator extends GradientCalculator {
       }
 
       beta[k] -= e * dfi_da[k];
+    }
+  }
+
+  /**
+   * Compute the matrix alpha and vector beta when the data value is zero.
+   *
+   * @param beta the beta
+   * @param dfi_da the gradient of the function with respect to each parameter a
+   * @param fi the function value at index i
+   */
+  protected void compute0(final double[] beta, final double[] dfi_da, final double fi) {
+    // Assume xi is zero. This removes most of the computation
+
+    for (int k = 0; k < nparams; k++) {
+      beta[k] -= dfi_da[k];
     }
   }
 
@@ -669,56 +669,28 @@ public class MLEGradientCalculator extends GradientCalculator {
    * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x
    * must be positive.
    *
-   * @param u the mean
+   * @param mean the mean
    * @param x the x
    * @return the likelihood
    */
-  public static double likelihood(double u, double x) {
+  public static double likelihood(double mean, double x) {
     if (x == 0) {
-      return FastMath.exp(-u);
+      return FastMath.exp(-mean);
     }
-    return Math.pow(u, x) * FastMath.exp(-u) / factorial(x);
+    return Math.pow(mean, x) * FastMath.exp(-mean) / factorial(x);
   }
 
   /**
-   * Factorial.
+   * Compute the factorial of the value (value!) using the gamma function.
    *
-   * @param k the k
-   * @return the double
+   * @param value the value
+   * @return the factorial
    */
-  private static double factorial(double k) {
-    if (k <= 1) {
+  private static double factorial(double value) {
+    if (value <= 1) {
       return 1;
     }
-    return Gamma.gamma(k + 1);
-  }
-
-  /**
-   * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive.
-   *
-   * @param u the mean
-   * @param x the x
-   * @return the log likelihood
-   */
-  public static double logLikelihood(double u, double x) {
-    if (x == 0) {
-      return -u;
-    }
-    return x * Math.log(u) - u - logFactorial(x);
-  }
-
-  /**
-   * Log factorial.
-   *
-   * @param k the k
-   * @return the double
-   */
-  private static double logFactorial(double k) {
-    if (k <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(k + 1);
+    return Gamma.gamma(value + 1);
   }
 
   /**
@@ -736,5 +708,33 @@ public class MLEGradientCalculator extends GradientCalculator {
       ll += logLikelihood(func.eval(i), x[i]);
     }
     return ll;
+  }
+
+  /**
+   * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
+   * must be positive.
+   *
+   * @param mean the mean
+   * @param x the x
+   * @return the log likelihood
+   */
+  public static double logLikelihood(double mean, double x) {
+    if (x == 0) {
+      return -mean;
+    }
+    return x * Math.log(mean) - mean - logFactorial(x);
+  }
+
+  /**
+   * Compute the log factorial of the value (log(value!)) using the gamma function.
+   *
+   * @param value the value
+   * @return the log factorial
+   */
+  private static double logFactorial(double value) {
+    if (value <= 1) {
+      return 0;
+    }
+    return Gamma.logGamma(value + 1);
   }
 }

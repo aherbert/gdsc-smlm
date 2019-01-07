@@ -1934,11 +1934,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   /**
    * Show histogram.
    *
-   * @param i the i
+   * @param index the index
    * @param histogram the spot histogram
    */
-  private void showHistogram(int i, double[] histogram) {
-    if (!displayHistograms[i]) {
+  private void showHistogram(int index, double[] histogram) {
+    if (!displayHistograms[index]) {
       return;
     }
     // Truncate to correct size
@@ -1948,7 +1948,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         break;
       }
     }
-    final String[] labels = NAMES[i].split(":");
+    final String[] labels = NAMES[index].split(":");
     final Plot2 plot = new Plot2(labels[0], labels[1], "Count");
     final double max = MathUtils.max(histogram);
     plot.setLimits(0, histogram.length, 0, max * 1.05);
@@ -1960,11 +1960,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Put the index on the jobs queue.
    *
    * @param jobs the jobs
-   * @param i the index
+   * @param index the index
    */
-  private static void put(BlockingQueue<Integer> jobs, int i) {
+  private static void put(BlockingQueue<Integer> jobs, int index) {
     try {
-      jobs.put(i);
+      jobs.put(index);
     } catch (final InterruptedException ex) {
       throw new RuntimeException("Unexpected interruption", ex);
     }
@@ -2161,7 +2161,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           .append('\t');
 
       if (showHistograms && displayHistograms[c + NAMES.length]) {
-        showHistogram(values, NAMES2[c]);
+        showCumulativeHistogram(values, NAMES2[c]);
       }
     }
 
@@ -2339,7 +2339,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @param values the values
    * @param xTitle The name of plotted statistic
    */
-  public void showHistogram(double[] values, String xTitle) {
+  private void showCumulativeHistogram(double[] values, String xTitle) {
     final double[][] h = MathUtils.cumulativeHistogram(values, false);
 
     final String title = TITLE + " " + xTitle + " Cumulative";

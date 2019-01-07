@@ -404,7 +404,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
   }
 
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
+  protected FisherInformationMatrix computeLastFisherInformationMatrix(double[] fx) {
     Gradient2Function f2 = (Gradient2Function) function;
     // Capture the y-values if necessary
     if (fx != null && fx.length == f2.size()) {

@@ -140,7 +140,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     double ll = 0;
     for (int i = 0; i < n; i++) {
       // Function now computes expected poisson mean without gain
-      double l = f.eval(i); // * alpha;
+      double l = function.eval(i); // * alpha;
 
       // Check for zero and return the worst likelihood score
       if (l <= 0) {
@@ -177,7 +177,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     final double[] dl_da = new double[nVariables];
     for (int i = 0; i < n; i++) {
       // Function now computes expected poisson mean without gain
-      double l = f.eval(i, dl_da); // * alpha;
+      double l = function.eval(i, dl_da); // * alpha;
 
       final double k = data[i];
 
@@ -209,7 +209,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
   @Override
   public double computeLikelihood(int i) {
     // Function now computes expected poisson mean without gain
-    double l = f.eval(i); // * alpha;
+    double l = function.eval(i); // * alpha;
 
     // Check for zero and return the worst likelihood score
     if (l <= 0) {
@@ -235,7 +235,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     }
     final double[] dl_da = new double[nVariables];
     // Function now computes expected poisson mean without gain
-    double l = f.eval(i, dl_da); // * alpha;
+    double l = function.eval(i, dl_da); // * alpha;
 
     // Check for zero and return the worst likelihood score
     if (l <= 0) {

@@ -141,9 +141,6 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
     }
     final StringBuilder sb = new StringBuilder();
     //@formatter:off
-    if (areSet(flags, V_AMPLITUDE)) {
-      append(sb, "Amplitude",        peak.getAmplitude());
-    }
     if (areSet(flags, V_PHOTONS)) {
       append(sb, "Signal",           peak.getSignal());
     }
@@ -205,15 +202,6 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
     return sb.toString();
   }
 
-  private static void append(StringBuilder sb, String name, double value) {
-    if (sb.length() != 0) {
-      sb.append("; ");
-    }
-    sb.append(name);
-    sb.append('=');
-    sb.append(value);
-  }
-
   /**
    * Generate a message using all flags that are set.
    *
@@ -226,9 +214,6 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
     }
     final StringBuilder sb = new StringBuilder();
     //@formatter:off
-    if (areSet(flags, V_AMPLITUDE)) {
-      append(sb, "Amplitude");
-    }
     if (areSet(flags, V_PHOTONS)) {
       append(sb, "Signal");
     }
@@ -290,6 +275,15 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
     return sb.toString();
   }
 
+  private static void append(StringBuilder sb, String name, double value) {
+    if (sb.length() != 0) {
+      sb.append("; ");
+    }
+    sb.append(name);
+    sb.append('=');
+    sb.append(value);
+  }
+
   private static void append(StringBuilder sb, String name) {
     if (sb.length() != 0) {
       sb.append("; ");
@@ -331,7 +325,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
    * @return the strength
    */
   public float computeStrength(double[] lower, double[] upper) {
-    double s = 0;
+    double strength = 0;
     final double[] p = getParameters();
     for (int i = 0; i < p.length; i++) {
       final double range = upper[i] - lower[i];
@@ -341,12 +335,12 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
       }
       final int o = lowerBoundOrientation(i);
       if (o < 0) {
-        s += (p[i] - lower[i]) / range;
+        strength += (p[i] - lower[i]) / range;
       } else if (o > 0) {
-        s += (upper[i] - p[i]) / range;
+        strength += (upper[i] - p[i]) / range;
       }
     }
-    return (float) s;
+    return (float) strength;
   }
 
   /**
@@ -368,10 +362,10 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
    * <p>This method does not check for null or if the other filter has a different number of
    * parameters.
    *
-   * @param o The other filter
+   * @param other The other filter
    * @return the count difference
    */
-  public int weakestUnsafe(DirectFilter o) {
+  public int weakestUnsafe(DirectFilter other) {
     // // This should not happen if used correctly
     // if (Float.isNaN(strength) || Float.isNaN(o.strength))
     // {
@@ -388,16 +382,16 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
 
     // int result = super.weakestUnsafe(o);
 
-    if (this.strength < o.strength) {
+    if (this.strength < other.strength) {
       // if (result >= 0)
       // System.out.println("Strength not same as weakest");
       return -1;
     }
-    if (this.strength > o.strength) {
+    if (this.strength > other.strength) {
       // if (result <= 0)
       // System.out.println("Strength not same as weakest");
       return 1;
     }
-    return super.weakestUnsafe(o);
+    return super.weakestUnsafe(other);
   }
 }

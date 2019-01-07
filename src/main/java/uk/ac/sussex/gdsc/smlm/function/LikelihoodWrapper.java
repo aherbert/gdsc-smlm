@@ -35,7 +35,7 @@ import java.util.Arrays;
  */
 public abstract class LikelihoodWrapper {
   /** The function. */
-  protected final NonLinearFunction f;
+  protected final NonLinearFunction function;
 
   /** The parameters. */
   protected final double[] a;
@@ -59,17 +59,17 @@ public abstract class LikelihoodWrapper {
    * parameters with gradient indices should be passed in to the functions to obtain the value (and
    * gradient).
    *
-   * @param f The function to be used to calculated the expected values
+   * @param function The function to be used to calculated the expected values
    * @param a The initial parameters for the function
    * @param k The observed values
    * @param n The number of observed values
    */
-  public LikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n) {
-    this.f = f;
+  public LikelihoodWrapper(NonLinearFunction function, double[] a, double[] k, int n) {
+    this.function = function;
     this.a = Arrays.copyOf(a, a.length);
     this.data = k;
     this.n = n;
-    nVariables = f.gradientIndices().length;
+    nVariables = function.gradientIndices().length;
   }
 
   /**
@@ -78,11 +78,11 @@ public abstract class LikelihoodWrapper {
    * @param variables the variables
    */
   protected void initialiseFunction(double[] variables) {
-    final int[] gradientIndices = f.gradientIndices();
+    final int[] gradientIndices = function.gradientIndices();
     for (int i = 0; i < gradientIndices.length; i++) {
       a[gradientIndices[i]] = variables[i];
     }
-    f.initialise(a);
+    function.initialise(a);
   }
 
   /**
@@ -118,7 +118,54 @@ public abstract class LikelihoodWrapper {
 
     initialiseFunction(variables);
     lastVariables = variables.clone();
-    return lastScore = computeLikelihood();
+    lastScore = computeLikelihood();
+    return lastScore;
+  }
+
+  /**
+   * Compute the negative log likelihood and the gradient. Returns positive infinity if the
+   * likelihood is zero at any point in the observed values. In this case the gradient computed is
+   * invalid.
+   *
+   * @param variables The variables of the function
+   * @param gradient The gradient (must be equal length to the variables array)
+   * @return The negative log likelihood
+   * @throws NotImplementedException If the sub-class cannot provide gradients
+   */
+  public double likelihood(double[] variables, double[] gradient) {
+    initialiseFunction(variables);
+    lastVariables = variables.clone();
+    lastScore = computeLikelihood(gradient);
+    return lastScore;
+  }
+
+  /**
+   * Compute the negative log likelihood at observed value index. Returns positive infinity if the
+   * likelihood is zero at the observed value.
+   *
+   * @param variables The variables of the function
+   * @param index Observed value index
+   * @return The negative log likelihood
+   */
+  public double likelihood(double[] variables, int index) {
+    initialiseFunction(variables);
+    return computeLikelihood(index);
+  }
+
+  /**
+   * Compute the negative log likelihood and gradient of the function at observed value index.
+   * Returns positive infinity if the likelihood is zero at the observed value. In this case the
+   * gradient computed will be invalid.
+   *
+   * @param variables The variables of the function
+   * @param gradient The gradient (must be equal length to the variables array)
+   * @param index Observed value index
+   * @return The negative log likelihood
+   * @throws NotImplementedException If the sub-class cannot provide gradients
+   */
+  public double likelihood(double[] variables, double[] gradient, int index) {
+    initialiseFunction(variables);
+    return computeLikelihood(gradient, index);
   }
 
   /**
@@ -136,86 +183,40 @@ public abstract class LikelihoodWrapper {
    * likelihood is zero at any point in the observed values. In this case the gradient computed is
    * invalid.
    *
-   * @param variables The variables of the function
-   * @param gradient The gradient (must be equal length to the variables array)
-   * @return The negative log likelihood
-   * @throws NotImplementedException If the sub-class cannot provide gradients
-   */
-  public double likelihood(double[] variables, double[] gradient) throws NotImplementedException {
-    initialiseFunction(variables);
-    lastVariables = variables.clone();
-    return lastScore = computeLikelihood(gradient);
-  }
-
-  /**
-   * Compute the negative log likelihood and the gradient. Returns positive infinity if the
-   * likelihood is zero at any point in the observed values. In this case the gradient computed is
-   * invalid.
-   *
    * <p>The wrapped NonLinearFunction will be correctly initialised before this function is called
    *
    * @param gradient The gradient (must be equal length to the variables array)
    * @return The negative log likelihood
    * @throws NotImplementedException If the sub-class cannot provide gradients
    */
-  protected double computeLikelihood(double[] gradient) throws NotImplementedException {
+  protected double computeLikelihood(double[] gradient) {
     throw new NotImplementedException();
   }
 
   /**
-   * Compute the negative log likelihood at observed value i. Returns positive infinity if the
-   * likelihood is zero at the observed value.
-   *
-   * @param variables The variables of the function
-   * @param i Observed value i
-   * @return The negative log likelihood
-   */
-  public double likelihood(double[] variables, int i) {
-    initialiseFunction(variables);
-    return computeLikelihood(i);
-  }
-
-  /**
-   * Compute the negative log likelihood at observed value i. Returns positive infinity if the
+   * Compute the negative log likelihood at observed value index. Returns positive infinity if the
    * likelihood is zero at the observed value.
    *
    * <p>The wrapped NonLinearFunction will be correctly initialised before this function is called
    *
-   * @param i Observed value i
+   * @param index Observed value index
    * @return The negative log likelihood
    */
-  protected abstract double computeLikelihood(int i);
+  protected abstract double computeLikelihood(int index);
 
   /**
-   * Compute the negative log likelihood and gradient of the function at observed value i. Returns
-   * positive infinity if the likelihood is zero at the observed value. In this case the gradient
-   * computed will be invalid.
-   *
-   * @param variables The variables of the function
-   * @param gradient The gradient (must be equal length to the variables array)
-   * @param i Observed value i
-   * @return The negative log likelihood
-   * @throws NotImplementedException If the sub-class cannot provide gradients
-   */
-  public double likelihood(double[] variables, double[] gradient, int i)
-      throws NotImplementedException {
-    initialiseFunction(variables);
-    return computeLikelihood(gradient, i);
-  }
-
-  /**
-   * Compute the negative log likelihood and gradient of the function at observed value i. Returns
-   * positive infinity if the likelihood is zero at the observed value. In this case the gradient
-   * computed will be invalid.
+   * Compute the negative log likelihood and gradient of the function at observed value index.
+   * Returns positive infinity if the likelihood is zero at the observed value. In this case the
+   * gradient computed will be invalid.
    *
    * <p>The wrapped NonLinearFunction will be correctly initialised before this function is called
    *
    * @param gradient The gradient (must be equal length to the variables array)
-   * @param i Observed value i
+   * @param index Observed value index
    * @return The negative log likelihood
    * @throws NotImplementedException If the sub-class cannot provide gradients
    */
-  protected double computeLikelihood(double[] gradient, int i) throws NotImplementedException {
+  protected double computeLikelihood(double[] gradient, int index) {
     throw new NotImplementedException();
   }
 
@@ -247,17 +248,17 @@ public abstract class LikelihoodWrapper {
   public double[][] fisherInformation(final double[] variables) {
     initialiseFunction(variables);
 
-    final double[] du_da = new double[nVariables];
+    final double[] duda = new double[nVariables];
 
     final double[][] I = new double[nVariables][nVariables];
 
     for (int k = 0; k < n; k++) {
-      final double uk = f.eval(k, du_da);
+      final double uk = function.eval(k, duda);
       final double yk = 1 / uk;
       for (int i = 0; i < nVariables; i++) {
-        final double du_dai = yk * du_da[i];
+        final double du_dai = yk * duda[i];
         for (int j = 0; j <= i; j++) {
-          I[i][j] += du_dai * du_da[j];
+          I[i][j] += du_dai * duda[j];
         }
       }
     }
@@ -301,7 +302,6 @@ public abstract class LikelihoodWrapper {
    * @return CRLB (or null if inversion failed)
    */
   public double[] crlb(final double[] variables, boolean allowReciprocal) {
-    final double[][] I = fisherInformation(variables);
-    return new FisherInformationMatrix(I).crlb(allowReciprocal);
+    return new FisherInformationMatrix(fisherInformation(variables)).crlb(allowReciprocal);
   }
 }

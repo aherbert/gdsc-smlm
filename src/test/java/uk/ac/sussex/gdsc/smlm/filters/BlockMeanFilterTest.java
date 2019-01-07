@@ -42,10 +42,10 @@ import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
 public class BlockMeanFilterTest extends AbstractFilterTest {
-  private final int InternalITER3 = 500;
-  private final int InternalITER = 50;
-  private final int ITER3 = 200;
-  private final int ITER = 20;
+  private static final int InternalITER3 = 500;
+  private static final int InternalITER = 50;
+  private static final int ITER3 = 200;
+  private static final int ITER = 20;
 
   /**
    * Do a simple and stupid mean filter.
@@ -129,12 +129,13 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
    * Do a simple and stupid mean filter with weights.
    *
    * @param data the data
-   * @param w the weights
+   * @param weights the weights
    * @param maxx the maxx
    * @param maxy the maxy
    * @param boxSize the box size
    */
-  public static void weightedMean(float[] data, float[] w, int maxx, int maxy, float boxSize) {
+  public static void weightedMean(float[] data, float[] weights, int maxx, int maxy,
+      float boxSize) {
     if (boxSize <= 0) {
       return;
     }
@@ -170,7 +171,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
               xxx = maxx - 1;
             }
             final int index = yyy * maxx + xxx;
-            final double w2 = w[index] * weight[yy] * weight[xx];
+            final double w2 = weights[index] * weight[yy] * weight[xx];
             sum += data[index] * w2;
             norm += w2;
           }
@@ -189,11 +190,11 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
       super(name, isInterpolated);
     }
 
-    BlockMeanFilter f = new BlockMeanFilter();
+    BlockMeanFilter filter = new BlockMeanFilter();
 
     @Override
-    public void setWeights(float[] w, int width, int height) {
-      f.setWeights(w, width, height);
+    public void setWeights(float[] weights, int width, int height) {
+      filter.setWeights(weights, width, height);
     }
   }
 
@@ -215,13 +216,13 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     }
   }
 
-  private static void weightedMeanIsCorrect(float[] data, float[] w, int width, int height,
+  private static void weightedMeanIsCorrect(float[] data, float[] weights, int width, int height,
       float boxSize, boolean internal, BlockMeanDataFilter filter) {
     final float[] data1 = data.clone();
     final float[] data2 = data.clone();
     final FloatEquality eq = new FloatEquality(1e-3f, 1e-10f);
 
-    weightedMean(data1, w, width, height, boxSize);
+    weightedMean(data1, weights, width, height, boxSize);
 
     //// Check the weights do not alter the image mean
     // double u1 = Maths.sum(data) / data.length;
@@ -249,7 +250,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
       for (final int height : primes) {
         final float[] data = createData(rg, width, height);
 
-        filter.f.setWeights(null, 0, 0);
+        filter.filter.setWeights(null, 0, 0);
         for (final float boxSize : boxSizes) {
           for (final boolean internal : checkInternal) {
             meanIsCorrect(data, width, height, boxSize, internal, filter);
@@ -263,7 +264,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
         // Uniform weights
         final float[] w = new float[width * height];
         Arrays.fill(w, 1);
-        filter.f.setWeights(w, width, height);
+        filter.filter.setWeights(w, width, height);
         for (final float boxSize : boxSizes) {
           for (final boolean internal : checkInternal) {
             weightedMeanIsCorrect(data, w, width, height, boxSize, internal, filter);
@@ -279,7 +280,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
           w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
         }
 
-        filter.f.setWeights(w, width, height);
+        filter.filter.setWeights(w, width, height);
         for (final float boxSize : boxSizes) {
           for (final boolean internal : checkInternal) {
             weightedMeanIsCorrect(data, w, width, height, boxSize, internal, filter);
@@ -298,12 +299,12 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter filter = new BlockMeanDataFilter("block", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, boxSize);
+        filter.blockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, boxSize);
+        filter.blockFilterInternal(data, width, height, boxSize);
       }
     };
     checkIsCorrect(seed, filter);
@@ -314,12 +315,12 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter filter = new BlockMeanDataFilter("stripedBlock", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, boxSize);
+        filter.stripedBlockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, boxSize);
       }
     };
     checkIsCorrect(seed, filter);
@@ -330,12 +331,12 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter filter = new BlockMeanDataFilter("rollingBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilter(data, width, height, (int) boxSize);
+        filter.rollingBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     checkIsCorrect(seed, filter);
@@ -500,23 +501,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("block", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, (int) boxSize);
+        filter.blockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, (int) boxSize);
+        filter.blockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, (int) boxSize);
+        filter.stripedBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
 
@@ -530,23 +531,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("block", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, boxSize);
+        filter.blockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, boxSize);
+        filter.blockFilterInternal(data, width, height, boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, boxSize);
+        filter.stripedBlockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, boxSize);
       }
     };
 
@@ -560,23 +561,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("block", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, (int) boxSize);
+        filter.blockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, (int) boxSize);
+        filter.blockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("rollingBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilter(data, width, height, (int) boxSize);
+        filter.rollingBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
 
@@ -590,23 +591,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, (int) boxSize);
+        filter.stripedBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("rollingBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilter(data, width, height, (int) boxSize);
+        filter.rollingBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
 
@@ -620,23 +621,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock3x3", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3(data, width, height);
+        filter.stripedBlockFilter3x3(data, width, height);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3Internal(data, width, height);
+        filter.stripedBlockFilter3x3Internal(data, width, height);
       }
     };
 
@@ -651,23 +652,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock3x3", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3(data, width, height, boxSize);
+        filter.stripedBlockFilter3x3(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3Internal(data, width, height, boxSize);
+        filter.stripedBlockFilter3x3Internal(data, width, height, boxSize);
       }
     };
 
@@ -682,23 +683,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock5x5", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5(data, width, height);
+        filter.stripedBlockFilter5x5(data, width, height);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5Internal(data, width, height);
+        filter.stripedBlockFilter5x5Internal(data, width, height);
       }
     };
 
@@ -713,23 +714,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock5x5", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5(data, width, height, boxSize);
+        filter.stripedBlockFilter5x5(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5Internal(data, width, height, boxSize);
+        filter.stripedBlockFilter5x5Internal(data, width, height, boxSize);
       }
     };
 
@@ -744,23 +745,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock7x7", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7(data, width, height);
+        filter.stripedBlockFilter7x7(data, width, height);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7Internal(data, width, height);
+        filter.stripedBlockFilter7x7Internal(data, width, height);
       }
     };
 
@@ -775,23 +776,23 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     final BlockMeanDataFilter slow = new BlockMeanDataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, boxSize);
       }
     };
     final BlockMeanDataFilter fast = new BlockMeanDataFilter("stripedBlock7x7", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7(data, width, height, boxSize);
+        filter.stripedBlockFilter7x7(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7Internal(data, width, height, boxSize);
+        filter.stripedBlockFilter7x7Internal(data, width, height, boxSize);
       }
     };
 

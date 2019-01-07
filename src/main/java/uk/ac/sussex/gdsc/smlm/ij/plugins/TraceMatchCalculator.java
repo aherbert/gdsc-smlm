@@ -376,7 +376,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     final Pulse p1 = (Pulse) pair.getPoint1();
     final Pulse p2 = (Pulse) pair.getPoint2();
     addPoint(sb, p1);
-    addResult(sb, p1, p2);
+    addPointPairResult(sb, p1, p2);
     pairsWindow.append(sb.toString());
   }
 
@@ -442,12 +442,12 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     final Pulse p2 = triple.p2;
     final Pulse p3 = triple.p3;
     addPoint(sb, p1);
-    addResult(sb, p1, p2);
-    addResult(sb, p1, p3);
+    addPointPairResult(sb, p1, p2);
+    addPointPairResult(sb, p1, p3);
     triplesWindow.append(sb.toString());
   }
 
-  private static void addResult(StringBuilder sb, Pulse p1, Pulse p2) {
+  private static void addPointPairResult(StringBuilder sb, Pulse p1, Pulse p2) {
     addPoint(sb, p2);
     final PointPair pair = new PointPair(p1, p2);
     final double d = pair.getXyDistance();

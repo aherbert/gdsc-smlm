@@ -416,7 +416,7 @@ public class CMOSAnalysis implements PlugIn {
       return;
     }
 
-    run();
+    runAnalysis();
 
     if (simulationImp == null) {
       // Just in case an old simulation is in the directory
@@ -636,7 +636,7 @@ public class CMOSAnalysis implements PlugIn {
     return true;
   }
 
-  private void run() {
+  private void runAnalysis() {
     final long start = System.currentTimeMillis();
 
     final TrackProgress trackProgress2 = new ImageJTrackProgress();

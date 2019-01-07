@@ -199,28 +199,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   static final String TITLE = "Create Data";
   private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
-  private static String[] ILLUMINATION = {"Uniform", "Radial"};
-  private static int RADIAL = 1;
-  private static String[] DISTRIBUTION =
+  private static final String[] ILLUMINATION = {"Uniform", "Radial"};
+  private static final int RADIAL = 1;
+  private static final String[] DISTRIBUTION =
       {"Uniform RNG", "Uniform Halton", "Uniform Sobol", "Mask", "Grid"};
-  // private static int UNIFORM = 0;
-  private static int UNIFORM_HALTON = 1;
-  private static int UNIFORM_SOBOL = 2;
-  private static int MASK = 3;
-  private static int GRID = 4;
-  private static String[] CONFINEMENT = {"None", "Mask", "Sphere", "Within Image"};
-  private static int CONFINEMENT_MASK = 1;
-  private static int CONFINEMENT_SPHERE = 2;
-  private static int CONFINEMENT_WITHIN_IMAGE = 3;
-  private static String[] PHOTON_DISTRIBUTION =
+  private static final int UNIFORM_HALTON = 1;
+  private static final int UNIFORM_SOBOL = 2;
+  private static final int MASK = 3;
+  private static final int GRID = 4;
+  private static final String[] CONFINEMENT = {"None", "Mask", "Sphere", "Within Image"};
+  private static final int CONFINEMENT_MASK = 1;
+  private static final int CONFINEMENT_SPHERE = 2;
+  private static final int CONFINEMENT_WITHIN_IMAGE = 3;
+  private static final String[] PHOTON_DISTRIBUTION =
       {"Uniform", "Gamma", "Custom", "Fixed", "Correlated"};
-  private static int PHOTON_UNIFORM;
-  private static int PHOTON_GAMMA = 1;
-  private static int PHOTON_CUSTOM = 2;
-  private static int PHOTON_FIXED = 3;
-  private static int PHOTON_CORRELATED = 4;
+  private static final int PHOTON_UNIFORM = 0;
+  private static final int PHOTON_GAMMA = 1;
+  private static final int PHOTON_CUSTOM = 2;
+  private static final int PHOTON_FIXED = 3;
+  private static final int PHOTON_CORRELATED = 4;
 
-  private static String[] PSF_MODELS = new String[] {"2D Gaussian", "Airy", "Image", "Astigmatism"};
+  private static final String[] PSF_MODELS =
+      new String[] {"2D Gaussian", "Airy", "Image", "Astigmatism"};
   private static final int PSF_MODEL_GAUSSIAN = 0;
   private static final int PSF_MODEL_AIRY = 1;
   private static final int PSF_MODEL_IMAGE = 2;
@@ -299,10 +299,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
   private String resultsFileHeader;
   private AtomicInteger photonsRemoved;
-  private AtomicInteger t1Removed;
-  private AtomicInteger tNRemoved;
+  private AtomicInteger t1removed;
+  private AtomicInteger tNremoved;
   private SummaryStatistics photonStats;
-  // private boolean imagePSF;
   private double hwhm;
   private PSF psf;
 
@@ -1159,7 +1158,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
       // Report and store the limits
       final double[] crlb = m.crlbSqrt();
-      // System.out.println(m);
       if (crlb != null) {
         ImageJUtils.log("Localisation precision (CRLB): B=%s, I=%s photons",
             MathUtils.rounded(crlb[0]), MathUtils.rounded(crlb[1]));
@@ -2123,8 +2121,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     List<LocalisationModelSet> newLocalisations =
         Collections.synchronizedList(new ArrayList<LocalisationModelSet>(localisationSets.size()));
     photonsRemoved = new AtomicInteger();
-    t1Removed = new AtomicInteger();
-    tNRemoved = new AtomicInteger();
+    t1removed = new AtomicInteger();
+    tNremoved = new AtomicInteger();
     photonStats = new SummaryStatistics();
 
     // Add drawn spots to memory
@@ -2241,12 +2239,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       ImageJUtils.log("Removed %d localisations with less than %.1f rendered photons",
           photonsRemoved.get(), settings.getMinPhotons());
     }
-    if (t1Removed.get() > 0) {
-      ImageJUtils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(),
+    if (t1removed.get() > 0) {
+      ImageJUtils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1removed.get(),
           settings.getMinSnrT1());
     }
-    if (tNRemoved.get() > 0) {
-      ImageJUtils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(),
+    if (tNremoved.get() > 0) {
+      ImageJUtils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNremoved.get(),
           settings.getMinSnrTN());
     }
     if (photonStats.getN() > 0) {
@@ -2454,7 +2452,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       final float[][] image = extractImageStack(imp, lower, upper);
       final ImagePSFModel model = new ImagePSFModel(image, zCentre - lower,
           psfSettings.getPixelSize() / settings.getPixelPitch(), unitsPerSlice,
-          psfSettings.getFwhm(), noiseFraction);
+          noiseFraction);
 
       // Add the calibrated centres. The map will not be null
       final Map<Integer, Offset> map = psfSettings.getOffsetsMap();
@@ -3109,7 +3107,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       double noise) {
     // Set the minimum SNR for either a single spot or for a spot next to a brighter neighbour
     double minSNR = settings.getMinSnrT1();
-    AtomicInteger counter = t1Removed;
+    AtomicInteger counter = t1removed;
 
     if (localisationSet.hasNeighbour()) {
       final double nextIntensity = getIntensity(localisationSet.getNext());
@@ -3119,7 +3117,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       if (Math.max(nextIntensity, previousIntensity) / noise > settings.getMinSnrT1()) {
         // If neighbours are bright then use a more lenient threshold
         minSNR = settings.getMinSnrTN();
-        counter = tNRemoved;
+        counter = tNremoved;
       }
     }
 
@@ -4144,7 +4142,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         }
       }
       addHeaderLine(sb, "Background", settings.getBackground());
-      addCameraOptions(sb);
+      addCameraOptionsHeader(sb);
       addHeaderLine(sb, "PSF_model", settings.getPsfModel());
       if (psfModelType == PSF_MODEL_IMAGE) {
         addHeaderLine(sb, "PSF_image", settings.getPsfImageName());
@@ -4556,7 +4554,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     }
   }
 
-  private void addCameraOptions(StringBuilder sb) {
+  private void addCameraOptionsHeader(StringBuilder sb) {
     final CameraType cameraType = settings.getCameraType();
     final boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
     if (isCCD) {

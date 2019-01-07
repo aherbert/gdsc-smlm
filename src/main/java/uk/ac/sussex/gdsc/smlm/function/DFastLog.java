@@ -47,7 +47,7 @@ public class DFastLog extends FastLog {
   /** The number of bits to remove from a float mantissa. */
   private final int q;
   /** (q-1). */
-  private final int q_minus_1;
+  private final int qm1;
   /**
    * The table of the log2 value of binary number 1.0000... to 1.1111...., depending on the
    * precision. The table has had the float bias (1023) and mantissa size (52) pre-subtracted (i.e.
@@ -90,13 +90,13 @@ public class DFastLog extends FastLog {
     if (n < 0 || n > 30) {
       throw new IllegalArgumentException("N must be in the range 0<=n<=30");
     }
-    scale = (float) getScale(base);
+    scale = (float) computeScale(base);
     this.base = base;
 
     final int size = 1 << (n + 1);
 
     q = 52 - n;
-    q_minus_1 = q - 1;
+    qm1 = q - 1;
     data = new float[size];
 
     for (int i = 0; i < size; i++) {
@@ -173,8 +173,19 @@ public class DFastLog extends FastLog {
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
 
-    return (e == 0 ? data[(int) (m >>> q_minus_1)]
+    return (e == 0 ? data[(int) (m >>> qm1)]
         : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>This just calls {@link #log2(double)}. Use {@link FFastLog} for a dedicated
+   * {@code float version}.
+   */
+  @Override
+  public float log2(float x) {
+    return log2((double) x);
   }
 
   /**
@@ -193,8 +204,19 @@ public class DFastLog extends FastLog {
     final long bits = Double.doubleToRawLongBits(x);
     final int e = (int) ((bits >>> 52) & 0x7ffL);
     final long m = (bits & 0xfffffffffffffL);
-    return (e == 0 ? data[(int) (m >>> q_minus_1)]
+    return (e == 0 ? data[(int) (m >>> qm1)]
         : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>This just calls {@link #fastLog2(double)}. Use {@link FFastLog} for a dedicated
+   * {@code float version}.
+   */
+  @Override
+  public float fastLog2(float x) {
+    return fastLog2((double) x);
   }
 
   @Override
@@ -211,8 +233,19 @@ public class DFastLog extends FastLog {
     if ((bits >> 63) != 0L) {
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
-    return (e == 0 ? data[(int) (m >>> q_minus_1)]
+    return (e == 0 ? data[(int) (m >>> qm1)]
         : e + data[(int) ((m | 0x10000000000000L) >>> q)]) * scale;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>This just calls {@link #log(double)}. Use {@link FFastLog} for a dedicated
+   * {@code float version}.
+   */
+  @Override
+  public float log(float x) {
+    return log((double) x);
   }
 
   /**
@@ -232,27 +265,16 @@ public class DFastLog extends FastLog {
     final long bits = Double.doubleToRawLongBits(x);
     final int e = (int) ((bits >>> 52) & 0x7ffL);
     final long m = (bits & 0xfffffffffffffL);
-    return (e == 0 ? data[(int) (m >>> q_minus_1)]
+    return (e == 0 ? data[(int) (m >>> qm1)]
         : e + data[(int) ((m | 0x10000000000000L) >>> q)]) * scale;
   }
 
-  // Don't bother with float versions. Use FFastLog instead.
-
-  @Override
-  public float log2(float x) {
-    return log2((double) x);
-  }
-
-  @Override
-  public float fastLog2(float x) {
-    return fastLog2((double) x);
-  }
-
-  @Override
-  public float log(float x) {
-    return log((double) x);
-  }
-
+  /**
+   * {@inheritDoc}
+   *
+   * <p>This just calls {@link #fastLog(double)}. Use {@link FFastLog} for a dedicated
+   * {@code float version}.
+   */
   @Override
   public float fastLog(float x) {
     return fastLog((double) x);

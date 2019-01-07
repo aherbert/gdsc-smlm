@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
@@ -50,7 +50,6 @@ import java.util.Arrays;
 public class ImagePSFModel extends PSFModel {
   /** The default noise fraction. */
   public static final double DEFAULT_NOISE_FRACTION = 5e-2;
-  private static final boolean COM_CHECK = false;
 
   private double[][] sumImage;
   private double[][] cumulativeImage;
@@ -61,7 +60,22 @@ public class ImagePSFModel extends PSFModel {
   private double unitsPerSlice;
   private double[] hwhm0;
   private double[] hwhm1;
+
+  /** The slice for the last drawn image. */
   private int lastSlice;
+
+  /**
+   * Construct the ImagePSF.
+   *
+   * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
+   *        YX order.
+   * @param zCentre The centre of the PSF image
+   * @param unitsPerPixel The distance between adjacent X/Y pixels
+   * @param unitsPerSlice The distance between adjacent Z pixels
+   */
+  public ImagePSFModel(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice) {
+    this(image, zCentre, unitsPerPixel, unitsPerSlice, DEFAULT_NOISE_FRACTION);
+  }
 
   /**
    * Construct the ImagePSF.
@@ -74,39 +88,66 @@ public class ImagePSFModel extends PSFModel {
    * @param zCentre The centre of the PSF image
    * @param unitsPerPixel The distance between adjacent X/Y pixels
    * @param unitsPerSlice The distance between adjacent Z pixels
-   * @param fwhm The full-width at half-maximum for the z-centre
    * @param noiseFraction The noise fraction
    */
   public ImagePSFModel(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice,
-      double fwhm, double noiseFraction) {
+      double noiseFraction) {
     super();
-    init(image, zCentre, unitsPerPixel, unitsPerSlice, fwhm, noiseFraction);
+    init(image, zCentre, unitsPerPixel, unitsPerSlice, noiseFraction);
   }
 
   /**
-   * Construct the ImagePSF.
+   * Instantiates a new image PSF model.
    *
+   * @param randomGenerator the random generator
    * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
    *        YX order.
    * @param zCentre The centre of the PSF image
    * @param unitsPerPixel The distance between adjacent X/Y pixels
    * @param unitsPerSlice The distance between adjacent Z pixels
-   * @param fwhm The full-width at half-maximum for the z-centre
    */
-  public ImagePSFModel(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice,
-      double fwhm) {
-    this(image, zCentre, unitsPerPixel, unitsPerSlice, fwhm, DEFAULT_NOISE_FRACTION);
+  public ImagePSFModel(RandomGenerator randomGenerator, float[][] image, int zCentre,
+      double unitsPerPixel, double unitsPerSlice) {
+    super(randomGenerator);
+    init(image, zCentre, unitsPerPixel, unitsPerSlice, DEFAULT_NOISE_FRACTION);
   }
 
   /**
-   * Private constructor used in the {@link #copy()} method.
+   * Instantiates a new image PSF model.
+   *
+   * @param randomDataGenerator the random data generator
+   * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
+   *        YX order.
+   * @param zCentre The centre of the PSF image
+   * @param unitsPerPixel The distance between adjacent X/Y pixels
+   * @param unitsPerSlice The distance between adjacent Z pixels
    */
-  private ImagePSFModel() {
+  public ImagePSFModel(RandomDataGenerator randomDataGenerator, float[][] image, int zCentre,
+      double unitsPerPixel, double unitsPerSlice) {
+    super(randomDataGenerator);
+    init(image, zCentre, unitsPerPixel, unitsPerSlice, DEFAULT_NOISE_FRACTION);
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  private ImagePSFModel(ImagePSFModel source) {
     super();
+    this.sumImage = source.sumImage;
+    this.cumulativeImage = source.cumulativeImage;
+    this.psfWidth = source.psfWidth;
+    this.xyCentre = source.xyCentre;
+    this.zCentre = source.zCentre;
+    this.unitsPerPixel = source.unitsPerPixel;
+    this.unitsPerSlice = source.unitsPerSlice;
+    this.hwhm0 = source.hwhm0;
+    this.hwhm1 = source.hwhm1;
   }
 
   private void init(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice,
-      double fwhm, double noiseFraction) {
+      double noiseFraction) {
     if (image == null || image.length == 0) {
       throw new IllegalArgumentException("Image cannot be null/empty");
     }
@@ -149,50 +190,13 @@ public class ImagePSFModel extends PSFModel {
     this.sumImage = duplicate(image);
 
     if (noiseFraction > 0) {
-      // double[] scratch = new double[size];
       for (int i = 0; i < sumImage.length; i++) {
-        // subtractNoise(sumImage[i], scratch, noiseFraction);
         subtractNoise(sumImage[i], noiseFraction);
       }
     }
 
-    // Debugging display
-    // Utils.display("floor", sumImage, psfWidth, psfWidth);
-
     // Normalise so that the highest intensity frame sums to 1.
     normalise(this.sumImage);
-
-    // Debugging display
-    // Utils.display("norm", sumImage, psfWidth, psfWidth);
-
-    // Used for debugging
-    if (COM_CHECK) {
-      // Find X/Y centre using centre of mass
-      double sx = 0;
-      double sy = 0;
-      double s = 0;
-      final double[] data = sumImage[zCentre];
-      final double cx = xyCentre[zCentre][0];
-      final double cy = xyCentre[zCentre][1];
-      for (int y = 0; y < psfWidth; y++) {
-        if (Math.abs(y + 0.5 - cy) > fwhm) {
-          continue;
-        }
-        for (int x = 0, j = y * psfWidth; x < psfWidth; x++, j++) {
-          if (Math.abs(x + 0.5 - cx) > fwhm) {
-            continue;
-          }
-          // Centre in middle of pixel
-          sx += (x + 0.5) * data[j];
-          sy += (y + 0.5) * data[j];
-          s += data[j];
-        }
-      }
-      sx = sx / s - cx;
-      sy = sy / s - cy;
-      System.out.printf("%dx%d centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy,
-          sx / unitsPerPixel, sy / unitsPerPixel);
-    }
 
     // Create a cumulative sum image
     cumulativeImage = new double[sumImage.length][];
@@ -200,59 +204,9 @@ public class ImagePSFModel extends PSFModel {
       cumulativeImage[i] = calculateCumulativeImage(sumImage[i]);
     }
 
-    // Debugging display
-    // Utils.display("cum", cumulativeImage, psfWidth, psfWidth);
-
     // Then create a rolling sum table
     for (int i = 0; i < sumImage.length; i++) {
       calculateRollingSums(sumImage[i]);
-    }
-  }
-
-  /**
-   * The noise fraction parameter can specify how to remove noise. Pixels are sorted in descending
-   * order and cumulatively summed. All pixels below the fraction of the total sum are set to zero.
-   * The remaining pixels are normalised to 1 to create a PDF for the image.
-   *
-   * @param image the image
-   * @param scratch the scratch
-   * @param noiseFraction the noise fraction
-   */
-  @SuppressWarnings("unused")
-  private static void subtractNoise(double[] image, double[] scratch, double noiseFraction) {
-    // Sort ascending and store the original indices
-    double sum = 0;
-    for (int i = 0; i < image.length; i++) {
-      sum += image[i];
-      scratch[i] = image[i];
-    }
-    Arrays.sort(scratch);
-    SimpleArrayUtils.reverse(scratch);
-    // Find the cut-off using the sum and the noise fraction
-    final double cutoff = sum - noiseFraction * sum;
-    sum = 0;
-    int cut = -1;
-    for (int i = 0; i < image.length; i++) {
-      sum += scratch[i];
-      if (sum > cutoff) {
-        // We will zero all pixels after the cut-off that have a lower pixel value
-        cut = i;
-        while (cut < image.length && scratch[i] == scratch[cut]) {
-          cut++;
-        }
-        break;
-      }
-    }
-    System.out.printf("Cut = %d, cutoff = %f\n", cut, cutoff);
-    if (cut == -1) {
-      return;
-    }
-    // All pixels to be included must subtract the noise floor.
-    // All pixels below the noise floor are zeroed.
-    final double floor = scratch[cut];
-    for (int i = 0; i < image.length; i++) {
-      final double newValue = image[i] - floor;
-      image[i] = (newValue > 0) ? newValue : 0;
     }
   }
 
@@ -326,7 +280,7 @@ public class ImagePSFModel extends PSFModel {
 
     double max = 0;
     for (int i = 0; i < image.length; i++) {
-      max = FastMath.max(max, sum(image[i]));
+      max = FastMath.max(max, MathUtils.sum(image[i]));
     }
 
     if (max <= 0) {
@@ -341,40 +295,13 @@ public class ImagePSFModel extends PSFModel {
     }
   }
 
-  private static double sum(double[] data) {
-    double sum = 0;
-    for (final double f : data) {
-      sum += f;
-    }
-    return sum;
-  }
-
   private static double[] calculateCumulativeImage(double[] s) {
-    final boolean normalised = true;
     final double[] c = new double[s.length + 1];
-    if (normalised) {
-      // Normalised image as input
-      double sum = 0;
-      for (int i = 0; i < s.length; i++) {
-        sum += s[i];
-        c[i + 1] = sum;
-      }
-    } else {
-      // Normalise as we go
-      final int n = s.length;
-      double mean = 0;
-      double sum = 0;
-
-      for (int i = 0; i < n; i++) {
-        mean += (s[i] - mean) / (i + 1);
-      }
-
-      c[0] = 0;
-
-      for (int i = 0; i < n; i++) {
-        sum += (s[i] / mean) / n;
-        c[i + 1] = sum;
-      }
+    // Assume normalised image as input
+    double sum = 0;
+    for (int i = 0; i < s.length; i++) {
+      sum += s[i];
+      c[i + 1] = sum;
     }
     return c;
   }
@@ -405,40 +332,6 @@ public class ImagePSFModel extends PSFModel {
         s[i] = (s[i - maxx] + cs);
       }
     }
-  }
-
-  /**
-   * Instantiates a new image PSF model.
-   *
-   * @param randomGenerator the random generator
-   * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
-   *        YX order.
-   * @param zCentre The centre of the PSF image
-   * @param unitsPerPixel The distance between adjacent X/Y pixels
-   * @param unitsPerSlice The distance between adjacent Z pixels
-   * @param fwhm The full-width at half-maximum for the z-centre
-   */
-  public ImagePSFModel(RandomGenerator randomGenerator, float[][] image, int zCentre,
-      double unitsPerPixel, double unitsPerSlice, double fwhm) {
-    super(randomGenerator);
-    init(image, zCentre, unitsPerPixel, unitsPerSlice, fwhm, DEFAULT_NOISE_FRACTION);
-  }
-
-  /**
-   * Instantiates a new image PSF model.
-   *
-   * @param randomDataGenerator the random data generator
-   * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
-   *        YX order.
-   * @param zCentre The centre of the PSF image
-   * @param unitsPerPixel The distance between adjacent X/Y pixels
-   * @param unitsPerSlice The distance between adjacent Z pixels
-   * @param fwhm The full-width at half-maximum for the z-centre
-   */
-  public ImagePSFModel(RandomDataGenerator randomDataGenerator, float[][] image, int zCentre,
-      double unitsPerPixel, double unitsPerSlice, double fwhm) {
-    super(randomDataGenerator);
-    init(image, zCentre, unitsPerPixel, unitsPerSlice, fwhm, DEFAULT_NOISE_FRACTION);
   }
 
   /** {@inheritDoc} */
@@ -819,17 +712,7 @@ public class ImagePSFModel extends PSFModel {
   /** {@inheritDoc} */
   @Override
   public ImagePSFModel copy() {
-    final ImagePSFModel model = new ImagePSFModel();
-    model.sumImage = sumImage;
-    model.cumulativeImage = cumulativeImage;
-    model.psfWidth = psfWidth;
-    model.xyCentre = xyCentre;
-    model.zCentre = zCentre;
-    model.unitsPerPixel = unitsPerPixel;
-    model.unitsPerSlice = unitsPerSlice;
-    model.hwhm0 = hwhm0;
-    model.hwhm1 = hwhm1;
-    return model;
+    return new ImagePSFModel(this);
   }
 
   @Override
@@ -866,40 +749,6 @@ public class ImagePSFModel extends PSFModel {
     randomX = rand.getRandomGenerator();
     randomY = rand.getRandomGenerator();
 
-    //// Debugging - Use a uniform distribution to sample x
-    // randomX = new AbstractRandomGenerator()
-    // {
-    // int pos = 0;
-    //
-    // @Override
-    // public double nextDouble()
-    // {
-    // double p = (double) pos / n;
-    // if (pos++ >= n)
-    // pos = 0;
-    // return p;
-    // }
-    //
-    // @Override
-    // public void setSeed(long seed)
-    // {
-    // pos = Math.abs((int) seed) % n;
-    // }
-    // };
-    //// Debugging - Use a fixed distribution to sample y
-    // randomY = new AbstractRandomGenerator()
-    // {
-    // public double nextDouble()
-    // {
-    // return 0.5;
-    // }
-    //
-    // @Override
-    // public void setSeed(long seed)
-    // {
-    // }
-    // };
-
     // Ensure the generated index is adjusted to the correct position
     // The index will be generated at 0,0 of a pixel in the PSF image.
     // We must subtract the PSF centre so that the middle coords are zero.
@@ -913,9 +762,6 @@ public class ImagePSFModel extends PSFModel {
     double[] x = new double[n];
     double[] y = new double[n];
     int count = 0;
-    double sx = 0;
-    double sy = 0;
-    double s = 0;
     for (int i = 0; i < n; i++) {
       final double p = randomX.nextDouble();
       // If outside the observed PSF then skip
@@ -930,23 +776,9 @@ public class ImagePSFModel extends PSFModel {
       // Add random dither within pixel for y
       final double yi = randomY.nextDouble() + (index / psfWidth);
 
-      if (COM_CHECK) {
-        final double v = 1;
-        sx += xi * v;
-        sy += yi * v;
-        s += v;
-      }
-
       x[count] = x0 + (xi * this.unitsPerPixel);
       y[count] = x1 + (yi * this.unitsPerPixel);
       count++;
-    }
-
-    if (COM_CHECK) {
-      sx = sx / s - xyCentre[slice][0];
-      sy = sy / s - xyCentre[slice][1];
-      System.out.printf("%dx%d sample centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy,
-          sx / unitsPerPixel, sy / unitsPerPixel);
     }
 
     x = Arrays.copyOf(x, count);
@@ -976,8 +808,7 @@ public class ImagePSFModel extends PSFModel {
     int lower = 0;
 
     while (upper - lower > 1) {
-      // final int mid = (upper + lower) / 2;
-      final int mid = upper + lower >>> 1;
+      final int mid = (upper + lower) / 2;
 
       if (p >= sum[mid]) {
         lower = mid;

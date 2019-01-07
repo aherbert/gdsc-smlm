@@ -99,7 +99,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -108,6 +107,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -120,8 +121,8 @@ import javax.swing.event.ListSelectionListener;
  * Allows analysis of the signal and on/off times for fixed fluorophore spots in an image stack.
  */
 public class SpotAnalysis extends PlugInFrame
-    implements ActionListener, ItemListener, Runnable, ListSelectionListener {
-  private static final long serialVersionUID = 1L;
+    implements ActionListener, ItemListener, ListSelectionListener {
+  private static final long serialVersionUID = 20190108L;
 
   private static final String PLUGIN_TITLE = "Spot Analysis";
 
@@ -156,12 +157,8 @@ public class SpotAnalysis extends PlugInFrame
   @SuppressWarnings("rawtypes")
   private JList onFramesList;
 
-  // private final int fontWidth = 12;
-  // private final Font monoFont = new Font("Monospaced", 0, fontWidth);
-
   private static final String OPT_LOCATION = "CT.location";
 
-  // private ImageJ ij;
   private int runMode;
   private ImagePlus imp;
   private ImagePlus rawImp;
@@ -186,7 +183,7 @@ public class SpotAnalysis extends PlugInFrame
   private boolean updated;
   private int blurCount;
 
-  private final Object runLock = new Object();
+  private final transient Object runLock = new Object();
 
   // Stores the list of images last used in the selection options
   private ArrayList<String> imageList = new ArrayList<>();
@@ -359,8 +356,7 @@ public class SpotAnalysis extends PlugInFrame
   }
 
   private void setup() {
-    final ImagePlus imp = WindowManager.getCurrentImage();
-    if (imp == null) {
+    if (WindowManager.getCurrentImage() == null) {
       return;
     }
     fillImagesList();
@@ -370,21 +366,18 @@ public class SpotAnalysis extends PlugInFrame
     // Find the currently open images
     final ArrayList<String> newImageList = new ArrayList<>();
 
-    final int[] idList = WindowManager.getIDList();
-    if (idList != null) {
-      for (final int id : idList) {
-        final ImagePlus imp = WindowManager.getImage(id);
+    for (final int id : ImageJUtils.getIdList()) {
+      final ImagePlus imp = WindowManager.getImage(id);
 
-        // Image must be greyscale stacks
-        if (imp != null && (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16
-            || imp.getType() == ImagePlus.GRAY32) && imp.getStackSize() > 2) {
-          // Exclude previous results
-          if (previousResult(imp.getTitle())) {
-            continue;
-          }
-
-          newImageList.add(imp.getTitle());
+      // Image must be greyscale stacks
+      if (imp != null && (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16
+          || imp.getType() == ImagePlus.GRAY32) && imp.getStackSize() > 2) {
+        // Exclude previous results
+        if (previousResult(imp.getTitle())) {
+          continue;
         }
+
+        newImageList.add(imp.getTitle());
       }
     }
 
@@ -447,10 +440,41 @@ public class SpotAnalysis extends PlugInFrame
     }
 
     if (runMode > 0) {
-      final Thread thread = new Thread(this, PLUGIN_TITLE);
+      final Thread thread = new Thread(() -> {
+        synchronized (runLock) {
+          try {
+            switch (runMode) {
+              case 1:
+                createProfile();
+                break;
+              case 2:
+                addFrame();
+                break;
+              case 3:
+                deleteFrames();
+                break;
+              case 4:
+                saveSpot();
+                break;
+              case 5:
+                saveTraces();
+                break;
+              default:
+                // Do nothing
+                break;
+            }
+          } finally {
+            runMode = 0;
+          }
+        }
+
+        synchronized (SpotAnalysis.this) {
+          super.notifyAll();
+        }
+      }, PLUGIN_TITLE);
       thread.start();
     }
-    super.notify();
+    super.notifyAll();
   }
 
   /** {@inheritDoc} */
@@ -480,41 +504,6 @@ public class SpotAnalysis extends PlugInFrame
 
     super.windowActivated(event);
     WindowManager.setWindow(this);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void run() {
-    synchronized (runLock) {
-      try {
-        switch (runMode) {
-          case 1:
-            createProfile();
-            break;
-          case 2:
-            addFrame();
-            break;
-          case 3:
-            deleteFrames();
-            break;
-          case 4:
-            saveSpot();
-            break;
-          case 5:
-            saveTraces();
-            break;
-          default:
-            // Do nothing
-            break;
-        }
-      } finally {
-        runMode = 0;
-      }
-    }
-
-    synchronized (this) {
-      super.notifyAll();
-    }
   }
 
   private void createProfile() {
@@ -573,38 +562,7 @@ public class SpotAnalysis extends PlugInFrame
       }
     }
 
-    createProfile(imp, bounds, psfWidth, blur);
-  }
-
-  private static boolean resultsWithinBounds(Rectangle bounds) {
-    if (resultsWindowShowing()) {
-      final float minx = bounds.x;
-      final float maxx = minx + bounds.width;
-      final float miny = bounds.y;
-      final float maxy = miny + bounds.height;
-
-      for (int i = 0; i < resultsWindow.getTextPanel().getLineCount(); i++) {
-        final String line = resultsWindow.getTextPanel().getLine(i);
-        try (Scanner s = new Scanner(line)) {
-          s.useDelimiter("\t");
-          s.nextInt();
-          final float cx = s.nextFloat(); // cx
-          final float cy = s.nextFloat(); // cy
-          s.close();
-          if (cx >= minx && cx <= maxx && cy >= miny && cy <= maxy) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  private static boolean resultsWindowShowing() {
-    if (resultsWindow == null || !resultsWindow.isShowing()) {
-      return false;
-    }
-    return true;
+    runCreateProfile(imp, bounds, psfWidth, blur);
   }
 
   private boolean parametersReady() {
@@ -631,7 +589,34 @@ public class SpotAnalysis extends PlugInFrame
     return (inputChoice.getSelectedIndex() != -1);
   }
 
-  private void createProfile(ImagePlus imp, Rectangle bounds, double psfWidth, double blur) {
+  private static boolean resultsWithinBounds(Rectangle bounds) {
+    if (resultsWindowShowing()) {
+      final float minx = bounds.x;
+      final float maxx = minx + bounds.width;
+      final float miny = bounds.y;
+      final float maxy = miny + bounds.height;
+
+      for (int i = 0; i < resultsWindow.getTextPanel().getLineCount(); i++) {
+        final String line = resultsWindow.getTextPanel().getLine(i);
+        try (Scanner s = new Scanner(line)) {
+          s.useDelimiter("\t");
+          s.nextInt();
+          final float cx = s.nextFloat(); // cx
+          final float cy = s.nextFloat(); // cy
+          if (cx >= minx && cx <= maxx && cy >= miny && cy <= maxy) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  private static boolean resultsWindowShowing() {
+    return resultsWindow != null && resultsWindow.isShowing();
+  }
+
+  private void runCreateProfile(ImagePlus imp, Rectangle bounds, double psfWidth, double blur) {
     areaBounds = bounds;
     this.imp = imp;
     area = bounds.width * bounds.height;
@@ -767,13 +752,10 @@ public class SpotAnalysis extends PlugInFrame
         final float miny = areaBounds.y;
         final float maxy = miny + areaBounds.height;
 
-        r.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
-          @Override
-          public void executeXYR(float x, float y, PeakResult p) {
-            if (p.getXPosition() >= minx && p.getXPosition() <= maxx && p.getYPosition() >= miny
-                && p.getYPosition() <= maxy) {
-              candidateFrames.add(p.getFrame());
-            }
+        r.forEach(DistanceUnit.PIXEL, (XYRResultProcedure) (x, y, result) -> {
+          if (result.getXPosition() >= minx && result.getXPosition() <= maxx
+              && result.getYPosition() >= miny && result.getYPosition() <= maxy) {
+            candidateFrames.add(result.getFrame());
           }
         });
       }
@@ -781,12 +763,7 @@ public class SpotAnalysis extends PlugInFrame
   }
 
   private void updateProfilePlots() {
-    final int nSlices = rawMean.length;
-    xValues = new double[nSlices];
-    for (int i = 0; i < nSlices; i++) {
-      xValues[i] = i + 1;
-    }
-
+    xValues = SimpleArrayUtils.newArray(rawMean.length, 1.0, 1.0);
     smoothMean = interpolate(xValues, rawMean);
     smoothSd = interpolate(xValues, rawSd);
 
@@ -801,17 +778,17 @@ public class SpotAnalysis extends PlugInFrame
     for (final Spot s : onFrames) {
       newX[s.frame - 1] = -1;
     }
-    int c = 0;
+    int count = 0;
     for (int i = 0; i < newX.length; i++) {
       if (newX[i] == -1) {
         continue;
       }
-      newX[c] = newX[i];
-      newY[c] = newY[i];
-      c++;
+      newX[count] = newX[i];
+      newY[count] = newY[i];
+      count++;
     }
-    newX = Arrays.copyOf(newX, c);
-    newY = Arrays.copyOf(newY, c);
+    newX = Arrays.copyOf(newX, count);
+    newY = Arrays.copyOf(newY, count);
     double smoothing = 0.25;
     try {
       smoothing = Double.parseDouble(smoothingTextField.getText());
@@ -862,11 +839,11 @@ public class SpotAnalysis extends PlugInFrame
     if (!onFrames.isEmpty()) {
       final double[] onx = new double[onFrames.size()];
       final double[] ony = new double[onx.length];
-      int c = 0;
+      int count = 0;
       for (final Spot s : onFrames) {
-        onx[c] = s.frame;
-        ony[c] = yValues[s.frame - 1];
-        c++;
+        onx[count] = s.frame;
+        ony[count] = yValues[s.frame - 1];
+        count++;
       }
       plot.addPoints(onx, ony, Plot.CIRCLE);
     }
@@ -876,12 +853,12 @@ public class SpotAnalysis extends PlugInFrame
       plot.setColor(Color.cyan);
       final double[] onx = new double[candidateFrames.size()];
       final double[] ony = new double[onx.length];
-      int c = 0;
+      int count = 0;
       for (int i = 0; i < candidateFrames.size(); i++) {
         final int frame = candidateFrames.getQuick(i);
-        onx[c] = frame;
-        ony[c] = yValues[frame - 1];
-        c++;
+        onx[count] = frame;
+        ony[count] = yValues[frame - 1];
+        count++;
       }
       plot.addPoints(onx, ony, Plot.BOX);
       plot.setColor(Color.magenta);
@@ -904,15 +881,15 @@ public class SpotAnalysis extends PlugInFrame
       if (onFrames.add(s)) {
         onFramesList.clearSelection();
         // Find the location to insert in order
-        int i = 0;
-        while (i < listModel.size()) {
-          final Spot s2 = (Spot) listModel.get(i);
+        int index = 0;
+        while (index < listModel.size()) {
+          final Spot s2 = (Spot) listModel.get(index);
           if (s.compareTo(s2) < 0) {
             break;
           }
-          i++;
+          index++;
         }
-        listModel.add(i, s);
+        listModel.add(index, s);
         updateProfilePlots();
         updated = true;
         // pack();
@@ -921,8 +898,7 @@ public class SpotAnalysis extends PlugInFrame
   }
 
   private double getSignal(int slice) {
-    final double signal = (rawMean[slice - 1] - smoothMean[slice - 1]) * area;
-    return signal;
+    return (rawMean[slice - 1] - smoothMean[slice - 1]) * area;
   }
 
   private void deleteFrames() {
@@ -962,7 +938,6 @@ public class SpotAnalysis extends PlugInFrame
       // Get the signal again since the background may have changed.
       final double spotSignal = getSignal(s.frame);
       signal += spotSignal;
-      // signal += s.signal;
       final float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(0, (float) (spotSignal),
           cx, cy, 0, psfWidth);
       final PeakResult result =
@@ -990,7 +965,6 @@ public class SpotAnalysis extends PlugInFrame
     traces.put(id, trace);
 
     updated = false;
-    // clearSelectedFrames();
   }
 
   private static void createResultsWindow() {
@@ -1040,8 +1014,6 @@ public class SpotAnalysis extends PlugInFrame
             s.nextDouble(); // cx
             s.nextDouble(); // cy
             signal = s.nextDouble();
-          } catch (final InputMismatchException ex) {
-            // Ignore
           } catch (final NoSuchElementException ex) {
             // Ignore
           }
@@ -1076,7 +1048,7 @@ public class SpotAnalysis extends PlugInFrame
     final BufferedWriter[] files = new BufferedWriter[5];
     try {
       files[0] = openBufferedWriter(resultsDirectory + "traces.txt",
-          String.format("#ms/frame = %s\n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
+          String.format("#ms/frame = %s%n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
               MathUtils.rounded(msPerFrame, 3)));
       files[1] = openBufferedWriter(resultsDirectory + "tOn.txt", "");
       files[2] = openBufferedWriter(resultsDirectory + "tOff.txt", "");
@@ -1093,14 +1065,14 @@ public class SpotAnalysis extends PlugInFrame
 
         final int[] on = traceResult.trace.getOnTimes();
         final int[] off = traceResult.trace.getOffTimes();
-        int t = traceResult.trace.getHead().getFrame();
+        int time = traceResult.trace.getHead().getFrame();
         for (int i = 0; i < on.length; i++) {
           writeLine(files[1], Double.toString(msPerFrame * on[i]));
 
-          sb.append('\t').append(t).append('\t').append(t + on[i] - 1);
+          sb.append('\t').append(time).append('\t').append(time + on[i] - 1);
           if (off != null && i < off.length) {
             writeLine(files[2], Double.toString(msPerFrame * off[i]));
-            t += on[i] + off[i];
+            time += on[i] + off[i];
           }
         }
         writeLine(files[0], sb.toString());
@@ -1114,15 +1086,16 @@ public class SpotAnalysis extends PlugInFrame
       }
     } catch (final Exception ex) {
       // Q. Add better handling of errors?
-      ex.printStackTrace();
-      IJ.log("Failed to save traces to results directory: " + resultsDirectory);
+      Logger.getLogger(getClass().getName()).log(Level.WARNING, ex,
+          () -> "Failed to save traces to results directory: " + resultsDirectory);
     } finally {
       for (final BufferedWriter tracesFile : files) {
         if (tracesFile != null) {
           try {
             tracesFile.close();
           } catch (final IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to close traces file",
+                ex);
           }
         }
       }

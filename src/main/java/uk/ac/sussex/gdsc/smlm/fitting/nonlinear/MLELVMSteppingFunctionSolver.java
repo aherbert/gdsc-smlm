@@ -200,7 +200,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
 
   /** {@inheritDoc} */
   @Override
-  protected FisherInformationMatrix computeFisherInformationMatrix(double[] fx) {
+  protected FisherInformationMatrix computeLastFisherInformationMatrix(double[] fx) {
     // The Hessian matrix refers to the log-likelihood ratio.
     // Compute and invert a matrix related to the Poisson log-likelihood.
     // This assumes this does achieve the maximum likelihood estimate for a

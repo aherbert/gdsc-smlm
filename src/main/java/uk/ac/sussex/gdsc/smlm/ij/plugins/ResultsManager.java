@@ -1333,11 +1333,11 @@ public class ResultsManager implements PlugIn {
         for (int i = 0; i < items.length; i++) {
           items[i] = option.values[i].toString();
         }
-        gd.addChoice(getName(option), items, option.getValue().toString());
+        gd.addChoice(getOptionName(option), items, option.getValue().toString());
       } else if (option.getValue() instanceof Number) {
         final Number n = (Number) option.getValue();
         if (n.doubleValue() == n.intValue()) {
-          gd.addNumericField(getName(option), n.intValue(), 0);
+          gd.addNumericField(getOptionName(option), n.intValue(), 0);
         } else {
           final String value = n.toString();
           int sig = 0;
@@ -1353,12 +1353,12 @@ public class ResultsManager implements PlugIn {
               sig++;
             }
           }
-          gd.addNumericField(getName(option), n.doubleValue(), sig);
+          gd.addNumericField(getOptionName(option), n.doubleValue(), sig);
         }
       } else if (option.getValue() instanceof String) {
-        gd.addStringField(getName(option), (String) option.getValue());
+        gd.addStringField(getOptionName(option), (String) option.getValue());
       } else if (option.getValue() instanceof Boolean) {
-        gd.addCheckbox(getName(option), (Boolean) option.getValue());
+        gd.addCheckbox(getOptionName(option), (Boolean) option.getValue());
       } else {
         IJ.log(TITLE + ": Unsupported reader option: " + option.name + "="
             + option.getValue().toString());
@@ -1390,7 +1390,7 @@ public class ResultsManager implements PlugIn {
     }
   }
 
-  private static String getName(ResultOption option) {
+  private static String getOptionName(ResultOption option) {
     return option.name.replace(' ', '_');
   }
 

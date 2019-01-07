@@ -117,7 +117,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   public static final int DISPLAY_Z_POSITION = 0x0400;
 
   /** The empty value. */
-  private double EMPTY;
+  private double empty;
 
   /** The title. */
   protected final String title;
@@ -259,17 +259,17 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     // Handle invalid bounds with an empty single pixel image
     final boolean validBounds = imageWidth > 0 && imageHeight > 0
         && (double) imageWidth * (double) imageHeight < Integer.MAX_VALUE;
-    int w;
-    int h;
+    int width;
+    int height;
     if (validBounds) {
-      w = imageWidth;
-      h = imageHeight;
+      width = imageWidth;
+      height = imageHeight;
     } else {
       if (IJ.getInstance() != null) {
         ImageJUtils.log("ERROR: Unable to create image results '%s' due to invalid dimensions:"
             + " width=%d, height=%d", title, imageWidth, imageHeight);
       }
-      w = h = 1;
+      width = height = 1;
     }
 
     // Q. Should this be changed to handle the data in non-pixel distances.
@@ -283,22 +283,22 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     lastPaintSize = 0;
     nextRepaintSize = 20; // Let some results appear before drawing
     nextPaintTime = System.currentTimeMillis() + repaintDelay;
-    data = new double[w * h];
+    data = new double[width * height];
 
     // Use negative zero so that we know when positive zero has been written to the array.
     if ((displayFlags & (DISPLAY_MAPPED | DISPLAY_MAP_ZERO)) == (DISPLAY_MAPPED
         | DISPLAY_MAP_ZERO)) {
-      EMPTY = -0.0f;
+      empty = -0.0f;
     }
     if ((displayFlags & DISPLAY_NEGATIVES) != 0) {
-      EMPTY = Double.NaN;
+      empty = Double.NaN;
     }
 
     resetData();
     imp = WindowManager.getImage(title);
     currentFrame = 1;
 
-    final ImageProcessor ip = createNewProcessor(w, h);
+    final ImageProcessor ip = createNewProcessor(width, height);
 
     if (imp == null) {
       imp = new ImagePlus(title, ip);
@@ -314,7 +314,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     } else {
       // Copy the lookup table
       ip.setColorModel(imp.getProcessor().getColorModel());
-      final ImageStack stack = createNewImageStack(w, h);
+      final ImageStack stack = createNewImageStack(width, height);
       stack.addSlice(null, ip);
       // If resizing then remove adornments
       if (stack.getWidth() != imp.getWidth() || stack.getHeight() != imp.getHeight()) {
@@ -423,25 +423,21 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     }
     // -Infinity is mapped to 0 in the LUT.
     if ((displayFlags & DISPLAY_NEGATIVES) != 0) {
-      final InfinityMappedFloatProcessor fp =
-          new InfinityMappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
-      return fp;
+      return new InfinityMappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
     }
-
     return new FloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
   }
 
-  private ImageStack createNewImageStack(int w, int h) {
+  private ImageStack createNewImageStack(int width, int height) {
     if ((displayFlags & DISPLAY_MAPPED) != 0) {
-      final MappedImageStack stack = new MappedImageStack(w, h);
+      final MappedImageStack stack = new MappedImageStack(width, height);
       stack.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
       return stack;
     }
     if ((displayFlags & DISPLAY_NEGATIVES) != 0) {
-      final InfinityMappedImageStack stack = new InfinityMappedImageStack(w, h);
-      return stack;
+      return new InfinityMappedImageStack(width, height);
     }
-    return new ImageStack(w, h);
+    return new ImageStack(width, height);
   }
 
   /**
@@ -539,27 +535,27 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
         // This cannot be displayed in ImageJ so we use -Infinity in the
         // data as a special value. This is ignored by ImageJ for most
         // FloatProcessor functionality.
-        int i = findNonNaNIndex(data);
-        if (i == -1) {
+        int index = findNonNaNIndex(data);
+        if (index == -1) {
           max = 1;
           min = 0;
           Arrays.fill(pixels, Float.NEGATIVE_INFINITY);
         } else {
-          Arrays.fill(pixels, 0, i, Float.NEGATIVE_INFINITY);
-          max = min = data[i];
-          while (i < data.length) {
+          Arrays.fill(pixels, 0, index, Float.NEGATIVE_INFINITY);
+          max = min = data[index];
+          while (index < data.length) {
             // Check for NaN
-            if (data[i] != data[i]) {
-              pixels[i] = Float.NEGATIVE_INFINITY;
+            if (data[index] != data[index]) {
+              pixels[index] = Float.NEGATIVE_INFINITY;
             } else {
-              if (max < data[i]) {
-                max = data[i];
-              } else if (min > data[i]) {
-                min = data[i];
+              if (max < data[index]) {
+                max = data[index];
+              } else if (min > data[index]) {
+                min = data[index];
               }
-              pixels[i] = (float) data[i];
+              pixels[index] = (float) data[index];
             }
-            i++;
+            index++;
           }
         }
       } else {
@@ -614,33 +610,301 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     updateImage();
   }
 
-  private void addData(int npoints, int nValues, int[] indices, float[] values) {
+  /** {@inheritDoc} */
+  @Override
+  public void add(PeakResult result) {
+    add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
+        result.getError(), result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+        null);
+  }
+
+  /**
+   * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a
+   * value.
+   *
+   * @param peak The peak frame
+   * @param x The X coordinate
+   * @param y The Y coordinate
+   * @param value The value
+   */
+  public void add(int peak, float x, float y, float value) {
+    if (!imageActive) {
+      return;
+    }
+
+    x = mapX(x);
+    y = mapY(y);
+
+    // Check bounds
+    if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
+      return;
+    }
+
+    checkAndUpdateToFrame(peak);
+
+    final int[] indices = new int[5];
+    final float[] values = new float[4];
+
+    getValue(value, x, y, indices, values);
+
+    addData(1, indices[4], indices, values);
+
+    updateImage();
+  }
+
+  /**
+   * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a
+   * value.
+   *
+   * @param x The X coordinate
+   * @param y The Y coordinate
+   * @param value The value
+   */
+  public void add(float x, float y, float value) {
+    if (!imageActive) {
+      return;
+    }
+
+    x = mapX(x);
+    y = mapY(y);
+
+    // Check bounds
+    if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
+      return;
+    }
+
+    final int[] indices = new int[5];
+    final float[] values = new float[4];
+
+    getValue(value, x, y, indices, values);
+
+    addData(1, indices[4], indices, values);
+
+    updateImage();
+  }
+
+  /**
+   * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a
+   * value.
+   *
+   * @param allpeak The peak frames
+   * @param allx The X coordinates
+   * @param ally The Y coordinates
+   * @param allv The values
+   */
+  public void add(int[] allpeak, float[] allx, float[] ally, float[] allv) {
+    if (!imageActive) {
+      return;
+    }
+
+    final int[] indices = new int[5];
+    final float[] values = new float[4];
+
+    int npoints = 0;
+    int nvalues = 0;
+
+    // Buffer output in batches
+    final int[] allIndices = new int[100];
+    final float[] allValues = new float[allIndices.length];
+
+    // We add at most 4 indices for each peak
+    final int limit = allIndices.length - 4;
+
+    for (int j = 0; j < allx.length; j++) {
+      final float x = mapX(allx[j]);
+      final float y = mapY(ally[j]);
+      final int peak = allpeak[j];
+
+      // Check bounds
+      if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
+        continue;
+      }
+
+      if (shouldUpdate(peak)) {
+        addData(npoints, nvalues, allIndices, allValues);
+        npoints = 0;
+        nvalues = 0;
+        updateToFrame(peak);
+      }
+
+      getValue(allv[j], x, y, indices, values);
+
+      for (int i = indices[4]; i-- > 0;) {
+        allIndices[nvalues] = indices[i];
+        allValues[nvalues] = values[i];
+        nvalues++;
+      }
+
+      npoints++;
+
+      if (nvalues > limit) {
+        addData(npoints, nvalues, allIndices, allValues);
+        npoints = 0;
+        nvalues = 0;
+        updateImage();
+        if (!imageActive) {
+          return;
+        }
+      }
+    }
+
+    // Now add the values to the configured indices
+    addData(npoints, nvalues, allIndices, allValues);
+
+    updateImage();
+  }
+
+  /**
+   * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a
+   * value.
+   *
+   * @param allx The X coordinates
+   * @param ally The Y coordinates
+   * @param allv The values
+   */
+  public void add(float[] allx, float[] ally, float[] allv) {
+    if (!imageActive) {
+      return;
+    }
+
+    final int[] indices = new int[5];
+    final float[] values = new float[4];
+
+    int npoints = 0;
+    int nvalues = 0;
+
+    // Buffer output in batches
+    final int[] allIndices = new int[100];
+    final float[] allValues = new float[allIndices.length];
+
+    // We add at most 4 indices for each peak
+    final int limit = allIndices.length - 4;
+
+    for (int j = 0; j < allx.length; j++) {
+      final float x = mapX(allx[j]);
+      final float y = mapY(ally[j]);
+
+      // Check bounds
+      if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
+        continue;
+      }
+
+      getValue(allv[j], x, y, indices, values);
+
+      for (int i = indices[4]; i-- > 0;) {
+        allIndices[nvalues] = indices[i];
+        allValues[nvalues] = values[i];
+        nvalues++;
+      }
+
+      npoints++;
+
+      if (nvalues > limit) {
+        addData(npoints, nvalues, allIndices, allValues);
+        npoints = 0;
+        nvalues = 0;
+        updateImage();
+        if (!imageActive) {
+          return;
+        }
+      }
+    }
+
+    // Now add the values to the configured indices
+    addData(npoints, nvalues, allIndices, allValues);
+
+    updateImage();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void addAll(PeakResult[] results) {
+    if (!imageActive) {
+      return;
+    }
+
+    final int[] indices = new int[5];
+    final float[] values = new float[4];
+
+    int npoints = 0;
+    int nvalues = 0;
+
+    // Buffer output in batches
+    final int[] allIndices = new int[100];
+    final float[] allValues = new float[allIndices.length];
+
+    // We add at most 4 indices for each peak
+    final int limit = allIndices.length - 4;
+
+    for (final PeakResult result : results) {
+      final float x = mapX(result.getXPosition());
+      final float y = mapY(result.getYPosition());
+
+      // Check bounds
+      if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
+        continue;
+      }
+
+      if (shouldUpdate(result.getFrame())) {
+        addData(npoints, nvalues, allIndices, allValues);
+        npoints = 0;
+        nvalues = 0;
+        updateToFrame(result.getFrame());
+      }
+
+      getValue(result.getFrame(), result.getParameters(), result.getError(), x, y, indices, values);
+
+      for (int i = indices[4]; i-- > 0;) {
+        allIndices[nvalues] = indices[i];
+        allValues[nvalues] = values[i];
+        nvalues++;
+      }
+
+      npoints++;
+
+      if (nvalues > limit) {
+        addData(npoints, nvalues, allIndices, allValues);
+        npoints = 0;
+        nvalues = 0;
+        updateImage();
+        if (!imageActive) {
+          return;
+        }
+      }
+    }
+
+    // Now add the values to the configured indices
+    addData(npoints, nvalues, allIndices, allValues);
+
+    updateImage();
+  }
+
+  private void addData(int npoints, int nvalues, int[] indices, float[] values) {
     // Add the values to the configured indices
     synchronized (data) {
-      size += npoints;
+      this.size += npoints;
 
       if ((displayFlags & DISPLAY_REPLACE) != 0) {
         // Replace the data
-        for (int i = 0; i < nValues; i++) {
+        for (int i = 0; i < nvalues; i++) {
           data[indices[i]] = values[i];
         }
       } else if ((displayFlags & DISPLAY_MAX) != 0) {
-        for (int i = 0; i < nValues; i++) {
+        for (int i = 0; i < nvalues; i++) {
           data[indices[i]] = max(data[indices[i]], values[i]);
         }
       } else {
         // Add the data
-        for (int i = 0; i < nValues; i++) {
+        for (int i = 0; i < nvalues; i++) {
           data[indices[i]] += values[i];
         }
       }
     }
   }
 
-  private static double max(final double a, final double b) {
+  private static double max(final double v1, final double v2) {
     // Ignore possible NaNs or infinity
-
-    return (a > b) ? a : b;
+    return (v1 > v2) ? v1 : v2;
   }
 
   /**
@@ -703,13 +967,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
    * <p>We construct the indices based on the current settings. 1, 2, or 4 indices will be returned
    * with their values. The number of indices is stored in the 5th position of the indices array.
    *
-   * @param v the value
+   * @param value the value
    * @param x the x position
    * @param y the y position
    * @param indices the indices
    * @param values the values for the indices
    */
-  private void getValue(float v, float x, float y, int[] indices, float[] values) {
+  private void getValue(float value, float x, float y, int[] indices, float[] values) {
     final int x1 = (int) x;
     final int y1 = (int) y;
     final int index = y1 * imageWidth + x1;
@@ -717,7 +981,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     if ((displayFlags & DISPLAY_WEIGHTED) == 0) {
       // No interpolation. Just put the value on the containing pixel
       indices[0] = index;
-      values[0] = v;
+      values[0] = value;
       indices[4] = 1;
       return;
     }
@@ -789,209 +1053,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     final float wxDelta = 1f - wx;
     final float wyDelta = 1f - wy;
 
-    values[0] = v * wx * wy;
-    values[1] = v * wxDelta * wy;
-    values[2] = v * wx * wyDelta;
-    values[3] = v * wxDelta * wyDelta;
+    values[0] = value * wx * wy;
+    values[1] = value * wxDelta * wy;
+    values[2] = value * wx * wyDelta;
+    values[3] = value * wxDelta * wyDelta;
   }
 
-  /**
-   * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a
-   * value.
-   *
-   * @param peak The peak frame
-   * @param x The X coordinate
-   * @param y The Y coordinate
-   * @param v The value
-   */
-  public void add(int peak, float x, float y, float v) {
-    if (!imageActive) {
-      return;
-    }
-
-    x = mapX(x);
-    y = mapY(y);
-
-    // Check bounds
-    if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
-      return;
-    }
-
-    checkAndUpdateToFrame(peak);
-
-    final int[] indices = new int[5];
-    final float[] values = new float[4];
-
-    getValue(v, x, y, indices, values);
-
-    addData(1, indices[4], indices, values);
-
-    updateImage();
-  }
-
-  /**
-   * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a
-   * value.
-   *
-   * @param x The X coordinate
-   * @param y The Y coordinate
-   * @param v The value
-   */
-  public void add(float x, float y, float v) {
-    if (!imageActive) {
-      return;
-    }
-
-    x = mapX(x);
-    y = mapY(y);
-
-    // Check bounds
-    if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
-      return;
-    }
-
-    final int[] indices = new int[5];
-    final float[] values = new float[4];
-
-    getValue(v, x, y, indices, values);
-
-    addData(1, indices[4], indices, values);
-
-    updateImage();
-  }
-
-  /**
-   * Simplified method to allow the image to be reconstructed using just T,X,Y coordinates and a
-   * value.
-   *
-   * @param allpeak The peak frames
-   * @param allx The X coordinates
-   * @param ally The Y coordinates
-   * @param allv The values
-   */
-  public void add(int[] allpeak, float[] allx, float[] ally, float[] allv) {
-    if (!imageActive) {
-      return;
-    }
-
-    final int[] indices = new int[5];
-    final float[] values = new float[4];
-
-    int npoints = 0;
-    int nValues = 0;
-
-    // Buffer output in batches
-    final int[] allIndices = new int[100];
-    final float[] allValues = new float[allIndices.length];
-
-    // We add at most 4 indices for each peak
-    final int limit = allIndices.length - 4;
-
-    for (int j = 0; j < allx.length; j++) {
-      final float x = mapX(allx[j]);
-      final float y = mapY(ally[j]);
-      final int peak = allpeak[j];
-
-      // Check bounds
-      if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
-        continue;
-      }
-
-      if (shouldUpdate(peak)) {
-        addData(npoints, nValues, allIndices, allValues);
-        npoints = 0;
-        nValues = 0;
-        updateToFrame(peak);
-      }
-
-      getValue(allv[j], x, y, indices, values);
-
-      for (int i = indices[4]; i-- > 0;) {
-        allIndices[nValues] = indices[i];
-        allValues[nValues] = values[i];
-        nValues++;
-      }
-
-      npoints++;
-
-      if (nValues > limit) {
-        addData(npoints, nValues, allIndices, allValues);
-        npoints = 0;
-        nValues = 0;
-        updateImage();
-        if (!imageActive) {
-          return;
-        }
-      }
-    }
-
-    // Now add the values to the configured indices
-    addData(npoints, nValues, allIndices, allValues);
-
-    updateImage();
-  }
-
-  /**
-   * Simplified method to allow the image to be reconstructed using just X,Y coordinates and a
-   * value.
-   *
-   * @param allx The X coordinates
-   * @param ally The Y coordinates
-   * @param allv The values
-   */
-  public void add(float[] allx, float[] ally, float[] allv) {
-    if (!imageActive) {
-      return;
-    }
-
-    final int[] indices = new int[5];
-    final float[] values = new float[4];
-
-    int npoints = 0;
-    int nValues = 0;
-
-    // Buffer output in batches
-    final int[] allIndices = new int[100];
-    final float[] allValues = new float[allIndices.length];
-
-    // We add at most 4 indices for each peak
-    final int limit = allIndices.length - 4;
-
-    for (int j = 0; j < allx.length; j++) {
-      final float x = mapX(allx[j]);
-      final float y = mapY(ally[j]);
-
-      // Check bounds
-      if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
-        continue;
-      }
-
-      getValue(allv[j], x, y, indices, values);
-
-      for (int i = indices[4]; i-- > 0;) {
-        allIndices[nValues] = indices[i];
-        allValues[nValues] = values[i];
-        nValues++;
-      }
-
-      npoints++;
-
-      if (nValues > limit) {
-        addData(npoints, nValues, allIndices, allValues);
-        npoints = 0;
-        nValues = 0;
-        updateImage();
-        if (!imageActive) {
-          return;
-        }
-      }
-    }
-
-    // Now add the values to the configured indices
-    addData(npoints, nValues, allIndices, allValues);
-
-    updateImage();
-  }
 
   /**
    * Check if the stack should be updated to move the rolling window to the given peak.
@@ -1024,13 +1091,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   protected void updateToFrame(int peak) {
     // Stop other threads adding more data
     synchronized (data) {
-      int i = 0;
+      int count = 0;
       final ImageStack stack = imp.getStack();
       peak -= rollingWindowSize;
       while (peak >= currentFrame) {
         // System.out.printf("%d => %d (%d)\n", currentFrame, currentFrame + rollingWindowSize,
         // peak+rollingWindowSize);
-        if (i++ == 0) {
+        if (count++ == 0) {
           // Draw all current data for first time we move forward.
           // Force repaint
           forceUpdateImage();
@@ -1042,7 +1109,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
       }
 
       // Check if any frames were added
-      if (i > 0) {
+      if (count > 0) {
         imp.setStack(stack);
         imp.setSlice(stack.getSize());
 
@@ -1052,78 +1119,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
   }
 
   private void resetData() {
-    Arrays.fill(data, EMPTY);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void add(PeakResult result) {
-    add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
-        result.getError(), result.getNoise(), result.getMeanIntensity(), result.getParameters(),
-        null);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void addAll(PeakResult[] results) {
-    if (!imageActive) {
-      return;
-    }
-
-    final int[] indices = new int[5];
-    final float[] values = new float[4];
-
-    int npoints = 0;
-    int nValues = 0;
-
-    // Buffer output in batches
-    final int[] allIndices = new int[100];
-    final float[] allValues = new float[allIndices.length];
-
-    // We add at most 4 indices for each peak
-    final int limit = allIndices.length - 4;
-
-    for (final PeakResult result : results) {
-      final float x = mapX(result.getXPosition());
-      final float y = mapY(result.getYPosition());
-
-      // Check bounds
-      if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight) {
-        continue;
-      }
-
-      if (shouldUpdate(result.getFrame())) {
-        addData(npoints, nValues, allIndices, allValues);
-        npoints = 0;
-        nValues = 0;
-        updateToFrame(result.getFrame());
-      }
-
-      getValue(result.getFrame(), result.getParameters(), result.getError(), x, y, indices, values);
-
-      for (int i = indices[4]; i-- > 0;) {
-        allIndices[nValues] = indices[i];
-        allValues[nValues] = values[i];
-        nValues++;
-      }
-
-      npoints++;
-
-      if (nValues > limit) {
-        addData(npoints, nValues, allIndices, allValues);
-        npoints = 0;
-        nValues = 0;
-        updateImage();
-        if (!imageActive) {
-          return;
-        }
-      }
-    }
-
-    // Now add the values to the configured indices
-    addData(npoints, nValues, allIndices, allValues);
-
-    updateImage();
+    Arrays.fill(data, empty);
   }
 
   /**

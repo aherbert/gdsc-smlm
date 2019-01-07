@@ -83,6 +83,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Produces an drift curve for a PSF image using fitting.
@@ -888,8 +890,8 @@ public class PSFDrift implements PlugIn {
     // Extract data uses index not slice number as arguments so subtract 1
     final double noiseFraction = 1e-3;
     final float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
-    final ImagePSFModel model = new ImagePSFModel(image, zCentre - lower, unitsPerPixel,
-        unitsPerSlice, psfSettings.getFwhm(), noiseFraction);
+    final ImagePSFModel model =
+        new ImagePSFModel(image, zCentre - lower, unitsPerPixel, unitsPerSlice, noiseFraction);
 
     // Add the calibrated centres
     final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
@@ -917,7 +919,8 @@ public class PSFDrift implements PlugIn {
     try {
       jobs.put(job);
     } catch (final InterruptedException ex) {
-      throw new RuntimeException("Unexpected interruption", ex);
+      Logger.getLogger(PSFDrift.class.getName()).log(Level.SEVERE, "Unexpected interruption", ex);
+      Thread.currentThread().interrupt();
     }
   }
 

@@ -176,6 +176,15 @@ public class GaussianPSFModel extends PSFModel {
   }
 
   /**
+   * Gets the standard deviation dimension 0 for the last drawn Gaussian.
+   *
+   * @return The standard deviation dimension 0 for the last drawn Gaussian.
+   */
+  public double getS0() {
+    return s0;
+  }
+
+  /**
    * Gets the width in dimension 1 for the given z-depth.
    *
    * @param z the z
@@ -183,6 +192,15 @@ public class GaussianPSFModel extends PSFModel {
    */
   public double getS1(double z) {
     return zModel.getSy(z);
+  }
+
+  /**
+   * Gets the standard deviation dimension 1 for the last drawn Gaussian.
+   *
+   * @return The standard deviation dimension 1 for the last drawn Gaussian.
+   */
+  public double getS1() {
+    return s1;
   }
 
   /**
@@ -375,24 +393,6 @@ public class GaussianPSFModel extends PSFModel {
       x = max;
     }
     return x;
-  }
-
-  /**
-   * Gets the standard deviation dimension 0 for the last drawn Gaussian.
-   *
-   * @return The standard deviation dimension 0 for the last drawn Gaussian.
-   */
-  public double getS0() {
-    return s0;
-  }
-
-  /**
-   * Gets the standard deviation dimension 1 for the last drawn Gaussian.
-   *
-   * @return The standard deviation dimension 1 for the last drawn Gaussian.
-   */
-  public double getS1() {
-    return s1;
   }
 
   /** {@inheritDoc} */

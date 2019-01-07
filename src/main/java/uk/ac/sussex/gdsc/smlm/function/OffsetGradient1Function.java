@@ -33,13 +33,13 @@ public class OffsetGradient1Function extends OffsetValueFunction
   protected final Gradient1Function f1;
 
   /** The procedure. */
-  protected Gradient1Procedure procedure;
+  protected Gradient1Procedure procedure1;
 
   /**
    * Class for evaluating a function and storing the values and gradients.
    */
   protected class FunctionStore implements Gradient1Procedure {
-    private int i;
+    private int index;
 
     /** The values. */
     public final double[] values;
@@ -70,16 +70,16 @@ public class OffsetGradient1Function extends OffsetValueFunction
      * Gets the values.
      */
     public void getValues() {
-      i = 0;
+      index = 0;
       f1.forEach(this);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void execute(double value, double[] dy_da) {
-      values[i] = value;
-      System.arraycopy(dy_da, 0, dyda[i], 0, length);
-      i++;
+    public void execute(double value, double[] dyda) {
+      values[index] = value;
+      System.arraycopy(dyda, 0, this.dyda[index], 0, length);
+      index++;
     }
   }
 
@@ -87,21 +87,21 @@ public class OffsetGradient1Function extends OffsetValueFunction
   protected FunctionStore store;
 
   /** All the values for the NonLinearFunction interface. */
-  protected double[] all_values;
+  protected double[] allValues;
 
   /** All the gradients for the NonLinearFunction interface. */
-  protected double[][] all_dyda;
+  protected double[][] allDyda;
 
   /**
    * Instantiates a new offset gradient1 function.
    *
-   * @param f the function
+   * @param function the function
    * @param values the precomputed values
    * @throws IllegalArgumentException if the values length does not match the function size
    */
-  protected OffsetGradient1Function(Gradient1Function f, double[] values) {
-    super(f, values);
-    f1 = f;
+  protected OffsetGradient1Function(Gradient1Function function, double[] values) {
+    super(function, values);
+    f1 = function;
   }
 
   /**
@@ -113,7 +113,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
    */
   protected OffsetGradient1Function(OffsetGradient1Function pre, double[] values) {
     super(pre, values);
-    f1 = (Gradient1Function) f;
+    f1 = (Gradient1Function) vf;
   }
 
   /**
@@ -129,7 +129,12 @@ public class OffsetGradient1Function extends OffsetValueFunction
   public void initialise(double[] a) {
     store = null;
     f1.initialise(a);
-    i = 0;
+    index = 0;
+  }
+
+  @Override
+  public void initialise1(double[] a) {
+    f1.initialise1(a);
   }
 
   @Override
@@ -143,37 +148,32 @@ public class OffsetGradient1Function extends OffsetValueFunction
   }
 
   @Override
-  public void initialise1(double[] a) {
-    f1.initialise1(a);
-  }
-
-  @Override
   public void forEach(Gradient1Procedure procedure) {
-    this.procedure = procedure;
-    i = 0;
+    this.procedure1 = procedure;
+    index = 0;
     f1.forEach((Gradient1Procedure) this);
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
-    procedure.execute(value + values[i++], dy_da);
+  public void execute(double value, double[] dyda) {
+    procedure1.execute(value + values[index++], dyda);
   }
 
   /**
    * Wrap a function with pre-computed values.
    *
    * @param func the function
-   * @param b Baseline pre-computed y-values
+   * @param baseline Baseline pre-computed y-values
    * @return the wrapped function (or the original if pre-computed values are null or wrong length)
    */
   public static Gradient1Function wrapGradient1Function(final Gradient1Function func,
-      final double[] b) {
-    if (b != null && b.length == func.size()) {
+      final double[] baseline) {
+    if (baseline != null && baseline.length == func.size()) {
       // Avoid multiple wrapping
       if (func instanceof OffsetGradient1Function) {
-        return new OffsetGradient1Function((OffsetGradient1Function) func, b);
+        return new OffsetGradient1Function((OffsetGradient1Function) func, baseline);
       }
-      return new OffsetGradient1Function(func, b);
+      return new OffsetGradient1Function(func, baseline);
     }
     return func;
   }
@@ -181,18 +181,8 @@ public class OffsetGradient1Function extends OffsetValueFunction
   @Override
   public double eval(int x, double[] dyda) {
     createStore();
-    System.arraycopy(all_dyda[i], 0, dyda, 0, store.length);
-    return all_values[x];
-  }
-
-  private void createStore() {
-    if (store == null) {
-      store = new FunctionStore(all_values, all_dyda);
-      store.getValues();
-      // Re-use space
-      all_values = store.values;
-      all_dyda = store.dyda;
-    }
+    System.arraycopy(allDyda[index], 0, dyda, 0, store.length);
+    return allValues[x];
   }
 
   @Override
@@ -202,19 +192,29 @@ public class OffsetGradient1Function extends OffsetValueFunction
   }
 
   @Override
-  public double eval(int x, double[] dyda, double[] w) {
-    w[0] = 1;
+  public double eval(int x, double[] dyda, double[] weight) {
+    weight[0] = 1;
     return eval(x, dyda);
   }
 
   @Override
-  public double evalw(int x, double[] w) {
-    w[0] = 1;
+  public double evalw(int x, double[] weight) {
+    weight[0] = 1;
     return eval(x);
   }
 
   @Override
   public boolean canComputeWeights() {
     return false;
+  }
+
+  private void createStore() {
+    if (store == null) {
+      store = new FunctionStore(allValues, allDyda);
+      store.getValues();
+      // Re-use space
+      allValues = store.values;
+      allDyda = store.dyda;
+    }
   }
 }

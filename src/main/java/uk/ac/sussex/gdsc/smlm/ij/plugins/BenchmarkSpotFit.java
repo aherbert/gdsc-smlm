@@ -735,7 +735,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       this.results = new TIntObjectHashMap<>();
       bounds = new Rectangle(0, 0, stack.getWidth(), stack.getHeight());
       // Instance copy
-      multiFilter = BenchmarkSpotFit.multiFilter.clone();
+      multiFilter = BenchmarkSpotFit.multiFilter.copy();
     }
 
     /** {@inheritDoc} */

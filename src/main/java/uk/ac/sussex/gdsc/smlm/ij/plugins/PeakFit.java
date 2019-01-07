@@ -3197,61 +3197,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
     addSingleFrameOverlay();
   }
 
-  private void addSingleFrameOverlay() {
-    // If a single frame was processed add the peaks as an overlay if they are in memory
-    ImagePlus imp = this.imp;
-
-    if (fitMaxima && singleFrame > 0) {
-      if (source instanceof IJImageSource) {
-        final String title = source.getName();
-        imp = WindowManager.getImage(title);
-      }
-    }
-
-    if (singleFrame > 0 && imp != null) {
-      MemoryPeakResults results = null;
-      for (final PeakResults r : this.results.toArray()) {
-        if (r instanceof MemoryPeakResults) {
-          results = (MemoryPeakResults) r;
-          break;
-        }
-      }
-      if (results == null || results.size() == 0) {
-        return;
-      }
-
-      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-      gd.enableYesNoCancel();
-      gd.hideCancelButton();
-      gd.addMessage("Add the fitted localisations as an overlay?");
-      gd.showDialog();
-      if (!gd.wasOKed()) {
-        return;
-      }
-
-      final LUT lut = LutHelper.createLut(LutColour.ICE);
-      final Overlay o = new Overlay();
-      final int size = results.size();
-      final Counter j = new Counter(size);
-      final ImagePlus finalImp = imp;
-      results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
-        @Override
-        public void executeXYR(float x, float y, PeakResult r) {
-          final PointRoi roi = new PointRoi(x, y);
-          final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
-          roi.setStrokeColor(c);
-          roi.setFillColor(c);
-          if (finalImp.getStackSize() > 1) {
-            roi.setPosition(singleFrame);
-          }
-          o.add(roi);
-        }
-      });
-      imp.setOverlay(o);
-      imp.getWindow().toFront();
-    }
-  }
-
   /**
    * Process the image. The current ROI will be used to define the region processed. The noise can
    * be estimated using the entire frame or the ROI region.
@@ -3374,6 +3319,61 @@ public class PeakFit implements PlugInFilter, ItemListener {
     showResults();
 
     source.close();
+  }
+
+  private void addSingleFrameOverlay() {
+    // If a single frame was processed add the peaks as an overlay if they are in memory
+    ImagePlus imp = this.imp;
+
+    if (fitMaxima && singleFrame > 0) {
+      if (source instanceof IJImageSource) {
+        final String title = source.getName();
+        imp = WindowManager.getImage(title);
+      }
+    }
+
+    if (singleFrame > 0 && imp != null) {
+      MemoryPeakResults results = null;
+      for (final PeakResults r : this.results.toArray()) {
+        if (r instanceof MemoryPeakResults) {
+          results = (MemoryPeakResults) r;
+          break;
+        }
+      }
+      if (results == null || results.size() == 0) {
+        return;
+      }
+
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+      gd.enableYesNoCancel();
+      gd.hideCancelButton();
+      gd.addMessage("Add the fitted localisations as an overlay?");
+      gd.showDialog();
+      if (!gd.wasOKed()) {
+        return;
+      }
+
+      final LUT lut = LutHelper.createLut(LutColour.ICE);
+      final Overlay o = new Overlay();
+      final int size = results.size();
+      final Counter j = new Counter(size);
+      final ImagePlus finalImp = imp;
+      results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
+        @Override
+        public void executeXYR(float x, float y, PeakResult r) {
+          final PointRoi roi = new PointRoi(x, y);
+          final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
+          roi.setStrokeColor(c);
+          roi.setFillColor(c);
+          if (finalImp.getStackSize() > 1) {
+            roi.setPosition(singleFrame);
+          }
+          o.add(roi);
+        }
+      });
+      imp.setOverlay(o);
+      imp.getWindow().toFront();
+    }
   }
 
   /**

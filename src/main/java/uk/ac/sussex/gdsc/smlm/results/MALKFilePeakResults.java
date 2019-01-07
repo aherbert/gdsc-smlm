@@ -213,18 +213,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     writeResult(1, sb.toString());
   }
 
-  private void addStandardData(StringBuilder sb, final float x, final float y, final int frame,
-      final float signal) {
-    sb.append(toNMConverter.convert(x));
-    sb.append('\t');
-    sb.append(toNMConverter.convert(y));
-    sb.append('\t');
-    sb.append(frame);
-    sb.append('\t');
-    sb.append(toPhotonConverter.convert(signal));
-    sb.append('\n');
-  }
-
   /** {@inheritDoc} */
   @Override
   public void add(PeakResult result) {
@@ -238,6 +226,18 @@ public class MALKFilePeakResults extends FilePeakResults {
         result.getIntensity());
 
     writeResult(1, sb.toString());
+  }
+
+  private void addStandardData(StringBuilder sb, final float x, final float y, final int frame,
+      final float signal) {
+    sb.append(toNMConverter.convert(x));
+    sb.append('\t');
+    sb.append(toNMConverter.convert(y));
+    sb.append('\t');
+    sb.append(frame);
+    sb.append('\t');
+    sb.append(toPhotonConverter.convert(signal));
+    sb.append('\n');
   }
 
   /** {@inheritDoc} */

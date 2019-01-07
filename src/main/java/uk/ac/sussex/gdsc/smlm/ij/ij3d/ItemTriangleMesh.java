@@ -497,10 +497,10 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     // been checked at this point to be the smaller of new and old.
     final GeometryArray ga = (GeometryArray) getGeometry();
 
-    points = reorder(points, indices);
+    points = reorderPoints(points, indices);
     // Sizes could be null or a single size
     if (sizes != null && sizes.length == points.length) {
-      sizes = reorder(sizes, indices);
+      sizes = reorderPoints(sizes, indices);
     }
 
     // Reorder all things in the geometry: coordinates and colour
@@ -522,15 +522,12 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     }
     mesh = Arrays.asList(coords);
 
-    ga.updateData(new GeometryUpdater() {
-      @Override
-      public void updateData(Geometry geometry) {
-        final GeometryArray ga = (GeometryArray) geometry;
-        // We re-use the geometry and just truncate the vertex count
-        ga.setCoordinates(0, coords);
-        ga.setColors(0, colors);
-        ga.setValidVertexCount(coords.length);
-      }
+    ga.updateData(geometry -> {
+      final GeometryArray geom = (GeometryArray) geometry;
+      // We re-use the geometry and just truncate the vertex count
+      geom.setCoordinates(0, coords);
+      geom.setColors(0, colors);
+      geom.setValidVertexCount(coords.length);
     });
 
     // this.setGeometry(ga);
@@ -539,14 +536,14 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
   /**
    * Reorder the points using the indices.
    *
-   * @param p the points
+   * @param points the points
    * @param indices the indices
    * @return the new points
    */
-  static Point3f[] reorder(Point3f[] p, int[] indices) {
+  static Point3f[] reorderPoints(Point3f[] points, int[] indices) {
     final Point3f[] c = new Point3f[indices.length];
     for (int i = indices.length; i-- > 0;) {
-      c[i] = p[indices[i]];
+      c[i] = points[indices[i]];
     }
     return c;
   }
@@ -559,8 +556,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
   /** {@inheritDoc} */
   @Override
-  public Point3f getCoordinate(int i) {
-    return points[i];
+  public Point3f getCoordinate(int index) {
+    return points[index];
   }
 
   /** {@inheritDoc} */
@@ -592,10 +589,10 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     final int objectSize = objectVertices.length;
     final int N = objectSize * size;
     final Color3f[] colors = new Color3f[N];
-    int i = 0;
+    int index = 0;
     for (final Color3f c : color) {
       for (int j = objectSize; j-- > 0;) {
-        colors[i++] = c;
+        colors[index++] = c;
       }
     }
     ga.setColors(0, colors);

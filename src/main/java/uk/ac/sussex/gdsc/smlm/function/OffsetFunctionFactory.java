@@ -27,28 +27,32 @@ package uk.ac.sussex.gdsc.smlm.function;
 /**
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure.
  */
-public class OffsetFunctionFactory {
+public final class OffsetFunctionFactory {
+
+  /** No public construction. */
+  private OffsetFunctionFactory() {}
+
   /**
    * Wrap a function with a pre-computed offset.
    *
    * @param func the function
-   * @param b Baseline pre-computed offset for the values
+   * @param baseline Baseline pre-computed offset for the values
    * @return the wrapped function (or the original if pre-computed values are null or wrong length)
    */
-  public static ValueFunction wrapFunction(final ValueFunction func, final double[] b) {
-    if (b != null && b.length == func.size()) {
+  public static ValueFunction wrapFunction(final ValueFunction func, final double[] baseline) {
+    if (baseline != null && baseline.length == func.size()) {
       // Wrap appropriately
       if (func instanceof ExtendedGradient2Function) {
         return OffsetExtendedGradient2Function
-            .wrapExtendedGradient2Function((ExtendedGradient2Function) func, b);
+            .wrapExtendedGradient2Function((ExtendedGradient2Function) func, baseline);
       }
       if (func instanceof Gradient2Function) {
-        return OffsetGradient2Function.wrapGradient2Function((Gradient2Function) func, b);
+        return OffsetGradient2Function.wrapGradient2Function((Gradient2Function) func, baseline);
       }
       if (func instanceof Gradient1Function) {
-        return OffsetGradient1Function.wrapGradient1Function((Gradient1Function) func, b);
+        return OffsetGradient1Function.wrapGradient1Function((Gradient1Function) func, baseline);
       }
-      return OffsetValueFunction.wrapValueFunction(func, b);
+      return OffsetValueFunction.wrapValueFunction(func, baseline);
     }
     return func;
   }

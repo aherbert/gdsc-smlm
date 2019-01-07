@@ -111,6 +111,12 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 
   /** {@inheritDoc} */
   @Override
+  public void initialise2(double[] a) {
+    f2.initialise2(a);
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public int[] gradientIndices() {
     return f1.gradientIndices();
   }
@@ -132,24 +138,18 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 
   /** {@inheritDoc} */
   @Override
-  public void execute(double value, double[] dy_da) {
-    values[index++] = value;
-    p1.execute(value, dy_da);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void initialise2(double[] a) {
-    f2.initialise2(a);
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public void forEach(Gradient2Procedure procedure) {
     index = 0;
     createValues();
     this.p2 = procedure;
     f2.forEach((Gradient2Procedure) this);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void execute(double value, double[] dy_da) {
+    values[index++] = value;
+    p1.execute(value, dy_da);
   }
 
   /** {@inheritDoc} */

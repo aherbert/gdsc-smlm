@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.utils;
 /**
  * Provide methods to retrieve the coordinates from a text line.
  */
+@FunctionalInterface
 public interface CoordinateProvider {
   /**
    * Get the coordinates from the line.

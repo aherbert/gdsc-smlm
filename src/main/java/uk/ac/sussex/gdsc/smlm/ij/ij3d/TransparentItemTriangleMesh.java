@@ -169,10 +169,10 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     // been checked at this point to be the smaller of new and old.
     final GeometryArray ga = (GeometryArray) getGeometry();
 
-    points = reorder(points, indices);
+    points = reorderPoints(points, indices);
     // Sizes could be null or a single size
     if (sizes != null && sizes.length == points.length) {
-      sizes = reorder(sizes, indices);
+      sizes = reorderPoints(sizes, indices);
     }
 
     // Reorder all things in the geometry: coordinates and colour

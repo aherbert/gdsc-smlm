@@ -68,7 +68,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper {
     // Compute the negative log-likelihood to be minimised
     double ll = 0;
     for (int i = 0; i < n; i++) {
-      ll -= p.logLikelihood(data[i], f.eval(i));
+      ll -= p.logLikelihood(data[i], function.eval(i));
     }
     return ll;
   }
@@ -76,7 +76,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper {
   /** {@inheritDoc} */
   @Override
   public double computeLikelihood(int i) {
-    return -p.logLikelihood(data[i], f.eval(i));
+    return -p.logLikelihood(data[i], function.eval(i));
   }
 
   /** {@inheritDoc} */

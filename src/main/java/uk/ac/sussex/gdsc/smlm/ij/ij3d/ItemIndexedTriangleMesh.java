@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+
 import customnode.CustomIndexedTriangleMesh;
 
 import org.scijava.java3d.Geometry;
@@ -186,15 +188,15 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
   }
 
   @Override
-  public void setCoordinate(final int i, final Point3f p) {
+  public void setCoordinate(final int index, final Point3f point) {
     dirty = true;
-    super.setCoordinate(i, p);
+    super.setCoordinate(index, point);
   }
 
   @Override
-  public void setCoordinates(final int[] indices, final Point3f p) {
+  public void setCoordinates(final int[] indices, final Point3f point) {
     dirty = true;
-    super.setCoordinates(indices, p);
+    super.setCoordinates(indices, point);
   }
 
   @Override
@@ -220,58 +222,6 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
     }
 
     return normals;
-  }
-
-  /**
-   * Check the facet normals point out from the centre 0,0,0. If the normal points inwards then the
-   * vertices will be swapped.
-   *
-   * @param vertices the vertices
-   * @param faces the faces
-   * @return the count of the number swapped
-   */
-  public static int checkFacets(Point3f[] vertices, int[] faces) {
-    int count = 0;
-    final int nFaces = faces.length;
-    final Vector3f v1 = new Vector3f();
-    final Vector3f v2 = new Vector3f();
-    for (int i = 0; i < nFaces; i += 3) {
-      final int f1 = faces[i];
-      final int f2 = faces[i + 1];
-      final int f3 = faces[i + 2];
-
-      // Use the same order as that used to compute facet normals in
-      // org.scijava.java3d.utils.geometry.NormalGenerator
-      v1.sub(vertices[f3], vertices[f2]);
-      v2.sub(vertices[f1], vertices[f2]);
-      v1.cross(v1, v2);
-      v1.normalize();
-
-      // Project point (x,y,z) to plane with normal (a,b,c) and point (d,e,f)
-      // t = (ad - ax + be - by + cd - cz) / (a^2 + b^2 + c^2)
-      // projected point = (x+ta,y+tb,z+tc)
-
-      // Project 0,0,0 to the facet
-      final double a = v1.x;
-      final double b = v1.y;
-      final double c = v1.z;
-      final double d = vertices[f1].x;
-      final double e = vertices[f1].y;
-      final double f = vertices[f1].z;
-      final double t = a * d + b * e + c * f;
-      if (t < 0) {
-        count++;
-        swap(faces, i + 2, i);
-      }
-    }
-    // System.out.printf("Swapped %d\n", count);
-    return count;
-  }
-
-  private static void swap(int[] faces, int i, int j) {
-    final int tmp = faces[i];
-    faces[i] = faces[j];
-    faces[j] = tmp;
   }
 
   /**
@@ -336,6 +286,51 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
     // }
 
     return normals;
+  }
+
+  /**
+   * Check the facet normals point out from the centre 0,0,0. If the normal points inwards then the
+   * vertices will be swapped.
+   *
+   * @param vertices the vertices
+   * @param faces the faces
+   * @return the count of the number swapped
+   */
+  public static int checkFacets(Point3f[] vertices, int[] faces) {
+    int count = 0;
+    final int nFaces = faces.length;
+    final Vector3f v1 = new Vector3f();
+    final Vector3f v2 = new Vector3f();
+    for (int i = 0; i < nFaces; i += 3) {
+      final int f1 = faces[i];
+      final int f2 = faces[i + 1];
+      final int f3 = faces[i + 2];
+
+      // Use the same order as that used to compute facet normals in
+      // org.scijava.java3d.utils.geometry.NormalGenerator
+      v1.sub(vertices[f3], vertices[f2]);
+      v2.sub(vertices[f1], vertices[f2]);
+      v1.cross(v1, v2);
+      v1.normalize();
+
+      // Project point (x,y,z) to plane with normal (a,b,c) and point (d,e,f)
+      // t = (ad - ax + be - by + cd - cz) / (a^2 + b^2 + c^2)
+      // projected point = (x+ta,y+tb,z+tc)
+
+      // Project 0,0,0 to the facet
+      final double a = v1.x;
+      final double b = v1.y;
+      final double c = v1.z;
+      final double d = vertices[f1].x;
+      final double e = vertices[f1].y;
+      final double f = vertices[f1].z;
+      final double t = a * d + b * e + c * f;
+      if (t < 0) {
+        count++;
+        SimpleArrayUtils.swap(faces, i + 2, i);
+      }
+    }
+    return count;
   }
 
   @Override

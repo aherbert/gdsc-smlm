@@ -777,6 +777,13 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     sampleNew[Y] = new DescriptiveStatistics();
   }
 
+  @Override
+  public void add(PeakResult result) {
+    add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
+        result.getError(), result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+        result.getParameterDeviations());
+  }
+
   /** {@inheritDoc} */
   @Override
   public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared,
@@ -796,13 +803,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
 
   private boolean sampleSizeReached() {
     return size() >= settings.getNumberOfPeaks();
-  }
-
-  @Override
-  public void add(PeakResult result) {
-    add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
-        result.getError(), result.getNoise(), result.getMeanIntensity(), result.getParameters(),
-        result.getParameterDeviations());
   }
 
   @Override

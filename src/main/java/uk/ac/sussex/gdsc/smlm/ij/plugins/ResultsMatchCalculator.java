@@ -40,7 +40,6 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
@@ -60,7 +59,7 @@ import java.util.List;
 /**
  * Compares the coordinates in two sets of results and computes the match statistics.
  */
-public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
+public class ResultsMatchCalculator implements PlugIn {
   private static String TITLE = "Results Match Calculator";
 
   private static String inputOption1 = "";
@@ -81,6 +80,50 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
   private static ImageROIPainter pairPainter;
 
   private final Rounder rounder = RounderUtils.create(4);
+
+  /**
+   * A point that holds a reference to a PeakResult.
+   */
+  public static class PeakResultPoint extends BasePoint {
+    /** The time. */
+    int t;
+
+    /** The peak result. */
+    PeakResult peakResult;
+
+    /**
+     * Instantiates a new peak result point.
+     *
+     * @param t the time
+     * @param x the x
+     * @param y the y
+     * @param z the z
+     * @param peakResult the peak result
+     */
+    public PeakResultPoint(int t, float x, float y, float z, PeakResult peakResult) {
+      super(x, y, z);
+      this.t = t;
+      this.peakResult = peakResult;
+    }
+
+    /**
+     * Gets the time.
+     *
+     * @return the time
+     */
+    public int getTime() {
+      return t;
+    }
+
+    /**
+     * Gets the peak result.
+     *
+     * @return the peak result
+     */
+    public PeakResult getPeakResult() {
+      return peakResult;
+    }
+  }
 
   /** {@inheritDoc} */
   @Override
@@ -116,7 +159,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
     }
 
     final long start = System.nanoTime();
-    compareCoordinates(results1, results2, dThreshold, increments, delta);
+    runCompareCoordinates(results1, results2, dThreshold, increments, delta);
     final double seconds = (System.nanoTime() - start) / 1000000000.0;
 
     IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
@@ -175,7 +218,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
   }
 
   @SuppressWarnings("null")
-  private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
+  private void runCompareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
       double dThreshold, int increments, double delta) {
     final boolean requirePairs = showPairs || saveClassifications;
 
@@ -198,16 +241,16 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
       final Coordinate[] actual = getCoordinates(actualCoordinates, t);
       final Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
 
-      final List<Coordinate> TP = null;
-      List<Coordinate> FP = null;
-      List<Coordinate> FN = null;
+      final List<Coordinate> tp = null;
+      List<Coordinate> fp = null;
+      List<Coordinate> fn = null;
       final List<PointPair> matches = new LinkedList<>();
       if (requirePairs) {
-        FP = new LinkedList<>();
-        FN = new LinkedList<>();
+        fp = new LinkedList<>();
+        fn = new LinkedList<>();
       }
 
-      MatchCalculator.analyseResults2D(actual, predicted, maxDistance, TP, FP, FN, matches);
+      MatchCalculator.analyseResults2D(actual, predicted, maxDistance, tp, fp, fn, matches);
 
       // Aggregate
       n1 += actual.length;
@@ -216,26 +259,26 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
       allMatches.addAll(matches);
       if (showPairs) {
         pairs.addAll(matches);
-        for (final Coordinate c : FN) {
+        for (final Coordinate c : fn) {
           pairs.add(new PointPair(c, null));
         }
-        for (final Coordinate c : FP) {
+        for (final Coordinate c : fp) {
           pairs.add(new PointPair(null, c));
         }
       }
       if (fileResults != null) {
         // Matches are marked in the original value with 1 for true, 0 for false
         for (final PointPair pair : matches) {
-          PeakResult p = ((PeakResultPoint) pair.getPoint2()).peakResult;
-          p = p.clone();
-          p.setOrigValue(1);
-          fileResults.add(p);
+          PeakResult result = ((PeakResultPoint) pair.getPoint2()).peakResult;
+          result = result.clone();
+          result.setOrigValue(1);
+          fileResults.add(result);
         }
-        for (final Coordinate c : FP) {
-          PeakResult p = ((PeakResultPoint) c).peakResult;
-          p = p.clone();
-          p.setOrigValue(0);
-          fileResults.add(p);
+        for (final Coordinate c : fp) {
+          PeakResult result = ((PeakResultPoint) c).peakResult;
+          result = result.clone();
+          result.setOrigValue(0);
+          fileResults.add(result);
         }
       }
     }
@@ -280,7 +323,23 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
             p.y += resultsWindow.getHeight();
             pairsWindow.setLocation(p);
           }
-          pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(), "", this);
+          pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(), "", line -> {
+            // Extract the startT and x,y coordinates from the first pulse in the line
+            final int[] index = {1, 4};
+            final String[] fields = line.split("\t");
+            final int startT = Integer.parseInt(fields[0]);
+            for (final int i : index) {
+              if (i < fields.length) {
+                if (fields[i].equals("-")) {
+                  continue;
+                }
+                final double x = Double.parseDouble(fields[i]);
+                final double y = Double.parseDouble(fields[i + 1]);
+                return new double[] {startT, x, y};
+              }
+            }
+            return null;
+          });
         }
         pairsWindow.getTextPanel().clear();
         String title = "Results 1";
@@ -291,18 +350,18 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
         pairPainter.setTitle(title);
         IJ.showStatus("Writing pairs table");
         IJ.showProgress(0);
-        int c = 0;
+        int count = 0;
         final int total = pairs.size();
         final int step = ImageJUtils.getProgressInterval(total);
         final ArrayList<String> list = new ArrayList<>(total);
         boolean flush = true;
         for (final PointPair pair : pairs) {
 
-          if (++c % step == 0) {
-            IJ.showProgress(c, total);
+          if (++count % step == 0) {
+            IJ.showProgress(count, total);
           }
           list.add(addPairResult(pair));
-          if (flush && c == 9) {
+          if (flush && count == 9) {
             pairsWindow.getTextPanel().append(list);
             list.clear();
             flush = false;
@@ -451,24 +510,22 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
       }
 
       // Add the results to the lists
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult p) {
-          final float x;
-          final float y;
-          final float z;
-          if (integerCoordinates) {
-            x = (int) p.getXPosition();
-            y = (int) p.getYPosition();
-            z = (int) p.getZPosition();
-          } else {
-            x = p.getXPosition();
-            y = p.getYPosition();
-            z = p.getZPosition();
-          }
-          for (int t = p.getFrame() - minT, i = p.getEndFrame() - p.getFrame() + 1; i-- > 0; t++) {
-            tmpCoords.get(t).add(new PeakResultPoint(t + minT, x, y, z, p));
-          }
+      results.forEach((PeakResultProcedure) result -> {
+        final float x;
+        final float y;
+        final float z;
+        if (integerCoordinates) {
+          x = (int) result.getXPosition();
+          y = (int) result.getYPosition();
+          z = (int) result.getZPosition();
+        } else {
+          x = result.getXPosition();
+          y = result.getYPosition();
+          z = result.getZPosition();
+        }
+        for (int t = result.getFrame() - minT, i = result.getEndFrame() - result.getFrame() + 1;
+            i-- > 0; t++) {
+          tmpCoords.get(t).add(new PeakResultPoint(t + minT, x, y, z, result));
         }
       });
 
@@ -481,6 +538,23 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
   }
 
   /**
+   * Return an array of coordinates for the given time point. Returns an empty array if there are no
+   * coordinates.
+   *
+   * @param coords the coords
+   * @param time the time
+   * @return the coordinates
+   */
+  public static Coordinate[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords,
+      int time) {
+    final ArrayList<Coordinate> tmp = coords.get(time);
+    if (tmp != null) {
+      return tmp.toArray(new Coordinate[tmp.size()]);
+    }
+    return new Coordinate[0];
+  }
+
+  /**
    * Merge the time points from each map into a single sorted list of unique time points.
    *
    * @param actualCoordinates the actual coordinates
@@ -489,20 +563,13 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
    */
   private static int[] getTimepoints(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
       TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates) {
-    // int[] set = SimpleArrayUtils.merge(actualCoordinates.keys(), predictedCoordinates.keys(),
-    // true);
 
     // Do inline to avoid materialising the keys arrays
     final TIntHashSet hashset =
         new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
-    final TIntProcedure p = new TIntProcedure() {
-
-      /** {@inheritDoc} */
-      @Override
-      public boolean execute(int value) {
-        hashset.add(value);
-        return true;
-      }
+    final TIntProcedure p = value -> {
+      hashset.add(value);
+      return true;
     };
     actualCoordinates.forEachKey(p);
     predictedCoordinates.forEachKey(p);
@@ -510,23 +577,6 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
 
     Arrays.sort(set);
     return set;
-  }
-
-  /**
-   * Return an array of coordinates for the given time point. Returns an empty array if there are no
-   * coordinates.
-   *
-   * @param coords the coords
-   * @param t the t
-   * @return the coordinates
-   */
-  public static Coordinate[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords,
-      Integer t) {
-    final ArrayList<Coordinate> tmp = coords.get(t);
-    if (tmp != null) {
-      return tmp.toArray(new Coordinate[tmp.size()]);
-    }
-    return new Coordinate[0];
   }
 
   /**
@@ -632,26 +682,6 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
     return sb.toString();
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public double[] getCoordinates(String line) {
-    // Extract the startT and x,y coordinates from the first pulse in the line
-    final int[] index = {1, 4};
-    final String[] fields = line.split("\t");
-    final int startT = Integer.valueOf(fields[0]);
-    for (final int i : index) {
-      if (i < fields.length) {
-        if (fields[i].equals("-")) {
-          continue;
-        }
-        final double x = Double.valueOf(fields[i]);
-        final double y = Double.valueOf(fields[i + 1]);
-        return new double[] {startT, x, y};
-      }
-    }
-    return null;
-  }
-
   private String addPairResult(PointPair pair) {
     final StringBuilder sb = new StringBuilder();
     final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
@@ -669,24 +699,19 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
     return sb.toString();
   }
 
-  private void addPoint(StringBuilder sb, PeakResultPoint p) {
-    if (p == null) {
+  private void addPoint(StringBuilder sb, PeakResultPoint result) {
+    if (result == null) {
       sb.append("-\t-\t-\t");
     } else {
-      sb.append(rounder.round(p.getX())).append('\t');
-      sb.append(rounder.round(p.getY())).append('\t');
-      sb.append(rounder.round(p.getZ())).append('\t');
+      sb.append(rounder.round(result.getX())).append('\t');
+      sb.append(rounder.round(result.getY())).append('\t');
+      sb.append(rounder.round(result.getZ())).append('\t');
     }
   }
 
   private static TIntHashSet getIds(MemoryPeakResults results) {
     final TIntHashSet ids = new TIntHashSet(results.size());
-    results.forEach(new PeakResultProcedure() {
-      @Override
-      public void execute(PeakResult p) {
-        ids.add(p.getId());
-      }
-    });
+    results.forEach((PeakResultProcedure) result -> ids.add(result.getId()));
     return ids;
   }
 
@@ -700,55 +725,11 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider {
 
   private static double[] getPairDistances(List<PointPair> pairs) {
     final double[] d = new double[pairs.size()];
-    int i = 0;
+    int index = 0;
     for (final PointPair pair : pairs) {
-      d[i++] = pair.getXyDistanceSquared();
+      d[index++] = pair.getXyDistanceSquared();
     }
     return d;
-  }
-
-  /**
-   * A point that holds a reference to a PeakResult.
-   */
-  public static class PeakResultPoint extends BasePoint {
-    /** The time. */
-    int t;
-
-    /** The peak result. */
-    PeakResult peakResult;
-
-    /**
-     * Instantiates a new peak result point.
-     *
-     * @param t the time
-     * @param x the x
-     * @param y the y
-     * @param z the z
-     * @param peakResult the peak result
-     */
-    public PeakResultPoint(int t, float x, float y, float z, PeakResult peakResult) {
-      super(x, y, z);
-      this.t = t;
-      this.peakResult = peakResult;
-    }
-
-    /**
-     * Gets the time.
-     *
-     * @return the time
-     */
-    public int getTime() {
-      return t;
-    }
-
-    /**
-     * Gets the peak result.
-     *
-     * @return the peak result
-     */
-    public PeakResult getPeakResult() {
-      return peakResult;
-    }
   }
 
   /**

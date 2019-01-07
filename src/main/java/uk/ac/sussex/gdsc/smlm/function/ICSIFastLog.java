@@ -246,71 +246,6 @@ public class ICSIFastLog extends FastLog {
     return (e + data[m >>> q]);
   }
 
-  /**
-   * Calculate the logarithm using base 2. Requires the argument be finite and positive.
-   *
-   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
-   * ({@code >fastLog2(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
-   * incorrect ({@code fastLog2(-x)}). <li>If the argument is positive infinity, then the result is
-   * incorrect ({@code fastLog2(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
-   * zero, then the result is incorrect ({@code fastLog2(Float.MIN_VALUE)}). </ul>
-   *
-   * @param x the argument (must be strictly positive)
-   * @return log2(x)
-   */
-  @Override
-  public float fastLog2(float x) {
-    final int bits = Float.floatToRawIntBits(x);
-    final int e = ((bits >> 23) & 0xff);
-    final int m = (bits & 0x7fffff);
-    return (e + data[m >>> q]);
-  }
-
-  @Override
-  public float log(float x) {
-    // Re-implement to avoid multiplication for all the edge cases
-    final int bits = Float.floatToRawIntBits(x);
-    final int e = (bits >> 23) & 0xff;
-    final int m = (bits & 0x7fffff);
-
-    if (e == 255) {
-      if (m != 0) {
-        return Float.NaN;
-      }
-      return ((bits >> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
-    }
-
-    if ((bits >> 31) != 0) {
-      return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-    }
-
-    if (e == 0) {
-      return (m == 0) ? Float.NEGATIVE_INFINITY : (data[m >>> q]) * LN2F;
-    }
-
-    return (e + data[m >>> q]) * LN2F;
-  }
-
-  /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive.
-   *
-   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
-   * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
-   * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
-   * incorrect ({@code fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
-   * zero, then the result is incorrect ({@code fastLog(Float.MIN_VALUE)}). </ul>
-   *
-   * @param x the argument (must be strictly positive)
-   * @return log(x)
-   */
-  @Override
-  public float fastLog(float x) {
-    final int bits = Float.floatToRawIntBits(x);
-    final int e = ((bits >> 23) & 0xff);
-    final int m = (bits & 0x7fffff);
-    return (e + data[m >>> q]) * LN2F;
-  }
-
   @Override
   public float log2(double x) {
     final long bits = Double.doubleToRawLongBits(x);
@@ -366,6 +301,26 @@ public class ICSIFastLog extends FastLog {
    * zero, then the result is incorrect ({@code fastLog2(Float.MIN_VALUE)}). </ul>
    *
    * @param x the argument (must be strictly positive)
+   * @return log2(x)
+   */
+  @Override
+  public float fastLog2(float x) {
+    final int bits = Float.floatToRawIntBits(x);
+    final int e = ((bits >> 23) & 0xff);
+    final int m = (bits & 0x7fffff);
+    return (e + data[m >>> q]);
+  }
+
+  /**
+   * Calculate the logarithm using base 2. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * ({@code >fastLog2(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
+   * incorrect ({@code fastLog2(-x)}). <li>If the argument is positive infinity, then the result is
+   * incorrect ({@code fastLog2(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
+   * zero, then the result is incorrect ({@code fastLog2(Float.MIN_VALUE)}). </ul>
+   *
+   * @param x the argument (must be strictly positive)
    * @return log(x)
    */
   @Override
@@ -374,6 +329,31 @@ public class ICSIFastLog extends FastLog {
     final int e = (int) ((bits >>> 52) & 0x7ffL);
     final long m = (bits & 0xfffffffffffffL);
     return (e + ddata[(int) (m >>> qd)]);
+  }
+
+  @Override
+  public float log(float x) {
+    // Re-implement to avoid multiplication for all the edge cases
+    final int bits = Float.floatToRawIntBits(x);
+    final int e = (bits >> 23) & 0xff;
+    final int m = (bits & 0x7fffff);
+
+    if (e == 255) {
+      if (m != 0) {
+        return Float.NaN;
+      }
+      return ((bits >> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
+    }
+
+    if ((bits >> 31) != 0) {
+      return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
+    }
+
+    if (e == 0) {
+      return (m == 0) ? Float.NEGATIVE_INFINITY : (data[m >>> q]) * LN2F;
+    }
+
+    return (e + data[m >>> q]) * LN2F;
   }
 
   @Override
@@ -398,6 +378,26 @@ public class ICSIFastLog extends FastLog {
     }
 
     return (e + ddata[(int) (m >>> qd)]) * LN2F;
+  }
+
+  /**
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
+   * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
+   * incorrect ({@code fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
+   * zero, then the result is incorrect ({@code fastLog(Float.MIN_VALUE)}). </ul>
+   *
+   * @param x the argument (must be strictly positive)
+   * @return log(x)
+   */
+  @Override
+  public float fastLog(float x) {
+    final int bits = Float.floatToRawIntBits(x);
+    final int e = ((bits >> 23) & 0xff);
+    final int m = (bits & 0x7fffff);
+    return (e + data[m >>> q]) * LN2F;
   }
 
   /**

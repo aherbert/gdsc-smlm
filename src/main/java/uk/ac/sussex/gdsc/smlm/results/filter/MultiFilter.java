@@ -127,22 +127,22 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
 
   /** The components for no width and shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_NoWidth_Shift;
+  MultiFilterComponentSet componentsNoWidthShift;
   /** The components for width and shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_Width_Shift;
+  MultiFilterComponentSet componentsWidthShift;
   /** The components for no width and no shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_NoWidth_NoShift;
+  MultiFilterComponentSet componentsNoWidthNoShift;
   /** The components for width and no shift. */
   @XStreamOmitField
-  MultiFilterComponentSet components_Width_NoShift;
+  MultiFilterComponentSet componentsWidthNoShift;
   /**
    * The components for width and no shift copied into a larger array so that the shift component
    * can be set at position 0.
    */
   @XStreamOmitField
-  MultiFilterComponentSet components_Shift0;
+  MultiFilterComponentSet componentsShift0;
   @XStreamOmitField
   private int filterSetupFlags;
   @XStreamOmitField
@@ -215,6 +215,40 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     zEnabled = isZEnabled();
   }
 
+  @Override
+  public void setup() {
+    filterSetupFlags = 0;
+    this.filterSetupData = null;
+    setupComponents(true, true, 0);
+  }
+
+  @Override
+  public void setup(int flags) {
+    filterSetupFlags = flags;
+    this.filterSetupData = null;
+    setupComponents(!areSet(flags, IDirectFilter.NO_WIDTH), !areSet(flags, IDirectFilter.NO_SHIFT),
+        // Pass through the flags that are recognised
+        flags & (IDirectFilter.XY_WIDTH | IDirectFilter.NO_Z));
+  }
+
+  @Override
+  public void setup(int flags, FilterSetupData... filterSetupData) {
+    setup(flags);
+    for (int i = filterSetupData.length; i-- > 0;) {
+      if (filterSetupData[i] instanceof ShiftFilterSetupData) {
+        this.filterSetupData = getFilterSetupData(filterSetupData[i]);
+        final double newShift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
+        if (newShift > 0) {
+          componentsShift0.replace0(new MultiFilterShiftComponent(newShift));
+          components = componentsShift0;
+        } else {
+          components = componentsWidthNoShift;
+        }
+        return;
+      }
+    }
+  }
+
   private boolean isZEnabled() {
     return (minZ != 0 || maxZ != 0) && minZ <= maxZ;
   }
@@ -229,28 +263,13 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
         peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
   }
 
-  @Override
-  public void setup() {
-    filterSetupFlags = 0;
-    this.filterSetupData = null;
-    setup(true, true, 0);
-  }
-
-  @Override
-  public void setup(int flags) {
-    filterSetupFlags = flags;
-    this.filterSetupData = null;
-    setup(!areSet(flags, IDirectFilter.NO_WIDTH), !areSet(flags, IDirectFilter.NO_SHIFT),
-        // Pass through the flags that are recognised
-        flags & (IDirectFilter.XY_WIDTH | IDirectFilter.NO_Z));
-  }
-
-  private void setup(final boolean widthEnabled, final boolean shiftEnabled, final int flags) {
+  private void setupComponents(final boolean widthEnabled, final boolean shiftEnabled,
+      final int flags) {
     // Note: The filter caches the combinations that are likely to be turned on/off:
     // width filtering and shift filtering
     // Other filters related to the PSF (XY widths, z-depth) are assumed to be constant.
 
-    if (components_Width_Shift == null || this.flags != flags) {
+    if (componentsWidthShift == null || this.flags != flags) {
       // Store this in case the filter is setup with different flags
       this.flags = flags;
 
@@ -300,36 +319,22 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       final MultiFilterComponent[] components4 =
           MultiFilter.remove(components2, components2.length, shiftComponentClass);
 
-      components_Width_Shift = MultiFilterComponentSetUtils.create(components1, s1);
-      components_NoWidth_Shift =
-          MultiFilterComponentSetUtils.create(components2, components2.length);
-      components_Width_NoShift =
-          MultiFilterComponentSetUtils.create(components3, components3.length);
-      components_NoWidth_NoShift =
+      componentsWidthShift = MultiFilterComponentSetUtils.create(components1, s1);
+      componentsNoWidthShift = MultiFilterComponentSetUtils.create(components2, components2.length);
+      componentsWidthNoShift = MultiFilterComponentSetUtils.create(components3, components3.length);
+      componentsNoWidthNoShift =
           MultiFilterComponentSetUtils.create(components4, components4.length);
 
       final MultiFilterComponent[] data = new MultiFilterComponent[components3.length + 1];
       System.arraycopy(components3, 0, data, 1, components3.length);
-      components_Shift0 = MultiFilterComponentSetUtils.create(data, data.length);
+      componentsShift0 = MultiFilterComponentSetUtils.create(data, data.length);
     }
 
     if (widthEnabled) {
-      components = (shiftEnabled) ? components_Width_Shift : components_NoWidth_Shift;
+      components = (shiftEnabled) ? componentsWidthShift : componentsNoWidthShift;
     } else {
-      components = (shiftEnabled) ? components_NoWidth_Shift : components_NoWidth_NoShift;
+      components = (shiftEnabled) ? componentsNoWidthShift : componentsNoWidthNoShift;
     }
-
-    // // This is the legacy support for all components together
-    // this.widthEnabled = widthEnabled;
-    // signalThreshold = (float) signal;
-    // if (widthEnabled)
-    // {
-    // lowerSigmaThreshold = (float) minWidth;
-    // upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
-    // }
-    // offset = Filter.getUpperSquaredLimit(shift);
-    // eoffset = Filter.getUpperSquaredLimit(eshift);
-    // variance = Filter.getDUpperSquaredLimit(precision);
   }
 
   /**
@@ -365,30 +370,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public void setup(int flags, FilterSetupData... filterSetupData) {
-    setup(flags);
-    for (int i = filterSetupData.length; i-- > 0;) {
-      if (filterSetupData[i] instanceof ShiftFilterSetupData) {
-        this.filterSetupData = getFilterSetupData(filterSetupData[i]);
-        final double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
-        if (shift > 0) {
-          components_Shift0.replace0(new MultiFilterShiftComponent(shift));
-          components = components_Shift0;
-        } else {
-          components = components_Width_NoShift;
-        }
-        return;
-      }
-    }
-  }
-
-  @Override
-  public int getFilterSetupFlags() throws IllegalStateException {
+  public int getFilterSetupFlags() {
     return filterSetupFlags;
   }
 
   @Override
-  public FilterSetupData[] getFilterSetupData() throws IllegalStateException {
+  public FilterSetupData[] getFilterSetupData() {
     return filterSetupData;
   }
 
@@ -456,41 +443,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     return components.validate(peak);
-
-    // // This is the legacy support for all components together
-    //
-    // // Current order of filter power obtained from BenchmarkFilterAnalysis:
-    // // Precision, Max Width, SNR, Shift, Min width
-    //
-    // if (peak.getLocationVariance() > variance)
-    // return V_LOCATION_VARIANCE;
-    //
-    // if (widthEnabled)
-    // {
-    // final float xsdf = peak.getXSDFactor();
-    // if (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold)
-    // return V_X_SD_FACTOR;
-    // }
-    //
-    // if (peak.getSNR() < this.snr)
-    // return V_SNR;
-    //
-    // // Shift
-    // final float xs2 = peak.getXRelativeShift2();
-    // if (xs2 > offset)
-    // return V_X_RELATIVE_SHIFT;
-    // final float ys2 = peak.getYRelativeShift2();
-    // if (ys2 > offset)
-    // return V_Y_RELATIVE_SHIFT;
-    //
-    // if (peak.getPhotons() < signal)
-    // return V_PHOTONS;
-    //
-    // // Euclidian shift
-    // if (xs2 + ys2 > eoffset)
-    // return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
-    //
-    // return 0;
   }
 
   @Override
@@ -659,26 +611,25 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
    * same or the number of parameters do not match then return 0. If the other filter is null return
    * -1.
    *
-   * @param o The other filter
+   * @param other The other filter
    * @return the count difference
    */
-  public int weakest(MultiFilter o) {
-    if (o == null) {
+  public int weakest(MultiFilter other) {
+    if (other == null) {
       return -1;
     }
 
     // Count the number of weakest
     //@formatter:off
-    return
-      compareMin(signal, o.signal) +
-        compareMin(snr, o.snr) +
-        compareMin(minWidth, o.minWidth) +
-        compareMax(maxWidth, o.maxWidth) +
-        compareMax(shift, o.shift) +
-        compareMax(eshift, o.eshift) +
-        compareMax(precision, o.precision) +
-        compareMin(minZ, o.minZ) +
-        compareMax(maxZ, o.maxZ);
+    return compareMin(signal, other.signal)
+        + compareMin(snr, other.snr)
+        + compareMin(minWidth, other.minWidth)
+        + compareMax(maxWidth, other.maxWidth)
+        + compareMax(shift, other.shift)
+        + compareMax(eshift, other.eshift)
+        + compareMax(precision, other.precision)
+        + compareMin(minZ, other.minZ)
+        + compareMax(maxZ, other.maxZ);
     //@formatter:on
   }
 
@@ -753,14 +704,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     // This is run after a clone() occurs.
     // Q. Can the setup state be maintained?
 
-    // components_Width_Shift = null;
-
     // Replace any object that is manipulated by the instance
-    if (components_Shift0 != null) {
-      final boolean update = components == components_Shift0;
-      components_Shift0 = components_Shift0.clone();
+    if (componentsShift0 != null) {
+      final boolean update = components == componentsShift0;
+      componentsShift0 = componentsShift0.clone();
       if (update) {
-        components = components_Shift0;
+        components = componentsShift0;
       }
     }
   }

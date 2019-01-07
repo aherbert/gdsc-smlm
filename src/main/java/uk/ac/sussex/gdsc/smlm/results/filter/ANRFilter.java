@@ -75,6 +75,16 @@ public class ANRFilter extends DirectFilter {
         : Float.POSITIVE_INFINITY;
   }
 
+  /**
+   * Gets the amplitude-to-noise ratio (ANR).
+   *
+   * @param peak the peak
+   * @return the amplitude-to-noise ratio (ANR)
+   */
+  static float getANR(PreprocessedPeakResult peak) {
+    return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
+  }
+
   @Override
   public int getValidationFlags() {
     return V_AMPLITUDE | V_NOISE;
@@ -86,16 +96,6 @@ public class ANRFilter extends DirectFilter {
       return V_AMPLITUDE | V_NOISE;
     }
     return 0;
-  }
-
-  /**
-   * Gets the amplitude-to-noise ratio (ANR).
-   *
-   * @param peak the peak
-   * @return the amplitude-to-noise ratio (ANR)
-   */
-  static float getANR(PreprocessedPeakResult peak) {
-    return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
   }
 
   /** {@inheritDoc} */

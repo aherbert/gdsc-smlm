@@ -199,33 +199,6 @@ public class TurboLog2 extends TurboLog {
     return logMantissa[(m + roundF) >>> q] + logExpF[e];
   }
 
-  /**
-   * Calculate the natural logarithm. Requires the argument be finite and positive.
-   *
-   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
-   * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
-   * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
-   * incorrect ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
-   * zero, then the result is negative infinity. </ul>
-   *
-   * @param x the argument (must be strictly positive)
-   * @return log(x)
-   */
-  @Override
-  public float fastLog(float x) {
-    // As above but no checks for NaN or infinity
-    final int bits = Float.floatToRawIntBits(x);
-    final int e = ((bits >>> 23) & 0xff);
-    final int m = (bits & 0x7fffff);
-    if (e == 0) {
-      return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
-    }
-    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
-      return (float) Math.log(x);
-    }
-    return logMantissa[(m + roundF) >>> q] + logExpF[e];
-  }
-
   @Override
   public float log(double x) {
     final long bits = Double.doubleToRawLongBits(x);
@@ -276,6 +249,34 @@ public class TurboLog2 extends TurboLog {
     // Round the mantissa
     return logMantissa[(int) ((m + roundD) >>> qd)] + logExpD[e];
   }
+
+  /**
+   * Calculate the natural logarithm. Requires the argument be finite and positive.
+   *
+   * <p>Special cases: <ul> <li>If the argument is NaN, then the result is incorrect
+   * ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is negative, then the result is
+   * incorrect ({@code fastLog(-x)}). <li>If the argument is positive infinity, then the result is
+   * incorrect ({@code >fastLog(Float.MAX_VALUE)}). <li>If the argument is positive zero or negative
+   * zero, then the result is negative infinity. </ul>
+   *
+   * @param x the argument (must be strictly positive)
+   * @return log(x)
+   */
+  @Override
+  public float fastLog(float x) {
+    // As above but no checks for NaN or infinity
+    final int bits = Float.floatToRawIntBits(x);
+    final int e = ((bits >>> 23) & 0xff);
+    final int m = (bits & 0x7fffff);
+    if (e == 0) {
+      return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
+    }
+    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
+      return (float) Math.log(x);
+    }
+    return logMantissa[(m + roundF) >>> q] + logExpF[e];
+  }
+
 
   /**
    * Calculate the natural logarithm. Requires the argument be finite and positive.

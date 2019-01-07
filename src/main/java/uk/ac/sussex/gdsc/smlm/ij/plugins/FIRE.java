@@ -70,6 +70,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import gnu.trove.list.array.TDoubleArrayList;
 
 import ij.IJ;
@@ -119,6 +121,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.TextField;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
@@ -155,10 +158,10 @@ public class FIRE implements PlugIn {
   private static int maxPerBin; // 5 in the Niewenhuizen paper
   private static boolean randomSplit = true;
   private static int blockSize = 50;
-  private static String[] SCALE_ITEMS;
-  private static int[] SCALE_VALUES = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
-  private static String[] IMAGE_SIZE_ITEMS;
-  private static int[] IMAGE_SIZE_VALUES;
+  private static final String[] scaleItems;
+  private static final int[] scaleValues = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
+  private static String[] imageSizeItems;
+  private static int[] imageSizeValues;
   private static int imageScaleIndex;
   private static int imageSizeIndex;
 
@@ -169,15 +172,15 @@ public class FIRE implements PlugIn {
   private static double sigma;
 
   static {
-    SCALE_ITEMS = new String[SCALE_VALUES.length];
-    SCALE_ITEMS[0] = "Auto";
-    for (int i = 1; i < SCALE_VALUES.length; i++) {
-      SCALE_ITEMS[i] = Integer.toString(SCALE_VALUES[i]);
+    scaleItems = new String[scaleValues.length];
+    scaleItems[0] = "Auto";
+    for (int i = 1; i < scaleValues.length; i++) {
+      scaleItems[i] = Integer.toString(scaleValues[i]);
     }
 
     // Create size for Fourier transforms. Must be power of 2.
-    IMAGE_SIZE_VALUES = new int[32];
-    IMAGE_SIZE_ITEMS = new String[IMAGE_SIZE_VALUES.length];
+    imageSizeValues = new int[32];
+    imageSizeItems = new String[imageSizeValues.length];
     int size = 512; // Start at a reasonable size. Too small does not work.
     int count = 0;
     while (size <= 16384) {
@@ -187,13 +190,13 @@ public class FIRE implements PlugIn {
 
       // Image sizes are 1 smaller so that rounding error when scaling does not create an image too
       // large for the power of 2
-      IMAGE_SIZE_VALUES[count] = size - 1;
-      IMAGE_SIZE_ITEMS[count] = Integer.toString(size);
+      imageSizeValues[count] = size - 1;
+      imageSizeItems[count] = Integer.toString(size);
       size *= 2;
       count++;
     }
-    IMAGE_SIZE_VALUES = Arrays.copyOf(IMAGE_SIZE_VALUES, count);
-    IMAGE_SIZE_ITEMS = Arrays.copyOf(IMAGE_SIZE_ITEMS, count);
+    imageSizeValues = Arrays.copyOf(imageSizeValues, count);
+    imageSizeItems = Arrays.copyOf(imageSizeItems, count);
   }
 
   /**
@@ -257,6 +260,9 @@ public class FIRE implements PlugIn {
   private static boolean chooseRoi;
   private static String roiImage = "";
 
+  private static int imagejNThreads = Prefs.getThreads();
+  private static int lastNThreads = imagejNThreads;
+
   private boolean extraOptions;
   private Rectangle roiBounds;
   private int roiImageWidth;
@@ -274,10 +280,14 @@ public class FIRE implements PlugIn {
   private double correctionMean;
   private double correctionSigma;
 
+  private TrackProgress progress = new ImageJTrackProgress();
+
+  private int numberOfThreads;
+
   /**
    * Store images for FIRE analysis.
    */
-  public class FireImages {
+  public static class FireImages {
     /** The first super-resolution image. */
     final ImageProcessor ip1;
     /** The second super-resolution image. */
@@ -302,7 +312,7 @@ public class FIRE implements PlugIn {
   /**
    * Contains the Fourier Image REsolution (FIRE) result.
    */
-  public class FireResult {
+  public static class FireResult {
     /** The fire number (in nm). */
     final double fireNumber;
 
@@ -378,6 +388,28 @@ public class FIRE implements PlugIn {
     }
   }
 
+  /**
+   * Dumb implementation of the track progress interface for parallel threads. Uses simple
+   * synchronisation to increment total progress.
+   */
+  private static class ParallelTrackProgress extends NullTrackProgress {
+    AtomicDouble done = new AtomicDouble();
+    final int total;
+
+    ParallelTrackProgress(int repeats) {
+      total = repeats;
+    }
+
+    @Override
+    public void incrementProgress(double fraction) {
+      // Avoid synchronisation for nothing
+      if (fraction == 0) {
+        return;
+      }
+      IJ.showProgress(done.addAndGet(fraction) / this.total);
+    }
+  }
+
   /** {@inheritDoc} */
   @Override
   public void run(String arg) {
@@ -434,8 +466,8 @@ public class FIRE implements PlugIn {
     // Compute FIRE
 
     String name = results.getName();
-    final double fourierImageScale = SCALE_VALUES[imageScaleIndex];
-    final int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
+    final double fourierImageScale = scaleValues[imageScaleIndex];
+    final int imageSize = imageSizeValues[imageSizeIndex];
 
     if (this.results2 != null) {
       name += " vs " + this.results2.getName();
@@ -687,8 +719,8 @@ public class FIRE implements PlugIn {
     final boolean single = results2 == null;
 
     gd.addMessage("Image construction options:");
-    gd.addChoice("Image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
-    gd.addChoice("Auto_image_size", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+    gd.addChoice("Image_scale", scaleItems, scaleItems[imageScaleIndex]);
+    gd.addChoice("Auto_image_size", imageSizeItems, imageSizeItems[imageSizeIndex]);
     if (extraOptions) {
       gd.addCheckbox("Use_signal (if present)", useSignal);
     }
@@ -761,7 +793,7 @@ public class FIRE implements PlugIn {
       sigma = Math.abs(gd.getNextNumber());
       if (extraOptions) {
         setThreads((int) gd.getNextNumber());
-        lastNThreads = this.nThreads;
+        lastNThreads = this.numberOfThreads;
       }
     }
 
@@ -1112,15 +1144,15 @@ public class FIRE implements PlugIn {
 
         // The threshold curve is the same
         threshold = FRC.calculateThresholdCurve(frcCurve, thresholdMethod);
-        add(colorThreshold, threshold);
+        addLine(colorThreshold, threshold);
       }
 
       for (int i = 0; i < xValues.length; i++) {
         yValues[i] = frcCurve.get(i).getCorrelation();
       }
 
-      add(colorValues, yValues);
-      add(colorNoSmooth, result.originalCorrelationCurve);
+      addLine(colorValues, yValues);
+      addLine(colorNoSmooth, result.originalCorrelationCurve);
     }
 
     public void addResolution(double resolution) {
@@ -1161,7 +1193,7 @@ public class FIRE implements PlugIn {
       }
     }
 
-    private void add(Color color, double[] y) {
+    private void addLine(Color color, double[] y) {
       if (color == null) {
         return;
       }
@@ -1288,44 +1320,6 @@ public class FIRE implements PlugIn {
     return calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, images);
   }
 
-  private TrackProgress progress = new ImageJTrackProgress();
-
-  private void setProgress(int repeats) {
-    if (repeats > 1) {
-      progress = new ParallelTrackProgress(repeats);
-    } else {
-      progress = new ImageJTrackProgress();
-    }
-  }
-
-  /**
-   * Dumb implementation of the track progress interface for parallel threads. Used simple
-   * synchronisation to increment total progress.
-   */
-  private static class ParallelTrackProgress extends NullTrackProgress {
-    double done;
-    final int total;
-
-    ParallelTrackProgress(int repeats) {
-      total = repeats;
-    }
-
-    @Override
-    public void incrementProgress(double fraction) {
-      // Avoid synchronisation for nothing
-      if (fraction == 0) {
-        return;
-      }
-      final double done = add(fraction);
-      IJ.showProgress(done / this.total);
-    }
-
-    synchronized double add(double d) {
-      done += d;
-      return done;
-    }
-  }
-
   /**
    * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should
    * be called after {@link #initialise(MemoryPeakResults, MemoryPeakResults)}.
@@ -1418,8 +1412,8 @@ public class FIRE implements PlugIn {
     final StoredDataStatistics precision = histogram.precision;
 
     // String name = results.getName();
-    final double fourierImageScale = SCALE_VALUES[imageScaleIndex];
-    final int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
+    final double fourierImageScale = scaleValues[imageScaleIndex];
+    final int imageSize = imageSizeValues[imageSizeIndex];
 
     // Create the image and compute the numerator of FRC.
     // Do not use the signal so results.size() is the number of localisations.
@@ -1948,8 +1942,8 @@ public class FIRE implements PlugIn {
 
     gd.addMessage("Image construction options:");
     // gd.addCheckbox("Use_signal (if present)", useSignal);
-    gd.addChoice("Image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
-    gd.addChoice("Auto_image_size", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+    gd.addChoice("Image_scale", scaleItems, scaleItems[imageScaleIndex]);
+    gd.addChoice("Auto_image_size", imageSizeItems, imageSizeItems[imageSizeIndex]);
     gd.addNumericField("Block_size", blockSize, 0);
     gd.addCheckbox("Random_split", randomSplit);
     gd.addNumericField("Max_per_bin", maxPerBin, 0);
@@ -2816,7 +2810,8 @@ public class FIRE implements PlugIn {
           }
         }
       } catch (final InterruptedException ex) {
-        // Ignore
+        // Propagate the interruption
+        Thread.currentThread().interrupt();
       }
 
       gd.showDialog();
@@ -2844,7 +2839,7 @@ public class FIRE implements PlugIn {
     return true;
   }
 
-  private class FIREDialogListener implements DialogListener, MouseListener {
+  private class FIREDialogListener extends MouseAdapter implements DialogListener {
     /**
      * Delay (in milliseconds) used when entering new values in the dialog before the preview is
      * processed.
@@ -2960,7 +2955,7 @@ public class FIRE implements PlugIn {
       if (event.getClickCount() < 2) {
         return;
       }
-      if (event.getSource() == null || !(event.getSource() instanceof Scrollbar)) {
+      if (!(event.getSource() instanceof Scrollbar)) {
         return;
       }
       final Scrollbar sl = (Scrollbar) event.getSource();
@@ -2974,32 +2969,7 @@ public class FIRE implements PlugIn {
         tf3.setText(q);
       }
     }
-
-    @Override
-    public void mousePressed(MouseEvent event) {
-      // Ignore
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent event) {
-      // Ignore
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent event) {
-      // Ignore
-    }
-
-    @Override
-    public void mouseExited(MouseEvent event) {
-      // Ignore
-    }
   }
-
-  private static int imagejNThreads = Prefs.getThreads();
-  private static int lastNThreads = imagejNThreads;
-
-  private int nThreads;
 
   /**
    * Gets the last N threads used in the input dialog.
@@ -3021,18 +2991,26 @@ public class FIRE implements PlugIn {
    * @return the threads
    */
   private int getThreads() {
-    if (nThreads == 0) {
-      nThreads = Prefs.getThreads();
+    if (numberOfThreads == 0) {
+      numberOfThreads = Prefs.getThreads();
     }
-    return nThreads;
+    return numberOfThreads;
   }
 
   /**
    * Sets the threads to use for multi-threaded computation.
    *
-   * @param nThreads the new threads
+   * @param threads the new threads
    */
-  public void setThreads(int nThreads) {
-    this.nThreads = Math.max(1, nThreads);
+  public void setThreads(int threads) {
+    this.numberOfThreads = Math.max(1, threads);
+  }
+
+  private void setProgress(int repeats) {
+    if (repeats > 1) {
+      progress = new ParallelTrackProgress(repeats);
+    } else {
+      progress = new ImageJTrackProgress();
+    }
   }
 }

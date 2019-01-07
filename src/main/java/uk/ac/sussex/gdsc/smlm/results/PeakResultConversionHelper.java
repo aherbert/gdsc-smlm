@@ -313,29 +313,30 @@ public class PeakResultConversionHelper {
     getIntensityConverter();
     getDistanceConverter();
 
-    final String intensityUnit =
+    final String safeIntensityUnit =
         (intensityConverter.to() != null) ? UnitHelper.getShortName(intensityConverter.to()) : "";
-    final String distanceUnit =
+    final String safeDistanceUnit =
         (distanceConverter.to() != null) ? UnitHelper.getShortName(distanceConverter.to()) : "";
-    String angleUnit = null;
+    String safeAngleUnit = null;
 
-    list.add(intensityUnit);
-    list.add(intensityUnit);
-    list.add(distanceUnit);
-    list.add(distanceUnit);
-    list.add(distanceUnit);
+    list.add(safeIntensityUnit);
+    list.add(safeIntensityUnit);
+    list.add(safeDistanceUnit);
+    list.add(safeDistanceUnit);
+    list.add(safeDistanceUnit);
     if (psf != null) {
       try {
         for (final PSFParameter p : PSFHelper.getParameters(psf)) {
           switch (p.getUnit()) {
             case DISTANCE:
-              list.add(distanceUnit);
+              list.add(safeDistanceUnit);
               break;
             case INTENSITY:
-              list.add(intensityUnit);
+              list.add(safeIntensityUnit);
               break;
             case ANGLE:
-              list.add(angleUnit = getAngleUnit(angleUnit));
+              safeAngleUnit = getOrCreateAngleUnit(safeAngleUnit);
+              list.add(safeAngleUnit);
               break;
             default:
               list.add("");
@@ -348,13 +349,10 @@ public class PeakResultConversionHelper {
     return list.toArray(new String[list.size()]);
   }
 
-  private String getAngleUnit(String angleUnit) {
+  private String getOrCreateAngleUnit(String angleUnit) {
     if (angleUnit == null) {
       getAngleConverter();
-      angleUnit =
-          (angleConverter.to() != null) ? angleUnit = UnitHelper.getShortName(angleConverter.to())
-              : "";
-
+      angleUnit = (angleConverter.to() != null) ? UnitHelper.getShortName(angleConverter.to()) : "";
     }
     return angleUnit;
   }
@@ -375,11 +373,7 @@ public class PeakResultConversionHelper {
     if (hasDistanceConverter() && getDistanceConverter().from() != getDistanceConverter().to()) {
       return true;
     }
-    if (hasAngleConverter() && getAngleConverter().from() != getAngleConverter().to()) {
-      return true;
-    }
-
-    return false;
+    return (hasAngleConverter() && getAngleConverter().from() != getAngleConverter().to());
   }
 
   /**
@@ -412,17 +406,17 @@ public class PeakResultConversionHelper {
       return null;
     }
 
-    final CalibrationWriter calibration = new CalibrationWriter(this.calibration);
+    final CalibrationWriter calibrationWriter = new CalibrationWriter(this.calibration);
     if (hasIntensityConverter()) {
-      calibration.setIntensityUnit(getIntensityConverter().to());
+      calibrationWriter.setIntensityUnit(getIntensityConverter().to());
     }
     if (hasDistanceConverter()) {
-      calibration.setDistanceUnit(getDistanceConverter().to());
+      calibrationWriter.setDistanceUnit(getDistanceConverter().to());
     }
     if (hasAngleConverter()) {
-      calibration.setAngleUnit(getAngleConverter().to());
+      calibrationWriter.setAngleUnit(getAngleConverter().to());
     }
 
-    return calibration.getCalibration();
+    return calibrationWriter.getCalibration();
   }
 }

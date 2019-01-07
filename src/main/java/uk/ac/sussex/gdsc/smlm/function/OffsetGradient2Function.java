@@ -33,18 +33,18 @@ public class OffsetGradient2Function extends OffsetGradient1Function
   protected final Gradient2Function f2;
 
   /** The procedure. */
-  protected Gradient2Procedure procedure;
+  protected Gradient2Procedure procedure2;
 
   /**
    * Instantiates a new offset gradient2 function.
    *
-   * @param f the function
+   * @param function the function
    * @param values the precomputed values
    * @throws IllegalArgumentException if the values length does not match the function size
    */
-  protected OffsetGradient2Function(Gradient2Function f, double[] values) {
-    super(f, values);
-    f2 = f;
+  protected OffsetGradient2Function(Gradient2Function function, double[] values) {
+    super(function, values);
+    f2 = function;
   }
 
   /**
@@ -56,7 +56,7 @@ public class OffsetGradient2Function extends OffsetGradient1Function
    */
   protected OffsetGradient2Function(OffsetGradient2Function pre, double[] values) {
     super(pre, values);
-    f2 = (Gradient2Function) f;
+    f2 = (Gradient2Function) vf;
   }
 
   /**
@@ -75,31 +75,31 @@ public class OffsetGradient2Function extends OffsetGradient1Function
 
   @Override
   public void forEach(Gradient2Procedure procedure) {
-    this.procedure = procedure;
-    i = 0;
+    this.procedure2 = procedure;
+    index = 0;
     f2.forEach((Gradient2Procedure) this);
   }
 
   @Override
-  public void execute(double value, double[] dy_da, double[] d2y_da2) {
-    procedure.execute(value + values[i++], dy_da, d2y_da2);
+  public void execute(double value, double[] dyda, double[] d2yda2) {
+    procedure2.execute(value + values[index++], dyda, d2yda2);
   }
 
   /**
    * Wrap a function with pre-computed values.
    *
    * @param func the function
-   * @param b Baseline pre-computed y-values
+   * @param baseline Baseline pre-computed y-values
    * @return the wrapped function (or the original if pre-computed values are null or wrong length)
    */
   public static Gradient2Function wrapGradient2Function(final Gradient2Function func,
-      final double[] b) {
-    if (b != null && b.length == func.size()) {
+      final double[] baseline) {
+    if (baseline != null && baseline.length == func.size()) {
       // Avoid multiple wrapping
       if (func instanceof OffsetGradient2Function) {
-        return new OffsetGradient2Function((OffsetGradient2Function) func, b);
+        return new OffsetGradient2Function((OffsetGradient2Function) func, baseline);
       }
-      return new OffsetGradient2Function(func, b);
+      return new OffsetGradient2Function(func, baseline);
     }
     return func;
   }

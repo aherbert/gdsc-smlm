@@ -31,8 +31,8 @@ public interface NamedFunction {
   /**
    * Gets the name of the parameter.
    *
-   * @param indeex the index
+   * @param index the index
    * @return the name
    */
-  String getParameterName(int indeex);
+  String getParameterName(int index);
 }

@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 /**
- * Implement the FastLog methods using Math.log
+ * Implement the {@link FastLog} methods using {@link Math#log(double)}.
  */
 public class NonFastLog extends FastLog {
   /** An instance of the class. */
@@ -52,22 +52,12 @@ public class NonFastLog extends FastLog {
   }
 
   @Override
-  public float fastLog2(float x) {
+  public float log2(double x) {
     return (float) (Math.log(x) / LN2);
   }
 
   @Override
-  public float log(float x) {
-    return (float) Math.log(x);
-  }
-
-  @Override
-  public float fastLog(float x) {
-    return (float) Math.log(x);
-  }
-
-  @Override
-  public float log2(double x) {
+  public float fastLog2(float x) {
     return (float) (Math.log(x) / LN2);
   }
 
@@ -77,7 +67,17 @@ public class NonFastLog extends FastLog {
   }
 
   @Override
+  public float log(float x) {
+    return (float) Math.log(x);
+  }
+
+  @Override
   public float log(double x) {
+    return (float) Math.log(x);
+  }
+
+  @Override
+  public float fastLog(float x) {
     return (float) Math.log(x);
   }
 

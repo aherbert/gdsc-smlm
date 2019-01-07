@@ -224,7 +224,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     // (ui+vari/gi^2) - x * ln(ui+vari/gi^2) + ln(gamma(x+1))
     double ll = 0;
     for (int i = 0; i < n; i++) {
-      double u = f.eval(i);
+      double u = function.eval(i);
 
       if (u < 0) {
         u = 0;
@@ -340,7 +340,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     }
     final double[] dl_da = new double[nVariables];
     for (int i = 0; i < n; i++) {
-      double u = f.eval(i, dl_da);
+      double u = function.eval(i, dl_da);
 
       if (u < 0) {
         u = 0;
@@ -365,7 +365,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
   /** {@inheritDoc} */
   @Override
   public double computeLikelihood(int i) {
-    double u = f.eval(i);
+    double u = function.eval(i);
 
     if (u < 0) {
       u = 0;
@@ -389,7 +389,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     }
     final double[] dl_da = new double[nVariables];
 
-    double u = f.eval(i, dl_da);
+    double u = function.eval(i, dl_da);
 
     if (u < 0) {
       u = 0;
@@ -492,7 +492,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     final double[][] I = new double[nVariables][nVariables];
 
     for (int k = 0; k < n; k++) {
-      final double uk = f.eval(k, du_da);
+      final double uk = function.eval(k, du_da);
       final double yk = 1 / (uk + varG2[k]);
       for (int i = 0; i < nVariables; i++) {
         final double du_dai = yk * du_da[i];

@@ -84,7 +84,6 @@ import com.google.protobuf.Parser;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 
-import ij.IJ;
 import ij.Prefs;
 
 import java.io.File;
@@ -98,12 +97,17 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.EnumSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manage the settings for ImageJ plugins.
  */
-public class SettingsManager {
+public final class SettingsManager {
+  private static Logger logger = Logger.getLogger(SettingsManager.class.getName());
+
   private static final String DEFAULT_FILENAME = System.getProperty("user.home")
       + System.getProperty("file.separator") + "gdsc.smlm.settings.xml";
   private static final String DEFAULT_DIRECTORY =
@@ -130,6 +134,505 @@ public class SettingsManager {
     setSettingsDirectory(Prefs.get(Constants.settingsDirectory, DEFAULT_DIRECTORY));
   }
 
+  /** No public constructor. */
+  private SettingsManager() {}
+
+  // Lazy loading of values and names of enums
+
+  /**
+   * Lazy loader for the {@link DistanceUnit} enum.
+   */
+  private static class DistanceUnitLoader {
+    /** The enum values. */
+    static final DistanceUnit[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
+      d.remove(DistanceUnit.UNRECOGNIZED);
+      values = d.toArray(new DistanceUnit[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
+      }
+    }
+  }
+
+  /**
+   * Gets the distance unit values.
+   *
+   * @return the distance unit values
+   */
+  public static DistanceUnit[] getDistanceUnitValues() {
+    return DistanceUnitLoader.values.clone();
+  }
+
+  /**
+   * Gets the distance unit names.
+   *
+   * @return the distance unit names
+   */
+  public static String[] getDistanceUnitNames() {
+    return DistanceUnitLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link IntensityUnit} enum.
+   */
+  private static class IntensityUnitLoader {
+    /** The enum values. */
+    static final IntensityUnit[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
+      d.remove(IntensityUnit.UNRECOGNIZED);
+      values = d.toArray(new IntensityUnit[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
+      }
+    }
+  }
+
+  /**
+   * Gets the intensity unit values.
+   *
+   * @return the intensity unit values
+   */
+  public static IntensityUnit[] getIntensityUnitValues() {
+    return IntensityUnitLoader.values.clone();
+  }
+
+  /**
+   * Gets the intensity unit names.
+   *
+   * @return the intensity unit names
+   */
+  public static String[] getIntensityUnitNames() {
+    return IntensityUnitLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link AngleUnit} enum.
+   */
+  private static class AngleUnitLoader {
+    /** The enum values. */
+    static final AngleUnit[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
+      d.remove(AngleUnit.UNRECOGNIZED);
+      values = d.toArray(new AngleUnit[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
+      }
+    }
+  }
+
+  /**
+   * Gets the angle unit values.
+   *
+   * @return the angle unit values
+   */
+  public static AngleUnit[] getAngleUnitValues() {
+    return AngleUnitLoader.values.clone();
+  }
+
+  /**
+   * Gets the angle unit names.
+   *
+   * @return the angle unit names
+   */
+  public static String[] getAngleUnitNames() {
+    return AngleUnitLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link TimeUnit} enum.
+   */
+  private static class TimeUnitLoader {
+    /** The enum values. */
+    static final TimeUnit[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
+      d.remove(TimeUnit.UNRECOGNIZED);
+      values = d.toArray(new TimeUnit[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
+      }
+    }
+  }
+
+  /**
+   * Gets the time unit values.
+   *
+   * @return the time unit values
+   */
+  public static TimeUnit[] getTimeUnitValues() {
+    return TimeUnitLoader.values.clone();
+  }
+
+  /**
+   * Gets the time unit names.
+   *
+   * @return the time unit names
+   */
+  public static String[] getTimeUnitNames() {
+    return TimeUnitLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link ResultsImageType} enum.
+   */
+  private static class ResultsImageTypeLoader {
+    /** The enum values. */
+    static final ResultsImageType[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
+      d.remove(ResultsImageType.UNRECOGNIZED);
+      values = d.toArray(new ResultsImageType[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = ResultsProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the results image type values.
+   *
+   * @return the results image type values
+   */
+  public static ResultsImageType[] getResultsImageTypeValues() {
+    return ResultsImageTypeLoader.values.clone();
+  }
+
+  /**
+   * Gets the results image type names.
+   *
+   * @return the results image type names
+   */
+  public static String[] getResultsImageTypeNames() {
+    return ResultsImageTypeLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link ResultsFileFormat} enum.
+   */
+  private static class ResultsFileFormatLoader {
+    /** The enum values. */
+    static final ResultsFileFormat[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
+      d.remove(ResultsFileFormat.UNRECOGNIZED);
+      values = d.toArray(new ResultsFileFormat[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = ResultsProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the results file format values.
+   *
+   * @return the results file format values
+   */
+  public static ResultsFileFormat[] getResultsFileFormatValues() {
+    return ResultsFileFormatLoader.values.clone();
+  }
+
+  /**
+   * Gets the results file format names.
+   *
+   * @return the results file format names
+   */
+  public static String[] getResultsFileFormatNames() {
+    return ResultsFileFormatLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link ResultsTableFormat} enum.
+   */
+  private static class ResultsTableFormatLoader {
+    /** The enum values. */
+    static final ResultsTableFormat[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<ResultsTableFormat> d = EnumSet.allOf(ResultsTableFormat.class);
+      d.remove(ResultsTableFormat.UNRECOGNIZED);
+      values = d.toArray(new ResultsTableFormat[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = ResultsProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the results table format values.
+   *
+   * @return the results table format values
+   */
+  public static ResultsTableFormat[] getResultsTableFormatValues() {
+    return ResultsTableFormatLoader.values.clone();
+  }
+
+  /**
+   * Gets the results table format names.
+   *
+   * @return the results table format names
+   */
+  public static String[] getResultsTableFormatNames() {
+    return ResultsTableFormatLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link DataFilterType} enum.
+   */
+  private static class DataFilterTypeLoader {
+    /** The enum values. */
+    static final DataFilterType[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<DataFilterType> d = EnumSet.allOf(DataFilterType.class);
+      d.remove(DataFilterType.UNRECOGNIZED);
+      values = d.toArray(new DataFilterType[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = FitProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the data filter type values.
+   *
+   * @return the data filter type values
+   */
+  public static DataFilterType[] getDataFilterTypeValues() {
+    return DataFilterTypeLoader.values.clone();
+  }
+
+  /**
+   * Gets the data filter type names.
+   *
+   * @return the data filter type names
+   */
+  public static String[] getDataFilterTypeNames() {
+    return DataFilterTypeLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link DataFilterMethod} enum.
+   */
+  private static class DataFilterMethodLoader {
+    /** The enum values. */
+    static final DataFilterMethod[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<DataFilterMethod> d = EnumSet.allOf(DataFilterMethod.class);
+      d.remove(DataFilterMethod.UNRECOGNIZED);
+      values = d.toArray(new DataFilterMethod[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = FitProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the data filter method values.
+   *
+   * @return the data filter method values
+   */
+  public static DataFilterMethod[] getDataFilterMethodValues() {
+    return DataFilterMethodLoader.values.clone();
+  }
+
+  /**
+   * Gets the data filter method names.
+   *
+   * @return the data filter method names
+   */
+  public static String[] getDataFilterMethodNames() {
+    return DataFilterMethodLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link FitSolver} enum.
+   */
+  private static class FitSolverLoader {
+    /** The enum values. */
+    static final FitSolver[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<FitSolver> d = EnumSet.allOf(FitSolver.class);
+      d.remove(FitSolver.UNRECOGNIZED);
+      values = d.toArray(new FitSolver[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = FitProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the fit solver values.
+   *
+   * @return the fit solver values
+   */
+  public static FitSolver[] getFitSolverValues() {
+    return FitSolverLoader.values.clone();
+  }
+
+  /**
+   * Gets the fit solver names.
+   *
+   * @return the fit solver names
+   */
+  public static String[] getFitSolverNames() {
+    return FitSolverLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link NoiseEstimatorMethod} enum.
+   */
+  private static class NoiseEstimatorMethodLoader {
+    /** The enum values. */
+    static final NoiseEstimatorMethod[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<NoiseEstimatorMethod> d = EnumSet.allOf(NoiseEstimatorMethod.class);
+      d.remove(NoiseEstimatorMethod.UNRECOGNIZED);
+      values = d.toArray(new NoiseEstimatorMethod[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = FitProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the noise estimator method values.
+   *
+   * @return the noise estimator method values
+   */
+  public static NoiseEstimatorMethod[] getNoiseEstimatorMethodValues() {
+    return NoiseEstimatorMethodLoader.values.clone();
+  }
+
+  /**
+   * Gets the noise estimator method names.
+   *
+   * @return the noise estimator method names
+   */
+  public static String[] getNoiseEstimatorMethodNames() {
+    return NoiseEstimatorMethodLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link CameraType} enum.
+   */
+  private static class CameraTypeLoader {
+    /** The enum values. */
+    static final CameraType[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<CameraType> d = EnumSet.allOf(CameraType.class);
+      d.remove(CameraType.UNRECOGNIZED);
+      values = d.toArray(new CameraType[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = CalibrationProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the camera type values.
+   *
+   * @return the camera type values
+   */
+  public static CameraType[] getCameraTypeValues() {
+    return CameraTypeLoader.values.clone();
+  }
+
+  /**
+   * Gets the camera type names.
+   *
+   * @return the camera type names
+   */
+  public static String[] getCameraTypeNames() {
+    return CameraTypeLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link PrecisionMethod} enum.
+   */
+  private static class PrecisionMethodLoader {
+    /** The enum values. */
+    static final PrecisionMethod[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<PrecisionMethod> d = EnumSet.allOf(PrecisionMethod.class);
+      d.remove(PrecisionMethod.UNRECOGNIZED);
+      values = d.toArray(new PrecisionMethod[d.size()]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = FitProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the precision method values.
+   *
+   * @return the precision method values
+   */
+  public static PrecisionMethod[] getPrecisionMethodValues() {
+    return PrecisionMethodLoader.values.clone();
+  }
+
+  /**
+   * Gets the precision method names.
+   *
+   * @return the precision method names
+   */
+  public static String[] getPrecisionMethodNames() {
+    return PrecisionMethodLoader.names.clone();
+  }
+
   /**
    * Gets the settings directory.
    *
@@ -141,7 +644,7 @@ public class SettingsManager {
   }
 
   /**
-   * Save the settings directory.
+   * Sets the settings directory.
    *
    * @param directory the directory
    */
@@ -153,511 +656,7 @@ public class SettingsManager {
         settingsDirectory.mkdirs();
       }
     } catch (final Exception ex) {
-      IJ.log("Unable create settings directory: " + ex.getMessage());
-    }
-  }
-
-  // Encapsulate the values and names of enums for lazy loading
-
-  private static DistanceUnit[] _DistanceUnitValues;
-
-  /**
-   * Gets the distance unit values.
-   *
-   * @return the distance unit values
-   */
-  public static DistanceUnit[] getDistanceUnitValues() {
-    if (_DistanceUnitValues == null) {
-      initDistanceUnit();
-    }
-    return _DistanceUnitValues;
-  }
-
-  private static String[] _DistanceUnitNames;
-
-  /**
-   * Gets the distance unit names.
-   *
-   * @return the distance unit names
-   */
-  public static String[] getDistanceUnitNames() {
-    if (_DistanceUnitNames == null) {
-      initDistanceUnit();
-    }
-    return _DistanceUnitNames;
-  }
-
-  private static void initDistanceUnit() {
-    final EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
-    d.remove(DistanceUnit.UNRECOGNIZED);
-    // d.remove(DistanceUnit.DISTANCE_UNIT_NA);
-    _DistanceUnitValues = d.toArray(new DistanceUnit[d.size()]);
-    _DistanceUnitNames = new String[_DistanceUnitValues.length];
-    for (int i = 0; i < _DistanceUnitValues.length; i++) {
-      _DistanceUnitNames[i] = getName(UnitHelper.getName(_DistanceUnitValues[i]),
-          UnitHelper.getShortName(_DistanceUnitValues[i]));
-    }
-  }
-
-  private static IntensityUnit[] _IntensityUnitValues;
-
-  /**
-   * Gets the intensity unit values.
-   *
-   * @return the intensity unit values
-   */
-  public static IntensityUnit[] getIntensityUnitValues() {
-    if (_IntensityUnitValues == null) {
-      initIntensityUnit();
-    }
-    return _IntensityUnitValues;
-  }
-
-  private static String[] _IntensityUnitNames;
-
-  /**
-   * Gets the intensity unit names.
-   *
-   * @return the intensity unit names
-   */
-  public static String[] getIntensityUnitNames() {
-    if (_IntensityUnitNames == null) {
-      initIntensityUnit();
-    }
-    return _IntensityUnitNames;
-  }
-
-  private static void initIntensityUnit() {
-    final EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
-    d.remove(IntensityUnit.UNRECOGNIZED);
-    // d.remove(IntensityUnit.INTENSITY_UNIT_NA);
-    _IntensityUnitValues = d.toArray(new IntensityUnit[d.size()]);
-    _IntensityUnitNames = new String[_IntensityUnitValues.length];
-    for (int i = 0; i < _IntensityUnitValues.length; i++) {
-      _IntensityUnitNames[i] = getName(UnitHelper.getName(_IntensityUnitValues[i]),
-          UnitHelper.getShortName(_IntensityUnitValues[i]));
-    }
-  }
-
-  private static AngleUnit[] _AngleUnitValues;
-
-  /**
-   * Gets the angle unit values.
-   *
-   * @return the angle unit values
-   */
-  public static AngleUnit[] getAngleUnitValues() {
-    if (_AngleUnitValues == null) {
-      initAngleUnit();
-    }
-    return _AngleUnitValues;
-  }
-
-  private static String[] _AngleUnitNames;
-
-  /**
-   * Gets the angle unit names.
-   *
-   * @return the angle unit names
-   */
-  public static String[] getAngleUnitNames() {
-    if (_AngleUnitNames == null) {
-      initAngleUnit();
-    }
-    return _AngleUnitNames;
-  }
-
-  private static void initAngleUnit() {
-    final EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
-    d.remove(AngleUnit.UNRECOGNIZED);
-    // d.remove(AngleUnit.ANGLE_UNIT_NA);
-    _AngleUnitValues = d.toArray(new AngleUnit[d.size()]);
-    _AngleUnitNames = new String[_AngleUnitValues.length];
-    for (int i = 0; i < _AngleUnitValues.length; i++) {
-      _AngleUnitNames[i] = getName(UnitHelper.getName(_AngleUnitValues[i]),
-          UnitHelper.getShortName(_AngleUnitValues[i]));
-    }
-  }
-
-  private static TimeUnit[] _TimeUnitValues;
-
-  /**
-   * Gets the time unit values.
-   *
-   * @return the time unit values
-   */
-  public static TimeUnit[] getTimeUnitValues() {
-    if (_TimeUnitValues == null) {
-      initTimeUnit();
-    }
-    return _TimeUnitValues;
-  }
-
-  private static String[] _TimeUnitNames;
-
-  /**
-   * Gets the time unit names.
-   *
-   * @return the time unit names
-   */
-  public static String[] getTimeUnitNames() {
-    if (_TimeUnitNames == null) {
-      initTimeUnit();
-    }
-    return _TimeUnitNames;
-  }
-
-  private static void initTimeUnit() {
-    final EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
-    d.remove(TimeUnit.UNRECOGNIZED);
-    // d.remove(TimeUnit.TIME_UNIT_NA);
-    _TimeUnitValues = d.toArray(new TimeUnit[d.size()]);
-    _TimeUnitNames = new String[_TimeUnitValues.length];
-    for (int i = 0; i < _TimeUnitValues.length; i++) {
-      _TimeUnitNames[i] = getName(UnitHelper.getName(_TimeUnitValues[i]),
-          UnitHelper.getShortName(_TimeUnitValues[i]));
-    }
-  }
-
-  private static ResultsImageType[] _ResultsImageTypeValues;
-
-  /**
-   * Gets the results image type values.
-   *
-   * @return the results image type values
-   */
-  public static ResultsImageType[] getResultsImageTypeValues() {
-    if (_ResultsImageTypeValues == null) {
-      initResultsImageType();
-    }
-    return _ResultsImageTypeValues;
-  }
-
-  private static String[] _ResultsImageTypeNames;
-
-  /**
-   * Gets the results image type names.
-   *
-   * @return the results image type names
-   */
-  public static String[] getResultsImageTypeNames() {
-    if (_ResultsImageTypeNames == null) {
-      initResultsImageType();
-    }
-    return _ResultsImageTypeNames;
-  }
-
-  private static void initResultsImageType() {
-    final EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
-    d.remove(ResultsImageType.UNRECOGNIZED);
-    _ResultsImageTypeValues = d.toArray(new ResultsImageType[d.size()]);
-    _ResultsImageTypeNames = new String[_ResultsImageTypeValues.length];
-    for (int i = 0; i < _ResultsImageTypeValues.length; i++) {
-      _ResultsImageTypeNames[i] = ResultsProtosHelper.getName(_ResultsImageTypeValues[i]);
-    }
-  }
-
-  private static ResultsFileFormat[] _ResultsFileFormatValues;
-
-  /**
-   * Gets the results file format values.
-   *
-   * @return the results file format values
-   */
-  public static ResultsFileFormat[] getResultsFileFormatValues() {
-    if (_ResultsFileFormatValues == null) {
-      initResultsFileFormat();
-    }
-    return _ResultsFileFormatValues;
-  }
-
-  private static String[] _ResultsFileFormatNames;
-
-  /**
-   * Gets the results file format names.
-   *
-   * @return the results file format names
-   */
-  public static String[] getResultsFileFormatNames() {
-    if (_ResultsFileFormatNames == null) {
-      initResultsFileFormat();
-    }
-    return _ResultsFileFormatNames;
-  }
-
-  private static void initResultsFileFormat() {
-    final EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
-    d.remove(ResultsFileFormat.UNRECOGNIZED);
-    _ResultsFileFormatValues = d.toArray(new ResultsFileFormat[d.size()]);
-    _ResultsFileFormatNames = new String[_ResultsFileFormatValues.length];
-    for (int i = 0; i < _ResultsFileFormatValues.length; i++) {
-      _ResultsFileFormatNames[i] = ResultsProtosHelper.getName(_ResultsFileFormatValues[i]);
-    }
-  }
-
-  private static ResultsTableFormat[] _ResultsTableFormatValues;
-
-  /**
-   * Gets the results table format values.
-   *
-   * @return the results table format values
-   */
-  public static ResultsTableFormat[] getResultsTableFormatValues() {
-    if (_ResultsTableFormatValues == null) {
-      initResultsTableFormat();
-    }
-    return _ResultsTableFormatValues;
-  }
-
-  private static String[] _ResultsTableFormatNames;
-
-  /**
-   * Gets the results table format names.
-   *
-   * @return the results table format names
-   */
-  public static String[] getResultsTableFormatNames() {
-    if (_ResultsTableFormatNames == null) {
-      initResultsTableFormat();
-    }
-    return _ResultsTableFormatNames;
-  }
-
-  private static void initResultsTableFormat() {
-    final EnumSet<ResultsTableFormat> d = EnumSet.allOf(ResultsTableFormat.class);
-    d.remove(ResultsTableFormat.UNRECOGNIZED);
-    _ResultsTableFormatValues = d.toArray(new ResultsTableFormat[d.size()]);
-    _ResultsTableFormatNames = new String[_ResultsTableFormatValues.length];
-    for (int i = 0; i < _ResultsTableFormatValues.length; i++) {
-      _ResultsTableFormatNames[i] = ResultsProtosHelper.getName(_ResultsTableFormatValues[i]);
-    }
-  }
-
-  private static DataFilterType[] _DataFilterTypeValues;
-
-  /**
-   * Gets the data filter type values.
-   *
-   * @return the data filter type values
-   */
-  public static DataFilterType[] getDataFilterTypeValues() {
-    if (_DataFilterTypeValues == null) {
-      initDataFilterType();
-    }
-    return _DataFilterTypeValues;
-  }
-
-  private static String[] _DataFilterTypeNames;
-
-  /**
-   * Gets the data filter type names.
-   *
-   * @return the data filter type names
-   */
-  public static String[] getDataFilterTypeNames() {
-    if (_DataFilterTypeNames == null) {
-      initDataFilterType();
-    }
-    return _DataFilterTypeNames;
-  }
-
-  private static void initDataFilterType() {
-    final EnumSet<DataFilterType> d = EnumSet.allOf(DataFilterType.class);
-    d.remove(DataFilterType.UNRECOGNIZED);
-    _DataFilterTypeValues = d.toArray(new DataFilterType[d.size()]);
-    _DataFilterTypeNames = new String[_DataFilterTypeValues.length];
-    for (int i = 0; i < _DataFilterTypeValues.length; i++) {
-      _DataFilterTypeNames[i] = FitProtosHelper.getName(_DataFilterTypeValues[i]);
-    }
-  }
-
-  private static DataFilterMethod[] _DataFilterMethodValues;
-
-  /**
-   * Gets the data filter method values.
-   *
-   * @return the data filter method values
-   */
-  public static DataFilterMethod[] getDataFilterMethodValues() {
-    if (_DataFilterMethodValues == null) {
-      initDataFilterMethod();
-    }
-    return _DataFilterMethodValues;
-  }
-
-  private static String[] _DataFilterMethodNames;
-
-  /**
-   * Gets the data filter method names.
-   *
-   * @return the data filter method names
-   */
-  public static String[] getDataFilterMethodNames() {
-    if (_DataFilterMethodNames == null) {
-      initDataFilterMethod();
-    }
-    return _DataFilterMethodNames;
-  }
-
-  private static void initDataFilterMethod() {
-    final EnumSet<DataFilterMethod> d = EnumSet.allOf(DataFilterMethod.class);
-    d.remove(DataFilterMethod.UNRECOGNIZED);
-    _DataFilterMethodValues = d.toArray(new DataFilterMethod[d.size()]);
-    _DataFilterMethodNames = new String[_DataFilterMethodValues.length];
-    for (int i = 0; i < _DataFilterMethodValues.length; i++) {
-      _DataFilterMethodNames[i] = FitProtosHelper.getName(_DataFilterMethodValues[i]);
-    }
-  }
-
-  private static FitSolver[] _FitSolverValues;
-
-  /**
-   * Gets the fit solver values.
-   *
-   * @return the fit solver values
-   */
-  public static FitSolver[] getFitSolverValues() {
-    if (_FitSolverValues == null) {
-      initFitSolver();
-    }
-    return _FitSolverValues;
-  }
-
-  private static String[] _FitSolverNames;
-
-  /**
-   * Gets the fit solver names.
-   *
-   * @return the fit solver names
-   */
-  public static String[] getFitSolverNames() {
-    if (_FitSolverNames == null) {
-      initFitSolver();
-    }
-    return _FitSolverNames;
-  }
-
-  private static void initFitSolver() {
-    final EnumSet<FitSolver> d = EnumSet.allOf(FitSolver.class);
-    d.remove(FitSolver.UNRECOGNIZED);
-    _FitSolverValues = d.toArray(new FitSolver[d.size()]);
-    _FitSolverNames = new String[_FitSolverValues.length];
-    for (int i = 0; i < _FitSolverValues.length; i++) {
-      _FitSolverNames[i] = FitProtosHelper.getName(_FitSolverValues[i]);
-    }
-  }
-
-  private static NoiseEstimatorMethod[] _NoiseEstimatorMethodValues;
-
-  /**
-   * Gets the noise estimator method values.
-   *
-   * @return the noise estimator method values
-   */
-  public static NoiseEstimatorMethod[] getNoiseEstimatorMethodValues() {
-    if (_NoiseEstimatorMethodValues == null) {
-      initNoiseEstimatorMethod();
-    }
-    return _NoiseEstimatorMethodValues;
-  }
-
-  private static String[] _NoiseEstimatorMethodNames;
-
-  /**
-   * Gets the noise estimator method names.
-   *
-   * @return the noise estimator method names
-   */
-  public static String[] getNoiseEstimatorMethodNames() {
-    if (_NoiseEstimatorMethodNames == null) {
-      initNoiseEstimatorMethod();
-    }
-    return _NoiseEstimatorMethodNames;
-  }
-
-  private static void initNoiseEstimatorMethod() {
-    final EnumSet<NoiseEstimatorMethod> d = EnumSet.allOf(NoiseEstimatorMethod.class);
-    d.remove(NoiseEstimatorMethod.UNRECOGNIZED);
-    _NoiseEstimatorMethodValues = d.toArray(new NoiseEstimatorMethod[d.size()]);
-    _NoiseEstimatorMethodNames = new String[_NoiseEstimatorMethodValues.length];
-    for (int i = 0; i < _NoiseEstimatorMethodValues.length; i++) {
-      _NoiseEstimatorMethodNames[i] = FitProtosHelper.getName(_NoiseEstimatorMethodValues[i]);
-    }
-  }
-
-  private static CameraType[] _CameraTypeValues;
-
-  /**
-   * Gets the camera type values.
-   *
-   * @return the camera type values
-   */
-  public static CameraType[] getCameraTypeValues() {
-    if (_CameraTypeValues == null) {
-      initCameraType();
-    }
-    return _CameraTypeValues;
-  }
-
-  private static String[] _CameraTypeNames;
-
-  /**
-   * Gets the camera type names.
-   *
-   * @return the camera type names
-   */
-  public static String[] getCameraTypeNames() {
-    if (_CameraTypeNames == null) {
-      initCameraType();
-    }
-    return _CameraTypeNames;
-  }
-
-  private static void initCameraType() {
-    final EnumSet<CameraType> d = EnumSet.allOf(CameraType.class);
-    d.remove(CameraType.UNRECOGNIZED);
-    _CameraTypeValues = d.toArray(new CameraType[d.size()]);
-    _CameraTypeNames = new String[_CameraTypeValues.length];
-    for (int i = 0; i < _CameraTypeValues.length; i++) {
-      _CameraTypeNames[i] = CalibrationProtosHelper.getName(_CameraTypeValues[i]);
-    }
-  }
-
-  private static PrecisionMethod[] _PrecisionMethodValues;
-
-  /**
-   * Gets the precision method values.
-   *
-   * @return the precision method values
-   */
-  public static PrecisionMethod[] getPrecisionMethodValues() {
-    if (_PrecisionMethodValues == null) {
-      initPrecisionMethod();
-    }
-    return _PrecisionMethodValues;
-  }
-
-  private static String[] _PrecisionMethodNames;
-
-  /**
-   * Gets the precision method names.
-   *
-   * @return the precision method names
-   */
-  public static String[] getPrecisionMethodNames() {
-    if (_PrecisionMethodNames == null) {
-      initPrecisionMethod();
-    }
-    return _PrecisionMethodNames;
-  }
-
-  private static void initPrecisionMethod() {
-    final EnumSet<PrecisionMethod> d = EnumSet.allOf(PrecisionMethod.class);
-    d.remove(PrecisionMethod.UNRECOGNIZED);
-    _PrecisionMethodValues = d.toArray(new PrecisionMethod[d.size()]);
-    _PrecisionMethodNames = new String[_PrecisionMethodValues.length];
-    for (int i = 0; i < _PrecisionMethodValues.length; i++) {
-      _PrecisionMethodNames[i] = FitProtosHelper.getName(_PrecisionMethodValues[i]);
+      logger.log(Level.SEVERE, "Unable create settings directory", ex);
     }
   }
 
@@ -682,11 +681,9 @@ public class SettingsManager {
         name = objects[i].toString();
       }
 
-      if (name.length() > 0) {
-        // Capitalise first letter
-        if (Character.isLowerCase(name.charAt(0))) {
-          name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-        }
+      // Capitalise first letter
+      if (name.length() > 0 && Character.isLowerCase(name.charAt(0))) {
+        name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
       }
       names[i] = name;
     }
@@ -780,6 +777,22 @@ public class SettingsManager {
   }
 
   /**
+   * Write to a settings file in the settings directory.
+   *
+   * @param fitEngineConfiguration the fit engine configuration
+   * @param flags the flags
+   * @return true, if successful
+   */
+  public static boolean writeSettings(FitEngineConfiguration fitEngineConfiguration, int flags) {
+    final FitConfiguration fitConfig = fitEngineConfiguration.getFitConfiguration();
+    // This is fail fast
+    boolean result = writeSettings(fitEngineConfiguration.getFitEngineSettings(), flags);
+    result &= writeSettings(fitConfig.getCalibration(), flags);
+    result &= writeSettings(fitConfig.getPSF(), flags);
+    return result;
+  }
+
+  /**
    * Clear the settings file for the given class.
    *
    * @param clazz the class
@@ -789,11 +802,11 @@ public class SettingsManager {
     final File file = createSettingsFile(clazz);
     try {
       if (file.exists()) {
-        return file.delete();
+        Files.delete(file.toPath());
       }
       return true; // Already clear
-    } catch (final SecurityException ex) {
-      IJ.log("Unable to clear the settings: " + ex.getMessage());
+    } catch (final Exception ex) {
+      logger.log(Level.WARNING, ex, () -> "Unable to clear the settings file: " + file);
     }
     return false;
   }
@@ -805,15 +818,15 @@ public class SettingsManager {
    */
   public static class ConfigurationReader<T extends Message> {
     /** the default instance of the message type. */
-    private final T t;
+    private final T mt;
 
     /**
      * Instantiates a new configuration reader.
      *
-     * @param t the default instance of the message type
+     * @param mt the default instance of the message type
      */
-    public ConfigurationReader(T t) {
-      this.t = t;
+    public ConfigurationReader(T mt) {
+      this.mt = mt;
     }
 
     /**
@@ -833,11 +846,12 @@ public class SettingsManager {
      */
     @SuppressWarnings("unchecked")
     public T read(int flags) {
-      T c = (T) readMessage(t.getParserForType(), createSettingsFile(t.getClass()), flags);
-      if (c == null && BitFlagUtils.anyNotSet(flags, FLAG_NO_DEFAULT)) {
-        c = t;
+      T msg = (T) readMessage(mt.getParserForType(), createSettingsFile(mt.getClass()), flags);
+      // If null use the default unless explicitly not requested
+      if (msg == null && BitFlagUtils.anyNotSet(flags, FLAG_NO_DEFAULT)) {
+        msg = mt;
       }
-      return c;
+      return msg;
     }
   }
 
@@ -1153,22 +1167,6 @@ public class SettingsManager {
   }
 
   /**
-   * Write to a settings file in the settings directory.
-   *
-   * @param fitEngineConfiguration the fit engine configuration
-   * @param flags the flags
-   * @return true, if successful
-   */
-  public static boolean writeSettings(FitEngineConfiguration fitEngineConfiguration, int flags) {
-    final FitConfiguration fitConfig = fitEngineConfiguration.getFitConfiguration();
-    // This is fail fast
-    boolean result = writeSettings(fitEngineConfiguration.getFitEngineSettings(), flags);
-    result &= writeSettings(fitConfig.getCalibration(), flags);
-    result &= writeSettings(fitConfig.getPSF(), flags);
-    return result;
-  }
-
-  /**
    * Write the message to file.
    *
    * <p>If this fails then an error message is written to the ImageJ log
@@ -1196,10 +1194,7 @@ public class SettingsManager {
     try (FileOutputStream fs = new FileOutputStream(file)) {
       return writeMessage(message, fs, flags);
     } catch (final IOException ex) {
-      // ex.printStackTrace();
-      if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + ex.getMessage());
-      }
+      logWriteError(flags, ex);
     }
     return false;
   }
@@ -1219,9 +1214,7 @@ public class SettingsManager {
       message.writeDelimitedTo(output);
       return true;
     } catch (final IOException ex) {
-      if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + ex.getMessage());
-      }
+      logWriteError(flags, ex);
     }
     return false;
   }
@@ -1254,13 +1247,11 @@ public class SettingsManager {
     try (FileInputStream fs = new FileInputStream(file)) {
       return readMessage(parser, fs, flags);
     } catch (final IOException ex) {
-      // ex.printStackTrace();
       // Only print this if the file-not-found flag is present
       // and not silent. This prevents warnings when settings files
       // have yet to be created, i.ex. for new users of a settings file.
-      if (BitFlagUtils.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ)
-          && !BitFlagUtils.anySet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + ex.getMessage());
+      if (BitFlagUtils.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ)) {
+        logReadError(flags, ex);
       }
     }
     return null;
@@ -1281,14 +1272,36 @@ public class SettingsManager {
     try {
       return parser.parseDelimitedFrom(input);
     } catch (final InvalidProtocolBufferException ex) {
-      // ex.printStackTrace();
-      if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + ex.getMessage());
-      }
+      logReadError(flags, ex);
     }
     return null;
   }
 
+  /**
+   * Log write error.
+   *
+   * @param flags the flags
+   * @param ex the ex
+   */
+  private static void logWriteError(final int flags, final Exception ex) {
+    if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
+      logger.log(Level.SEVERE, "Unable to write message", ex);
+    }
+  }
+
+  /**
+   * Log read error.
+   *
+   * @param flags the flags
+   * @param ex the ex
+   */
+  private static void logReadError(final int flags, final Exception ex) {
+    if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
+      logger.log(Level.SEVERE, "Unable to read message", ex);
+    }
+  }
+
+  /** The printer. */
   private static Printer printer;
 
   /**
@@ -1344,9 +1357,7 @@ public class SettingsManager {
     try (PrintStream fs = new PrintStream(file)) {
       return toJSON(message, fs, flags);
     } catch (final FileNotFoundException ex) {
-      if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + ex.getMessage());
-      }
+      logWriteError(flags, ex);
     }
     return false;
   }
@@ -1364,23 +1375,22 @@ public class SettingsManager {
       if (printer == null) {
         printer = JsonFormat.printer();
       }
-      Printer p = printer;
+      Printer localPrinter = printer;
       if (BitFlagUtils.anyNotSet(flags, FLAG_JSON_WHITESPACE)) {
-        p = p.omittingInsignificantWhitespace();
+        localPrinter = localPrinter.omittingInsignificantWhitespace();
       }
       if (BitFlagUtils.anySet(flags, FLAG_JSON_DEFAULT_VALUES)) {
-        p = p.includingDefaultValueFields();
+        localPrinter = localPrinter.includingDefaultValueFields();
       }
-      p.appendTo(message, output);
+      localPrinter.appendTo(message, output);
       return true;
     } catch (final IOException ex) {
-      if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to write message: " + ex.getMessage());
-      }
+      logWriteError(flags, ex);
     }
     return false;
   }
 
+  /** The parser. */
   private static com.google.protobuf.util.JsonFormat.Parser parser;
 
   /**
@@ -1418,9 +1428,7 @@ public class SettingsManager {
     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
       return fromJSON(reader, builder, flags);
     } catch (final IOException ex) {
-      if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + ex.getMessage());
-      }
+      logReadError(flags, ex);
     }
     return false;
   }
@@ -1441,9 +1449,7 @@ public class SettingsManager {
       parser.merge(reader, builder);
       return true;
     } catch (final IOException ex) {
-      if (BitFlagUtils.anyNotSet(flags, FLAG_SILENT)) {
-        IJ.log("Unable to read message: " + ex.getMessage());
-      }
+      logReadError(flags, ex);
     }
     return false;
   }

@@ -105,6 +105,27 @@ public class EMGainAnalysis implements PlugInFilter {
   private ImagePlus imp;
   private double offset;
 
+  /**
+   * Store the probability density function (PDF).
+   */
+  private static class PDF {
+    /** The observed value x. */
+    final double[] x;
+    /** The probability. */
+    final double[] probability;
+
+    /**
+     * Instantiates a new pdf.
+     *
+     * @param x the observed value x
+     * @param p the probability
+     */
+    PDF(double[] x, double[] p) {
+      this.x = x;
+      this.probability = p;
+    }
+  }
+
   /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -186,7 +207,7 @@ public class EMGainAnalysis implements PlugInFilter {
     final PDF pdf = pdf(0, step, _photons, _gain, _noise);
 
     // Debug this
-    final double[] g = pdf.p;
+    final double[] g = pdf.probability;
     final double[] x = pdf.x;
     ImageJUtils.display(TITLE + " PDF",
         new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
@@ -574,20 +595,6 @@ public class EMGainAnalysis implements PlugInFilter {
    *
    * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
-   * @param c The count to evaluate
-   * @param p The average number of photons per pixel input to the EM-camera
-   * @param m The multiplication factor (gain)
-   * @return The PDF
-   */
-  private static double probabilityEMGain(double c, double p, double m) {
-    return PoissonGammaFunction.poissonGamma(c, p, m);
-  }
-
-  /**
-   * Calculate the probability density function for EM-gain.
-   *
-   * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-   *
    * @param max The maximum count to evaluate
    * @param step the step between counts to evaluate
    * @param p The average number of photons per pixel input to the EM-camera
@@ -611,14 +618,18 @@ public class EMGainAnalysis implements PlugInFilter {
     return g;
   }
 
-  private class PDF {
-    final double[] x;
-    final double[] p;
-
-    PDF(double[] x, double[] p) {
-      this.x = x;
-      this.p = p;
-    }
+  /**
+   * Calculate the probability density function for EM-gain.
+   *
+   * <p>See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * @param c The count to evaluate
+   * @param p The average number of photons per pixel input to the EM-camera
+   * @param m The multiplication factor (gain)
+   * @return The PDF
+   */
+  private static double probabilityEMGain(double c, double p, double m) {
+    return PoissonGammaFunction.poissonGamma(c, p, m);
   }
 
   /**
@@ -855,7 +866,7 @@ public class EMGainAnalysis implements PlugInFilter {
     final double step = getStepSize(_photons, _gain, _noise);
 
     final PDF pdf = pdf(0, step, _photons, _gain, _noise);
-    double[] pmf = pdf.p;
+    double[] pmf = pdf.probability;
     double yMax = MathUtils.max(pmf);
 
     // Get the approximation

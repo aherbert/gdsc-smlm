@@ -1121,8 +1121,7 @@ public class PSFCreator implements PlugInFilter {
     for (int i = 0; i <= fractionIndex; i++) {
       sum += allValues[i];
     }
-    final float min = (float) (sum / (fractionIndex + 1));
-    return min;
+    return (float) (sum / (fractionIndex + 1));
   }
 
   private boolean[] dmap;
@@ -3229,7 +3228,7 @@ public class PSFCreator implements PlugInFilter {
     public void analyse() {
       // These are window dependent
       final int window = getAnalysisWindow();
-      limits = getLimits(psf.psf, psf.maxx, psf.maxy, window);
+      limits = getLimitsPerSlice(psf.psf, psf.maxx, psf.maxy, window);
 
       bdata = bsmoother.smooth(limits[0]).getFSmooth();
       fdata = fsmoother.smooth(limits[1]).getFSmooth();
@@ -4397,16 +4396,27 @@ public class PSFCreator implements PlugInFilter {
     return psfs;
   }
 
-  private static float[][] getLimits(float[][] psf, int x, int y, int n) {
+  /**
+   * Gets the min and max limits per slice.
+   *
+   * <p>Smooths the PSF block region data before analysis.
+   *
+   * @param psf the psf
+   * @param maxx the maxx
+   * @param maxy the maxy
+   * @param n the block size of the region
+   * @return the limits per slice
+   */
+  private static float[][] getLimitsPerSlice(float[][] psf, int maxx, int maxy, int n) {
     final BlockMeanFilter filter = new BlockMeanFilter();
     final float[][] limits = new float[2][psf.length];
     for (int zz = 0; zz < psf.length; zz++) {
       float[] data = psf[zz];
       if (n > 0) {
         data = data.clone();
-        filter.rollingBlockFilterInternal(data, x, y, n);
+        filter.rollingBlockFilterInternal(data, maxx, maxy, n);
       }
-      final float[] l = findLimits(data, x, y, n);
+      final float[] l = findLimits(data, maxx, maxy, n);
       limits[0][zz] = l[0];
       limits[1][zz] = l[1];
       // float[] l2 = Maths.limits(data);
@@ -4415,8 +4425,17 @@ public class PSFCreator implements PlugInFilter {
     return limits;
   }
 
-  private static float getBackground(float[][] psf, int x, int y, int n) {
-    final float[][] limits = getLimits(psf, x, y, n);
+  /**
+   * Gets the psf background in the stack.
+   *
+   * @param psf the psf
+   * @param maxx the maxx
+   * @param maxy the maxy
+   * @param n the block size of the region
+   * @return the psf background
+   */
+  private static float getPsfBackground(float[][] psf, int maxx, int maxy, int n) {
+    final float[][] limits = getLimitsPerSlice(psf, maxx, maxy, n);
     return MathUtils.min(limits[0]);
     // return Maths.min(new Smoother().smooth(limits[0]).getFSmooth());
   }
@@ -4858,7 +4877,7 @@ public class PSFCreator implements PlugInFilter {
       }
 
       final int window = (int) Math.round(settings.getAnalysisWindow());
-      background = getBackground(fval, rangex, rangey, window);
+      background = getPsfBackground(fval, rangex, rangey, window);
       final double[] sum = new double[rangez];
       for (int z = 0; z < rangez; z++) {
         final float[] slice = fval[z];

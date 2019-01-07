@@ -33,18 +33,18 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
   protected final ExtendedGradient2Function ef2;
 
   /** The procedure. */
-  protected ExtendedGradient2Procedure procedure;
+  protected ExtendedGradient2Procedure procedureEx2;
 
   /**
    * Instantiates a new offset extended gradient2 function.
    *
-   * @param f the function
+   * @param function the function
    * @param values the pre-computed offset values
    * @throws IllegalArgumentException if the values length does not match the function size
    */
-  protected OffsetExtendedGradient2Function(ExtendedGradient2Function f, double[] values) {
-    super(f, values);
-    ef2 = f;
+  protected OffsetExtendedGradient2Function(ExtendedGradient2Function function, double[] values) {
+    super(function, values);
+    ef2 = function;
   }
 
   /**
@@ -55,7 +55,7 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
    */
   protected OffsetExtendedGradient2Function(OffsetExtendedGradient2Function pre, double[] values) {
     super(pre, values);
-    ef2 = (ExtendedGradient2Function) f;
+    ef2 = (ExtendedGradient2Function) vf;
   }
 
   /**
@@ -74,31 +74,32 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
 
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
-    this.procedure = procedure;
-    i = 0;
+    this.procedureEx2 = procedure;
+    index = 0;
     ef2.forEach((ExtendedGradient2Procedure) this);
   }
 
   @Override
-  public void executeExtended(double value, double[] dy_da, double[] d2y_dadb) {
-    procedure.executeExtended(value + values[i++], dy_da, d2y_dadb);
+  public void executeExtended(double value, double[] dyda, double[] d2ydadb) {
+    procedureEx2.executeExtended(value + values[index++], dyda, d2ydadb);
   }
 
   /**
    * Wrap a function with pre-computed values.
    *
    * @param func the function
-   * @param b Baseline pre-computed y-values
+   * @param baseline Baseline pre-computed y-values
    * @return the wrapped function (or the original if pre-computed values are null or wrong length)
    */
   public static ExtendedGradient2Function
-      wrapExtendedGradient2Function(final ExtendedGradient2Function func, final double[] b) {
-    if (b != null && b.length == func.size()) {
+      wrapExtendedGradient2Function(final ExtendedGradient2Function func, final double[] baseline) {
+    if (baseline != null && baseline.length == func.size()) {
       // Avoid multiple wrapping
       if (func instanceof OffsetExtendedGradient2Function) {
-        return new OffsetExtendedGradient2Function((OffsetExtendedGradient2Function) func, b);
+        return new OffsetExtendedGradient2Function((OffsetExtendedGradient2Function) func,
+            baseline);
       }
-      return new OffsetExtendedGradient2Function(func, b);
+      return new OffsetExtendedGradient2Function(func, baseline);
     }
     return func;
   }

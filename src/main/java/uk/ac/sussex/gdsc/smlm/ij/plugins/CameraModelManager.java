@@ -211,14 +211,6 @@ public class CameraModelManager implements PlugIn {
     return list.toArray(new String[list.size()]);
   }
 
-  private static List<String> createList(boolean includeNone) {
-    final List<String> list = new TurboList<>();
-    if (includeNone) {
-      list.add("[None]");
-    }
-    return list;
-  }
-
   /**
    * List the camera models with the correct dimensions.
    *
@@ -238,6 +230,14 @@ public class CameraModelManager implements PlugIn {
       }
     }
     return list.toArray(new String[list.size()]);
+  }
+
+  private static List<String> createList(boolean includeNone) {
+    final List<String> list = new TurboList<>();
+    if (includeNone) {
+      list.add("[None]");
+    }
+    return list;
   }
 
   //@formatter:off
@@ -274,29 +274,29 @@ public class CameraModelManager implements PlugIn {
 
     switch (pluginSettings.getOption()) {
       case 5:
-        filterImage();
+        runFilterImage();
         break;
       case 4:
-        deleteCameraModel();
+        runDeleteCameraModel();
         break;
       case 3:
-        viewCameraModel();
+        runViewCameraModel();
         break;
       case 2:
-        printCameraModels();
+        runPrintCameraModels();
         break;
       case 1:
-        loadFromDirectory();
+        runLoadFromDirectory();
         break;
       case 0:
       default:
-        loadFromFile();
+        runLoadFromFile();
     }
 
     SettingsManager.writeSettings(pluginSettings);
   }
 
-  private void filterImage() {
+  private void runFilterImage() {
     // Select an image
     GenericDialog gd = new GenericDialog(TITLE);
     final String[] list = ImageJUtils.getImageList(ImageJUtils.GREY_SCALE);
@@ -366,7 +366,7 @@ public class CameraModelManager implements PlugIn {
     imp2.show();
   }
 
-  private void deleteCameraModel() {
+  private void runDeleteCameraModel() {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] MODELS = listCameraModels(false);
     gd.addChoice("Model", MODELS, pluginSettings.getSelected());
@@ -389,7 +389,7 @@ public class CameraModelManager implements PlugIn {
     ImageJUtils.log("Deleted camera model: %s\n%s", name, resource);
   }
 
-  private static void loadFromDirectory() {
+  private static void runLoadFromDirectory() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load camera models from a directory.");
     egd.addFilenameField("Directory", directory);
@@ -412,7 +412,7 @@ public class CameraModelManager implements PlugIn {
     }
   }
 
-  private static void loadFromFile() {
+  private static void runLoadFromFile() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load a camera model from file.");
     egd.addFilenameField("Filename", filename);
@@ -435,7 +435,7 @@ public class CameraModelManager implements PlugIn {
     }
   }
 
-  private void viewCameraModel() {
+  private void runViewCameraModel() {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] MODELS = listCameraModels(false);
     gd.addChoice("Model", MODELS, pluginSettings.getSelected());
@@ -532,7 +532,7 @@ public class CameraModelManager implements PlugIn {
         MathUtils.rounded(stats.getMax()));
   }
 
-  private static void printCameraModels() {
+  private static void runPrintCameraModels() {
     IJ.log(settings.toString());
   }
 }

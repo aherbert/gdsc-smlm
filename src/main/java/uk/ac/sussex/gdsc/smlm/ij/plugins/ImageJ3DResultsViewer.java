@@ -359,13 +359,13 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
       this.results = results;
       this.points = points;
       this.sizes = sizes;
-      Rendering rendering = Rendering.forNumber(settings.getRendering());
-      if (rendering.isHighResolution()) {
+      Rendering outlineRendering = Rendering.forNumber(settings.getRendering());
+      if (outlineRendering.isHighResolution()) {
         // Don't draw a mesh with too much detail.
         // Note the Icosahedron does not envelope the shape but the next division does.
-        rendering = Rendering.LOW_RES_SPHERE;
+        outlineRendering = Rendering.LOW_RES_SPHERE;
       }
-      this.rendering = rendering;
+      this.rendering = outlineRendering;
       highlightColourUpdated();
     }
 
@@ -374,7 +374,7 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
       // Maintain a list of the results that are picked (the table model).
       // At each new click, check the list does not contain the points
       // and add it.
-      // Selction is handled by a selection model.
+      // Selection is handled by a selection model.
       // For multiple items we add new switches. Each new selected point uses the
       // first non-visible switch for display (or creates a new one).
       // If a point is removed then set the switch off.
@@ -389,9 +389,9 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
      * @return the custom mesh
      */
     private CustomMesh createOutline() {
-      final TurboList<Point3f> points = new TurboList<>(1);
-      points.add(new Point3f());
       if (settings.getRendering() == 0) {
+        final TurboList<Point3f> points = new TurboList<>(1);
+        points.add(new Point3f());
         final ItemPointMesh mesh = new ItemPointMesh(points, highlightColor, 0);
         mesh.setPointSize((float) settings.getPixelSize());
         mesh.getAppearance().getPolygonAttributes().setPolygonMode(PolygonAttributes.POLYGON_LINE);
@@ -415,20 +415,7 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
       // Note using a line mesh would work but does not cull the backface
       final Shape3D shape = Shape3DHelper.createShape(rendering, 0);
 
-      // pointOutline = Shape3DHelper.createLocalisationObject(rendering);
-
-      // ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline.toArray(new
-      // Point3f[pointOutline.size()]),
-      // new Point3f[] { new Point3f() }, null, highlightColor, 0);
-
-      // updateAppearance(mesh, settings);
-
-      // Outline
-      // mesh.setShaded(false);
-
-      Appearance appearance;
-      // appearance = mesh.getAppearance();
-      appearance = shape.getAppearance();
+      Appearance appearance = shape.getAppearance();
 
       final PolygonAttributes pa = appearance.getPolygonAttributes();
       pa.setCullFace(PolygonAttributes.CULL_BACK);
@@ -443,7 +430,10 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
 
       return new ItemMesh(new Point3f(), (GeometryArray) shape.getGeometry(), appearance, null,
           highlightColor, 0f);
-      // return mesh;
+    }
+
+    void select(PeakResult result) {
+      select(results.indexOf(result));
     }
 
     void select(int index) {
@@ -477,17 +467,17 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
       contentInstance.setCustomSwitch(switchIndex, true);
     }
 
-    private int findSelected(PeakResult r) {
+    private int findSelected(PeakResult result) {
       for (int i = 0; i < selected.size(); i++) {
         final PeakResult r2 = selected.getf(i);
-        if (r2 != null && r.equals(r2)) {
+        if (r2 != null && result.equals(r2)) {
           return i;
         }
       }
       return -1;
     }
 
-    private int addToSelected(PeakResult r) {
+    private int addToSelected(PeakResult result) {
       // Find the first available index
       int switchIndex = findEmpty();
       if (switchIndex == -1) {
@@ -498,10 +488,10 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
         tg.setPickable(false);
         // Add the outline before to support transparency.
         switchIndex = contentInstance.addCustomSwitch(tg, true);
-        selected.add(r);
+        selected.add(result);
         selectedNode.add(tg);
       } else {
-        selected.setf(switchIndex, r);
+        selected.setf(switchIndex, result);
       }
       return switchIndex;
     }
@@ -523,13 +513,9 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
       }
     }
 
-    void select(PeakResult r) {
-      select(results.indexOf(r));
-    }
-
-    void setPointSize(float f) {
+    void setPointSize(float size) {
       if (rendering == Rendering.POINT) {
-        ((ItemPointMesh) outline).setPointSize(f);
+        ((ItemPointMesh) outline).setPointSize(size);
       }
     }
 
@@ -1270,12 +1256,12 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
         if (sizeMode != SizeMode.XYZ_DEVIATIONS) {
           sphereSize = createSphereSizeFromDeviations(results);
         }
-        return createAlpha(minA, maxA, sphereSize);
+        return createAlphaFromSize(minA, maxA, sphereSize);
       case XY_PRECISION:
         if (sizeMode != SizeMode.XY_PRECISION) {
           sphereSize = createSphereSizeFromPrecision(results);
         }
-        return createAlpha(minA, maxA, sphereSize);
+        return createAlphaFromSize(minA, maxA, sphereSize);
       case SIZE:
         return createAlphaFromSize(results, settings, minA, maxA, sphereSize);
       default:
@@ -1328,10 +1314,10 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
       }
     }
 
-    return createAlpha(minA, maxA, sphereSize);
+    return createAlphaFromSize(minA, maxA, sphereSize);
   }
 
-  private static float[] createAlpha(double minA, double maxA, Point3f[] sphereSize) {
+  private static float[] createAlphaFromSize(double minA, double maxA, Point3f[] sphereSize) {
     if (sphereSize == null) {
       return null;
     }
@@ -2528,13 +2514,32 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
         }
       }
 
-      private void save(TransparentItemShape t) {
-        final int size = t.size();
+      private void save(TransparentItemShape shape) {
+        final int size = shape.size();
         if (alpha == null || alpha.length != size) {
           alpha = new float[size];
         }
-        t.getItemAlpha(alpha);
-        t.setItemAlpha(1);
+        shape.getItemAlpha(alpha);
+        shape.setItemAlpha(1);
+      }
+
+      public void save(ItemGroup group) {
+        if (group instanceof ItemGeometryGroup) {
+          save((ItemGeometryGroup) group);
+        } else {
+          transparency = group.getTransparency();
+          group.setTransparency(0f);
+        }
+      }
+
+      public void save(ItemGeometryGroup group) {
+        final int size = group.size();
+        if (alpha == null || alpha.length != size) {
+          alpha = new float[size];
+        }
+        group.getItemAlpha(alpha);
+        transparency = group.getTransparency();
+        group.setItemAlpha(1f, 0f);
       }
 
       public void restore(CustomMesh mesh) {
@@ -2549,18 +2554,9 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
         }
       }
 
-      private void restore(TransparentItemShape t) {
-        if (alpha != null && alpha.length == t.size()) {
-          t.setItemAlpha(alpha);
-        }
-      }
-
-      public void save(ItemGroup group) {
-        if (group instanceof ItemGeometryGroup) {
-          save((ItemGeometryGroup) group);
-        } else {
-          transparency = group.getTransparency();
-          group.setTransparency(0f);
+      private void restore(TransparentItemShape shape) {
+        if (alpha != null && alpha.length == shape.size()) {
+          shape.setItemAlpha(alpha);
         }
       }
 
@@ -2570,16 +2566,6 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
         } else {
           group.setTransparency(transparency);
         }
-      }
-
-      public void save(ItemGeometryGroup group) {
-        final int size = group.size();
-        if (alpha == null || alpha.length != size) {
-          alpha = new float[size];
-        }
-        group.getItemAlpha(alpha);
-        transparency = group.getTransparency();
-        group.setItemAlpha(1f, 0f);
       }
 
       public void restore(ItemGeometryGroup group) {

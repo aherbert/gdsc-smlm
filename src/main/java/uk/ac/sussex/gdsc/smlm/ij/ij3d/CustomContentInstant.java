@@ -30,7 +30,6 @@ import customnode.CustomMeshNode;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.io.FileInfo;
 import ij.io.OpenDialog;
 
@@ -96,7 +95,7 @@ public class CustomContentInstant extends ContentInstant {
   private PointList points;
 
   // scene graph entries
-  // private final OrderedGroup ordered;
+  // private final OrderedGroup ordered
   private final Group ordered;
 
   private boolean available = true;
@@ -303,10 +302,10 @@ public class CustomContentInstant extends ContentInstant {
     ((Switch) ordered.getChild(which)).setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
   }
 
-  /*
-   * ************************************************************ swapping
-   *
-   ***********************************************************/
+  /////////////////////////////////////////////////////////////
+  // swapping
+  /////////////////////////////////////////////////////////////
+
   @Override
   public void swapDisplayedData() {
     if (!available) {
@@ -359,33 +358,33 @@ public class CustomContentInstant extends ContentInstant {
     return displayedDataSwapfile;
   }
 
-  /*
-   * ************************************************************ setters - visibility flags
-   *
-   ***********************************************************/
+  /////////////////////////////////////////////////////////////
+  // setters - visibility flags
+  /////////////////////////////////////////////////////////////
 
   @Override
-  public void setVisible(final boolean b) {
-    visible = b;
-    setSwitch(CO, b);
-    setSwitch(CS, b & coordVisible);
-    // whichChild.set(BB, b && bbVisible);
-    // only if hiding, hide the point list
-    if (!b) {
+  public void setVisible(final boolean visible) {
+    this.visible = visible;
+    setSwitch(CO, visible);
+    setSwitch(CS, visible && coordVisible);
+    // whichChild.set(BB, visible && bbVisible)
+
+    // Only if hiding, hide the point list
+    if (!visible) {
       showPointList(false);
     }
   }
 
   @Override
-  public void showBoundingBox(final boolean b) {
-    bbVisible = b;
-    setSwitch(BB, b);
+  public void showBoundingBox(final boolean visible) {
+    bbVisible = visible;
+    setSwitch(BB, visible);
   }
 
   @Override
-  public void showCoordinateSystem(final boolean b) {
-    coordVisible = b;
-    setSwitch(CS, b);
+  public void showCoordinateSystem(final boolean visible) {
+    coordVisible = visible;
+    setSwitch(CS, visible);
   }
 
   @Override
@@ -395,27 +394,26 @@ public class CustomContentInstant extends ContentInstant {
     setSwitch(BS, sb);
   }
 
-  /*
-   * ************************************************************ point list
-   *
-   ***********************************************************/
+  /////////////////////////////////////////////////////////////
+  // point list
+  /////////////////////////////////////////////////////////////
 
   @Override
-  public void setPointListDialog(final PointListDialog p) {
-    this.plDialog = p;
+  public void setPointListDialog(final PointListDialog plDialog) {
+    this.plDialog = plDialog;
   }
 
   @Override
-  public void showPointList(final boolean b) {
+  public void showPointList(final boolean visible) {
     if (plShape == null) {
       return;
     }
 
-    setSwitch(PL, b);
-    showPL = b;
-    if (b && plDialog != null) {
+    setSwitch(PL, visible);
+    showPL = visible;
+    if (visible && plDialog != null) {
       plDialog.addPointList(getName(), plPanel);
-    } else if (!b && plDialog != null) {
+    } else if (!visible && plDialog != null) {
       plDialog.removePointList(plPanel);
     }
   }
@@ -438,13 +436,13 @@ public class CustomContentInstant extends ContentInstant {
   @Override
   public void savePointList() {
     String dir = OpenDialog.getDefaultDirectory();
-    String n = this.getName();
+    String name = this.getName();
     if (image != null) {
       final FileInfo fi = image.getFileInfo();
       dir = fi.directory;
-      n = fi.fileName;
+      name = fi.fileName;
     }
-    points.save(dir, n);
+    points.save(dir, name);
   }
 
   @Override
@@ -455,13 +453,13 @@ public class CustomContentInstant extends ContentInstant {
   /**
    * Adds the point list point.
    *
-   * @param p the point
+   * @param point the point
    * @deprecated To be removed
    */
   @Deprecated
   @Override
-  public void addPointListPoint(final Point3d p) {
-    points.add(p.x, p.y, p.z);
+  public void addPointListPoint(final Point3d point) {
+    points.add(point.x, point.y, point.z);
     if (plDialog != null) {
       plDialog.update();
     }
@@ -470,14 +468,14 @@ public class CustomContentInstant extends ContentInstant {
   /**
    * Sets the list point point.
    *
-   * @param i the index
-   * @param p the point
+   * @param index the index
+   * @param point the point
    * @deprecated To be removed
    */
   @Override
   @Deprecated
-  public void setListPointPos(final int i, final Point3d p) {
-    points.placePoint(points.get(i), p.x, p.y, p.z);
+  public void setListPointPos(final int index, final Point3d point) {
+    points.placePoint(points.get(index), point.x, point.y, point.z);
   }
 
   @Override
@@ -486,8 +484,8 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   @Override
-  public void setLandmarkPointSize(final float r) {
-    plShape.setRadius(r);
+  public void setLandmarkPointSize(final float radius) {
+    plShape.setRadius(radius);
   }
 
   @Override
@@ -508,30 +506,30 @@ public class CustomContentInstant extends ContentInstant {
   /**
    * Delete point list point.
    *
-   * @param i the index
+   * @param index the index
    * @deprecated To be removed
    */
   @Override
   @Deprecated
-  public void deletePointListPoint(final int i) {
-    points.remove(i);
+  public void deletePointListPoint(final int index) {
+    points.remove(index);
     if (plDialog != null) {
       plDialog.update();
     }
   }
 
-  /*
-   * ************************************************************ setters - transform
-   *
-   **************************************************************/
+  /////////////////////////////////////////////////////////////
+  // setters - transform
+  /////////////////////////////////////////////////////////////
+
   @Override
   public void toggleLock() {
     locked = !locked;
   }
 
   @Override
-  public void setLocked(final boolean b) {
-    locked = b;
+  public void setLocked(final boolean locked) {
+    this.locked = locked;
   }
 
   @Override
@@ -588,17 +586,17 @@ public class CustomContentInstant extends ContentInstant {
     localTranslate.setTransform(t);
   }
 
-  /*
-   * ************************************************************ setters - attributes
-   *
-   ***********************************************************/
+  /////////////////////////////////////////////////////////////
+  // setters - attributes
+  /////////////////////////////////////////////////////////////
 
   @Override
-  public void setLUT(final int[] rLUT, final int[] gLUT, final int[] bLUT, final int[] aLUT) {
-    this.rLUT = rLUT;
-    this.gLUT = gLUT;
-    this.bLUT = bLUT;
-    this.aLUT = aLUT;
+  public void setLUT(final int[] redLut, final int[] greenLut, final int[] blueLut,
+      final int[] alphaLut) {
+    this.rLUT = redLut;
+    this.gLUT = greenLut;
+    this.bLUT = blueLut;
+    this.aLUT = alphaLut;
     if (contentNode != null) {
       contentNode.lutUpdated(rLUT, gLUT, bLUT, aLUT);
     }
@@ -628,9 +626,9 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   @Override
-  public void setShaded(final boolean b) {
-    if (b != shaded) {
-      this.shaded = b;
+  public void setShaded(final boolean shaded) {
+    if (this.shaded != shaded) {
+      this.shaded = shaded;
       if (contentNode != null) {
         contentNode.shadeUpdated(shaded);
       }
@@ -643,9 +641,9 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   @Override
-  public void setSaturatedVolumeRendering(final boolean b) {
+  public void setSaturatedVolumeRendering(final boolean value) {
     if (contentNode != null && type == VOLUME) {
-      ((VoltexGroup) contentNode).getRenderer().getVolume().setSaturatedVolumeRendering(b);
+      ((VoltexGroup) contentNode).getRenderer().getVolume().setSaturatedVolumeRendering(value);
     }
   }
 
@@ -703,22 +701,22 @@ public class CustomContentInstant extends ContentInstant {
     }
   }
 
-  /*
-   * ************************************************************ UniverseListener interface
-   *
-   *************************************************************/
+  /////////////////////////////////////////////////////////////
+  // UniverseListener interface
+  /////////////////////////////////////////////////////////////
+
   @Override
   public void transformationStarted(final View view) {
     // Do nothing
   }
 
   @Override
-  public void contentAdded(final Content c) {
+  public void contentAdded(final Content content) {
     // Do nothing
   }
 
   @Override
-  public void contentRemoved(final Content c) {
+  public void contentRemoved(final Content content) {
     if (plDialog != null) {
       plDialog.removePointList(plPanel);
     }
@@ -730,12 +728,12 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   @Override
-  public void contentSelected(final Content c) {
+  public void contentSelected(final Content content) {
     // Do nothing
   }
 
   @Override
-  public void contentChanged(final Content c) {
+  public void contentChanged(final Content content) {
     // Do nothing
   }
 
@@ -763,10 +761,10 @@ public class CustomContentInstant extends ContentInstant {
     }
   }
 
-  /*
-   * ************************************************************* getters
-   *
-   **************************************************************/
+  /////////////////////////////////////////////////////////////
+  // getters
+  /////////////////////////////////////////////////////////////
+
   @Override
   public int getType() {
     return type;
@@ -788,23 +786,23 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   @Override
-  public void getRedLUT(final int[] l) {
-    System.arraycopy(rLUT, 0, l, 0, rLUT.length);
+  public void getRedLUT(final int[] lut) {
+    System.arraycopy(rLUT, 0, lut, 0, rLUT.length);
   }
 
   @Override
-  public void getGreenLUT(final int[] l) {
-    System.arraycopy(gLUT, 0, l, 0, gLUT.length);
+  public void getGreenLUT(final int[] lut) {
+    System.arraycopy(gLUT, 0, lut, 0, gLUT.length);
   }
 
   @Override
-  public void getBlueLUT(final int[] l) {
-    System.arraycopy(bLUT, 0, l, 0, bLUT.length);
+  public void getBlueLUT(final int[] lut) {
+    System.arraycopy(bLUT, 0, lut, 0, bLUT.length);
   }
 
   @Override
-  public void getAlphaLUT(final int[] l) {
-    System.arraycopy(aLUT, 0, l, 0, aLUT.length);
+  public void getAlphaLUT(final int[] lut) {
+    System.arraycopy(aLUT, 0, lut, 0, aLUT.length);
   }
 
   @Override
@@ -833,18 +831,18 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   @Override
+  public void getLocalRotate(final Transform3D transform) {
+    localRotate.getTransform(transform);
+  }
+
+  @Override
   public TransformGroup getLocalTranslate() {
     return localTranslate;
   }
 
   @Override
-  public void getLocalRotate(final Transform3D t) {
-    localRotate.getTransform(t);
-  }
-
-  @Override
-  public void getLocalTranslate(final Transform3D t) {
-    localTranslate.getTransform(t);
+  public void getLocalTranslate(final Transform3D transform) {
+    localTranslate.getTransform(transform);
   }
 
   @Override
