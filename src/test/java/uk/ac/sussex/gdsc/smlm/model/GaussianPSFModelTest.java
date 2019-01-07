@@ -66,7 +66,8 @@ public class GaussianPSFModelTest {
     final AstigmatismZModel zModel =
         HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 
-    final int maxx = 21, maxy = 21;
+    final int maxx = 21;
+    final int maxy = 21;
     final double[] e = new double[maxx * maxy];
     final double[] o = new double[maxx * maxy];
     final double[] o2 = new double[maxx * maxy];
@@ -126,7 +127,8 @@ public class GaussianPSFModelTest {
 
     // zModel = new NullAstigmatismZModel(1.2, 1.2);
 
-    final int maxx = 21, maxy = 21;
+    final int maxx = 21;
+    final int maxy = 21;
     final double[] o = new double[maxx * maxy];
     final double[] o2 = new double[maxx * maxy];
     final double[] o3 = new double[maxx * maxy];
@@ -183,7 +185,8 @@ public class GaussianPSFModelTest {
     final AstigmatismZModel zModel =
         HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 
-    final int maxx = 21, maxy = 21;
+    final int maxx = 21;
+    final int maxy = 21;
     final double[] o = new double[maxx * maxy];
     final double[] o2 = new double[maxx * maxy];
 
@@ -200,7 +203,8 @@ public class GaussianPSFModelTest {
           final double x2 = k * 0.33;
           psf.getValue(maxx, maxy, x0, x1, x2, o);
           psf2.getValue(maxx, maxy, x0, x1, x2, o2);
-          int extra = 0, zero = 0;
+          int extra = 0;
+          int zero = 0;
           for (int ii = 0; ii < o.length; ii++) {
             if (o[ii] == 0) {
               // PSF has a larger range

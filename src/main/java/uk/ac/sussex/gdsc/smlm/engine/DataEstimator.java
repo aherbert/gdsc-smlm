@@ -40,14 +40,14 @@ import org.apache.commons.math3.stat.ranking.NaNStrategy;
  * data. If this is not achieved then the estimates are made using all the data.
  */
 public class DataEstimator {
-  private final int ESTIMATE_LARGE_ENOUGH = 0;
-  private final int ESTIMATE_BACKGROUND = 1;
-  private final int ESTIMATE_NOISE = 2;
-  private final int ESTIMATE_THRESHOLD = 3;
-  private final int ESTIMATE_BACKGROUND_SIZE = 4;
+  private static final int ESTIMATE_LARGE_ENOUGH = 0;
+  private static final int ESTIMATE_BACKGROUND = 1;
+  private static final int ESTIMATE_NOISE = 2;
+  private static final int ESTIMATE_THRESHOLD = 3;
+  private static final int ESTIMATE_BACKGROUND_SIZE = 4;
 
   private final float[] data;
-  private Histogram h;
+  private Histogram hist;
   private final int width;
   private final int height;
   private float fraction = 0.25f;
@@ -114,6 +114,17 @@ public class DataEstimator {
   }
 
   /**
+   * Estimate the noise in all the data.
+   *
+   * @param method the method
+   * @return the noise
+   */
+  public float getNoise(NoiseEstimator.Method method) {
+    final NoiseEstimator ne = NoiseEstimator.wrap(data, width, height);
+    return (float) ne.getNoise(method);
+  }
+
+  /**
    * Gets the threshold for the background region.
    *
    * @return the noise
@@ -137,21 +148,21 @@ public class DataEstimator {
     if (estimate == null) {
       estimate = new float[5];
 
-      if (h == null) {
-        h = FloatHistogram.buildHistogram(data.clone(), true);
-        h = h.compact(histogramSize);
+      if (hist == null) {
+        hist = FloatHistogram.buildHistogram(data.clone(), true);
+        hist = hist.compact(histogramSize);
       }
 
       // Threshold the data
-      final float t = estimate[ESTIMATE_THRESHOLD] = h.getAutoThreshold(thresholdMethod);
+      final float t = estimate[ESTIMATE_THRESHOLD] = hist.getAutoThreshold(thresholdMethod);
 
       // Get stats below the threshold
       Statistics stats = new Statistics();
-      for (int i = h.minBin; i <= h.maxBin; i++) {
-        if (h.getValue(i) >= t) {
+      for (int i = hist.minBin; i <= hist.maxBin; i++) {
+        if (hist.getValue(i) >= t) {
           break;
         }
-        stats.add(h.histogramCounts[i], h.getValue(i));
+        stats.add(hist.histogramCounts[i], hist.getValue(i));
       }
 
       // Check if background region is large enough
@@ -167,17 +178,6 @@ public class DataEstimator {
       estimate[ESTIMATE_BACKGROUND] = (float) stats.getMean();
       estimate[ESTIMATE_NOISE] = (float) stats.getStandardDeviation();
     }
-  }
-
-  /**
-   * Estimate the noise in the all the data.
-   *
-   * @param method the method
-   * @return the noise
-   */
-  public float getNoise(NoiseEstimator.Method method) {
-    final NoiseEstimator ne = NoiseEstimator.wrap(data, width, height);
-    return (float) ne.getNoise(method);
   }
 
   /**
@@ -260,6 +260,6 @@ public class DataEstimator {
   public void setHistogramSize(int histogramSize) {
     this.histogramSize = histogramSize;
     this.estimate = null;
-    this.h = null;
+    this.hist = null;
   }
 }

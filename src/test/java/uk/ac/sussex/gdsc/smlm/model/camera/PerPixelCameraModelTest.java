@@ -58,10 +58,16 @@ public class PerPixelCameraModelTest implements Function<RandomSeed, Object> {
     ConcurrentHashMap = null;
   }
 
-  static final int w = 113, h = 29, size = w * h;
+  static final int w = 113;
+  static final int h = 29;
+  static final int size = w * h;
 
   private static class PerPixelCameraModelTestData {
-    float[] bias, gain, variance, varG2, image;
+    float[] bias;
+    float[] gain;
+    float[] variance;
+    float[] varG2;
+    float[] image;
   }
 
   @Override

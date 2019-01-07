@@ -513,7 +513,8 @@ public class PrecisionTest {
     final float[] g1 = new float[n];
     final double[] g2 = new double[n];
 
-    double t1 = 0, t2 = 0;
+    double t1 = 0;
+    double t2 = 0;
     final double[] tg1 = new double[n];
     final double[] tg2 = new double[n];
 
@@ -550,7 +551,8 @@ public class PrecisionTest {
     p1[Gaussian.X_POSITION] = (float) (p2[Gaussian.X_POSITION] = (float) (0.123 + maxx / 2));
     p1[Gaussian.Y_POSITION] = (float) (p2[Gaussian.Y_POSITION] = (float) (0.789 + maxx / 2));
 
-    long time1, time2;
+    long time1;
+    long time2;
 
     if (noSum) {
       time1 = runSingleWithGradientsNoSum(maxx, f1, p1);
@@ -568,7 +570,8 @@ public class PrecisionTest {
       time2 += runDoubleWithGradients(maxx, f2, p2);
     }
 
-    Class<?> c1, c2;
+    Class<?> c1;
+    Class<?> c2;
     if (doubleFaster) {
       final long time = time1;
       time1 = time2;
@@ -700,7 +703,8 @@ public class PrecisionTest {
     p1[Gaussian.X_POSITION] = (float) (p2[Gaussian.X_POSITION] = (float) (0.123 + maxx / 2));
     p1[Gaussian.Y_POSITION] = (float) (p2[Gaussian.Y_POSITION] = (float) (0.789 + maxx / 2));
 
-    long time1, time2;
+    long time1;
+    long time2;
     if (noSum) {
       time1 = runSingleNoSum(maxx, f1, p1);
       time1 = runSingleNoSum(maxx, f1, p1);
@@ -717,7 +721,8 @@ public class PrecisionTest {
       time2 += runDouble(maxx, f2, p2);
     }
 
-    Class<?> c1, c2;
+    Class<?> c1;
+    Class<?> c2;
     if (doubleFaster) {
       final long time = time1;
       time1 = time2;

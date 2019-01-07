@@ -60,7 +60,9 @@ public class ChiSquaredDistributionTableTest {
   @SeededTest
   public void canComputeProbability() {
     for (final int df : new int[] {5, 10}) {
-      double o, e, chi = 0;
+      double o;
+      double e;
+      double chi = 0;
       final ChiSquaredDistribution d = new ChiSquaredDistribution(null, df);
 
       o = ChiSquaredDistributionTable.computePValue(chi, df);

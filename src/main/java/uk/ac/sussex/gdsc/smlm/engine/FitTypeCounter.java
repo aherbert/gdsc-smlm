@@ -76,6 +76,30 @@ public class FitTypeCounter {
   /**
    * Get the count of the given type.
    *
+   * @param setFlags The flags that must be set
+   * @param unsetFlags The flags that must be unset
+   * @return The count
+   */
+  public int get(int setFlags, int unsetFlags) {
+    // Check set flags and unset flags do not clash
+    // If they do then return 0
+    // TODO - check this works...
+    if ((setFlags & unsetFlags) != 0) {
+      return 0;
+    }
+
+    int total = 0;
+    for (int i = 0; i < count.length; i++) {
+      if ((i & setFlags) == setFlags && (i & unsetFlags) == 0) {
+        total += count[i].get();
+      }
+    }
+    return total;
+  }
+
+  /**
+   * Get the count of the given type.
+   *
    * @param flags The flags that must be set
    * @return The count
    */
@@ -110,30 +134,6 @@ public class FitTypeCounter {
         if ((i & flags) == 0) {
           total += count[i].get();
         }
-      }
-    }
-    return total;
-  }
-
-  /**
-   * Get the count of the given type.
-   *
-   * @param setFlags The flags that must be set
-   * @param unsetFlags The flags that must be unset
-   * @return The count
-   */
-  public int get(int setFlags, int unsetFlags) {
-    // Check set flags and unset flags do not clash
-    // If they do then return 0
-    // TODO - check this works...
-    if ((setFlags & unsetFlags) != 0) {
-      return 0;
-    }
-
-    int total = 0;
-    for (int i = 0; i < count.length; i++) {
-      if ((i & setFlags) == setFlags && (i & unsetFlags) == 0) {
-        total += count[i].get();
       }
     }
     return total;

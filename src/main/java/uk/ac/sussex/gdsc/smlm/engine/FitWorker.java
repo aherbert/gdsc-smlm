@@ -484,6 +484,28 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     estimateSignal = 2.5 * config.getHWHMMax() / Gaussian2DFunction.SD_TO_HWHM_FACTOR < fitting;
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public void run() {
+    try {
+      while (!finished) {
+        final FitJob fitjob = jobs.take();
+        if (fitjob == null || fitjob.data == null || finished) {
+          break;
+        }
+        run(fitjob);
+      }
+    } catch (final InterruptedException ex) {
+      Logger.getLogger(FitWorker.class.getName()).log(Level.WARNING,
+          () -> "Interrupted: " + ex.toString());
+      Thread.currentThread().interrupt();
+      throw new ConcurrentRuntimeException(ex);
+    } finally {
+      finished = true;
+      // notifyAll();
+    }
+  }
+
   /**
    * Locate all the peaks in the image specified by the fit job.
    *
@@ -539,7 +561,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     candidates = indentifySpots(job, width, height, params);
 
     if (candidates.getSize() == 0) {
-      finish(job, start);
+      finishJob(job, start);
       return;
     }
 
@@ -738,7 +760,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
     this.results.addAll(sliceResults);
 
-    finish(job, start);
+    finishJob(job, start);
   }
 
   private CandidateList indentifySpots(FitJob job, int width, int height, FitParameters params) {
@@ -837,7 +859,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     return spotFilter;
   }
 
-  private void finish(FitJob job, final long start) {
+  private void finishJob(FitJob job, final long start) {
     time += System.nanoTime() - start;
     job.finished();
   }
@@ -1241,7 +1263,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Analyse neighbours and include them in the fit if they are within a set height of this
       // peak.
       resetNeighbours();
-      neighbours = findNeighbours(regionBounds, candidateId, (float) getFittingBackgroundSingle());
+      neighbours =
+          findNeighboursInRegion(regionBounds, candidateId, (float) getFittingBackgroundSingle());
 
       if (benchmarking) {
         // When benchmarking we may compute additional results after the main filtering routine
@@ -2025,7 +2048,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     /**
      * Gets the local background and noise for the given peak assuming that multiple peaks were fit.
      *
-     *
      * <p>The local region is defined using the region within 1 SD of the centre.
      *
      * <p>The local background is computed using the sum of the region minus the sum of the function
@@ -2083,36 +2105,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       return result;
     }
 
-    private double noiseEstimateFromBackground(double b, Rectangle bounds) {
-      if (isFitCameraCounts) {
-        if (totalGain == 0) {
-          // Unknown calibration so use the global noise estimate
-          return fitConfig.getNoise();
-        }
-
-        // Convert the local background to photons
-        b /= totalGain;
-      }
-
-      // Apply the EM-CCD noise factor of 2 to the photon shot noise
-      if (isEMCCD) {
-        b *= 2;
-      }
-
-      // Using the mean variance allows an estimate for a per-pixel camera model.
-      // Use the normalised variance (i.e. the variance in photo-electrons).
-      double noise = Math.sqrt(b + cameraModel.getMeanNormalisedVariance(bounds));
-
-      if (isFitCameraCounts) {
-        noise *= totalGain;
-      }
-
-      return noise;
-    }
-
     /**
      * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation.
-     *
      *
      * <p>The range is clipped to 1 to max.
      *
@@ -2122,13 +2116,40 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
      */
     public int getRange(double range, int max) {
       final double l = Math.ceil(range);
-      if (l < 1L) {
+      if (l < 1) {
         return 1;
       }
       if (l >= max) {
         return max;
       }
       return (int) l;
+    }
+
+    private double noiseEstimateFromBackground(double background, Rectangle bounds) {
+      if (isFitCameraCounts) {
+        if (totalGain == 0) {
+          // Unknown calibration so use the global noise estimate
+          return fitConfig.getNoise();
+        }
+
+        // Convert the local background to photons
+        background /= totalGain;
+      }
+
+      // Apply the EM-CCD noise factor of 2 to the photon shot noise
+      if (isEMCCD) {
+        background *= 2;
+      }
+
+      // Using the mean variance allows an estimate for a per-pixel camera model.
+      // Use the normalised variance (i.e. the variance in photo-electrons).
+      double noiseEstimate = Math.sqrt(background + cameraModel.getMeanNormalisedVariance(bounds));
+
+      if (isFitCameraCounts) {
+        noiseEstimate *= totalGain;
+      }
+
+      return noiseEstimate;
     }
 
     /**
@@ -2145,7 +2166,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
      * @param precomputedFunction the precomputed function
      * @return [local background, noise]
      */
-    private double[] getLocalStatistics(double[] params, double[] precomputedFunction) {
+    private double[] getLocalStatisticsSinglePeak(double[] params, double[] precomputedFunction) {
       // This obtains the parameters without the background
       final double[] spotParams = extractSpotParams(params, 0);
 
@@ -2713,7 +2734,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
               localStats[n] = (fittedNeighbourCount == 0)
                   // If there are no other fitted peaks in the region then compute
                   // using the fitted background
-                  ? getLocalStatistics(params, null)
+                  ? getLocalStatisticsSinglePeak(params, null)
                   // If there are other fitted peaks in the region then compute the local
                   // background using the mean without the function value
                   : getLocalStatistics(0, params);
@@ -3738,7 +3759,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
    * @param background The background in the region
    * @return The number of neighbours
    */
-  private int findNeighbours(Rectangle regionBounds, int candidateId, float background) {
+  private int findNeighboursInRegion(Rectangle regionBounds, int candidateId, float background) {
     final int xmin = regionBounds.x;
     final int xmax = xmin + regionBounds.width - 1;
     final int ymin = regionBounds.y;
@@ -3767,11 +3788,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     CandidateList neighbours = findNeighbours(spot);
     for (int i = 0; i < neighbours.getSize(); i++) {
       final Candidate neighbour = neighbours.get(i);
-      if (isFit(neighbour.index)) {
-        continue;
-      }
-      if (canIgnore(neighbour.x, neighbour.y, xmin, xmax, ymin, ymax, neighbour.intensity,
-          heightThreshold)) {
+      if (isFit(neighbour.index) || canIgnore(neighbour.x, neighbour.y, xmin, xmax, ymin, ymax,
+          neighbour.intensity, heightThreshold)) {
         continue;
       }
       candidateNeighbours[candidateNeighbourCount++] = neighbour;
@@ -3817,8 +3835,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // }
 
       // Note: A smarter filter would be to compute the bounding rectangle of each fitted result and
-      // see if it
-      // overlaps the target region. This would involve overlap analysis
+      // see if it overlaps the target region. This would involve overlap analysis
       final double x0min = regionBounds.x;
       final double y0min = regionBounds.y;
       final double x0max = regionBounds.x + regionBounds.width;
@@ -4000,28 +4017,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       }
     }
     return candidates;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void run() {
-    try {
-      while (!finished) {
-        final FitJob fitjob = jobs.take();
-        if (fitjob == null || fitjob.data == null || finished) {
-          break;
-        }
-        run(fitjob);
-      }
-    } catch (final InterruptedException ex) {
-      Logger.getLogger(FitWorker.class.getName()).log(Level.WARNING,
-          () -> "Interrupted: " + ex.toString());
-      Thread.currentThread().interrupt();
-      throw new ConcurrentRuntimeException(ex);
-    } finally {
-      finished = true;
-      // notifyAll();
-    }
   }
 
   /**

@@ -209,7 +209,8 @@ public abstract class Image2DTest {
 
   @Test
   public void canComputeRollingSumTable() {
-    final int w = 2, h = 3;
+    final int w = 2;
+    final int h = 3;
     final Image2D image = createData(w, h);
     final double[] table = image.computeRollingSumTable(null);
     for (int hh = 1, i = 0; hh <= h; hh++) {

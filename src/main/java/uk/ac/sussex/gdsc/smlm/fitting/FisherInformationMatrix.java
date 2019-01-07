@@ -24,8 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+import uk.ac.sussex.gdsc.core.annotation.NotNull;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 
 import java.util.Arrays;
@@ -43,7 +46,7 @@ public class FisherInformationMatrix {
   private static final byte UNKNOWN = 0;
   private static final byte NO = -1;
 
-  private final DenseMatrix64F m;
+  private final DenseMatrix64F matrix;
   private double[] crlb;
   private byte inverted = UNKNOWN;
   private double inversionTolerance;
@@ -51,61 +54,61 @@ public class FisherInformationMatrix {
   /**
    * Instantiates a new fisher information matrix.
    *
-   * @param m the fisher information matrix
+   * @param matrix the fisher information matrix
    * @param inversionTolerance the inversion tolerance
    */
-  public FisherInformationMatrix(double[][] m, double inversionTolerance) {
-    this(EJMLLinearSolver.toA(m), inversionTolerance);
+  public FisherInformationMatrix(double[][] matrix, double inversionTolerance) {
+    this(EJMLLinearSolver.toA(matrix), inversionTolerance);
   }
 
   /**
    * Instantiates a new fisher information matrix.
    *
-   * @param m the fisher information matrix
+   * @param matrix the fisher information matrix
    * @param n the number of columns/rows
    * @param inversionTolerance the inversion tolerance
    */
-  public FisherInformationMatrix(double[] m, int n, double inversionTolerance) {
-    this(EJMLLinearSolver.toA(m, n), inversionTolerance);
+  public FisherInformationMatrix(double[] matrix, int n, double inversionTolerance) {
+    this(EJMLLinearSolver.toA(matrix, n), inversionTolerance);
   }
 
   /**
    * Instantiates a new fisher information matrix.
    *
-   * @param m the fisher information matrix
+   * @param matrix the fisher information matrix
    * @param inversionTolerance the inversion tolerance
    */
-  public FisherInformationMatrix(DenseMatrix64F m, double inversionTolerance) {
-    this.m = m;
+  public FisherInformationMatrix(DenseMatrix64F matrix, double inversionTolerance) {
+    this.matrix = matrix;
     setInversionTolerance(inversionTolerance);
   }
 
   /**
    * Instantiates a new fisher information matrix.
    *
-   * @param m the fisher information matrix
+   * @param matrix the fisher information matrix
    */
-  public FisherInformationMatrix(double[][] m) {
-    this(EJMLLinearSolver.toA(m));
+  public FisherInformationMatrix(double[][] matrix) {
+    this(EJMLLinearSolver.toA(matrix));
   }
 
   /**
    * Instantiates a new fisher information matrix.
    *
-   * @param m the fisher information matrix
+   * @param matrix the fisher information matrix
    * @param n the number of columns/rows
    */
-  public FisherInformationMatrix(double[] m, int n) {
-    this(EJMLLinearSolver.toA(m, n));
+  public FisherInformationMatrix(double[] matrix, int n) {
+    this(EJMLLinearSolver.toA(matrix, n));
   }
 
   /**
    * Instantiates a new fisher information matrix.
    *
-   * @param m the fisher information matrix
+   * @param matrix the fisher information matrix
    */
-  public FisherInformationMatrix(DenseMatrix64F m) {
-    this(m, DEFAULT_INVERSION_TOLERANCE);
+  public FisherInformationMatrix(DenseMatrix64F matrix) {
+    this(matrix, DEFAULT_INVERSION_TOLERANCE);
   }
 
   /**
@@ -115,7 +118,7 @@ public class FisherInformationMatrix {
    * @return the subset fisher information matrix
    */
   public FisherInformationMatrix subset(int[] indices) {
-    final int n = m.getNumCols();
+    final int n = matrix.getNumCols();
 
     // Check the indices are within the matrix
     for (int i = 0; i < indices.length; i++) {
@@ -124,9 +127,9 @@ public class FisherInformationMatrix {
       }
     }
 
-    final double[] in = m.getData();
-    final int m = indices.length;
-    final double[] out = new double[m * m];
+    final double[] in = matrix.getData();
+    final int size = indices.length;
+    final double[] out = new double[size * size];
     for (int i = 0, ii = 0; i < indices.length; i++) {
       final int index = indices[i] * n;
       for (int j = 0; j < indices.length; j++, ii++) {
@@ -134,7 +137,7 @@ public class FisherInformationMatrix {
       }
     }
 
-    return new FisherInformationMatrix(out, m);
+    return new FisherInformationMatrix(out, size);
   }
 
   private void invert() {
@@ -142,9 +145,9 @@ public class FisherInformationMatrix {
       return;
     }
 
-    if (m.numCols == 0) {
+    if (matrix.numCols == 0) {
       // Nothing to do
-      crlb = new double[0];
+      crlb = ArrayUtils.EMPTY_DOUBLE_ARRAY;
       inverted = YES;
       return;
     }
@@ -153,34 +156,36 @@ public class FisherInformationMatrix {
 
     // Matrix inversion
     final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(inversionTolerance);
-    final double[] crlb = solver.invertDiagonal(m); // Does not modify the matrix
-    if (crlb != null) {
-      // Check all diagonal values are zero or above
-      if (inversionTolerance > 0) {
-        // Already checked so just ignore values just below zero
-        for (int i = m.numCols; i-- > 0;) {
-          if (crlb[i] < 0) {
-            crlb[i] = 0;
-          }
-        }
-      } else {
-        // A small error is OK
-        for (int i = m.numCols; i-- > 0;) {
-          if (crlb[i] < 0) {
-            if (crlb[i] > -DEFAULT_INVERSION_TOLERANCE) {
-              crlb[i] = 0;
-              continue;
-            }
-            return;
-          }
+    final double[] result = solver.invertDiagonal(matrix); // Does not modify the matrix
+    if (result == null) {
+      return;
+    }
+
+    // Check all diagonal values are zero or above
+    if (inversionTolerance > 0) {
+      // Already checked so just ignore values just below zero
+      for (int i = matrix.numCols; i-- > 0;) {
+        if (result[i] < 0) {
+          result[i] = 0;
         }
       }
-
-      // Check all diagonal values are zero or above
-
-      inverted = YES;
-      this.crlb = crlb;
+    } else {
+      // A small error is OK
+      for (int i = matrix.numCols; i-- > 0;) {
+        if (result[i] <= 0) {
+          // Use the default tolerance since the user specified tolerance is not positive
+          if (result[i] > -DEFAULT_INVERSION_TOLERANCE) {
+            result[i] = 0;
+            continue;
+          }
+          // Not within tolerance
+          return;
+        }
+      }
     }
+
+    inverted = YES;
+    this.crlb = result;
   }
 
   /**
@@ -191,7 +196,7 @@ public class FisherInformationMatrix {
    *
    * @return CRLB (or null if inversion failed)
    */
-  public double[] crlb() {
+  public @Nullable double[] crlb() {
     return crlb(false);
   }
 
@@ -206,7 +211,7 @@ public class FisherInformationMatrix {
    * @param allowReciprocal the allow reciprocal flag
    * @return CRLB (or null if inversion failed and the reciprocal is not used)
    */
-  public double[] crlb(boolean allowReciprocal) {
+  public @Nullable double[] crlb(boolean allowReciprocal) {
     invert();
 
     if (inverted == YES) {
@@ -229,10 +234,29 @@ public class FisherInformationMatrix {
    *
    * @return CRLB (or null if inversion failed)
    */
-  public double[] crlbReciprocal() {
-    final double[] crlb = new double[m.numCols];
-    for (int i = 0, j = 0, n = m.numCols; i < n; i++, j += n + 1) {
-      crlb[i] = reciprocal(m.data[j]);
+  public @Nullable double[] crlbReciprocal() {
+    final double[] result = new double[matrix.numCols];
+    for (int i = 0, j = 0, n = matrix.numCols; i < n; i++, j += n + 1) {
+      result[i] = reciprocal(matrix.data[j]);
+    }
+    return result;
+  }
+
+  /**
+   * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of
+   * the central diagonal of the Fisher information matrix.
+   *
+   * <p>The information matrix is NOT inverted. Uses the reciprocal of the central diagonal returned
+   * for a (possibly loose) lower bound.
+   *
+   * @param matrix the fisher information matrix
+   * @return CRLB
+   */
+  public static @NotNull double[] crlbReciprocal(double[][] matrix) {
+    final int n = matrix.length;
+    final double[] crlb = new double[n];
+    for (int i = 0; i < n; i++) {
+      crlb[i] = reciprocal(matrix[i][i]);
     }
     return crlb;
   }
@@ -245,7 +269,7 @@ public class FisherInformationMatrix {
    *
    * @return CRLB (or null if inversion failed)
    */
-  public double[] crlbSqrt() {
+  public @Nullable double[] crlbSqrt() {
     return crlbSqrt(false);
   }
 
@@ -260,15 +284,15 @@ public class FisherInformationMatrix {
    * @param allowReciprocal the allow reciprocal flag
    * @return CRLB (or null if inversion failed and the reciprocal is not used)
    */
-  public double[] crlbSqrt(boolean allowReciprocal) {
+  public @Nullable double[] crlbSqrt(boolean allowReciprocal) {
     invert();
 
     if (inverted == YES) {
-      final double[] crlb = new double[this.crlb.length];
-      for (int i = crlb.length; i-- > 0;) {
-        crlb[i] = Math.sqrt(this.crlb[i]);
+      final double[] result = new double[this.crlb.length];
+      for (int i = result.length; i-- > 0;) {
+        result[i] = Math.sqrt(this.crlb[i]);
       }
-      return crlb;
+      return result;
     }
 
     if (allowReciprocal) {
@@ -285,33 +309,14 @@ public class FisherInformationMatrix {
    * <p>The information matrix is NOT inverted. Uses the square root of the reciprocal of the
    * central diagonal returned for a (possibly loose) lower bound.
    *
-   * @return CRLB (or null if inversion failed)
-   */
-  public double[] crlbReciprocalSqrt() {
-    final double[] crlb = new double[m.numCols];
-    for (int i = 0, j = 0, n = m.numCols; i < n; i++, j += n + 1) {
-      crlb[i] = reciprocalSqrt(m.data[j]);
-    }
-    return crlb;
-  }
-
-  /**
-   * Compute the Cramér–Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of
-   * the central diagonal of the Fisher information matrix.
-   *
-   * <p>The information matrix is NOT inverted. Uses the reciprocal of the central diagonal returned
-   * for a (possibly loose) lower bound.
-   *
-   * @param m the fisher information matrix
    * @return CRLB
    */
-  public static double[] crlbReciprocal(double[][] m) {
-    final int n = m.length;
-    final double[] crlb = new double[n];
-    for (int i = 0; i < n; i++) {
-      crlb[i] = reciprocal(m[i][i]);
+  public @NotNull double[] crlbReciprocalSqrt() {
+    final double[] result = new double[matrix.numCols];
+    for (int i = 0, j = 0, n = matrix.numCols; i < n; i++, j += n + 1) {
+      result[i] = reciprocalSqrt(matrix.data[j]);
     }
-    return crlb;
+    return result;
   }
 
   /**
@@ -321,14 +326,14 @@ public class FisherInformationMatrix {
    * <p>The information matrix is NOT inverted. Uses the square root of the reciprocal of the
    * central diagonal returned for a (possibly loose) lower bound.
    *
-   * @param m the fisher information matrix
+   * @param matrix the fisher information matrix
    * @return CRLB
    */
-  public static double[] crlbReciprocalSqrt(double[][] m) {
-    final int n = m.length;
+  public static @NotNull double[] crlbReciprocalSqrt(double[][] matrix) {
+    final int n = matrix.length;
     final double[] crlb = new double[n];
     for (int i = 0; i < n; i++) {
-      crlb[i] = reciprocalSqrt(m[i][i]);
+      crlb[i] = reciprocalSqrt(matrix[i][i]);
     }
     return crlb;
   }
@@ -343,11 +348,11 @@ public class FisherInformationMatrix {
    * <p>The reciprocal of the diagonal element of the Fisher information matrix is a (possibly
    * loose) lower bound.
    *
-   * @param d the input value
+   * @param value the input value
    * @return the reciprocal of the square root of the input value
    */
-  public static double reciprocal(double d) {
-    return (d > 0) ? 1.0 / d : 0;
+  public static double reciprocal(double value) {
+    return (value > 0) ? 1.0 / value : 0;
   }
 
   /**
@@ -360,11 +365,11 @@ public class FisherInformationMatrix {
    * <p>The square root of the reciprocal of the diagonal element of the Fisher information matrix
    * is a (possibly loose) lower bound.
    *
-   * @param d the input value
+   * @param value the input value
    * @return the reciprocal of the square root of the input value
    */
-  public static double reciprocalSqrt(double d) {
-    return (d > 0) ? 1.0 / Math.sqrt(d) : 0;
+  public static double reciprocalSqrt(double value) {
+    return (value > 0) ? 1.0 / Math.sqrt(value) : 0;
   }
 
   /**
@@ -395,7 +400,7 @@ public class FisherInformationMatrix {
    * @return the matrix
    */
   public double[][] getSquareMatrix() {
-    return EJMLLinearSolver.toSquareData(m);
+    return EJMLLinearSolver.toSquareData(matrix);
   }
 
   /**
@@ -404,11 +409,11 @@ public class FisherInformationMatrix {
    * @return the matrix
    */
   public DenseMatrix64F getMatrix() {
-    return m;
+    return matrix;
   }
 
   @Override
   public String toString() {
-    return "CRLB=" + Arrays.toString(crlb) + "\nM=" + m.toString();
+    return "CRLB=" + Arrays.toString(crlb) + "\nM=" + matrix.toString();
   }
 }

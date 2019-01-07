@@ -34,7 +34,8 @@ public class InterpolatedPoissonFunctionTest {
   static double[] photons = {0.25, 0.5, 1, 2, 4, 10, 100, 1000};
 
   // Set this at the range output from cumulativeProbabilityIsOneWithInteger
-  static int[][] minRange = null, maxRange = null;
+  static int[][] minRange = null;
+  static int[][] maxRange = null;
 
   static {
     minRange = new int[gain.length][photons.length];
@@ -218,7 +219,8 @@ public class InterpolatedPoissonFunctionTest {
     for (int i = 1; i < h.length; i++) {
       h[i] += h[i - 1];
     }
-    int minx = 0, maxx = h.length - 1;
+    int minx = 0;
+    int maxx = h.length - 1;
     while (h[minx + 1] < 0.0025) {
       minx++;
     }

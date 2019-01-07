@@ -51,7 +51,9 @@ public class CubicSplineDataTest {
   private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision)
       throws IOException {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final int x = 6, y = 5, z = 4;
+    final int x = 6;
+    final int y = 5;
+    final int z = 4;
 
     final int size = x * y;
     final CustomTricubicFunction[][] splines = new CustomTricubicFunction[z][x * y];

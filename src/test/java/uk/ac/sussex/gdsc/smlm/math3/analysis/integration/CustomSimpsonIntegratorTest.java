@@ -144,7 +144,8 @@ public class CustomSimpsonIntegratorTest {
     // Number of sub intervals
     final int n = 1 << c + 1;
     final double h = (b - a) / n; // sub-interval width
-    double sum2 = 0, sum4 = 0;
+    double sum2 = 0;
+    double sum4 = 0;
     for (int j = 1; j <= n / 2 - 1; j++) {
       sum2 += f.value(a + (2 * j) * h);
     }

@@ -86,7 +86,9 @@ public class CoordinateStoreTest {
 
   @Test
   public void canDetectZDuplicates() {
-    final double x = 3.1, y = 4.3, z = 1.1;
+    final double x = 3.1;
+    final double y = 4.3;
+    final double z = 1.1;
     final double[] resolution = {0.3, 0.5, 1.5};
 
     CoordinateStore s;

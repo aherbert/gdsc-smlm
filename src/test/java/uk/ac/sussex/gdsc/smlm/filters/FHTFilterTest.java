@@ -64,8 +64,10 @@ public class FHTFilterTest {
 
   private static void canFilter(RandomSeed seed, Operation operation) {
     final int size = 16;
-    final int ex = 5, ey = 7;
-    final int ox = 1, oy = 2;
+    final int ex = 5;
+    final int ey = 7;
+    final int ox = 1;
+    final int oy = 2;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
     // This is offset from the centre

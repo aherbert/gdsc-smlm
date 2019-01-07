@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -65,6 +67,7 @@ public class JumpDistanceAnalysisTest {
 
   final DoubleDoubleBiPredicate deltaD = TestHelper.doublesAreClose(0.1, 0);
   final DoubleDoubleBiPredicate deltaF = TestHelper.doublesAreClose(0.2, 0);
+
   // Used for testing single populations
   // Used for testing dual populations:
   // 15-fold, 5-fold, 3-fold difference between pairs
@@ -73,10 +76,10 @@ public class JumpDistanceAnalysisTest {
   // double[] D = new double[] { 0.2, 1 };
   // For proteins with mass 823 and 347 kDa the
   // difference using predicted diffusion coefficients is 3:1
-  double[] D = new double[] {3, 1};
+  static final double[] D = new double[] {3, 1};
 
-  // Commented out as this test always passes
-  // @Test
+  @Disabled("Commented out as this test always passes")
+  @Test
   public void canIntegrateProbabilityToCumulativeWithSinglePopulation() {
     final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
     jd.setMinD(0);
@@ -108,8 +111,8 @@ public class JumpDistanceAnalysisTest {
     }
   }
 
-  // Commented out as this test always passes
-  // @Test
+  @Disabled("Commented out as this test always passes")
+  @Test
   public void canIntegrateProbabilityToCumulativeWithMixedPopulation() {
     final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
     jd.setMinD(0);
@@ -309,8 +312,8 @@ public class JumpDistanceAnalysisTest {
   // Store the fitted N to allow repeat in the benchmark with fixed N if necessary
   int fitN = 0;
 
-  private void fit(UniformRandomProvider rg, String title, int samples, int n, double[] d,
-      double[] f, boolean mle) {
+  private void fit(UniformRandomProvider rg, String title, int samples, int n, double[] dc,
+      double[] fraction, boolean mle) {
     // Used for testing
     // @formatter:off
     //if (!mle) return;
@@ -320,8 +323,8 @@ public class JumpDistanceAnalysisTest {
     //n = 2;
     // @formatter:on
 
-    JumpDistanceAnalysis.sort(d, f);
-    final double[] jumpDistances = createData(rg, samples, d, f);
+    JumpDistanceAnalysis.sort(dc, fraction);
+    final double[] jumpDistances = createData(rg, samples, dc, fraction);
     final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
     jd.setFitRestarts(3);
     double[][] fit;
@@ -342,24 +345,24 @@ public class JumpDistanceAnalysisTest {
 
     // Record results to file
     if (out != null) {
-      writeResult(title, sample.d, sample.f, samples, n, d, f, mle, fitD, fitF);
+      writeResult(title, sample.dc, sample.fraction, samples, n, dc, fraction, mle, fitD, fitF);
     }
 
     fitN = fitD.length;
     AssertionError error = null;
     try {
-      Assertions.assertEquals(d.length, fitD.length, "Failed to fit n");
-      TestAssertions.assertArrayTest(d, fitD, deltaD, "Failed to fit d");
-      TestAssertions.assertArrayTest(f, fitF, deltaF, "Failed to fit f");
+      Assertions.assertEquals(dc.length, fitD.length, "Failed to fit n");
+      TestAssertions.assertArrayTest(dc, fitD, deltaD, "Failed to fit d");
+      TestAssertions.assertArrayTest(fraction, fitF, deltaF, "Failed to fit f");
     } catch (final AssertionError ex) {
       error = ex;
     } finally {
-      final double[] e1 = getPercentError(d, fitD);
-      final double[] e2 = getPercentError(f, fitF);
+      final double[] e1 = getPercentError(dc, fitD);
+      final double[] e2 = getPercentError(fraction, fitF);
       logger.info(
           FunctionUtils.getSupplier("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]",
-              (error == null) ? "+++ Pass" : "--- Fail", title, d.length, samples, n, toString(d),
-              toString(fitD), toString(e1), toString(f), toString(fitF), toString(e2)));
+              (error == null) ? "+++ Pass" : "--- Fail", title, dc.length, samples, n, toString(dc),
+              toString(fitD), toString(e1), toString(fraction), toString(fitF), toString(e2)));
       if (error != null) {
         throw error;
       }
@@ -407,16 +410,16 @@ public class JumpDistanceAnalysisTest {
   }
 
   private void writeResult(String title, double[] actualD, double[] actualF, int samples, int n,
-      double[] d, double[] f, boolean mle, double[] fd, double[] ff) {
-    final int size = d.length;
-    final int fsize = fd.length;
+      double[] dc, double[] fraction, boolean mle, double[] fitDc, double[] fitFraction) {
+    final int size = dc.length;
+    final int fitSize = fitDc.length;
     // Pad results if they are too small
-    if (fsize < size) {
-      fd = Arrays.copyOf(fd, size);
-      ff = Arrays.copyOf(ff, size);
+    if (fitSize < size) {
+      fitDc = Arrays.copyOf(fitDc, size);
+      fitFraction = Arrays.copyOf(fitFraction, size);
     }
-    final double[] ed = getRelativeError(d, fd);
-    final double[] ef = getRelativeError(f, ff);
+    final double[] ed = getRelativeError(dc, fitDc);
+    final double[] ef = getRelativeError(fraction, fitFraction);
 
     final StringBuilder sb = new StringBuilder(title);
     sb.append('\t').append(repeat);
@@ -430,21 +433,21 @@ public class JumpDistanceAnalysisTest {
     sb.append('\t').append(mle);
     sb.append('\t').append(n);
     sb.append('\t').append(size);
-    sb.append('\t').append(fsize);
+    sb.append('\t').append(fitSize);
     for (int i = 0; i < size; i++) {
-      sb.append('\t').append(d[i]);
+      sb.append('\t').append(dc[i]);
     }
     for (int i = 0; i < size; i++) {
-      sb.append('\t').append(fd[i]);
+      sb.append('\t').append(fitDc[i]);
     }
     for (int i = 0; i < size; i++) {
       sb.append('\t').append(ed[i]);
     }
     for (int i = 0; i < size; i++) {
-      sb.append('\t').append(f[i]);
+      sb.append('\t').append(fraction[i]);
     }
     for (int i = 0; i < size; i++) {
-      sb.append('\t').append(ff[i]);
+      sb.append('\t').append(fitFraction[i]);
     }
     for (int i = 0; i < size; i++) {
       sb.append('\t').append(ef[i]);
@@ -457,87 +460,69 @@ public class JumpDistanceAnalysisTest {
     }
   }
 
-  private static double[] getPercentError(double[] e, double[] o) {
-    final double[] error = new double[Math.min(e.length, o.length)];
+  private static double[] getPercentError(double[] exp, double[] obs) {
+    final double[] error = new double[Math.min(exp.length, obs.length)];
     for (int i = 0; i < error.length; i++) {
-      error[i] = 100.0 * (o[i] - e[i]) / e[i];
+      error[i] = 100.0 * (obs[i] - exp[i]) / exp[i];
     }
     return error;
   }
 
-  private static double[] getRelativeError(double[] e, double[] o) {
-    final double[] error = new double[Math.min(e.length, o.length)];
+  private static double[] getRelativeError(double[] exp, double[] obs) {
+    final double[] error = new double[Math.min(exp.length, obs.length)];
     for (int i = 0; i < error.length; i++) {
       // As per the Weimann Plos One paper
-      error[i] = Math.abs(o[i] - e[i]) / e[i];
+      error[i] = Math.abs(obs[i] - exp[i]) / exp[i];
+      // Use the relative error from the largest value
+      // error[i] = uk.ac.sussex.gdsc.smlm.utils.DoubleEquality.relativeError(o[i], e[i]);
     }
-    // Use the relative error from the largest value
-    // error[i] = uk.ac.sussex.gdsc.smlm.utils.DoubleEquality.relativeError(o[i], e[i]);
     return error;
   }
 
-  private static String toString(double[] d) {
-    if (d.length == 0) {
+  private static String toString(double[] data) {
+    if (data.length == 0) {
       return "";
     }
-    if (d.length == 1) {
-      return format(d[0]);
+    if (data.length == 1) {
+      return format(data[0]);
     }
     final StringBuilder sb = new StringBuilder();
-    sb.append(format(d[0]));
-    for (int i = 1; i < d.length; i++) {
-      sb.append(',').append(format(d[i]));
+    sb.append(format(data[0]));
+    for (int i = 1; i < data.length; i++) {
+      sb.append(',').append(format(data[i]));
     }
     return sb.toString();
   }
 
-  private static String format(double d) {
-    return String.format("%.3f", d);
+  private static String format(double value) {
+    return String.format("%.3f", value);
   }
 
   class DataSample {
-    double[] d, f, s;
-    double[] data = null;
-    int[] sample = null;
+    double[] dc;
+    double[] fraction;
+    double[] sigma;
+    double[] data;
+    int[] sample;
 
-    DataSample(double[] d, double[] f) {
-      this.d = d.clone();
+    DataSample(double[] dc, double[] fraction) {
+      this.dc = dc.clone();
 
       // Convert diffusion co-efficient into the standard deviation for the random move in each
-      // dimension
+      // dimension.
       // For 1D diffusion: sigma^2 = 2D
       // sigma = sqrt(2D)
       // See: https://en.wikipedia.org/wiki/Brownian_motion#Einstein.27s_theory
-      s = new double[d.length];
+      sigma = new double[dc.length];
       double sum = 0;
-      for (int i = 0; i < s.length; i++) {
-        s[i] = Math.sqrt(2 * d[i]);
-        sum += f[i];
+      for (int i = 0; i < sigma.length; i++) {
+        sigma[i] = Math.sqrt(2 * dc[i]);
+        sum += fraction[i];
       }
-      this.f = new double[f.length];
-      for (int i = 0; i < f.length; i++) {
-        this.f[i] = f[i] / sum;
+      this.fraction = new double[fraction.length];
+      for (int i = 0; i < fraction.length; i++) {
+        this.fraction[i] = fraction[i] / sum;
       }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof DataSample)) {
-        return super.equals(obj);
-      }
-      final DataSample that = (DataSample) obj;
-      if (that.d.length != this.d.length) {
-        return false;
-      }
-      for (int i = d.length; i-- > 0;) {
-        if (that.d[i] != this.d[i]) {
-          return false;
-        }
-        if (that.f[i] != this.f[i]) {
-          return false;
-        }
-      }
-      return true;
     }
 
     void add(double[] data2, int[] sample2) {
@@ -564,10 +549,10 @@ public class JumpDistanceAnalysisTest {
         final int extra = size - getSize();
 
         // Get cumulative fraction
-        final double[] c = new double[f.length];
+        final double[] c = new double[fraction.length];
         double sum = 0;
-        for (int i = 0; i < f.length; i++) {
-          sum += f[i];
+        for (int i = 0; i < fraction.length; i++) {
+          sum += fraction[i];
           c[i] = sum;
         }
 
@@ -588,8 +573,8 @@ public class JumpDistanceAnalysisTest {
           // Pick the population using the fraction
           final int j = sample[i];
           // Get the x/y shifts
-          final double x = gs.sample() * s[j];
-          final double y = gs.sample() * s[j];
+          final double x = gs.sample() * sigma[j];
+          final double y = gs.sample() * sigma[j];
           // Get the squared jump distance
           data[i] = x * x + y * y;
         }
@@ -598,7 +583,7 @@ public class JumpDistanceAnalysisTest {
 
       // Build the sample data and return the D and fractions
       final double[] data = Arrays.copyOf(this.data, size);
-      final double[] d = new double[this.d.length];
+      final double[] d = new double[this.dc.length];
       final double[] f = new double[d.length];
       for (int i = 0; i < size; i++) {
         final int j = sample[i];
@@ -615,10 +600,35 @@ public class JumpDistanceAnalysisTest {
       return new double[][] {data, d, f};
     }
 
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof DataSample)) {
+        return super.equals(obj);
+      }
+      final DataSample that = (DataSample) obj;
+      if (that.dc.length != this.dc.length) {
+        return false;
+      }
+      for (int i = dc.length; i-- > 0;) {
+        if (that.dc[i] != this.dc[i]) {
+          return false;
+        }
+        if (that.fraction[i] != this.fraction[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     /** {@inheritDoc} */
     @Override
     public int hashCode() {
-      return super.hashCode();
+      int hash = 1;
+      for (int i = dc.length; i-- > 0;) {
+        hash = hash * 31 + Double.hashCode(dc[i]);
+        hash = hash * 31 + Double.hashCode(fraction[i]);
+      }
+      return hash;
     }
   }
 
@@ -635,15 +645,15 @@ public class JumpDistanceAnalysisTest {
    * Create random jump distances.
    *
    * @param n Number of jump distances
-   * @param d Diffusion rate (should be ascending order of magnitude)
-   * @param f Fraction of population (will be updated with the actual fractions, normalised to sum
-   *        to 1)
+   * @param dc Diffusion rate (should be ascending order of magnitude)
+   * @param fraction Fraction of population (will be updated with the actual fractions, normalised
+   *        to sum to 1)
    * @return The jump distances
    */
-  private double[] createData(UniformRandomProvider rg, int n, double[] d, double[] f) {
+  private double[] createData(UniformRandomProvider rg, int n, double[] dc, double[] fraction) {
     // Cache the data so that if we run a second test with
     // the same d and f we use the same data
-    sample = new DataSample(d, f);
+    sample = new DataSample(dc, fraction);
     final int index = samples.indexOf(sample);
     if (index != -1) {
       sample = samples.get(index);
@@ -653,13 +663,13 @@ public class JumpDistanceAnalysisTest {
 
     final double[][] dataSample = sample.getSample(rg, n);
     final double[] data = dataSample[0];
-    final double[] d2 = dataSample[1];
+    final double[] dc2 = dataSample[1];
     final double[] f2 = dataSample[2];
 
     // Update with the real values
-    for (int i = 0; i < d.length; i++) {
-      d[i] = d2[i];
-      f[i] = f2[i];
+    for (int i = 0; i < dc.length; i++) {
+      dc[i] = dc2[i];
+      fraction[i] = f2[i];
     }
 
     // Debug
@@ -679,12 +689,12 @@ public class JumpDistanceAnalysisTest {
     return data;
   }
 
-  private static int pick(double[] f, double nextDouble) {
-    for (int i = 0; i < f.length; i++) {
-      if (nextDouble < f[i]) {
+  private static int pick(double[] fraction, double nextDouble) {
+    for (int i = 0; i < fraction.length; i++) {
+      if (nextDouble < fraction[i]) {
         return i;
       }
     }
-    return f.length - 1;
+    return fraction.length - 1;
   }
 }

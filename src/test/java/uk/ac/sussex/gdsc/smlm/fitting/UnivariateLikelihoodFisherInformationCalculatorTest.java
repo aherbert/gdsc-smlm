@@ -158,8 +158,8 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
     }
   }
 
-  private static void canComputePerPixelPoissonGaussianApproximationFisherInformation(
-      UniformRandomProvider r) {
+  private static void
+      canComputePerPixelPoissonGaussianApproximationFisherInformation(UniformRandomProvider r) {
     // Create function
     final Gaussian2DFunction func =
         GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE, null);

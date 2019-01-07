@@ -78,7 +78,8 @@ public abstract class CubicSplineFunctionTest {
   protected double[] testcz2 = new double[] {-1.9, 0.7};
 
   // Different widths to test for non-square function evaluation
-  protected int maxx = 8, maxy = 9;
+  protected int maxx = 8;
+  protected int maxy = 9;
   protected double background = 50;
   protected CubicSplineFunction f1;
   protected CubicSplineFunction f1f;
@@ -90,8 +91,11 @@ public abstract class CubicSplineFunctionTest {
   static final int zDepth = 5;
   protected QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-  static final CubicSplineData splineData, splineDataFloat;
-  static final double cx, cy, cz;
+  static final CubicSplineData splineData;
+  static final CubicSplineData splineDataFloat;
+  static final double cx;
+  static final double cy;
+  static final double cz;
   static final int scale;
 
   static {
@@ -191,8 +195,8 @@ public abstract class CubicSplineFunctionTest {
     if (cf.evaluatesBackground()) {
       Assertions.assertEquals(0, gradientIndices[p++], "Background");
     }
-    for (int peak = 1, i = 1; peak <= npeaks; peak++, i +=
-        CubicSplineFunction.PARAMETERS_PER_PEAK) {
+    for (int peak = 1, i = 1; peak <= npeaks;
+        peak++, i += CubicSplineFunction.PARAMETERS_PER_PEAK) {
       final int ii = i;
       if (cf.evaluatesSignal()) {
         Assertions.assertEquals(i, gradientIndices[p++], () -> CubicSplineFunction.getName(ii));

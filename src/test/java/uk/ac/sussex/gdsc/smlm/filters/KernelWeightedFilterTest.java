@@ -31,7 +31,8 @@ public class KernelWeightedFilterTest extends WeightedKernelFilterTest {
     // Do not support non-integer box sizes
     return new DataFilter("kernel", false, 3) {
       float[] w;
-      int width, height;
+      int width;
+      int height;
       KernelFilter f;
       int k = 0;
 

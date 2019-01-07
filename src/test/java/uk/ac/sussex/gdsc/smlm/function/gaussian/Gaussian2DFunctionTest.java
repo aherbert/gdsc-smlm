@@ -61,7 +61,8 @@ public abstract class Gaussian2DFunctionTest {
   protected double[] testangle2 = new double[] {Math.PI / 7, Math.PI / 11};
 
   // Different widths to test for non-square function evaluation
-  protected int maxx = 8, maxy = 9;
+  protected int maxx = 8;
+  protected int maxy = 9;
   protected double background = 50;
   protected double angle = 0;
   protected double width = 5;

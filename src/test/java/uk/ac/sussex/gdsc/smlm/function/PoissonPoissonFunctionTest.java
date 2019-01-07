@@ -36,26 +36,27 @@ public class PoissonPoissonFunctionTest {
   static double[] photons = PoissonGaussianFunctionTest.photons;
 
   static {
-    int c = 0;
+    int count = 0;
 
     // No gain below 1
-    c = 0;
+    count = 0;
     for (int i = 0; i < gain.length; i++) {
       if (gain[i] >= 1) {
-        gain[c++] = gain[i];
+        gain[count++] = gain[i];
       }
     }
-    gain = Arrays.copyOf(gain, c);
+    gain = Arrays.copyOf(gain, count);
 
     // No negative photons
-    c = 0;
+    count = 0;
     for (int i = 0; i < photons.length; i++) {
       if (photons[i] >= 0) {
-        photons[c++] = photons[i];
+        photons[count++] = photons[i];
       }
     }
-    photons = Arrays.copyOf(photons, c);
+    photons = Arrays.copyOf(photons, count);
   }
+
   static double[] noise = PoissonGaussianFunctionTest.noise;
 
   @Test

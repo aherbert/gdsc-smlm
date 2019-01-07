@@ -1,6 +1,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -46,17 +47,17 @@ public class JTransformsTest {
     logger = null;
   }
 
-  private static FloatProcessor createProcessor(int size, int x, int y, int w, int h,
-      UniformRandomProvider r) {
+  private static FloatProcessor createProcessor(int size, int x, int y, int width, int height,
+      UniformRandomProvider rng) {
     final ByteProcessor bp = new ByteProcessor(size, size);
     bp.setColor(255);
-    bp.fillOval(x, y, w, h);
+    bp.fillOval(x, y, width, height);
     final EDM e = new EDM();
     final FloatProcessor fp = e.makeFloatEDM(bp, 0, true);
-    if (r != null) {
+    if (rng != null) {
       final float[] d = (float[]) fp.getPixels();
       for (int i = 0; i < d.length; i++) {
-        d[i] += r.nextFloat() * 0.01;
+        d[i] += rng.nextFloat() * 0.01;
       }
     }
     return fp;
@@ -74,8 +75,10 @@ public class JTransformsTest {
 
   private static void canComputeUsingFFT(boolean convolution) {
     final int size = 16;
-    final int ex = 5, ey = 7;
-    final int ox = 1, oy = 2;
+    final int ex = 5;
+    final int ey = 7;
+    final int ox = 1;
+    final int oy = 2;
     final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, null);
     final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, null);
 
@@ -126,8 +129,10 @@ public class JTransformsTest {
     // is the same format as FHT so we just test that.
 
     final int size = 16;
-    final int ex = 5, ey = 7;
-    final int ox = 1, oy = 2;
+    final int ex = 5;
+    final int ey = 7;
+    final int ox = 1;
+    final int oy = 2;
     final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, null);
     final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, null);
 
@@ -166,16 +171,8 @@ public class JTransformsTest {
     }
 
     @Override
-    public Object getData(int i) {
-      return clone(data);
-    }
-
-    private float[][] clone(float[][] data) {
-      final float[][] data2 = new float[data.length][];
-      for (int i = 0; i < data.length; i++) {
-        data2[i] = data[i].clone();
-      }
-      return data2;
+    public Object getData(int index) {
+      return SimpleArrayUtils.deepCopy(data);
     }
 
     @Override
@@ -269,7 +266,7 @@ public class JTransformsTest {
 
   @SpeedTag
   @SeededTest
-  public void jTransforms2DDHTIsFasterThanFHT2(RandomSeed seed) {
+  public void jtransforms2DDHTIsFasterThanFHT2(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     // Test the forward DHT of data. and reverse transform or the pre-computed correlation.

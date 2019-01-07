@@ -632,12 +632,13 @@ public class ImageSourceTest {
     // Set the expected frames returned by the interlacing
     final int[] expected = new int[] {4, 5, 7, 8, 10, 11, 13, 14};
 
-    int i = 0, ii = 0;
-    float[] d = null;
-    while ((d = source.next()) != null) {
+    int i1 = 0;
+    int i2 = 0;
+    float[] next = null;
+    while ((next = source.next()) != null) {
       // Get the range for the data
-      final int endE = FastMath.min(i + 2, expected.length - 1);
-      final int startFrame = expected[i];
+      final int endE = FastMath.min(i1 + 2, expected.length - 1);
+      final int startFrame = expected[i1];
       final int endFrame = expected[endE];
 
       // Check the correct range is returned
@@ -646,17 +647,17 @@ public class ImageSourceTest {
 
       // Check the data is collated correctly
       final float[] all = new float[data[0].length];
-      for (int e = i; e <= endE; e++) {
+      for (int e = i1; e <= endE; e++) {
         final int frame = expected[e] - 1;
         for (int j = 0; j < all.length; j++) {
           all[j] += data[frame][j];
         }
       }
-      Assertions.assertArrayEquals(all, d);
-      i += 3;
-      ii++;
+      Assertions.assertArrayEquals(all, next);
+      i1 += 3;
+      i2++;
     }
-    Assertions.assertEquals(ii, source.getFrames());
+    Assertions.assertEquals(i2, source.getFrames());
   }
 
   @SeededTest

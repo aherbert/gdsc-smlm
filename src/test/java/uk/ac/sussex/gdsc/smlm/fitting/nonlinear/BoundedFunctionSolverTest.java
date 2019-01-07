@@ -95,7 +95,8 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
 
     for (final double s : signal) {
       final double[] expected = createParams(1, s, 0, 0, 1);
-      double[] lower = null, upper = null;
+      double[] lower = null;
+      double[] upper = null;
       if (applyBounds) {
         lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8);
         upper = createParams(3, s * 2, 0.2, 0.2, 1.2);

@@ -292,8 +292,8 @@ public class ResultsManagerTest {
           () -> "YPosition mismatch @ " + ii);
       Assertions.assertEquals(p1.getZPosition(), p2.getZPosition(),
           () -> "ZPosition mismatch @ " + ii);
-      for (int j = PeakResult.STANDARD_PARAMETERS, size =
-          p1.getNumberOfParameters(); j < size; j++) {
+      for (int j = PeakResult.STANDARD_PARAMETERS, size = p1.getNumberOfParameters(); j < size;
+          j++) {
         Assertions.assertEquals(p1.getParameter(j), p2.getParameter(j), 1e-6,
             () -> "Parameter mismatch @ " + ii);
       }

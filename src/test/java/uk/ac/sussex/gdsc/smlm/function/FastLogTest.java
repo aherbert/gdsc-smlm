@@ -313,7 +313,8 @@ public class FastLogTest {
       logD[i] = (float) Math.log(d[i]);
     }
 
-    final int min = 0, max = 23;
+    final int min = 0;
+    final int max = 23;
     // int min = 13, max = 13;
 
     // for (int n = min; n <= max; n++)
@@ -367,7 +368,8 @@ public class FastLogTest {
 
     // Full range in blocks.
     // Only when the number is around 1 or min value are there significant errors
-    final float[] d = null, logD = null;
+    final float[] d = null;
+    final float[] logD = null;
 
     // All
     // testFloatErrorRange(test, n, d, logD, 0, 255, 0);
@@ -426,7 +428,12 @@ public class FastLogTest {
   }
 
   private class Stats {
-    double min, max, s, ss, minv, maxv;
+    double min;
+    double max;
+    double s;
+    double ss;
+    double minv;
+    double maxv;
     int n = 1;
 
     Stats(double e, double v) {
@@ -522,7 +529,8 @@ public class FastLogTest {
 
     // All float values is a lot so we do a representative set
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
+    final double lower = Double.MIN_VALUE;
+    final double upper = Double.MAX_VALUE;
     final double[] d = new double[10000000];
     final double[] logD = new double[d.length];
     for (int i = 0; i < d.length; i++) {
@@ -532,7 +540,8 @@ public class FastLogTest {
     }
 
     // int min = 0, max = 23;
-    final int min = 4, max = 13;
+    final int min = 4;
+    final int max = 13;
 
     // for (int n = min; n <= max; n++)
     // {
@@ -559,7 +568,8 @@ public class FastLogTest {
 
     // All float values is a lot so we do a representative set
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
+    final double lower = Double.MIN_VALUE;
+    final double upper = Double.MAX_VALUE;
     final double[] d = new double[100000];
     final double[] logD = new double[d.length];
     for (int i = 0; i < d.length; i++) {
@@ -596,7 +606,8 @@ public class FastLogTest {
 
     // Full range in blocks.
     // Only when the number is around 1 or min value are there significant errors
-    final double[] d = new double[10000000], logD = null;
+    final double[] d = new double[10000000];
+    final double[] logD = null;
 
     // All
     // testDoubleErrorRange(test, n, d, logD, 0, 255, 0);

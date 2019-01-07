@@ -173,8 +173,8 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
   }
 
   @SeededTest
-  public void gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureUnrolledComputesSameAsGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, true);
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, true);
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, true);
@@ -217,8 +217,8 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
+  public void
+      gradientProcedureIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, true);
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, true);
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, true);

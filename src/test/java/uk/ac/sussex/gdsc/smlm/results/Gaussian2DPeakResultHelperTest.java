@@ -50,7 +50,8 @@ public class Gaussian2DPeakResultHelperTest {
   double[] test_s = {80, 100, 140};
   double[] test_N = {1, 10, 30, 100, 1000};
   double[] test_b2 = {0, 1, 2, 4, 8};
-  int minpoints = 3, maxpoints = 20;
+  int minpoints = 3;
+  int maxpoints = 20;
 
   @Test
   public void canCalculateMaximumLikelihoodVariance() {
@@ -130,7 +131,8 @@ public class Gaussian2DPeakResultHelperTest {
     final double[] sum = new double[maxpoints + 1];
     final double[] sum2 = new double[sum.length];
     final long[] time = new long[sum.length];
-    long count = 0, count2 = 0;
+    long count = 0;
+    long count2 = 0;
 
     for (final double a : new double[] {108}) {
       for (final double s : new double[] {120}) {

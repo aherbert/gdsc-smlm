@@ -86,7 +86,8 @@ public class ConvolutionTest {
         final double[] data2 = randomData(random, size);
         final double[] kernel = createKernel(s);
 
-        double[] e1, e2;
+        double[] e1;
+        double[] e2;
         double[][] r1;
         for (int fft = 0; fft < 2; fft++) {
           if (fft == 1) {

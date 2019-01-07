@@ -62,8 +62,7 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
   }
 
   private SolverSpeedTestData ensureData(RandomSeed seed, int size) {
-    final SolverSpeedTestData data =
-        (SolverSpeedTestData) dataCache.computeIfAbsent(seed, this);
+    final SolverSpeedTestData data = (SolverSpeedTestData) dataCache.computeIfAbsent(seed, this);
     final ArrayList<float[][]> Adata = data.Adata;
     final ArrayList<float[]> Bdata = data.Bdata;
     if (Adata.size() < size) {
@@ -225,7 +224,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
     final GaussJordan solver = new GaussJordan();
     final EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-    long t1 = Long.MAX_VALUE, t2 = Long.MAX_VALUE;
+    long t1 = Long.MAX_VALUE;
+    long t2 = Long.MAX_VALUE;
 
     for (int loops = 5; loops-- > 0;) {
       final ArrayList<float[][]> A = copyAfloat(data.Adata, ITER);
@@ -257,7 +257,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
     final GaussJordan solver = new GaussJordan();
     final EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-    long t1 = Long.MAX_VALUE, t2 = Long.MAX_VALUE;
+    long t1 = Long.MAX_VALUE;
+    long t2 = Long.MAX_VALUE;
 
     for (int loops = 5; loops-- > 0;) {
       final ArrayList<float[][]> A = copyAfloat(data.Adata, ITER);
@@ -296,7 +297,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
     final GaussJordan solver = new GaussJordan();
     final EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-    long t1 = Long.MAX_VALUE, t2 = Long.MAX_VALUE;
+    long t1 = Long.MAX_VALUE;
+    long t2 = Long.MAX_VALUE;
 
     for (int loops = 5; loops-- > 0;) {
       final ArrayList<double[][]> A = copyAdouble(data.Adata, ITER);
@@ -328,7 +330,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
     final GaussJordan solver = new GaussJordan();
     final EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-    long t1 = Long.MAX_VALUE, t2 = Long.MAX_VALUE;
+    long t1 = Long.MAX_VALUE;
+    long t2 = Long.MAX_VALUE;
 
     for (int loops = 5; loops-- > 0;) {
       final ArrayList<double[][]> A = copyAdouble(data.Adata, ITER);
@@ -360,7 +363,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
     final GaussJordan solver = new GaussJordan();
     final EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-    long t1 = Long.MAX_VALUE, t2 = Long.MAX_VALUE;
+    long t1 = Long.MAX_VALUE;
+    long t2 = Long.MAX_VALUE;
 
     for (int loops = 5; loops-- > 0;) {
       final ArrayList<double[][]> A = copyAdouble(data.Adata, ITER);
@@ -392,7 +396,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
     final GaussJordan solver = new GaussJordan();
     final EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-    long t1 = Long.MAX_VALUE, t2 = Long.MAX_VALUE;
+    long t1 = Long.MAX_VALUE;
+    long t2 = Long.MAX_VALUE;
 
     for (int loops = 5; loops-- > 0;) {
       final ArrayList<double[][]> A = copyAdouble(data.Adata, ITER);
@@ -424,7 +429,8 @@ public class SolverSpeedTest implements Function<RandomSeed, Object> {
     final GaussJordan solver = new GaussJordan();
     final EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-    long t1 = Long.MAX_VALUE, t2 = Long.MAX_VALUE;
+    long t1 = Long.MAX_VALUE;
+    long t2 = Long.MAX_VALUE;
 
     for (int loops = 5; loops-- > 0;) {
       final ArrayList<double[][]> A = copyAdouble(data.Adata, ITER);

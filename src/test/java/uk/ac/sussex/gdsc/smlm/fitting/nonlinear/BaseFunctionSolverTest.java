@@ -85,6 +85,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     params[Gaussian2DFunction.Y_POSITION] = size / 2;
     params[Gaussian2DFunction.X_SD] = sd;
   }
+
   static double[] defaultClampValues;
 
   static {
@@ -144,8 +145,8 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
   private static double emGain = 300;
   private static double noiseEMCCD = 0.02;
 
-  private static double[][] weights = new double[NoiseModel.values().length][],
-      noise = new double[weights.length][];
+  private static double[][] weights = new double[NoiseModel.values().length][];
+  private static double[][] noise = new double[weights.length][];
 
   private static ConcurrentHashMap<RandomSeed, double[][]> ConcurrentHashMap =
       new ConcurrentHashMap<>();
@@ -344,10 +345,12 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
     final String msg = "%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b %s";
 
-    int i1 = 0, i2 = 0;
+    int i1 = 0;
+    int i2 = 0;
     for (final double s : signal) {
       final double[] expected = createParams(1, s, 0, 0, 1);
-      double[] lower = null, upper = null;
+      double[] lower = null;
+      double[] upper = null;
       if (applyBounds || applyBounds2) {
         lower = createParams(0, s * 0.5, -0.3, -0.3, 0.8);
         upper = createParams(3, s * 2, 0.3, 0.3, 1.2);
@@ -452,7 +455,8 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
       }
     }
 
-    int better = 0, total = 0;
+    int better = 0;
+    int total = 0;
     for (int index = 0; index < statName.length; index++) {
       better += betterPrecision[index] + betterAccuracy[index];
       total += totalPrecision[index] + totalAccuracy[index];
@@ -600,7 +604,8 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     return data;
   }
 
-  static double[] p1, p12;
+  static double[] p1;
+  static double[] p12;
   static double[] p2v;
 
   static {
@@ -697,7 +702,8 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
 
       // Deviation should be lower with only 1 peak.
       // Due to matrix inversion this may not be the case for all parameters so count.
-      int ok = 0, fail = 0;
+      int ok = 0;
+      int fail = 0;
       final StringBuilder sb = new StringBuilder();
       for (int i = 0; i < e.length; i++) {
         if (e[i] <= o[i]) {

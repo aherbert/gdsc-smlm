@@ -324,7 +324,8 @@ public class PoissonCalculatorTest {
       ));
     }
     final TDoubleArrayList list = new TDoubleArrayList();
-    final int imin = 5, imax = 15;
+    final int imin = 5;
+    final int imax = 15;
     for (int i = imin; i <= imax; i++) {
       a[0] = (double) i / 10;
       nlf.initialise(a);
@@ -348,7 +349,7 @@ public class PoissonCalculatorTest {
       final double q = ChiSquaredDistributionTable.computeQValue(llr, df);
       logger.log(TestLogUtils.getRecord(Level.INFO,
           "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f "
-          + "(reject=%b @ %.3f, reject=%b @ %.3f)",
+              + "(reject=%b @ %.3f, reject=%b @ %.3f)",
           a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q,
           table.reject(llr, df), table.getSignificanceValue(), table2.reject(llr, df),
           table2.getSignificanceValue()));
@@ -671,7 +672,8 @@ public class PoissonCalculatorTest {
     final int n = 100;
     final double[] u = new double[n];
     final double[] x = new double[n];
-    double e, o;
+    double e;
+    double o;
     for (final double testx : new double[] {Math.nextDown(PoissonCalculator.APPROXIMATION_X),
         PoissonCalculator.APPROXIMATION_X, Math.nextUp(PoissonCalculator.APPROXIMATION_X),
         PoissonCalculator.APPROXIMATION_X * 1.1, PoissonCalculator.APPROXIMATION_X * 2,
@@ -721,7 +723,8 @@ public class PoissonCalculatorTest {
   }
 
   private abstract static class PCTimingTask extends BaseTimingTask {
-    double[] x, u;
+    double[] x;
+    double[] u;
     int ll;
     int llr;
 

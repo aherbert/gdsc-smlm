@@ -127,7 +127,8 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
 
     for (int y = 0; y < maxy; y++) {
       for (int x = 0; x < maxx; x++) {
-        double sum = 0, norm = 0;
+        double sum = 0;
+        double norm = 0;
         for (int yy = 0; yy < size; yy++) {
           int yyy = y + yy - n;
           if (yyy < 0) {

@@ -77,7 +77,12 @@ public class PoissonLikelihoodWrapperTest {
   double[][] testw1_ = new double[][] {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
   double[] testangle1_ = new double[] {Math.PI / 5, Math.PI / 3};
 
-  double[] testbackground, testsignal1, testangle1, testcx1, testcy1, testcz1;
+  double[] testbackground;
+  double[] testsignal1;
+  double[] testangle1;
+  double[] testcx1;
+  double[] testcy1;
+  double[] testcz1;
   double[][] testw1;
 
   int maxx = 10;
@@ -202,7 +207,8 @@ public class PoissonLikelihoodWrapperTest {
     PoissonLikelihoodWrapper ff1;
 
     final int n = maxx * maxx;
-    int count = 0, total = 0;
+    int count = 0;
+    int total = 0;
 
     for (final double background : testbackground) {
       for (final double signal1 : testsignal1) {
@@ -401,7 +407,8 @@ public class PoissonLikelihoodWrapperTest {
     PoissonLikelihoodWrapper ff1;
 
     final int n = maxx * maxx;
-    int count = 0, total = 0;
+    int count = 0;
+    int total = 0;
 
     for (final double background : testbackground) {
       for (final double signal1 : testsignal1) {

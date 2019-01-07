@@ -57,7 +57,8 @@ public class ImageConverterTest implements Function<RandomSeed, Object> {
     ConcurrentHashMap = null;
   }
 
-  static final int w = 200, h = 300;
+  static final int w = 200;
+  static final int h = 300;
 
   private class ImageConverterTestData {
     byte[] bdata;

@@ -256,7 +256,8 @@ public class ErfTest {
 
   private static void erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(BaseErf erf) {
     final int range = 5;
-    double max = 0, max2 = 0;
+    double max = 0;
+    double max2 = 0;
 
     // Standard deviation
     final double s = 1.3;
@@ -264,7 +265,9 @@ public class ErfTest {
     final double norm = 1 / (Math.PI * twos2);
     final double denom = 1.0 / (Math.sqrt(2.0) * s);
 
-    double sum1 = 0, sum2 = 0, sum3 = 0;
+    double sum1 = 0;
+    double sum2 = 0;
+    double sum3 = 0;
 
     for (int x = -range; x <= range; x++) {
       final double o1 = 0.5 * erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
@@ -372,7 +375,9 @@ public class ErfTest {
 
   @Test
   public void gaussianIntegralApproximatesErf() {
-    final double x = 1.3, y = 2.2, s = 1.14;
+    final double x = 1.3;
+    final double y = 2.2;
+    final double s = 1.14;
     final int minx = (int) x;
     final int miny = (int) y;
     final int maxx = minx + 1;

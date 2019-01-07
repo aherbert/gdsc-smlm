@@ -91,7 +91,8 @@ public class TensorTest {
   @SeededTest
   public void canComputeSameTensor(RandomSeed seed) {
     final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
-    final int w = 3, h = 4;
+    final int w = 3;
+    final int h = 4;
     final float[] data = new float[w * h];
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-6, 0);
     for (int i = 0; i < 10; i++) {

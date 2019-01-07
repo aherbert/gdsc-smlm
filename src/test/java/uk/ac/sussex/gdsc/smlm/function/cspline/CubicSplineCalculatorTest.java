@@ -75,8 +75,12 @@ public class CubicSplineCalculatorTest {
 
   @Test
   public void canComputeCoefficientsForGaussianFunction() {
-    final int x = 4, y = 4, z = 4;
-    final double xscale = 1, yscale = 0.5, zscale = 2.0;
+    final int x = 4;
+    final int y = 4;
+    final int z = 4;
+    final double xscale = 1;
+    final double yscale = 0.5;
+    final double zscale = 2.0;
     final double[] xval = SimpleArrayUtils.newArray(x, 0, xscale);
     final double[] yval = SimpleArrayUtils.newArray(y, 0, yscale);
     final double[] zval = SimpleArrayUtils.newArray(z, 0, zscale);

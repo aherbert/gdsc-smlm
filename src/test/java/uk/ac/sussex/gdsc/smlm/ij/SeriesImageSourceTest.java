@@ -49,7 +49,9 @@ import java.io.IOException;
 
 @SuppressWarnings({"javadoc"})
 public class SeriesImageSourceTest {
-  int w = 10, h = 5, d = 7;
+  int w = 10;
+  int h = 5;
+  int d = 7;
 
   @Test
   public void canReadBigTIFFSequentially() throws IOException {

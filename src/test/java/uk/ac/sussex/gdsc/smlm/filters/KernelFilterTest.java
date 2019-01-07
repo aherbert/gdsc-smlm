@@ -163,7 +163,8 @@ public class KernelFilterTest {
 
   @SeededTest
   public void kernelFilterIsSameAsIJFilter(RandomSeed seed) {
-    final int kw = 5, kh = 5;
+    final int kw = 5;
+    final int kh = 5;
     final float[] kernel = createKernel(kw, kh);
     filter1IsSameAsFilter2(seed, new KernelFilterWrapper(kernel, kw, kh),
         new ConvolverWrapper(kernel, kw, kh), false, 1e-2);
@@ -171,7 +172,8 @@ public class KernelFilterTest {
 
   @SeededTest
   public void zeroKernelFilterIsSameAsIJFilter(RandomSeed seed) {
-    final int kw = 5, kh = 5;
+    final int kw = 5;
+    final int kh = 5;
     final float[] kernel = createKernel(kw, kh);
     filter1IsSameAsFilter2(seed, new ZeroKernelFilterWrapper(kernel, kw, kh),
         new ConvolverWrapper(kernel, kw, kh), true, 1e-2);

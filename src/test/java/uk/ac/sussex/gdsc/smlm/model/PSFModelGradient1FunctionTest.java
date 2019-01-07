@@ -54,7 +54,8 @@ public class PSFModelGradient1FunctionTest {
         HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 
     // Small size ensure the PSF model covers the entire image
-    final int maxx = 11, maxy = 11;
+    final int maxx = 11;
+    final int maxy = 11;
     final double[] ve = new double[maxx * maxy];
     final double[] vo = new double[maxx * maxy];
     final double[][] ge = new double[maxx * maxy][];

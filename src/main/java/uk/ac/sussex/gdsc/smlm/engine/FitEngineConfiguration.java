@@ -597,6 +597,18 @@ public class FitEngineConfiguration implements Cloneable {
    *
    * @param dataFilterType the type of filter to apply to the data before identifying local maxima
    */
+  public void setDataFilterType(int dataFilterType) {
+    final DataFilterType t = DataFilterType.forNumber(dataFilterType);
+    if (t != null) {
+      setDataFilterType(t);
+    }
+  }
+
+  /**
+   * Sets the type of filter to apply to the data before identifying local maxima.
+   *
+   * @param dataFilterType the type of filter to apply to the data before identifying local maxima
+   */
   public void setDataFilterType(DataFilterType dataFilterType) {
     final DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
     b.setDataFilterType(dataFilterType);
@@ -621,18 +633,6 @@ public class FitEngineConfiguration implements Cloneable {
   private static void truncateFilters(DataFilterSettings.Builder b, int n) {
     while (b.getDataFiltersCount() > n) {
       b.removeDataFilters(b.getDataFiltersCount() - 1);
-    }
-  }
-
-  /**
-   * Sets the type of filter to apply to the data before identifying local maxima.
-   *
-   * @param dataFilterType the type of filter to apply to the data before identifying local maxima
-   */
-  public void setDataFilterType(int dataFilterType) {
-    final DataFilterType t = DataFilterType.forNumber(dataFilterType);
-    if (t != null) {
-      setDataFilterType(t);
     }
   }
 

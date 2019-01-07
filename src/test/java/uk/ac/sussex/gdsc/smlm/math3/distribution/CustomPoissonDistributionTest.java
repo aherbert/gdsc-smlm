@@ -38,7 +38,8 @@ public class CustomPoissonDistributionTest {
     UniformRandomProvider r;
     double mean;
     double min;
-    int n, m = 10;
+    int n;
+    int m = 10;
 
     public MyTimingTask(String name, RandomSeed seed, double min, double max) {
       super(String.format("%s %.1f - %.1f", name, min, max));

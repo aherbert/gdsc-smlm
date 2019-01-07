@@ -232,7 +232,9 @@ public abstract class Image3DTest {
 
   @Test
   public void canComputeRollingSumTable() {
-    final int w = 2, h = 3, d = 4;
+    final int w = 2;
+    final int h = 3;
+    final int d = 4;
     final Image3D image = createData(w, h, d);
     final double[] table = image.computeRollingSumTable(null);
     for (int dd = 1, i = 0; dd <= d; dd++) {

@@ -48,6 +48,10 @@ import org.ejml.ops.CommonOps;
  * if no gradient is available for a parameter.
  */
 public class EJMLLinearSolver {
+  // Allow matrix name A and vector names b & x for equation A x = b
+  // @CHECKSTYLE.OFF: MemberName
+  // @CHECKSTYLE.OFF: ParameterName
+
   /**
    * Solve the matrix using direct inversion.
    */
@@ -58,7 +62,7 @@ public class EJMLLinearSolver {
     /**
      * Instantiates a new inversion solver.
      */
-    public InversionSolver() {}
+    InversionSolver() {}
 
     /** {@inheritDoc} */
     @Override
@@ -92,14 +96,14 @@ public class EJMLLinearSolver {
 
     /** {@inheritDoc} */
     @Override
-    public void solve(DenseMatrix64F B, DenseMatrix64F X) {
-      CommonOps.mult(A, B, X);
+    public void solve(DenseMatrix64F b, DenseMatrix64F x) {
+      CommonOps.mult(A, b, x);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void invert(DenseMatrix64F A_inv) {
-      System.arraycopy(A.data, 0, A_inv.data, 0, A.data.length);
+    public void invert(DenseMatrix64F Ainv) {
+      System.arraycopy(A.data, 0, Ainv.data, 0, A.data.length);
     }
 
     /** {@inheritDoc} */
@@ -133,16 +137,16 @@ public class EJMLLinearSolver {
   /** The last successful solver. */
   private LinearSolver<DenseMatrix64F> lastSuccessfulSolver;
 
-  /** The vector X. */
-  private DenseMatrix64F X;
+  /** The vector x. */
+  private DenseMatrix64F x;
 
   /** The inverse of matrix A. */
-  private DenseMatrix64F A_inv;
+  private DenseMatrix64F Ainv;
 
   /** The solver size. */
   private int solverSize;
 
-  /** The error checking flag. Set to true to check the solution X to linear equations A x = b. */
+  /** The error checking flag. Set to true to check the solution x to linear equations A x = b. */
   private boolean errorChecking;
 
   /** The class used to check equality (with zero). */
@@ -211,17 +215,34 @@ public class EJMLLinearSolver {
   }
 
   /**
-   * Solves (one) linear equation, A x = b.
+   * Gets the inversion tolerance. Inversions are checked by ensuring that the product matches the
+   * identity matrix: A * A^-1 = I. Elements must be within the tolerance or else the inversion is
+   * rejected. Set to zero to disable.
    *
-   * <p>On output b replaced by x. Matrix a may be modified.
-   *
-   * @param A the matrix A
-   * @param B the vector b
-   * @return False if the equation is singular (no solution)
+   * @return the inversion tolerance
    */
-  public boolean solveLinear(DenseMatrix64F A, DenseMatrix64F B) {
-    createSolver(A.numCols);
-    return solve(getLinearSolver(), A, B);
+  public double getInversionTolerance() {
+    return inversionTolerance;
+  }
+
+  /**
+   * Sets the inversion tolerance. Inversions are checked by ensuring that the product matches the
+   * identity matrix: A * A^-1 = I. Elements must be within the tolerance or else the inversion is
+   * rejected. Set to zero to disable.
+   *
+   * @param inversionTolerance the new inversion tolerance
+   */
+  public void setInversionTolerance(double inversionTolerance) {
+    this.inversionTolerance = inversionTolerance;
+  }
+
+  /**
+   * Checks if there is an inversion tolerance.
+   *
+   * @return true, if there is an inversion tolerance
+   */
+  private boolean isInversionTolerance() {
+    return inversionTolerance > 0;
   }
 
   /**
@@ -230,12 +251,12 @@ public class EJMLLinearSolver {
    * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
-   * @param B the vector b
+   * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveCholesky(DenseMatrix64F A, DenseMatrix64F B) {
+  public boolean solveLinear(DenseMatrix64F A, DenseMatrix64F b) {
     createSolver(A.numCols);
-    return solve(getCholeskySolver(), A, B);
+    return solveEquation(getLinearSolver(), A, b);
   }
 
   /**
@@ -244,12 +265,12 @@ public class EJMLLinearSolver {
    * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
-   * @param B the vector b
+   * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveCholeskyLDLT(DenseMatrix64F A, DenseMatrix64F B) {
+  public boolean solveCholesky(DenseMatrix64F A, DenseMatrix64F b) {
     createSolver(A.numCols);
-    return solve(getCholeskyLDLTSolver(), A, B);
+    return solveEquation(getCholeskySolver(), A, b);
   }
 
   /**
@@ -258,12 +279,26 @@ public class EJMLLinearSolver {
    * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
-   * @param B the vector b
+   * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solvePseudoInverse(DenseMatrix64F A, DenseMatrix64F B) {
+  public boolean solveCholeskyLDLT(DenseMatrix64F A, DenseMatrix64F b) {
     createSolver(A.numCols);
-    return solve(getPseudoInverseSolver(), A, B);
+    return solveEquation(getCholeskyLDLTSolver(), A, b);
+  }
+
+  /**
+   * Solves (one) linear equation, A x = b.
+   *
+   * <p>On output b replaced by x. Matrix a may be modified.
+   *
+   * @param A the matrix A
+   * @param b the vector b
+   * @return False if the equation is singular (no solution)
+   */
+  public boolean solvePseudoInverse(DenseMatrix64F A, DenseMatrix64F b) {
+    createSolver(A.numCols);
+    return solveEquation(getPseudoInverseSolver(), A, b);
   }
 
   /**
@@ -273,12 +308,12 @@ public class EJMLLinearSolver {
    * <p>On output b replaced by x. Matrix a may be modified.
    *
    * @param A the matrix A
-   * @param B the vector b
+   * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveDirectInversion(DenseMatrix64F A, DenseMatrix64F B) {
+  public boolean solveDirectInversion(DenseMatrix64F A, DenseMatrix64F b) {
     createSolver(A.numCols);
-    return solve(getInversionSolver(), A, B);
+    return solveEquation(getInversionSolver(), A, b);
   }
 
   /**
@@ -288,20 +323,21 @@ public class EJMLLinearSolver {
    *
    * @param solver the solver
    * @param A the matrix A
-   * @param B the vector b
+   * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  private boolean solve(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, DenseMatrix64F B) {
+  private boolean solveEquation(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A,
+      DenseMatrix64F b) {
     final boolean copy = (errorChecking || solver.modifiesB());
-    final DenseMatrix64F x = (copy) ? getX() : B;
+    final DenseMatrix64F x = (copy) ? getX() : b;
 
-    if (!solve(solver, A, B, x)) {
+    if (!solveEquation(solver, A, b, x)) {
       return false;
     }
 
     // Copy back result if necessary
     if (copy) {
-      System.arraycopy(x.data, 0, B.data, 0, B.numRows);
+      System.arraycopy(x.data, 0, b.data, 0, b.numRows);
     }
 
     return true;
@@ -312,25 +348,25 @@ public class EJMLLinearSolver {
    *
    * <p>Output is written to x.
    *
-   * <p>If checking the solution then A and/or B will not be modified. If no solution checking is
-   * enabled then A and/or B could be modified.
+   * <p>If checking the solution then A and/or b will not be modified. If no solution checking is
+   * enabled then A and/or b could be modified.
    *
    * @param solver the solver
    * @param A the matrix A
-   * @param B the vector b
-   * @param X the vector x
+   * @param b the vector b
+   * @param x the vector x
    * @return False if the equation is singular (no solution)
    */
-  private boolean solve(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, DenseMatrix64F B,
-      DenseMatrix64F X) {
+  private boolean solveEquation(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A,
+      DenseMatrix64F b, DenseMatrix64F x) {
     if (errorChecking) {
-      // We need A+B for error checking so solve without modification
-      if (!solveSafe(solver, A, B, X)) {
+      // We need A+b for error checking so solve without modification
+      if (!solveEquationSafe(solver, A, b, x)) {
         return false;
       }
-      return validate(A, X, B);
+      return validate(A, x, b);
     }
-    return solveUnsafe(solver, A, B, X);
+    return solveEquationUnsafe(solver, A, b, x);
   }
 
   /**
@@ -338,29 +374,29 @@ public class EJMLLinearSolver {
    *
    * <p>Output is written to x.
    *
-   * <p>A and/or B will not be modified. If you do not care then use
-   * {@link #solveUnsafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
+   * <p>A and/or b will not be modified. If you do not care then use
+   * {@link #solveEquationUnsafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
    *
    * @param solver the solver
    * @param A the matrix A
-   * @param B the vector b
-   * @param X the vector x
+   * @param b the vector b
+   * @param x the vector x
    * @return False if the equation is singular (no solution)
    */
-  private boolean solveSafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, DenseMatrix64F B,
-      DenseMatrix64F X) {
+  private boolean solveEquationSafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A,
+      DenseMatrix64F b, DenseMatrix64F x) {
     if (solver.modifiesA()) {
       A = A.copy();
     }
     if (solver.modifiesB()) {
-      B = B.copy();
+      b = b.copy();
     }
 
     if (!initialiseSolver(solver, A)) {
       return false;
     }
 
-    solver.solve(B, X);
+    solver.solve(b, x);
 
     return true;
   }
@@ -370,22 +406,22 @@ public class EJMLLinearSolver {
    *
    * <p>Output is written to x.
    *
-   * <p>A and/or B may be modified. Check the solver before calling or use
-   * {@link #solveSafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
+   * <p>A and/or b may be modified. Check the solver before calling or use
+   * {@link #solveEquationSafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
    *
    * @param solver the solver
    * @param A the matrix A
-   * @param B the vector b
-   * @param X the vector x
+   * @param b the vector b
+   * @param x the vector x
    * @return False if the equation is singular (no solution)
    */
-  private boolean solveUnsafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A,
-      DenseMatrix64F B, DenseMatrix64F X) {
+  private boolean solveEquationUnsafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A,
+      DenseMatrix64F b, DenseMatrix64F x) {
     if (!initialiseSolver(solver, A)) {
       return false;
     }
 
-    solver.solve(B, X);
+    solver.solve(b, x);
 
     return true;
   }
@@ -400,24 +436,15 @@ public class EJMLLinearSolver {
    */
   private boolean validate(DenseMatrix64F A, DenseMatrix64F x, DenseMatrix64F b) {
     // Compute A x = b
-
-    // Used for debugging
-    // DenseMatrix64F b2 = new DenseMatrix64F(size, 1);
-    // CommonOps.mult(A, x, b2);
-    // return equal.almostEqualComplement(b.data, b2.data);
-
     for (int i = 0, index = 0; i < b.numRows; i++) {
       double bi = 0;
       for (int j = 0; j < b.numRows; j++) {
         bi += A.data[index++] * x.data[j];
       }
       if (!equal.almostEqualRelativeOrAbsolute(b.data[i], bi)) {
-        // System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi,
-        // DoubleEquality.relativeError(b.data[i], bi), DoubleEquality.complement(b.data[i], bi));
         return false;
       }
     }
-    // System.out.println("OK");
     return true;
   }
 
@@ -430,10 +457,10 @@ public class EJMLLinearSolver {
    * PseudoInverse decomposition.
    *
    * @param A the matrix A
-   * @param B the vector b
+   * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solve(DenseMatrix64F A, DenseMatrix64F B) {
+  public boolean solve(DenseMatrix64F A, DenseMatrix64F b) {
     createSolver(A.numCols);
 
     // Speed tests show the Cholesky solver marginally outperforms the
@@ -441,14 +468,13 @@ public class EJMLLinearSolver {
     // returns a Cholesky solver for symmetric positive definite matrices
     // so we use this.
 
-    // Note: Use solveSafe as we need the A and B matrix for the subsequent
+    // Note: Use solveSafe as we need the A and b matrix for the subsequent
     // solve attempt if failure
 
-    if (solveSafe(getCholeskySolver(), A, B, getX())) {
-      if (!errorChecking || validate(A, X, B)) {
-        System.arraycopy(X.data, 0, B.data, 0, A.numCols);
-        return true;
-      }
+    if (solveEquationSafe(getCholeskySolver(), A, b, getX())
+        && (!errorChecking || validate(A, x, b))) {
+      System.arraycopy(x.data, 0, b.data, 0, A.numCols);
+      return true;
     }
 
     // TODO - Count how often the primary method fails on a realistic set of fitting data
@@ -457,8 +483,8 @@ public class EJMLLinearSolver {
 
     // No need for an explicit solveSafe this time.
     // Use the solve() method which will include validate().
-    if (solve(getPseudoInverseSolver(), A, B, X)) {
-      System.arraycopy(X.data, 0, B.data, 0, A.numCols);
+    if (solveEquation(getPseudoInverseSolver(), A, b, x)) {
+      System.arraycopy(x.data, 0, b.data, 0, A.numCols);
       return true;
     }
 
@@ -493,10 +519,10 @@ public class EJMLLinearSolver {
       return false;
     }
 
-    lastSuccessfulSolver.invert(getA_inv());
+    lastSuccessfulSolver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = A_inv.data;
+    final double[] a_inv = Ainv.data;
     for (int i = a_inv.length; i-- > 0;) {
       if (!Double.isFinite(a_inv[i])) {
         return false;
@@ -539,8 +565,8 @@ public class EJMLLinearSolver {
       // Reset size dependent objects
       choleskySolver = null;
       linearSolver = null;
-      X = null;
-      A_inv = null;
+      x = null;
+      Ainv = null;
     }
   }
 
@@ -550,10 +576,10 @@ public class EJMLLinearSolver {
    * @return the x
    */
   private DenseMatrix64F getX() {
-    if (X == null) {
-      X = new DenseMatrix64F(solverSize, 1);
+    if (x == null) {
+      x = new DenseMatrix64F(solverSize, 1);
     }
-    return X;
+    return x;
   }
 
   /**
@@ -561,11 +587,11 @@ public class EJMLLinearSolver {
    *
    * @return the space for A^-1
    */
-  private DenseMatrix64F getA_inv() {
-    if (A_inv == null) {
-      A_inv = new DenseMatrix64F(solverSize, solverSize);
+  private DenseMatrix64F getAinv() {
+    if (Ainv == null) {
+      Ainv = new DenseMatrix64F(solverSize, solverSize);
     }
-    return A_inv;
+    return Ainv;
   }
 
   /**
@@ -777,10 +803,10 @@ public class EJMLLinearSolver {
     if (!initialiseSolver(solver, Ain)) {
       return false;
     }
-    solver.invert(getA_inv());
+    solver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = A_inv.data;
+    final double[] a_inv = Ainv.data;
     for (int i = a_inv.length; i-- > 0;) {
       if (!Double.isFinite(a_inv[i])) {
         return false;
@@ -810,10 +836,10 @@ public class EJMLLinearSolver {
     if (!initialiseSolver(solver, Ain)) {
       return false;
     }
-    solver.invert(getA_inv());
+    solver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = A_inv.data;
+    final double[] a_inv = Ainv.data;
     for (int i = a_inv.length; i-- > 0;) {
       if (!Double.isFinite(a_inv[i])) {
         System.out.printf("Not finite\n");
@@ -839,10 +865,10 @@ public class EJMLLinearSolver {
    */
   private boolean invalidInversion(DenseMatrix64F A, boolean pseudoInverse) {
     // Check for the identity matrix:
-    // Compute A A_inv = I
+    // Compute A Ainv = I
     final int n = A.numCols;
     final DenseMatrix64F I = new DenseMatrix64F(n, n);
-    CommonOps.mult(A, A_inv, I);
+    CommonOps.mult(A, Ainv, I);
 
     if (pseudoInverse) {
       for (int i = n, index = I.data.length; i-- > 0;) {
@@ -953,10 +979,9 @@ public class EJMLLinearSolver {
       }
 
       // The matrix was too big for fast inversion so try linear algebra
-    } else if (!invertSafe(getCholeskyLDLTSolver(), A, false)) {
-      if (!invertUnsafe(getPseudoInverseSolver(), A, true)) {
-        return null;
-      }
+    } else if (!invertSafe(getCholeskyLDLTSolver(), A, false)
+        && (!invertUnsafe(getPseudoInverseSolver(), A, true))) {
+      return null;
     }
 
     // We reach here when 'a' has been inverted
@@ -1042,6 +1067,7 @@ public class EJMLLinearSolver {
   }
 
   // Methods for input of primitive arrays
+  // @CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
 
   /**
    * Solves (one) linear equation, A x = b.
@@ -1140,10 +1166,10 @@ public class EJMLLinearSolver {
       return false;
     }
 
-    lastSuccessfulSolver.invert(getA_inv());
+    lastSuccessfulSolver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = A_inv.data;
+    final double[] a_inv = Ainv.data;
     for (int i = a_inv.length; i-- > 0;) {
       if (!Double.isFinite(a_inv[i])) {
         return false;
@@ -1153,7 +1179,7 @@ public class EJMLLinearSolver {
     // Q. Should we check the product is the identity matrix?
     // This will require that we have the original matrix A used to initialise the solver.
 
-    toSquareData(A_inv, a);
+    toSquareData(Ainv, a);
     return true;
   }
 
@@ -1375,12 +1401,12 @@ public class EJMLLinearSolver {
       return false;
     }
 
-    lastSuccessfulSolver.invert(getA_inv());
+    lastSuccessfulSolver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = A_inv.data;
-    for (int i = a_inv.length; i-- > 0;) {
-      if (!Double.isFinite(a_inv[i])) {
+    final double[] inv = Ainv.data;
+    for (int i = inv.length; i-- > 0;) {
+      if (!Double.isFinite(inv[i])) {
         return false;
       }
     }
@@ -1388,7 +1414,7 @@ public class EJMLLinearSolver {
     // Q. Should we check the product is the identity matrix?
     // This will require that we have the original matrix A used to initialise the solver.
 
-    System.arraycopy(a_inv, 0, a, 0, a_inv.length);
+    System.arraycopy(inv, 0, a, 0, inv.length);
 
     return true;
   }
@@ -1418,36 +1444,5 @@ public class EJMLLinearSolver {
    */
   public double[] invertDiagonal(double[] a, int n) {
     return invertDiagonal(toA(a, n));
-  }
-
-  /**
-   * Gets the inversion tolerance. Inversions are checked by ensuring that the product matches the
-   * identity matrix: A * A^-1 = I. Elements must be within the tolerance or else the inversion is
-   * rejected. Set to zero to disable.
-   *
-   * @return the inversion tolerance
-   */
-  public double getInversionTolerance() {
-    return inversionTolerance;
-  }
-
-  /**
-   * Sets the inversion tolerance. Inversions are checked by ensuring that the product matches the
-   * identity matrix: A * A^-1 = I. Elements must be within the tolerance or else the inversion is
-   * rejected. Set to zero to disable.
-   *
-   * @param inversionTolerance the new inversion tolerance
-   */
-  public void setInversionTolerance(double inversionTolerance) {
-    this.inversionTolerance = inversionTolerance;
-  }
-
-  /**
-   * Checks if there is an inversion tolerance.
-   *
-   * @return true, if there is an inversion tolerance
-   */
-  private boolean isInversionTolerance() {
-    return inversionTolerance > 0;
   }
 }

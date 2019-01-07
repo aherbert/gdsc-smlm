@@ -39,7 +39,8 @@ public class CustomGammaDistributionTest {
     UniformRandomProvider r;
     double shape = 0.5;
     double scale = 300;
-    int n = 1000, m = 10;
+    int n = 1000;
+    int m = 10;
 
     public MyTimingTask(String name, RandomSeed seed) {
       super(name);

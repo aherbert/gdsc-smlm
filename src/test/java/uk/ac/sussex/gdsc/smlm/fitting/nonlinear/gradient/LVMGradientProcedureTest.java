@@ -44,6 +44,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.opentest4j.AssertionFailedError;
 
 import java.util.ArrayList;
@@ -650,9 +651,9 @@ public class LVMGradientProcedureTest {
     });
   }
 
-  // This test now passes as the tolerance for computing the gradient has been lowered
-  // so that the test passes under a stress test using many different random seeds.
-  // @SeededTest
+  @Disabled("This test now passes as the tolerance for computing the gradient has been lowered "
+      + " so that the tests pass under a stress test using many different random seeds.")
+  @SeededTest
   public void gradientProcedureFastLogMLECannotComputeGradientWithHighPrecision(RandomSeed seed) {
     // Try different precision
     for (int n = FastLog.N; n < 23; n++) {

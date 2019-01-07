@@ -120,7 +120,8 @@ public class PoissonFunctionTest {
     for (int i = 1; i < h.length; i++) {
       h[i] += h[i - 1];
     }
-    int minx = 0, maxx = h.length - 1;
+    int minx = 0;
+    int maxx = h.length - 1;
     while (h[minx + 1] < 0.0025) {
       minx++;
     }

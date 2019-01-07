@@ -199,8 +199,7 @@ public class FisherInformationMatrixTest {
     }
   }
 
-  private static FisherInformationMatrix
-      createRandomMatrix(UniformRandomProvider rng, int size) {
+  private static FisherInformationMatrix createRandomMatrix(UniformRandomProvider rng, int size) {
     final double[] data = new double[size * size];
     for (int i = 0; i < data.length; i++) {
       data[i] = rng.nextDouble();

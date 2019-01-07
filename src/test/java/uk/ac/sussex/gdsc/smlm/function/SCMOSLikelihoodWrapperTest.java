@@ -98,7 +98,12 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
   private final double[][] testw1_ =
       new double[][] {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
 
-  private double[] testbackground, testsignal1, testangle1, testcx1, testcy1, testcz1;
+  private double[] testbackground;
+  private double[] testsignal1;
+  private double[] testangle1;
+  private double[] testcx1;
+  private double[] testcy1;
+  private double[] testcz1;
   private double[][] testw1;
 
   private static int maxx = 10;
@@ -251,7 +256,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     SCMOSLikelihoodWrapper ff1;
 
     final int n = maxx * maxx;
-    int count = 0, total = 0;
+    int count = 0;
+    int total = 0;
 
     final SCMOSLikelihoodWrapperTestData testData =
         (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
@@ -459,7 +465,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     SCMOSLikelihoodWrapper ff1;
 
     final int n = maxx * maxx;
-    int count = 0, total = 0;
+    int count = 0;
+    int total = 0;
 
     final SCMOSLikelihoodWrapperTestData testData =
         (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
@@ -679,7 +686,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     final IntArrayFormatSupplier msg1 = new IntArrayFormatSupplier("computeLikelihood @ %d", 1);
     final IntArrayFormatSupplier msg2 =
         new IntArrayFormatSupplier("computeLikelihood+gradient @ %d", 1);
-    double total = 0, p = 0;
+    double total = 0;
+    double p = 0;
     double maxp = 0;
     int maxi = 0;
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
@@ -720,7 +728,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     }
 
     // Check the function can compute the same total
-    double sum, sum2;
+    double sum;
+    double sum2;
     sum = f.computeLikelihood();
     sum2 = f.computeLikelihood(gradient);
     TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
@@ -856,7 +865,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     TestAssertions.assertTest(oll2, oll, predicate, "Observed Log-likelihood");
 
     final TDoubleArrayList list = new TDoubleArrayList();
-    final int imin = 5, imax = 15;
+    final int imin = 5;
+    final int imax = 15;
     for (int i = imin; i <= imax; i++) {
       a[0] = (double) i / 10;
       final double ll = f.likelihood(a);

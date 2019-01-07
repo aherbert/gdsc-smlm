@@ -464,7 +464,7 @@ Software for single molecule localisation microscopy (SMLM)
           <consoleOutput>false</consoleOutput>
           <failsOnError>true</failsOnError>
           <linkXRef>true</linkXRef>
-          <includeTestSourceDirectory>false</includeTestSourceDirectory>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <excludes>**\/*Protos.java</excludes>
         </configuration>
         <executions>

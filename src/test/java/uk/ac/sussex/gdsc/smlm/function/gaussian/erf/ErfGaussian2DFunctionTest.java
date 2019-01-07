@@ -47,7 +47,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
   @Test
   public void factoryDefaultsToErfGaussian2DFunction() {
-    Gaussian2DFunction f, f2;
+    Gaussian2DFunction f;
+    Gaussian2DFunction f2;
 
     final int flags2 = BitFlagUtils.unset(flags, GaussianFunctionFactory.FIT_ERF);
 
@@ -364,7 +365,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     ErfGaussian2DFunction f2;
     double[][] x;
     int order;
-    final double[] dyda, d2yda2;
+    final double[] dyda;
+    final double[] d2yda2;
     final int n = f1.size();
 
     public FunctionTimingTask(Gaussian2DFunction f, double[][] x, int order) {
@@ -1116,7 +1118,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
       }
     }
     final int n = (int) Math.ceil(10000.0 / p.size());
-    double s1 = 0, s2 = 0;
+    double s1 = 0;
+    double s2 = 0;
     long t1 = System.nanoTime();
     for (int i = n; i-- > 0;) {
       for (int j = p.size(); j-- > 0;) {
@@ -1216,7 +1219,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
       }
     }
     final int n = (int) Math.ceil(10000.0 / p.size());
-    double s1 = 0, s2 = 0;
+    double s1 = 0;
+    double s2 = 0;
     long t1 = System.nanoTime();
     for (int i = n; i-- > 0;) {
       for (int j = p.size(); j-- > 0;) {
