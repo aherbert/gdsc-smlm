@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
+ * Copyright (C) 2011 - 2019 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -26,5 +26,6 @@
  * Provides PC-PALM plugins to execute within <a href="https://imagej.nih.gov/ij/">ImageJ</a>.
  *
  * @since 1.0.0
- */
+  */
+
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;

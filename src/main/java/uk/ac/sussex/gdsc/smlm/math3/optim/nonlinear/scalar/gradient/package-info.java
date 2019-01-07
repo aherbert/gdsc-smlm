@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
+ * Copyright (C) 2011 - 2019 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -28,5 +28,6 @@
  *
  * @see <a href="http://commons.apache.org/proper/commons-math/">Apache Commons Math</a>
  * @since 1.0.0
- */
+  */
+
 package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient;

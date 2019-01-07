@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
+ * Copyright (C) 2011 - 2019 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -59,15 +59,14 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
    * @param y the y
    * @return the total sum of squares
    */
-  public static double getTotalSumOfSquares(double[] y) {
+  public static double computeTotalSumOfSquares(double[] y) {
     double sx = 0;
     double ssx = 0;
     for (int i = y.length; i-- > 0;) {
       sx += y[i];
       ssx += y[i] * y[i];
     }
-    final double sumOfSquares = ssx - (sx * sx) / (y.length);
-    return sumOfSquares;
+    return ssx - (sx * sx) / (y.length);
   }
 
   /**
@@ -106,7 +105,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
   @Override
   public double getTotalSumOfSquares() {
     if (Double.isNaN(totalSumOfSquares) && lastY != null) {
-      totalSumOfSquares = getTotalSumOfSquares(lastY);
+      totalSumOfSquares = computeTotalSumOfSquares(lastY);
     }
     return totalSumOfSquares;
   }

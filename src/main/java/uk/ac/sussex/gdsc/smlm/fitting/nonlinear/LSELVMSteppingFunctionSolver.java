@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
+ * Copyright (C) 2011 - 2019 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -188,7 +188,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   @Override
   public double getTotalSumOfSquares() {
     if (Double.isNaN(totalSumOfSquares) && lastY != null) {
-      totalSumOfSquares = LSEBaseFunctionSolver.getTotalSumOfSquares(lastY);
+      totalSumOfSquares = LSEBaseFunctionSolver.computeTotalSumOfSquares(lastY);
     }
     return totalSumOfSquares;
   }

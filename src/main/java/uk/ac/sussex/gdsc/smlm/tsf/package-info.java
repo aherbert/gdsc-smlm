@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
- * Copyright (C) 2011 - 2018 Alex Herbert
+ * Copyright (C) 2011 - 2019 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -35,5 +35,6 @@
  * @see <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a>
  * @see <a href="https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format">Tagged Spot File
  *      (TSF) format</a>
- */
+  */
+
 package uk.ac.sussex.gdsc.smlm.tsf;
