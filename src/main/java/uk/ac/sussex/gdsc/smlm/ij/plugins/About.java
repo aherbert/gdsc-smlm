@@ -175,7 +175,8 @@ public class About implements PlugIn, MacroExtension {
 
     // Build final message
     msg = new StringBuilder(msg.toString().trim());
-    addVersion(msg, "GDSC", Version.getVersion(), Version.getBuildDate(), Version.getBuildNumber());
+    addVersion(msg, "GDSC-SMLM", Version.getVersion(), Version.getBuildDate(),
+        Version.getBuildNumber());
     addVersion(msg, "GDSC-Core", uk.ac.sussex.gdsc.core.VersionUtils.getVersion(),
         uk.ac.sussex.gdsc.core.VersionUtils.getBuildDate(),
         uk.ac.sussex.gdsc.core.VersionUtils.getBuildNumber());
