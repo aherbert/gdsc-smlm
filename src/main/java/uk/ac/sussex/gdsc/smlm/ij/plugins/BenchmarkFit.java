@@ -64,8 +64,8 @@ import org.apache.commons.math3.random.HaltonSequenceGenerator;
 
 import java.awt.Rectangle;
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -331,7 +331,7 @@ public class BenchmarkFit implements PlugIn {
       double[][] bounds = null;
       final double[][] result = new double[offsets.length][];
       final long[] time = new long[offsets.length];
-      int c = 0;
+      int count = 0;
       int resultPosition = frame;
       for (final double[] offset : offsets) {
         final long start = System.nanoTime();
@@ -358,19 +358,17 @@ public class BenchmarkFit implements PlugIn {
             params[Gaussian2DFunction.BACKGROUND] /= benchmarkParameters.gain;
             params[Gaussian2DFunction.SIGNAL] /= benchmarkParameters.gain;
           }
-          result[c] = params;
-          time[c] = System.nanoTime() - start;
+          result[count] = params;
+          time[count] = System.nanoTime() - start;
           // Store all the results for later analysis
           results[resultPosition] = params;
-          resultsTime[resultPosition] = time[c];
-          c++;
-        } else {
-          // System.out.println(status);
+          resultsTime[resultPosition] = time[count];
+          count++;
         }
         resultPosition += totalFrames;
       }
 
-      addResults(stats, answer, benchmarkParameters.p[frame], sa, time, result, c);
+      addResults(stats, answer, benchmarkParameters.p[frame], sa, time, result, count);
     }
 
     /**
@@ -518,12 +516,12 @@ public class BenchmarkFit implements PlugIn {
    * @param sa the sa
    * @param time the time
    * @param result the result
-   * @param c Count of the number of results
+   * @param count Count of the number of results
    */
   private static void addResults(Statistics[] stats, double[] answer, double photons, double sa,
-      long[] time, double[][] result, int c) {
+      long[] time, double[][] result, int count) {
     // Store the results from each run
-    for (int i = 0; i < c; i++) {
+    for (int i = 0; i < count; i++) {
       addResult(stats, answer, photons, sa, result[i], time[i]);
     }
   }
@@ -581,7 +579,7 @@ public class BenchmarkFit implements PlugIn {
         return;
       }
 
-      run();
+      runFit();
     }
   }
 
@@ -849,10 +847,8 @@ public class BenchmarkFit implements PlugIn {
   }
 
   private double getSa() {
-    final double sa =
-        PSFCalculator.squarePixelAdjustment(benchmarkParameters.s, benchmarkParameters.a)
-            / benchmarkParameters.a;
-    return sa;
+    return PSFCalculator.squarePixelAdjustment(benchmarkParameters.s, benchmarkParameters.a)
+        / benchmarkParameters.a;
   }
 
   private int progress;
@@ -863,15 +859,14 @@ public class BenchmarkFit implements PlugIn {
    * Show progress.
    */
   private synchronized void showProgress() {
-    if (progress % stepProgress == 0) {
-      if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
-        IJ.showProgress(progress, totalProgress);
-      }
+    if (progress % stepProgress == 0
+        && ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
+      IJ.showProgress(progress, totalProgress);
     }
     progress++;
   }
 
-  private void run() {
+  private void runFit() {
     // Initialise the answer.
     answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground();
     answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal();
@@ -882,8 +877,8 @@ public class BenchmarkFit implements PlugIn {
     answer[Gaussian2DFunction.Y_SD] = benchmarkParameters.s / benchmarkParameters.a;
 
     // Set up the fit region. Always round down since 0.5 is the centre of the pixel.
-    int x = (int) benchmarkParameters.x;
-    int y = (int) benchmarkParameters.y;
+    final int x = (int) benchmarkParameters.x;
+    final int y = (int) benchmarkParameters.y;
     region = new Rectangle(x - regionSize, y - regionSize, 2 * regionSize + 1, 2 * regionSize + 1);
     if (!new Rectangle(0, 0, imp.getWidth(), imp.getHeight()).contains(region)) {
       // Check if it is incorrect by only 1 pixel
@@ -898,8 +893,6 @@ public class BenchmarkFit implements PlugIn {
     }
 
     // Adjust the centre & account for 0.5 pixel offset during fitting
-    x -= region.x;
-    y -= region.y;
     answer[Gaussian2DFunction.X_POSITION] -= (region.x + 0.5);
     answer[Gaussian2DFunction.Y_POSITION] -= (region.y + 0.5);
 
@@ -1032,8 +1025,7 @@ public class BenchmarkFit implements PlugIn {
   private static void saveStatistics(StoredDataStatistics stats, String title) {
     final String filename = rawDataDirectory + title.replace(" ", "_") + ".txt";
 
-    try (BufferedWriter out =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8"))) {
+    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(filename))) {
       // out.write(title);
       // out.newLine();
       final double[] data = stats.getValues();
@@ -1048,9 +1040,9 @@ public class BenchmarkFit implements PlugIn {
     }
   }
 
-  private static void put(BlockingQueue<Integer> jobs, int i) {
+  private static void put(BlockingQueue<Integer> jobs, int index) {
     try {
-      jobs.put(i);
+      jobs.put(index);
     } catch (final InterruptedException ex) {
       throw new RuntimeException("Unexpected interruption", ex);
     }
@@ -1130,16 +1122,16 @@ public class BenchmarkFit implements PlugIn {
    * Sum the intensity above background to estimate the signal.
    *
    * @param data the data
-   * @param b background
+   * @param background the background
    * @return The signal
    */
-  public static double getSignal(double[] data, double b) {
-    double s = 0;
+  public static double getSignal(double[] data, double background) {
+    double signal = 0;
     for (final double d : data) {
-      s += d;
+      signal += d;
     }
     // Subtract the background per pixel and ensure at least 1 photon in the signal
-    return Math.max(1, s - b * data.length);
+    return Math.max(1, signal - background * data.length);
   }
 
   /**
@@ -1344,17 +1336,17 @@ public class BenchmarkFit implements PlugIn {
 
     // Build a list of all the frames which have results
     final int[] valid = new int[length];
-    int j = 0;
-    final int[] count = new int[benchmarkResults.size()];
+    int index = 0;
+    final int[] counts = new int[benchmarkResults.size()];
     for (final BenchmarkResult benchmarkResult : benchmarkResults) {
-      int c = 0;
+      int count = 0;
       for (int i = 0; i < valid.length; i++) {
         if (benchmarkResult.results[i] != null) {
-          c++;
+          count++;
           valid[i]++;
         }
       }
-      count[j++] = c;
+      counts[index++] = count;
     }
 
     final int target = benchmarkResults.size();
@@ -1372,7 +1364,7 @@ public class BenchmarkFit implements PlugIn {
     createAnalysisTable();
 
     // Create the results using only frames where all the fitting methods were successful
-    j = 0;
+    index = 0;
     for (final BenchmarkResult benchmarkResult : benchmarkResults) {
       final double[] answer = benchmarkResult.answer;
 
@@ -1400,7 +1392,7 @@ public class BenchmarkFit implements PlugIn {
       // Add the original recall
       sb.append('\t');
       final double recall2 =
-          (count[j++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
+          (counts[index++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
       sb.append(MathUtils.rounded(recall2));
 
       // Convert to units of the image (ADUs and pixels)

@@ -73,8 +73,8 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Color;
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -549,8 +549,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     if (distancesFilename != null) {
       distancesFilename = ImageJUtils.replaceExtension(distancesFilename, "xls");
 
-      try (BufferedWriter out = new BufferedWriter(
-          new OutputStreamWriter(new FileOutputStream(distancesFilename), "UTF-8"))) {
+      try (BufferedWriter out = Files.newBufferedWriter(Paths.get(distancesFilename))) {
         final double[] msd = msdPerMolecule.getValues();
         final double[] msd2 = msdPerMoleculeAdjacent.getValues();
         final double[] dStar = dStarPerMolecule.getValues();
@@ -595,8 +594,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
     final String filename = rawDataDirectory + "MSD.txt";
 
-    try (BufferedWriter out =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8"))) {
+    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(filename))) {
       out.write("Time (s)\tDistance (um^2)\tS.E.");
       out.newLine();
       for (int i = 0; i < x.length; i++) {
@@ -624,8 +622,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     final String filename =
         rawDataDirectory + title.replace("/", " per ").replace("*", "star") + ".txt";
 
-    try (BufferedWriter out =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8"))) {
+    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(filename))) {
       out.write(label);
       out.newLine();
       final double[] data = stats.getValues();
@@ -656,8 +653,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
     final String filename = rawDataDirectory + "Fit." + title + ".txt";
 
-    try (BufferedWriter out =
-        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8"))) {
+    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(filename))) {
       out.write("JumpDistance\tCumulativeP");
       out.newLine();
       for (int i = 0; i < x.length; i++) {

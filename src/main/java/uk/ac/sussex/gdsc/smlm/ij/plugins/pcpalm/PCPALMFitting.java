@@ -73,6 +73,8 @@ import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.InputMismatchException;
@@ -638,7 +640,7 @@ public class PCPALMFitting implements PlugIn {
     if (outputFilename != null) {
       outputFilename = ImageJUtils.replaceExtension(outputFilename, "xls");
 
-      try (BufferedWriter output = new BufferedWriter(new FileWriter(outputFilename))) {
+      try (BufferedWriter output = Files.newBufferedWriter(Paths.get(outputFilename))) {
         writeHeader(output, HEADER_PEAK_DENSITY, Double.toString(previous_peakDensity));
         writeHeader(output, HEADER_SPATIAL_DOMAIN, Boolean.toString(previous_spatialDomain));
         output.write("#r\tg(r)\tS.E.");
@@ -687,8 +689,7 @@ public class PCPALMFitting implements PlugIn {
     boolean spatialDomainSet = false;
     boolean peakDensitySet = false;
 
-    try (BufferedReader input =
-        new BufferedReader(new UnicodeReader(new FileInputStream(inputFilename), null))) {
+    try (BufferedReader input = Files.newBufferedReader(Paths.get(inputFilename))) {
       String line;
       int count = 0;
 

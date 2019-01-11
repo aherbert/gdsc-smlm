@@ -38,14 +38,15 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -65,7 +66,7 @@ public class MALKFilePeakResults extends FilePeakResults {
    */
   protected TypeConverter<IntensityUnit> toPhotonConverter;
 
-  private OutputStreamWriter out;
+  private Writer out;
 
   /**
    * Instantiates a new MALK file peak results.
@@ -89,11 +90,7 @@ public class MALKFilePeakResults extends FilePeakResults {
 
   @Override
   protected void openOutput() {
-    try {
-      out = new OutputStreamWriter(fos, "UTF-8");
-    } catch (final UnsupportedEncodingException ex) {
-      throw new RuntimeException(ex);
-    }
+    out = new BufferedWriter(new OutputStreamWriter(fos, StandardCharsets.UTF_8));
   }
 
   @Override
@@ -280,9 +277,11 @@ public class MALKFilePeakResults extends FilePeakResults {
   /** {@inheritDoc} */
   @Override
   protected void sort() throws IOException {
-    try (BufferedReader input = new BufferedReader(new FileReader(filename))) {
-      final TurboList<Result> results = new TurboList<>(size);
-      final StringBuilder header = new StringBuilder();
+    final TurboList<Result> results = new TurboList<>(size);
+    final StringBuilder header = new StringBuilder();
+
+    final Path path = Paths.get(filename);
+    try (BufferedReader input = Files.newBufferedReader(path)) {
 
       String line;
       // Skip the header
@@ -292,28 +291,26 @@ public class MALKFilePeakResults extends FilePeakResults {
           results.add(new Result(line));
           break;
         }
-        header.append(line).append("\n");
+        header.append(line).append(System.lineSeparator());
       }
 
       while ((line = input.readLine()) != null) {
         results.add(new Result(line));
       }
+    }
 
-      input.close();
+    Collections.sort(results);
 
-      Collections.sort(results);
-
-      try (BufferedWriter output = new BufferedWriter(new FileWriter(filename))) {
-        output.write(header.toString());
-        for (int i = 0; i < results.size(); i++) {
-          output.write(results.getf(i).line);
-          output.write("\n");
-        }
+    try (BufferedWriter output = Files.newBufferedWriter(path)) {
+      output.write(header.toString());
+      for (int i = 0; i < results.size(); i++) {
+        output.write(results.getf(i).line);
+        output.newLine();
       }
     }
   }
 
-  private class Result implements Comparable<Result> {
+  private static class Result implements Comparable<Result> {
     String line;
     int slice;
 
@@ -328,25 +325,16 @@ public class MALKFilePeakResults extends FilePeakResults {
         scanner.nextFloat(); // X
         scanner.nextFloat(); // Y
         slice = scanner.nextInt();
-        scanner.close();
-      } catch (final InputMismatchException ex) {
-        // Ignore
       } catch (final NoSuchElementException ex) {
         // Ignore
       }
     }
 
     @Override
-    public int compareTo(Result o) {
+    public int compareTo(Result other) {
       // Sort by slice number
       // (Note: peak height is already done in the run(...) method)
-      if (slice < o.slice) {
-        return -1;
-      }
-      if (slice > o.slice) {
-        return 1;
-      }
-      return 0;
+      return Integer.compare(slice, other.slice);
     }
   }
 }

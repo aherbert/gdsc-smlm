@@ -36,11 +36,12 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.NoSuchElementException;
@@ -499,7 +500,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     final TurboList<Result> results = new TurboList<>(size);
     final StringBuilder header = new StringBuilder();
 
-    try (BufferedReader input = new BufferedReader(new FileReader(filename))) {
+    final Path path = Paths.get(filename);
+    try (BufferedReader input = Files.newBufferedReader(path)) {
 
       String line;
       // Skip the header
@@ -519,7 +521,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
 
     Collections.sort(results);
 
-    try (BufferedWriter output = new BufferedWriter(new FileWriter(filename))) {
+    try (BufferedWriter output = Files.newBufferedWriter(path)) {
       output.write(header.toString());
       for (int i = 0; i < results.size(); i++) {
         output.write(results.getf(i).line);

@@ -82,7 +82,8 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Rectangle;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -660,8 +661,8 @@ public class TraceMolecules implements PlugIn {
   }
 
   private void saveTraceData(StoredDataStatistics s, String name, String fileSuffix) {
-    try (BufferedWriter file = new BufferedWriter(
-        new FileWriter(settings.getTraceDataDirectory() + TITLE + "." + fileSuffix + ".txt"))) {
+    try (BufferedWriter file = Files.newBufferedWriter(
+        Paths.get(settings.getTraceDataDirectory(), TITLE + "." + fileSuffix + ".txt"))) {
       file.append(name);
       file.newLine();
 

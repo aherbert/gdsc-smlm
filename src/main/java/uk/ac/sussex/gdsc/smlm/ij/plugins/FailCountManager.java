@@ -76,9 +76,9 @@ import java.awt.AWTEvent;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -515,9 +515,9 @@ public class FailCountManager implements PlugIn {
       return;
     }
     settings.setFilename(filename);
-    final TurboList<FailCountData> failCountData = new TurboList<>();
+    final TurboList<FailCountData> countData = new TurboList<>();
 
-    try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+    try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
       final Pattern pattern = Pattern.compile("[\t, ]+");
       // Ignore the first line
       String line = br.readLine();
@@ -542,7 +542,7 @@ public class FailCountManager implements PlugIn {
 
         if (lastId != id) {
           if (array.size() > 0) {
-            failCountData.add(new FailCountData(lastId, array.toArray()));
+            countData.add(new FailCountData(lastId, array.toArray()));
             array.clear();
           }
           if (candidate != 1) {
@@ -562,11 +562,11 @@ public class FailCountManager implements PlugIn {
       }
       // Final ID
       if (array.size() > 0) {
-        failCountData.add(new FailCountData(lastId, array.toArray()));
+        countData.add(new FailCountData(lastId, array.toArray()));
       }
 
-      IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(failCountData.size(), "sequence"));
-      FailCountManager.failCountData = failCountData;
+      IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(countData.size(), "sequence"));
+      FailCountManager.failCountData = countData;
     } catch (final NumberFormatException ex) {
       IJ.error(TITLE, "Failed to load data:\n" + ex.getMessage());
     } catch (final IOException ex) {
@@ -626,7 +626,7 @@ public class FailCountManager implements PlugIn {
     }
     settings.setFilename(filename);
 
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+    try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(filename))) {
       bw.write("ID,Candidate,Status");
       bw.newLine();
       for (int i = 0; i < failCountData.size(); i++) {

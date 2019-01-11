@@ -95,8 +95,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -1104,7 +1105,7 @@ public class SpotAnalysis extends PlugInFrame
 
   private static BufferedWriter openBufferedWriter(String filename, String header)
       throws IOException {
-    final BufferedWriter tracesFile = new BufferedWriter(new FileWriter(filename));
+    final BufferedWriter tracesFile = Files.newBufferedWriter(Paths.get(filename));
     if (header != null && header.length() > 0) {
       writeLine(tracesFile, header);
     }

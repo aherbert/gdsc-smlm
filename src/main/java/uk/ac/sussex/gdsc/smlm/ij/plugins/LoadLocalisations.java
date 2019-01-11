@@ -277,7 +277,7 @@ public class LoadLocalisations implements PlugIn {
     final boolean hasComment = !TextUtils.isNullOrEmpty(comment);
     int errors = 0;
     int count = 0;
-    int h = Math.max(0, settings.getHeaderLines());
+    int headerCount = Math.max(0, settings.getHeaderLines());
 
     try (BufferedReader input = new BufferedReader(
         new UnicodeReader(new FileInputStream(settings.getLocalisationsFilename()), null))) {
@@ -296,7 +296,7 @@ public class LoadLocalisations implements PlugIn {
       String line;
       while ((line = input.readLine()) != null) {
         // Skip header
-        if (h-- > 0) {
+        if (headerCount-- > 0) {
           continue;
         }
         // Skip empty lines

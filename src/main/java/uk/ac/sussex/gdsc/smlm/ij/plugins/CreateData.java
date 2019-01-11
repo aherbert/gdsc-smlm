@@ -177,6 +177,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2451,8 +2453,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       final double noiseFraction = 1e-3;
       final float[][] image = extractImageStack(imp, lower, upper);
       final ImagePSFModel model = new ImagePSFModel(image, zCentre - lower,
-          psfSettings.getPixelSize() / settings.getPixelPitch(), unitsPerSlice,
-          noiseFraction);
+          psfSettings.getPixelSize() / settings.getPixelPitch(), unitsPerSlice, noiseFraction);
 
       // Add the calibrated centres. The map will not be null
       final Map<Integer, Offset> map = psfSettings.getOffsetsMap();
@@ -4027,7 +4028,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           ImageJUtils.replaceExtension(settings.getFluorophoresFilename(), "xls"));
 
       try (BufferedWriter output =
-          new BufferedWriter(new FileWriter(settings.getFluorophoresFilename()))) {
+          Files.newBufferedWriter(Paths.get(settings.getFluorophoresFilename()))) {
         output.write(createResultsFileHeader());
         output.write("#Id\tn-Blinks\tStart\tStop\t...");
         output.newLine();

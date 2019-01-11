@@ -64,6 +64,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.InputMismatchException;
@@ -386,7 +388,7 @@ public class PCPALMClusters implements PlugIn {
     final float[][] hist = histogramData.histogram;
 
     filename = ImageJUtils.replaceExtension(filename, "tsv");
-    try (BufferedWriter output = new BufferedWriter(new FileWriter(filename))) {
+    try (BufferedWriter output = Files.newBufferedWriter(Paths.get(filename))) {
       if (histogramData.isCalibrated()) {
         output.write(String.format("Frames  %d", histogramData.frames));
         output.newLine();
@@ -421,8 +423,7 @@ public class PCPALMClusters implements PlugIn {
   private HistogramData loadHistogram(String filename) {
     int count = 0;
 
-    try (BufferedReader input =
-        new BufferedReader(new UnicodeReader(new FileInputStream(filename), null))) {
+    try (BufferedReader input = Files.newBufferedReader(Paths.get(filename))) {
       int f = 0;
       double a = 0;
       String u = "";

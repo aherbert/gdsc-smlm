@@ -38,9 +38,9 @@ import ij.plugin.PlugIn;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -50,11 +50,11 @@ import java.util.LinkedList;
  * Contains help dialogs for the GDSC ImageJ plugins.
  */
 public class About implements PlugIn, MacroExtension {
-  private static String TITLE = "GDSC SMLM ImageJ Plugins";
+  private static final String TITLE = "GDSC SMLM ImageJ Plugins";
   /** The help url for the SMLM plugins. */
-  public static String HELP_URL =
+  public static final String HELP_URL =
       "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
-  private static String YEAR = "2016";
+  private static final String YEAR = "2019";
 
   /**
    * The configure option.
@@ -161,7 +161,7 @@ public class About implements PlugIn, MacroExtension {
           if (line.equals("")) {
             line = " "; // Required to insert a line in the GenericDialog
           }
-          msg.append(line).append("\n");
+          msg.append(line).append('\n');
         }
       }
     } catch (final IOException ex) {
@@ -283,9 +283,9 @@ public class About implements PlugIn, MacroExtension {
 
     if (choice == ConfigureOption.REMOVE) {
       try {
-        new File(filename).delete();
+        Files.delete(Paths.get(filename));
         return 1;
-      } catch (final SecurityException ex) {
+      } catch (final SecurityException | IOException ex) {
         IJ.error("Unable to remove existing file");
       }
       return -1;
@@ -310,7 +310,7 @@ public class About implements PlugIn, MacroExtension {
       gd.addMessage("Edit the file contents before install:");
       sb.setLength(0);
       for (final String line : contents) {
-        sb.append(line).append("\n");
+        sb.append(line).append('\n');
       }
       gd.addTextAreas(sb.toString(), null, 20, 80);
       gd.showDialog();
@@ -324,31 +324,15 @@ public class About implements PlugIn, MacroExtension {
     }
 
     // Install the file
-    BufferedWriter output = null;
-    try {
-      // Write
-      final FileOutputStream fos = new FileOutputStream(filename);
-      output = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
+    try (BufferedWriter output = Files.newBufferedWriter(Paths.get(filename))) {
       for (final String content : contents) {
         output.write(content);
         output.newLine();
       }
     } catch (final IOException ex) {
       IJ.error("Unable to install " + resourceTitle + ".\n \n" + ex.getMessage());
-    } finally {
-      close(output);
     }
     return 0;
-  }
-
-  private static void close(BufferedWriter output) {
-    if (output != null) {
-      try {
-        output.close();
-      } catch (final IOException ex) {
-        // Ignore
-      }
-    }
   }
 
   private void setupExtensions() {

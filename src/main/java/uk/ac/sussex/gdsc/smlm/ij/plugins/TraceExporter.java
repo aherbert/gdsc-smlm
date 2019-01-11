@@ -49,10 +49,9 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /**
@@ -309,8 +308,8 @@ public class TraceExporter implements PlugIn {
     // https://spoton.berkeley.edu/SPTGUI/docs/latest#input-formats
     // frame, t (seconds), trajectory (trace id), x (um), y (um)
 
-    try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-        new FileOutputStream(new File(directory, results.getName() + ".csv")), "UTF-8"))) {
+    try (BufferedWriter out =
+        Files.newBufferedWriter(Paths.get(directory, results.getName() + ".csv"))) {
       out.write("frame,t,trajectory,x,y");
       out.newLine();
 

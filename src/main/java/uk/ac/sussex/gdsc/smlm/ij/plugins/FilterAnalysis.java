@@ -29,11 +29,9 @@ import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsReader;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.filter.AndFilter;
@@ -59,11 +57,10 @@ import ij.text.TextWindow;
 
 import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -207,8 +204,8 @@ public class FilterAnalysis implements PlugIn {
       IJ.showStatus("Reading filters ...");
       filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
 
-      try (BufferedReader input = new BufferedReader(
-          new UnicodeReader(new FileInputStream(filterSettings.getFilterSetFilename()), null))) {
+      try (BufferedReader input =
+          Files.newBufferedReader(Paths.get(filterSettings.getFilterSetFilename()))) {
         // Use the instance so we can catch the exception
         final Object o = FilterXStreamUtils.getXStreamInstance().fromXML(input);
         if (o instanceof List<?>) {
@@ -234,8 +231,8 @@ public class FilterAnalysis implements PlugIn {
     final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
     if (chooser.getFileName() != null) {
       filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
-      try (OutputStreamWriter out = new OutputStreamWriter(
-          new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8")) {
+      try (BufferedWriter out =
+          Files.newBufferedWriter(Paths.get(filterSettings.getFilterSetFilename()))) {
         // Use the instance so we can catch the exception
         FilterXStreamUtils.getXStreamInstance().toXML(filterSets, out);
         SettingsManager.writeSettings(filterSettings.build());
@@ -257,13 +254,9 @@ public class FilterAnalysis implements PlugIn {
       }
     }
 
-    final List<MemoryPeakResults> resultsList = new LinkedList<>();
-    final File[] fileList = (new File(inputDirectory)).listFiles(new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return (name.endsWith(".xls") || name.endsWith(".csv") || name.endsWith(".bin"));
-      }
-    });
+    final List<MemoryPeakResults> list = new LinkedList<>();
+    final File[] fileList = (new File(inputDirectory)).listFiles(
+        (dir, name) -> name.endsWith(".xls") || name.endsWith(".csv") || name.endsWith(".bin"));
     if (fileList != null) {
       // Exclude directories
       for (int i = 0; i < fileList.length; i++) {
@@ -273,7 +266,7 @@ public class FilterAnalysis implements PlugIn {
           final PeakResultsReader reader = new PeakResultsReader(fileList[i].getPath());
           final MemoryPeakResults results = reader.getResults();
           if (results != null && results.size() > 0) {
-            resultsList.add(results);
+            list.add(results);
           }
         }
       }
@@ -282,7 +275,7 @@ public class FilterAnalysis implements PlugIn {
     IJ.showProgress(1);
     lastInputDirectory = inputDirectory;
 
-    return resultsList;
+    return list;
   }
 
   private static boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput) {
@@ -293,12 +286,9 @@ public class FilterAnalysis implements PlugIn {
     final Counter tp = new Counter();
     for (final MemoryPeakResults r : resultsList) {
       total += r.size();
-      r.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult p) {
-          if (p.getOrigValue() != 0) {
-            tp.increment();
-          }
+      r.forEach((PeakResultProcedure) result -> {
+        if (result.getOrigValue() != 0) {
+          tp.increment();
         }
       });
     }

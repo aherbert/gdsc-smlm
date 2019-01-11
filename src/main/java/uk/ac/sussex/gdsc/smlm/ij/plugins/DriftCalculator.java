@@ -80,6 +80,8 @@ import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1085,7 +1087,7 @@ public class DriftCalculator implements PlugIn {
     if (!getDriftFilename()) {
       return;
     }
-    try (BufferedWriter out = new BufferedWriter(new FileWriter(driftFilename))) {
+    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(driftFilename))) {
       out.write("Time\tX\tY\n");
       for (int t = 0; t < dx.length; t++) {
         if (originalDriftTimePoints[t] != 0) {
@@ -1163,8 +1165,7 @@ public class DriftCalculator implements PlugIn {
    */
   private int readDriftFile(int[] limits) {
     int ok = 0;
-    try (BufferedReader input =
-        new BufferedReader(new UnicodeReader(new FileInputStream(driftFilename), null))) {
+    try (BufferedReader input =Files.newBufferedReader(Paths.get(driftFilename))) {
       String line;
       final Pattern pattern = Pattern.compile("[\t, ]+");
       while ((line = input.readLine()) != null) {
@@ -1184,8 +1185,6 @@ public class DriftCalculator implements PlugIn {
             calculatedTimepoints[t] = ++ok;
             lastdx[t] = x;
             lastdy[t] = y;
-          } catch (final InputMismatchException ex) {
-            // Do nothing
           } catch (final NoSuchElementException ex) {
             // Do nothing
           }
