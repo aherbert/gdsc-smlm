@@ -28,8 +28,6 @@ import java.awt.Rectangle;
 
 /**
  * An CCD camera model with all pixels treated equally.
- *
- * @author Alex Herbert
  */
 public class CCDCameraModel extends FixedPixelCameraModel {
 
@@ -76,6 +74,15 @@ public class CCDCameraModel extends FixedPixelCameraModel {
   }
 
   /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected CCDCameraModel(CCDCameraModel source) {
+    super(source);
+  }
+
+  /**
    * {@inheritDoc}
    *
    * <p>Note: This is an CCD camera model. The normalised variance represents the effective read
@@ -114,12 +121,6 @@ public class CCDCameraModel extends FixedPixelCameraModel {
   /** {@inheritDoc} */
   @Override
   public CCDCameraModel copy() {
-    return clone();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected CCDCameraModel clone() {
-    return (CCDCameraModel) super.clone();
+    return new CCDCameraModel(this);
   }
 }

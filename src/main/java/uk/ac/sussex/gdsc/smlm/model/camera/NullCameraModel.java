@@ -28,56 +28,31 @@ import java.awt.Rectangle;
 
 /**
  * A camera model with all pixels treated equally.
- *
- * @author Alex Herbert
  */
-public class NullCameraModel extends BaseCameraModel {
-  /** {@inheritDoc} */
+public class NullCameraModel implements CameraModel {
   @Override
   public Rectangle getBounds() {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setOrigin(int x, int y) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public CameraModel crop(Rectangle bounds, boolean resetOrigin) {
     return this;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isPerPixelModel() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] getBias(Rectangle bounds) {
-    return newArray(bounds, 0);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public float[] getGain(Rectangle bounds) {
-    return newArray(bounds, 1f);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public float[] getVariance(Rectangle bounds) {
-    return newArray(bounds, 0);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public float[] getNormalisedVariance(Rectangle bounds) {
-    return newArray(bounds, 0);
+    return CameraModelUtils.newArray(bounds, 0);
   }
 
   @Override
@@ -86,8 +61,18 @@ public class NullCameraModel extends BaseCameraModel {
   }
 
   @Override
+  public float[] getGain(Rectangle bounds) {
+    return CameraModelUtils.newArray(bounds, 1f);
+  }
+
+  @Override
   public float getGain(int x, int y) {
     return 1f;
+  }
+
+  @Override
+  public float[] getVariance(Rectangle bounds) {
+    return CameraModelUtils.newArray(bounds, 0);
   }
 
   @Override
@@ -96,119 +81,97 @@ public class NullCameraModel extends BaseCameraModel {
   }
 
   @Override
+  public float[] getNormalisedVariance(Rectangle bounds) {
+    return CameraModelUtils.newArray(bounds, 0);
+  }
+
+  @Override
   public float getNormalisedVariance(int x, int y) {
     return 0f;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMeanVariance(Rectangle bounds) {
     return 0d;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMeanNormalisedVariance(Rectangle bounds) {
     return 0d;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] getWeights(Rectangle bounds) {
-    return newArray(bounds, 1f);
+    return CameraModelUtils.newArray(bounds, 1f);
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] getNormalisedWeights(Rectangle bounds) {
-    return newArray(bounds, 1f);
+    return CameraModelUtils.newArray(bounds, 1f);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void removeBias(Rectangle bounds, float[] data) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public void removeGain(Rectangle bounds, float[] data) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void removeBiasAndGain(Rectangle bounds, float[] data) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyBias(Rectangle bounds, float[] data) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyGain(Rectangle bounds, float[] data) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyGainAndBias(Rectangle bounds, float[] data) {
-    // Ignore
-  }
-
-  /** {@inheritDoc} */
   @Override
   public void removeBias(float[] data) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void removeGain(Rectangle bounds, float[] data) {
+    // Ignore
+  }
+
   @Override
   public void removeGain(float[] data) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void removeBiasAndGain(Rectangle bounds, float[] data) {
+    // Ignore
+  }
+
   @Override
   public void removeBiasAndGain(float[] data) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyBias(Rectangle bounds, float[] data) {
+    // Ignore
+  }
+
   @Override
   public void applyBias(float[] data) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyGain(Rectangle bounds, float[] data) {
+    // Ignore
+  }
+
   @Override
   public void applyGain(float[] data) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyGainAndBias(Rectangle bounds, float[] data) {
+    // Ignore
+  }
+
   @Override
   public void applyGainAndBias(float[] data) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public NullCameraModel copy() {
-    return this; // no state so no need to clone()
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected NullCameraModel clone() {
-    try {
-      return (NullCameraModel) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
+    return this; // no state so no need to copy
   }
 }

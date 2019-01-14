@@ -29,8 +29,6 @@ package uk.ac.sussex.gdsc.smlm.model.camera;
  * this model reports itself as a per-pixel model even though all pixels are treated equally. This
  * allows testing algorithms that require a per-pixel model with a fixed-pixel model, e.g. for
  * performance comparison.
- *
- * @author Alex Herbert
  */
 public class FakePerPixelCameraModel extends FixedPixelCameraModel {
   /**
@@ -75,9 +73,22 @@ public class FakePerPixelCameraModel extends FixedPixelCameraModel {
     super(bias, gain, variance);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected FakePerPixelCameraModel(FakePerPixelCameraModel source) {
+    super(source);
+  }
+
   @Override
   public boolean isPerPixelModel() {
     return true;
+  }
+
+  @Override
+  public FakePerPixelCameraModel copy() {
+    return new FakePerPixelCameraModel(this);
   }
 }

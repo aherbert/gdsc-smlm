@@ -26,21 +26,25 @@ package uk.ac.sussex.gdsc.smlm.model.camera;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.awt.Rectangle;
 import java.util.Arrays;
 
 /**
  * Base class for the camera model.
- *
- * @author Alex Herbert
  */
-public abstract class BaseCameraModel implements CameraModel, Cloneable {
+public final class CameraModelUtils {
+
+  /** No public constructor. */
+  private CameraModelUtils() {}
+
   /**
    * Check bias is finite.
    *
    * @param bias the bias
    */
-  public void checkBias(float bias) {
+  public static void checkBias(float bias) {
     if (!Double.isFinite(bias)) {
       throw new IllegalArgumentException("Bias must be a finite number");
     }
@@ -51,7 +55,7 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable {
    *
    * @param gain the gain
    */
-  public void checkGain(float gain) {
+  public static void checkGain(float gain) {
     if (!(gain <= Double.MAX_VALUE && gain > 0)) {
       throw new IllegalArgumentException("Gain must be strictly positive");
     }
@@ -62,7 +66,7 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable {
    *
    * @param variance the variance
    */
-  public void checkVariance(float variance) {
+  public static void checkVariance(float variance) {
     if (!(variance <= Double.MAX_VALUE && variance >= 0)) {
       throw new IllegalArgumentException("Variance must be positive");
     }
@@ -73,11 +77,11 @@ public abstract class BaseCameraModel implements CameraModel, Cloneable {
    *
    * @param bounds the bounds
    * @param value the value
-   * @return the float[]
+   * @return the new array
    */
   protected static float[] newArray(Rectangle bounds, float value) {
     if (bounds == null || bounds.width <= 0 || bounds.height <= 0) {
-      return new float[0];
+      return ArrayUtils.EMPTY_FLOAT_ARRAY;
     }
     final float[] data = new float[bounds.width * bounds.height];
     Arrays.fill(data, value);

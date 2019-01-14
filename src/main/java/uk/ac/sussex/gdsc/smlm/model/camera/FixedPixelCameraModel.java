@@ -28,10 +28,8 @@ import java.awt.Rectangle;
 
 /**
  * A camera model with all pixels treated equally.
- *
- * @author Alex Herbert
  */
-public abstract class FixedPixelCameraModel extends BaseCameraModel {
+public abstract class FixedPixelCameraModel implements CameraModel {
   /** The bias. */
   protected final float bias;
 
@@ -51,7 +49,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
    * @param gain the gain (count/photon)
    */
   public FixedPixelCameraModel(float bias, float gain) {
-    this(bias, gain, 0f);
+    this(bias, gain, 0F);
   }
 
   /**
@@ -61,7 +59,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
    * @param gain the gain (count/photon)
    */
   public FixedPixelCameraModel(double bias, double gain) {
-    this(bias, gain, 0d);
+    this(bias, gain, 0D);
   }
 
   /**
@@ -72,9 +70,9 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
    * @param variance the variance (in counts)
    */
   public FixedPixelCameraModel(float bias, float gain, float variance) {
-    checkBias(bias);
-    checkGain(gain);
-    checkVariance(variance);
+    CameraModelUtils.checkBias(bias);
+    CameraModelUtils.checkGain(gain);
+    CameraModelUtils.checkVariance(variance);
     this.bias = bias;
     this.gain = gain;
     this.variance = variance;
@@ -94,60 +92,49 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
 
     // Cast to float then check
     this.bias = (float) bias;
-    checkBias(this.bias);
+    CameraModelUtils.checkBias(this.bias);
     this.gain = (float) gain;
-    checkGain(this.gain);
+    CameraModelUtils.checkGain(this.gain);
     this.variance = (float) variance;
-    checkVariance(this.variance);
+    CameraModelUtils.checkVariance(this.variance);
     this.varG2 = (float) (variance / (gain * gain));
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected FixedPixelCameraModel(FixedPixelCameraModel source) {
+    this.bias = source.bias;
+    this.gain = source.gain;
+    this.variance = source.variance;
+    this.varG2 = source.varG2;
+  }
+
   @Override
   public Rectangle getBounds() {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setOrigin(int x, int y) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public CameraModel crop(Rectangle bounds, boolean resetOrigin) {
     return this;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isPerPixelModel() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] getBias(Rectangle bounds) {
-    return newArray(bounds, bias);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public float[] getGain(Rectangle bounds) {
-    return newArray(bounds, gain);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public float[] getVariance(Rectangle bounds) {
-    return newArray(bounds, variance);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public float[] getNormalisedVariance(Rectangle bounds) {
-    return newArray(bounds, varG2);
+    return CameraModelUtils.newArray(bounds, bias);
   }
 
   @Override
@@ -156,8 +143,18 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
   }
 
   @Override
+  public float[] getGain(Rectangle bounds) {
+    return CameraModelUtils.newArray(bounds, gain);
+  }
+
+  @Override
   public float getGain(int x, int y) {
     return gain;
+  }
+
+  @Override
+  public float[] getVariance(Rectangle bounds) {
+    return CameraModelUtils.newArray(bounds, variance);
   }
 
   @Override
@@ -166,71 +163,40 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
   }
 
   @Override
+  public float[] getNormalisedVariance(Rectangle bounds) {
+    return CameraModelUtils.newArray(bounds, varG2);
+  }
+
+  @Override
   public float getNormalisedVariance(int x, int y) {
     return varG2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMeanVariance(Rectangle bounds) {
     return variance;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMeanNormalisedVariance(Rectangle bounds) {
     return varG2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] getWeights(Rectangle bounds) {
-    return newArray(bounds, 1f);
+    return CameraModelUtils.newArray(bounds, 1f);
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] getNormalisedWeights(Rectangle bounds) {
-    return newArray(bounds, 1f);
+    return CameraModelUtils.newArray(bounds, 1f);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void removeBias(Rectangle bounds, float[] data) {
     removeBias(data);
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public void removeGain(Rectangle bounds, float[] data) {
-    removeGain(data);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void removeBiasAndGain(Rectangle bounds, float[] data) {
-    removeBiasAndGain(data);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyBias(Rectangle bounds, float[] data) {
-    applyBias(data);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyGain(Rectangle bounds, float[] data) {
-    applyGain(data);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyGainAndBias(Rectangle bounds, float[] data) {
-    applyGainAndBias(data);
-  }
-
-  /** {@inheritDoc} */
   @Override
   public void removeBias(float[] data) {
     if (data == null) {
@@ -241,7 +207,11 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void removeGain(Rectangle bounds, float[] data) {
+    removeGain(data);
+  }
+
   @Override
   public void removeGain(float[] data) {
     if (data == null) {
@@ -252,7 +222,12 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void removeBiasAndGain(Rectangle bounds, float[] data) {
+    removeBiasAndGain(data);
+  }
+
+
   @Override
   public void removeBiasAndGain(float[] data) {
     if (data == null) {
@@ -263,7 +238,11 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyBias(Rectangle bounds, float[] data) {
+    applyBias(data);
+  }
+
   @Override
   public void applyBias(float[] data) {
     if (data == null) {
@@ -274,7 +253,11 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyGain(Rectangle bounds, float[] data) {
+    applyGain(data);
+  }
+
   @Override
   public void applyGain(float[] data) {
     if (data == null) {
@@ -285,7 +268,11 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyGainAndBias(Rectangle bounds, float[] data) {
+    applyGainAndBias(data);
+  }
+
   @Override
   public void applyGainAndBias(float[] data) {
     if (data == null) {
@@ -293,22 +280,6 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel {
     }
     for (int i = 0; i < data.length; i++) {
       data[i] = data[i] * gain + bias;
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public FixedPixelCameraModel copy() {
-    return clone();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected FixedPixelCameraModel clone() {
-    try {
-      return (FixedPixelCameraModel) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
     }
   }
 }

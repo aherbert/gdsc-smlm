@@ -30,10 +30,13 @@ import java.awt.Rectangle;
 
 /**
  * Define the methods for manipulating camera pixel data.
- *
- * @author Alex Herbert
  */
-public class PerPixelCameraModel extends BaseCameraModel {
+public class PerPixelCameraModel implements CameraModel {
+  private static final String BOUNDS_MUST_MATCH_FRAME_SIZE =
+      "Bounds (width x height) must match the camera data frame size";
+  private static final String FRAME_MUST_MATCH_MODEL_SIZE =
+      "Camera data frame must match the camera model bounds";
+
   private final Rectangle cameraBounds;
 
   private final float[] bias;
@@ -118,9 +121,9 @@ public class PerPixelCameraModel extends BaseCameraModel {
       this.variance = variance;
     }
     for (int i = 0; i < size; i++) {
-      checkBias(bias[i]);
-      checkGain(gain[i]);
-      checkVariance(variance[i]);
+      CameraModelUtils.checkBias(bias[i]);
+      CameraModelUtils.checkGain(gain[i]);
+      CameraModelUtils.checkVariance(variance[i]);
     }
   }
 
@@ -201,67 +204,15 @@ public class PerPixelCameraModel extends BaseCameraModel {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Rectangle getBounds() {
     return new Rectangle(cameraBounds);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setOrigin(int x, int y) {
     cameraBounds.x = x;
     cameraBounds.y = y;
-  }
-
-  /**
-   * Gets a copy of the bias for the current bounds.
-   *
-   * @return the bias
-   */
-  public float[] getBias() {
-    return bias.clone();
-  }
-
-  /**
-   * Gets a copy of the gain for the current bounds.
-   *
-   * @return the gain
-   */
-  public float[] getGain() {
-    return gain.clone();
-  }
-
-  /**
-   * Gets a copy of the variance for the current bounds.
-   *
-   * @return the variance
-   */
-  public float[] getVariance() {
-    return variance.clone();
-  }
-
-  /**
-   * Gets a copy of the normalised variance for the current bounds.
-   *
-   * @return the normalised variance
-   */
-  public float[] getNormalisedVariance() {
-    return getNormalisedVarianceInternal().clone();
-  }
-
-  /**
-   * Initialise the model. This allows caching of precomputed values but it is not required to call
-   * this method before using the model.
-   */
-  public void initialise() {
-    getNormalisedVarianceInternal();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public boolean isPerPixelModel() {
-    return true;
   }
 
   /**
@@ -300,28 +251,93 @@ public class PerPixelCameraModel extends BaseCameraModel {
     return cameraBounds.height;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Gets a copy of the bias for the current bounds.
+   *
+   * @return the bias
+   */
+  public float[] getBias() {
+    return bias.clone();
+  }
+
   @Override
   public float[] getBias(Rectangle bounds) {
     return getData(bounds, bias);
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public float getBias(int x, int y) {
+    return getData(x, y, bias);
+  }
+
+  /**
+   * Gets a copy of the gain for the current bounds.
+   *
+   * @return the gain
+   */
+  public float[] getGain() {
+    return gain.clone();
+  }
+
   @Override
   public float[] getGain(Rectangle bounds) {
     return getData(bounds, gain);
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public float getGain(int x, int y) {
+    return getData(x, y, gain);
+  }
+
+  /**
+   * Gets a copy of the variance for the current bounds.
+   *
+   * @return the variance
+   */
+  public float[] getVariance() {
+    return variance.clone();
+  }
+
   @Override
   public float[] getVariance(Rectangle bounds) {
     return getData(bounds, variance);
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public float getVariance(int x, int y) {
+    return getData(x, y, variance);
+  }
+
+  /**
+   * Gets a copy of the normalised variance for the current bounds.
+   *
+   * @return the normalised variance
+   */
+  public float[] getNormalisedVariance() {
+    return getNormalisedVarianceInternal().clone();
+  }
+
   @Override
   public float[] getNormalisedVariance(Rectangle bounds) {
     return getData(bounds, getNormalisedVarianceInternal());
+  }
+
+  @Override
+  public float getNormalisedVariance(int x, int y) {
+    return getData(x, y, getNormalisedVarianceInternal());
+  }
+
+  @Override
+  public boolean isPerPixelModel() {
+    return true;
+  }
+
+  /**
+   * Initialise the model. This allows caching of precomputed values but it is not required to call
+   * this method before using the model.
+   */
+  public void initialise() {
+    getNormalisedVarianceInternal();
   }
 
   private float[] getNormalisedVarianceInternal() {
@@ -342,32 +358,10 @@ public class PerPixelCameraModel extends BaseCameraModel {
   }
 
   @Override
-  public float getBias(int x, int y) {
-    return getData(x, y, bias);
-  }
-
-  @Override
-  public float getGain(int x, int y) {
-    return getData(x, y, gain);
-  }
-
-  @Override
-  public float getVariance(int x, int y) {
-    return getData(x, y, variance);
-  }
-
-  @Override
-  public float getNormalisedVariance(int x, int y) {
-    return getData(x, y, getNormalisedVarianceInternal());
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public double getMeanVariance(Rectangle bounds) {
     return getMean(bounds, variance);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMeanNormalisedVariance(Rectangle bounds) {
     return getMean(bounds, getNormalisedVarianceInternal());
@@ -378,7 +372,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    */
   @Override
   public float[] getWeights(Rectangle bounds) {
-    return toWeights(getVariance(bounds));
+    return CameraModelUtils.toWeights(getVariance(bounds));
   }
 
   /**
@@ -386,7 +380,7 @@ public class PerPixelCameraModel extends BaseCameraModel {
    */
   @Override
   public float[] getNormalisedWeights(Rectangle bounds) {
-    return toWeights(getNormalisedVariance(bounds));
+    return CameraModelUtils.toWeights(getNormalisedVariance(bounds));
   }
 
   /**
@@ -399,71 +393,6 @@ public class PerPixelCameraModel extends BaseCameraModel {
   private float[] getData(Rectangle bounds, float[] values) {
     final Rectangle intersection = getIntersection(bounds);
     return getData(values, intersection, true);
-  }
-
-  /**
-   * Gets the mean of the data from the values using the intersection of the bounds.
-   *
-   * @param bounds the bounds
-   * @param values the values
-   * @return the mean of the data
-   */
-  private double getMean(Rectangle bounds, float[] values) {
-    final Rectangle intersection = getIntersection(bounds);
-    return getMean(values, intersection);
-  }
-
-  /**
-   * Gets the intersection between the target bounds and the camera bounds. The results is offset by
-   * the camera bounds origin so can be used to crop the camera per-pixel data.
-   *
-   * @param bounds the bounds
-   * @return the intersection
-   */
-  private Rectangle getIntersection(Rectangle bounds) {
-    if (bounds == null) {
-      throw new IllegalArgumentException("Bounds are null");
-    }
-    if (equal(bounds)) {
-      return new Rectangle(getWidth(), getHeight()); // Offset to the origin
-    }
-    checkBounds(bounds);
-    // We avoid underflow since we have checked the bounds are positive integers
-    final int minx = bounds.x - cameraBounds.x;
-    final int miny = bounds.y - cameraBounds.y;
-    if (minx < 0 || miny < 0) {
-      throw new IllegalArgumentException("Bounds must be within the camera bounds");
-    }
-    // Avoid overflow using a long result
-    final long maxx = (long) minx + bounds.width;
-    final long maxy = (long) miny + bounds.height;
-    if (maxx > cameraBounds.width || maxy > cameraBounds.height) {
-      throw new IllegalArgumentException("Bounds must be within the camera bounds");
-    }
-    return new Rectangle(minx, miny, bounds.width, bounds.height);
-
-    // // Using java.awt.Rectangle.intesection function
-    // Rectangle intersection = cameraBounds.intersection(bounds);
-    // if (intersection.width != bounds.width || intersection.height != bounds.height)
-    // throw new IllegalArgumentException("Bounds must be within the camera bounds");
-    // intersection.x -= cameraBounds.x;
-    // intersection.y -= cameraBounds.y;
-    // return intersection;
-  }
-
-  /**
-   * Check if the bounds are equal to the camera bounds.
-   *
-   * @param bounds the bounds
-   * @return true, if successful
-   */
-  private boolean equal(Rectangle bounds) {
-    //@formatter:off
-    return cameraBounds.x == bounds.x &&
-         cameraBounds.y == bounds.y &&
-         cameraBounds.width == bounds.width &&
-         cameraBounds.height == bounds.height;
-    //@formatter:on
   }
 
   /**
@@ -487,6 +416,36 @@ public class PerPixelCameraModel extends BaseCameraModel {
       return pixels2;
     }
     return (copy) ? pixels.clone() : pixels;
+  }
+
+  /**
+   * Gets the data value.
+   *
+   * @param x the x
+   * @param y the y
+   * @param data the data
+   * @return the data value
+   * @throws IllegalArgumentException If the coordinates are not inside the bounds
+   */
+  private float getData(int x, int y, float[] data) {
+    x -= cameraBounds.x;
+    y -= cameraBounds.y;
+    if (x < 0 || y < 0 || x >= cameraBounds.width || y >= cameraBounds.height) {
+      throw new IllegalArgumentException("Coordinates must be within the camera bounds");
+    }
+    return data[y * cameraBounds.width + x];
+  }
+
+  /**
+   * Gets the mean of the data from the values using the intersection of the bounds.
+   *
+   * @param bounds the bounds
+   * @param values the values
+   * @return the mean of the data
+   */
+  private double getMean(Rectangle bounds, float[] values) {
+    final Rectangle intersection = getIntersection(bounds);
+    return getMean(values, intersection);
   }
 
   /**
@@ -515,212 +474,227 @@ public class PerPixelCameraModel extends BaseCameraModel {
   }
 
   /**
-   * Gets the data value.
+   * Gets the intersection between the target bounds and the camera bounds. The result is offset by
+   * the camera bounds origin so can be used to crop the camera per-pixel data. I.e. if the camera
+   * bounds are [3,4,10,10] and the bounds are [3,4,5,5] the result will be [0,0,5,5].
    *
-   * @param x the x
-   * @param y the y
-   * @param data the data
-   * @return the data value
-   * @throws IllegalArgumentException If the coordinates are not inside the bounds
+   * @param bounds the bounds
+   * @return the intersection
    */
-  private float getData(int x, int y, float[] data) {
-    x -= cameraBounds.x;
-    y -= cameraBounds.y;
-    if (x < 0 || y < 0 || x >= cameraBounds.width || y >= cameraBounds.height) {
-      throw new IllegalArgumentException("Coordinates must be within the camera bounds");
+  private Rectangle getIntersection(Rectangle bounds) {
+    if (bounds == null) {
+      throw new IllegalArgumentException("Bounds are null");
     }
-    return data[y * cameraBounds.width + x];
+    if (equalBounds(bounds)) {
+      return new Rectangle(getWidth(), getHeight()); // Offset to the origin
+    }
+    checkBounds(bounds);
+    // We avoid underflow since we have checked the bounds are positive integers
+    final int minx = bounds.x - cameraBounds.x;
+    final int miny = bounds.y - cameraBounds.y;
+    if (minx < 0 || miny < 0) {
+      throw new IllegalArgumentException("Bounds must be within the camera bounds");
+    }
+    // Avoid overflow using a long result
+    final long maxx = (long) minx + bounds.width;
+    final long maxy = (long) miny + bounds.height;
+    if (maxx > cameraBounds.width || maxy > cameraBounds.height) {
+      throw new IllegalArgumentException("Bounds must be within the camera bounds");
+    }
+    return new Rectangle(minx, miny, bounds.width, bounds.height);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Check if the bounds are equal to the camera bounds.
+   *
+   * @param bounds the bounds
+   * @return true, if successful
+   */
+  private boolean equalBounds(Rectangle bounds) {
+    //@formatter:off
+    return cameraBounds.x == bounds.x &&
+         cameraBounds.y == bounds.y &&
+         cameraBounds.width == bounds.width &&
+         cameraBounds.height == bounds.height;
+    //@formatter:on
+  }
+
   @Override
   public void removeBias(Rectangle bounds, float[] data) {
     if (data == null) {
       return;
     }
     final Rectangle intersection = getIntersection(bounds);
-    final float[] bias = getData(this.bias, intersection, false);
-    if (data.length != bias.length) {
-      throw new IllegalArgumentException("Bounds must match the data size");
+    final float[] biasData = getData(this.bias, intersection, false);
+    if (data.length != biasData.length) {
+      throw new IllegalArgumentException(BOUNDS_MUST_MATCH_FRAME_SIZE);
     }
     for (int i = 0; i < data.length; i++) {
-      data[i] -= bias[i];
+      data[i] -= biasData[i];
     }
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public void removeGain(Rectangle bounds, float[] data) {
-    if (data == null) {
-      return;
-    }
-    final Rectangle intersection = getIntersection(bounds);
-    final float[] gain = getData(this.gain, intersection, false);
-    if (data.length != gain.length) {
-      throw new IllegalArgumentException("Bounds must match the data size");
-    }
-    for (int i = 0; i < data.length; i++) {
-      data[i] /= gain[i];
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void removeBiasAndGain(Rectangle bounds, float[] data) {
-    if (data == null) {
-      return;
-    }
-    final Rectangle intersection = getIntersection(bounds);
-    final float[] bias = getData(this.bias, intersection, false);
-    if (data.length != bias.length) {
-      throw new IllegalArgumentException("Bounds must match the data size");
-    }
-    final float[] gain = getData(this.gain, intersection, false);
-    for (int i = 0; i < data.length; i++) {
-      data[i] = (data[i] - bias[i]) / gain[i];
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyBias(Rectangle bounds, float[] data) {
-    if (data == null) {
-      return;
-    }
-    final Rectangle intersection = getIntersection(bounds);
-    final float[] bias = getData(this.bias, intersection, false);
-    if (data.length != bias.length) {
-      throw new IllegalArgumentException("Bounds must match the data size");
-    }
-    for (int i = 0; i < data.length; i++) {
-      data[i] += bias[i];
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyGain(Rectangle bounds, float[] data) {
-    if (data == null) {
-      return;
-    }
-    final Rectangle intersection = getIntersection(bounds);
-    final float[] gain = getData(this.gain, intersection, false);
-    if (data.length != gain.length) {
-      throw new IllegalArgumentException("Bounds must match the data size");
-    }
-    for (int i = 0; i < data.length; i++) {
-      data[i] *= gain[i];
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void applyGainAndBias(Rectangle bounds, float[] data) {
-    if (data == null) {
-      return;
-    }
-    final Rectangle intersection = getIntersection(bounds);
-    final float[] bias = getData(this.bias, intersection, false);
-    if (data.length != bias.length) {
-      throw new IllegalArgumentException("Bounds must match the data size");
-    }
-    final float[] gain = getData(this.gain, intersection, false);
-    for (int i = 0; i < data.length; i++) {
-      data[i] = data[i] * gain[i] + bias[i];
-    }
-  }
-
-  /** {@inheritDoc} */
   @Override
   public void removeBias(float[] data) {
     if (data == null) {
       return;
     }
     if (data.length != bias.length) {
-      throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+      throw new IllegalArgumentException(FRAME_MUST_MATCH_MODEL_SIZE);
     }
     for (int i = 0; i < data.length; i++) {
       data[i] -= bias[i];
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void removeGain(Rectangle bounds, float[] data) {
+    if (data == null) {
+      return;
+    }
+    final Rectangle intersection = getIntersection(bounds);
+    final float[] gainData = getData(this.gain, intersection, false);
+    if (data.length != gainData.length) {
+      throw new IllegalArgumentException(BOUNDS_MUST_MATCH_FRAME_SIZE);
+    }
+    for (int i = 0; i < data.length; i++) {
+      data[i] /= gainData[i];
+    }
+  }
+
   @Override
   public void removeGain(float[] data) {
     if (data == null) {
       return;
     }
     if (data.length != gain.length) {
-      throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+      throw new IllegalArgumentException(FRAME_MUST_MATCH_MODEL_SIZE);
     }
     for (int i = 0; i < data.length; i++) {
       data[i] /= gain[i];
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void removeBiasAndGain(Rectangle bounds, float[] data) {
+    if (data == null) {
+      return;
+    }
+    final Rectangle intersection = getIntersection(bounds);
+    final float[] biasData = getData(this.bias, intersection, false);
+    if (data.length != biasData.length) {
+      throw new IllegalArgumentException(BOUNDS_MUST_MATCH_FRAME_SIZE);
+    }
+    final float[] gainData = getData(this.gain, intersection, false);
+    for (int i = 0; i < data.length; i++) {
+      data[i] = (data[i] - biasData[i]) / gainData[i];
+    }
+  }
+
   @Override
   public void removeBiasAndGain(float[] data) {
     if (data == null) {
       return;
     }
     if (data.length != bias.length) {
-      throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+      throw new IllegalArgumentException(FRAME_MUST_MATCH_MODEL_SIZE);
     }
     for (int i = 0; i < data.length; i++) {
       data[i] = (data[i] - bias[i]) / gain[i];
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyBias(Rectangle bounds, float[] data) {
+    if (data == null) {
+      return;
+    }
+    final Rectangle intersection = getIntersection(bounds);
+    final float[] biasData = getData(this.bias, intersection, false);
+    if (data.length != biasData.length) {
+      throw new IllegalArgumentException(BOUNDS_MUST_MATCH_FRAME_SIZE);
+    }
+    for (int i = 0; i < data.length; i++) {
+      data[i] += biasData[i];
+    }
+  }
+
   @Override
   public void applyBias(float[] data) {
     if (data == null) {
       return;
     }
     if (data.length != bias.length) {
-      throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+      throw new IllegalArgumentException(FRAME_MUST_MATCH_MODEL_SIZE);
     }
     for (int i = 0; i < data.length; i++) {
       data[i] += bias[i];
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyGain(Rectangle bounds, float[] data) {
+    if (data == null) {
+      return;
+    }
+    final Rectangle intersection = getIntersection(bounds);
+    final float[] gainData = getData(this.gain, intersection, false);
+    if (data.length != gainData.length) {
+      throw new IllegalArgumentException(BOUNDS_MUST_MATCH_FRAME_SIZE);
+    }
+    for (int i = 0; i < data.length; i++) {
+      data[i] *= gainData[i];
+    }
+  }
+
   @Override
   public void applyGain(float[] data) {
     if (data == null) {
       return;
     }
     if (data.length != gain.length) {
-      throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+      throw new IllegalArgumentException(FRAME_MUST_MATCH_MODEL_SIZE);
     }
     for (int i = 0; i < data.length; i++) {
       data[i] *= gain[i];
     }
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public void applyGainAndBias(Rectangle bounds, float[] data) {
+    if (data == null) {
+      return;
+    }
+    final Rectangle intersection = getIntersection(bounds);
+    final float[] biasData = getData(this.bias, intersection, false);
+    if (data.length != biasData.length) {
+      throw new IllegalArgumentException(BOUNDS_MUST_MATCH_FRAME_SIZE);
+    }
+    final float[] gainData = getData(this.gain, intersection, false);
+    for (int i = 0; i < data.length; i++) {
+      data[i] = data[i] * gainData[i] + biasData[i];
+    }
+  }
+
   @Override
   public void applyGainAndBias(float[] data) {
     if (data == null) {
       return;
     }
     if (data.length != bias.length) {
-      throw new IllegalArgumentException("Data length must match the bounds (width x height)");
+      throw new IllegalArgumentException(FRAME_MUST_MATCH_MODEL_SIZE);
     }
     for (int i = 0; i < data.length; i++) {
       data[i] = data[i] * gain[i] + bias[i];
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public CameraModel crop(Rectangle bounds, boolean resetOrigin) {
     if (bounds == null) {
       throw new IllegalArgumentException("Bounds are null");
     }
-    if (equal(bounds)) {
+    if (equalBounds(bounds)) {
       if (resetOrigin) {
         final PerPixelCameraModel model = copy();
         model.setOrigin(0, 0);
@@ -729,27 +703,16 @@ public class PerPixelCameraModel extends BaseCameraModel {
       return this;
     }
     final Rectangle intersection = getIntersection(bounds);
-    final float[] bias = getData(this.bias, intersection, true);
-    final float[] gain = getData(this.gain, intersection, true);
-    final float[] variance = getData(this.variance, intersection, true);
-    final float[] varG2 = (this.varG2 == null) ? null : getData(this.varG2, intersection, true);
-    return new PerPixelCameraModel(false, bounds, bias, gain, variance, varG2);
+    final float[] biasC = getData(this.bias, intersection, true);
+    final float[] gainC = getData(this.gain, intersection, true);
+    final float[] varianceC = getData(this.variance, intersection, true);
+    final float[] varG2C = (this.varG2 == null) ? null : getData(this.varG2, intersection, true);
+    return new PerPixelCameraModel(false, bounds, biasC, gainC, varianceC, varG2C);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PerPixelCameraModel copy() {
     // Deep copy
     return new PerPixelCameraModel(true, cameraBounds, bias, gain, variance, varG2);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected PerPixelCameraModel clone() {
-    try {
-      return (PerPixelCameraModel) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
   }
 }

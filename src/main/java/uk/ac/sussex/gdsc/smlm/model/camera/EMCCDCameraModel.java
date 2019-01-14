@@ -28,8 +28,6 @@ import java.awt.Rectangle;
 
 /**
  * An EM-CCD camera model with all pixels treated equally.
- *
- * @author Alex Herbert
  */
 public class EMCCDCameraModel extends FixedPixelCameraModel {
   /**
@@ -75,6 +73,15 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
   }
 
   /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected EMCCDCameraModel(EMCCDCameraModel source) {
+    super(source);
+  }
+
+  /**
    * {@inheritDoc}
    *
    * <p>Note: This is an EM-CCD camera model. The normalised variance represents the effective read
@@ -115,12 +122,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
   /** {@inheritDoc} */
   @Override
   public EMCCDCameraModel copy() {
-    return clone();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected EMCCDCameraModel clone() {
-    return (EMCCDCameraModel) super.clone();
+    return new EMCCDCameraModel(this);
   }
 }
