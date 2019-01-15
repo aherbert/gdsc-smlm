@@ -226,7 +226,7 @@ public class SolverSpeedTest {
           TestAssertions.assertArrayTest(db1, b2, predicate, "Different b result");
         });
         failCounter.run(1, () -> {
-          TestAssertions.assertArrayTest(a1, a2, predicate, "Different a result");
+          TestAssertions.assertArrayTest(da1, a2, predicate, "Different a result");
         });
       } else {
         fail++;
