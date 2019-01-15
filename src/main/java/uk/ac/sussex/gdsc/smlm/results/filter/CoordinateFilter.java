@@ -108,19 +108,16 @@ public class CoordinateFilter extends DirectFilter {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using a coordinate range.";
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 4;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     switch (index) {
@@ -135,14 +132,12 @@ public class CoordinateFilter extends DirectFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
     return DEFAULT_INCREMENT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getDisabledParameterValue(int index) {
     checkIndex(index);
@@ -158,7 +153,6 @@ public class CoordinateFilter extends DirectFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -174,7 +168,6 @@ public class CoordinateFilter extends DirectFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -190,14 +183,12 @@ public class CoordinateFilter extends DirectFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new CoordinateFilter((float) parameters[0], (float) parameters[1], (float) parameters[2],
         (float) parameters[3]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMin(parameters, 0, minX);
@@ -206,26 +197,22 @@ public class CoordinateFilter extends DirectFilter {
     setMax(parameters, 3, maxY);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lowerBoundOrientation(int index) {
     return (index == 1 || index == 3) ? 1 : -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int length() {
     return 4;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] sequence() {
     // Ignore the mode parameters
     return new double[] {minX, maxX, minY, maxY};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {DEFAULT_RANGE, DEFAULT_RANGE, DEFAULT_RANGE, DEFAULT_RANGE};

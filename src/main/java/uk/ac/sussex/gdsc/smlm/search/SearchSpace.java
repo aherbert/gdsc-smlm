@@ -197,8 +197,58 @@ public class SearchSpace {
     reset();
 
     // Find the best individual
-    final SearchResult<T> current = findOptimum(dimensions, scoreFunction, null);
+    return findOptimum(dimensions, scoreFunction, null);
+  }
 
+  /**
+   * Find the optimum. Create the search space using the current dimensions. Score any new point
+   * that has not previously been scored. Compare the result with the current optimum and return the
+   * best.
+   *
+   * @param <T> the type of comparable score
+   * @param scoreFunction the score function
+   * @param current the current optimum
+   * @return the new optimum
+   */
+  private <T extends Comparable<T>> SearchResult<T> findOptimum(SearchDimension[] dimensions,
+      ScoreFunction<T> scoreFunction, SearchResult<T> current) {
+    if (!createSearchSpace(dimensions, current)) {
+      return null;
+    }
+
+    start("Find Optimum");
+
+    scoredSearchSpace = searchSpace;
+    scoredSearchSpaceHash.clear();
+
+    if (!coveredSpace.isEmpty()) {
+      // Check we do not recompute scores
+      scoredSearchSpace = new double[searchSpace.length][];
+      scoredSearchSpaceHash.ensureCapacity(searchSpace.length);
+      int size = 0;
+      for (int i = 0; i < searchSpace.length; i++) {
+        final String hash = generateHashString(searchSpace[i]);
+        if (!coveredSpace.contains(hash)) {
+          scoredSearchSpace[size++] = searchSpace[i];
+          scoredSearchSpaceHash.add(hash);
+        }
+      }
+      if (size == 0) {
+        end();
+        // We have scored everything already so return the current best
+        return current;
+      }
+
+      scoredSearchSpace = Arrays.copyOf(scoredSearchSpace, size);
+    }
+
+    final SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
+    // Replace if better
+    if (optimum != null && optimum.compareTo(current) < 0) {
+      current = optimum;
+    }
+
+    end();
     return current;
   }
 
@@ -268,9 +318,7 @@ public class SearchSpace {
         // Round to dimension interval
         final int k = indices[j];
         final double value = dimensions[k].round(p[k]);
-        if (value < min[j]) {
-          return false;
-        } else if (value > max[j]) {
+        if (value < min[j] || value > max[j]) {
           return false;
         }
         p[k] = value;
@@ -280,66 +328,6 @@ public class SearchSpace {
     searchSpace = seed;
     return true;
 
-  }
-
-  /**
-   * Find the optimum. Create the search space using the current dimensions. Score any new point
-   * that has not previously been scored. Compare the result with the current optimum and return the
-   * best.
-   *
-   * @param <T> the type of comparable score
-   * @param scoreFunction the score function
-   * @param current the current optimum
-   * @return the new optimum
-   */
-  private <T extends Comparable<T>> SearchResult<T> findOptimum(SearchDimension[] dimensions,
-      ScoreFunction<T> scoreFunction, SearchResult<T> current) {
-    if (!createSearchSpace(dimensions, current)) {
-      return null;
-    }
-
-    start("Find Optimum");
-
-    scoredSearchSpace = searchSpace;
-    scoredSearchSpaceHash.clear();
-
-    if (!coveredSpace.isEmpty()) {
-      // Check we do not recompute scores
-      scoredSearchSpace = new double[searchSpace.length][];
-      scoredSearchSpaceHash.ensureCapacity(searchSpace.length);
-      int size = 0;
-      for (int i = 0; i < searchSpace.length; i++) {
-        final String hash = generateHashString(searchSpace[i]);
-        if (!coveredSpace.contains(hash)) {
-          scoredSearchSpace[size++] = searchSpace[i];
-          scoredSearchSpaceHash.add(hash);
-        }
-      }
-      if (size == 0) {
-        end();
-        // We have scored everything already so return the current best
-        return current;
-      }
-
-      // System.out.printf("Scoring %d / %d\n", size, searchSpace.length);
-      scoredSearchSpace = Arrays.copyOf(scoredSearchSpace, size);
-    }
-
-    final SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
-    if (optimum != null) {
-      // System.out.printf("Optimum = %s\n", optimum.score);
-      // if (current != null)
-      // System.out.printf("Current = %s\n", current.score);
-      // Replace if better
-      if (optimum.compareTo(current) < 0) {
-        current = optimum;
-        // if (searchMode == REFINE)
-        // System.out.printf("Refine improved = %s\n", current.score);
-      }
-    }
-
-    end();
-    return current;
   }
 
   /**
@@ -377,6 +365,76 @@ public class SearchSpace {
     }
     end();
     return searchSpace != null;
+  }
+
+  /**
+   * Creates the search space.
+   *
+   * @param dimensions the dimensions
+   * @return the double[][]
+   */
+  public static double[][] createSearchSpace(SearchDimension[] dimensions) {
+    // Get the values
+    final double[][] dimensionValues = new double[dimensions.length][];
+    for (int i = 0; i < dimensions.length; i++) {
+      dimensionValues[i] = dimensions[i].values();
+    }
+    return createSearchSpace(dimensionValues);
+  }
+
+  /**
+   * Creates the search space.
+   *
+   * @param dimensionValues the dimension values
+   * @return the search space
+   */
+  private static double[][] createSearchSpace(double[][] dimensionValues) {
+    // Get the values
+    int combinations = 1;
+    final double[] value = new double[dimensionValues.length];
+    for (int i = 0; i < dimensionValues.length; i++) {
+      combinations *= dimensionValues[i].length;
+      value[i] = dimensionValues[i][0];
+    }
+
+    // This will be a list of points enumerating the entire range
+    // of the dimensions
+    final double[][] searchSpace = new double[combinations][];
+
+    // Start with the min value in each dimension
+    searchSpace[0] = value;
+    int values = 1;
+    try {
+      // Enumerate each dimension
+      for (int i = 0; i < dimensionValues.length; i++) {
+        // The number of current points
+        final int size = values;
+
+        // Values to iterate over for this dimension
+        final double[] v1 = dimensionValues[i];
+
+        // For all the current points
+        for (int j = 0; j < size; j++) {
+          // The point values
+          final double[] v2 = searchSpace[j];
+
+          // We started with the min value for the dimension
+          // so go from index 1 upwards
+          for (int k = 1; k < v1.length; k++) {
+            // Create a new point with an updated value for this dimension
+            final double[] v3 = v2.clone();
+            v3[i] = v1[k];
+            searchSpace[values++] = v3;
+          }
+        }
+      }
+    } catch (final ArrayIndexOutOfBoundsException ex) {
+      // Return false
+      ex.printStackTrace();
+      values = -1;
+    }
+
+    return (values == combinations) ? searchSpace : null;
   }
 
   /**
@@ -428,7 +486,7 @@ public class SearchSpace {
     final double[][] searchSpace = new double[combinations][];
 
     // Start with the min value in each dimension
-    int n = 0;
+    int index = 0;
     // Enumerate each dimension
     for (int i = 0; i < dimensionValues.length; i++) {
       // Values to iterate over for this dimension
@@ -438,7 +496,7 @@ public class SearchSpace {
         // Create a new point with an updated value for this dimension
         final double[] v3 = point.clone();
         v3[i] = v1[k];
-        searchSpace[n++] = v3;
+        searchSpace[index++] = v3;
       }
     }
 
@@ -475,23 +533,6 @@ public class SearchSpace {
   }
 
   /**
-   * Creates the search space.
-   *
-   * @param dimensions the dimensions
-   * @return the double[][]
-   */
-  public static double[][] createSearchSpace(SearchDimension[] dimensions) {
-    // Get the values
-    final double[][] dimensionValues = new double[dimensions.length][];
-    for (int i = 0; i < dimensions.length; i++) {
-      dimensionValues[i] = dimensions[i].values();
-    }
-    // System.out.printf(" [%d] %.3f-%.3f", i, dimensions[i].getLower(), dimensions[i].getUpper());
-    // System.out.println();
-    return createSearchSpace(dimensionValues);
-  }
-
-  /**
    * Count the number of combinations if enumerating the search space.
    *
    * @param dimensions the dimensions
@@ -503,61 +544,6 @@ public class SearchSpace {
       combinations *= dimensions[i].values().length;
     }
     return combinations;
-  }
-
-  /**
-   * Creates the search space.
-   *
-   * @param dimensionValues the dimension values
-   * @return the double[][]
-   */
-  private static double[][] createSearchSpace(double[][] dimensionValues) {
-    // Get the values
-    int combinations = 1;
-    final double[] v = new double[dimensionValues.length];
-    for (int i = 0; i < dimensionValues.length; i++) {
-      combinations *= dimensionValues[i].length;
-      v[i] = dimensionValues[i][0];
-    }
-
-    // This will be a list of points enumerating the entire range
-    // of the dimensions
-    final double[][] searchSpace = new double[combinations][];
-
-    // Start with the min value in each dimension
-    searchSpace[0] = v;
-    int n = 1;
-    try {
-      // Enumerate each dimension
-      for (int i = 0; i < dimensionValues.length; i++) {
-        // The number of current points
-        final int size = n;
-
-        // Values to iterate over for this dimension
-        final double[] v1 = dimensionValues[i];
-
-        // For all the current points
-        for (int j = 0; j < size; j++) {
-          // The point values
-          final double[] v2 = searchSpace[j];
-
-          // We started with the min value for the dimension
-          // so go from index 1 upwards
-          for (int k = 1; k < v1.length; k++) {
-            // Create a new point with an updated value for this dimension
-            final double[] v3 = v2.clone();
-            v3[i] = v1[k];
-            searchSpace[n++] = v3;
-          }
-        }
-      }
-    } catch (final ArrayIndexOutOfBoundsException ex) {
-      // Return false
-      ex.printStackTrace();
-      n = -1;
-    }
-
-    return (n == combinations) ? searchSpace : null;
   }
 
   /**
@@ -579,14 +565,6 @@ public class SearchSpace {
     boolean changed = false;
 
     final double[] p = current.getPoint();
-    // System.out.printf("[%d] Before:", iteration);
-    // for (int i = 0; i < dimensions.length; i++)
-    // {
-    // if (dimensions[i].isActive())
-    // System.out.printf(" %.2f-%.2f (%.2f)", dimensions[i].getLower(), dimensions[i].getUpper(),
-    // p[i]);
-    // }
-    // System.out.println();
 
     if (searchMode != RefinementMode.NONE) {
       // During refinement we will not repeat the same point if the optimum moves
@@ -677,16 +655,51 @@ public class SearchSpace {
 
     end();
 
-    // System.out.printf("[%d] After:", iteration);
-    // for (int i = 0; i < dimensions.length; i++)
-    // {
-    // if (dimensions[i].isActive())
-    // System.out.printf(" %.2f-%.2f (%.2f)", dimensions[i].getLower(), dimensions[i].getUpper(),
-    // p[i]);
-    // }
-    // System.out.println();
-
     return changed;
+  }
+
+  /**
+   * Update search space.
+   *
+   * @param <T> the type of comparable score
+   * @param dimensions the dimensions
+   * @param current the current
+   * @param scores the scores
+   * @param padding the padding
+   * @return the new dimensions
+   */
+  private static <T extends Comparable<T>> Dimension[] updateSearchSpace(Dimension[] dimensions,
+      SearchResult<T> current, SearchResult<T>[] scores, double padding) {
+    // Find the limits in the current scores
+    final double[] lower = current.getPoint().clone();
+    final double[] upper = current.getPoint().clone();
+    for (int i = 0; i < scores.length; i++) {
+      final double[] point = scores[i].getPoint();
+      for (int j = 0; j < lower.length; j++) {
+        if (lower[j] > point[j]) {
+          lower[j] = point[j];
+        }
+        if (upper[j] < point[j]) {
+          upper[j] = point[j];
+        }
+      }
+    }
+
+    // Pad the range
+    if (padding > 0) {
+      for (int j = 0; j < lower.length; j++) {
+        final double range = padding * (upper[j] - lower[j]);
+        lower[j] -= range;
+        upper[j] += range;
+      }
+    }
+
+    // Create new dimensions
+    for (int j = 0; j < lower.length; j++) {
+      dimensions[j] = dimensions[j].create(lower[j], upper[j]);
+    }
+
+    return dimensions;
   }
 
   /**
@@ -1029,11 +1042,11 @@ public class SearchSpace {
     if (generator == null) {
       generator = new RandomVectorGenerator[1];
     }
-    RandomVectorGenerator g = generator[0];
-    if (g == null || g.nextVector().length != size) {
-      generator[0] = g = new HaltonSequenceGenerator(size);
+    RandomVectorGenerator rvg = generator[0];
+    if (rvg == null || rvg.nextVector().length != size) {
+      generator[0] = rvg = new HaltonSequenceGenerator(size);
     }
-    return g;
+    return rvg;
   }
 
   /**
@@ -1092,50 +1105,6 @@ public class SearchSpace {
       searchSpace[i] = p;
     }
     return searchSpace;
-  }
-
-  /**
-   * Update search space.
-   *
-   * @param <T> the type of comparable score
-   * @param dimensions the dimensions
-   * @param current the current
-   * @param scores the scores
-   * @param padding the padding
-   * @return the new dimensions
-   */
-  private static <T extends Comparable<T>> Dimension[] updateSearchSpace(Dimension[] dimensions,
-      SearchResult<T> current, SearchResult<T>[] scores, double padding) {
-    // Find the limits in the current scores
-    final double[] lower = current.getPoint().clone();
-    final double[] upper = current.getPoint().clone();
-    for (int i = 0; i < scores.length; i++) {
-      final double[] point = scores[i].getPoint();
-      for (int j = 0; j < lower.length; j++) {
-        if (lower[j] > point[j]) {
-          lower[j] = point[j];
-        }
-        if (upper[j] < point[j]) {
-          upper[j] = point[j];
-        }
-      }
-    }
-
-    // Pad the range
-    if (padding > 0) {
-      for (int j = 0; j < lower.length; j++) {
-        final double range = padding * (upper[j] - lower[j]);
-        lower[j] -= range;
-        upper[j] += range;
-      }
-    }
-
-    // Create new dimensions
-    for (int j = 0; j < lower.length; j++) {
-      dimensions[j] = dimensions[j].create(lower[j], upper[j]);
-    }
-
-    return dimensions;
   }
 
   /**

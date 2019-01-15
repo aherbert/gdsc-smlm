@@ -40,13 +40,11 @@ public class MultiFilterVarianceCRLBComponent extends MultiFilterComponent {
     this.variance = Filter.getDUpperSquaredLimit(precision);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     return (peak.getLocationVarianceCRLB() > variance);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return IDirectFilter.V_LOCATION_VARIANCE_CRLB;

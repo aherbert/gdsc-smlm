@@ -47,7 +47,6 @@ public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction
     super(numberOfPeaks, maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new NBEllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);

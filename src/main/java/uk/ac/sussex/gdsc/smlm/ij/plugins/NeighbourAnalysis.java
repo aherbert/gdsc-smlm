@@ -51,7 +51,6 @@ public class NeighbourAnalysis implements PlugIn {
 
   private MemoryPeakResults results;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

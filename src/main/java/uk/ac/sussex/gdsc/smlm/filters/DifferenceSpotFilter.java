@@ -67,38 +67,32 @@ public class DifferenceSpotFilter extends MaximaSpotFilter {
     processor2 = source.processor2.copy();
   }
 
-  /** {@inheritDoc} */
   @Override
   public DifferenceSpotFilter copy() {
     return new DifferenceSpotFilter(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isAbsoluteIntensity() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return processor1.isWeighted() || processor2.isWeighted();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(float[] weights, int width, int height) {
     processor1.setWeights(weights, width, height);
     processor2.setWeights(weights, width, height);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasWeights() {
     return processor1.hasWeights() || processor2.hasWeights();
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] preprocessData(float[] data, int width, int height) {
     final float[] data1 = processor1.process(data, width, height);
@@ -109,13 +103,11 @@ public class DifferenceSpotFilter extends MaximaSpotFilter {
     return data1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return "Difference";
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
@@ -124,7 +116,6 @@ public class DifferenceSpotFilter extends MaximaSpotFilter {
     return list;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSpread() {
     return Math.max(processor1.getSpread(), processor2.getSpread());

@@ -50,7 +50,6 @@ public class SearchResult<T extends Comparable<T>> implements Comparable<SearchR
     this.score = score;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int compareTo(SearchResult<T> o) {
     if (o == null) {

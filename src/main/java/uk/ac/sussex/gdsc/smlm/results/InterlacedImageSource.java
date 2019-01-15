@@ -77,61 +77,51 @@ public class InterlacedImageSource extends ImageSource {
     this.skip = skip;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getXOrigin() {
     return imageSource.getXOrigin();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getYOrigin() {
     return imageSource.getYOrigin();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getWidth() {
     return imageSource.getWidth();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getHeight() {
     return imageSource.getHeight();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFrames() {
     return (int) Math.ceil((imageSource.getFrames() - start + 1) * ((double) size / (size + skip)));
   }
 
-  /** {@inheritDoc} */
   @Override
   public ImageSource getParent() {
     return imageSource;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ImageSource getOriginal() {
     return imageSource.getOriginal();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean openSource() {
     return imageSource.openSource();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void closeSource() {
     imageSource.closeSource();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean initialiseSequentialRead() {
     if (imageSource.initialiseSequentialRead()) {
@@ -147,7 +137,6 @@ public class InterlacedImageSource extends ImageSource {
 
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Object nextRawFrame() {
     // Skip frames until at the start of the next block
@@ -171,7 +160,6 @@ public class InterlacedImageSource extends ImageSource {
     return pixels;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Object getRawFrame(int frame) {
     if (frame < 1) {
@@ -206,7 +194,6 @@ public class InterlacedImageSource extends ImageSource {
     return imageSource.isValid(frame);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("%s (Interlaced %d,%d,%d)", imageSource.toString(), start, size, skip);
@@ -239,13 +226,11 @@ public class InterlacedImageSource extends ImageSource {
     return skip;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setReadHint(ReadHint readHint) {
     imageSource.setReadHint(readHint);
   }
 
-  /** {@inheritDoc} */
   @Override
   public ReadHint getReadHint() {
     return imageSource.getReadHint();

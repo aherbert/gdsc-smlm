@@ -86,13 +86,11 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     this.type = ValidationUtils.checkNotNull(type, "Type must not be null");
   }
 
-  /** {@inheritDoc} */
   @Override
   public FunctionSolverType getType() {
     return type;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitStatus fit(double[] y, double[] fx, double[] a, double[] parametersVariance) {
     // Reset the results
@@ -130,7 +128,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     // To be optionally over-ridden
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean evaluate(double[] y, double[] fx, double[] a) {
     // Reset the results
@@ -154,7 +151,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     return status;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean computeDeviations(double[] y, double[] a, double[] parametersVariance) {
     // Use a dedicated solver optimised for inverting the matrix diagonal.
@@ -295,25 +291,21 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     return (value > 0) ? value : 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfFittedParameters() {
     return function.getNumberOfGradients();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfFittedPoints() {
     return numberOfFittedPoints;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getIterations() {
     return iterations;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getEvaluations() {
     return evaluations;
@@ -337,25 +329,21 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     this.maxEvaluations = maxEvaluations;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isBounded() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isConstrained() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isStrictlyPositiveFunction() {
     // Provide a default implementation based on the type.
@@ -377,25 +365,21 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setBounds(double[] lower, double[] upper) {
     // To be over-ridden
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setConstraints(double[] lower, double[] upper) {
     // To be over-ridden
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(double[] weights) {
     // To be over-ridden
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getValue() {
     return value;
@@ -423,7 +407,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
     return function;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName(int index) {
     if (function instanceof NamedFunction) {

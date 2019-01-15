@@ -45,13 +45,11 @@ public class PeakResultDataParameterDeviationConverter extends PeakResultDataFlo
     this.index = index;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Float getValue(PeakResult result) {
     return converter.convert(result.getParameterDeviation(index));
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return PeakResult.getParameterName(index) + " Deviation";

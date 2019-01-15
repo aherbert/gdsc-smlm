@@ -64,7 +64,6 @@ public class PerPixelNormaliser implements Normaliser {
     return sum / normalisation[index];
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, int size) {
     for (int i = 0; i < size; i++) {
@@ -72,7 +71,6 @@ public class PerPixelNormaliser implements Normaliser {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, float[] out, int size) {
     for (int i = 0; i < size; i++) {
@@ -80,7 +78,6 @@ public class PerPixelNormaliser implements Normaliser {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, int maxx, int maxy, int border) {
     final int xlimit = maxx - border;
@@ -92,7 +89,6 @@ public class PerPixelNormaliser implements Normaliser {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, float[] out, int maxx, int maxy, int border) {
     final int xlimit = maxx - border;
@@ -104,7 +100,6 @@ public class PerPixelNormaliser implements Normaliser {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(double[] data, float[] out, int size) {
     for (int i = 0; i < size; i++) {
@@ -112,7 +107,6 @@ public class PerPixelNormaliser implements Normaliser {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(double[] data, float[] out, int maxx, int maxy, int border) {
     final int xlimit = maxx - border;

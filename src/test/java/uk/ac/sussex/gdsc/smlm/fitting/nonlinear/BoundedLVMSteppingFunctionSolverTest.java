@@ -54,35 +54,35 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 
   @SeededTest
   public void fitSingleGaussianLVMWithoutBias(RandomSeed seed) {
-    fitSingleGaussianLVMWithoutBias(seed, false, 0);
+    fitSingleGaussianWithoutBias(seed, false, 0);
   }
 
   @SeededTest
   public void fitSingleGaussianCLVMWithoutBias(RandomSeed seed) {
-    fitSingleGaussianLVMWithoutBias(seed, false, 1);
+    fitSingleGaussianWithoutBias(seed, false, 1);
   }
 
   @SeededTest
   public void fitSingleGaussianDCLVMWithoutBias(RandomSeed seed) {
-    fitSingleGaussianLVMWithoutBias(seed, false, 2);
+    fitSingleGaussianWithoutBias(seed, false, 2);
   }
 
   @SeededTest
   public void fitSingleGaussianBLVMWithoutBias(RandomSeed seed) {
-    fitSingleGaussianLVMWithoutBias(seed, true, 0);
+    fitSingleGaussianWithoutBias(seed, true, 0);
   }
 
   @SeededTest
   public void fitSingleGaussianBCLVMWithoutBias(RandomSeed seed) {
-    fitSingleGaussianLVMWithoutBias(seed, true, 1);
+    fitSingleGaussianWithoutBias(seed, true, 1);
   }
 
   @SeededTest
   public void fitSingleGaussianBDCLVMWithoutBias(RandomSeed seed) {
-    fitSingleGaussianLVMWithoutBias(seed, true, 2);
+    fitSingleGaussianWithoutBias(seed, true, 2);
   }
 
-  private void fitSingleGaussianLVMWithoutBias(RandomSeed seed, boolean applyBounds, int clamping) {
+  private void fitSingleGaussianWithoutBias(RandomSeed seed, boolean applyBounds, int clamping) {
     Assumptions.assumeTrue(runTests);
 
     final double bias = 100;

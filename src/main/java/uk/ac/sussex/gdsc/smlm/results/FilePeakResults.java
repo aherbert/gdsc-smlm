@@ -62,7 +62,6 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     this.filename = filename;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void begin() {
     fos = null;
@@ -259,13 +258,11 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return size;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void end() {
     if (fos == null) {
@@ -313,7 +310,6 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     return sortAfterEnd;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return fos != null;

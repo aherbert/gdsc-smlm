@@ -66,7 +66,6 @@ public abstract class TextPanelMouseListener extends MouseAdapter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void mouseClicked(MouseEvent event) {
     // Show the result that was double clicked in the result table
@@ -90,7 +89,6 @@ public abstract class TextPanelMouseListener extends MouseAdapter {
    */
   public abstract void selected(int selectionStart, int selectionEnd);
 
-  /** {@inheritDoc} */
   @Override
   public void mousePressed(MouseEvent event) {
     final int index = textPanel.getSelectionStart();

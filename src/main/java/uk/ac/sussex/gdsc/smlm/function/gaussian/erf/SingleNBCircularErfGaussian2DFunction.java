@@ -57,7 +57,6 @@ public class SingleNBCircularErfGaussian2DFunction extends SingleCircularErfGaus
     return new SingleNBCircularErfGaussian2DFunction(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda) {
     // Unpack the predictor into the dimensions
@@ -74,7 +73,6 @@ public class SingleNBCircularErfGaussian2DFunction extends SingleCircularErfGaus
     return tB + tI * duda[0];
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
@@ -136,19 +134,16 @@ public class SingleNBCircularErfGaussian2DFunction extends SingleCircularErfGaus
     return 4;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return 4;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
     if (tB == 0) {
@@ -166,7 +161,6 @@ public class SingleNBCircularErfGaussian2DFunction extends SingleCircularErfGaus
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -185,7 +179,6 @@ public class SingleNBCircularErfGaussian2DFunction extends SingleCircularErfGaus
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -214,7 +207,6 @@ public class SingleNBCircularErfGaussian2DFunction extends SingleCircularErfGaus
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
     final int n = getNumberOfGradients();

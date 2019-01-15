@@ -109,7 +109,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
   private IJTablePeakResults results;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -176,7 +175,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
     final double[] limits = getLimits(imp.getProcessor());
@@ -270,7 +268,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     return limits;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     smooth = gd.getNextNumber();
@@ -354,7 +351,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     Prefs.set(Constants.initialPeakStdDev0, initialPeakStdDev);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     final Rectangle bounds = ip.getRoi();

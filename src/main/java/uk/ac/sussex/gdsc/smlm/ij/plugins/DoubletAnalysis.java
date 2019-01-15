@@ -68,8 +68,6 @@ import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.procedure.TObjectProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -294,7 +292,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       this.fp = fp;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(DoubletBonus that) {
       return Double.compare(this.residuals, that.residuals);
@@ -316,7 +313,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       this.id = id;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(ResultCoordinate that) {
       // if (this.result.spot.intensity > that.result.spot.intensity)
@@ -428,7 +424,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       return (score1 + score2) * 0.5;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(DoubletResult that) {
       // Makes the resutls easy to find in the table
@@ -467,7 +462,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int[] resultHistogram;
     final int[][] neighbourHistogram;
     final int[][] almostNeighbourHistogram;
-    final Overlay o;
+    final Overlay overlay;
     double[] region;
     float[] data;
     ArrayList<DoubletResult> results = new ArrayList<>();
@@ -484,11 +479,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
      * @param stack the stack
      * @param actualCoordinates the actual coordinates
      * @param fitConfig the fit config
-     * @param o the overlay
+     * @param overlay the overlay
      */
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
         TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig,
-        Overlay o) {
+        Overlay overlay) {
       this.jobs = jobs;
       this.stack = stack;
       this.actualCoordinates = actualCoordinates;
@@ -504,14 +499,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       resultHistogram = new int[spotHistogram.length];
       neighbourHistogram = new int[3][spotHistogram.length];
       almostNeighbourHistogram = new int[3][spotHistogram.length];
-      this.o = o;
+      this.overlay = overlay;
       rampedScore = new RampedScore(lowerDistance, matchDistance);
       if (signalFactor > 0) {
         signalScore = new RampedScore(lowerSignalFactor, signalFactor);
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -1444,7 +1438,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
      */
     private void addToOverlay(int frame, Spot[] spots, int singles, int doublets, int multiples,
         int[] spotMatchCount) {
-      if (o != null) {
+      if (overlay != null) {
         // Create an output stack with coloured ROI overlay for each n=1, n=2, n=other
         // to check that the doublets are correctly identified.
         final int[] sx = new int[singles];
@@ -1472,7 +1466,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           roi.setFillColor(color[c]);
           roi.setStrokeColor(color[c]);
           // Overlay uses a vector which is synchronized already
-          o.add(roi);
+          overlay.add(roi);
         }
       }
     }
@@ -1497,7 +1491,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     return 2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1525,7 +1518,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         return;
       }
 
-      run();
+      runFitting();
     }
   }
 
@@ -1763,10 +1756,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @return the sa
    */
   private double getSa() {
-    final double sa =
-        PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a)
-            / simulationParameters.a;
-    return sa;
+    return PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a)
+        / simulationParameters.a;
   }
 
   private int progress;
@@ -1777,18 +1768,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Show progress.
    */
   private synchronized void showProgress() {
-    if (progress % stepProgress == 0) {
-      if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
-        IJ.showProgress(progress, totalProgress);
-      }
+    if (progress % stepProgress == 0
+        && ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
+      IJ.showProgress(progress, totalProgress);
     }
     progress++;
   }
 
-  /**
-   * Run.
-   */
-  private void run() {
+  private void runFitting() {
     doubletResults = null;
 
     final ImageStack stack = imp.getImageStack();
@@ -1798,12 +1785,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         ResultsMatchCalculator.getCoordinates(results, false);
 
     final long[] sumCount = new long[1];
-    actualCoordinates.forEachValue(new TObjectProcedure<ArrayList<Coordinate>>() {
-      @Override
-      public boolean execute(ArrayList<Coordinate> list) {
-        sumCount[0] += list.size();
-        return true;
-      }
+    actualCoordinates.forEachValue(list -> {
+      sumCount[0] += list.size();
+      return true;
     });
     final double density = 1e6 * sumCount[0]
         / (simulationParameters.a * simulationParameters.a * results.getBounds().getWidth()
@@ -1828,12 +1812,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     totalProgress = actualCoordinates.size();
     stepProgress = ImageJUtils.getProgressInterval(totalProgress);
     progress = 0;
-    actualCoordinates.forEachKey(new TIntProcedure() {
-      @Override
-      public boolean execute(int frame) {
-        put(jobs, frame);
-        return true;
-      }
+    actualCoordinates.forEachKey(frame -> {
+      put(jobs, frame);
+      return true;
     });
     // Finish all the worker threads by passing in a null job
     for (int i = 0; i < threads.size(); i++) {
@@ -1849,7 +1830,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       }
     }
     threads.clear();
-    threads = null;
 
     IJ.showProgress(1);
     IJ.showStatus("Collecting results ...");
@@ -1915,7 +1895,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       showHistogram(7, almostNeighbourHistogram[2]);
     }
     workers.clear();
-    workers = null;
 
     if (overlay != null) {
       imp.setOverlay(overlay);
@@ -3085,7 +3064,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         + "wMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
   }
 
-  /** {@inheritDoc} */
   @Override
   public void itemStateChanged(ItemEvent event) {
     if (event.getSource() instanceof Choice) {

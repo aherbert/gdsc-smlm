@@ -50,7 +50,6 @@ public class MLELVMGradientProcedureX extends MLELVMGradientProcedure {
     // We could check that y is positive ...
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi, double[] dfi_da) {
     ++yi;
@@ -79,7 +78,6 @@ public class MLELVMGradientProcedureX extends MLELVMGradientProcedure {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi) {
     ++yi;

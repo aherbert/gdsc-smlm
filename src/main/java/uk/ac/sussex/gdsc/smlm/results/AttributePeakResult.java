@@ -41,19 +41,16 @@ public class AttributePeakResult extends PeakResult {
   private int endFrame;
   private float precision;
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasId() {
     return ((fields & FIELD_ID) == FIELD_ID);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasEndFrame() {
     return ((fields & FIELD_END_FRAME) == FIELD_END_FRAME);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasPrecision() {
     return ((fields & FIELD_PRECISION) == FIELD_PRECISION);
@@ -92,7 +89,6 @@ public class AttributePeakResult extends PeakResult {
     fields = fields & ~FIELD_PRECISION;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getId() {
     if (hasId()) {
@@ -108,16 +104,10 @@ public class AttributePeakResult extends PeakResult {
    */
   public void setId(int id) {
     // Allow ID to be anything, including zero
-    // if (id != super.getId())
-    // {
     setHasId();
     this.id = id;
-    // }
-    // else
-    // clearHasId();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getEndFrame() {
     if (hasEndFrame()) {
@@ -149,7 +139,6 @@ public class AttributePeakResult extends PeakResult {
     setEndFrame(endFrame);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getPrecision() {
     if (hasPrecision()) {
@@ -223,11 +212,7 @@ public class AttributePeakResult extends PeakResult {
    * @param peakResult the peak result
    */
   public AttributePeakResult(PeakResult peakResult) {
-    super(peakResult.getFrame(), peakResult.getOrigX(), peakResult.getOrigY(),
-        peakResult.getOrigValue(), peakResult.getError(), peakResult.getNoise(),
-        peakResult.getMeanIntensity(), peakResult.getParameters().clone(),
-        (peakResult.getParameterDeviations() == null) ? null
-            : peakResult.getParameterDeviations().clone());
+    super(peakResult);
     if (peakResult.hasId()) {
       setId(peakResult.getId());
     }
@@ -237,5 +222,10 @@ public class AttributePeakResult extends PeakResult {
     if (peakResult.hasPrecision()) {
       setPrecision(peakResult.getPrecision());
     }
+  }
+
+  @Override
+  public AttributePeakResult copy() {
+    return new AttributePeakResult(this);
   }
 }

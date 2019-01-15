@@ -72,7 +72,6 @@ public abstract class MaximaSpotFilter extends SpotFilter {
     nms = source.nms.copy();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Spot[] find(final float[] data, final int width, final int height) {
     data2 = preprocessData(data, width, height);
@@ -92,7 +91,6 @@ public abstract class MaximaSpotFilter extends SpotFilter {
     return spots;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] getPreprocessedData() {
     return data2;

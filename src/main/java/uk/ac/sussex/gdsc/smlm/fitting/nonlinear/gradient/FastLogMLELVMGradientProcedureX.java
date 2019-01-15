@@ -52,7 +52,6 @@ public class FastLogMLELVMGradientProcedureX extends FastLogMLELVMGradientProced
     // We could check that y is positive ...
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi, double[] dfi_da) {
     ++yi;
@@ -81,7 +80,6 @@ public class FastLogMLELVMGradientProcedureX extends FastLogMLELVMGradientProced
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi) {
     ++yi;

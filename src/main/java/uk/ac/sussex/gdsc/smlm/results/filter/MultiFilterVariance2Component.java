@@ -39,13 +39,11 @@ public class MultiFilterVariance2Component extends MultiFilterComponent {
     this.variance = Filter.getDUpperSquaredLimit(precision);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     return (peak.getLocationVariance2() > variance);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return IDirectFilter.V_LOCATION_VARIANCE2;

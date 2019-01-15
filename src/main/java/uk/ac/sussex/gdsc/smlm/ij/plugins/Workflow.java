@@ -34,7 +34,6 @@ import java.util.Arrays;
  * changes to settings. This class is designed to be used to allow live display of results upon
  * settings changes by running the analysis on worker threads.
  *
- * @author Alex Herbert
  * @param <S> the generic type
  * @param <R> the generic type
  */
@@ -121,7 +120,6 @@ public class Workflow<S, R> {
       this.worker = worker;
     }
 
-    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("unchecked")
     public void run() {

@@ -100,19 +100,16 @@ public enum PrecisionType implements NamedObject {
     this.shortName = sname;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return shortName;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return name;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getShortName() {
     return shortName;

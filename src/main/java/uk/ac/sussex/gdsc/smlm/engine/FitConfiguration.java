@@ -602,7 +602,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     this.directFilter = (DirectFilter) f;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitConfiguration clone() {
     // Make a new initialised instance. This will have new settings builder objects.
@@ -2090,8 +2089,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
      * @param params The fitted peak parameters
      * @param paramDevs the fitted peak parameter variances (can be null)
      */
-    void setResult(int peakNumber, double[] initialParams, double[] params,
-        double[] paramDevs);
+    void setResult(int peakNumber, double[] initialParams, double[] params, double[] paramDevs);
 
     /**
      * Gets the local background.
@@ -2151,7 +2149,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     this.peakResultValidationData = peakResultValidationData;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitStatus validateFit(int peaks, double[] initialParams, double[] params,
       double[] paramDevs) {
@@ -2740,7 +2737,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       return newResult;
     }
 
-    /** {@inheritDoc} */
     @Override
     public FractionalAssignment[] getAssignments(int predictedId) {
       return null;
@@ -2759,27 +2755,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       return p;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setValidationResult(int result) {
       throw new NotImplementedException(
           "The validation result should not be set on a dynamic result");
     }
 
-    /** {@inheritDoc} */
     @Override
     public int getValidationResult() {
       throw new NotImplementedException(
           "The validation result should not be set on a dynamic result");
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean ignore() {
       return false;
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isNotDuplicate() {
       return false;
@@ -3401,13 +3393,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup() {
     setup(0);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(int flags) {
     filterSetupFlags = createFlags(flags);
@@ -3427,7 +3417,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(int flags, FilterSetupData... filterSetupData) {
     filterSetupFlags = createFlags(flags);
@@ -3472,27 +3461,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     return flags;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFilterSetupFlags() {
     // Cached for speed
     return filterSetupFlags;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FilterSetupData[] getFilterSetupData() {
     // Cached for speed
     return filterSetupData;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean accept(PreprocessedPeakResult peak) {
     return (filterResult = validate(peak)) == 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int validate(PreprocessedPeakResult peak) {
     final int result = doValidate(peak);
@@ -3503,7 +3488,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     return result;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getValidationFlags() {
     if (directFilter != null) {
@@ -3620,19 +3604,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FilterType getFilterType() {
     return FilterType.DIRECT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getResult() {
     return filterResult;
   }
 
-  /** {@inheritDoc} */
   @Override
   public IDirectFilter copy() {
     return clone();

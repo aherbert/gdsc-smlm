@@ -249,7 +249,6 @@ public class CustomGammaDistribution extends AbstractRealDistribution {
     uninitialised = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double density(double x) {
     if (x < 0) {
@@ -306,7 +305,6 @@ public class CustomGammaDistribution extends AbstractRealDistribution {
     return ret;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getSolverAbsoluteAccuracy() {
     return solverAbsoluteAccuracy;
@@ -360,13 +358,11 @@ public class CustomGammaDistribution extends AbstractRealDistribution {
     return Double.POSITIVE_INFINITY;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isSupportLowerBoundInclusive() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isSupportUpperBoundInclusive() {
     return false;

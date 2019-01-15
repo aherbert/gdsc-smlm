@@ -100,13 +100,11 @@ public class DoubleImage2D extends Image2D {
     this.data = source.data.clone();
   }
 
-  /** {@inheritDoc} */
   @Override
   public DoubleImage2D copy() {
     return new DoubleImage2D(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void createData(int size) {
     data = new double[size];
@@ -121,13 +119,11 @@ public class DoubleImage2D extends Image2D {
     return data;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getDataLength() {
     return data.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public DoubleImage2D crop(int x, int y, int width, int height) {
     return crop(x, y, width, height, null);

@@ -115,7 +115,6 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
     Arrays.fill(data, 0.0);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da) {
     if (value > 0.0) {

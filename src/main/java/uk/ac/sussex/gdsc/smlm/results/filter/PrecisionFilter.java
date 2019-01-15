@@ -91,70 +91,59 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using an upper precision threshold.";
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     return precision;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
     return PrecisionFilter.DEFAULT_INCREMENT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
     return ParameterType.PRECISION;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
     return new PrecisionFilter(updateParameter(precision, delta, DEFAULT_RANGE));
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new PrecisionFilter(parameters[0]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMax(parameters, 0, precision);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lowerBoundOrientation(int index) {
     return 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     return new double[] {UPPER_LIMIT};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {DEFAULT_RANGE};

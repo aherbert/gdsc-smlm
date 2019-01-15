@@ -64,7 +64,6 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
     setSignificantDigits(significantDigits);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
     super.initialise(a);
@@ -80,13 +79,11 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void copyCoefficients(double[] a) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void evaluate(double oldError, double newError, double[] a) {
     // Use a comparison of error to a set number of significant digits

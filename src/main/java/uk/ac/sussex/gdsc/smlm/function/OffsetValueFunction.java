@@ -114,7 +114,6 @@ public class OffsetValueFunction extends PrecomputedValueFunction
     return func;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getParameterName(int index) {
     if (vf instanceof NamedFunction) {

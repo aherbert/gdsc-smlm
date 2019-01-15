@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -35,7 +36,6 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
@@ -53,13 +53,27 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Plugin to export traced datasets.
  */
 public class TraceExporter implements PlugIn {
+  private static final String TITLE = "Trace Exporter";
+  private static ArrayList<String> selected;
+  private static String directory = "";
+  private static int minLength = 2;
+  private static int maxJump = 1;
+  private static double wobble;
+
+  private static String[] formatNames;
+  private static int format;
+
   private enum ExportFormat implements NamedObject {
     SPOT_ON("Spot-On");
+
+    private static final ExportFormat[] values = values();
 
     private final String name;
 
@@ -76,31 +90,24 @@ public class TraceExporter implements PlugIn {
     public String getShortName() {
       return name;
     }
+
+    /**
+     * Get the enum value from the index ordinal.
+     *
+     * @param index the index
+     * @return the export format
+     */
+    @SuppressWarnings("unused")
+    public static ExportFormat fromOrdinal(int index) {
+      return values[MathUtils.clip(0, values.length - 1, index)];
+    }
   }
 
-  private static final String TITLE = "Trace Exporter";
-  private static ArrayList<String> selected;
-  private static String directory = "";
-  private static int minLength = 2;
-  private static int maxJump = 1;
-  private static double wobble;
-
-  private static String[] FORMAT_NAMES;
-  private static int format;
-
-  private ExportFormat exportFormat;
-
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-    final MemoryResultsItems items = new MemoryResultsItems(new MultiDialog.MemoryResultsFilter() {
-      @Override
-      public boolean accept(MemoryPeakResults results) {
-        return results.hasId();
-      }
-    });
+    final MemoryResultsItems items = new MemoryResultsItems(MemoryPeakResults::hasId);
 
     if (items.size() == 0) {
       IJ.error(TITLE, "No traced localisations in memory");
@@ -119,16 +126,14 @@ public class TraceExporter implements PlugIn {
       return;
     }
 
-    exportFormat = getExportFormat();
-
     for (final MemoryPeakResults results : allResults) {
       export(results);
     }
   }
 
   private static boolean showDialog() {
-    if (FORMAT_NAMES == null) {
-      FORMAT_NAMES = SettingsManager.getNames((Object[]) ExportFormat.values());
+    if (formatNames == null) {
+      formatNames = SettingsManager.getNames((Object[]) ExportFormat.values());
     }
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Export traces to a directory");
@@ -139,7 +144,7 @@ public class TraceExporter implements PlugIn {
     gd.addNumericField("Max_jump", maxJump, 0);
     gd.addMessage("Specify localistion precision (wobble) to add");
     gd.addNumericField("Wobble", wobble, 0, 6, "nm");
-    gd.addChoice("Format", FORMAT_NAMES, FORMAT_NAMES[format]);
+    gd.addChoice("Format", formatNames, formatNames[format]);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -181,24 +186,12 @@ public class TraceExporter implements PlugIn {
     return !allResults.isEmpty();
   }
 
-  private static ExportFormat getExportFormat() {
-    if (format >= 0 && format < FORMAT_NAMES.length) {
-      return ExportFormat.values()[format];
-    }
-    return ExportFormat.SPOT_ON;
-  }
-
-  private void export(MemoryPeakResults results) {
+  private static void export(MemoryPeakResults results) {
     // Copy to allow manipulation
     results = results.copy();
 
     // Strip results with no trace Id
-    results.removeIf(new PeakResultPredicate() {
-      @Override
-      public boolean test(PeakResult t) {
-        return t.getId() <= 0;
-      }
-    });
+    results.removeIf(result -> result.getId() <= 0);
 
     // Sort by ID then time
     results.sort(IdFramePeakResultComparator.INSTANCE);
@@ -226,12 +219,7 @@ public class TraceExporter implements PlugIn {
     }
 
     if (!remove.isEmpty()) {
-      results.removeIf(new PeakResultPredicate() {
-        @Override
-        public boolean test(PeakResult t) {
-          return remove.contains(t.getId());
-        }
-      });
+      results.removeIf(result -> remove.contains(result.getId()));
       results.sort(IdFramePeakResultComparator.INSTANCE);
     }
 
@@ -241,24 +229,17 @@ public class TraceExporter implements PlugIn {
       final double w = c.convertBack(wobble);
       final RandomGenerator r = new Well19937c();
       final boolean is3D = results.is3D();
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult peakResult) {
-          peakResult.setXPosition((float) (peakResult.getXPosition() + w * r.nextGaussian()));
-          peakResult.setYPosition((float) (peakResult.getYPosition() + w * r.nextGaussian()));
-          if (is3D) {
-            peakResult.setZPosition((float) (peakResult.getZPosition() + w * r.nextGaussian()));
-          }
+      results.forEach((PeakResultProcedure) peakResult -> {
+        peakResult.setXPosition((float) (peakResult.getXPosition() + w * r.nextGaussian()));
+        peakResult.setYPosition((float) (peakResult.getYPosition() + w * r.nextGaussian()));
+        if (is3D) {
+          peakResult.setZPosition((float) (peakResult.getZPosition() + w * r.nextGaussian()));
         }
       });
-
     }
 
-    switch (exportFormat) {
-      case SPOT_ON:
-      default:
-        exportSpotOn(results);
-    }
+    // Only one format at the moment ...
+    exportSpotOn(results);
   }
 
   private static MemoryPeakResults splitTraces(MemoryPeakResults results) {
@@ -318,46 +299,46 @@ public class TraceExporter implements PlugIn {
 
       @SuppressWarnings("resource")
       final BufferedWriter writer = out;
-      results.forEach(DistanceUnit.UM, new XYRResultProcedure() {
-        @Override
-        public void executeXYR(float x, float y, PeakResult result) {
-          try {
-            if (result.hasEndFrame()) {
-              final String sId = Integer.toString(result.getId());
-              final String sx = Float.toString(x);
-              final String sy = Float.toString(y);
-              for (int t = result.getFrame(); t <= result.getEndFrame(); t++) {
-                writer.write(Integer.toString(t));
-                writer.write(",");
-                writer.write(Float.toString(converter.convert(t)));
-                writer.write(",");
-                writer.write(sId);
-                writer.write(",");
-                writer.write(sx);
-                writer.write(",");
-                writer.write(sy);
-                writer.newLine();
-              }
-            } else {
-              writer.write(Integer.toString(result.getFrame()));
+      results.forEach(DistanceUnit.UM, (XYRResultProcedure) (x, y, result) -> {
+        try {
+          if (result.hasEndFrame()) {
+            final String sId = Integer.toString(result.getId());
+            final String sx = Float.toString(x);
+            final String sy = Float.toString(y);
+            for (int t = result.getFrame(); t <= result.getEndFrame(); t++) {
+              writer.write(Integer.toString(t));
               writer.write(",");
-              writer.write(Float.toString(converter.convert(result.getFrame())));
+              writer.write(Float.toString(converter.convert(t)));
               writer.write(",");
-              writer.write(Integer.toString(result.getId()));
+              writer.write(sId);
               writer.write(",");
-              writer.write(Float.toString(x));
+              writer.write(sx);
               writer.write(",");
-              writer.write(Float.toString(y));
+              writer.write(sy);
               writer.newLine();
             }
-          } catch (final IOException ex) {
-            // Allow clean-up by passing the exception up
-            throw new RuntimeException(ex);
+          } else {
+            writer.write(Integer.toString(result.getFrame()));
+            writer.write(",");
+            writer.write(Float.toString(converter.convert(result.getFrame())));
+            writer.write(",");
+            writer.write(Integer.toString(result.getId()));
+            writer.write(",");
+            writer.write(Float.toString(x));
+            writer.write(",");
+            writer.write(Float.toString(y));
+            writer.newLine();
           }
+        } catch (final IOException ex) {
+          handleException(ex);
         }
       });
-    } catch (final Exception ex) {
-      ex.printStackTrace();
+    } catch (final IOException ex) {
+      handleException(ex);
     }
+  }
+
+  private static void handleException(Exception ex) {
+    Logger.getLogger(TraceExporter.class.getName()).log(Level.SEVERE, "Failed to export", ex);
   }
 }

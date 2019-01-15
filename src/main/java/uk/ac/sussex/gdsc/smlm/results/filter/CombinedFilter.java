@@ -88,7 +88,6 @@ public abstract class CombinedFilter extends DirectFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter clone() {
     // Add a reminder to implement clone
@@ -199,7 +198,6 @@ public abstract class CombinedFilter extends DirectFilter {
     return result2 == 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(MemoryPeakResults peakResults) {
     filter1.setup(peakResults);
@@ -284,20 +282,17 @@ public abstract class CombinedFilter extends DirectFilter {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void end() {
     filter1.end();
     filter2.end();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getNumericalValue() {
     return filter1.getNumericalValue();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getNumericalValueName() {
     return filter1.getNumericalValueName();
@@ -382,7 +377,6 @@ public abstract class CombinedFilter extends DirectFilter {
    */
   protected abstract Filter createFilter(Filter f1, Filter f2);
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     final double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
@@ -391,7 +385,6 @@ public abstract class CombinedFilter extends DirectFilter {
     return createFilter(filter1.create(p1), filter2.create(p2));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     final double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
@@ -403,19 +396,16 @@ public abstract class CombinedFilter extends DirectFilter {
     System.arraycopy(p2, 0, parameters, p1.length, p2.length);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean subsetWithFailCount() {
     return filter1.subsetWithFailCount() && filter2.subsetWithFailCount();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int length() {
     return filter1.length() + filter2.length();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] lowerLimit() {
     final double[] l1 = filter1.lowerLimit();
@@ -434,7 +424,6 @@ public abstract class CombinedFilter extends DirectFilter {
     return lower;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     final double[] u1 = filter1.upperLimit();
@@ -453,13 +442,11 @@ public abstract class CombinedFilter extends DirectFilter {
     return upper;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] sequence() {
     return combine(filter1.sequence(), filter2.sequence());
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return combine(filter1.mutationStepRange(), filter2.mutationStepRange());
@@ -472,7 +459,6 @@ public abstract class CombinedFilter extends DirectFilter {
     return s;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] getChromosomeParameters() {
     final int[] s1 = filter1.getChromosomeParameters();

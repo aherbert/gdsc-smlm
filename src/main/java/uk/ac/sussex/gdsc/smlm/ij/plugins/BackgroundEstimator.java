@@ -137,7 +137,6 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     return IJ.setupDialog(imp, FLAGS);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     percentile = gd.getNextNumber();
@@ -250,7 +249,6 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     ImageJUtils.display(title, plot, wo);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     // Perform all methods and add to the results
@@ -274,7 +272,6 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     results.add(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setNPasses(int passes) {
     // Do nothing

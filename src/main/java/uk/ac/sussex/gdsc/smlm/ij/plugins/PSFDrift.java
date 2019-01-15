@@ -194,7 +194,6 @@ public class PSFDrift implements PlugIn {
       createBounds();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -378,7 +377,6 @@ public class PSFDrift implements PlugIn {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

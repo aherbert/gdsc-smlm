@@ -173,8 +173,7 @@ public class DFastLog extends FastLog {
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
 
-    return (e == 0 ? data[(int) (m >>> qm1)]
-        : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
+    return (e == 0 ? data[(int) (m >>> qm1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
   }
 
   /**
@@ -204,8 +203,7 @@ public class DFastLog extends FastLog {
     final long bits = Double.doubleToRawLongBits(x);
     final int e = (int) ((bits >>> 52) & 0x7ffL);
     final long m = (bits & 0xfffffffffffffL);
-    return (e == 0 ? data[(int) (m >>> qm1)]
-        : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
+    return (e == 0 ? data[(int) (m >>> qm1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
   }
 
   /**
@@ -233,8 +231,8 @@ public class DFastLog extends FastLog {
     if ((bits >> 63) != 0L) {
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
-    return (e == 0 ? data[(int) (m >>> qm1)]
-        : e + data[(int) ((m | 0x10000000000000L) >>> q)]) * scale;
+    return (e == 0 ? data[(int) (m >>> qm1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)])
+        * scale;
   }
 
   /**
@@ -265,8 +263,8 @@ public class DFastLog extends FastLog {
     final long bits = Double.doubleToRawLongBits(x);
     final int e = (int) ((bits >>> 52) & 0x7ffL);
     final long m = (bits & 0xfffffffffffffL);
-    return (e == 0 ? data[(int) (m >>> qm1)]
-        : e + data[(int) ((m | 0x10000000000000L) >>> q)]) * scale;
+    return (e == 0 ? data[(int) (m >>> qm1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)])
+        * scale;
   }
 
   /**

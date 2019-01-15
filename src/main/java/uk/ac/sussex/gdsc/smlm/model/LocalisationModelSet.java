@@ -105,7 +105,6 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
     return time;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int compareTo(LocalisationModelSet other) {
     return Integer.compare(time, other.time);

@@ -48,7 +48,6 @@ public class IntegralValueProcedure implements ValueProcedure {
     return integral;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value) {
     integral += value;

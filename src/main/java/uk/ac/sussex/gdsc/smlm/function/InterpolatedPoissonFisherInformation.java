@@ -154,7 +154,6 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
     return I;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getAlpha(double t) {
     if (t <= 0) {
@@ -200,7 +199,6 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
     return (upperFI != null) ? upperFI.getAlpha(t) : alphaMax;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void postClone() {
     // Ensure the function instance is cloned

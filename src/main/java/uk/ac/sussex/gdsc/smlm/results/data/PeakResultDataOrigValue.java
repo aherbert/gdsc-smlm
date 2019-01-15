@@ -30,13 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Gets the original value from a result.
  */
 public class PeakResultDataOrigValue extends PeakResultDataFloat {
-  /** {@inheritDoc} */
   @Override
   public Float getValue(PeakResult result) {
     return result.getOrigValue();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "Orig Value";

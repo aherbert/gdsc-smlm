@@ -43,7 +43,6 @@ public class MLEGradientCalculator5 extends MLEGradientCalculator {
     super(5);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void zero(final double[][] alpha, final double[] beta) {
     alpha[0][0] = 0;
@@ -69,7 +68,6 @@ public class MLEGradientCalculator5 extends MLEGradientCalculator {
     beta[4] = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da,
       final double fi, final double xi) {
@@ -105,7 +103,6 @@ public class MLEGradientCalculator5 extends MLEGradientCalculator {
     beta[4] -= e * dfi_da[4];
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void symmetric(final double[][] alpha) {
     alpha[0][1] = alpha[1][0];

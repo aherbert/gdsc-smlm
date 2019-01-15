@@ -36,7 +36,6 @@ public class FrameEndFrameIntensityPeakResultComparator implements Comparator<Pe
   public static final FrameEndFrameIntensityPeakResultComparator INSTANCE =
       new FrameEndFrameIntensityPeakResultComparator();
 
-  /** {@inheritDoc} */
   @Override
   public int compare(PeakResult o1, PeakResult o2) {
     int f1 = o1.getFrame();

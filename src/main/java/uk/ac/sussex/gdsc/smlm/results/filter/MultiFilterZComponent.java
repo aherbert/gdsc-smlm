@@ -42,14 +42,12 @@ public class MultiFilterZComponent extends MultiFilterComponent {
     this.maxZ = (float) maxZ;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     final float z = peak.getZ();
     return (z > maxZ || z < minZ);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return IDirectFilter.V_Z;

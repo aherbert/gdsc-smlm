@@ -1366,7 +1366,6 @@ public class JumpDistanceAnalysis {
       return values;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double[] variables) {
       // Compute the log-likelihood:
@@ -1453,7 +1452,6 @@ public class JumpDistanceAnalysis {
       return 1 - FastMath.exp(-x / (4 * params[0]));
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       final double[] values = new double[x.length];
@@ -1464,7 +1462,6 @@ public class JumpDistanceAnalysis {
       return values;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[][] jacobian(double[] variables) {
       // Compute the gradients using calculus differentiation:
@@ -1571,7 +1568,6 @@ public class JumpDistanceAnalysis {
       return values;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double[] params) {
       // Compute the log-likelihood
@@ -1676,13 +1672,11 @@ public class JumpDistanceAnalysis {
       super(x, y, estimatedD, n);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] point) {
       return getValue(point);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[][] jacobian(double[] variables) {
       // Compute the gradients using calculus differentiation:
@@ -1795,7 +1789,6 @@ public class JumpDistanceAnalysis {
       super(x, y, estimatedD, n);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double[] parameters) {
       final double[] obs = getValue(parameters);

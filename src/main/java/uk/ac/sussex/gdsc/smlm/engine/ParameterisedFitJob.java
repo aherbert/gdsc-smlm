@@ -69,13 +69,11 @@ public class ParameterisedFitJob extends FitJob {
     this.parameters = parameters;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitParameters getFitParameters() {
     return parameters;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setResults(List<PeakResult> results) {
     this.peakResults = results;
@@ -90,13 +88,11 @@ public class ParameterisedFitJob extends FitJob {
     return peakResults;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setIndices(int[] indices) {
     this.indices = indices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setFitResult(int n, FitResult fitResult) {
     if (fitResults == null) {

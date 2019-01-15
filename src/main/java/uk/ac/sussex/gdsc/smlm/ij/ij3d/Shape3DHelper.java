@@ -97,8 +97,7 @@ public class Shape3DHelper {
         @Override public boolean isHighResolution() { return true; }},
         ;
 
-    /** {@inheritDoc} */
-    @Override
+      @Override
     public String getShortName()
     {
       return getName();

@@ -339,7 +339,6 @@ public class About implements PlugIn, MacroExtension {
     Functions.registerExtensions(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String handleExtension(String name, Object[] args) {
     if (name == null) {
@@ -360,7 +359,6 @@ public class About implements PlugIn, MacroExtension {
     return "";
   }
 
-  /** {@inheritDoc} */
   @Override
   public ExtensionDescriptor[] getExtensionFunctions() {
     final ArrayList<ExtensionDescriptor> list = new ArrayList<>(3);

@@ -30,13 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Gets the noise from a result.
  */
 public class PeakResultDataNoise extends PeakResultDataFloat {
-  /** {@inheritDoc} */
   @Override
   public Float getValue(PeakResult result) {
     return result.getNoise();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "Noise";

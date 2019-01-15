@@ -1340,27 +1340,23 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int length() {
     // Assume all the parameters are included in the Chromosome
     return getNumberOfParameters();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] sequence() {
     // Assume all the parameters are included in the Chromosome
     return getParameters();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Chromosome<FilterScore> newChromosome(double[] sequence) {
     return create(sequence);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] lowerLimit() {
     // Set zero as the lower limit
@@ -1373,13 +1369,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setFitness(FilterScore fitness) {
     this.fitness = fitness;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FilterScore getFitness() {
     return fitness;
@@ -1405,7 +1399,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     return distance;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean equalTo(Chromosome<FilterScore> other) {
     if (length() != other.length()) {
@@ -1525,7 +1518,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean equals(Object obj) {
     if (obj == null) {
@@ -1557,7 +1549,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     // Use the cached hash.
@@ -1575,7 +1566,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     return result;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int compareTo(Filter obj) {
     // Anything is less than null

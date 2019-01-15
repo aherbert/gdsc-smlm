@@ -148,7 +148,6 @@ public class PCPALMClusters implements PlugIn {
   private int nMolecules;
   private double count;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

@@ -103,7 +103,7 @@ public class LVMGradientProcedureTest {
     return fastLog;
   }
 
-  int MAX_ITER = 20000;
+  int maxIter = 20000;
   int blockWidth = 10;
   double noise = 0.3;
   double background = 0.5;
@@ -117,8 +117,8 @@ public class LVMGradientProcedureTest {
   double xwidth = 1.2;
   double ywidth = 1.2;
 
-  private static double random(UniformRandomProvider r, double d) {
-    return d - d * 0.1 + r.nextDouble() * 0.2;
+  private static double random(UniformRandomProvider rng, double value) {
+    return value - value * 0.1 + rng.nextDouble() * 0.2;
   }
 
   @SeededTest
@@ -222,34 +222,6 @@ public class LVMGradientProcedureTest {
     gradientProcedureComputesSameAsGradientCalculator(seed, 21, type, error);
   }
 
-  @SpeedTag
-  @SeededTest
-  public void gradientProcedureLSQIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.LSQ);
-  }
-
-  @SpeedTag
-  @SeededTest
-  public void gradientProcedureMLEIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.MLE);
-  }
-
-  @SpeedTag
-  @SeededTest
-  public void gradientProcedureFastLogMLEIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.FastLogMLE);
-  }
-
-  private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, Type type) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4, type);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5, type);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6, type);
-    // 2 peaks
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11, type);
-    // 4 peaks
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21, type);
-  }
-
   private void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed, int nparams,
       Type type, double error) {
     final int iter = 10;
@@ -329,14 +301,42 @@ public class LVMGradientProcedureTest {
 
     long time() {
       loops++;
-      long t = System.nanoTime();
+      long time = System.nanoTime();
       run();
-      t = System.nanoTime() - t;
+      time = System.nanoTime() - time;
       // logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
-      return t;
+      return time;
     }
 
     abstract void run();
+  }
+
+  @SpeedTag
+  @SeededTest
+  public void gradientProcedureLSQIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.LSQ);
+  }
+
+  @SpeedTag
+  @SeededTest
+  public void gradientProcedureMLEIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.MLE);
+  }
+
+  @SpeedTag
+  @SeededTest
+  public void gradientProcedureFastLogMLEIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.FastLogMLE);
+  }
+
+  private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, Type type) {
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4, type);
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5, type);
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6, type);
+    // 2 peaks
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11, type);
+    // 4 peaks
+    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21, type);
   }
 
   private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed,
@@ -762,31 +762,31 @@ public class LVMGradientProcedureTest {
       final double[] a = paramsList.get(i);
       final double[] a2 = a.clone();
 
-      LVMGradientProcedure p;
+      LVMGradientProcedure gp;
       if (precomputed) {
         // Mock fitting part of the function already
         for (int j = 0; j < b.length; j++) {
           b[j] = y[j] * 0.5;
         }
-        p = LVMGradientProcedureFactory.create(y,
+        gp = LVMGradientProcedureFactory.create(y,
             OffsetGradient1Function.wrapGradient1Function(func, b), type, fastLog);
       } else {
-        p = LVMGradientProcedureFactory.create(y, func, type, fastLog);
+        gp = LVMGradientProcedureFactory.create(y, func, type, fastLog);
       }
-      p.gradient(a);
+      gp.gradient(a);
       // double s = p.value;
-      final double[] beta = p.beta.clone();
+      final double[] beta = gp.beta.clone();
       for (int j = 0; j < nparams; j++) {
         final int jj = j;
         final int k = indices[j];
         // double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
         final double d = Precision.representableDelta(a[k], delta);
         a2[k] = a[k] + d;
-        p.value(a2);
-        final double s1 = p.value;
+        gp.value(a2);
+        final double s1 = gp.value;
         a2[k] = a[k] - d;
-        p.value(a2);
-        final double s2 = p.value;
+        gp.value(a2);
+        final double s2 = gp.value;
         a2[k] = a[k];
 
         // Apply a factor of -2 to compute the actual gradients:
@@ -840,14 +840,14 @@ public class LVMGradientProcedureTest {
   private void gradientProcedureSupportsPrecomputed(RandomSeed seed, final Type type,
       boolean checkGradients) {
     final int iter = 10;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, noise);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rng, 0, noise);
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
     // 3 peaks
-    createData(r, 3, iter, paramsList, yList, true);
+    createData(rng, 3, iter, paramsList, yList, true);
 
     for (int i = 0; i < paramsList.size(); i++) {
       final double[] y = yList.get(i);
@@ -907,19 +907,19 @@ public class LVMGradientProcedureTest {
       // Evaluate peak 3 to get the background and subtract it from the data to get the new data
       f3.initialise0(a1peaks);
       f3.forEach(new ValueProcedure() {
-        int k = 0;
+        int index = 0;
 
         @Override
         public void execute(double value) {
-          b[k] = value;
+          b[index] = value;
           // Remove negatives for MLE
           if (type.isMLE()) {
-            y[k] = Math.max(0, y[k]);
-            y_b[k] = Math.max(0, y[k] - value);
+            y[index] = Math.max(0, y[index]);
+            y_b[index] = Math.max(0, y[index] - value);
           } else {
-            y_b[k] = y[k] - value;
+            y_b[index] = y[index] - value;
           }
-          k++;
+          index++;
         }
       });
 
@@ -936,16 +936,16 @@ public class LVMGradientProcedureTest {
       final double[][] m123 = p123.getAlphaMatrix();
 
       p12b3.gradient(a2peaks);
-      double s = p12b3.value;
+      double value = p12b3.value;
       final double[] beta = p12b3.beta.clone();
       double[][] alpha = p12b3.getAlphaMatrix();
 
       // logger.fine(FunctionUtils.getSupplier("MLE=%b [%d] p12b3 %f %f", type.isMLE(), i,
       // p123.value, s);
 
-      if (!eq.almostEqualRelativeOrAbsolute(p123.value, s)) {
+      if (!eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
         Assertions.fail(FunctionUtils.getSupplier("p12b3 Not same value @ %d (error=%s) : %s == %s",
-            i, DoubleEquality.relativeError(p123.value, s), p123.value, s));
+            i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
       }
       if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta)) {
         Assertions
@@ -1005,7 +1005,7 @@ public class LVMGradientProcedureTest {
       // Sometimes they are not different.
 
       p12m3.gradient(a2peaks);
-      s = p12m3.value;
+      value = p12m3.value;
       System.arraycopy(p12m3.beta, 0, beta, 0, p12m3.beta.length);
       alpha = p12m3.getAlphaMatrix();
 
@@ -1015,9 +1015,9 @@ public class LVMGradientProcedureTest {
       // ExtraAssertions.fail has been changed for TestLog.logFailure
 
       if (type != Type.LSQ) {
-        if (eq.almostEqualRelativeOrAbsolute(p123.value, s)) {
+        if (eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
           logger.log(TestLogUtils.getFailRecord("p12b3 Same value @ %d (error=%s) : %s == %s", i,
-              DoubleEquality.relativeError(p123.value, s), p123.value, s));
+              DoubleEquality.relativeError(p123.value, value), p123.value, value));
         }
         if (eq.almostEqualRelativeOrAbsolute(beta, p123.beta)) {
           logger.log(TestLogUtils.getFailRecord("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
@@ -1050,9 +1050,9 @@ public class LVMGradientProcedureTest {
               dj, error, Arrays.toString(alpha[dj]), Arrays.toString(m123[dj])));
         }
       } else {
-        if (!eq.almostEqualRelativeOrAbsolute(p123.value, s)) {
+        if (!eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
           logger.log(TestLogUtils.getFailRecord("p12b3 Not same value @ %d (error=%s) : %s == %s",
-              i, DoubleEquality.relativeError(p123.value, s), p123.value, s));
+              i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
         }
         if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta)) {
           logger
@@ -1118,7 +1118,7 @@ public class LVMGradientProcedureTest {
    * @param randomiseParams Set to true to randomise the params
    * @return the double[]
    */
-  private double[] doubleCreateGaussianData(UniformRandomProvider r, int npeaks, double[] params,
+  private double[] doubleCreateGaussianData(UniformRandomProvider rng, int npeaks, double[] params,
       boolean randomiseParams) {
     final int n = blockWidth * blockWidth;
 
@@ -1126,23 +1126,23 @@ public class LVMGradientProcedureTest {
     final ErfGaussian2DFunction func =
         (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth,
             GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
-    params[0] = random(r, background);
+    params[0] = random(rng, background);
     for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
-      params[j + Gaussian2DFunction.SIGNAL] = random(r, signal);
-      params[j + Gaussian2DFunction.X_POSITION] = random(r, xpos);
-      params[j + Gaussian2DFunction.Y_POSITION] = random(r, ypos);
-      params[j + Gaussian2DFunction.X_SD] = random(r, xwidth);
-      params[j + Gaussian2DFunction.Y_SD] = random(r, ywidth);
+      params[j + Gaussian2DFunction.SIGNAL] = random(rng, signal);
+      params[j + Gaussian2DFunction.X_POSITION] = random(rng, xpos);
+      params[j + Gaussian2DFunction.Y_POSITION] = random(rng, ypos);
+      params[j + Gaussian2DFunction.X_SD] = random(rng, xwidth);
+      params[j + Gaussian2DFunction.Y_SD] = random(rng, ywidth);
     }
 
     if (npeaks > 1) {
       // Move the peaks around so they do not overlap
       final double[] shift = SimpleArrayUtils.newArray(npeaks, -2, 4.0 / (npeaks - 1));
-      RandomUtils.shuffle(shift, r);
+      RandomUtils.shuffle(shift, rng);
       for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
         params[j + Gaussian2DFunction.X_POSITION] += shift[i];
       }
-      RandomUtils.shuffle(shift, r);
+      RandomUtils.shuffle(shift, rng);
       for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
         params[j + Gaussian2DFunction.Y_POSITION] += shift[i];
       }
@@ -1150,7 +1150,7 @@ public class LVMGradientProcedureTest {
 
     final double[] y = new double[n];
     final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
     func.initialise(params);
     for (int i = 0; i < y.length; i++) {
       // Add random Poisson noise
@@ -1159,27 +1159,27 @@ public class LVMGradientProcedureTest {
     }
 
     if (randomiseParams) {
-      params[0] = random(r, params[0]);
+      params[0] = random(rng, params[0]);
       for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
-        params[j + Gaussian2DFunction.SIGNAL] = random(r, params[j + Gaussian2DFunction.SIGNAL]);
+        params[j + Gaussian2DFunction.SIGNAL] = random(rng, params[j + Gaussian2DFunction.SIGNAL]);
         params[j + Gaussian2DFunction.X_POSITION] =
-            random(r, params[j + Gaussian2DFunction.X_POSITION]);
+            random(rng, params[j + Gaussian2DFunction.X_POSITION]);
         params[j + Gaussian2DFunction.Y_POSITION] =
-            random(r, params[j + Gaussian2DFunction.Y_POSITION]);
-        params[j + Gaussian2DFunction.X_SD] = random(r, params[j + Gaussian2DFunction.X_SD]);
-        params[j + Gaussian2DFunction.Y_SD] = random(r, params[j + Gaussian2DFunction.Y_SD]);
+            random(rng, params[j + Gaussian2DFunction.Y_POSITION]);
+        params[j + Gaussian2DFunction.X_SD] = random(rng, params[j + Gaussian2DFunction.X_SD]);
+        params[j + Gaussian2DFunction.Y_SD] = random(rng, params[j + Gaussian2DFunction.Y_SD]);
       }
     }
 
     return y;
   }
 
-  protected int[] createData(UniformRandomProvider r, int npeaks, int iter,
+  protected int[] createData(UniformRandomProvider rng, int npeaks, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList) {
-    return createData(r, npeaks, iter, paramsList, yList, true);
+    return createData(rng, npeaks, iter, paramsList, yList, true);
   }
 
-  protected int[] createData(UniformRandomProvider r, int npeaks, int iter,
+  protected int[] createData(UniformRandomProvider rng, int npeaks, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList, boolean randomiseParams) {
     final int[] x = new int[blockWidth * blockWidth];
     for (int i = 0; i < x.length; i++) {
@@ -1187,14 +1187,14 @@ public class LVMGradientProcedureTest {
     }
     for (int i = 0; i < iter; i++) {
       final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
-      final double[] y = doubleCreateGaussianData(r, npeaks, params, randomiseParams);
+      final double[] y = doubleCreateGaussianData(rng, npeaks, params, randomiseParams);
       paramsList.add(params);
       yList.add(y);
     }
     return x;
   }
 
-  protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter,
+  protected int[] createFakeData(UniformRandomProvider rng, int nparams, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList) {
     final int[] x = new int[blockWidth * blockWidth];
     for (int i = 0; i < x.length; i++) {
@@ -1202,23 +1202,23 @@ public class LVMGradientProcedureTest {
     }
     for (int i = 0; i < iter; i++) {
       final double[] params = new double[nparams];
-      final double[] y = createFakeData(r, params);
+      final double[] y = createFakeData(rng, params);
       paramsList.add(params);
       yList.add(y);
     }
     return x;
   }
 
-  private double[] createFakeData(UniformRandomProvider r, double[] params) {
+  private double[] createFakeData(UniformRandomProvider rng, double[] params) {
     final int n = blockWidth * blockWidth;
 
     for (int i = 0; i < params.length; i++) {
-      params[i] = r.nextDouble();
+      params[i] = rng.nextDouble();
     }
 
     final double[] y = new double[n];
     for (int i = 0; i < y.length; i++) {
-      y[i] = r.nextDouble();
+      y[i] = rng.nextDouble();
     }
 
     return y;

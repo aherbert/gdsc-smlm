@@ -30,13 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
  * Gets a double data value from a result.
  */
 public abstract class PeakResultDataDouble implements PeakResultData<Double> {
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "";
   }
 
-  /** {@inheritDoc} */
   @Override
   public Class<?> getValueClass() {
     return Double.class;

@@ -47,7 +47,6 @@ public class NBFixedGaussian2DFunction extends FixedGaussian2DFunction {
     super(numberOfPeaks, maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new NBFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);

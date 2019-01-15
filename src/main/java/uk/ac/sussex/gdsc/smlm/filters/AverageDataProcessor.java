@@ -103,7 +103,6 @@ public class AverageDataProcessor extends DataProcessor {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public AverageDataProcessor copy() {
     return new AverageDataProcessor(this);
@@ -123,13 +122,11 @@ public class AverageDataProcessor extends DataProcessor {
     return smooth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(float[] weights, int width, int height) {
     final BaseWeightedFilter f = getFilter();
@@ -138,14 +135,12 @@ public class AverageDataProcessor extends DataProcessor {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasWeights() {
     final BaseWeightedFilter f = getFilter();
     return (f != null && f.hasWeights());
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] process(float[] data, int width, int height) {
     float[] smoothData = data;
@@ -201,13 +196,11 @@ public class AverageDataProcessor extends DataProcessor {
     return smooth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return "Average";
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
@@ -215,7 +208,6 @@ public class AverageDataProcessor extends DataProcessor {
     return list;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSpread() {
     return 2 * smooth + 1;

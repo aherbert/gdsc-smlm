@@ -156,7 +156,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
   private final SpotFilterHelper spotFilterHelper = new SpotFilterHelper();
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -175,7 +174,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     return flags;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
     this.o = imp.getOverlay();
@@ -307,7 +305,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     return DONE;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     if (refreshing) {
@@ -369,7 +366,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
   private FitEngineSettings lastFitEngineSettings;
   private PSF lastPSF;
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     if (refreshing) {
@@ -811,7 +807,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     o.add(roi);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setNPasses(int passes) {
     // Nothing to do
@@ -914,13 +909,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     textBorder.setText("" + config.getBorder());
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitConfiguration getFitConfiguration() {
     return fitConfig;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void optionCollected(OptionCollectedEvent event) {
     // Just run on the current processor

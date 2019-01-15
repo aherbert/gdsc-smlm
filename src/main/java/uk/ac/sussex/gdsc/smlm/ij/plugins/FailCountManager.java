@@ -330,7 +330,6 @@ public class FailCountManager implements PlugIn {
 
   private FailCountManagerSettings.Builder settings;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

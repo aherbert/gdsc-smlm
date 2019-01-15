@@ -3403,7 +3403,6 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -4007,7 +4006,6 @@ public class OPTICS implements PlugIn {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void optionCollected(OptionCollectedEvent event) {
       // This occurs when any of the additional options have changed.

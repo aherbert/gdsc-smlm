@@ -116,7 +116,6 @@ public class CMOSAnalysis implements PlugIn {
       this.photons = photons;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       // Avoid the status bar talking to the current image
@@ -248,7 +247,6 @@ public class CMOSAnalysis implements PlugIn {
       this.moment = moment.newInstance();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -379,7 +377,6 @@ public class CMOSAnalysis implements PlugIn {
     lastNThreads = this.nThreads;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

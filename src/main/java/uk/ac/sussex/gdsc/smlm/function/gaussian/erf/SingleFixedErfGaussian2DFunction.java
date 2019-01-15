@@ -78,7 +78,6 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
     return new SingleFixedErfGaussian2DFunction(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise1(double[] a) {
     create1Arrays();
@@ -99,7 +98,6 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
     createFirstOrderTables(one_sSqrt2, one_2ss, I_sSqrt2pi, deltaEy, du_dty, ty);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise2(double[] a) {
     create2Arrays();
@@ -123,7 +121,6 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
         d2u_dty2, ty);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialiseExtended2(double[] a) {
     initialise2(a);
@@ -281,19 +278,16 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
     return 3;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return 4;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -310,7 +304,6 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -331,7 +324,6 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
     final int n = getNumberOfGradients();

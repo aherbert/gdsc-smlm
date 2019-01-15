@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.data.DataException;
-
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
@@ -36,6 +34,8 @@ import java.util.Comparator;
  */
 public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore
     implements PeakResultStoreList {
+  private static final String IMMUTABLE_MESSAGE = "This result store is immutable";
+
   private final PeakResultStoreList store;
 
   /**
@@ -55,24 +55,22 @@ public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore
 
   @Override
   public PeakResult remove(int index) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void remove(int fromIndex, int toIndex) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void sort() {
-    // store.sort();
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void sort(Comparator<PeakResult> comparator) {
-    // store.sort(comparator);
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
@@ -87,14 +85,12 @@ public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore
 
   @Override
   public void shuffle(final RandomGenerator randomSource) {
-    // store.shuffle(randomGenerator);
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void shuffle(UniformRandomProvider randomSource) {
-    // store.shuffle(randomSource);
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override

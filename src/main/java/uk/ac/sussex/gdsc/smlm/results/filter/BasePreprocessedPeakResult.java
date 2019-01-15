@@ -186,157 +186,131 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
     return (float) (f * f);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFrame() {
     return frame;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getUniqueId() {
     return uniqueId;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getId() {
     return id;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getCandidateId() {
     return candidateId;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getSignal() {
     return signal;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getMeanSignal() {
     return meanSignal;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getSNR() {
     return snr;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getNoise() {
     return noise;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLocationVariance() {
     return variance;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLocationVariance2() {
     return variance2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLocationVarianceCRLB() {
     return varianceCRLB;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getSD() {
     return sd;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getBackground() {
     return b;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getAmplitude() {
     return amp;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getAngle() {
     return angle;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getX() {
     return x;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getY() {
     return y;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getZ() {
     return z;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getXRelativeShift2() {
     return xshift2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getYRelativeShift2() {
     return yshift2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getXSD() {
     return xsd;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getYSD() {
     return ysd;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getXSDFactor() {
     return xwf;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getYSDFactor() {
     return ywf;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isExistingResult() {
     return existingResult;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isNewResult() {
     return newResult;
@@ -373,19 +347,16 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
     return assignments != null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setAssignments(ResultAssignment[] assignments) {
     this.assignments = assignments;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean ignore() {
     return ignore;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setIgnore(boolean ignore) {
     this.ignore = ignore;
@@ -410,19 +381,16 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
     return p;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getValidationResult() {
     return validationResult;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setValidationResult(int validationResult) {
     this.validationResult = validationResult;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isNotDuplicate() {
     return notDuplicate;

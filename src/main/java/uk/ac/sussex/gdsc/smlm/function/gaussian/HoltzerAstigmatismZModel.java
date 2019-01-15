@@ -174,43 +174,36 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
     return s0 * Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSx(double z) {
     return getS(s0x, z - gamma, oneOverD2, ax, bx);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSx(double z, double[] dsdz) {
     return getS1(s0x, z - gamma, oneOverD2, ax, bx, dsdz);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSx2(double z, double[] dsdz) {
     return getS2(s0x, z - gamma, oneOverD2, ax, bx, dsdz);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSy(double z) {
     return getS(s0y, z + gamma, oneOverD2, ay, by);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSy(double z, double[] dsdz) {
     return getS1(s0y, z + gamma, oneOverD2, ay, by, dsdz);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSy2(double z, double[] dsdz) {
     return getS2(s0y, z + gamma, oneOverD2, ay, by, dsdz);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("s0x=%f s0y=%f gamma=%f 1/d^2=%f Ax=%f Bx=%f Ay=%f By=%f", s0x, s0y, gamma,

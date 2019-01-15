@@ -644,7 +644,6 @@ public class JumpDistanceAnalysisTest {
       return true;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int hashCode() {
       int hash = 1;

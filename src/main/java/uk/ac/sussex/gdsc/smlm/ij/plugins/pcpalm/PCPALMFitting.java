@@ -146,7 +146,6 @@ public class PCPALMFitting implements PlugIn {
   private static double previous_peakDensity;
   private static boolean previous_spatialDomain;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1582,7 +1581,6 @@ public class PCPALMFitting implements PlugIn {
       return evaluate(r, parameters[0], parameters[1]);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       increment();
@@ -1765,7 +1763,6 @@ public class PCPALMFitting implements PlugIn {
     // Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
     // Use the deprecated API since the new one is not yet documented.
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       increment();
@@ -2063,7 +2060,6 @@ public class PCPALMFitting implements PlugIn {
    */
   private class EmulsionModelFunctionGradient extends EmulsionModelFunction
       implements MultivariateVectorFunction {
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       increment();

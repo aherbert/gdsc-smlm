@@ -132,7 +132,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     sumLogFactorialK = sum;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double computeLikelihood() {
     // Compute the negative log-likelihood to be minimised
@@ -158,7 +157,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     return ll + sumLogFactorialK;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double computeLikelihood(double[] gradient) {
     // Compute the negative log-likelihood to be minimised
@@ -205,7 +203,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     return ll + sumLogFactorialK;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double computeLikelihood(int i) {
     // Function now computes expected poisson mean without gain
@@ -227,7 +224,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
         - logAlpha;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double computeLikelihood(double[] gradient, int i) {
     for (int j = 0; j < nVariables; j++) {
@@ -298,7 +294,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     return FastMath.exp(-nll);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean canComputeGradient() {
     return true;

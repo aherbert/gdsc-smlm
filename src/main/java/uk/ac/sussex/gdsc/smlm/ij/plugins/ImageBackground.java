@@ -51,7 +51,6 @@ public class ImageBackground implements PlugInFilter {
   private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private ImagePlus imp;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -96,7 +95,6 @@ public class ImageBackground implements PlugInFilter {
     return flags;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     final ImageProcessor median = getProjection();

@@ -110,13 +110,11 @@ public enum ParameterType implements NamedObject {
     return shortName;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return name;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getShortName() {
     return shortName;

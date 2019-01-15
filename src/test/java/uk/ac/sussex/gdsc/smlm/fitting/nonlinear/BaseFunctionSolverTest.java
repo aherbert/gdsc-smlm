@@ -63,7 +63,6 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,7 +70,7 @@ import java.util.logging.Logger;
  * Base class for testing the function solvers.
  */
 @SuppressWarnings({"javadoc"})
-public abstract class BaseFunctionSolverTest implements Function<RandomSeed, double[][]> {
+public abstract class BaseFunctionSolverTest {
   protected static Logger logger;
 
   @BeforeAll
@@ -175,12 +174,13 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
   private static ConcurrentHashMap<RandomSeed, double[][]> ConcurrentHashMap =
       new ConcurrentHashMap<>();
 
-  private double[] getWeights(RandomSeed seed, NoiseModel noiseModel) {
+  private static double[] getWeights(RandomSeed seed, NoiseModel noiseModel) {
     final int index = noiseModel.ordinal();
     if (weights[index] == null) {
       if (noiseModel == NoiseModel.SCMOS) {
         // Special case of per-pixel random weights
-        final double[][] data = ConcurrentHashMap.computeIfAbsent(seed, this);
+        final double[][] data =
+            ConcurrentHashMap.computeIfAbsent(seed, BaseFunctionSolverTest::createData);
         return data[0];
       }
       computeWeights(noiseModel, index);
@@ -188,12 +188,13 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     return weights[index];
   }
 
-  private double[] getNoise(RandomSeed seed, NoiseModel noiseModel) {
+  private static double[] getNoise(RandomSeed seed, NoiseModel noiseModel) {
     final int index = noiseModel.ordinal();
     if (noise[index] == null) {
       if (noiseModel == NoiseModel.SCMOS) {
         // Special case of per-pixel random noise
-        final double[][] data = ConcurrentHashMap.computeIfAbsent(seed, this);
+        final double[][] data =
+            ConcurrentHashMap.computeIfAbsent(seed, BaseFunctionSolverTest::createData);
         return data[1];
       }
       computeWeights(noiseModel, index);
@@ -229,8 +230,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     Arrays.fill(noise, sd);
   }
 
-  @Override
-  public double[][] apply(RandomSeed source) {
+  private static double[][] createData(RandomSeed source) {
     // Per observation read noise.
     // This is generated once so create the randon generator here.
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
@@ -266,7 +266,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     // Allow reporting the fit deviations
     final boolean report = false;
     double[] crlb = null;
-    SimpleArrayMoment m = null;
+    SimpleArrayMoment moment = null;
 
     final double[] noise = getNoise(seed, noiseModel);
     if (solver.isWeighted()) {
@@ -294,7 +294,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
         // against the same data.
         // It should be repeated against different data generated with constant
         // parameters and variable noise.
-        m = new SimpleArrayMoment();
+        moment = new SimpleArrayMoment();
       }
       final double[] data = drawGaussian(expected, noise, noiseModel, rg);
       for (final double db : base) {
@@ -320,7 +320,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
               }
               // Store the deviations
               if (report) {
-                m.add(fp);
+                moment.add(fp);
               }
             }
           }
@@ -330,7 +330,7 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
       if (report) {
         logger.info(FunctionUtils.getSupplier("%s %s %f : CRLB = %s, Deviations = %s",
             solver.getClass().getSimpleName(), noiseModel, s, Arrays.toString(crlb),
-            Arrays.toString(m.getStandardDeviation())));
+            Arrays.toString(moment.getStandardDeviation())));
       }
     }
   }
@@ -516,13 +516,6 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     // p));
   }
 
-  static double distance(double[] o, double[] e) {
-    final double dx = o[Gaussian2DFunction.X_POSITION] - e[Gaussian2DFunction.X_POSITION];
-    final double dy = o[Gaussian2DFunction.Y_POSITION] - e[Gaussian2DFunction.Y_POSITION];
-    // Use the signs of the coords to assign a direction vector
-    return Math.sqrt(dx * dx + dy * dy) * Math.signum(Math.signum(dy) * Math.signum(dx));
-  }
-
   private static void compare(double[] o1, double[] e1, double[] o2, double[] e2, int i,
       Statistics stats1, Statistics stats2) {
     compare(o1[i], e1[i], o2[i], e2[i], stats1, stats2);
@@ -544,10 +537,10 @@ public abstract class BaseFunctionSolverTest implements Function<RandomSeed, dou
     return p;
   }
 
-  double[] addBiasToParams(double[] p, double bias) {
-    p = p.clone();
-    p[Gaussian2DFunction.BACKGROUND] += bias;
-    return p;
+  double[] addBiasToParams(double[] params, double bias) {
+    params = params.clone();
+    params[Gaussian2DFunction.BACKGROUND] += bias;
+    return params;
   }
 
   double[] fitGaussian(FunctionSolver solver, double[] data, double[] params, double[] expected) {

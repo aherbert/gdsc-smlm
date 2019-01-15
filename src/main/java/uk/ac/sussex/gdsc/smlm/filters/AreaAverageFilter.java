@@ -345,7 +345,6 @@ public class AreaAverageFilter extends BaseWeightedFilter {
     this.simpleInterpolation = simpleInterpolation;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void newWeights() {
     sumFilter1.setWeights(weights, weightWidth, weightHeight);

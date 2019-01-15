@@ -35,7 +35,6 @@ import ij.process.ImageProcessor;
 public class BinaryDisplay implements PlugInFilter {
   private ImagePlus imp;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -57,7 +56,6 @@ public class BinaryDisplay implements PlugInFilter {
     return DOES_ALL;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     // float min = Float.POSITIVE_INFINITY;

@@ -36,7 +36,6 @@ import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
@@ -62,8 +61,6 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -274,7 +271,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       requireSNR = (levels.length > 0);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -502,7 +498,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -537,7 +532,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       return;
     }
 
-    run();
+    runAnalysis();
   }
 
   private boolean showDialog() {
@@ -662,15 +657,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * Show progress.
    */
   private synchronized void showProgress() {
-    if (progress % stepProgress == 0) {
-      if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
-        IJ.showProgress(progress, totalProgress);
-      }
+    if (progress % stepProgress == 0
+        && ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
+      IJ.showProgress(progress, totalProgress);
     }
     progress++;
   }
 
-  private void run() {
+  private void runAnalysis() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
     if (lastId != simulationParameters.id) {

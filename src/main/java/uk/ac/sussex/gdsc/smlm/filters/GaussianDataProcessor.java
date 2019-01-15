@@ -61,7 +61,6 @@ public class GaussianDataProcessor extends DataProcessor {
     filter = source.filter.copy();
   }
 
-  /** {@inheritDoc} */
   @Override
   public GaussianDataProcessor copy() {
     return new GaussianDataProcessor(this);
@@ -89,25 +88,21 @@ public class GaussianDataProcessor extends DataProcessor {
     return sigma;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(float[] weights, int width, int height) {
     filter.setWeights(weights, width, height);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasWeights() {
     return filter.hasWeights();
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] process(float[] data, int width, int height) {
     float[] smoothData = data;
@@ -123,13 +118,11 @@ public class GaussianDataProcessor extends DataProcessor {
     return smoothData;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return "Gaussian";
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
@@ -138,7 +131,6 @@ public class GaussianDataProcessor extends DataProcessor {
     return list;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSpread() {
     return 6 * sigma;

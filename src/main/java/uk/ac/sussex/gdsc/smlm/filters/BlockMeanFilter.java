@@ -54,7 +54,6 @@ public class BlockMeanFilter extends BlockFilter {
     return new BlockMeanFilter(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Normaliser computeWeightedNormaliser(float n) {
     final float[] divisor = weights.clone();
@@ -69,7 +68,6 @@ public class BlockMeanFilter extends BlockFilter {
     return new PerPixelNormaliser(divisor);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Normaliser computeNormaliser(float n) {
     return new FixedNormaliser(pow2(2 * n + 1));

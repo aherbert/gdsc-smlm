@@ -59,7 +59,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     return new MultiFreeCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
     tB = a[Gaussian2DFunction.BACKGROUND];
@@ -93,7 +92,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     return sum;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise1(double[] a) {
     create1Arrays();
@@ -113,7 +111,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise2(double[] a) {
     create2Arrays();
@@ -135,7 +132,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialiseExtended2(double[] a) {
     createEx2Arrays();
@@ -443,7 +439,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda) {
     // Unpack the predictor into the dimensions
@@ -465,7 +460,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     return I;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
@@ -528,7 +522,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     return 5;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -573,7 +566,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -599,7 +591,6 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
     final int ng = getNumberOfGradients();

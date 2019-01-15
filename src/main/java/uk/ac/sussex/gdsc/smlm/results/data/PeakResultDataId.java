@@ -30,13 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Gets the Id from a result.
  */
 public class PeakResultDataId extends PeakResultDataInteger {
-  /** {@inheritDoc} */
   @Override
   public Integer getValue(PeakResult result) {
     return result.getId();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "ID";

@@ -66,7 +66,6 @@ public class MedianFilter implements PlugInFilter {
   private int counter;
   private int size;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -218,7 +217,6 @@ public class MedianFilter implements PlugInFilter {
       this.n = n;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       showProgressSingle();
@@ -256,7 +254,6 @@ public class MedianFilter implements PlugInFilter {
       this.end = end;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       if (IJ.escapePressed()) {
@@ -444,7 +441,6 @@ public class MedianFilter implements PlugInFilter {
       this.n = n;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       showProgressSingle();

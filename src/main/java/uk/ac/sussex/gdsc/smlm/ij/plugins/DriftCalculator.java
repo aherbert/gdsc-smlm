@@ -174,7 +174,6 @@ public class DriftCalculator implements PlugIn {
       this.to = to;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       for (int i = from; i < to && i < ip.length; i++) {
@@ -213,7 +212,6 @@ public class DriftCalculator implements PlugIn {
       this.to = to;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       for (int i = from; i < to && i < ip.length; i++) {
@@ -250,7 +248,6 @@ public class DriftCalculator implements PlugIn {
       this.dy = dy;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       incrementProgress();
@@ -283,7 +280,6 @@ public class DriftCalculator implements PlugIn {
       this.to = to;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       for (int i = from; i < to && i < images.length; i++) {
@@ -295,7 +291,6 @@ public class DriftCalculator implements PlugIn {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

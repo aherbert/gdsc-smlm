@@ -301,13 +301,11 @@ public class MultiHysteresisFilter extends HysteresisFilter {
         + " Any results outside the weak limits are excluded. " + super.getDescription();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 12 + super.getNumberOfParameters();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     if (index < super.getNumberOfParameters()) {
@@ -376,7 +374,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -437,7 +434,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
       WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
       PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE};
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -459,7 +455,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
     return create(parameters);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new MultiHysteresisFilter(parameters[0], (int) parameters[1], parameters[2],
@@ -468,7 +463,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
         parameters[12], parameters[13], parameters[14], parameters[15]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     super.weakestParameters(parameters);
@@ -489,7 +483,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
     parameters[15] = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Chromosome<FilterScore> newChromosome(double[] sequence) {
     // Override the default Hysteresis filter implementation for speed since this is the filter we
@@ -500,7 +493,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
         sequence[12], sequence[13]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
@@ -510,7 +502,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
         ShiftFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {getDefaultSearchRange(), getDefaultTimeRange(), SignalFilter.DEFAULT_RANGE,

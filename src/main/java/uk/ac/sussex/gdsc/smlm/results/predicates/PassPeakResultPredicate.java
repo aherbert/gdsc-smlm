@@ -26,11 +26,12 @@ package uk.ac.sussex.gdsc.smlm.results.predicates;
 
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
+import java.util.function.Predicate;
+
 /**
  * Always pass a result.
  */
-public class PassPeakResultPredicate implements PeakResultPredicate {
-  /** {@inheritDoc} */
+public class PassPeakResultPredicate implements Predicate<PeakResult> {
   @Override
   public boolean test(PeakResult peakResult) {
     return true;

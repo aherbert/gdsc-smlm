@@ -75,7 +75,6 @@ public class CreateFilters implements PlugIn, ItemListener {
 
   private final Pattern pattern = Pattern.compile("(\\S+)=\"(\\S+):(\\S+):(\\S+)\"(\\S*)");
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -354,7 +353,6 @@ public class CreateFilters implements PlugIn, ItemListener {
       this.attributeSubstitutions = attributeSubstitutions;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) {
       sb.append("<").append(qName);
@@ -374,7 +372,6 @@ public class CreateFilters implements PlugIn, ItemListener {
       sb.append(">");
     }
 
-    /** {@inheritDoc} */
     @Override
     public void endElement(String uri, String localName, String qName) {
       sb.append("</").append(qName).append(">");

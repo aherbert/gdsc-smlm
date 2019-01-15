@@ -55,7 +55,6 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
   private boolean preview;
   private Label label;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -242,7 +241,6 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
     this.pfr = pfr;
@@ -274,7 +272,6 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     return IJ.setupDialog(imp, FLAGS);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     label.setText("");
@@ -286,7 +283,6 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setNPasses(int passes) {
     // Ignore

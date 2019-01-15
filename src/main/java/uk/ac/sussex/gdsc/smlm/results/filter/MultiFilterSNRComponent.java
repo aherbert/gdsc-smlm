@@ -39,13 +39,11 @@ public class MultiFilterSNRComponent extends MultiFilterComponent {
     this.snr = snr;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     return peak.getSNR() < this.snr;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return IDirectFilter.V_SNR;

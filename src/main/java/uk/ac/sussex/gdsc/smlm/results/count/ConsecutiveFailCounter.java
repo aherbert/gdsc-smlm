@@ -58,19 +58,16 @@ public class ConsecutiveFailCounter extends BaseFailCounter {
     return new ConsecutiveFailCounter(Math.max(0, allowedFailures));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass() {
     failCount = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass(int n) {
     failCount = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail() {
     if (failCount == Integer.MAX_VALUE) {
@@ -79,7 +76,6 @@ public class ConsecutiveFailCounter extends BaseFailCounter {
     failCount++;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail(int n) {
     if (n < 0) {
@@ -91,19 +87,16 @@ public class ConsecutiveFailCounter extends BaseFailCounter {
     failCount += n;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isOK() {
     return failCount <= allowedFailures;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FailCounter newCounter() {
     return new ConsecutiveFailCounter(allowedFailures);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reset() {
     failCount = 0;

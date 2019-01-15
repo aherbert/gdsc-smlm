@@ -102,7 +102,6 @@ public class DoubleDHT2D extends DoubleImage2D {
     jj = source.jj;
   }
 
-  /** {@inheritDoc} */
   @Override
   public DoubleDHT2D copy() {
     return new DoubleDHT2D(this);

@@ -51,7 +51,6 @@ public abstract class MultiFilterComponentSet implements Cloneable {
    */
   abstract void replace0(MultiFilterComponent c);
 
-  /** {@inheritDoc} */
   @Override
   public MultiFilterComponentSet clone() {
     try {

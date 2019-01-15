@@ -39,13 +39,11 @@ public class MultiFilterSignalComponent extends MultiFilterComponent {
     this.signal = (float) signal;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     return peak.getSignal() < this.signal;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return IDirectFilter.V_PHOTONS;

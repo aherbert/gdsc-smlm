@@ -69,7 +69,6 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     super(title, bounds, scale);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void preBegin() {
     // this.displayFlags should be OK so don't call super.preBegin()
@@ -115,21 +114,18 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isUncalibrated() {
     // Not supported
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setUncalibrated(boolean uncalibrated) {
     throw new NotImplementedException(
         "This method is not supported. The PSF assumes the units are in pixels.");
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, float x, float y, float v) {
     if (requirePSFParameters) {
@@ -138,7 +134,6 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     add(new PeakResult(peak, x, y, v));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(float x, float y, float v) {
     if (requirePSFParameters) {
@@ -147,7 +142,6 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     add(new PeakResult(x, y, v));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int[] allpeak, float[] allx, float[] ally, float[] allv) {
     if (requirePSFParameters) {
@@ -158,7 +152,6 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(float[] allx, float[] ally, float[] allv) {
     if (requirePSFParameters) {
@@ -169,7 +162,6 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsDev) {
@@ -329,7 +321,6 @@ public class PSFImagePeakResults extends IJImagePeakResults {
     return params;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addAll(PeakResult[] results) {
     if (!imageActive) {

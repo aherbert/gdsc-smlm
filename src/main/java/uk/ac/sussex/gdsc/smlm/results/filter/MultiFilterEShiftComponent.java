@@ -42,13 +42,11 @@ public class MultiFilterEShiftComponent extends MultiFilterComponent {
     this.eoffset = Filter.getUpperSquaredLimit(eshift);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     return (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return type;

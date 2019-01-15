@@ -94,7 +94,6 @@ public class DensityImage implements PlugIn {
   private int roiImageWidth;
   private int roiImageHeight;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

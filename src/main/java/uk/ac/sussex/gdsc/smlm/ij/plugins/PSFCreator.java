@@ -250,7 +250,6 @@ public class PSFCreator implements PlugInFilter {
   private boolean plotLock3;
   private boolean plotLock4;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -475,7 +474,6 @@ public class PSFCreator implements PlugInFilter {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     if (settings.getMode() == MODE_FITTING) {

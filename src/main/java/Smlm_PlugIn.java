@@ -50,7 +50,6 @@ import ij.plugin.PlugIn;
  * <p>ImageJ will load this class from the plugins directory. This class can call all other plugins.
  */
 public class Smlm_PlugIn implements PlugIn {
-  /** {@inheritDoc} */
   @SuppressWarnings("unused")
   @Override
   public void run(String arg) {

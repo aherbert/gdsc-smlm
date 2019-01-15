@@ -226,13 +226,11 @@ public class FixedDimension implements Cloneable, Dimension {
     return upper;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isAtBounds(double v) {
     return (v <= lower || v >= upper);
   }
 
-  /** {@inheritDoc} */
   @Override
   public FixedDimension clone() {
     try {
@@ -242,19 +240,16 @@ public class FixedDimension implements Cloneable, Dimension {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMin() {
     return min;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMax() {
     return max;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return active;

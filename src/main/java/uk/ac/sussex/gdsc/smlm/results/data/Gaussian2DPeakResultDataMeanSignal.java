@@ -41,14 +41,12 @@ public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat {
   /** The index of the y width. */
   static final int j = i + 1;
 
-  /** {@inheritDoc} */
   @Override
   public Float getValue(PeakResult result) {
     return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getIntensity(),
         result.getParameter(i), result.getParameter(j)));
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "Gaussian2D mean signal";

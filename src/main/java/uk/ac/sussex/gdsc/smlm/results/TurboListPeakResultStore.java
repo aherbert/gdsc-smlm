@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import org.apache.commons.math3.random.RandomAdaptor;
@@ -65,37 +64,31 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     this.results = new TurboList<>(store.results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult get(int index) {
     return results.get(index);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return results.size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean add(PeakResult result) {
     return results.add(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addCollection(Collection<PeakResult> results) {
     return this.results.addAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addArray(PeakResult[] results) {
     return this.results.addAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addStore(PeakResultStore results) {
     if (results instanceof TurboListPeakResultStore) {
@@ -104,13 +97,11 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     return addArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult remove(int index) {
     return results.remove(index);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void remove(int fromIndex, int toIndex) {
     if (fromIndex > toIndex) {
@@ -121,25 +112,21 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean remove(PeakResult result) {
     return results.remove(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeCollection(Collection<PeakResult> results) {
     return this.results.removeAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeArray(PeakResult[] results) {
     return this.results.removeAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -148,19 +135,16 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     return removeArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainCollection(Collection<PeakResult> results) {
     return this.results.retainAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainArray(PeakResult[] results) {
     return this.results.retainAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -169,62 +153,49 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     return retainArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public void clear() {
     results.clear();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void trimToSize() {
     results.trimToSize();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void sort(Comparator<PeakResult> comparator) {
     Collections.sort(results, comparator);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult[] toArray() {
     return results.toArray(new PeakResult[size()]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy() {
     return new TurboListPeakResultStore(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy(boolean deepCopy) {
     if (deepCopy) {
       final TurboListPeakResultStore copy = new TurboListPeakResultStore(size());
       for (int i = 0, size = size(); i < size; i++) {
-        copy.add(results.getf(i).clone());
+        copy.add(results.getf(i).copy());
       }
       return copy;
     }
     return copy();
   }
 
-  /** {@inheritDoc} */
   @Override
-  public boolean removeIf(final PeakResultPredicate filter) {
+  public boolean removeIf(final Predicate<PeakResult> filter) {
     // Delegate to the list implementation
-    return this.results.removeIf(new Predicate<PeakResult>() {
-      @Override
-      public boolean test(PeakResult t) {
-        return filter.test(t);
-      }
-    });
+    return this.results.removeIf(filter);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(PeakResultProcedure procedure) {
     for (int i = 0, size = size(); i < size; i++) {
@@ -232,9 +203,8 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     }
   }
 
-  /** {@inheritDoc} */
   @Override
-  public PeakResult[] subset(PeakResultPredicate filter) {
+  public PeakResult[] subset(Predicate<PeakResult> filter) {
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
     for (int i = 0, size = size(); i < size; i++) {
       if (filter.test(results.getf(i))) {
@@ -244,7 +214,6 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     return list.toArray();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void shuffle(RandomGenerator randomSource) {
     Collections.shuffle(results, RandomAdaptor.createAdaptor(randomSource));
@@ -256,32 +225,27 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
         RandomAdaptor.createAdaptor(new RandomGeneratorAdapter(randomSource)));
   }
 
-  /** {@inheritDoc} */
   @Override
   public int indexOf(PeakResult result) {
     return results.indexOf(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lastIndexOf(PeakResult result) {
     return results.lastIndexOf(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean contains(PeakResult result) {
     return results.contains(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   @SuppressWarnings("unchecked")
   public Collection<PeakResult> getCollection() {
     return (Collection<PeakResult>) results.clone();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Collection<PeakResult> getCollectionReference() {
     return results;

@@ -231,7 +231,6 @@ public class CameraModelAnalysis
     return random;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -239,7 +238,6 @@ public class CameraModelAnalysis
     return NO_IMAGE_REQUIRED;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
     settings = SettingsManager.readCameraModelAnalysisSettings(0).toBuilder();
@@ -320,7 +318,6 @@ public class CameraModelAnalysis
     return DONE;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     dirty = true;
@@ -357,13 +354,11 @@ public class CameraModelAnalysis
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setNPasses(int passes) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     execute();

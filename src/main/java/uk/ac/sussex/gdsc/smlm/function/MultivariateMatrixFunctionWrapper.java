@@ -42,7 +42,6 @@ public class MultivariateMatrixFunctionWrapper extends NonLinearFunctionWrapper
     super(fun, a, n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[][] value(double[] point) {
     return computeJacobian(point);

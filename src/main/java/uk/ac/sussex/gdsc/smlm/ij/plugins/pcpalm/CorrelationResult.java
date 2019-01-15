@@ -103,7 +103,6 @@ public class CorrelationResult implements Comparable<CorrelationResult> {
     this.spatialDomain = spatialDomain;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int compareTo(CorrelationResult o) {
     return Integer.compare(id, o.id);

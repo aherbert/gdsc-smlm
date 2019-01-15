@@ -530,7 +530,6 @@ public class BinomialFitter {
       super(pvalues, trials, zeroTruncated);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double[] parameters) {
       final double[] p2 = getP(parameters[0]);
@@ -594,7 +593,6 @@ public class BinomialFitter {
       return w;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] point) {
       return getP(point[0]);

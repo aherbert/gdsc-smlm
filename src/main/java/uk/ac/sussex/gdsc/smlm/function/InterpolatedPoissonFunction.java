@@ -75,7 +75,6 @@ public class InterpolatedPoissonFunction
     pd = (nonInteger) ? null : new CustomPoissonDistribution(null, 1);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double likelihood(double x, double mu) {
     if (x < 0 || mu <= 0) {
@@ -203,7 +202,6 @@ public class InterpolatedPoissonFunction
     return Gamma.gamma(value + 1);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double logLikelihood(double x, double mu) {
     if (x < 0 || mu <= 0) {

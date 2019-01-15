@@ -79,7 +79,6 @@ public class FilterResults implements PlugIn {
   private PrecisionResultProcedure pp;
   private WidthResultProcedure wp;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

@@ -38,7 +38,6 @@ import java.awt.event.ActionListener;
  * A simple class used to test plugin functionality.
  */
 public class Test_PlugIn implements PlugIn {
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     // The parameters that have options must be available statically for the OptionListener

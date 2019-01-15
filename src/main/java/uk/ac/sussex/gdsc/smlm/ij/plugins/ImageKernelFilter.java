@@ -81,7 +81,6 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private ImagePlus dataImp;
   private ImagePlus kernelImp;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     if ("final".equals(arg)) {
@@ -151,7 +150,6 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     return IJ.setupDialog(imp, FLAGS);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     imageTitle = gd.getNextChoice();

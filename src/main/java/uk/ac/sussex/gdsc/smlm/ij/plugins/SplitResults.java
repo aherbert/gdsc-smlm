@@ -53,7 +53,6 @@ public class SplitResults implements PlugIn {
   private static boolean showObjectMask;
   private static boolean nonMaskDataset;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

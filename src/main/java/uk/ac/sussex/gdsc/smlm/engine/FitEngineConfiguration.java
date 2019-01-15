@@ -556,7 +556,6 @@ public class FitEngineConfiguration implements Cloneable {
     return fitEngineSettings.getDuplicateDistance().getAbsolute();
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitEngineConfiguration clone() {
     // Manual copy using the current proto objects

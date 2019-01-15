@@ -60,7 +60,6 @@ public class CircularMeanDataProcessor extends DataProcessor {
     filter = source.filter.copy();
   }
 
-  /** {@inheritDoc} */
   @Override
   public CircularMeanDataProcessor copy() {
     return new CircularMeanDataProcessor(this);
@@ -79,25 +78,21 @@ public class CircularMeanDataProcessor extends DataProcessor {
     return smooth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(float[] weights, int width, int height) {
     filter.setWeights(weights, width, height);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasWeights() {
     return filter.hasWeights();
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] process(float[] data, int width, int height) {
     float[] smoothData = data;
@@ -122,13 +117,11 @@ public class CircularMeanDataProcessor extends DataProcessor {
     return radius;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return "Circular Mean";
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
@@ -136,7 +129,6 @@ public class CircularMeanDataProcessor extends DataProcessor {
     return list;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSpread() {
     return CircularFilter.getPixelRadius(radius) * 2;

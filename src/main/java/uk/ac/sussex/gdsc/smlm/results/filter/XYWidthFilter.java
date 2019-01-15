@@ -79,21 +79,18 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using an upper XY width factor."
         + " (Width is relative to initial peak width.)";
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
     return new XYWidthFilter(updateParameter(width, delta, DEFAULT_RANGE));
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new XYWidthFilter(parameters[0]);

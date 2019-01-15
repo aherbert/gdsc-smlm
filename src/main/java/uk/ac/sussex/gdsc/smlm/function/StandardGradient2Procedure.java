@@ -62,7 +62,6 @@ public class StandardGradient2Procedure implements Gradient2Procedure {
     return values;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] gradient1, double[] gradient2) {
     values[index] = value;

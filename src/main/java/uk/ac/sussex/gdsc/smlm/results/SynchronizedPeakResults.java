@@ -34,7 +34,7 @@ import java.util.Collection;
  * Wraps a peak results with synchronized methods.
  */
 public class SynchronizedPeakResults implements ThreadSafePeakResults {
-  private final PeakResults r;
+  private final PeakResults peakResults;
   private final Object lock = new Object();
 
   /**
@@ -47,7 +47,7 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults {
     if (peakResults == null) {
       throw new IllegalArgumentException("PeakResults must not be null");
     }
-    this.r = peakResults;
+    this.peakResults = peakResults;
   }
 
   /**
@@ -84,140 +84,159 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults {
     return new SynchronizedPeakResults(peakResults);
   }
 
-  //@formatter:off
-
   @Override
-  public void begin()
-  {
-    synchronized (lock)  { r.begin(); }
+  public void begin() {
+    synchronized (lock) {
+      peakResults.begin();
+    }
   }
 
   @Override
-  public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity, float[] params,
-      float[] paramsStdDev)
-  {
-    synchronized (lock)  { r.add(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev); }
+  public void add(int peak, int origX, int origY, float origValue, double error, float noise,
+      float meanIntensity, float[] params, float[] paramsStdDev) {
+    synchronized (lock) {
+      peakResults.add(peak, origX, origY, origValue, error, noise, meanIntensity, params,
+          paramsStdDev);
+    }
   }
 
   @Override
-  public void add(PeakResult result)
-  {
-    synchronized (lock)  { r.add(result); }
+  public void add(PeakResult result) {
+    synchronized (lock) {
+      peakResults.add(result);
+    }
   }
 
   @Override
-  public void addAll(Collection<PeakResult> results)
-  {
-    synchronized (lock)  { r.addAll(results); }
+  public void addAll(Collection<PeakResult> results) {
+    synchronized (lock) {
+      peakResults.addAll(results);
+    }
   }
 
   @Override
-  public void addAll(PeakResult[] results)
-  {
-    synchronized (lock)  { r.addAll(results); }
+  public void addAll(PeakResult[] results) {
+    synchronized (lock) {
+      peakResults.addAll(results);
+    }
   }
 
   @Override
-  public void addAll(PeakResultStore results)
-  {
-    synchronized (lock)  { r.addAll(results); }
+  public void addAll(PeakResultStore results) {
+    synchronized (lock) {
+      peakResults.addAll(results);
+    }
   }
 
   @Override
-  public int size()
-  {
-    synchronized (lock)  { return r.size(); }
+  public int size() {
+    synchronized (lock) {
+      return peakResults.size();
+    }
   }
 
   @Override
-  public void end()
-  {
-    synchronized (lock)  { r.end(); }
+  public void end() {
+    synchronized (lock) {
+      peakResults.end();
+    }
   }
 
   @Override
-  public boolean isActive()
-  {
-    synchronized (lock)  { return r.isActive(); }
+  public boolean isActive() {
+    synchronized (lock) {
+      return peakResults.isActive();
+    }
   }
 
   @Override
-  public void setSource(ImageSource source)
-  {
-    synchronized (lock)  { r.setSource(source); }
+  public void setSource(ImageSource source) {
+    synchronized (lock) {
+      peakResults.setSource(source);
+    }
   }
 
   @Override
-  public ImageSource getSource()
-  {
-    synchronized (lock)  { return r.getSource(); }
+  public ImageSource getSource() {
+    synchronized (lock) {
+      return peakResults.getSource();
+    }
   }
 
   @Override
-  public void setBounds(Rectangle bounds)
-  {
-    synchronized (lock)  { r.setBounds(bounds); }
+  public void setBounds(Rectangle bounds) {
+    synchronized (lock) {
+      peakResults.setBounds(bounds);
+    }
   }
 
   @Override
-  public Rectangle getBounds()
-  {
-    synchronized (lock)  { return r.getBounds(); }
+  public Rectangle getBounds() {
+    synchronized (lock) {
+      return peakResults.getBounds();
+    }
   }
 
   @Override
-  public void setCalibration(Calibration calibration)
-  {
-    synchronized (lock)  { r.setCalibration(calibration); }
+  public void setCalibration(Calibration calibration) {
+    synchronized (lock) {
+      peakResults.setCalibration(calibration);
+    }
   }
 
   @Override
-  public Calibration getCalibration()
-  {
-    synchronized (lock)  { return r.getCalibration(); }
+  public Calibration getCalibration() {
+    synchronized (lock) {
+      return peakResults.getCalibration();
+    }
   }
 
   @Override
-  public void setPSF(PSF psf)
-  {
-    synchronized (lock)  { r.setPSF(psf); }
+  public void setPSF(PSF psf) {
+    synchronized (lock) {
+      peakResults.setPSF(psf);
+    }
   }
 
   @Override
-  public PSF getPSF()
-  {
-    synchronized (lock)  { return r.getPSF(); }
+  public PSF getPSF() {
+    synchronized (lock) {
+      return peakResults.getPSF();
+    }
   }
 
   @Override
-  public void setConfiguration(String configuration)
-  {
-    synchronized (lock)  { r.setConfiguration(configuration); }
+  public void setConfiguration(String configuration) {
+    synchronized (lock) {
+      peakResults.setConfiguration(configuration);
+    }
   }
 
   @Override
-  public String getConfiguration()
-  {
-    synchronized (lock)  { return r.getConfiguration(); }
+  public String getConfiguration() {
+    synchronized (lock) {
+      return peakResults.getConfiguration();
+    }
   }
 
   @Override
-  public String getName()
-  {
-    synchronized (lock)  { return r.getName(); }
+  public String getName() {
+    synchronized (lock) {
+      return peakResults.getName();
+    }
   }
 
   @Override
-  public void setName(String name)
-  {
-    synchronized (lock)  { r.setName(name); }
+  public void setName(String name) {
+    synchronized (lock) {
+      peakResults.setName(name);
+    }
   }
 
   @Override
-  public void copySettings(PeakResults peakResults)
-  {
-    synchronized (lock)  { r.copySettings(peakResults); }
+  public void copySettings(PeakResults peakResults) {
+    synchronized (lock) {
+      peakResults.copySettings(peakResults);
+    }
   }
-
-  //@formatter:on
 }

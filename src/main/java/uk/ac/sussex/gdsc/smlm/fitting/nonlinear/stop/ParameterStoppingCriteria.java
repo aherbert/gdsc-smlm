@@ -56,7 +56,6 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
     eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(significantDigits), 1e-16);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected StringBuilder logParameters(double oldError, double newError, double[] a) {
     if (log != null) {
@@ -100,7 +99,6 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean noCoordinateChange(double[] a) {
     // Old code does not correctly compute difference in angles. This is ignored for now.

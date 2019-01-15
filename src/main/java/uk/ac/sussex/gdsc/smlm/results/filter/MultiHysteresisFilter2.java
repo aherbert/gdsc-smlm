@@ -123,7 +123,6 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter {
     return ParameterType.PRECISION2_RANGE;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new MultiHysteresisFilter2(parameters[0], (int) parameters[1], parameters[2],
@@ -132,7 +131,6 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter {
         parameters[12], parameters[13], parameters[14], parameters[15]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Chromosome<FilterScore> newChromosome(double[] sequence) {
     // Override the default Hysteresis filter implementation for speed since this is the filter we

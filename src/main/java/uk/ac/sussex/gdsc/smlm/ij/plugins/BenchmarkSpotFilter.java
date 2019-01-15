@@ -493,7 +493,6 @@ public class BenchmarkSpotFilter implements PlugIn {
       return FastMath.max(0, 1 - score);
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(ScoredSpot o) {
       return Double.compare(o.spot.intensity, spot.intensity);
@@ -564,7 +563,6 @@ public class BenchmarkSpotFilter implements PlugIn {
       this.coordinates = new TIntObjectHashMap<>();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -729,7 +727,6 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -1124,7 +1121,6 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1302,7 +1298,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       // Single filter mode
       setupProgress(imp.getImageStackSize(), "Frame");
 
-      filterResult = run(config);
+      filterResult = runAnalysis(config);
     }
 
     IJ.showProgress(-1);
@@ -1346,7 +1342,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         return batchResult;
       }
     }
-    final BatchResult[] batchResult = run(dataFilter, param, search, param2);
+    final BatchResult[] batchResult = runFilter(dataFilter, param, search, param2);
     if (batchResult != null) {
       cachedBatchResults.add(batchResult);
     }
@@ -1390,6 +1386,14 @@ public class BenchmarkSpotFilter implements PlugIn {
     for (int i = 0; i < batchResult.length; i++) {
       data[0][i] = (float) (batchResult[i].param * scale);
       data[1][i] = (float) batchResult[i].getScore(index);
+    }
+    return data;
+  }
+
+  private static double[] extractData(BatchResult[] batchResult, int index, double[][] stats) {
+    final double[] data = new double[batchResult.length];
+    for (int i = 0; i < batchResult.length; i++) {
+      data[i] = getScore(batchResult[i], index, stats);
     }
     return data;
   }
@@ -1452,7 +1456,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         }
       }
 
-      final BenchmarkFilterResult result = run(config, true);
+      final BenchmarkFilterResult result = runAnalysis(config, true);
       getTable(true).flush();
       return result;
     }
@@ -1482,14 +1486,6 @@ public class BenchmarkSpotFilter implements PlugIn {
     return stats;
   }
 
-  private static double[] extractData(BatchResult[] batchResult, int index, double[][] stats) {
-    final double[] data = new double[batchResult.length];
-    for (int i = 0; i < batchResult.length; i++) {
-      data[i] = getScore(batchResult[i], index, stats);
-    }
-    return data;
-  }
-
   private static double getScore(BatchResult batchResult, int index, double[][] stats) {
     if (stats == null) {
       return batchResult.getScore(index);
@@ -1512,7 +1508,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     return param;
   }
 
-  private BatchResult[] run(DataFilterMethod dataFilter, double[] param, int search,
+  private BatchResult[] runFilter(DataFilterMethod dataFilter, double[] param, int search,
       double param2) {
     progressPrefix = new BatchResult(null, dataFilter, 0, search, param2).getName();
     final TurboList<BatchResult> result = new TurboList<>();
@@ -1529,7 +1525,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     for (int i = 0; i < param.length; i++) {
       config.setDataFilter(dataFilter, param[i], true, 0);
       try {
-        final BenchmarkFilterResult filterResult = run(config, false);
+        final BenchmarkFilterResult filterResult = runAnalysis(config, false);
         if (filterResult != null) {
           result.add(new BatchResult(filterResult, dataFilter, param[i], search, param2));
         }
@@ -1763,11 +1759,11 @@ public class BenchmarkSpotFilter implements PlugIn {
     progress++;
   }
 
-  private BenchmarkFilterResult run(FitEngineConfiguration config) {
-    return run(config, false);
+  private BenchmarkFilterResult runAnalysis(FitEngineConfiguration config) {
+    return runAnalysis(config, false);
   }
 
-  private BenchmarkFilterResult run(FitEngineConfiguration config, boolean batchSummary) {
+  private BenchmarkFilterResult runAnalysis(FitEngineConfiguration config, boolean batchSummary) {
     if (ImageJUtils.isInterrupted()) {
       return null;
     }

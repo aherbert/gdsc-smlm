@@ -63,7 +63,6 @@ public class LSQVarianceGradientProcedure6 extends LSQVarianceGradientProcedure 
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(final double Ei, double[] Eix) {
     for (int a = 0; a < n; a++) {

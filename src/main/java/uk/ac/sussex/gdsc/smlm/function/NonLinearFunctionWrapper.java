@@ -69,7 +69,6 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
     fun.initialise(a);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;
@@ -80,37 +79,31 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
     return gradientIndices.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(int x, double[] dyda) {
     return fun.eval(x, dyda);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(int x) {
     return fun.eval(x);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(int x, double[] dyda, double[] w) {
     return fun.eval(x, dyda, w);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double evalw(int x, double[] w) {
     return fun.eval(x, w);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean canComputeWeights() {
     return fun.canComputeWeights();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] computeValues(double[] variables) {
     initialise(variables);
@@ -122,7 +115,6 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
     return values;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[][] computeJacobian(double[] variables) {
     initialise(variables);
@@ -139,13 +131,11 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
     return jacobian;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean canComputeValuesAndJacobian() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables) {
     initialise(variables);

@@ -56,13 +56,11 @@ public class CircularSumFilter extends CircularFilter {
     return new CircularSumFilter(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Normaliser computeWeightedNormaliser(double radius) {
     return NonNormaliser.INSTANCE;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Normaliser computeNormaliser(int npoints) {
     return NonNormaliser.INSTANCE;

@@ -249,7 +249,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     return (int) Math.ceil(value);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void begin() {
     imageActive = false;
@@ -582,7 +581,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     return -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsDev) {
@@ -610,7 +608,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     updateImage();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(PeakResult result) {
     add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
@@ -816,7 +813,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     updateImage();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addAll(PeakResult[] results) {
     if (!imageActive) {
@@ -1200,13 +1196,11 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return size;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void end() {
     // Wait for previous image to finish rendering
@@ -1294,7 +1288,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults {
     return displayFlags;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return imageActive;

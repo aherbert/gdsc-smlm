@@ -72,34 +72,24 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
     }
   }
 
-  @Test
-  public void probabilityMatchesLogProbability() {
-    for (final double g : gain) {
-      for (final double p : photons) {
-        for (final double s : noise) {
-          probabilityMatchesLogProbability(g, p, s);
-        }
-      }
-    }
-  }
-
   private static void cumulativeProbabilityIsOne(final double gain, final double mu,
-      final double s) {
-    final double p2 = cumulativeProbability(gain, mu, s);
+      final double sd) {
+    final double p2 = cumulativeProbability(gain, mu, sd);
     // This only works when the mean is above 2 if the gain is low
     if (mu > 2 || gain > 20) {
-      Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s));
+      Assertions.assertEquals(1, p2, 0.02,
+          () -> String.format("g=%f, mu=%f, s=%f", gain, mu, sd));
     }
   }
 
-  private static double cumulativeProbability(final double gain, final double mu, double s) {
+  private static double cumulativeProbability(final double gain, final double mu, double sd) {
     final PoissonGammaGaussianConvolutionFunction f =
-        PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, s);
+        PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, sd);
 
-    final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1.0 / gain, s);
+    final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1.0 / gain, sd);
     f2.setConvolutionMode(ConvolutionMode.DISCRETE_PDF);
 
-    double p = 0;
+    double pvalue = 0;
     int min = 1;
     int max = 0;
 
@@ -114,7 +104,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
     // At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
     if (mu > 0) {
       // Note: The input s parameter is after-gain so adjust.
-      final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s / gain);
+      final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, sd / gain);
       min = range[0];
       max = range[1];
       for (int x = min; x <= max; x++) {
@@ -123,7 +113,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
         if (debug) {
           logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
         }
-        p += pp;
+        pvalue += pp;
       }
       // if (p > 1.01)
       // Assertions.fail("P > 1: " + p);
@@ -139,8 +129,8 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
       if (debug) {
         logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
       }
-      p += pp;
-      if (pp == 0 || pp / p < changeTolerance) {
+      pvalue += pp;
+      if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
       }
     }
@@ -151,14 +141,15 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
       if (debug) {
         logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
       }
-      p += pp;
-      if (pp == 0 || pp / p < changeTolerance) {
+      pvalue += pp;
+      if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
       }
     }
 
-    if (p < 0.98 || p > 1.02) {
-      logger.log(TestLogUtils.getRecord(Level.FINE, "g=%f, mu=%f, s=%f p=%f", gain, mu, s, p));
+    if (pvalue < 0.98 || pvalue > 1.02) {
+      logger.log(
+          TestLogUtils.getRecord(Level.FINE, "g=%f, mu=%f, s=%f p=%f", gain, mu, sd, pvalue));
     }
 
     // Do a formal integration
@@ -173,28 +164,39 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
     }, min, max);
 
     if (p2 < 0.98 || p2 > 1.02) {
-      logger.log(
-          TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, s, p, p2));
+      logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, sd,
+          pvalue, p2));
     }
 
     return p2;
   }
 
-  private static void probabilityMatchesLogProbability(final double gain, double mu, double s) {
+  @Test
+  public void probabilityMatchesLogProbability() {
+    for (final double g : gain) {
+      for (final double p : photons) {
+        for (final double s : noise) {
+          probabilityMatchesLogProbability(g, p, s);
+        }
+      }
+    }
+  }
+
+  private static void probabilityMatchesLogProbability(final double gain, double mu, double sd) {
     final PoissonGammaGaussianConvolutionFunction f =
-        PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, s);
+        PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, sd);
 
     // Evaluate an initial range.
     // Gaussian should have >99% within +/- s
     // Poisson will have mean mu with a variance mu.
     // At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
     // Note: The input s parameter is after-gain so adjust.
-    final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s / gain);
+    final int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, sd / gain);
     final int min = range[0];
     final int max = range[1];
     // Note: The input mu parameter is pre-gain.
     final double e = mu;
-    final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+    final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, sd);
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-3, 0);
     for (int x = min; x <= max; x++) {
       final double p = f.likelihood(x, e);

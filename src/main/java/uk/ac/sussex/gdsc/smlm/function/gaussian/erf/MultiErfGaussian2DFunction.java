@@ -62,7 +62,6 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
     tI = new double[numberOfPeaks];
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNPeaks() {
     return numberOfPeaks;
@@ -97,13 +96,11 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
     return indices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return gradientIndices.length;
@@ -149,7 +146,6 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   @Override
   public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
     // Unroll for the number of peaks

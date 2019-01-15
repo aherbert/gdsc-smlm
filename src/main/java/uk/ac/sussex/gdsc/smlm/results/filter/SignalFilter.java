@@ -81,59 +81,50 @@ public class SignalFilter extends DirectFilter implements IMultiFilter {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using a lower signal threshold. The threshold is applied in "
         + "photons (i.e. the signal is divided by the calibrated gain).";
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     return signal;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
     return SignalFilter.DEFAULT_INCREMENT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
     return ParameterType.SIGNAL;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
     return new SignalFilter(updateParameter(signal, delta, DEFAULT_RANGE));
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new SignalFilter(parameters[0]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMin(parameters, 0, signal);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {DEFAULT_RANGE};

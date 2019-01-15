@@ -101,7 +101,6 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
     return error;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getTotalSumOfSquares() {
     if (Double.isNaN(totalSumOfSquares) && lastY != null) {
@@ -110,26 +109,22 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver
     return totalSumOfSquares;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getResidualSumOfSquares() {
     return value;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getCoefficientOfDetermination() {
     return 1.0 - (value / getTotalSumOfSquares());
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getAdjustedCoefficientOfDetermination() {
     return MathUtils.getAdjustedCoefficientOfDetermination(getResidualSumOfSquares(),
         getTotalSumOfSquares(), getNumberOfFittedPoints(), getNumberOfFittedParameters());
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMeanSquaredError() {
     return getResidualSumOfSquares() / (getNumberOfFittedPoints() - getNumberOfFittedParameters());

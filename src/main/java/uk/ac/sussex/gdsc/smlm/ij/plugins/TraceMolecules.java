@@ -213,7 +213,6 @@ public class TraceMolecules implements PlugIn {
   private boolean altKeyDown;
   private boolean optimiseBlinkingRate;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

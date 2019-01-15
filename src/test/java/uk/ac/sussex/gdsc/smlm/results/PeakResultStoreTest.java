@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
 @SuppressWarnings({"javadoc"})
 public class PeakResultStoreTest {
@@ -124,12 +124,7 @@ public class PeakResultStoreTest {
       store.add(result);
     }
     Assertions.assertTrue(size != store.size(), "Same size after adding null results");
-    store.removeIf(new PeakResultPredicate() {
-      @Override
-      public boolean test(PeakResult t) {
-        return t == null;
-      }
-    });
+    store.removeIf(Objects::isNull);
     assertEquals(list, size, store);
 
     // Can clear

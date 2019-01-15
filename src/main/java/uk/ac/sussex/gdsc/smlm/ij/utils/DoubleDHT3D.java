@@ -106,7 +106,6 @@ public class DoubleDHT3D extends DoubleImage3D {
     jj = source.jj;
   }
 
-  /** {@inheritDoc} */
   @Override
   public DoubleDHT3D copy() {
     return new DoubleDHT3D(this);

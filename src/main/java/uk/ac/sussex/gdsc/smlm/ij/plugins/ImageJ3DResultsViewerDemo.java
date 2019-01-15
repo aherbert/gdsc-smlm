@@ -72,7 +72,6 @@ import java.util.List;
 public class ImageJ3DResultsViewerDemo implements PlugIn {
   private static final String TITLE = "ImageJ 3D Results Viewer";
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     if (ImageJ3DViewerUtils.JAVA_3D_VERSION == null) {

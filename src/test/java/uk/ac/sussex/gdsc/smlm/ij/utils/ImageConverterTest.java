@@ -43,31 +43,30 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 @SuppressWarnings({"javadoc"})
-public class ImageConverterTest implements Function<RandomSeed, Object> {
-  private static ConcurrentHashMap<RandomSeed, Object> ConcurrentHashMap;
+public class ImageConverterTest {
+  private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
   @BeforeAll
   public static void beforeAll() {
-    ConcurrentHashMap = new ConcurrentHashMap<>();
+    dataCache = new ConcurrentHashMap<>();
   }
 
   @AfterAll
   public static void afterAll() {
-    ConcurrentHashMap.clear();
-    ConcurrentHashMap = null;
+    dataCache.clear();
+    dataCache = null;
   }
 
   static final int w = 200;
   static final int h = 300;
 
-  private class ImageConverterTestData {
+  private static class ImageConverterTestData {
     byte[] bdata;
     short[] sdata;
     float[] fdata;
   }
 
-  @Override
-  public Object apply(RandomSeed seed) {
+  private static Object createData(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final ByteProcessor bp = new ByteProcessor(w, h);
     final ImageConverterTestData data = new ImageConverterTestData();
@@ -84,8 +83,8 @@ public class ImageConverterTest implements Function<RandomSeed, Object> {
 
   @SeededTest
   public void canGetData(RandomSeed seed) {
-    final ImageConverterTestData data =
-        (ImageConverterTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+    final ImageConverterTestData data = (ImageConverterTestData) dataCache
+        .computeIfAbsent(seed, ImageConverterTest::createData);
     final byte[] bdata = data.bdata;
     final short[] sdata = data.sdata;
     final float[] fdata = data.fdata;
@@ -103,8 +102,8 @@ public class ImageConverterTest implements Function<RandomSeed, Object> {
 
   @SeededTest
   public void canGetDataWithFullBounds(RandomSeed seed) {
-    final ImageConverterTestData data =
-        (ImageConverterTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+    final ImageConverterTestData data = (ImageConverterTestData) dataCache
+        .computeIfAbsent(seed, ImageConverterTest::createData);
     final byte[] bdata = data.bdata;
     final short[] sdata = data.sdata;
     final float[] fdata = data.fdata;
@@ -122,8 +121,8 @@ public class ImageConverterTest implements Function<RandomSeed, Object> {
 
   @SeededTest
   public void canGetCropData(RandomSeed seed) {
-    final ImageConverterTestData data =
-        (ImageConverterTestData) ConcurrentHashMap.computeIfAbsent(seed, this);
+    final ImageConverterTestData data = (ImageConverterTestData) dataCache
+        .computeIfAbsent(seed, ImageConverterTest::createData);
     final byte[] bdata = data.bdata;
     final short[] sdata = data.sdata;
     final float[] fdata = data.fdata;

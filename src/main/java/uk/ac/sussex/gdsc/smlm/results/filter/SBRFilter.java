@@ -90,58 +90,49 @@ public class SBRFilter extends DirectFilter {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using a lower SBR threshold.";
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     return sbr;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
     return SNRFilter.DEFAULT_INCREMENT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
     return ParameterType.SBR;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
     return new SBRFilter(updateParameter(sbr, delta, SNRFilter.DEFAULT_RANGE));
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new SBRFilter((float) parameters[0]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMin(parameters, 0, sbr);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {SNRFilter.DEFAULT_RANGE};

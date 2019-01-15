@@ -24,16 +24,18 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.function.Predicate;
 
 /**
- * Stores peak results using a set. This is similar to an HashSet but does not have concurrency
- * checking.
+ * Stores peak results using a set.
+ *
+ * <p>Note that the {@link PeakResult} object does not implement {@link Object#hashCode()} or
+ * {@link Object#equals(Object)} and so this stores all unique result references.
  */
 public class SetPeakResultStore implements PeakResultStore, PeakResultStoreCollection {
   /** The results. */
@@ -57,31 +59,26 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
     this.results = new HashSet<>(store.results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return results.size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean add(PeakResult result) {
     return results.add(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addCollection(Collection<PeakResult> results) {
     return this.results.addAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addArray(PeakResult[] results) {
     return this.results.addAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -90,25 +87,21 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
     return addArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean remove(PeakResult result) {
     return results.remove(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeCollection(Collection<PeakResult> results) {
     return this.results.removeAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeArray(PeakResult[] results) {
     return this.results.removeAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -117,19 +110,16 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
     return removeArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainCollection(Collection<PeakResult> results) {
     return this.results.retainAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainArray(PeakResult[] results) {
     return this.results.retainAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -138,46 +128,38 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
     return retainArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public void clear() {
     results.clear();
   }
 
-  /** {@inheritDoc} */
   @Override
-  public void trimToSize() {
-    // results.trimToSize();
-  }
+  public void trimToSize() {}
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult[] toArray() {
     return results.toArray(new PeakResult[size()]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy() {
     return new SetPeakResultStore(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy(boolean deepCopy) {
     if (deepCopy) {
       final SetPeakResultStore copy = new SetPeakResultStore(size());
       for (final PeakResult r : results) {
-        copy.add(r.clone());
+        copy.add(r.copy());
       }
       return copy;
     }
     return copy();
   }
 
-  /** {@inheritDoc} */
   @Override
-  public boolean removeIf(final PeakResultPredicate filter) {
+  public boolean removeIf(final Predicate<PeakResult> filter) {
     // Delegate to the list implementation
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
     for (final PeakResult r : results) {
@@ -188,7 +170,6 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
     return this.results.removeAll(Arrays.asList(list.toArray()));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(PeakResultProcedure procedure) {
     for (final PeakResult r : results) {
@@ -196,9 +177,8 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
     }
   }
 
-  /** {@inheritDoc} */
   @Override
-  public PeakResult[] subset(PeakResultPredicate filter) {
+  public PeakResult[] subset(Predicate<PeakResult> filter) {
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
     for (final PeakResult r : results) {
       if (filter.test(r)) {
@@ -208,20 +188,17 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
     return list.toArray();
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean contains(PeakResult result) {
     return results.contains(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   @SuppressWarnings("unchecked")
   public Collection<PeakResult> getCollection() {
     return (Collection<PeakResult>) results.clone();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Collection<PeakResult> getCollectionReference() {
     return results;

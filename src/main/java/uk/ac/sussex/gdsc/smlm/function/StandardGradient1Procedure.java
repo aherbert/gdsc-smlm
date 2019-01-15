@@ -55,7 +55,6 @@ public class StandardGradient1Procedure implements Gradient1Procedure {
     return values;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] gradient) {
     values[index] = value;

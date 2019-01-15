@@ -677,7 +677,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       this.maxCandidate = maxCandidate;
     }
 
-    /** {@inheritDoc} */
     @Override
     public FilterCandidates clone() {
       try {
@@ -738,7 +737,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       multiFilter = BenchmarkSpotFit.multiFilter.copy();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -1008,7 +1006,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1025,8 +1022,34 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       return;
     }
 
-    run();
+    runFitting();
     finished = true;
+  }
+
+  /**
+   * Run the analysis non-interactively using the given filter settings.
+   *
+   * @param filter the filter
+   * @param residualsThreshold the residuals threshold
+   * @param failuresLimit the failures limit
+   * @param duplicateDistance the duplicate distance
+   * @param duplicateDistanceAbsolute the duplicate distance absolute
+   */
+  public void run(DirectFilter filter, double residualsThreshold, int failuresLimit,
+      double duplicateDistance, boolean duplicateDistanceAbsolute) {
+    multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
+    config.setFailuresLimit(failuresLimit);
+    config.setDuplicateDistance(duplicateDistance);
+    config.setDuplicateDistanceAbsolute(duplicateDistanceAbsolute);
+
+    clearFitResults();
+
+    silent = true;
+    if (!initialise()) {
+      return;
+    }
+
+    runFitting();
   }
 
   private boolean initialise() {
@@ -1310,7 +1333,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     progress++;
   }
 
-  private void run() {
+  private void runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
     if (lastId != simulationParameters.id) {
@@ -2589,7 +2612,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         l = 0;
         break;
       case HALF_MAX_JACCARD_VALUE:
-        l = getValue(metric, j, maxJ * 0.5);
+        l = getXValue(metric, j, maxJ * 0.5);
         break;
       default:
         throw new RuntimeException("Missing lower limit method");
@@ -2608,7 +2631,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         u = 0;
         break;
       case MAX_JACCARD2:
-        u = getValue(metric, j, maxJ) * 2;
+        u = getXValue(metric, j, maxJ) * 2;
         // System.out.printf("MaxJ = %.4f @ %.3f\n", maxJ, u / 2);
         break;
       default:
@@ -2629,7 +2652,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private static double getPercentile(double[][] h, double p) {
     final double[] x = h[0];
     final double[] y = h[1];
-    return getValue(x, y, p);
+    return getXValue(x, y, p);
   }
 
   /**
@@ -2640,15 +2663,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @param p the p
    * @return the value
    */
-  private static double getValue(double[] x, double[] y, double p) {
+  private static double getXValue(double[] x, double[] y, double p) {
     for (int i = 0; i < x.length; i++) {
       if (y[i] >= p) {
         if (i == 0 || y[i] == p) {
           return x[i];
         }
         // Interpolation
-        final double delta = (p - y[i - 1]) / (y[i] - y[i - 1]);
-        return x[i - 1] + delta * (x[i] - x[i - 1]);
+        return MathUtils.interpolateX(x[i - 1], y[i - 1], x[i], y[i], p);
       }
     }
     return x[x.length - 1];
@@ -2824,32 +2846,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       textNeighbourHeight.setText(MathUtils.rounded(neighbourHeightThrehsold));
       cbComputeDoublets.setState(computeDoublets);
     }
-  }
-
-  /**
-   * Run the analysis non-interactively using the given filter settings.
-   *
-   * @param filter the filter
-   * @param residualsThreshold the residuals threshold
-   * @param failuresLimit the failures limit
-   * @param duplicateDistance the duplicate distance
-   * @param duplicateDistanceAbsolute the duplicate distance absolute
-   */
-  public void run(DirectFilter filter, double residualsThreshold, int failuresLimit,
-      double duplicateDistance, boolean duplicateDistanceAbsolute) {
-    multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
-    config.setFailuresLimit(failuresLimit);
-    config.setDuplicateDistance(duplicateDistance);
-    config.setDuplicateDistanceAbsolute(duplicateDistanceAbsolute);
-
-    clearFitResults();
-
-    silent = true;
-    if (!initialise()) {
-      return;
-    }
-
-    run();
   }
 
   /**

@@ -75,7 +75,6 @@ public class DrawClusters implements PlugIn {
   private static boolean useStackPosition;
   private static int lut;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -64,10 +65,10 @@ public class PrecisionTest {
     logger = null;
   }
 
-  int Single = 1;
-  int Double = 2;
+  static final int SINGLE = 1;
+  static final int DOUBLE = 2;
 
-  private final int MAX_ITER = 200000;
+  private static final int MAX_ITER = 200000;
 
   int maxx = 10;
   // Use realistic values for a camera with a bias of 500
@@ -158,24 +159,6 @@ public class PrecisionTest {
       return background + gaussian(x0, x1, dyda);
     }
 
-    private double gaussian(final int x0, final int x1, final double[] dy_da) {
-      final double h = amplitude;
-
-      final double dx = x0 - x0pos;
-      final double dy = x1 - x1pos;
-      final double dx2dy2 = dx * dx + dy * dy;
-
-      dy_da[1] = FastMath.exp(aa * (dx2dy2));
-      final double y = h * dy_da[1];
-      final double yaa2 = y * aa2;
-      dy_da[2] = yaa2 * dx;
-      dy_da[3] = yaa2 * dy;
-
-      dy_da[4] = y * (ax * (dx2dy2));
-
-      return y;
-    }
-
     @Override
     public double eval(final int x) {
       final int x1 = x / maxx;
@@ -185,6 +168,24 @@ public class PrecisionTest {
       final double dy = x1 - x1pos;
 
       return background + amplitude * FastMath.exp(aa * (dx * dx + dy * dy));
+    }
+
+    private double gaussian(final int x0, final int x1, final double[] dyda) {
+      final double h = amplitude;
+
+      final double dx = x0 - x0pos;
+      final double dy = x1 - x1pos;
+      final double dx2dy2 = dx * dx + dy * dy;
+
+      dyda[1] = FastMath.exp(aa * (dx2dy2));
+      final double y = h * dyda[1];
+      final double yaa2 = y * aa2;
+      dyda[2] = yaa2 * dx;
+      dyda[3] = yaa2 * dy;
+
+      dyda[4] = y * (ax * (dx2dy2));
+
+      return y;
     }
   }
 
@@ -229,24 +230,6 @@ public class PrecisionTest {
       return background + gaussian(x0, x1, dyda);
     }
 
-    private float gaussian(final int x0, final int x1, final float[] dy_da) {
-      final float h = amplitude;
-
-      final float dx = x0 - x0pos;
-      final float dy = x1 - x1pos;
-      final float dx2dy2 = dx * dx + dy * dy;
-
-      dy_da[1] = (float) FastMath.exp(aa * (dx2dy2));
-      final float y = h * dy_da[1];
-      final float yaa2 = y * aa2;
-      dy_da[2] = yaa2 * dx;
-      dy_da[3] = yaa2 * dy;
-
-      dy_da[4] = y * (ax * (dx2dy2));
-
-      return y;
-    }
-
     @Override
     public float eval(final int x) {
       final int x1 = x / maxx;
@@ -256,6 +239,24 @@ public class PrecisionTest {
       final float dy = x1 - x1pos;
 
       return background + amplitude * (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+    }
+
+    private float gaussian(final int x0, final int x1, final float[] dyda) {
+      final float h = amplitude;
+
+      final float dx = x0 - x0pos;
+      final float dy = x1 - x1pos;
+      final float dx2dy2 = dx * dx + dy * dy;
+
+      dyda[1] = (float) FastMath.exp(aa * (dx2dy2));
+      final float y = h * dyda[1];
+      final float yaa2 = y * aa2;
+      dyda[2] = yaa2 * dx;
+      dyda[3] = yaa2 * dy;
+
+      dyda[4] = y * (ax * (dx2dy2));
+
+      return y;
     }
   }
 
@@ -299,21 +300,6 @@ public class PrecisionTest {
       return background + gaussian(x0, x1, dyda);
     }
 
-    private double gaussian(final int x0, final int x1, final double[] dy_da) {
-      final double h = amplitude;
-
-      final double dx = x0 - x0pos;
-      final double dy = x1 - x1pos;
-
-      dy_da[1] = FastMath.exp(aa * (dx * dx + dy * dy));
-      final double y = h * dy_da[1];
-      final double yaa2 = y * aa2;
-      dy_da[2] = yaa2 * dx;
-      dy_da[3] = yaa2 * dy;
-
-      return y;
-    }
-
     @Override
     public double eval(final int x) {
       final int x1 = x / maxx;
@@ -323,6 +309,21 @@ public class PrecisionTest {
       final double dy = x1 - x1pos;
 
       return background + amplitude * FastMath.exp(aa * (dx * dx + dy * dy));
+    }
+
+    private double gaussian(final int x0, final int x1, final double[] dyda) {
+      final double h = amplitude;
+
+      final double dx = x0 - x0pos;
+      final double dy = x1 - x1pos;
+
+      dyda[1] = FastMath.exp(aa * (dx * dx + dy * dy));
+      final double y = h * dyda[1];
+      final double yaa2 = y * aa2;
+      dyda[2] = yaa2 * dx;
+      dyda[3] = yaa2 * dy;
+
+      return y;
     }
   }
 
@@ -366,21 +367,6 @@ public class PrecisionTest {
       return background + gaussian(x0, x1, dyda);
     }
 
-    private float gaussian(final int x0, final int x1, final float[] dy_da) {
-      final float h = amplitude;
-
-      final float dx = x0 - x0pos;
-      final float dy = x1 - x1pos;
-
-      dy_da[1] = (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
-      final float y = h * dy_da[1];
-      final float yaa2 = y * aa2;
-      dy_da[2] = yaa2 * dx;
-      dy_da[3] = yaa2 * dy;
-
-      return y;
-    }
-
     @Override
     public float eval(final int x) {
       final int x1 = x / maxx;
@@ -390,6 +376,21 @@ public class PrecisionTest {
       final float dy = x1 - x1pos;
 
       return background + amplitude * (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+    }
+
+    private float gaussian(final int x0, final int x1, final float[] dyda) {
+      final float h = amplitude;
+
+      final float dx = x0 - x0pos;
+      final float dy = x1 - x1pos;
+
+      dyda[1] = (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+      final float y = h * dyda[1];
+      final float yaa2 = y * aa2;
+      dyda[2] = yaa2 * dx;
+      dyda[3] = yaa2 * dy;
+
+      return y;
     }
   }
 
@@ -564,7 +565,7 @@ public class PrecisionTest {
     TestAssertions.assertTest(t2, t1, predicate, "Different totals");
   }
 
-  private void isFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2,
+  private static void isFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2,
       boolean noSum, boolean doubleFaster) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
@@ -613,8 +614,8 @@ public class PrecisionTest {
   }
 
   @SuppressWarnings("unused")
-  private long runSingleWithGradients(int maxx, SinglePrecision f, float[] p) {
-    f.initialise(p);
+  private static long runSingleWithGradients(int maxx, SinglePrecision function, float[] params) {
+    function.initialise(params);
     final int n = params1.length;
     final float[] g = new float[n];
     final double[] tg = new double[n];
@@ -624,7 +625,7 @@ public class PrecisionTest {
     // Warm up
     for (int j = 0; j < 10; j++) {
       for (int i = 0; i < limit; i++) {
-        f.eval(i, g);
+        function.eval(i, g);
       }
     }
 
@@ -633,7 +634,7 @@ public class PrecisionTest {
     for (int j = 0; j < MAX_ITER; j++) {
       sum = 0;
       for (int i = 0; i < limit; i++) {
-        sum += f.eval(i, g);
+        sum += function.eval(i, g);
         for (int k = 0; k < n; k++) {
           tg[k] += g[k];
         }
@@ -642,8 +643,9 @@ public class PrecisionTest {
     return System.nanoTime() - time;
   }
 
-  private long runSingleWithGradientsNoSum(int maxx, SinglePrecision f, float[] p) {
-    f.initialise(p);
+  private static long runSingleWithGradientsNoSum(int maxx, SinglePrecision function,
+      float[] params) {
+    function.initialise(params);
     final float[] g = new float[params1.length];
 
     final int limit = maxx * maxx;
@@ -651,22 +653,22 @@ public class PrecisionTest {
     // Warm up
     for (int j = 0; j < 10; j++) {
       for (int i = 0; i < limit; i++) {
-        f.eval(i, g);
+        function.eval(i, g);
       }
     }
 
     final long time = System.nanoTime();
     for (int j = 0; j < MAX_ITER; j++) {
       for (int i = 0; i < limit; i++) {
-        f.eval(i, g);
+        function.eval(i, g);
       }
     }
     return System.nanoTime() - time;
   }
 
   @SuppressWarnings("unused")
-  private long runDoubleWithGradients(int maxx, DoublePrecision f, double[] p) {
-    f.initialise(p);
+  private static long runDoubleWithGradients(int maxx, DoublePrecision function, double[] params) {
+    function.initialise(params);
     final int n = params1.length;
     final double[] g = new double[n];
     final double[] tg = new double[n];
@@ -676,7 +678,7 @@ public class PrecisionTest {
     // Warm up
     for (int j = 0; j < 10; j++) {
       for (int i = 0; i < limit; i++) {
-        f.eval(i, g);
+        function.eval(i, g);
       }
     }
 
@@ -685,7 +687,7 @@ public class PrecisionTest {
     for (int j = 0; j < MAX_ITER; j++) {
       sum = 0;
       for (int i = 0; i < limit; i++) {
-        sum += f.eval(i, g);
+        sum += function.eval(i, g);
         for (int k = 0; k < n; k++) {
           tg[k] += g[k];
         }
@@ -694,8 +696,9 @@ public class PrecisionTest {
     return System.nanoTime() - time;
   }
 
-  private long runDoubleWithGradientsNoSum(int maxx, DoublePrecision f, double[] p) {
-    f.initialise(p);
+  private static long runDoubleWithGradientsNoSum(int maxx, DoublePrecision function,
+      double[] params) {
+    function.initialise(params);
     final double[] g = new double[params1.length];
 
     final int limit = maxx * maxx;
@@ -703,20 +706,20 @@ public class PrecisionTest {
     // Warm up
     for (int j = 0; j < 10; j++) {
       for (int i = 0; i < limit; i++) {
-        f.eval(i, g);
+        function.eval(i, g);
       }
     }
 
     final long time = System.nanoTime();
     for (int j = 0; j < MAX_ITER; j++) {
       for (int i = 0; i < limit; i++) {
-        f.eval(i, g);
+        function.eval(i, g);
       }
     }
     return System.nanoTime() - time;
   }
 
-  private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
+  private static void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
       boolean doubleFaster) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
@@ -763,14 +766,14 @@ public class PrecisionTest {
   }
 
   @SuppressWarnings("unused")
-  private long runSingle(int maxx, SinglePrecision f, float[] p) {
+  private static long runSingle(int maxx, SinglePrecision function, float[] params) {
     final int limit = maxx * maxx;
 
     // Warm up
     for (int j = 0; j < 10; j++) {
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        f.eval(i);
+        function.eval(i);
       }
     }
 
@@ -778,44 +781,44 @@ public class PrecisionTest {
     double sum = 0;
     for (int j = 0; j < MAX_ITER; j++) {
       sum = 0;
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        sum += f.eval(i);
+        sum += function.eval(i);
       }
     }
     return System.nanoTime() - time;
   }
 
-  private long runSingleNoSum(int maxx, SinglePrecision f, float[] p) {
+  private static long runSingleNoSum(int maxx, SinglePrecision function, float[] params) {
     final int limit = maxx * maxx;
 
     // Warm up
     for (int j = 0; j < 10; j++) {
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        f.eval(i);
+        function.eval(i);
       }
     }
 
     final long time = System.nanoTime();
     for (int j = 0; j < MAX_ITER; j++) {
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        f.eval(i);
+        function.eval(i);
       }
     }
     return System.nanoTime() - time;
   }
 
   @SuppressWarnings("unused")
-  private long runDouble(int maxx, DoublePrecision f, double[] p) {
+  private static long runDouble(int maxx, DoublePrecision function, double[] params) {
     final int limit = maxx * maxx;
 
     // Warm up
     for (int j = 0; j < 10; j++) {
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        f.eval(i);
+        function.eval(i);
       }
     }
 
@@ -823,48 +826,40 @@ public class PrecisionTest {
     double sum = 0;
     for (int j = 0; j < MAX_ITER; j++) {
       sum = 0;
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        sum += f.eval(i);
+        sum += function.eval(i);
       }
     }
     return System.nanoTime() - time;
   }
 
-  private long runDoubleNoSum(int maxx, DoublePrecision f, double[] p) {
+  private static long runDoubleNoSum(int maxx, DoublePrecision function, double[] params) {
     final int limit = maxx * maxx;
 
     // Warm up
     for (int j = 0; j < 10; j++) {
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        f.eval(i);
+        function.eval(i);
       }
     }
 
     final long time = System.nanoTime();
     for (int j = 0; j < MAX_ITER; j++) {
-      f.initialise(p);
+      function.initialise(params);
       for (int i = 0; i < limit; i++) {
-        f.eval(i);
+        function.eval(i);
       }
     }
     return System.nanoTime() - time;
   }
 
-  private static float[] toFloat(double[] p) {
-    final float[] f = new float[p.length];
-    for (int i = 0; i < f.length; i++) {
-      f[i] = (float) p[i];
-    }
-    return f;
+  private static float[] toFloat(double[] data) {
+    return SimpleArrayUtils.toFloat(data);
   }
 
-  private static double[] toDouble(float[] p) {
-    final double[] f = new double[p.length];
-    for (int i = 0; i < f.length; i++) {
-      f[i] = p[i];
-    }
-    return f;
+  private static double[] toDouble(float[] data) {
+    return SimpleArrayUtils.toDouble(data);
   }
 }

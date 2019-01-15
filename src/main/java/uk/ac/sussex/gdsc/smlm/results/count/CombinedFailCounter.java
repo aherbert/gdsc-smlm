@@ -74,35 +74,30 @@ public abstract class CombinedFailCounter extends BaseFailCounter {
    */
   protected abstract String getOperator();
 
-  /** {@inheritDoc} */
   @Override
   public void pass() {
     c1.pass();
     c2.pass();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass(int n) {
     c1.pass(n);
     c2.pass(n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail() {
     c1.fail();
     c2.fail();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail(int n) {
     c1.fail(n);
     c2.fail(n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reset() {
     c1.reset();

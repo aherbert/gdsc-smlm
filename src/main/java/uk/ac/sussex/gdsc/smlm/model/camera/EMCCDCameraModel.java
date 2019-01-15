@@ -119,7 +119,6 @@ public class EMCCDCameraModel extends FixedPixelCameraModel {
     return super.getMeanNormalisedVariance(bounds);
   }
 
-  /** {@inheritDoc} */
   @Override
   public EMCCDCameraModel copy() {
     return new EMCCDCameraModel(this);

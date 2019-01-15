@@ -98,7 +98,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     this.filename = filename;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void begin() {
     out = null;
@@ -155,13 +154,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return out != null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsStdDev) {
@@ -383,7 +380,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return size;
@@ -427,7 +423,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults {
         .ordinal()] = IntensityUnits.PHOTONS;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void end() {
     // Get the offset to the SpotList message

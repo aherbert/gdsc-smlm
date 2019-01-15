@@ -273,7 +273,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
         : ResultsSettings.newBuilder();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -3180,7 +3179,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     if (source == null) {

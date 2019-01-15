@@ -46,14 +46,12 @@ public class MultiFilterWidthComponent extends MultiFilterComponent {
     this.upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     final float xsdf = peak.getXSDFactor();
     return (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return IDirectFilter.V_X_SD_FACTOR;

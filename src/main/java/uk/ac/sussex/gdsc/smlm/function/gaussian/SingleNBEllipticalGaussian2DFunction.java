@@ -54,7 +54,6 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
     super(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new SingleNBEllipticalGaussian2DFunction(maxx, maxy);
@@ -118,7 +117,6 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

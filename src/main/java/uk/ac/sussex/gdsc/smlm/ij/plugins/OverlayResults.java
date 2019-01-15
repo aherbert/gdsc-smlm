@@ -338,7 +338,6 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

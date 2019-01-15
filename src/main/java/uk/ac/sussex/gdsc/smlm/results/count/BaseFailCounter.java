@@ -30,7 +30,6 @@ package uk.ac.sussex.gdsc.smlm.results.count;
 public abstract class BaseFailCounter implements FailCounter {
   private String description;
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     if (description == null) {

@@ -698,7 +698,6 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
   private JMenuItem cropResults;
   private JCheckBoxMenuItem toggleDynamicTransparency;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     // For testing

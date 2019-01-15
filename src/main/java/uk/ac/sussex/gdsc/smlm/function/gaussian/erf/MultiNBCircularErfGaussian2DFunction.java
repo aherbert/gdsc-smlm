@@ -56,7 +56,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     return new MultiNBCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda) {
     // Unpack the predictor into the dimensions
@@ -76,7 +75,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     return I;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
@@ -159,7 +157,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -179,7 +176,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -210,7 +206,6 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
     final int ng = getNumberOfGradients();

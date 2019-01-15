@@ -247,7 +247,6 @@ public class BenchmarkFit implements PlugIn {
           answer[Gaussian2DFunction.Y_POSITION], answer[Gaussian2DFunction.Z_POSITION]};
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {

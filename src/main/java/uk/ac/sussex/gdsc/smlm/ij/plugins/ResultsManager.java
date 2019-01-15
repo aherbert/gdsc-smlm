@@ -169,7 +169,6 @@ public class ResultsManager implements PlugIn {
   private static double input_exposureTime = Prefs.get(Constants.inputExposureTime, 0);
   private static ArrayList<String> selected;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     extraOptions = ImageJUtils.isExtraOptions();

@@ -410,7 +410,6 @@ public class FIRE implements PlugIn {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     extraOptions = ImageJUtils.isExtraOptions();

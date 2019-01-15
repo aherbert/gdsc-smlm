@@ -25,8 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import org.apache.commons.math3.random.RandomAdaptor;
@@ -65,37 +63,31 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
     this.results = new ArrayList<>(store.results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult get(int index) {
     return results.get(index);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return results.size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean add(PeakResult result) {
     return results.add(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addCollection(Collection<PeakResult> results) {
     return this.results.addAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addArray(PeakResult[] results) {
     return this.results.addAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -104,13 +96,11 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
     return addArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult remove(int index) {
     return results.remove(index);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void remove(int fromIndex, int toIndex) {
     if (fromIndex > toIndex) {
@@ -121,25 +111,21 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean remove(PeakResult result) {
     return results.remove(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeCollection(Collection<PeakResult> results) {
     return this.results.removeAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeArray(PeakResult[] results) {
     return this.results.removeAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -148,19 +134,16 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
     return removeArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainCollection(Collection<PeakResult> results) {
     return this.results.retainAll(results);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainArray(PeakResult[] results) {
     return this.results.retainAll(Arrays.asList(results));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainStore(PeakResultStore results) {
     if (results instanceof PeakResultStoreCollection) {
@@ -169,68 +152,48 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
     return retainArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public void clear() {
     results.clear();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void trimToSize() {
     results.trimToSize();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void sort(Comparator<PeakResult> comparator) {
     Collections.sort(results, comparator);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult[] toArray() {
     return results.toArray(new PeakResult[size()]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy() {
     return new ArrayListPeakResultStore(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy(boolean deepCopy) {
     if (deepCopy) {
       final ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
       for (int i = 0, size = size(); i < size; i++) {
-        copy.add(results.get(i).clone());
+        copy.add(results.get(i).copy());
       }
       return copy;
     }
     return copy();
   }
 
-  /** {@inheritDoc} */
   @Override
-  public boolean removeIf(final PeakResultPredicate filter) {
-    // Util we upgrade the Java version to 1.8 the ArrayList does not support
-    // predicates so use a TurboList
-    final TurboList<PeakResult> temp = new TurboList<>(this.results);
-    if (temp.removeIf(new Predicate<PeakResult>() {
-      @Override
-      public boolean test(PeakResult t) {
-        return filter.test(t);
-      }
-    })) {
-      this.results = new ArrayList<>(temp);
-      return true;
-    }
-    return false;
+  public boolean removeIf(final Predicate<PeakResult> filter) {
+    return results.removeIf(filter);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(PeakResultProcedure procedure) {
     for (int i = 0, size = size(); i < size; i++) {
@@ -238,9 +201,8 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
     }
   }
 
-  /** {@inheritDoc} */
   @Override
-  public PeakResult[] subset(PeakResultPredicate filter) {
+  public PeakResult[] subset(Predicate<PeakResult> filter) {
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
     for (int i = 0, size = size(); i < size; i++) {
       if (filter.test(results.get(i))) {
@@ -250,7 +212,6 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
     return list.toArray();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void shuffle(RandomGenerator randomSource) {
     Collections.shuffle(results, RandomAdaptor.createAdaptor(randomSource));
@@ -262,32 +223,27 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
         RandomAdaptor.createAdaptor(new RandomGeneratorAdapter(randomSource)));
   }
 
-  /** {@inheritDoc} */
   @Override
   public int indexOf(PeakResult result) {
     return results.indexOf(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lastIndexOf(PeakResult result) {
     return results.lastIndexOf(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean contains(PeakResult result) {
     return results.contains(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   @SuppressWarnings("unchecked")
   public Collection<PeakResult> getCollection() {
     return (Collection<PeakResult>) results.clone();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Collection<PeakResult> getCollectionReference() {
     return results;

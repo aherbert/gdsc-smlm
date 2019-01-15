@@ -126,7 +126,6 @@ public class EMGainAnalysis implements PlugInFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

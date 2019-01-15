@@ -64,7 +64,6 @@ public class EJMLLinearSolver {
      */
     InversionSolver() {}
 
-    /** {@inheritDoc} */
     @Override
     public boolean setA(DenseMatrix64F A) {
       if (A.numCols <= UnrolledInverseFromMinor.MAX) {
@@ -88,31 +87,26 @@ public class EJMLLinearSolver {
       return false;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double quality() {
       return 0;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void solve(DenseMatrix64F b, DenseMatrix64F x) {
       CommonOps.mult(A, b, x);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void invert(DenseMatrix64F Ainv) {
       System.arraycopy(A.data, 0, Ainv.data, 0, A.data.length);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean modifiesA() {
       return true;
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean modifiesB() {
       return false;

@@ -129,8 +129,8 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
         randomGenerator);
   }
 
-  private void init(double t, double tOn, double tOff, double tOff2, double blinks1,
-      double blinks2, boolean useGeometricBlinkingDistribution, RandomDataGenerator rand) {
+  private void init(double t, double tOn, double tOff, double tOff2, double blinks1, double blinks2,
+      boolean useGeometricBlinkingDistribution, RandomDataGenerator rand) {
     // Model two dark states: short and long. The second tOff and blinks1 is for the long dark
     // state:
     //

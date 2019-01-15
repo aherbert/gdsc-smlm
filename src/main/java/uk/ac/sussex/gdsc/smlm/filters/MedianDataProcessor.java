@@ -60,7 +60,6 @@ public class MedianDataProcessor extends DataProcessor {
     filter = source.filter.copy();
   }
 
-  /** {@inheritDoc} */
   @Override
   public MedianDataProcessor copy() {
     return new MedianDataProcessor(this);
@@ -81,25 +80,21 @@ public class MedianDataProcessor extends DataProcessor {
     return (int) smooth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(float[] weights, int width, int height) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasWeights() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] process(float[] data, int width, int height) {
     float[] smoothData = data;
@@ -144,13 +139,11 @@ public class MedianDataProcessor extends DataProcessor {
     return smooth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return "Median";
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
@@ -158,7 +151,6 @@ public class MedianDataProcessor extends DataProcessor {
     return list;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSpread() {
     return 2 * smooth + 1;

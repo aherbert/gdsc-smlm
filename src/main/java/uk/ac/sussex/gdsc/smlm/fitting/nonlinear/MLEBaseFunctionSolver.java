@@ -52,13 +52,11 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver
     llr = Double.NaN;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihood() {
     return value;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihoodRatio() {
     if (Double.isNaN(llr) && lastY != null) {
@@ -90,7 +88,6 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver
    */
   protected abstract double computeObservedLogLikelihood(double[] y, double[] a);
 
-  /** {@inheritDoc} */
   @Override
   public double getQ() {
     return ChiSquaredDistributionTable.computeQValue(getLogLikelihoodRatio(),

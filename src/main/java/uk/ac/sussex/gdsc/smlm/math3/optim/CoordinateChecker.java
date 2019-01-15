@@ -89,7 +89,6 @@ public abstract class CoordinateChecker
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean converged(int iteration, PointValuePair previous, PointValuePair current) {
     return converged(previous.getPointRef(), current.getPointRef());

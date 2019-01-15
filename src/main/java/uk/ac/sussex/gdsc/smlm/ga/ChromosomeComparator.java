@@ -35,7 +35,6 @@ import java.util.List;
  * @param <T> the generic type
  */
 public class ChromosomeComparator<T extends Comparable<T>> implements Comparator<Chromosome<T>> {
-  /** {@inheritDoc} */
   @Override
   public int compare(Chromosome<T> chromosome1, Chromosome<T> chromosome2) {
     return chromosome1.getFitness().compareTo(chromosome2.getFitness());

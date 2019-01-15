@@ -63,7 +63,6 @@ public abstract class CircularFilter extends BaseWeightedFilter {
     weightedNormaliserRadius = source.weightedNormaliserRadius;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void newWeights() {
     weightedNormaliser = null;

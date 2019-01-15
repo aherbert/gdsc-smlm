@@ -484,7 +484,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     estimateSignal = 2.5 * config.getHWHMMax() / Gaussian2DFunction.SD_TO_HWHM_FACTOR < fitting;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run() {
     try {
@@ -4087,13 +4086,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFrame() {
     return slice;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfResults() {
     // This is the total number of results we produce.
@@ -4286,14 +4283,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
   private DynamicMultiPathFitResult dynamicMultiPathFitResult;
 
-  /** {@inheritDoc} */
   @Override
   public MultiPathFitResult getResult(int index) {
     dynamicMultiPathFitResult.reset(index);
     return dynamicMultiPathFitResult;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void complete(int index) {
     if (benchmarking) {
@@ -4333,7 +4328,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getTotalCandidates() {
     // This is the total number of candidates Ids we may produce
@@ -4345,7 +4339,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
    */
   private int success;
 
-  /** {@inheritDoc} */
   @Override
   public void add(SelectedResult selectedResult) {
     // TODO - Print the current state of the dynamicMultiPathFitResult to file.
@@ -4499,14 +4492,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isFit(int candidateId) {
     // Return if we already have a fit result for this candidate
     return candidates.get(candidateId).fit;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isValid(int candidateId) {
     // If we have an estimate then this is a valid candidate for fitting.
@@ -4518,7 +4509,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     return isValid[candidateId];
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass(PreprocessedPeakResult result) {
     // Do not ignore these. They may be from a fit result that is eventually not selected so we
@@ -4531,7 +4521,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     isValid[result.getCandidateId()] = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void passMin(PreprocessedPeakResult result) {
     // This is a candidate that passed validation. Store the estimate as passing the minimal filter.

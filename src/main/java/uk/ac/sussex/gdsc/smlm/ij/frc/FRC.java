@@ -172,7 +172,6 @@ public class FRC {
     public String getName() { return "Four sigma"; }};
     //@formatter:on
 
-    /** {@inheritDoc} */
     @Override
     public String toString() {
       return getName();
@@ -206,7 +205,6 @@ public class FRC {
     public String getName() { return "Interpolated Circle"; }};
     //@formatter:on
 
-    /** {@inheritDoc} */
     @Override
     public String toString() {
       return getName();
@@ -234,7 +232,6 @@ public class FRC {
     public String getName() { return "FHT"; }};
     //@formatter:on
 
-    /** {@inheritDoc} */
     @Override
     public String toString() {
       return getName();

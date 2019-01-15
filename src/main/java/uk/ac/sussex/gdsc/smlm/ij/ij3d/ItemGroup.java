@@ -221,13 +221,11 @@ public abstract class ItemGroup extends Group implements ItemShape {
     return Arrays.toString(points);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return points.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Point3f getCoordinate(int i) {
     return points[i];

@@ -129,7 +129,6 @@ public class GridDistribution implements SpatialDistribution {
     nCells = nCellsPerRow * nCellsPerRow;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] next() {
     if (previous != null) {
@@ -173,7 +172,6 @@ public class GridDistribution implements SpatialDistribution {
     return previous;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithin(double[] xyz) {
     for (int i = 0; i < xyz.length; i++) {
@@ -184,7 +182,6 @@ public class GridDistribution implements SpatialDistribution {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithinXy(double[] xyz) {
     for (int i = 0; i < 2; i++) {
@@ -195,7 +192,6 @@ public class GridDistribution implements SpatialDistribution {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] xyz) {
     // Ignore

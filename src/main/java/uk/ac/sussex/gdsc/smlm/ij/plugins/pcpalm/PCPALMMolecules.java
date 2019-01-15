@@ -208,7 +208,6 @@ public class PCPALMMolecules implements PlugIn {
   /** The area. */
   static double area;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -2053,7 +2052,6 @@ public class PCPALMMolecules implements PlugIn {
       return jacobian;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       final double[] values = new double[x.size()];
@@ -2073,7 +2071,6 @@ public class PCPALMMolecules implements PlugIn {
       super(parameters);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double[] point) {
       // Objective function is to minimise sum-of-squares

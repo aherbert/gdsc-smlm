@@ -77,7 +77,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     super(filename);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected String getHeaderEnd() {
     return null;
@@ -157,7 +156,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected String[] getHeaderComments() {
     final String[] comments = new String[3];
@@ -180,7 +178,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     return Arrays.copyOf(comments, count);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected String[] getFieldNames() {
     final String[] names = new String[] {"X", "Y", "Frame", "Signal"};
@@ -194,7 +191,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     return names;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsStdDev) {
@@ -210,7 +206,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     writeResult(1, sb.toString());
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(PeakResult result) {
     if (fos == null) {
@@ -237,7 +232,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     sb.append('\n');
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addAll(PeakResult[] results) {
     if (fos == null) {
@@ -274,7 +268,6 @@ public class MALKFilePeakResults extends FilePeakResults {
     addAll(cluster.getPoints());
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void sort() throws IOException {
     final TurboList<Result> results = new TurboList<>(size);

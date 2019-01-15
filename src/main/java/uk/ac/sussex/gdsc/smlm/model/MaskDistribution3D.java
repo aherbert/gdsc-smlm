@@ -183,7 +183,6 @@ public class MaskDistribution3D implements SpatialDistribution {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] next() {
     final int randomPosition = randomGenerator.nextInt(indices.length);
@@ -221,7 +220,6 @@ public class MaskDistribution3D implements SpatialDistribution {
     return (maxxMaxy) * z + maxx * y + x;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithin(double[] xyz) {
     final int index = getIndex(xyz);
@@ -237,7 +235,6 @@ public class MaskDistribution3D implements SpatialDistribution {
     return mask[index] == particle;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithinXy(double[] xyz) {
     createProjection();
@@ -260,7 +257,6 @@ public class MaskDistribution3D implements SpatialDistribution {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] xyz) {
     findParticles();

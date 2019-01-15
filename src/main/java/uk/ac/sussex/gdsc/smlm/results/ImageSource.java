@@ -459,7 +459,6 @@ public abstract class ImageSource {
    */
   public abstract boolean isValid(int frame);
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     // Over-ride this to produce a nicer output description of the results source

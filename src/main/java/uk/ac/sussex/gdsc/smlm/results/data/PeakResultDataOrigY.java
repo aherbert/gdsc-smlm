@@ -30,13 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Gets the original Y from a result.
  */
 public class PeakResultDataOrigY extends PeakResultDataInteger {
-  /** {@inheritDoc} */
   @Override
   public Integer getValue(PeakResult result) {
     return result.getOrigY();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "Orig Y";

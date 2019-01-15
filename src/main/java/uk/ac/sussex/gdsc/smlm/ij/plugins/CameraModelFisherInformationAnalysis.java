@@ -456,7 +456,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
   private ExecutorService es;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -890,34 +889,34 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     return alpha;
   }
 
-  private static double[] getFisherInformation(double[] alpha, double[] photons) {
-    final double[] I = new double[photons.length];
-    for (int i = 0; i < photons.length; i++) {
-      I[i] = alpha[i] / photons[i];
-    }
-    return I;
-  }
-
   private static double[] getAlpha(BasePoissonFisherInformation fi, double[] photons) {
     // Do not multi-thread as this is an interpolated/fast function
-    final double[] rI = new double[photons.length];
+    final double[] alpha = new double[photons.length];
     for (int i = 0; i < photons.length; i++) {
-      rI[i] = fi.getAlpha(photons[i]);
+      alpha[i] = fi.getAlpha(photons[i]);
     }
-    return rI;
+    return alpha;
+  }
+
+  private static double[] getFisherInformation(double[] alpha, double[] photons) {
+    final double[] fisherI = new double[photons.length];
+    for (int i = 0; i < photons.length; i++) {
+      fisherI[i] = alpha[i] / photons[i];
+    }
+    return fisherI;
   }
 
   private static BasePoissonFisherInformation getInterpolatedPoissonFisherInformation(
-      CameraType type, double[] logU, double[] alpha1, BasePoissonFisherInformation f) {
+      CameraType type, double[] logU, double[] alpha1, BasePoissonFisherInformation fisherI) {
     if (type.isFast()) {
-      return f;
+      return fisherI;
     }
     // This should not matter as the interpolation is only used between the ends of the range
-    BasePoissonFisherInformation upperf = f;
+    BasePoissonFisherInformation upperFI = fisherI;
     if (type == CameraType.EM_CCD) {
-      upperf = new HalfPoissonFisherInformation();
+      upperFI = new HalfPoissonFisherInformation();
     }
-    return new InterpolatedPoissonFisherInformation(logU, alpha1, type.isLowerFixedI(), upperf);
+    return new InterpolatedPoissonFisherInformation(logU, alpha1, type.isLowerFixedI(), upperFI);
   }
 
   private static int getPointShape(int pointOption) {
@@ -935,11 +934,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
   }
 
-  private static double[] limits(double[] limits, double[] f) {
+  private static double[] limits(double[] limits, double[] fisherI) {
     double min = limits[0];
     double max = limits[1];
-    for (int i = 0; i < f.length; i++) {
-      final double d = f[i];
+    for (int i = 0; i < fisherI.length; i++) {
+      final double d = fisherI[i];
       // Find limits of numbers that can be logged
       if (d <= 0 || d == Double.POSITIVE_INFINITY) {
         continue;

@@ -248,14 +248,12 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
     uninitialised = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double probability(int x) {
     final double logProbability = logProbability(x);
     return logProbability == Double.NEGATIVE_INFINITY ? 0 : FastMath.exp(logProbability);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double logProbability(int x) {
     double ret;
@@ -271,7 +269,6 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution {
     return ret;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double cumulativeProbability(int x) {
     if (x < 0) {

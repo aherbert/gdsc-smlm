@@ -59,6 +59,7 @@ import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 /**
  * Shows a list of all the results sets held in memory, allowing multiple results to be selected.
@@ -123,22 +124,9 @@ public class MultiDialog extends Dialog
     }
   }
 
-  /**
-   * Interface to allow results to populate the items in the multi dialog.
-   */
-  public interface MemoryResultsFilter {
-    /**
-     * Accept the results.
-     *
-     * @param results the results
-     * @return true, if successful
-     */
-    boolean accept(MemoryPeakResults results);
-  }
-
-  private static class NullMemoryResultsFilter implements MemoryResultsFilter {
+  private static class NullMemoryResultsFilter implements Predicate<MemoryPeakResults> {
     @Override
-    public boolean accept(MemoryPeakResults results) {
+    public boolean test(MemoryPeakResults results) {
       return true;
     }
   }
@@ -162,12 +150,12 @@ public class MultiDialog extends Dialog
      *
      * @param filter the filter
      */
-    public MemoryResultsItems(MemoryResultsFilter filter) {
+    public MemoryResultsItems(Predicate<MemoryPeakResults> filter) {
       final Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
       names = new String[allResults.size()];
       size = 0;
       for (final MemoryPeakResults results : allResults) {
-        if (filter.accept(results)) {
+        if (filter.test(results)) {
           names[size++] = ResultsManager.getName(results);
         }
       }
@@ -331,7 +319,6 @@ public class MultiDialog extends Dialog
     return wasCanceled;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void actionPerformed(ActionEvent event) {
     final Object source = event.getSource();
@@ -349,7 +336,6 @@ public class MultiDialog extends Dialog
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void keyTyped(KeyEvent paramKeyEvent) {
     // Ignore
@@ -384,7 +370,6 @@ public class MultiDialog extends Dialog
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void keyReleased(KeyEvent paramKeyEvent) {
     // Ignore
@@ -455,7 +440,6 @@ public class MultiDialog extends Dialog
     return theText;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void windowClosing(WindowEvent event) {
     wasCanceled = true;
@@ -542,13 +526,11 @@ public class MultiDialog extends Dialog
    */
   protected int lastEvent = -1;
 
-  /** {@inheritDoc} */
   @Override
   public void mouseClicked(MouseEvent paramMouseEvent) {
     modifiers = paramMouseEvent.getModifiers();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void itemStateChanged(ItemEvent paramItemEvent) {
     final int index = (Integer) paramItemEvent.getItem();

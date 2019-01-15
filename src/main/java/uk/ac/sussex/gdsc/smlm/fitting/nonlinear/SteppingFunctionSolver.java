@@ -326,7 +326,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
     function.forEach(new SimpleValueProcedure(fx));
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean computeValue(double[] y, double[] fx, double[] a) {
     // If the fx array is not null then wrap the gradient function.
@@ -373,7 +372,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
    */
   protected abstract double computeFunctionValue(double[] a);
 
-  /** {@inheritDoc} */
   @Override
   protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a) {
     gradientIndices = function.gradientIndices();
@@ -400,14 +398,12 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   protected abstract FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y,
       double[] a);
 
-  /** {@inheritDoc} */
   @Override
   public boolean isBounded() {
     // Bounds are tighter than constraints and we support those
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setBounds(double[] lower, double[] upper) {
     bounds.setBounds(lower, upper);
@@ -428,13 +424,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
     bounds.setGradientFunction(function);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(double[] weights) {
     this.weights = weights;

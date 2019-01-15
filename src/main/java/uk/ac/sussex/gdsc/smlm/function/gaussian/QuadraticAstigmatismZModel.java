@@ -65,6 +65,19 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
   }
 
   /**
+   * Gets the standard deviation, first and second derivatives for the z-depth.
+   *
+   * @param z the z
+   * @param dsdz the first and second derivative of s given z
+   * @return the standard deviation
+   */
+  private double getS2(double z, double[] dsdz) {
+    final double s = getS1(z, zDepth, dsdz);
+    dsdz[1] = d2sOverDz2; // Use cached value
+    return s;
+  }
+
+  /**
    * Gets the standard deviation and first derivative for the z-depth.
    *
    * @param z the z
@@ -91,50 +104,31 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel {
     return 1.0 + z * z * 0.5;
   }
 
-  /**
-   * Gets the standard deviation, first and second derivatives for the z-depth.
-   *
-   * @param z the z
-   * @param dsdz the first and second derivative of s given z
-   * @return the standard deviation
-   */
-  private double getS2(double z, double[] dsdz) {
-    final double s = getS1(z, zDepth, dsdz);
-    dsdz[1] = d2sOverDz2; // Use cached value
-    return s;
-  }
-
-  /** {@inheritDoc} */
   @Override
   public double getSx(double z) {
     return getS(z - gamma, zDepth);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSx(double z, double[] dsdz) {
     return getS1(z - gamma, zDepth, dsdz);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSx2(double z, double[] dsdz) {
     return getS2(z - gamma, dsdz);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSy(double z) {
     return getS(z + gamma, zDepth);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSy(double z, double[] dsdz) {
     return getS1(z + gamma, zDepth, dsdz);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSy2(double z, double[] dsdz) {
     return getS2(z + gamma, dsdz);

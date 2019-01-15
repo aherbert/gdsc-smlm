@@ -148,7 +148,6 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
     Arrays.fill(data, 0.0);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da) {
     // Note: Ignore the value

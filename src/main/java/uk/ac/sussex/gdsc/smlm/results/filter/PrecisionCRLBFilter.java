@@ -82,45 +82,38 @@ public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using an upper precision threshold (uses fitted parameter variance).";
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean requiresParameterDeviations() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     return precision;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
     return PrecisionFilter.DEFAULT_INCREMENT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
     return ParameterType.PRECISION_CRLB;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -128,31 +121,26 @@ public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter {
         updateParameter(precision, delta, PrecisionFilter.DEFAULT_RANGE));
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new PrecisionCRLBFilter(parameters[0]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMax(parameters, 0, precision);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lowerBoundOrientation(int index) {
     return 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     return new double[] {PrecisionFilter.UPPER_LIMIT};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {PrecisionFilter.DEFAULT_RANGE};

@@ -427,7 +427,6 @@ class Calibration implements Cloneable {
     setExposureTime(exposureTime);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Calibration clone() {
     try {

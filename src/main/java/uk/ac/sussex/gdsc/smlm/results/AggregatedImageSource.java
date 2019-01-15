@@ -67,61 +67,51 @@ public class AggregatedImageSource extends ImageSource {
     this.aggregate = aggregate;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getXOrigin() {
     return imageSource.getXOrigin();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getYOrigin() {
     return imageSource.getYOrigin();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getWidth() {
     return imageSource.getWidth();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getHeight() {
     return imageSource.getHeight();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFrames() {
     return (int) Math.ceil((double) imageSource.getFrames() / aggregate);
   }
 
-  /** {@inheritDoc} */
   @Override
   public ImageSource getParent() {
     return imageSource;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ImageSource getOriginal() {
     return imageSource.getOriginal();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean openSource() {
     return imageSource.openSource();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void closeSource() {
     imageSource.closeSource();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean initialiseSequentialRead() {
     if (imageSource.initialiseSequentialRead()) {
@@ -228,7 +218,6 @@ public class AggregatedImageSource extends ImageSource {
     return lastImage;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Object nextRawFrame() {
     // Aggregate frames consecutive frames
@@ -256,7 +245,6 @@ public class AggregatedImageSource extends ImageSource {
     return image;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Object getRawFrame(int frame) {
     if (frame < 1) {
@@ -318,19 +306,16 @@ public class AggregatedImageSource extends ImageSource {
     return aggregate;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("%s (Aggregate %d images)", imageSource.toString(), aggregate);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setReadHint(ReadHint readHint) {
     imageSource.setReadHint(readHint);
   }
 
-  /** {@inheritDoc} */
   @Override
   public ReadHint getReadHint() {
     return imageSource.getReadHint();

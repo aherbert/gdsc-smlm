@@ -130,14 +130,12 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     super(FunctionSolverType.MLE, function, tc, bounds, maxRelativeError, maxAbsoluteError);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void preProcess() {
     ll = Double.NaN;
     lastyFit = null;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double[] prepareY(double[] y) {
     // We can handle per-observation variances as detailed in
@@ -156,7 +154,6 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     return ensurePositive(y);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected LVMGradientProcedure createGradientProcedure(double[] y) {
     // We can handle per-observation variances as detailed in
@@ -178,7 +175,6 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     return super.computeFitValue(a);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void computeValues(double[] fx) {
     super.computeValues(fx);
@@ -198,7 +194,6 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected FisherInformationMatrix computeLastFisherInformationMatrix(double[] fx) {
     // The Hessian matrix refers to the log-likelihood ratio.
@@ -241,7 +236,6 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     return new FisherInformationMatrix(p.getLinear(), function.getNumberOfGradients());
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihood() {
     if (Double.isNaN(ll)) {
@@ -267,14 +261,12 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     return ll;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihoodRatio() {
     // This method computes the log-likelihood ratio directly
     return value;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getQ() {
     // Wilks theorum states the LLR approaches the chi-squared distribution for large n.

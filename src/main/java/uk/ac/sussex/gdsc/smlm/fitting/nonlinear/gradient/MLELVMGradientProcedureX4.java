@@ -52,7 +52,6 @@ public class MLELVMGradientProcedureX4 extends MLELVMGradientProcedure {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi, double[] dfi_da) {
     ++yi;

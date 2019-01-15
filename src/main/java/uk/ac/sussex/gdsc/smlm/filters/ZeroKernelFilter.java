@@ -51,7 +51,6 @@ public class ZeroKernelFilter extends KernelFilter {
     super(source);
   }
 
-  /** {@inheritDoc} */
   @Override
   public ZeroKernelFilter copy() {
     return new ZeroKernelFilter(this);

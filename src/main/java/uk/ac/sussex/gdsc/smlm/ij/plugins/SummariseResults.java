@@ -68,7 +68,6 @@ public class SummariseResults implements PlugIn, MouseListener {
   private int histgramBins;
   private int removeOutliers;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

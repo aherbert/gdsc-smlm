@@ -58,19 +58,16 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure {
     this.values = values;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return function.size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
     function.initialise0(a);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
     index = 0;
@@ -88,7 +85,6 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value) {
     values[index++] = value;

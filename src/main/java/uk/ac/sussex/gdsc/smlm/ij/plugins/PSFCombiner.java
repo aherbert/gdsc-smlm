@@ -60,7 +60,6 @@ public class PSFCombiner implements PlugIn {
   private static List<String> selected;
   private final List<PSF> input = new LinkedList<>();
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

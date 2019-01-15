@@ -63,12 +63,11 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
-public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> {
+public class SCMOSLikelihoodWrapperTest {
   private static Logger logger;
   private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
@@ -110,17 +109,16 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
   // is close to zero)
   private final double h_ = 0.01; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
-  private final int[] testx = new int[] {4, 5, 6};
-  private final int[] testy = new int[] {4, 5, 6};
+  private final int[] testx = {4, 5, 6};
+  private final int[] testy = {4, 5, 6};
   // Do not test zero background since this is an edge case for the likelihood function
-  private final double[] testbackground_ = new double[] {0.1, 1, 10};
-  private final double[] testsignal1_ = new double[] {15, 55, 105};
-  private final double[] testangle1_ = new double[] {Math.PI / 5, Math.PI / 3};
-  private final double[] testcx1_ = new double[] {4.9, 5.3};
-  private final double[] testcy1_ = new double[] {4.8, 5.2};
-  private final double[] testcz1_ = new double[] {-1.5, 1.0};
-  private final double[][] testw1_ =
-      new double[][] {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
+  private final double[] testbackground_ = {0.1, 1, 10};
+  private final double[] testsignal1_ = {15, 55, 105};
+  private final double[] testangle1_ = {Math.PI / 5, Math.PI / 3};
+  private final double[] testcx1_ = {4.9, 5.3};
+  private final double[] testcy1_ = {4.8, 5.2};
+  private final double[] testcz1_ = {-1.5, 1.0};
+  private final double[][] testw1_ = {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
 
   private double[] testbackground;
   private double[] testsignal1;
@@ -138,15 +136,14 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
   private static float G_SD = 0.2f;
   private static float O = 100f;
 
-  private class SCMOSLikelihoodWrapperTestData {
+  private static class SCMOSLikelihoodWrapperTestData {
     float[] var;
     float[] g;
     float[] o;
     float[] sd;
   }
 
-  @Override
-  public Object apply(RandomSeed source) {
+  private static Object createData(RandomSeed source) {
     final int n = maxx * maxx;
     final SCMOSLikelihoodWrapperTestData data = new SCMOSLikelihoodWrapperTestData();
     data.var = new float[n];
@@ -283,8 +280,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     int count = 0;
     int total = 0;
 
-    final SCMOSLikelihoodWrapperTestData testData =
-        (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
+    final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
+        .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
     final float[] g = testData.g;
     final float[] o = testData.o;
@@ -492,8 +489,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     int count = 0;
     int total = 0;
 
-    final SCMOSLikelihoodWrapperTestData testData =
-        (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
+    final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
+        .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
     final float[] g = testData.g;
     final float[] o = testData.o;
@@ -844,7 +841,7 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     //@formatter:on
   }
 
-  private void canComputePValue(RandomSeed seed, BaseNonLinearFunction nlf) {
+  private static void canComputePValue(RandomSeed seed, BaseNonLinearFunction nlf) {
     logger.log(TestLogUtils.getRecord(Level.INFO, nlf.name));
 
     final int n = maxx * maxx;
@@ -854,8 +851,8 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
     // Simulate sCMOS camera
     nlf.initialise(a);
 
-    final SCMOSLikelihoodWrapperTestData testData =
-        (SCMOSLikelihoodWrapperTestData) dataCache.computeIfAbsent(seed, this);
+    final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
+        .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
     final float[] g = testData.g;
     final float[] o = testData.o;
@@ -919,19 +916,19 @@ public class SCMOSLikelihoodWrapperTest implements Function<RandomSeed, Object> 
 
     // Find min using quadratic fit
     final double[] data = list.toArray();
-    int i = SimpleArrayUtils.findMinIndex(data);
-    final double mina = (double) (imin + i) / 10;
+    int index = SimpleArrayUtils.findMinIndex(data);
+    final double mina = (double) (imin + index) / 10;
     double fita = mina;
     try {
-      if (i == 0) {
-        i++;
+      if (index == 0) {
+        index++;
       }
-      if (i == data.length - 1) {
-        i--;
+      if (index == data.length - 1) {
+        index--;
       }
-      final int i1 = i - 1;
-      final int i2 = i;
-      final int i3 = i + 1;
+      final int i1 = index - 1;
+      final int i2 = index;
+      final int i3 = index + 1;
 
       fita = QuadraticUtils.findMinMax((double) (imin + i1) / 10, data[i1],
           (double) (imin + i2) / 10, data[i2], (double) (imin + i3) / 10, data[i3]);

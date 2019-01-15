@@ -178,7 +178,6 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void computeStep(double[] step) {
     final double[] d1 = gradientProcedure.d1;

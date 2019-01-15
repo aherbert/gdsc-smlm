@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -35,6 +34,7 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Stores peak results using an array.
@@ -88,7 +88,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return results[index];
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return size;
@@ -117,7 +116,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean add(PeakResult result) {
     checkCapacity(1);
@@ -125,13 +123,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addCollection(Collection<PeakResult> results) {
     return addArray(results.toArray(new PeakResult[results.size()]));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addArray(PeakResult[] results) {
     if (results == null) {
@@ -150,7 +146,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean addStore(PeakResultStore results) {
     if (results instanceof ArrayPeakResultStore) {
@@ -160,13 +155,40 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return addArray(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult remove(int index) {
     rangeCheck(index);
     final PeakResult oldValue = results[index];
     fastRemove(index);
     return oldValue;
+  }
+
+  @Override
+  public void remove(int fromIndex, int toIndex) {
+    if (fromIndex > toIndex) {
+      throw new IllegalArgumentException("fromIndex must be <= toIndex");
+    }
+    rangeCheckWithLowerBounds(fromIndex);
+    rangeCheck(toIndex); // This is above fromIndex so ignore lower bounds check
+    toIndex++; // Make exclusive
+    final int numMoved = size - toIndex;
+    if (numMoved > 0) {
+      System.arraycopy(results, toIndex, results, fromIndex, numMoved);
+    }
+    // Let gc do its work
+    while (fromIndex++ < toIndex) {
+      results[size--] = null;
+    }
+  }
+
+  @Override
+  public boolean remove(PeakResult result) {
+    final int index = indexOf(result);
+    if (index != -1) {
+      fastRemove(index);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -207,43 +229,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     results[--size] = null; // Let gc do its work
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public void remove(int fromIndex, int toIndex) {
-    if (fromIndex > toIndex) {
-      throw new IllegalArgumentException("fromIndex must be <= toIndex");
-    }
-    rangeCheckWithLowerBounds(fromIndex);
-    rangeCheck(toIndex); // This is above fromIndex so ignore lower bounds check
-    toIndex++; // Make exclusive
-    final int numMoved = size - toIndex;
-    if (numMoved > 0) {
-      System.arraycopy(results, toIndex, results, fromIndex, numMoved);
-    }
-    // Let gc do its work
-    while (fromIndex++ < toIndex) {
-      results[size--] = null;
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public boolean remove(PeakResult result) {
-    final int index = indexOf(result);
-    if (index != -1) {
-      fastRemove(index);
-      return true;
-    }
-    return false;
-  }
-
-  /** {@inheritDoc} */
   @Override
   public boolean removeCollection(Collection<PeakResult> results) {
     return removeArray(results.toArray(new PeakResult[results.size()]));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeArray(PeakResult[] results) {
     if (results == null || results.length == 0) {
@@ -252,7 +242,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return batchRemove(results, false);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean removeStore(PeakResultStore results) {
     if (results instanceof ArrayPeakResultStore) {
@@ -262,43 +251,41 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
   }
 
   private boolean batchRemove(PeakResult[] results2, boolean complement) {
-    // Adapted from java.utisl.ArrayList
+    // Adapted from java.utils.ArrayList
 
     final ArrayPeakResultStore c = new ArrayPeakResultStore(results2);
-    int r = 0;
-    int w = 0;
+    int index = 0;
+    int newSize = 0;
     boolean modified = false;
     try {
-      for (; r < size; r++) {
-        if (c.contains(results[r]) == complement) {
-          results[w++] = results[r];
+      for (; index < size; index++) {
+        if (c.contains(results[index]) == complement) {
+          results[newSize++] = results[index];
         }
       }
     } finally {
       // Preserve data even if c.contains() throws.
-      if (r != size) {
-        System.arraycopy(results, r, results, w, size - r);
-        w += size - r;
+      if (index != size) {
+        System.arraycopy(results, index, results, newSize, size - index);
+        newSize += size - index;
       }
-      if (w != size) {
+      if (newSize != size) {
         // clear to let GC do its work
-        for (int i = w; i < size; i++) {
+        for (int i = newSize; i < size; i++) {
           results[i] = null;
         }
-        size = w;
+        size = newSize;
         modified = true;
       }
     }
     return modified;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainCollection(Collection<PeakResult> results) {
     return retainArray(results.toArray(new PeakResult[results.size()]));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainArray(PeakResult[] results) {
     if (results == null || results.length == 0) {
@@ -309,7 +296,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return batchRemove(results, true);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean retainStore(PeakResultStore results) {
     if (results instanceof ArrayPeakResultStore) {
@@ -329,7 +315,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     size = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void trimToSize() {
     if (size < results.length) {
@@ -337,13 +322,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void sort(Comparator<PeakResult> comparator) {
     Arrays.sort(results, 0, size, comparator);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult[] toArray() {
     final PeakResult[] array = new PeakResult[size];
@@ -351,19 +334,17 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return array;
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy() {
     return new ArrayPeakResultStore(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResultStore copy(boolean deepCopy) {
     if (deepCopy) {
       final ArrayPeakResultStore copy = new ArrayPeakResultStore(size());
-      for (int i = 0, size = size(); i < size; i++) {
-        copy.add(results[i].clone());
+      for (int i = 0, max = size(); i < max; i++) {
+        copy.add(results[i].copy());
       }
       return copy;
     }
@@ -377,7 +358,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
    * {@link #get(int)} can return stale data.
    */
   @Override
-  public boolean removeIf(PeakResultPredicate filter) {
+  public boolean removeIf(Predicate<PeakResult> filter) {
     Objects.requireNonNull(filter);
 
     // Adapted from java.util.ArrayList (Java 1.8)
@@ -386,9 +367,9 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     // any exception thrown from the filter predicate at this stage
     // will leave the collection unmodified
     int removeCount = 0;
-    final int size = this.size;
-    final BitSet removeSet = new BitSet(size);
-    for (int i = 0; i < size; i++) {
+    final int oldSize = this.size;
+    final BitSet removeSet = new BitSet(oldSize);
+    for (int i = 0; i < oldSize; i++) {
       if (filter.test(results[i])) {
         removeSet.set(i);
         removeCount++;
@@ -398,22 +379,20 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     // shift surviving elements left over the spaces left by removed elements
     final boolean anyToRemove = removeCount > 0;
     if (anyToRemove) {
-      final int newSize = size - removeCount;
-      for (int i = 0, j = 0; (i < size) && (j < newSize); i++, j++) {
+      final int newSize = oldSize - removeCount;
+      for (int i = 0, j = 0; (i < oldSize) && (j < newSize); i++, j++) {
         i = removeSet.nextClearBit(i);
         results[j] = results[i];
       }
-      // for (int k = newSize; k < size; k++)
-      // {
-      // results[k] = null; // Let gc do its work
-      // }
+      for (int k = newSize; k < oldSize; k++) {
+        results[k] = null; // Let gc do its work
+      }
       this.size = newSize;
     }
 
     return anyToRemove;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(PeakResultProcedure procedure) {
     for (int i = 0; i < size; i++) {
@@ -421,9 +400,8 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
-  public PeakResult[] subset(PeakResultPredicate filter) {
+  public PeakResult[] subset(Predicate<PeakResult> filter) {
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
     for (int i = 0; i < size; i++) {
       if (filter.test(results[i])) {
@@ -433,7 +411,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return list.toArray();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void shuffle(RandomGenerator randomSource) {
     // Fisher-Yates shuffle
@@ -445,7 +422,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void shuffle(UniformRandomProvider randomSource) {
     // Fisher-Yates shuffle
@@ -457,7 +433,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int indexOf(PeakResult result) {
     if (result == null) {
@@ -476,7 +451,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lastIndexOf(PeakResult result) {
     if (result == null) {
@@ -495,7 +469,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList {
     return -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean contains(PeakResult result) {
     return indexOf(result) != -1;

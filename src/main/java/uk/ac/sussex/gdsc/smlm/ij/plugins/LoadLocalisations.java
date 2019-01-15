@@ -218,7 +218,6 @@ public class LoadLocalisations implements PlugIn {
 
   private static final String TITLE = "Load Localisations";
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

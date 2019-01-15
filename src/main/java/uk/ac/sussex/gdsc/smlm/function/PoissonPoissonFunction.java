@@ -114,7 +114,6 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     return new PoissonPoissonFunction(alpha, var);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double likelihood(double x, double mu) {
     // convert to photons
@@ -170,7 +169,6 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     return Gamma.gamma(value + 1);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double logLikelihood(double x, double mu) {
     // convert to photons

@@ -84,15 +84,6 @@ public class PoissonGammaFunctionTest {
     }
   }
 
-  @Test
-  public void probabilityMatchesLogProbability() {
-    for (final double g : gain) {
-      for (final double p : photons) {
-        probabilityMatchesLogProbability(g, p);
-      }
-    }
-  }
-
   private static void cumulativeProbabilityIsOne(final double gain, final double mu, boolean pdf) {
     final double p2 = cumulativeProbability(gain, mu, pdf);
 
@@ -111,7 +102,7 @@ public class PoissonGammaFunctionTest {
   private static double cumulativeProbability(final double gain, final double mu, boolean pdf) {
     final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
-    double p = 0;
+    double pvalue = 0;
     int min = 1;
     int max = 0;
 
@@ -135,7 +126,7 @@ public class PoissonGammaFunctionTest {
         if (debug) {
           logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
         }
-        p += pp;
+        pvalue += pp;
       }
       // if (p > 1.01)
       // Assertions.fail("P > 1: " + p);
@@ -151,8 +142,8 @@ public class PoissonGammaFunctionTest {
       if (debug) {
         logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
       }
-      p += pp;
-      if (pp == 0 || pp / p < changeTolerance) {
+      pvalue += pp;
+      if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
       }
     }
@@ -163,18 +154,18 @@ public class PoissonGammaFunctionTest {
       if (debug) {
         logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
       }
-      p += pp;
-      if (pp == 0 || pp / p < changeTolerance) {
+      pvalue += pp;
+      if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
       }
     }
 
-    double p2 = p;
+    double p2 = pvalue;
     if (pdf) {
       // Do a formal integration
       if (debug) {
-        if (p < 0.98 || p > 1.02) {
-          logger.fine(FunctionUtils.getSupplier("g=%f, mu=%f, p=%f", gain, mu, p));
+        if (pvalue < 0.98 || pvalue > 1.02) {
+          logger.fine(FunctionUtils.getSupplier("g=%f, mu=%f, p=%f", gain, mu, pvalue));
         }
       }
       final UnivariateIntegrator in =
@@ -191,9 +182,18 @@ public class PoissonGammaFunctionTest {
     }
 
     // if (p2 < 0.98 || p2 > 1.02)
-    logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, p=%f  %f", gain, mu, p, p2));
+    logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, p=%f  %f", gain, mu, pvalue, p2));
 
     return p2;
+  }
+
+  @Test
+  public void probabilityMatchesLogProbability() {
+    for (final double g : gain) {
+      for (final double p : photons) {
+        probabilityMatchesLogProbability(g, p);
+      }
+    }
   }
 
   private static void probabilityMatchesLogProbability(final double gain, double mu) {

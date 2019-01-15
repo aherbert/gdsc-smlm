@@ -65,7 +65,6 @@ public class OptimumDistanceResultFilter extends ResultFilter {
     bestPeakResults = new PeakResult[filter.size()];
   }
 
-  /** {@inheritDoc} */
   @Override
   public void filter(FitResult fitResult, int maxIndex, PeakResult... results) {
     for (final PeakResult r : results) {
@@ -92,7 +91,6 @@ public class OptimumDistanceResultFilter extends ResultFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void filter(FitResult fitResult, int maxIndex, float x, float y) {
     for (int i = 0; i < filter.size(); i++) {
@@ -113,7 +111,6 @@ public class OptimumDistanceResultFilter extends ResultFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void finalise() {
     // Note that there could be the same result allocated to two target positions

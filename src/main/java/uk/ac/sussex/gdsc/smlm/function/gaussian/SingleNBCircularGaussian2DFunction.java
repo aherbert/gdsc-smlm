@@ -54,7 +54,6 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
     super(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new SingleNBCircularGaussian2DFunction(maxx, maxy);
@@ -98,7 +97,6 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

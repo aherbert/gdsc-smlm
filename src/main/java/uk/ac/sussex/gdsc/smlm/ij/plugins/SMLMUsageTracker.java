@@ -138,7 +138,6 @@ public class SMLMUsageTracker implements PlugIn {
     ImageJAnalyticsUtils.pageview(pageUrl, pageTitle);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     // If this is the first plugin to call recordPlugin(...) then the dialog may be shown.

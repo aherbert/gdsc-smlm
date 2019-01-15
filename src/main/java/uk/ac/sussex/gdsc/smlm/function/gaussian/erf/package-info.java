@@ -40,6 +40,6 @@
  * that achieves theoretically minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
  *
  * @since 1.0.0
-  */
+ */
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;

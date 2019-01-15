@@ -63,31 +63,26 @@ public class Gradient1FunctionStore extends ValueFunctionStore
     length = function.getNumberOfGradients();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
     function1.initialise(a);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise1(double[] a) {
     function1.initialise(a);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return function1.gradientIndices();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return function1.getNumberOfGradients();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     index = 0;
@@ -106,7 +101,6 @@ public class Gradient1FunctionStore extends ValueFunctionStore
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da) {
     values[index] = value;

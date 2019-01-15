@@ -55,7 +55,6 @@ public class FastLogMLELVMGradientProcedure4 extends FastLogMLELVMGradientProced
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi, double[] dfi_da) {
     ++yi;

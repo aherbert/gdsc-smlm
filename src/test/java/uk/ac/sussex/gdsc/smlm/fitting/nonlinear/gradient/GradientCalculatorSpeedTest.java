@@ -86,7 +86,7 @@ public class GradientCalculatorSpeedTest {
 
   DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
-  static final int MAX_ITER = 20000;
+  static final int maxIter = 20000;
   int blockWidth = 10;
   double background = 0.5;
   double amplitude = 100;

@@ -89,13 +89,11 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     this.maxWidth = Math.max(0, maxWidth);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected String generateName() {
     return "Width " + minWidth + "-" + maxWidth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(MemoryPeakResults peakResults) {
     calculator =
@@ -109,13 +107,11 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup() {
     setup(minWidth, maxWidth);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(int flags) {
     if (areSet(flags, IDirectFilter.NO_WIDTH)) {
@@ -125,7 +121,6 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(int flags, FilterSetupData... filterSetupData) {
     setup(flags);
@@ -153,26 +148,22 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFilterSetupFlags() throws IllegalStateException {
     return (widthEnabled) ? 0 : IDirectFilter.NO_WIDTH;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean accept(PeakResult peak) {
     final float sd = calculator.getStandardDeviation(peak.getParameters());
     return sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getValidationFlags() {
     return V_X_SD_FACTOR;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (widthEnabled) {
@@ -183,19 +174,16 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using a width range. (Width is relative to initial peak width.)";
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 2;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     switch (index) {
@@ -206,7 +194,6 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
@@ -218,7 +205,6 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -230,7 +216,6 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -243,92 +228,77 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new WidthFilter2(parameters[0], parameters[1]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMin(parameters, 0, minWidth);
     setMax(parameters, 1, maxWidth);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lowerBoundOrientation(int index) {
     return (index == 1) ? 1 : -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     return new double[] {WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSignal() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSNR() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMinWidth() {
     return minWidth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMaxWidth() {
     return maxWidth;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getShift() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getEShift() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getPrecision() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public PrecisionType getPrecisionType() {
     return PrecisionType.NONE;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMinZ() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMaxZ() {
     return 0;

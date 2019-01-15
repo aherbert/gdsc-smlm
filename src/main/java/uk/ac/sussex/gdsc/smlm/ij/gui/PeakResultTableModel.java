@@ -365,31 +365,26 @@ public class PeakResultTableModel extends AbstractTableModel {
   // Table model methods
   // *************************************************************************/
 
-  /** {@inheritDoc} */
   @Override
   public int getRowCount() {
     return data.size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getColumnName(int column) {
     return names[column]; // values[column].getValueName();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     return values[columnIndex].getValueClass();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getColumnCount() {
     return values.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
     if (rowCounter) {

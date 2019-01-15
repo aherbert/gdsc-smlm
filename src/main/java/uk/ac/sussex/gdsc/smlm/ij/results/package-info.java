@@ -27,6 +27,6 @@
  * the <a href="https://imagej.nih.gov/ij/">ImageJ</a> library.
  *
  * @since 1.0.0
-  */
+ */
 
 package uk.ac.sussex.gdsc.smlm.ij.results;

@@ -53,7 +53,6 @@ public class LSQLVMGradientProcedureMatrix5 extends LSQLVMGradientProcedureMatri
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da) {
     final double dy = y[++yi] - value;

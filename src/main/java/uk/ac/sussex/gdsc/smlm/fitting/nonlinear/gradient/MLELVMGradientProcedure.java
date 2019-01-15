@@ -50,7 +50,6 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure {
     // We could check that y is positive ...
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi, double[] dfi_da) {
     ++yi;
@@ -86,7 +85,6 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi) {
     ++yi;

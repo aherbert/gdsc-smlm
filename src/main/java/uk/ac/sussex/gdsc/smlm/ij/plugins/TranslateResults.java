@@ -44,7 +44,6 @@ import ij.plugin.PlugIn;
 public class TranslateResults implements PlugIn {
   private static final String TITLE = "Translate Results";
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

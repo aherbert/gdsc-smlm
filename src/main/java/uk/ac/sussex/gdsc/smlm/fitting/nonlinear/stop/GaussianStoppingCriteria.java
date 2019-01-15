@@ -64,7 +64,6 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
     this.peaks = func.getNPeaks();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void evaluate(double oldError, double newError, double[] a) {
     final StringBuilder sb = logParameters(oldError, newError, a);

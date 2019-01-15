@@ -489,7 +489,6 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     return (GeometryArray) sphere.getShape(0).getGeometry();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f color) {
     // Global colour
@@ -514,7 +513,6 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f[] color) {
     if (color == null) {
@@ -544,7 +542,6 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor4(Color4f[] color) {
     if (color == null) {
@@ -576,7 +573,6 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float[] alpha) {
     if (alpha != null) {
@@ -650,7 +646,6 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     setTransparency(transparency);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float alpha) {
     if (alphas == null) {
@@ -697,7 +692,6 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     setTransparency(transparency);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getItemAlpha(float[] alpha) {
     final int size = size();

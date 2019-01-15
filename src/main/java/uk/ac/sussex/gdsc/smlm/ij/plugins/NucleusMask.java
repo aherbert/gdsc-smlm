@@ -61,7 +61,6 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
   private ImagePlus imp;
   private ImageStack sphere;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -350,7 +349,6 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     final double old = diameter;

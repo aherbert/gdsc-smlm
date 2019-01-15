@@ -152,7 +152,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     this.clearAtStart = clearAtStart;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void begin() {
     tableActive = false;
@@ -381,7 +380,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int frame, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsDev) {
@@ -518,7 +516,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addAll(PeakResult[] results) {
     if (!tableActive) {
@@ -539,13 +536,11 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return size;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void end() {
     tableActive = false;
@@ -577,7 +572,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
     this.frameColumnName = frameColumnName;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return tableActive;

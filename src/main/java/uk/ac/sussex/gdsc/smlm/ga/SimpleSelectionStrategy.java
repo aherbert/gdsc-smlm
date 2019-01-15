@@ -123,7 +123,6 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
     return size;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialiseBreeding(List<? extends Chromosome<T>> individuals) {
     if (individuals != null && individuals.size() < 2) {
@@ -158,14 +157,12 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
     return new ChromosomePair<>(individuals.get(first), individuals.get(second));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void finishBreeding() {
     // Free memory
     individuals = null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setTracker(TrackProgress tracker) {
     this.tracker = tracker;

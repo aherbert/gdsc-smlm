@@ -100,13 +100,11 @@ public class FloatImage2D extends Image2D {
     this.data = source.data.clone();
   }
 
-  /** {@inheritDoc} */
   @Override
   public FloatImage2D copy() {
     return new FloatImage2D(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void createData(int size) {
     data = new float[size];
@@ -121,13 +119,11 @@ public class FloatImage2D extends Image2D {
     return data;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getDataLength() {
     return data.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FloatImage2D crop(int x, int y, int width, int height) {
     return crop(x, y, width, height, null);

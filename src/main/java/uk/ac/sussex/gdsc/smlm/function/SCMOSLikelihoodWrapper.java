@@ -57,6 +57,8 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
   private final double[] x;
   private final double[] logG;
 
+  private double observedLikelihood = Double.NaN;
+
   /**
    * Initialise the function.
    *
@@ -217,7 +219,6 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     return new SCMOSLikelihoodWrapper(f, a, x, n, varG2, logG, logNormalisation);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double computeLikelihood() {
     // Compute the negative log-likelihood to be minimised:
@@ -240,7 +241,103 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     return ll + logNormalisation;
   }
 
-  private double observedLikelihood = Double.NaN;
+  @Override
+  public double computeLikelihood(double[] gradient) {
+    // Compute the negative log-likelihood to be minimised
+    // (ui+vari/gi^2) - x * ln(ui+vari/gi^2) + ln(gamma(x+1))
+    // with x as the mapped observed value: x = (k-o)/g + var/g^2
+
+    // To compute the gradient we do the same as for a Poisson distribution:
+    // f(x) = l(x) - k * ln(l(x)) + log(gamma(k+1))
+    // with l(x) as the Poisson mean (the output dependent on the function variables x)
+    // and k the observed value.
+    //
+    // Since (k * ln(l(x)))' = (k * ln(l(x))') * l'(x)
+    // = (k / l(x)) * l'(x)
+
+    // f'(x) = l'(x) - (k/l(x) * l'(x))
+    // f'(x) = l'(x) * (1 - k/l(x))
+
+    double ll = 0;
+    for (int j = 0; j < nVariables; j++) {
+      gradient[j] = 0;
+    }
+    final double[] dl_da = new double[nVariables];
+    for (int i = 0; i < n; i++) {
+      double u = function.eval(i, dl_da);
+
+      if (u < 0) {
+        u = 0;
+      }
+
+      final double l = u + varG2[i];
+
+      ll += l;
+      if (x[i] != 0) {
+        ll -= x[i] * Math.log(l);
+      }
+
+      // Note: if l==0 then we get divide by zero and a NaN value
+      final double factor = (1 - x[i] / l);
+      for (int j = 0; j < gradient.length; j++) {
+        gradient[j] += dl_da[j] * factor;
+      }
+    }
+    return ll + logNormalisation;
+  }
+
+  @Override
+  public double computeLikelihood(int i) {
+    double u = function.eval(i);
+
+    if (u < 0) {
+      u = 0;
+    }
+
+    final double l = u + varG2[i];
+
+    double ll = l + logG[i];
+    if (x[i] != 0) {
+      ll += logGamma1(x[i]) - x[i] * Math.log(l);
+    }
+
+    return ll;
+  }
+
+  @Override
+  public double computeLikelihood(double[] gradient, int i) {
+    for (int j = 0; j < nVariables; j++) {
+      gradient[j] = 0;
+    }
+    final double[] dl_da = new double[nVariables];
+
+    double u = function.eval(i, dl_da);
+
+    if (u < 0) {
+      u = 0;
+    }
+
+    final double l = u + varG2[i];
+
+    final double factor = (1 - x[i] / l);
+    for (int j = 0; j < gradient.length; j++) {
+      gradient[j] = dl_da[j] * factor;
+    }
+
+    double ll = l + logG[i];
+    if (x[i] != 0) {
+      ll += logGamma1(x[i]) - x[i] * Math.log(l);
+    }
+
+    return ll;
+  }
+
+  private static double logGamma1(double k) {
+    if (k <= 1) {
+      return 0;
+    }
+    return Gamma.logGamma(k + 1);
+  }
 
   /**
    * Compute the observed negative log likelihood. This is the value of {@link #computeLikelihood()}
@@ -316,107 +413,6 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     return ChiSquaredDistributionTable.computeQValue(llr, degreesOfFreedom);
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public double computeLikelihood(double[] gradient) {
-    // Compute the negative log-likelihood to be minimised
-    // (ui+vari/gi^2) - x * ln(ui+vari/gi^2) + ln(gamma(x+1))
-    // with x as the mapped observed value: x = (k-o)/g + var/g^2
-
-    // To compute the gradient we do the same as for a Poisson distribution:
-    // f(x) = l(x) - k * ln(l(x)) + log(gamma(k+1))
-    // with l(x) as the Poisson mean (the output dependent on the function variables x)
-    // and k the observed value.
-    //
-    // Since (k * ln(l(x)))' = (k * ln(l(x))') * l'(x)
-    // = (k / l(x)) * l'(x)
-
-    // f'(x) = l'(x) - (k/l(x) * l'(x))
-    // f'(x) = l'(x) * (1 - k/l(x))
-
-    double ll = 0;
-    for (int j = 0; j < nVariables; j++) {
-      gradient[j] = 0;
-    }
-    final double[] dl_da = new double[nVariables];
-    for (int i = 0; i < n; i++) {
-      double u = function.eval(i, dl_da);
-
-      if (u < 0) {
-        u = 0;
-      }
-
-      final double l = u + varG2[i];
-
-      ll += l;
-      if (x[i] != 0) {
-        ll -= x[i] * Math.log(l);
-      }
-
-      // Note: if l==0 then we get divide by zero and a NaN value
-      final double factor = (1 - x[i] / l);
-      for (int j = 0; j < gradient.length; j++) {
-        gradient[j] += dl_da[j] * factor;
-      }
-    }
-    return ll + logNormalisation;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public double computeLikelihood(int i) {
-    double u = function.eval(i);
-
-    if (u < 0) {
-      u = 0;
-    }
-
-    final double l = u + varG2[i];
-
-    double ll = l + logG[i];
-    if (x[i] != 0) {
-      ll += logGamma1(x[i]) - x[i] * Math.log(l);
-    }
-
-    return ll;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public double computeLikelihood(double[] gradient, int i) {
-    for (int j = 0; j < nVariables; j++) {
-      gradient[j] = 0;
-    }
-    final double[] dl_da = new double[nVariables];
-
-    double u = function.eval(i, dl_da);
-
-    if (u < 0) {
-      u = 0;
-    }
-
-    final double l = u + varG2[i];
-
-    final double factor = (1 - x[i] / l);
-    for (int j = 0; j < gradient.length; j++) {
-      gradient[j] = dl_da[j] * factor;
-    }
-
-    double ll = l + logG[i];
-    if (x[i] != 0) {
-      ll += logGamma1(x[i]) - x[i] * Math.log(l);
-    }
-
-    return ll;
-  }
-
-  private static double logGamma1(double k) {
-    if (k <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(k + 1);
-  }
-
   /**
    * Compute the negative log likelihood.
    *
@@ -467,7 +463,6 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper {
     return FastMath.exp(-nll);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean canComputeGradient() {
     return true;

@@ -100,13 +100,11 @@ public class SNRHysteresisFilter extends HysteresisFilter {
         + "Any results below the lower SNR limit are excluded. " + super.getDescription();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 2 + super.getNumberOfParameters();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     if (index < super.getNumberOfParameters()) {
@@ -121,7 +119,6 @@ public class SNRHysteresisFilter extends HysteresisFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -140,7 +137,6 @@ public class SNRHysteresisFilter extends HysteresisFilter {
   private static double[] defaultRange =
       new double[] {0, 0, 0, 0, SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE};
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -160,14 +156,12 @@ public class SNRHysteresisFilter extends HysteresisFilter {
     return create(parameters);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new SNRHysteresisFilter(parameters[0], (int) parameters[1], parameters[2],
         (int) parameters[3], (float) parameters[4], (float) parameters[5]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     super.weakestParameters(parameters);
@@ -178,7 +172,6 @@ public class SNRHysteresisFilter extends HysteresisFilter {
     parameters[5] = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {getDefaultSearchRange(), getDefaultTimeRange(), SNRFilter.DEFAULT_RANGE,

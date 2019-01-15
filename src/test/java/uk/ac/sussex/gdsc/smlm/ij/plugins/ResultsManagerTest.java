@@ -64,43 +64,43 @@ public class ResultsManagerTest {
   public void writeTSFMatchesRead(RandomSeed seed) {
     // This is redundant
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    writeTSFMatchesRead(seed, 1, 1, 1, 1);
+    checkWriteTSFMatchesRead(seed, 1, 1, 1, 1);
   }
 
   @SeededTest
   public void writeTSFMatchesReadWithChannels(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    writeTSFMatchesRead(seed, 2, 1, 1, 1);
+    checkWriteTSFMatchesRead(seed, 2, 1, 1, 1);
   }
 
   @SeededTest
   public void writeTSFMatchesReadWithSlices(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    writeTSFMatchesRead(seed, 1, 2, 1, 1);
+    checkWriteTSFMatchesRead(seed, 1, 2, 1, 1);
   }
 
   @SeededTest
   public void writeTSFMatchesReadWithPositions(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    writeTSFMatchesRead(seed, 1, 1, 2, 1);
+    checkWriteTSFMatchesRead(seed, 1, 1, 2, 1);
   }
 
   @SeededTest
   public void writeTSFMatchesReadWithTypes(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    writeTSFMatchesRead(seed, 1, 1, 1, 2);
+    checkWriteTSFMatchesRead(seed, 1, 1, 1, 2);
   }
 
   @SeededTest
   public void writeTSFMatchesReadWithCombinations(RandomSeed seed) {
     // This takes longer
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-    writeTSFMatchesRead(seed, 2, 2, 2, 2);
+    checkWriteTSFMatchesRead(seed, 2, 2, 2, 2);
   }
 
   @SuppressWarnings("null")
-  private static void writeTSFMatchesRead(RandomSeed seed, int channels, int slices, int positions,
-      int types) {
+  private static void checkWriteTSFMatchesRead(RandomSeed seed, int channels, int slices,
+      int positions, int types) {
     Assumptions.assumeFalse(java.awt.GraphicsEnvironment.isHeadless());
 
     final String filename = createFile();

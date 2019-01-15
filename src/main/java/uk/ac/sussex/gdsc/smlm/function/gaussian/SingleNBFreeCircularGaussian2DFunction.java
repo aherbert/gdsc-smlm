@@ -54,7 +54,6 @@ public class SingleNBFreeCircularGaussian2DFunction extends SingleFreeCircularGa
     super(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new SingleNBFreeCircularGaussian2DFunction(maxx, maxy);
@@ -114,7 +113,6 @@ public class SingleNBFreeCircularGaussian2DFunction extends SingleFreeCircularGa
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

@@ -82,7 +82,6 @@ public class DarkTimeAnalysis implements PlugIn {
   private static double percentile = 99;
   private static int nBins;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

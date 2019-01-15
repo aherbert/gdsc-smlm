@@ -46,7 +46,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultValueParameter;
 import uk.ac.sussex.gdsc.smlm.results.predicates.MinMaxPeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PassPeakResultPredicate;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.MinMaxResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
 
@@ -59,6 +58,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
+import java.util.function.Predicate;
 
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.
@@ -85,10 +85,9 @@ public class CropResults implements PlugIn {
   private MemoryPeakResults results;
   private String outputName;
   private MinMaxResultProcedure minMax;
-  private TypeConverter<DistanceUnit> c;
+  private TypeConverter<DistanceUnit> converter;
   private boolean myLimitZ;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -209,21 +208,22 @@ public class CropResults implements PlugIn {
       final double minz = FastMath.max(settings.getMinZ(), min);
 
       // Display in nm
-      c = new IdentityTypeConverter<>(null);
+      converter = new IdentityTypeConverter<>(null);
       String unit = "";
 
       final DistanceUnit nativeUnit = results.getDistanceUnit();
       if (nativeUnit != null) {
         unit = UnitHelper.getShortName(nativeUnit);
         try {
-          c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
+          converter =
+              CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
           unit = UnitHelper.getShortName(DistanceUnit.NM);
         } catch (final ConversionException ex) {
           // No native units
         }
       }
-      min = c.convert(min);
-      max = c.convert(max);
+      min = converter.convert(min);
+      max = converter.convert(max);
 
       final String msg = String.format("%.2f <= z <= %.2f (%s)", min, max, unit);
 
@@ -232,8 +232,8 @@ public class CropResults implements PlugIn {
 
       gd.addMessage(msg);
       gd.addCheckbox("Limit Z-depth", settings.getLimitZ());
-      gd.addSlider("minZ", min, max, c.convert(minz));
-      gd.addSlider("maxZ", min, max, c.convert(maxz));
+      gd.addSlider("minZ", min, max, converter.convert(minz));
+      gd.addSlider("maxZ", min, max, converter.convert(maxz));
     }
 
     gd.addChoice("Name_option", NAME_OPTIONS, settings.getNameOption(),
@@ -263,11 +263,11 @@ public class CropResults implements PlugIn {
             } else if (settings.getNameOption() == NAME_OPTION_SEQUENCE) {
               final String name = settings.getNameSuffix();
               egd.addStringField("Name_suffix", name, MathUtils.clip(20, 60, name.length()));
-              int c = settings.getNameCounter();
-              if (c < 1) {
-                c = 1;
+              int counter = settings.getNameCounter();
+              if (counter < 1) {
+                counter = 1;
               }
-              egd.addNumericField("Name_counter", c, 0);
+              egd.addNumericField("Name_counter", counter, 0);
             } else {
               throw new IllegalStateException("Unknown name option: " + settings.getNameOption());
             }
@@ -295,8 +295,8 @@ public class CropResults implements PlugIn {
       // 3D crop options
       myLimitZ = gd.getNextBoolean();
       settings.setLimitZ(myLimitZ);
-      settings.setMinZ(c.convertBack(gd.getNextNumber()));
-      settings.setMaxZ(c.convertBack(gd.getNextNumber()));
+      settings.setMinZ(converter.convertBack(gd.getNextNumber()));
+      settings.setMaxZ(converter.convertBack(gd.getNextNumber()));
     }
 
     settings.setNameOption(gd.getNextChoiceIndex());
@@ -315,21 +315,16 @@ public class CropResults implements PlugIn {
         IJ.error(TITLE, "No output suffix");
         return false;
       }
-      // if (suffix.charAt(0) != ' ')
-      // suffix = " " + suffix;
       outputName = results.getName() + suffix;
     } else if (settings.getNameOption() == NAME_OPTION_SEQUENCE) {
       outputName = results.getName();
       final String suffix = settings.getNameSuffix();
       if (!TextUtils.isNullOrEmpty(suffix)) {
-        // if (suffix.charAt(0) != ' ')
-        // outputName += " " + suffix;
-        // else
         outputName += suffix;
       }
-      final int c = settings.getNameCounter();
-      outputName += c;
-      settings.setNameCounter(c + 1); // Increment for next time
+      final int count = settings.getNameCounter();
+      outputName += count;
+      settings.setNameCounter(count + 1); // Increment for next time
     }
     return true;
   }
@@ -380,15 +375,12 @@ public class CropResults implements PlugIn {
 
     final Rectangle2D bounds = pixelBounds;
 
-    final PeakResultPredicate testZ = getZFilter();
+    final Predicate<PeakResult> testZ = getZFilter();
 
     if (bounds.getWidth() > 0 && bounds.getHeight() > 0) {
-      results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
-        @Override
-        public void executeXYR(float x, float y, PeakResult result) {
-          if (bounds.contains(x, y) && testZ.test(result)) {
-            newResults.add(result);
-          }
+      results.forEach(DistanceUnit.PIXEL, (XYRResultProcedure) (x, y, result) -> {
+        if (bounds.contains(x, y) && testZ.test(result)) {
+          newResults.add(result);
         }
       });
     }
@@ -410,7 +402,7 @@ public class CropResults implements PlugIn {
    *
    * @return the z filter
    */
-  private PeakResultPredicate getZFilter() {
+  private Predicate<PeakResult> getZFilter() {
     if (myLimitZ) {
       return new MinMaxPeakResultPredicate((float) settings.getMinZ(), (float) settings.getMaxZ(),
           new PeakResultValueParameter(PeakResult.Z));
@@ -480,14 +472,11 @@ public class CropResults implements PlugIn {
     final double xscale = (double) roiImageWidth / integerBounds.width;
     final double yscale = (double) roiImageHeight / integerBounds.height;
 
-    final PeakResultPredicate testZ = getZFilter();
+    final Predicate<PeakResult> testZ = getZFilter();
 
-    results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
-      @Override
-      public void executeXYR(float x, float y, PeakResult result) {
-        if (roiTest.test(x * xscale, y * yscale) && testZ.test(result)) {
-          newResults.add(result);
-        }
+    results.forEach(DistanceUnit.PIXEL, (XYRResultProcedure) (x, y, result) -> {
+      if (roiTest.test(x * xscale, y * yscale) && testZ.test(result)) {
+        newResults.add(result);
       }
     });
 

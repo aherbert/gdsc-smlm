@@ -94,7 +94,6 @@ public class Configuration
   private TextField textMinWidthFactor;
   private TextField textWidthFactor;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -349,19 +348,16 @@ public class Configuration
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitEngineConfiguration getFitEngineConfiguration() {
     return config;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitConfiguration getFitConfiguration() {
     return config.getFitConfiguration();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void itemStateChanged(ItemEvent event) {
     if (event.getSource() instanceof Choice) {

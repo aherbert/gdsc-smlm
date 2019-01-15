@@ -101,14 +101,12 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
     return ta;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorder(int[] indices) {
     checkIndices(indices, mesh.size());
     reorderFast(indices);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorderFast(int[] indices) {
     changed = true;
@@ -176,19 +174,16 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return mesh.size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Point3f getCoordinate(int i) {
     return mesh.get(i);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setColor(Color3f color) {
     // Delegate this to the interface implementation.
@@ -196,13 +191,11 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
     setItemColor(color);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f color) {
     super.setColor(color);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f[] color) {
     this.color = null;

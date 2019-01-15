@@ -60,7 +60,6 @@ public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure {
     this.fastLog = fastLog;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi, double[] dfi_da) {
     ++yi;
@@ -101,7 +100,6 @@ public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double fi) {
     ++yi;

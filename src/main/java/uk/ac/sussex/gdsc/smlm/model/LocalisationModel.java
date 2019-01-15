@@ -206,7 +206,6 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
     this.intensity = intensity;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int compareTo(LocalisationModel o) {
     if (time == o.time) {

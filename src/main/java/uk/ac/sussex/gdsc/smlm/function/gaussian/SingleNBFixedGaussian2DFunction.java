@@ -54,7 +54,6 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
     super(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new SingleNBFixedGaussian2DFunction(maxx, maxy);
@@ -95,7 +94,6 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

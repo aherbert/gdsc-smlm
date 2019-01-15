@@ -96,13 +96,11 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
     super(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new SingleEllipticalGaussian2DFunction(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
     background = a[BACKGROUND];
@@ -202,6 +200,26 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
     return background + gaussian(x0, x1, dyda);
   }
 
+  /**
+   * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public double eval(final int x) {
+    // Unpack the predictor into the dimensions
+    final int x1 = x / maxx;
+    final int x0 = x % maxx;
+
+    final double dx = x0 - x0pos;
+    final double dy = x1 - x1pos;
+
+    if (zeroAngle) {
+      return background + height * FastMath.exp(aa * dx * dx + cc * dy * dy);
+    }
+    return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+  }
+
   private double gaussian(final int x0, final int x1, final double[] dy_da) {
     final double dx = x0 - x0pos;
     final double dy = x1 - x1pos;
@@ -239,26 +257,6 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
     dy_da[6] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
     return y;
-  }
-
-  /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public double eval(final int x) {
-    // Unpack the predictor into the dimensions
-    final int x1 = x / maxx;
-    final int x0 = x % maxx;
-
-    final double dx = x0 - x0pos;
-    final double dy = x1 - x1pos;
-
-    if (zeroAngle) {
-      return background + height * FastMath.exp(aa * dx * dx + cc * dy * dy);
-    }
-    return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
   }
 
   @Override
@@ -301,7 +299,6 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
     return 6;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

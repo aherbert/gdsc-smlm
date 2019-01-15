@@ -71,13 +71,11 @@ public class RollingWindowFailCounter extends BaseFailCounter {
     return new RollingWindowFailCounter(Math.max(0, allowedFailures), window);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass() {
     rollingArray.add(false);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass(int n) {
     if (n < 0) {
@@ -86,13 +84,11 @@ public class RollingWindowFailCounter extends BaseFailCounter {
     rollingArray.add(false, n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail() {
     rollingArray.add(true);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail(int n) {
     if (n < 0) {
@@ -101,19 +97,16 @@ public class RollingWindowFailCounter extends BaseFailCounter {
     rollingArray.add(true, n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isOK() {
     return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FailCounter newCounter() {
     return new RollingWindowFailCounter(allowedFailures, getWindow());
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reset() {
     rollingArray.clear();

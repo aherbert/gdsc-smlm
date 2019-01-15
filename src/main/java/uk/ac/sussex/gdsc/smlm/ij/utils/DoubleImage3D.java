@@ -104,13 +104,11 @@ public class DoubleImage3D extends Image3D {
     this.data = source.data.clone();
   }
 
-  /** {@inheritDoc} */
   @Override
   public DoubleImage3D copy() {
     return new DoubleImage3D(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void createData(int size) {
     data = new double[size];
@@ -125,13 +123,11 @@ public class DoubleImage3D extends Image3D {
     return data;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getDataLength() {
     return data.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public DoubleImage3D crop(int x, int y, int z, int width, int height, int depth) {
     return crop(x, y, z, width, height, depth, null);

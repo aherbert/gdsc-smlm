@@ -38,31 +38,26 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
   @XStreamOmitField
   private float strength = Float.NaN;
 
-  /** {@inheritDoc} */
   @Override
   public void setup() {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(final int flags) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setup(int flags, FilterSetupData... filterSetupData) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFilterSetupFlags() throws IllegalStateException {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FilterSetupData[] getFilterSetupData() throws IllegalStateException {
     return null;
@@ -100,29 +95,24 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
     return (flags & bits) != 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public final boolean accept(final PreprocessedPeakResult peak) {
     return (result = validate(peak)) == 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public abstract int validate(final PreprocessedPeakResult peak);
 
-  /** {@inheritDoc} */
   @Override
   public FilterType getFilterType() {
     return FilterType.DIRECT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getResult() {
     return result;
   }
 
-  /** {@inheritDoc} */
   @Override
   public IDirectFilter copy() {
     return (IDirectFilter) clone();

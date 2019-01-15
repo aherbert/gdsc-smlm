@@ -93,7 +93,6 @@ public class SpotInspector implements PlugIn, MouseListener {
   private static int currentId;
   private int id;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

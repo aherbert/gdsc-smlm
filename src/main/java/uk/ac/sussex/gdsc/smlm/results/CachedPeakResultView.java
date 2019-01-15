@@ -26,9 +26,10 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.results.predicates.FramePeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.IdPeakResultPredicate;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+
+import java.util.function.Predicate;
 
 /**
  * Provides a cache of the view of the results.
@@ -87,7 +88,7 @@ public class CachedPeakResultView implements PeakResultView {
   }
 
   private PeakResult[] findResults(TIntObjectHashMap<PeakResult[]> map, int key,
-      PeakResultPredicate filter) {
+      Predicate<PeakResult> filter) {
     final PeakResult[] results = store.subset(filter);
     map.put(key, results);
     return results;

@@ -74,7 +74,6 @@ public class OffsetGradient1Function extends OffsetValueFunction
       f1.forEach(this);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void execute(double value, double[] dyda) {
       values[index] = value;

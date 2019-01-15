@@ -76,7 +76,6 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   private static ImageROIPainter pairPainter;
   private static ImageROIPainter triplePainter;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -416,7 +415,6 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     return sb.toString();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] getCoordinates(String line) {
     // Extract the startT and x,y coordinates from the first pulse in the line
@@ -515,7 +513,6 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(TimeComparablePointPair o) {
       // Significance of points are: p1, p2, p3
@@ -630,7 +627,6 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(TimeComparableTriple o) {
       // Significance of points are: p1, p2, p3
@@ -712,7 +708,6 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(ScoreComparableTriple o) {
       if (score > o.score) {

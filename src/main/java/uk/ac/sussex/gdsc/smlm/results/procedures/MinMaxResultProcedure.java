@@ -50,7 +50,6 @@ public class MinMaxResultProcedure implements PeakResultProcedure {
     results.forEach(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(PeakResult peakResult) {
     final float v = value.getValue(peakResult);

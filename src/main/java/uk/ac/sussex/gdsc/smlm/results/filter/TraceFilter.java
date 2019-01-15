@@ -132,13 +132,11 @@ public class TraceFilter extends Filter {
     return "Filter results that can be traced over time frames.";
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 2;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     switch (index) {
@@ -149,7 +147,6 @@ public class TraceFilter extends Filter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
@@ -161,7 +158,6 @@ public class TraceFilter extends Filter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -173,7 +169,6 @@ public class TraceFilter extends Filter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -185,20 +180,17 @@ public class TraceFilter extends Filter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new TraceFilter(parameters[0], (int) parameters[1]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMax(parameters, 0, d);
     setMax(parameters, 1, t);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {DEFAULT_DISTANCE_RANGE, DEFAULT_TIME_RANGE};

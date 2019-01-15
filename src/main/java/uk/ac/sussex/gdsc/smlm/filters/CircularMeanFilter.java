@@ -56,7 +56,6 @@ public class CircularMeanFilter extends CircularFilter {
     return new CircularMeanFilter(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Normaliser computeWeightedNormaliser(double radius) {
     final float[] npoints = weights.clone();
@@ -65,7 +64,6 @@ public class CircularMeanFilter extends CircularFilter {
     return new PerPixelNormaliser(npoints);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Normaliser computeNormaliser(int npoints) {
     return new FixedNormaliser(npoints);

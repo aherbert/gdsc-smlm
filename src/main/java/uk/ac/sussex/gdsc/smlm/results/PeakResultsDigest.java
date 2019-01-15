@@ -177,7 +177,6 @@ public class PeakResultsDigest {
     return value.equals(other.value);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     if (size <= 0) {
@@ -187,7 +186,6 @@ public class PeakResultsDigest {
     return value.hashCode();
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -199,7 +197,6 @@ public class PeakResultsDigest {
     return matches((PeakResultsDigest) obj);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("size=%d;digest=%s", size, getDigest());

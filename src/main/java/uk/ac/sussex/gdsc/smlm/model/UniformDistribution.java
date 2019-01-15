@@ -58,7 +58,6 @@ public class UniformDistribution implements SpatialDistribution {
       return rng;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] nextVector() {
       return new double[] {rng1.nextDouble(), rng2.nextDouble(), rng3.nextDouble()};
@@ -167,7 +166,6 @@ public class UniformDistribution implements SpatialDistribution {
     this.vectorGenerator = randomVectorGenerator;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] next() {
     final double[] d = vectorGenerator.nextVector();
@@ -186,7 +184,6 @@ public class UniformDistribution implements SpatialDistribution {
     return vectorGenerator.nextVector();
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithin(double[] xyz) {
     for (int i = 0; i < xyz.length; i++) {
@@ -197,7 +194,6 @@ public class UniformDistribution implements SpatialDistribution {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithinXy(double[] xyz) {
     for (int i = 0; i < 2; i++) {
@@ -208,7 +204,6 @@ public class UniformDistribution implements SpatialDistribution {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] xyz) {
     // Ignore

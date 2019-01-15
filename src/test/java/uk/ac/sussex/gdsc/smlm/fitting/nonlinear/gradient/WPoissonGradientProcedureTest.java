@@ -46,11 +46,10 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
-public class WPoissonGradientProcedureTest implements Function<RandomSeed, double[]> {
+public class WPoissonGradientProcedureTest {
   private static Logger logger;
   private static ConcurrentHashMap<RandomSeed, double[]> dataCache;
 
@@ -72,7 +71,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
   DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
-  int MAX_ITER = 20000;
+  int maxIter = 20000;
   static int blockWidth = 10;
   double background = 0.5;
   double signal = 100;
@@ -82,21 +81,20 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
   double xwidth = 1.2;
   double ywidth = 1.2;
 
-  @Override
-  public double[] apply(RandomSeed source) {
-    int n = blockWidth * blockWidth;
-    final double[] var = new double[n];
-    final UniformRandomProvider r = RngUtils.create(source.getSeed());
-    while (n-- > 0) {
+  private static double[] createData(RandomSeed source) {
+    int count = blockWidth * blockWidth;
+    final double[] var = new double[count];
+    final UniformRandomProvider rng = RngUtils.create(source.getSeed());
+    while (count-- > 0) {
       // Range 0.9 to 1.1
-      var[n] = 0.9 + 0.2 * r.nextDouble();
+      var[count] = 0.9 + 0.2 * rng.nextDouble();
     }
     return var;
   }
 
   @SeededTest
   public void gradientProcedureFactoryCreatesOptimisedProcedures(RandomSeed seed) {
-    final double[] var = dataCache.computeIfAbsent(seed, this);
+    final double[] var = dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData);
     final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
     Assertions.assertEquals(
         WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
@@ -120,14 +118,14 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
   private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed,
       int nparams) {
-    final double[] var = dataCache.computeIfAbsent(seed, this);
+    final double[] var = dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData);
 
     final int iter = 10;
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    createFakeParams(r, nparams, iter, paramsList);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    createFakeParams(rng, nparams, iter, paramsList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     final IntArrayFormatSupplier msgOA =
@@ -136,7 +134,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
 
     for (int i = 0; i < paramsList.size(); i++) {
-      final double[] y = createFakeData(r);
+      final double[] y = createFakeData(rng);
       final WPoissonGradientProcedure p1 = WPoissonGradientProcedureFactory.create(y, var, func);
       p1.computeFisherInformation(paramsList.get(i));
       final WLSQLVMGradientProcedure p2 = new WLSQLVMGradientProcedure(y, var, func);
@@ -179,18 +177,19 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
     long time() {
       loops++;
-      long t = System.nanoTime();
+      long time = System.nanoTime();
       run();
-      t = System.nanoTime() - t;
+      time = System.nanoTime() - time;
       // logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
-      return t;
+      return time;
     }
 
     abstract void run();
   }
 
   @SeededTest
-  public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  public void
+      gradientProcedureUnrolledComputesSameAsGradientProcedureWithoutPrecomputed(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4, false);
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5, false);
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6, false);
@@ -210,16 +209,18 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    createFakeParams(r, nparams, iter, paramsList);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    createFakeParams(rng, nparams, iter, paramsList);
     final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
-    final double[] v = (precomputed) ? dataCache.computeIfAbsent(seed, this) : null;
+    final double[] v =
+        (precomputed) ? dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData)
+            : null;
 
     final IntArrayFormatSupplier msg =
         getMessage(nparams, "[%d] Observations: Not same linear @ %d");
     for (int i = 0; i < paramsList.size(); i++) {
-      final double[] y = createFakeData(r);
+      final double[] y = createFakeData(rng);
       final WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
       p1.computeFisherInformation(paramsList.get(i));
 
@@ -233,7 +234,8 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+  public void
+      gradientProcedureIsFasterUnrolledThanGradientProcedureWithoutPrecomputed(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, false);
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, false);
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, false);
@@ -261,7 +263,9 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
 
     // Remove the timing of the function call by creating a dummy function
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
-    final double[] v = (precomputed) ? dataCache.computeIfAbsent(seed, this) : null;
+    final double[] v =
+        (precomputed) ? dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData)
+            : null;
     final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("M [%d]", 1);
 
     for (int i = 0; i < paramsList.size(); i++) {
@@ -329,7 +333,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final double[] var = dataCache.computeIfAbsent(seed, this);
+    final double[] var = dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData);
     createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
@@ -383,7 +387,7 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
         "WPoissonGradientProcedure", time2));
   }
 
-  protected int[] createFakeData(UniformRandomProvider r, int nparams, int iter,
+  protected int[] createFakeData(UniformRandomProvider rng, int nparams, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList) {
     final int[] x = new int[blockWidth * blockWidth];
     for (int i = 0; i < x.length; i++) {
@@ -391,67 +395,59 @@ public class WPoissonGradientProcedureTest implements Function<RandomSeed, doubl
     }
     for (int i = 0; i < iter; i++) {
       final double[] params = new double[nparams];
-      final double[] y = createFakeData(r, params);
+      final double[] y = createFakeData(rng, params);
       paramsList.add(params);
       yList.add(y);
     }
     return x;
   }
 
-  private static double[] createFakeData(UniformRandomProvider r, double[] params) {
+  private static double[] createFakeData(UniformRandomProvider rng, double[] params) {
     final int n = blockWidth * blockWidth;
 
     for (int i = 0; i < params.length; i++) {
-      params[i] = r.nextDouble();
+      params[i] = rng.nextDouble();
     }
 
     final double[] y = new double[n];
     for (int i = 0; i < y.length; i++) {
-      y[i] = r.nextDouble();
+      y[i] = rng.nextDouble();
     }
 
     return y;
   }
 
-  private static double[] createFakeData(UniformRandomProvider r) {
+  private static double[] createFakeData(UniformRandomProvider rng) {
     final int n = blockWidth * blockWidth;
 
     final double[] y = new double[n];
     for (int i = 0; i < y.length; i++) {
-      y[i] = r.nextDouble();
+      y[i] = rng.nextDouble();
     }
 
     return y;
   }
 
-  protected void createFakeParams(UniformRandomProvider r, int nparams, int iter,
+  protected void createFakeParams(UniformRandomProvider rng, int nparams, int iter,
       ArrayList<double[]> paramsList) {
     for (int i = 0; i < iter; i++) {
       final double[] params = new double[nparams];
-      createFakeParams(r, params);
+      createFakeParams(rng, params);
       paramsList.add(params);
     }
   }
 
-  private static void createFakeParams(UniformRandomProvider r, double[] params) {
+  private static void createFakeParams(UniformRandomProvider rng, double[] params) {
     for (int i = 0; i < params.length; i++) {
-      params[i] = r.nextDouble();
+      params[i] = rng.nextDouble();
     }
   }
 
   protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList) {
     final ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
     for (int i = 0; i < paramsList.size(); i++) {
-      params2List.add(copydouble(paramsList.get(i)));
+      params2List.add(paramsList.get(i).clone());
     }
     return params2List;
-  }
-
-  private static double[] copydouble(double[] d) {
-    final double[] d2 = new double[d.length];
-    for (int i = 0; i < d.length; i++) {
-      d2[i] = d[i];
-    }
-    return d2;
   }
 }

@@ -107,13 +107,11 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     super(FunctionSolverType.LSE, function, tc, bounds, maxRelativeError, maxAbsoluteError);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void preProcess() {
     totalSumOfSquares = Double.NaN;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected LVMGradientProcedure createGradientProcedure(double[] y) {
     return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) function);
@@ -184,7 +182,6 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
   // function.getNumberOfGradients());
   // }
 
-  /** {@inheritDoc} */
   @Override
   public double getTotalSumOfSquares() {
     if (Double.isNaN(totalSumOfSquares) && lastY != null) {
@@ -193,32 +190,27 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     return totalSumOfSquares;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getResidualSumOfSquares() {
     return value;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getCoefficientOfDetermination() {
     return 1.0 - (value / getTotalSumOfSquares());
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getAdjustedCoefficientOfDetermination() {
     return MathUtils.getAdjustedCoefficientOfDetermination(value, getTotalSumOfSquares(),
         getNumberOfFittedPoints(), getNumberOfFittedParameters());
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMeanSquaredError() {
     return value / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     // This is a stepping solver that is not weighted

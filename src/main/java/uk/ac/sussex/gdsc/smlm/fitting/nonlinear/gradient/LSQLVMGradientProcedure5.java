@@ -66,7 +66,6 @@ public class LSQLVMGradientProcedure5 extends LSQLVMGradientProcedure {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da) {
     final double dy = y[++yi] - value;

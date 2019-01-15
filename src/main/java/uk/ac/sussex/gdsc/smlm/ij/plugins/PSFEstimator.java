@@ -113,7 +113,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
    */
   public PSFEstimator() {}
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -374,7 +373,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     int result;
@@ -784,7 +782,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
         result.getParameterDeviations());
   }
 
-  /** {@inheritDoc} */
   @Override
   public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared,
       float noise, float meanIntensity, float[] params, float[] paramsStdDev) {
@@ -838,7 +835,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return true;

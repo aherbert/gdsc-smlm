@@ -43,7 +43,6 @@ public class DepthMask implements PlugIn {
   private static String titleXZ = "";
   private static String titleYZ = "";
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

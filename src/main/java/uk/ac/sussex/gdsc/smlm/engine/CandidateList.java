@@ -45,7 +45,6 @@ class CandidateList {
   }
 
   private static class CandidateComparator implements Comparator<Candidate> {
-    /** {@inheritDoc} */
     @Override
     public int compare(Candidate o1, Candidate o2) {
       return o1.index - o2.index;

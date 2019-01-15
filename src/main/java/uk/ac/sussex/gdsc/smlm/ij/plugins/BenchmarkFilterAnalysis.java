@@ -169,8 +169,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported
  * are shown in a table, e.g. precision, Jaccard, F-score.
  */
-public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterScore>, TrackProgress,
-    FractionScoreStore, FullScoreFunction<FilterScore> {
+public class BenchmarkFilterAnalysis
+    implements PlugIn, FitnessFunction<FilterScore>, TrackProgress, FullScoreFunction<FilterScore> {
   private static final String TITLE = "Benchmark Filter Analysis";
   private static TextWindow resultsWindow;
   private static TextWindow summaryWindow;
@@ -315,7 +315,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private static List<FilterSet> filterList;
   /** The last id. */
   static int lastId;
-  private static TIntObjectHashMap<IdPeakResult[]> actualCoordinates;
+  private static TIntObjectHashMap<UniqueIdPeakResult[]> actualCoordinates;
   private static MultiPathFitResults[] resultsList;
   // private static MultiPathFitResults[] clonedResultsList = null;
   private static int matches;
@@ -337,14 +337,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   // Used to tile plot windows
   private final WindowOrganiser wo = new WindowOrganiser();
 
-  private class CustomFractionalAssignment extends PeakFractionalAssignment {
-    public final double d;
+  private static class CustomFractionalAssignment extends PeakFractionalAssignment {
+    /** The distance to the other true location in nm. */
+    public final double distToTarget;
     public final PeakResult peak;
 
     public CustomFractionalAssignment(int targetId, int predictedId, double distance, double score,
-        double d, PreprocessedPeakResult spot, PeakResult peak) {
+        double distToTarget, PreprocessedPeakResult spot, PeakResult peak) {
       super(targetId, predictedId, distance, score, spot);
-      this.d = d;
+      this.distToTarget = distToTarget;
       this.peak = peak;
     }
 
@@ -353,34 +354,47 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
   }
 
-  private class CustomResultAssignment extends ResultAssignment {
-    public final double d;
+  private static class CustomResultAssignment extends ResultAssignment {
+    /** The distance to the other true location in nm. */
+    public final double distToTarget;
     public final PeakResult peak;
 
-    public CustomResultAssignment(int targetId, double distance, double score, double d,
+    public CustomResultAssignment(int targetId, double distance, double score, double distToTarget,
         PeakResult peak) {
       super(targetId, distance, score);
-      this.d = d;
+      this.distToTarget = distToTarget;
       this.peak = peak;
     }
 
     @Override
     public FractionalAssignment toFractionalAssignment(int predictedId,
         PreprocessedPeakResult spot) {
-      return new CustomFractionalAssignment(targetId, predictedId, distance, score, d, spot, peak);
+      return new CustomFractionalAssignment(targetId, predictedId, distance, score, distToTarget,
+          spot, peak);
     }
   }
 
-  private class IdPeakResult extends PeakResult {
+  private static class UniqueIdPeakResult extends PeakResult {
     final int id;
     final int uniqueId;
 
-    public IdPeakResult(int id, int uniqueId, PeakResult result) {
+    public UniqueIdPeakResult(int id, int uniqueId, PeakResult result) {
       super(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
           result.getError(), result.getNoise(), result.getMeanIntensity(), result.getParameters(),
           null);
       this.id = id;
       this.uniqueId = uniqueId;
+    }
+
+    protected UniqueIdPeakResult(UniqueIdPeakResult source) {
+      super(source);
+      id = source.id;
+      uniqueId = source.uniqueId;
+    }
+
+    @Override
+    public PeakResult copy() {
+      return new UniqueIdPeakResult(this);
     }
   }
 
@@ -449,7 +463,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -484,7 +497,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
       depthStats.add(result.zPosition);
 
-      IdPeakResult[] actual = getCoordinates(actualCoordinates, frame);
+      UniqueIdPeakResult[] actual = getCoordinates(actualCoordinates, frame);
       final int nActual = actual.length;
       final boolean[] matched = new boolean[nActual];
       actual = filterUsingBorder(actual);
@@ -609,7 +622,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
                   }
                 }
 
-                final int id = ((IdPeakResult) actual[j]).id;
+                final int id = ((UniqueIdPeakResult) actual[j]).id;
 
                 // Invert for the ranking (i.e. low is best)
                 double distance = 1 - score;
@@ -716,7 +729,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     isHeadless = java.awt.GraphicsEnvironment.isHeadless();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -752,7 +764,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
     // Score a given filter
     if ("score".equals(arg)) {
-      score();
+      scoreSingleFilter();
       return;
     }
     // Score a given filter
@@ -1002,7 +1014,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * Score a single multi-path filter and report the results. This is used for testing changes to
    * the filter parameters.
    */
-  private void score() {
+  private void scoreSingleFilter() {
     // Show dialog to allow the user to change the settings.
     if (!showScoreDialog()) {
       return;
@@ -1304,52 +1316,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   }
 
   /**
-   * Count combinations. Set the increment for any parameter not expanded to zero.
-   *
-   * @param parameters the parameters
-   * @param parameters2 the parameters 2
-   * @param increment the increment
-   * @return the combinations
-   */
-  private static long countCombinations(double[] parameters, double[] parameters2,
-      double[] increment) {
-    final int n = parameters.length;
-    long combinations = 1;
-    for (int i = 0; i < n; i++) {
-      final double inc = increment[i];
-      increment[i] = 0;
-
-      if (Double.isNaN(inc) || Double.isInfinite(inc)) {
-        continue;
-      }
-      if (Double.isNaN(parameters[i]) || Double.isInfinite(parameters[i])) {
-        continue;
-      }
-      if (Double.isNaN(parameters2[i]) || Double.isInfinite(parameters2[i])) {
-        continue;
-      }
-      if (parameters[i] > parameters2[i]) {
-        continue;
-      }
-
-      increment[i] = inc;
-
-      final double min = parameters[i];
-      final double max = parameters2[i];
-      final double max2 = max + inc;
-
-      long extra = 1;
-      // Check the current value is less than the max or (to avoid small round-off error)
-      // that the current value is closer to the max than the next value after the max.
-      for (double value = min + inc; value < max || value - max < max2 - value; value += inc) {
-        extra++;
-      }
-      combinations *= extra;
-    }
-    return combinations;
-  }
-
-  /**
    * Expand filters. Set the increment for any parameter not expanded to zero. Set the input
    * parameters array to the lower bounds. Set the input parameters2 array to the upper bounds.
    *
@@ -1430,6 +1396,52 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     Collections.sort(list);
 
     return list;
+  }
+
+  /**
+   * Count combinations. Set the increment for any parameter not expanded to zero.
+   *
+   * @param parameters the parameters
+   * @param parameters2 the parameters 2
+   * @param increment the increment
+   * @return the combinations
+   */
+  private static long countCombinations(double[] parameters, double[] parameters2,
+      double[] increment) {
+    final int n = parameters.length;
+    long combinations = 1;
+    for (int i = 0; i < n; i++) {
+      final double inc = increment[i];
+      increment[i] = 0;
+
+      if (Double.isNaN(inc) || Double.isInfinite(inc)) {
+        continue;
+      }
+      if (Double.isNaN(parameters[i]) || Double.isInfinite(parameters[i])) {
+        continue;
+      }
+      if (Double.isNaN(parameters2[i]) || Double.isInfinite(parameters2[i])) {
+        continue;
+      }
+      if (parameters[i] > parameters2[i]) {
+        continue;
+      }
+
+      increment[i] = inc;
+
+      final double min = parameters[i];
+      final double max = parameters2[i];
+      final double max2 = max + inc;
+
+      long extra = 1;
+      // Check the current value is less than the max or (to avoid small round-off error)
+      // that the current value is closer to the max than the next value after the max.
+      for (double value = min + inc; value < max || value - max < max2 - value; value += inc) {
+        extra++;
+      }
+      combinations *= extra;
+    }
+    return combinations;
   }
 
   /**
@@ -1706,8 +1718,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return resultsList;
   }
 
-  private TIntObjectHashMap<IdPeakResult[]> getCoordinates(MemoryPeakResults results) {
-    final TIntObjectHashMap<IdPeakResult[]> coords = new TIntObjectHashMap<>();
+  private TIntObjectHashMap<UniqueIdPeakResult[]> getCoordinates(MemoryPeakResults results) {
+    final TIntObjectHashMap<UniqueIdPeakResult[]> coords = new TIntObjectHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
       // will be many calls to getEntry(). Instead sort the results and use
@@ -1723,26 +1735,26 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         public void execute(PeakResult p) {
           if (counter.advanceAndReset(p.getFrame())) {
             if (!tmp.isEmpty()) {
-              coords.put(counter.previousFrame(), tmp.toArray(new IdPeakResult[tmp.size()]));
+              coords.put(counter.previousFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
               tmp.clear();
             }
           }
-          tmp.add(new IdPeakResult(tmp.size(), uniqueId.getAndIncrement(), p));
+          tmp.add(new UniqueIdPeakResult(tmp.size(), uniqueId.getAndIncrement(), p));
         }
       });
 
       if (!tmp.isEmpty()) {
-        coords.put(counter.previousFrame(), tmp.toArray(new IdPeakResult[tmp.size()]));
+        coords.put(counter.previousFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
       }
     }
     return coords;
   }
 
-  private static IdPeakResult[] EMPTY = new IdPeakResult[0];
+  private static UniqueIdPeakResult[] EMPTY = new UniqueIdPeakResult[0];
 
-  private static IdPeakResult[] getCoordinates(TIntObjectHashMap<IdPeakResult[]> coords,
+  private static UniqueIdPeakResult[] getCoordinates(TIntObjectHashMap<UniqueIdPeakResult[]> coords,
       Integer t) {
-    final IdPeakResult[] tmp = coords.get(t);
+    final UniqueIdPeakResult[] tmp = coords.get(t);
     return (tmp == null) ? EMPTY : tmp;
   }
 
@@ -2507,9 +2519,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             if (Math.abs(c.peak.getZPosition()) <= range) {
               tp += c.getScore();
             }
-            d += c.d;
+            d += c.distToTarget;
             sf += c.getSignalFactor();
-            rmsd += c.d * c.d;
+            rmsd += c.distToTarget * c.distToTarget;
             regression.addData(c.peakResult.getSignal(), c.peak.getIntensity());
           }
           scored += assignments.length;
@@ -4620,6 +4632,81 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         coordinateStore);
   }
 
+  private FilterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
+      boolean createTextResult, CoordinateStore coordinateStore) {
+    final FractionClassificationResult r =
+        scoreFilter(filter, minFilter, ga_resultsListToScore, coordinateStore);
+
+    // // DEBUG - Test if the two methods produce the same results
+    // FractionClassificationResult r2 = scoreFilter(filter, minFilter,
+    // BenchmarkFilterAnalysis.clonedResultsList);
+    // if
+    // (!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(
+    // r.getTruePositives(), r2.getTruePositives(), 1e-6, 1e-10) ||
+    // !uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(
+    // r.getFalsePositives(), r2.getFalsePositives(), 1e-6, 1e-10) ||
+    // !uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(),
+    // r2.getFN(), 1e-6, 1e-10))
+    // {
+    // System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f : %s\n", r.getTruePositives(),
+    // r2.getTruePositives(), r.getFalsePositives(),
+    // r2.getFalsePositives(), r.getFN(), r2.getFN(), filter.getName());
+    //
+    // // // Debug
+    // // MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
+    // // multiPathFilter.setDebugFile("/tmp/1.txt");
+    // // multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount, nActual, null);
+    // // multiPathFilter = createMPF(filter, minFilter);
+    // // multiPathFilter.setDebugFile("/tmp/2.txt");
+    // // multiPathFilter.fractionScoreSubset(BenchmarkFilterAnalysis.clonedResultsList, failCount,
+    // // nActual, null);
+    // }
+    // else
+    // {
+    // //System.out.println("Matched scores");
+    // }
+
+    final double score = getScore(r);
+    final double criteria = getCriteria(r);
+
+    // Show the result if it achieves the criteria limit
+    final String text =
+        (createTextResult && criteria >= minCriteria) ? createResult(filter, r).toString() : null;
+
+    return new FilterScoreResult(score, criteria, filter, text);
+  }
+
+  private FilterScoreResult scoreFilter(DirectFilter filter) {
+    final FractionClassificationResult r =
+        scoreFilter(filter, minimalFilter, resultsList, coordinateStore);
+    final double score = getScore(r);
+    final double criteria = getCriteria(r);
+    // Create the score output
+    final String text = createResult(filter, r).toString();
+    return new FilterScoreResult(score, criteria, filter, text);
+  }
+
+  private ParameterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
+      int failCount, double residualsThreshold, double duplicateDistance,
+      CoordinateStore coordinateStore, boolean createTextResult) {
+    final MultiPathFilter multiPathFilter =
+        new MultiPathFilter(filter, minFilter, residualsThreshold);
+
+    final FractionClassificationResult r =
+        multiPathFilter.fractionScoreSubset(ga_resultsListToScore,
+            ConsecutiveFailCounter.create(failCount), nActual, null, null, coordinateStore);
+
+    final double score = getScore(r);
+    final double criteria = getCriteria(r);
+    // Create the score output
+    final String text = (createTextResult && criteria >= minCriteria)
+        ? createResult(filter, r,
+            buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance)).toString()
+        : null;
+    final double[] parameters = new double[] {failCount, residualsThreshold, duplicateDistance};
+    return new ParameterScoreResult(score, criteria, parameters, text);
+  }
+
   private MultiPathFilter createMPF(DirectFilter filter, DirectFilter minFilter) {
     return new MultiPathFilter(filter, minFilter, residualsThreshold);
   }
@@ -4716,14 +4803,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     sb.append('\t').append(value);
   }
 
-  private static void add(StringBuilder sb, int value, int i) {
-    if (showColumns[i]) {
+  private static void add(StringBuilder sb, int value, int index) {
+    if (showColumns[index]) {
       add(sb, value);
     }
   }
 
-  private static void addCount(StringBuilder sb, double value, int i) {
-    if (showColumns[i]) {
+  private static void add(StringBuilder sb, double value, int index) {
+    if (showColumns[index]) {
+      add(sb, MathUtils.rounded(value));
+    }
+  }
+
+  private static void addCount(StringBuilder sb, double value, int index) {
+    if (showColumns[index]) {
       // Check if the double holds an integer count
       if ((int) value == value) {
         sb.append('\t').append((int) value);
@@ -4733,12 +4826,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       } else {
         add(sb, MathUtils.rounded(value));
       }
-    }
-  }
-
-  private static void add(StringBuilder sb, double value, int i) {
-    if (showColumns[i]) {
-      add(sb, MathUtils.rounded(value));
     }
   }
 
@@ -5293,7 +5380,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       }
       for (int i = 0; i < assignments.length; i++) {
         final CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
-        sumDistance += distance2[count] = c.d;
+        sumDistance += distance2[count] = c.distToTarget;
         sumSignal += signal2[count] = c.getSignalFactor();
         count++;
       }
@@ -5376,14 +5463,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
 
     // Score the best filter just so we have the unique Ids of the results
-    score(bestFilter, -1, nParams, null, null, null, 0);
+    scoreComponents(bestFilter, -1, nParams, null, null, null, 0);
     final int[] uniqueIds1 = uniqueIds;
     final int uniqueIdCount1 = uniqueIdCount;
 
     // Limit to 12 params == 4095 combinations (this is the max for two multi filters combined)
     if (componentAnalysis >= 3 && nParams <= 12) {
       // Enumeration of combinations
-      final long count = countCombinations(nParams);
+      final long count = countComponentCombinations(nParams);
 
       // Enumerate all combinations
       final ComplexFilterScore[] scores = new ComplexFilterScore[(int) count];
@@ -5399,7 +5486,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
             enable2[combinations[i]] = true;
           }
           final DirectFilter f = (DirectFilter) bestFilter.create(enable2);
-          scores[j++] = score(f, 0, k, combinations, enable2, uniqueIds1, uniqueIdCount1);
+          scores[j++] = scoreComponents(f, 0, k, combinations, enable2, uniqueIds1, uniqueIdCount1);
         }
       }
 
@@ -5490,7 +5577,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
         System.arraycopy(previousCombinations, 0, combinations, 0, previousCombinations.length);
         combinations[k - 1] = n;
         Arrays.sort(combinations);
-        scores[j++] = score(f, n, k, combinations, null, uniqueIds1, uniqueIdCount1);
+        scores[j++] = scoreComponents(f, n, k, combinations, null, uniqueIds1, uniqueIdCount1);
       }
 
       // Rank them
@@ -5510,7 +5597,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
   }
 
-  private ComplexFilterScore score(DirectFilter f, int i, int size, int[] combinations,
+  private ComplexFilterScore scoreComponents(DirectFilter f, int i, int size, int[] combinations,
       boolean[] enable, int[] uniqueIds1, int uniqueIdCount1) {
     setupFractionScoreStore();
 
@@ -5592,7 +5679,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return false;
   }
 
-  private static long countCombinations(int n) {
+  /**
+   * Count component combinations.
+   *
+   * @param n the number of parameters
+   * @return the combinations
+   */
+  private static long countComponentCombinations(int n) {
     return (long) FastMath.pow(2, n) - 1;
 
     // This returns the same as (2^n)-1
@@ -5606,16 +5699,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   private int uniqueIdCount;
 
   private void setupFractionScoreStore() {
-    scoreStore = this;
     uniqueIds = new int[maxUniqueId];
     uniqueIdCount = 0;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void add(int uniqueId) {
     // Store the Id of each result
-    uniqueIds[uniqueIdCount++] = uniqueId;
+    scoreStore = uniqueId -> uniqueIds[uniqueIdCount++] = uniqueId;
   }
 
   private void endFractionScoreStore() {
@@ -6039,7 +6126,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       this.coordinateStore = coordinateStore;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -6097,7 +6183,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
           new GridCoordinateStore(bounds.x, bounds.y, bounds.width, bounds.height, 0, 0);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -6240,18 +6325,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return scoreResults;
   }
 
-  private static int getThreads(int length) {
-    return Math.max(1, Math.min(Prefs.getThreads(), length));
-  }
-
-  private static <T> void put(BlockingQueue<T> jobs, T job) {
-    try {
-      jobs.put(job);
-    } catch (final InterruptedException ex) {
-      throw new RuntimeException("Unexpected interruption", ex);
-    }
-  }
-
   /**
    * Score filters.
    *
@@ -6325,6 +6398,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     finishScoring();
 
     return scoreResults;
+  }
+
+  private static int getThreads(int length) {
+    return Math.max(1, Math.min(Prefs.getThreads(), length));
+  }
+
+  private static <T> void put(BlockingQueue<T> jobs, T job) {
+    try {
+      jobs.put(job);
+    } catch (final InterruptedException ex) {
+      throw new RuntimeException("Unexpected interruption", ex);
+    }
   }
 
   /**
@@ -6410,81 +6495,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
   }
 
-  private FilterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
-      boolean createTextResult, CoordinateStore coordinateStore) {
-    final FractionClassificationResult r =
-        scoreFilter(filter, minFilter, ga_resultsListToScore, coordinateStore);
-
-    // // DEBUG - Test if the two methods produce the same results
-    // FractionClassificationResult r2 = scoreFilter(filter, minFilter,
-    // BenchmarkFilterAnalysis.clonedResultsList);
-    // if
-    // (!uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(
-    // r.getTruePositives(), r2.getTruePositives(), 1e-6, 1e-10) ||
-    // !uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(
-    // r.getFalsePositives(), r2.getFalsePositives(), 1e-6, 1e-10) ||
-    // !uk.ac.sussex.gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(),
-    // r2.getFN(), 1e-6, 1e-10))
-    // {
-    // System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f : %s\n", r.getTruePositives(),
-    // r2.getTruePositives(), r.getFalsePositives(),
-    // r2.getFalsePositives(), r.getFN(), r2.getFN(), filter.getName());
-    //
-    // // // Debug
-    // // MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
-    // // multiPathFilter.setDebugFile("/tmp/1.txt");
-    // // multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount, nActual, null);
-    // // multiPathFilter = createMPF(filter, minFilter);
-    // // multiPathFilter.setDebugFile("/tmp/2.txt");
-    // // multiPathFilter.fractionScoreSubset(BenchmarkFilterAnalysis.clonedResultsList, failCount,
-    // // nActual, null);
-    // }
-    // else
-    // {
-    // //System.out.println("Matched scores");
-    // }
-
-    final double score = getScore(r);
-    final double criteria = getCriteria(r);
-
-    // Show the result if it achieves the criteria limit
-    final String text =
-        (createTextResult && criteria >= minCriteria) ? createResult(filter, r).toString() : null;
-
-    return new FilterScoreResult(score, criteria, filter, text);
-  }
-
-  private FilterScoreResult scoreFilter(DirectFilter filter) {
-    final FractionClassificationResult r =
-        scoreFilter(filter, minimalFilter, resultsList, coordinateStore);
-    final double score = getScore(r);
-    final double criteria = getCriteria(r);
-    // Create the score output
-    final String text = createResult(filter, r).toString();
-    return new FilterScoreResult(score, criteria, filter, text);
-  }
-
-  private ParameterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
-      int failCount, double residualsThreshold, double duplicateDistance,
-      CoordinateStore coordinateStore, boolean createTextResult) {
-    final MultiPathFilter multiPathFilter =
-        new MultiPathFilter(filter, minFilter, residualsThreshold);
-
-    final FractionClassificationResult r =
-        multiPathFilter.fractionScoreSubset(ga_resultsListToScore,
-            ConsecutiveFailCounter.create(failCount), nActual, null, null, coordinateStore);
-
-    final double score = getScore(r);
-    final double criteria = getCriteria(r);
-    // Create the score output
-    final String text = (createTextResult && criteria >= minCriteria)
-        ? createResult(filter, r,
-            buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance)).toString()
-        : null;
-    final double[] parameters = new double[] {failCount, residualsThreshold, duplicateDistance};
-    return new ParameterScoreResult(score, criteria, parameters, text);
-  }
-
   /**
    * Finish scoring and reset the subset.
    */
@@ -6495,7 +6505,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(List<? extends Chromosome<FilterScore>> individuals) {
     ga_iteration++;
@@ -6531,7 +6540,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return filters;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FilterScore fitness(Chromosome<FilterScore> chromosome) {
     // In case the user aborted with Escape
@@ -6551,7 +6559,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return new SimpleFilterScore(scoreResult, true, scoreResult.criteria >= minCriteria);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void shutdown() {
     // Report the score for the best filter
@@ -6737,7 +6744,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public SearchResult<FilterScore> findOptimum(double[][] points) {
     ga_iteration++;
@@ -6775,7 +6781,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return new SearchResult<>(filter.getParameters(), max);
   }
 
-  /** {@inheritDoc} */
   @Override
   public SearchResult<FilterScore>[] score(double[][] points) {
     ga_iteration++;
@@ -6816,7 +6821,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     return scores;
   }
 
-  /** {@inheritDoc} */
   @Override
   @SuppressWarnings("unchecked")
   public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size) {
@@ -6870,7 +6874,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
   private double limit;
 
-  /** {@inheritDoc} */
   @Override
   public void progress(double fraction) {
     if (fraction == 1) {
@@ -6889,50 +6892,42 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     IJ.showProgress(fraction);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void progress(long position, long total) {
     progress((double) position / total);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void incrementProgress(double fraction) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public void log(String format, Object... args) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public void status(String format, Object... args) {
     IJ.showStatus(ga_statusPrefix + String.format(format, args));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isEnded() {
     // Ignore
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isProgress() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isLog() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isStatus() {
     return true;
@@ -7064,7 +7059,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
   /**
    * Abstract class to allow the array storage to be reused.
    */
-  private abstract class CustomTIntObjectProcedure implements TIntObjectProcedure<IdPeakResult[]> {
+  private abstract class CustomTIntObjectProcedure
+      implements TIntObjectProcedure<UniqueIdPeakResult[]> {
     float[] x;
     float[] y;
     float[] x2;
@@ -7119,7 +7115,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       int frame = 0;
       for (int i = 0; i < assignments.length; i++) {
         final CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
-        final IdPeakResult peak = (IdPeakResult) c.peak;
+        final UniqueIdPeakResult peak = (UniqueIdPeakResult) c.peak;
         final BasePreprocessedPeakResult spot = (BasePreprocessedPeakResult) c.peakResult;
         actual.add(peak.uniqueId);
         predicted.add(spot.getUniqueId());
@@ -7208,7 +7204,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
       // Add the results to the lists
       actualCoordinates.forEachEntry(new CustomTIntObjectProcedure(x, y, x2, y2) {
         @Override
-        public boolean execute(int frame, IdPeakResult[] results) {
+        public boolean execute(int frame, UniqueIdPeakResult[] results) {
           int c = 0;
           int c2 = 0;
           if (x.length <= results.length) {
@@ -7259,7 +7255,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
    * @param results the results
    * @return the results that are inside the border
    */
-  private static IdPeakResult[] filterUsingBorder(IdPeakResult[] results) {
+  private static UniqueIdPeakResult[] filterUsingBorder(UniqueIdPeakResult[] results) {
     // Respect the border used in BenchmarkSpotFilter?
     if (BenchmarkSpotFilter.lastAnalysisBorder == null
         || BenchmarkSpotFilter.lastAnalysisBorder.x == 0) {
@@ -7273,10 +7269,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
     final float border = lastAnalysisBorder.x;
     final float xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
     final float ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
-    final IdPeakResult[] results2 = new IdPeakResult[results.length];
+    final UniqueIdPeakResult[] results2 = new UniqueIdPeakResult[results.length];
     int j = 0;
     for (int i = 0; i < results.length; i++) {
-      final IdPeakResult p = results[i];
+      final UniqueIdPeakResult p = results[i];
       if (outsideBorder(p, border, xlimit, ylimit)) {
         continue;
       }

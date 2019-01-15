@@ -98,7 +98,6 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     super(splineData, maxx, maxy, cx, cy, cz, scale);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getN() {
     return n;
@@ -120,7 +119,6 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     this.n = n;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     if (gradientIndices == null) {
@@ -129,13 +127,11 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     return gradientIndices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return 1 + 4 * n;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void initialise(double[] a, int order) {
     tb = a[PeakResult.BACKGROUND];
@@ -163,7 +159,6 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
     for (int n = 0; n < w; n++) {
@@ -195,7 +190,6 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -230,7 +224,6 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -266,7 +259,6 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isNodeBoundary(int gradientIndex) {
     final int parameterIndex = gradientIndices()[gradientIndex];

@@ -247,28 +247,29 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * function evaluation.
      *
      * @param id the id (used to write the correct derivatives)
-     * @param tI the target Intensity
-     * @param tX the target X
-     * @param tY the target Y
-     * @param tZ the target Z
+     * @param intensity the target Intensity
+     * @param tx the target X
+     * @param ty the target Y
+     * @param tz the target Z
      * @param order the derivative order
      * @return true, if the spline partially overlaps with the target region
      */
-    public boolean initialise(int id, double tI, double tX, double tY, double tZ, int order) {
+    public boolean initialise(int id, double intensity, double tx, double ty, double tz,
+        int order) {
       // Map z to a position in the spline
       // We want 0 to be in the centre.
       // Note: Scale up the input parameter to the spline scale.
-      final double z = cz + scale * tZ;
+      final double z = cz + scale * tz;
 
       if (z < 0 || z > maxSz) {
         return false;
       }
 
       // Shift the scaled XY spline bounds by the target centre
-      final double x1 = lx + tX;
-      final double x2 = ux + tX;
-      final double y1 = ly + tY;
-      final double y2 = uy + tY;
+      final double x1 = lx + tx;
+      final double x2 = ux + tx;
+      final double y1 = ly + ty;
+      final double y2 = uy + ty;
 
       // Check if it is within the region
       if (!(x2 > 0 && y2 > 0 && x1 < maxx && y1 < maxy)) {
@@ -317,7 +318,7 @@ public abstract class CubicSplineFunction implements Gradient2Function {
 
       // The scale is the increment we sample the PSF.
       // In order to have the same integral we adjust the intensity.
-      this.tiByS2 = tI * scale2;
+      this.tiByS2 = intensity * scale2;
       this.id = id;
       if (order > 0) {
         this.offset = 1 + id * 4;
@@ -363,10 +364,10 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * Checks if is the next Y-index is active. If true then it initialises the worker for iteration
      * through x. Otherwise it resets the gradients.
      *
-     * @param df_da the df da
+     * @param gradient1 the first order gradients
      * @return true, if is next Y active
      */
-    public boolean isNextYActive(double[] df_da) {
+    public boolean isNextYActive(double[] gradient1) {
       // pre-increment yindex
       yindex += scale;
       if (yindex >= 0 && yindex < maxSy) {
@@ -376,10 +377,10 @@ public abstract class CubicSplineFunction implements Gradient2Function {
         return true;
       }
       // Zero gradients
-      df_da[offset] = 0;
-      df_da[offset + 1] = 0;
-      df_da[offset + 2] = 0;
-      df_da[offset + 3] = 0;
+      gradient1[offset] = 0;
+      gradient1[offset + 1] = 0;
+      gradient1[offset + 2] = 0;
+      gradient1[offset + 3] = 0;
       return false;
     }
 
@@ -387,11 +388,11 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * Checks if is the next Y-index is active. If true then it initialises the worker for iteration
      * through x. Otherwise it resets the gradients.
      *
-     * @param df_da the df da
-     * @param d2f_da2 the d 2 f da 2
+     * @param gradient1 the first order gradients
+     * @param gradient2 the second order gradients
      * @return true, if is next Y active
      */
-    public boolean isNextYActive(double[] df_da, double[] d2f_da2) {
+    public boolean isNextYActive(double[] gradient1, double[] gradient2) {
       // pre-increment yindex
       yindex += scale;
       if (yindex >= 0 && yindex < maxSy) {
@@ -401,13 +402,13 @@ public abstract class CubicSplineFunction implements Gradient2Function {
         return true;
       }
       // Zero gradients
-      df_da[offset] = 0;
-      df_da[offset + 1] = 0;
-      df_da[offset + 2] = 0;
-      df_da[offset + 3] = 0;
-      d2f_da2[offset + 1] = 0;
-      d2f_da2[offset + 2] = 0;
-      d2f_da2[offset + 3] = 0;
+      gradient1[offset] = 0;
+      gradient1[offset + 1] = 0;
+      gradient1[offset + 2] = 0;
+      gradient1[offset + 3] = 0;
+      gradient2[offset + 1] = 0;
+      gradient2[offset + 2] = 0;
+      gradient2[offset + 3] = 0;
       return false;
     }
 
@@ -434,41 +435,77 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     }
 
     /**
-     * Compute the value.
-     *
-     * @param customTricubicFunction the custom tricubic function
-     * @return the value
-     */
-    public abstract double computeValue(CustomTricubicFunction customTricubicFunction);
-
-    /**
      * Compute the value and derivatives at the given x-index. Assumes that the current y-index has
      * been set with a call to {@link TargetSpline#isNextYActive(double[])}.
      *
      * @param x the x
-     * @param df_da the df da
+     * @param gradient1 the first order gradients
      * @return the value
      */
-    public double value(int x, double[] df_da) {
+    public double value(int x, double[] gradient1) {
       yxindex += scale; // pre-increment
       if (activeX[x]) {
         final double v = computeValue1(xySplines[yxindex]);
         // Copy the gradients into the correct position and account for the intensity.
         // Negate the gradients as a shift of the position moves the spline the
         // other direction. Also scale the gradients appropriately.
-        df_da[offset] = scale2 * v;
-        df_da[offset + 1] = negtiByS3 * dfda[0];
-        df_da[offset + 2] = negtiByS3 * dfda[1];
-        df_da[offset + 3] = negtiByS3 * -dfda[2];
+        gradient1[offset] = scale2 * v;
+        gradient1[offset + 1] = negtiByS3 * dfda[0];
+        gradient1[offset + 2] = negtiByS3 * dfda[1];
+        gradient1[offset + 3] = negtiByS3 * -dfda[2];
         return tiByS2 * v;
       }
       // Zero gradients
-      df_da[offset] = 0;
-      df_da[offset + 1] = 0;
-      df_da[offset + 2] = 0;
-      df_da[offset + 3] = 0;
+      gradient1[offset] = 0;
+      gradient1[offset + 1] = 0;
+      gradient1[offset + 2] = 0;
+      gradient1[offset + 3] = 0;
       return 0;
     }
+
+    /**
+     * Compute the value and derivatives at the given x-index. Assumes that the current y-index has
+     * been set with a call to #{@link TargetSpline#isNextYActive(double[],double[])}.
+     *
+     * @param x the x
+     * @param gradient1 the first order gradients
+     * @param gradient2 the second order gradients
+     * @return the value
+     */
+    public double value(int x, double[] gradient1, double[] gradient2) {
+      yxindex += scale; // pre-increment
+      if (activeX[x]) {
+        final double v = computeValue2(xySplines[yxindex]);
+        // Copy the gradients into the correct position and account for the intensity.
+        // Negate the gradients as a shift of the position moves the spline the
+        // other direction. Also scale the gradients appropriately.
+        gradient1[offset] = scale2 * v;
+        gradient1[offset + 1] = negtiByS3 * dfda[0];
+        gradient1[offset + 2] = negtiByS3 * dfda[1];
+        gradient1[offset + 3] = negtiByS3 * -dfda[2];
+        gradient2[offset + 1] = tiByS4 * d2fda2[0];
+        gradient2[offset + 2] = tiByS4 * d2fda2[1];
+        gradient2[offset + 3] = tiByS4 * d2fda2[2];
+        return tiByS2 * v;
+      }
+      // Zero gradients
+      gradient1[offset] = 0;
+      gradient1[offset + 1] = 0;
+      gradient1[offset + 2] = 0;
+      gradient1[offset + 3] = 0;
+      gradient2[offset + 1] = 0;
+      gradient2[offset + 2] = 0;
+      gradient2[offset + 3] = 0;
+      return 0;
+    }
+
+    /**
+     * Compute the value.
+     *
+     * @param customTricubicFunction the custom tricubic function
+     * @return the value
+     */
+    public abstract double computeValue(CustomTricubicFunction customTricubicFunction);
 
     /**
      * Compute the value and first-order derivatives. The derivatives are stored in
@@ -478,42 +515,6 @@ public abstract class CubicSplineFunction implements Gradient2Function {
      * @return the value
      */
     public abstract double computeValue1(CustomTricubicFunction customTricubicFunction);
-
-    /**
-     * Compute the value and derivatives at the given x-index. Assumes that the current y-index has
-     * been set with a call to #{@link TargetSpline#isNextYActive(double[],double[])}.
-     *
-     * @param x the x
-     * @param df_da the df da
-     * @param d2f_da2 the d 2 f da 2
-     * @return the value
-     */
-    public double value(int x, double[] df_da, double[] d2f_da2) {
-      yxindex += scale; // pre-increment
-      if (activeX[x]) {
-        final double v = computeValue2(xySplines[yxindex]);
-        // Copy the gradients into the correct position and account for the intensity.
-        // Negate the gradients as a shift of the position moves the spline the
-        // other direction. Also scale the gradients appropriately.
-        df_da[offset] = scale2 * v;
-        df_da[offset + 1] = negtiByS3 * dfda[0];
-        df_da[offset + 2] = negtiByS3 * dfda[1];
-        df_da[offset + 3] = negtiByS3 * -dfda[2];
-        d2f_da2[offset + 1] = tiByS4 * d2fda2[0];
-        d2f_da2[offset + 2] = tiByS4 * d2fda2[1];
-        d2f_da2[offset + 3] = tiByS4 * d2fda2[2];
-        return tiByS2 * v;
-      }
-      // Zero gradients
-      df_da[offset] = 0;
-      df_da[offset + 1] = 0;
-      df_da[offset + 2] = 0;
-      df_da[offset + 3] = 0;
-      d2f_da2[offset + 1] = 0;
-      d2f_da2[offset + 2] = 0;
-      d2f_da2[offset + 3] = 0;
-      return 0;
-    }
 
     /**
      * Compute the value, first- and second-order derivatives. The derivatives are stored in
@@ -550,7 +551,6 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     /** The table 6. */
     double[] table6;
 
-    /** {@inheritDoc} */
     @Override
     public void computePowerTable(double x, double y, double z, int order) {
       table1 = CustomTricubicFunction.computePowerTable(x, y, z);
@@ -583,25 +583,21 @@ public abstract class CubicSplineFunction implements Gradient2Function {
       return table;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double computeValue(CustomTricubicFunction customTricubicFunction) {
       return customTricubicFunction.value(table1);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double computeValue1(CustomTricubicFunction customTricubicFunction) {
       return customTricubicFunction.value(table1, table2, table3, dfda);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double computeValue2(CustomTricubicFunction customTricubicFunction) {
       return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isNodeBoundary(int dimension) {
       return CustomTricubicFunction.isBoundary(dimension, table1);
@@ -625,7 +621,6 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     /** The table 6. */
     float[] table6;
 
-    /** {@inheritDoc} */
     @Override
     public void computePowerTable(double x, double y, double z, int order) {
       table1 = CustomTricubicFunction.computeFloatPowerTable(x, y, z);
@@ -658,25 +653,21 @@ public abstract class CubicSplineFunction implements Gradient2Function {
       return table;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double computeValue(CustomTricubicFunction customTricubicFunction) {
       return customTricubicFunction.value(table1);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double computeValue1(CustomTricubicFunction customTricubicFunction) {
       return customTricubicFunction.value(table1, table2, table3, dfda);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double computeValue2(CustomTricubicFunction customTricubicFunction) {
       return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isNodeBoundary(int dimension) {
       return CustomTricubicFunction.isBoundary(dimension, table1);
@@ -913,13 +904,11 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return maxx * maxy;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
     initialise(a, 0);
@@ -933,19 +922,16 @@ public abstract class CubicSplineFunction implements Gradient2Function {
    */
   protected abstract void initialise(double[] a, int order);
 
-  /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
     initialise(a, 0);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise1(double[] a) {
     initialise(a, 1);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise2(double[] a) {
     initialise(a, 2);

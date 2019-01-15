@@ -30,13 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
  * Gets an integer data value from a result.
  */
 public abstract class PeakResultDataInteger implements PeakResultData<Integer> {
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "";
   }
 
-  /** {@inheritDoc} */
   @Override
   public Class<?> getValueClass() {
     return Integer.class;

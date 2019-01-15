@@ -81,14 +81,12 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter {
     return variance; // Return the current limit
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using multiple thresholds: Signal, SNR, width, shift, "
         + "Euclidian shift, precision (uses fitted parameter variance) and Z-depth";
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean requiresParameterDeviations() {
     return (precision != 0);
@@ -99,7 +97,6 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter {
     return ParameterType.PRECISION_CRLB;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -110,7 +107,6 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter {
         params[5], params[6], (float) params[7], (float) params[8]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new MultiFilterCRLB(parameters[0], (float) parameters[1], parameters[2], parameters[3],

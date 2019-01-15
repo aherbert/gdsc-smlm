@@ -282,7 +282,6 @@ public class AstigmatismModelManager implements PlugIn {
     OPTIONS2 = Arrays.copyOf(OPTIONS, 1);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1662,12 +1661,13 @@ public class AstigmatismModelManager implements PlugIn {
   private void invertModel() {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listAstigmatismModels(false);
-    gd.addMessage("Invert the z-orientation of a model.\n \n" + TextUtils.wrap(
-        "Note that a positive gamma puts the focal plane for the X-dimension "
-            + "above the z-centre (positive Z) and the focal "
-            + "plane for the Y-dimension below the z-centre (negative Z). If gamma "
-            + "is negative then the orientation of the focal planes of X and Y are reversed.",
-        80));
+    gd.addMessage(
+        "Invert the z-orientation of a model.\n \n" + TextUtils.wrap(
+            "Note that a positive gamma puts the focal plane for the X-dimension "
+                + "above the z-centre (positive Z) and the focal "
+                + "plane for the Y-dimension below the z-centre (negative Z). If gamma "
+                + "is negative then the orientation of the focal planes of X and Y are reversed.",
+            80));
 
     gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();

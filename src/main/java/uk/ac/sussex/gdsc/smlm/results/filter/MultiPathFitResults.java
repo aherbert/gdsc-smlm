@@ -107,31 +107,26 @@ public class MultiPathFitResults implements IMultiPathFitResults {
     return new MultiPathFitResults(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getFrame() {
     return frame;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfResults() {
     return multiPathFitResultList.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public MultiPathFitResult getResult(int index) {
     return multiPathFitResultList[index];
   }
 
-  /** {@inheritDoc} */
   @Override
   public void complete(int index) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getTotalCandidates() {
     return totalCandidates;

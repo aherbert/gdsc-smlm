@@ -54,13 +54,11 @@ public class UniformIllumination implements SpatialIllumination {
     this.pulseInterval = pulseInterval;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getPhotons(double[] xyz) {
     return photons;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] getPulsedPhotons(double[] xyz, int time) {
 
@@ -70,7 +68,6 @@ public class UniformIllumination implements SpatialIllumination {
     return new double[] {0, photons};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getAveragePhotons() {
     if (pulseInterval > 1) {

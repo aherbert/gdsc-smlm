@@ -42,7 +42,6 @@ public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper
     super(fun, a, n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] value(double[] point) {
     return computeValues(point);

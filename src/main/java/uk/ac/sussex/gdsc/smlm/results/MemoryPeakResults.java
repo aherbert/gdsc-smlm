@@ -39,7 +39,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.BIRResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.BIXYResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.BIXYZResultProcedure;
@@ -72,7 +71,9 @@ import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Stores peak results in memory.
@@ -80,7 +81,7 @@ import java.util.Set;
  * <p>The PeakResults interface add methods are not-thread safe. The results should be wrapped in a
  * SynchronizedPeakResults object if using on multiple threads.
  */
-public class MemoryPeakResults extends AbstractPeakResults implements Cloneable {
+public class MemoryPeakResults extends AbstractPeakResults {
   private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<>();
 
   /**
@@ -95,6 +96,13 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    */
   @VisibleForTesting
   static final int PEAK_RESULT_SIZE_WITH_DEVIATIONS = 136;
+
+  /** The preferred distance unit. */
+  public static final DistanceUnit PREFERRED_DISTANCE_UNIT = DistanceUnit.PIXEL;
+  /** The preferred intensity unit. */
+  public static final IntensityUnit PREFERRED_INTENSITY_UNIT = IntensityUnit.PHOTON;
+  /** The preferred angle unit. */
+  public static final AngleUnit PREFERRED_ANGLE_UNIT = AngleUnit.RADIAN;
 
   private boolean sortAfterEnd;
 
@@ -144,7 +152,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
     return this.results.get(index);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return this.results.size();
@@ -158,6 +165,29 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   @Override
   public void add(PeakResult result) {
     this.results.add(result);
+  }
+
+  /**
+   * Adds the results.
+   *
+   * @param results the results
+   */
+  public void add(MemoryPeakResults results) {
+    this.results.addStore(results.results);
+  }
+
+  /**
+   * Add a result.
+   *
+   * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
+   *
+   * {@inheritDoc}
+   */
+  @Override
+  public void add(int peak, int origX, int origY, float origValue, double error, float noise,
+      float meanIntensity, float[] params, float[] paramsStdDev) {
+    add(new PeakResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
+        paramsStdDev));
   }
 
   /**
@@ -188,15 +218,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   @Override
   public void addAll(PeakResultStore results) {
     this.results.addStore(results);
-  }
-
-  /**
-   * Adds the results.
-   *
-   * @param results the results
-   */
-  public void add(MemoryPeakResults results) {
-    this.results.addStore(results.results);
   }
 
   /**
@@ -243,12 +264,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * Removes the null results from the store.
    */
   public void removeNullResults() {
-    this.results.removeIf(new PeakResultPredicate() {
-      @Override
-      public boolean test(PeakResult t) {
-        return t == null;
-      }
-    });
+    this.results.removeIf(Objects::isNull);
   }
 
   /**
@@ -258,7 +274,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @param filter the filter
    * @return true, if any were removed
    */
-  public boolean removeIf(PeakResultPredicate filter) {
+  public boolean removeIf(Predicate<PeakResult> filter) {
     return this.results.removeIf(filter);
   }
 
@@ -314,6 +330,20 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   public MemoryPeakResults(PSF psf) {
     this();
     setPSF(psf);
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   * @param copyResults Set to true to copy peak result objects
+   */
+  protected MemoryPeakResults(MemoryPeakResults source, boolean copyResults) {
+    this.sortAfterEnd = source.sortAfterEnd;
+    copySettings(source);
+    // Deep copy the mutable bounds object
+    setBounds(new Rectangle(getBounds()));
+    results = (PeakResultStoreList) results.copy(copyResults);
   }
 
   /////////////////////////////////////////////////////////////////
@@ -484,21 +514,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
     clear();
   }
 
-  /**
-   * Add a result.
-   *
-   * <p>Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-   *
-   * {@inheritDoc}
-   */
-  @Override
-  public void add(int peak, int origX, int origY, float origValue, double error, float noise,
-      float meanIntensity, float[] params, float[] paramsStdDev) {
-    add(new PeakResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-        paramsStdDev));
-  }
-
-  /** {@inheritDoc} */
   @Override
   public void end() {
     if (isSortAfterEnd()) {
@@ -531,13 +546,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
 
       final int maxX = (int) Math.ceil(b.x + b.width);
       final int maxY = (int) Math.ceil(b.y + b.height);
-
-      // For compatibility with drawing images add one to the limits if they are integers
-      // Q. Is this still necessary since drawing images has been re-written to handle edge cases?
-      // if (maxX == b.x + b.width)
-      // maxX += 1;
-      // if (maxY == b.y + b.height)
-      // maxY += 1;
 
       bounds.width = maxX - bounds.x;
       bounds.height = maxY - bounds.y;
@@ -598,7 +606,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
     //@formatter:on
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return true;
@@ -623,21 +630,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Shallow copy this set of results. To create new object references use {@link #copy()}.
-   *
-   * @return the memory peak results
-   */
-  @Override
-  public MemoryPeakResults clone() {
-    try {
-      return (MemoryPeakResults) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      // This should not happen so ignore
-    }
-    return null;
-  }
-
-  /**
    * Copy the results. Create new objects for the properties (avoiding a shallow copy) but does not
    * deep copy all of the peak results. Allows results to be resorted but not modified.
    *
@@ -649,22 +641,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
 
   /**
    * Copy the results. Create new objects for the properties (avoiding a shallow copy) and
-   * optionally a deep copy all of the peak results. Copying the peak result allows modification of
+   * optionally a deep copy all of the peak results. Copying the peak results allows modification of
    * their properties.
    *
    * @param copyResults Set to true to copy peak result objects
    * @return the memory peak results
    */
   public MemoryPeakResults copy(boolean copyResults) {
-    final MemoryPeakResults copy = clone();
-    if (copy != null) {
-      // Deep copy the objects that are not immutable
-      if (getBounds() != null) {
-        copy.setBounds(new Rectangle(getBounds()));
-      }
-      copy.results = (PeakResultStoreList) results.copy(copyResults);
-    }
-    return copy;
+    return new MemoryPeakResults(this, copyResults);
   }
 
   /**
@@ -846,10 +830,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws IllegalStateException If the size is zero
    */
   public PeakResult getFirst() {
+    checkNotEmpty();
+    return getfX(0);
+  }
+
+  private void checkNotEmpty() {
     if (isEmpty()) {
       throw new IllegalStateException("Empty");
     }
-    return getfX(0);
   }
 
   /**
@@ -859,9 +847,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws IllegalStateException If the size is zero
    */
   public PeakResult getLast() {
-    if (isEmpty()) {
-      throw new IllegalStateException("Empty");
-    }
+    checkNotEmpty();
     return getfX(size() - 1);
   }
 
@@ -874,9 +860,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws IllegalStateException If the size is zero
    */
   public int getFirstFrame() {
-    if (isEmpty()) {
-      throw new IllegalStateException("Empty");
-    }
+    checkNotEmpty();
     return getf(0).getFrame();
   }
 
@@ -889,9 +873,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws IllegalStateException If the size is zero
    */
   public int getLastFrame() {
-    if (isEmpty()) {
-      throw new IllegalStateException("Empty");
-    }
+    checkNotEmpty();
     return getf(size() - 1).getEndFrame();
   }
 
@@ -902,9 +884,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws IllegalStateException If the size is zero
    */
   public int getMinFrame() {
-    if (isEmpty()) {
-      throw new IllegalStateException("Empty");
-    }
+    checkNotEmpty();
     int min = getf(0).getFrame();
     for (int i = 1, size = size(); i < size; i++) {
       if (min > getf(i).getFrame()) {
@@ -921,9 +901,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws IllegalStateException If the size is zero
    */
   public int getMaxFrame() {
-    if (isEmpty()) {
-      throw new IllegalStateException("Empty");
-    }
+    checkNotEmpty();
     int max = getf(0).getEndFrame();
     for (int i = 1, size = size(); i < size; i++) {
       if (max < getf(i).getEndFrame()) {
@@ -946,13 +924,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
     }
     return false;
   }
-
-  /** The preferred distance unit. */
-  public static final DistanceUnit PREFERRED_DISTANCE_UNIT = DistanceUnit.PIXEL;
-  /** The preferred intensity unit. */
-  public static final IntensityUnit PREFERRED_INTENSITY_UNIT = IntensityUnit.PHOTON;
-  /** The preferred angle unit. */
-  public static final AngleUnit PREFERRED_ANGLE_UNIT = AngleUnit.RADIAN;
 
   /**
    * Checks if is distance in preferred units.
@@ -1051,19 +1022,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   /////////////////////////////////////////////////////////////////
 
   /**
-   * For each result execute the procedure.
-   *
-   * <p>Warning: Results with be in their native units since no unit conversion is performed.
-   *
-   * @param procedure the procedure
-   */
-  public void forEach(PeakResultProcedure procedure) {
-    for (int i = 0, size = size(); i < size; i++) {
-      procedure.execute(getfX(i));
-    }
-  }
-
-  /**
    * For the first result execute the procedure.
    *
    * @param procedure the procedure
@@ -1073,36 +1031,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
       return;
     }
     procedure.execute(getfX(0));
-  }
-
-  /**
-   * For each result execute the fast-exit procedure.
-   *
-   * @param procedure the procedure
-   * @return true, if a fast exit occurred
-   */
-  public boolean forEach(PeakResultProcedureX procedure) {
-    for (int i = 0, size = size(); i < size; i++) {
-      if (procedure.execute(getfX(i))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * For each result execute the procedure.
-   *
-   * <p>Warning: Results with be in their native units since no unit conversion is performed.
-   *
-   * @param procedure the procedure
-   */
-  public void forEachNative(BIXYZResultProcedure procedure) {
-    for (int i = 0, size = size(); i < size; i++) {
-      final PeakResult r = getf(i);
-      procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(),
-          r.getYPosition(), r.getZPosition());
-    }
   }
 
   /**
@@ -1122,20 +1050,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure.
-   *
-   * <p>Warning: Results with be in their native units since no unit conversion is performed.
-   *
-   * @param procedure the procedure
-   */
-  public void forEachNative(BResultProcedure procedure) {
-    for (int i = 0, size = size(); i < size; i++) {
-      final PeakResult r = getf(i);
-      procedure.executeB(r.getBackground());
-    }
-  }
-
-  /**
    * For the first result execute the procedure.
    *
    * <p>Warning: Results with be in their native units since no unit conversion is performed.
@@ -1148,20 +1062,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
     }
     final PeakResult r = getf(0);
     procedure.executeB(r.getBackground());
-  }
-
-  /**
-   * For each result execute the procedure.
-   *
-   * <p>Warning: Results with be in their native units since no unit conversion is performed.
-   *
-   * @param procedure the procedure
-   */
-  public void forEachNative(IResultProcedure procedure) {
-    for (int i = 0, size = size(); i < size; i++) {
-      final PeakResult r = getf(i);
-      procedure.executeI(r.getIntensity());
-    }
   }
 
   /**
@@ -1180,20 +1080,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * For each result execute the procedure.
-   *
-   * <p>Warning: Results with be in their native units since no unit conversion is performed.
-   *
-   * @param procedure the procedure
-   */
-  public void forEachNative(XYZResultProcedure procedure) {
-    for (int i = 0, size = size(); i < size; i++) {
-      final PeakResult r = getf(i);
-      procedure.executeXYZ(r.getXPosition(), r.getYPosition(), r.getZPosition());
-    }
-  }
-
-  /**
    * For the first result execute the procedure.
    *
    * <p>Warning: Results with be in their native units since no unit conversion is performed.
@@ -1209,6 +1095,91 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
+   *
+   * @param procedure the procedure
+   */
+  public void forEachNative(BIXYZResultProcedure procedure) {
+    for (int i = 0, size = size(); i < size; i++) {
+      final PeakResult r = getf(i);
+      procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(),
+          r.getYPosition(), r.getZPosition());
+    }
+  }
+
+  /**
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
+   *
+   * @param procedure the procedure
+   */
+  public void forEachNative(BResultProcedure procedure) {
+    for (int i = 0, size = size(); i < size; i++) {
+      final PeakResult r = getf(i);
+      procedure.executeB(r.getBackground());
+    }
+  }
+
+  /**
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
+   *
+   * @param procedure the procedure
+   */
+  public void forEachNative(IResultProcedure procedure) {
+    for (int i = 0, size = size(); i < size; i++) {
+      final PeakResult r = getf(i);
+      procedure.executeI(r.getIntensity());
+    }
+  }
+
+  /**
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
+   *
+   * @param procedure the procedure
+   */
+  public void forEachNative(XYZResultProcedure procedure) {
+    for (int i = 0, size = size(); i < size; i++) {
+      final PeakResult r = getf(i);
+      procedure.executeXYZ(r.getXPosition(), r.getYPosition(), r.getZPosition());
+    }
+  }
+
+  /**
+   * For each result execute the procedure.
+   *
+   * <p>Warning: Results with be in their native units since no unit conversion is performed.
+   *
+   * @param procedure the procedure
+   */
+  public void forEach(PeakResultProcedure procedure) {
+    for (int i = 0, size = size(); i < size; i++) {
+      procedure.execute(getfX(i));
+    }
+  }
+
+  /**
+   * For each result execute the fast-exit procedure.
+   *
+   * @param procedure the procedure
+   * @return true, if a fast exit occurred
+   */
+  public boolean forEach(PeakResultProcedureX procedure) {
+    for (int i = 0, size = size(); i < size; i++) {
+      if (procedure.execute(getfX(i))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * For each result execute the procedure using the specified units.
    *
    * <p>This will fail if the calibration is missing information to convert the units.
@@ -1218,8 +1189,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(IntensityUnit intensityUnit, BResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(IntensityUnit intensityUnit, BResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1237,8 +1207,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(IntensityUnit intensityUnit, BIRResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(IntensityUnit intensityUnit, BIRResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1264,7 +1233,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      BIXYResultProcedure procedure) throws ConversionException, ConfigurationException {
+      BIXYResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1293,7 +1262,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      BIXYZResultProcedure procedure) throws ConversionException, ConfigurationException {
+      BIXYZResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1324,8 +1293,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(IntensityUnit intensityUnit, HResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(IntensityUnit intensityUnit, HResultProcedure procedure) {
     checkCalibration();
 
     final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
@@ -1363,8 +1331,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(IntensityUnit intensityUnit, IResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(IntensityUnit intensityUnit, IResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1388,7 +1355,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYResultProcedure procedure) throws ConversionException, ConfigurationException {
+      IXYResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1416,7 +1383,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYRResultProcedure procedure) throws ConversionException, ConfigurationException {
+      IXYRResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1445,7 +1412,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYZResultProcedure procedure) throws ConversionException, ConfigurationException {
+      IXYZResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1474,7 +1441,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYZRResultProcedure procedure) throws ConversionException, ConfigurationException {
+      IXYZRResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1523,8 +1490,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, TXYResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, TXYResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1548,8 +1514,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, WResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, WResultProcedure procedure) {
     checkCalibration();
 
     // Note that in the future we may support more than just Gaussian2D PSF
@@ -1589,8 +1554,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, WxWyResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, WxWyResultProcedure procedure) {
     checkCalibration();
 
     // Note that in the future we may support more than just Gaussian2D PSF
@@ -1624,8 +1588,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1650,8 +1613,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYRResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, XYRResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1675,8 +1637,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYZResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, XYZResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1700,8 +1661,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYZRResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, XYZRResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1726,8 +1686,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, ZResultProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(DistanceUnit distanceUnit, ZResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
@@ -1760,8 +1719,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(LSEPrecisionProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(LSEPrecisionProcedure procedure) {
     checkCalibration();
 
     final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
@@ -1782,8 +1740,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(LSEPrecisionBProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(LSEPrecisionBProcedure procedure) {
     checkCalibration();
 
     final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
@@ -1803,8 +1760,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(MLEPrecisionProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(MLEPrecisionProcedure procedure) {
     checkCalibration();
 
     final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
@@ -1825,8 +1781,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(MLEPrecisionBProcedure procedure)
-      throws ConversionException, ConfigurationException {
+  public void forEach(MLEPrecisionBProcedure procedure) {
     checkCalibration();
 
     final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
@@ -1848,7 +1803,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void translate(int x, int y) throws ConversionException, ConfigurationException {
+  public void translate(int x, int y) {
     if (x == 0 && y == 0) {
       return;
     }
@@ -1887,10 +1842,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @return the distance unit
    */
   public DistanceUnit getDistanceUnit() {
-    if (hasCalibration()) {
-      if (getCalibrationReader().hasDistanceUnit()) {
-        return getCalibrationReader().getDistanceUnit();
-      }
+    if (hasCalibration() && getCalibrationReader().hasDistanceUnit()) {
+      return getCalibrationReader().getDistanceUnit();
     }
     return null;
   }
@@ -1901,10 +1854,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @return the intensity unit
    */
   public IntensityUnit getIntensityUnit() {
-    if (hasCalibration()) {
-      if (getCalibrationReader().hasIntensityUnit()) {
-        return getCalibrationReader().getIntensityUnit();
-      }
+    if (hasCalibration() && getCalibrationReader().hasIntensityUnit()) {
+      return getCalibrationReader().getIntensityUnit();
     }
     return null;
   }
@@ -1915,10 +1866,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @return the angle unit
    */
   public AngleUnit getAngleUnit() {
-    if (hasCalibration()) {
-      if (getCalibrationReader().hasAngleUnit()) {
-        return getCalibrationReader().getAngleUnit();
-      }
+    if (hasCalibration() && getCalibrationReader().hasAngleUnit()) {
+      return getCalibrationReader().getAngleUnit();
     }
     return null;
   }
@@ -1931,8 +1880,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit distanceUnit)
-      throws ConversionException, ConfigurationException {
+  public TypeConverter<DistanceUnit> getDistanceConverter(DistanceUnit distanceUnit) {
     checkCalibration();
     return getCalibrationReader().getDistanceConverter(distanceUnit);
   }
@@ -1945,8 +1893,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit intensityUnit)
-      throws ConversionException, ConfigurationException {
+  public TypeConverter<IntensityUnit> getIntensityConverter(IntensityUnit intensityUnit) {
     checkCalibration();
     return getCalibrationReader().getIntensityConverter(intensityUnit);
   }
@@ -1959,8 +1906,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public TypeConverter<TimeUnit> getTimeConverter(TimeUnit timeUnit)
-      throws ConversionException, ConfigurationException {
+  public TypeConverter<TimeUnit> getTimeConverter(TimeUnit timeUnit) {
     checkCalibration();
     return getCalibrationReader().getTimeConverter(timeUnit);
   }
@@ -1970,7 +1916,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    *
    * @throws ConfigurationException if the configuration is invalid
    */
-  private void checkCalibration() throws ConversionException, ConfigurationException {
+  private void checkCalibration() {
     if (!hasCalibration()) {
       throw new ConfigurationException("No calibration");
     }
@@ -1986,8 +1932,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void setZeroBackground(IntensityUnit intensityUnit, float newBackground)
-      throws ConversionException, ConfigurationException {
+  public void setZeroBackground(IntensityUnit intensityUnit, float newBackground) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     newBackground = ic.convertBack(newBackground);
     for (int i = 0, size = size(); i < size; i++) {
@@ -2028,18 +1973,19 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable 
   }
 
   /**
-   * Get a subset of the results if they match the filter.
+   * Get a subset of the results that match the filter.
    *
    * @param filter the filter
    * @return the results
    */
-  public PeakResult[] getResults(PeakResultPredicate filter) {
+  public PeakResult[] getSubset(Predicate<PeakResult> filter) {
     return results.subset(filter);
   }
 
   /**
-   * Find the index of the given result. Uses the == operator on the provided reference so it must
-   * be the exact same object.
+   * Find the index of the given result. More formally, returns the lowest index <tt>i</tt> such
+   * that <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>, or -1
+   * if there is no such index.
    *
    * @param result the result
    * @return the index (or -1)

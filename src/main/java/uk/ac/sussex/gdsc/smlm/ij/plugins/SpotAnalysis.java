@@ -203,13 +203,11 @@ public class SpotAnalysis extends PlugInFrame
       return String.format("%d : %.2f", frame, getSignal(frame));
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(Spot other) {
       return Integer.compare(frame, other.frame);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
       if (!(obj instanceof Spot)) {
@@ -219,7 +217,6 @@ public class SpotAnalysis extends PlugInFrame
       return frame == o.frame;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int hashCode() {
       return Integer.hashCode(frame);
@@ -260,7 +257,6 @@ public class SpotAnalysis extends PlugInFrame
       this.outputStack = outputStack;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       final GaussianBlur gb = new GaussianBlur();
@@ -413,7 +409,6 @@ public class SpotAnalysis extends PlugInFrame
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public synchronized void actionPerformed(ActionEvent event) {
     final Object actioner = event.getSource();
@@ -478,27 +473,23 @@ public class SpotAnalysis extends PlugInFrame
     super.notifyAll();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void itemStateChanged(ItemEvent event) {
     // Ignore
   }
 
-  /** {@inheritDoc} */
   @Override
   public void windowClosing(WindowEvent event) {
     Prefs.saveLocation(OPT_LOCATION, getLocation());
     close();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() {
     instance = null;
     super.close();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void windowActivated(WindowEvent event) {
     fillImagesList();

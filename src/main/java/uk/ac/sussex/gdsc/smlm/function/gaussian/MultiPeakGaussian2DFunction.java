@@ -55,13 +55,11 @@ public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction {
     this.gradientIndices = createGradientIndices(numberOfPeaks);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNPeaks() {
     return numberOfPeaks;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

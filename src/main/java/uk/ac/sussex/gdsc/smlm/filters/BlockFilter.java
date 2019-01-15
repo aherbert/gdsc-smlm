@@ -69,7 +69,6 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     super(source);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void newWeights() {
     weightedNormaliser = null;

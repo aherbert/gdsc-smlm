@@ -685,7 +685,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   private static int benchmarkImageId;
   private static String benchmarkResultsName = "";
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -2717,7 +2716,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       qe = getQuantumEfficiency();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       if (ImageJUtils.isInterrupted()) {

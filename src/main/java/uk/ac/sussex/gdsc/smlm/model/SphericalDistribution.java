@@ -67,7 +67,6 @@ public class SphericalDistribution implements SpatialDistribution {
     this.randomGenerator = randomGenerator;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] next() {
     final double[] xyz = new double[3];
@@ -110,14 +109,12 @@ public class SphericalDistribution implements SpatialDistribution {
     return xyz;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithin(double[] xyz) {
     final double[] delta = {xyz[0] - origin[0], xyz[1] - origin[1], xyz[2] - origin[2]};
     return (delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]) < r2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithinXy(double[] xyz) {
     final double[] delta = {xyz[0] - origin[0], xyz[1] - origin[1]};
@@ -144,7 +141,6 @@ public class SphericalDistribution implements SpatialDistribution {
     this.useRejectionMethod = useRejectionMethod;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] xyz) {
     if (xyz != null && xyz.length > 2) {

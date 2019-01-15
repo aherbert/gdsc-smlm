@@ -56,13 +56,11 @@ public class GridCoordinateStore1 extends GridCoordinateStore {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public GridCoordinateStore newInstance(int minx, int miny, int width, int height) {
     return new GridCoordinateStore1(minx, miny, width, height, getXYResolution(), getZResolution());
   }
 
-  /** {@inheritDoc} */
   @Override
   protected int getBlock(final double x) {
     // blockResolution is always 1

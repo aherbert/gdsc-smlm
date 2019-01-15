@@ -91,7 +91,6 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter {
     return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using multiple thresholds: Signal, SNR, width, shift, "
@@ -103,7 +102,6 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter {
     return ParameterType.PRECISION2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -114,7 +112,6 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter {
         params[5], params[6], (float) params[7], (float) params[8]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new MultiFilter2(parameters[0], (float) parameters[1], parameters[2], parameters[3],

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
@@ -90,10 +91,33 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
     final double x1 = a[3];
     final double x2 = a[4];
     if (!psf.getValue(width, height, x0, x1, x2, v)) {
-      throw new RuntimeException("Unable to compute value");
+      throw new ComputationException("Unable to compute value");
     }
     for (int i = 0; i < v.length; i++) {
       procedure.execute(c + m * v[i]);
+    }
+  }
+
+  @Override
+  public void forEach(Gradient1Procedure procedure) {
+    final double[] v = new double[size()];
+    final double[][] g = new double[v.length][];
+    final double c = a[0];
+    final double m = a[1];
+    final double x0 = a[2];
+    final double x1 = a[3];
+    final double x2 = a[4];
+    if (!psf.getValueAndGradient(width, height, x0, x1, x2, v, g)) {
+      throw new ComputationException("Unable to compute value and gradient");
+    }
+    final double[] df_da = new double[5];
+    df_da[0] = 1;
+    for (int i = 0; i < v.length; i++) {
+      df_da[1] = v[i];
+      df_da[2] = m * g[i][0];
+      df_da[3] = m * g[i][1];
+      df_da[4] = m * g[i][2];
+      procedure.execute(c + m * v[i], df_da);
     }
   }
 
@@ -128,31 +152,8 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
   }
 
   @Override
-  public void forEach(Gradient1Procedure procedure) {
-    final double[] v = new double[size()];
-    final double[][] g = new double[v.length][];
-    final double c = a[0];
-    final double m = a[1];
-    final double x0 = a[2];
-    final double x1 = a[3];
-    final double x2 = a[4];
-    if (!psf.getValueAndGradient(width, height, x0, x1, x2, v, g)) {
-      throw new RuntimeException("Unable to compute value and gradient");
-    }
-    final double[] df_da = new double[5];
-    df_da[0] = 1;
-    for (int i = 0; i < v.length; i++) {
-      df_da[1] = v[i];
-      df_da[2] = m * g[i][0];
-      df_da[3] = m * g[i][1];
-      df_da[4] = m * g[i][2];
-      procedure.execute(c + m * v[i], df_da);
-    }
-  }
-
-  @Override
-  public String getParameterName(int i) {
-    switch (i) {
+  public String getParameterName(int index) {
+    switch (index) {
       case 0:
         return "Background";
       case 1:

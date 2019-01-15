@@ -81,13 +81,26 @@ public class ExtendedPeakResult extends IdPeakResult {
     super(x, y, intensity, id);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected ExtendedPeakResult(ExtendedPeakResult source) {
+    super(source);
+    this.endFrame = source.endFrame;
+  }
+
+  @Override
+  public ExtendedPeakResult copy() {
+    return new ExtendedPeakResult(this);
+  }
+
   @Override
   public boolean hasEndFrame() {
     return endFrame > getFrame();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getEndFrame() {
     return endFrame;

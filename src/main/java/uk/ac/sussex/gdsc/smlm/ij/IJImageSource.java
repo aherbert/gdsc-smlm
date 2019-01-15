@@ -204,7 +204,6 @@ public class IJImageSource extends ImageSource {
     yOrigin = y;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean openSource() {
     if (nullImageArray() && imageStack == null) {
@@ -230,7 +229,6 @@ public class IJImageSource extends ImageSource {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void closeSource() {
     imageArray = null;
@@ -256,14 +254,12 @@ public class IJImageSource extends ImageSource {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean initialiseSequentialRead() {
     slice = 0;
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Object nextRawFrame() {
     ++slice;
@@ -274,7 +270,6 @@ public class IJImageSource extends ImageSource {
     return get(slice);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Object getRawFrame(int frame) {
     if (imageArray != null) {
@@ -297,7 +292,6 @@ public class IJImageSource extends ImageSource {
     return frame > 0 && frame <= frames;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     String string = super.toString();

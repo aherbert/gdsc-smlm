@@ -35,7 +35,6 @@ public class FrameIdPeakResultComparator implements Comparator<PeakResult> {
   /** An instance of the comparator. */
   public static final FrameIdPeakResultComparator INSTANCE = new FrameIdPeakResultComparator();
 
-  /** {@inheritDoc} */
   @Override
   public int compare(PeakResult o1, PeakResult o2) {
     final int f1 = o1.getFrame();

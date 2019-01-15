@@ -66,7 +66,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
 
   private final int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     if (arg.equals("final")) {
@@ -92,7 +91,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     return flags;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
     // Note: We cannot use a NonBlockinnericDialog as scrolling through the image
@@ -120,7 +118,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     return IJ.setupDialog(imp, flags);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     filter1 = gd.getNextChoiceIndex();
@@ -133,7 +130,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     return !gd.invalidNumber();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     final Rectangle bounds = ip.getRoi();
@@ -169,7 +165,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     return new SingleSpotFilter(search, border, processor0);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setNPasses(int passes) {
     // Nothing to do

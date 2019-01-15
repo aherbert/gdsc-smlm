@@ -64,7 +64,7 @@ public class ResultsMatchCalculator implements PlugIn {
 
   private static String inputOption1 = "";
   private static String inputOption2 = "";
-  private static double dThreshold = 0.5;
+  private static double distanceThreshold = 0.5;
   private static int increments = 5;
   private static double delta = 0.1;
   private static double beta = 4;
@@ -86,7 +86,7 @@ public class ResultsMatchCalculator implements PlugIn {
    */
   public static class PeakResultPoint extends BasePoint {
     /** The time. */
-    int t;
+    int time;
 
     /** The peak result. */
     PeakResult peakResult;
@@ -94,15 +94,15 @@ public class ResultsMatchCalculator implements PlugIn {
     /**
      * Instantiates a new peak result point.
      *
-     * @param t the time
+     * @param time the time
      * @param x the x
      * @param y the y
      * @param z the z
      * @param peakResult the peak result
      */
-    public PeakResultPoint(int t, float x, float y, float z, PeakResult peakResult) {
+    public PeakResultPoint(int time, float x, float y, float z, PeakResult peakResult) {
       super(x, y, z);
-      this.t = t;
+      this.time = time;
       this.peakResult = peakResult;
     }
 
@@ -112,7 +112,7 @@ public class ResultsMatchCalculator implements PlugIn {
      * @return the time
      */
     public int getTime() {
-      return t;
+      return time;
     }
 
     /**
@@ -125,7 +125,6 @@ public class ResultsMatchCalculator implements PlugIn {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -159,7 +158,7 @@ public class ResultsMatchCalculator implements PlugIn {
     }
 
     final long start = System.nanoTime();
-    runCompareCoordinates(results1, results2, dThreshold, increments, delta);
+    runCompareCoordinates(results1, results2, distanceThreshold, increments, delta);
     final double seconds = (System.nanoTime() - start) / 1000000000.0;
 
     IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
@@ -171,7 +170,7 @@ public class ResultsMatchCalculator implements PlugIn {
     gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
     ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY);
     ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.MEMORY);
-    gd.addNumericField("Distance", dThreshold, 2);
+    gd.addNumericField("Distance", distanceThreshold, 2);
 
     gd.addSlider("Increments", 0, 10, increments);
     gd.addNumericField("Delta", delta, 2);
@@ -189,7 +188,7 @@ public class ResultsMatchCalculator implements PlugIn {
 
     inputOption1 = gd.getNextChoice();
     inputOption2 = gd.getNextChoice();
-    dThreshold = gd.getNextNumber();
+    distanceThreshold = gd.getNextNumber();
     increments = (int) gd.getNextNumber();
     delta = gd.getNextNumber();
     beta = gd.getNextNumber();
@@ -205,7 +204,7 @@ public class ResultsMatchCalculator implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isPositive("Distance threshold", dThreshold);
+      Parameters.isPositive("Distance threshold", distanceThreshold);
       Parameters.isPositive("Increments", increments);
       Parameters.isAboveZero("Delta", delta);
       Parameters.isPositive("Beta", beta);
@@ -219,7 +218,7 @@ public class ResultsMatchCalculator implements PlugIn {
 
   @SuppressWarnings("null")
   private void runCompareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
-      double dThreshold, int increments, double delta) {
+      double maxDistanceThreshold, int increments, double delta) {
     final boolean requirePairs = showPairs || saveClassifications;
 
     final TextFilePeakResults fileResults = createFilePeakResults(results2);
@@ -227,7 +226,7 @@ public class ResultsMatchCalculator implements PlugIn {
     final List<PointPair> allMatches = new LinkedList<>();
     final List<PointPair> pairs = (requirePairs) ? new LinkedList<>() : null;
 
-    final double maxDistance = dThreshold + increments * delta;
+    final double maxDistance = maxDistanceThreshold + increments * delta;
 
     // Divide the results into time points
     final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
@@ -270,13 +269,13 @@ public class ResultsMatchCalculator implements PlugIn {
         // Matches are marked in the original value with 1 for true, 0 for false
         for (final PointPair pair : matches) {
           PeakResult result = ((PeakResultPoint) pair.getPoint2()).peakResult;
-          result = result.clone();
+          result = result.copy();
           result.setOrigValue(1);
           fileResults.add(result);
         }
         for (final Coordinate c : fp) {
           PeakResult result = ((PeakResultPoint) c).peakResult;
-          result = result.clone();
+          result = result.copy();
           result.setOrigValue(0);
           fileResults.add(result);
         }
@@ -381,7 +380,7 @@ public class ResultsMatchCalculator implements PlugIn {
 
     // We have the results for the largest distance.
     // Now reduce the distance threshold and recalculate the results
-    final double[] distanceThresholds = getDistances(dThreshold, increments, delta);
+    final double[] distanceThresholds = getDistances(maxDistanceThreshold, increments, delta);
     final double[] pairDistances = getPairDistances(allMatches);
     // Re-use storage for the ID analysis
     TIntHashSet id1 = null;
@@ -424,9 +423,9 @@ public class ResultsMatchCalculator implements PlugIn {
         if (doIdAnalysis2) {
           matchId2.clear();
         }
-        int i = 0;
+        int index = 0;
         for (final PointPair pair : allMatches) {
-          if (pairDistances[i++] <= d2) {
+          if (pairDistances[index++] <= d2) {
             if (doIdAnalysis1) {
               matchId1.add(((PeakResultPoint) pair.getPoint1()).peakResult.getId());
             }
@@ -629,12 +628,12 @@ public class ResultsMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private void addResult(String i1, String i2, double dThrehsold, MatchResult result,
+  private void addResult(String i1, String i2, double distanceThrehsold, MatchResult result,
       MatchResult idResult1, MatchResult idResult2) {
     final StringBuilder sb = new StringBuilder();
     sb.append(i1).append('\t');
     sb.append(i2).append('\t');
-    sb.append(rounder.round(dThrehsold)).append('\t');
+    sb.append(rounder.round(distanceThrehsold)).append('\t');
     sb.append(result.getNumberPredicted()).append('\t');
     sb.append(result.getTruePositives()).append('\t');
     sb.append(result.getFalsePositives()).append('\t');
@@ -715,10 +714,10 @@ public class ResultsMatchCalculator implements PlugIn {
     return ids;
   }
 
-  private static double[] getDistances(double dThreshold, int increments, double delta) {
+  private static double[] getDistances(double distanceThreshold, int increments, double delta) {
     final double[] d = new double[increments + 1];
     for (int i = 0; i <= increments; i++) {
-      d[i] = dThreshold + i * delta;
+      d[i] = distanceThreshold + i * delta;
     }
     return d;
   }

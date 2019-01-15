@@ -461,7 +461,6 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     return normals;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorder(int[] indices) {
     if (dirty) {
@@ -472,7 +471,6 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     reorderFast(indices);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorderFast(int[] indices) {
     if (dirty) {
@@ -548,19 +546,16 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     return c;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return points.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Point3f getCoordinate(int index) {
     return points[index];
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setColor(Color3f color) {
     // Delegate this to the interface implementation.
@@ -568,13 +563,11 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     setItemColor(color);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f color) {
     super.setColor(color);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f[] color) {
     this.color = null;

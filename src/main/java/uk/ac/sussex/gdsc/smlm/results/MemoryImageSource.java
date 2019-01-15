@@ -87,13 +87,11 @@ public class MemoryImageSource extends ImageSource {
     this.frames = data.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean openSource() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void closeSource() {
     // Free the memory
@@ -102,14 +100,12 @@ public class MemoryImageSource extends ImageSource {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean initialiseSequentialRead() {
     counter = 0;
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected @Nullable float[] nextRawFrame() {
     if (counter < data.length) {
@@ -118,7 +114,6 @@ public class MemoryImageSource extends ImageSource {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected @Nullable float[] getRawFrame(int frame) {
     if (frame > 0 && frame <= data.length) {
@@ -127,7 +122,6 @@ public class MemoryImageSource extends ImageSource {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isValid(int frame) {
     return (frame > 0 && frame <= data.length);

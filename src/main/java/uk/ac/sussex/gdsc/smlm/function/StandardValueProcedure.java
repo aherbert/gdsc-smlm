@@ -67,7 +67,6 @@ public class StandardValueProcedure implements ValueProcedure {
     function.forEach(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value) {
     values[index++] = value;

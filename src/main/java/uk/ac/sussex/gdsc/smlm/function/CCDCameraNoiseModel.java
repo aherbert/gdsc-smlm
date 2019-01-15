@@ -50,13 +50,11 @@ public class CCDCameraNoiseModel extends CameraNoiseModel {
     super(readNoise, bias);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double variance(final double value) {
     return readNoise2 + FastMath.max(value - bias, 0.0);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isEmCCD() {
     return false;

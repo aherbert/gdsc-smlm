@@ -24,16 +24,17 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * Stores peak results and prevents modification.
  */
 public class ImmutablePeakResultStore implements PeakResultStore {
+  private static final String IMMUTABLE_MESSAGE = "This results store is immutable";
+
   private final PeakResultStore store;
 
   /**
@@ -55,62 +56,62 @@ public class ImmutablePeakResultStore implements PeakResultStore {
 
   @Override
   public boolean add(PeakResult result) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean addCollection(Collection<PeakResult> results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean addArray(PeakResult[] results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean addStore(PeakResultStore results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean remove(PeakResult result) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean removeCollection(Collection<PeakResult> results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean removeArray(PeakResult[] results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean removeStore(PeakResultStore results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean retainCollection(Collection<PeakResult> results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean retainArray(PeakResult[] results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean retainStore(PeakResultStore results) {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void clear() {
-    throw new DataException("This result store is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
@@ -147,8 +148,8 @@ public class ImmutablePeakResultStore implements PeakResultStore {
   }
 
   @Override
-  public boolean removeIf(PeakResultPredicate filter) {
-    throw new DataException("This result store is immutable");
+  public boolean removeIf(Predicate<PeakResult> filter) {
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   /**
@@ -173,7 +174,7 @@ public class ImmutablePeakResultStore implements PeakResultStore {
   }
 
   @Override
-  public PeakResult[] subset(PeakResultPredicate filter) {
+  public PeakResult[] subset(Predicate<PeakResult> filter) {
     return makeImmutable(store.subset(filter));
   }
 

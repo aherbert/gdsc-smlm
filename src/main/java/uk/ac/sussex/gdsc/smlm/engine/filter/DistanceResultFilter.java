@@ -53,7 +53,6 @@ public class DistanceResultFilter extends ResultFilter {
     peakResults = new ArrayList<>(nMaxima);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void filter(FitResult fitResult, int maxIndex, PeakResult... results) {
     boolean found = false;
@@ -79,7 +78,6 @@ public class DistanceResultFilter extends ResultFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void filter(FitResult fitResult, int maxIndex, float x, float y) {
     boolean found = false;
@@ -99,7 +97,6 @@ public class DistanceResultFilter extends ResultFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void finalise() {
     filteredFitResults = Arrays.copyOf(filteredFitResults, filteredCount);

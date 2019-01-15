@@ -59,49 +59,41 @@ public class SingleSpotFilter extends MaximaSpotFilter {
     processor = source.processor.copy();
   }
 
-  /** {@inheritDoc} */
   @Override
   public SingleSpotFilter copy() {
     return new SingleSpotFilter(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isAbsoluteIntensity() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     return processor.isWeighted();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(float[] weights, int width, int height) {
     processor.setWeights(weights, width, height);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasWeights() {
     return processor.hasWeights();
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] preprocessData(float[] data, int width, int height) {
     return processor.process(data, width, height);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return "Single";
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
@@ -109,7 +101,6 @@ public class SingleSpotFilter extends MaximaSpotFilter {
     return list;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSpread() {
     return processor.getSpread();

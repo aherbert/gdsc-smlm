@@ -56,7 +56,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
   public void canComputePoissonFisherInformation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     for (int n = 1; n < 10; n++) {
-      canComputePoissonFisherInformation(r, Model.POISSON);
+      computePoissonFisherInformation(r, Model.POISSON);
     }
   }
 
@@ -64,7 +64,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
   public void canComputeHalfPoissonFisherInformation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     for (int n = 1; n < 10; n++) {
-      canComputePoissonFisherInformation(r, Model.HALF_POISSON);
+      computePoissonFisherInformation(r, Model.HALF_POISSON);
     }
   }
 
@@ -72,20 +72,20 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
   public void canComputePoissonGaussianApproximationFisherInformation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     for (int n = 1; n < 10; n++) {
-      canComputePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
+      computePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
     }
   }
 
-  private static void canComputePoissonFisherInformation(UniformRandomProvider r, Model model) {
+  private static void computePoissonFisherInformation(UniformRandomProvider rng, Model model) {
     // Create function
     final Gaussian2DFunction func =
         GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
     final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-    params[Gaussian2DFunction.BACKGROUND] = nextUniform(r, 0.1, 0.3);
-    params[Gaussian2DFunction.SIGNAL] = nextUniform(r, 100, 300);
-    params[Gaussian2DFunction.X_POSITION] = nextUniform(r, 4, 6);
-    params[Gaussian2DFunction.Y_POSITION] = nextUniform(r, 4, 6);
-    params[Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
+    params[Gaussian2DFunction.BACKGROUND] = nextUniform(rng, 0.1, 0.3);
+    params[Gaussian2DFunction.SIGNAL] = nextUniform(rng, 100, 300);
+    params[Gaussian2DFunction.X_POSITION] = nextUniform(rng, 4, 6);
+    params[Gaussian2DFunction.Y_POSITION] = nextUniform(rng, 4, 6);
+    params[Gaussian2DFunction.X_SD] = nextUniform(rng, 1, 1.3);
 
     Gradient1Function f1 = func;
     FisherInformation fi;
@@ -93,7 +93,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
     switch (model) {
       // Get a variance
       case POISSON_GAUSSIAN:
-        final double var = 0.9 + 0.2 * r.nextDouble();
+        final double var = 0.9 + 0.2 * rng.nextDouble();
         fi = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var));
         f1 = (Gradient1Function) OffsetFunctionFactory.wrapFunction(func,
             SimpleArrayUtils.newDoubleArray(func.size(), var));
@@ -159,16 +159,16 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
   }
 
   private static void
-      canComputePerPixelPoissonGaussianApproximationFisherInformation(UniformRandomProvider r) {
+      canComputePerPixelPoissonGaussianApproximationFisherInformation(UniformRandomProvider rng) {
     // Create function
     final Gaussian2DFunction func =
         GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
     final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-    params[Gaussian2DFunction.BACKGROUND] = nextUniform(r, 0.1, 0.3);
-    params[Gaussian2DFunction.SIGNAL] = nextUniform(r, 100, 300);
-    params[Gaussian2DFunction.X_POSITION] = nextUniform(r, 4, 6);
-    params[Gaussian2DFunction.Y_POSITION] = nextUniform(r, 4, 6);
-    params[Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
+    params[Gaussian2DFunction.BACKGROUND] = nextUniform(rng, 0.1, 0.3);
+    params[Gaussian2DFunction.SIGNAL] = nextUniform(rng, 100, 300);
+    params[Gaussian2DFunction.X_POSITION] = nextUniform(rng, 4, 6);
+    params[Gaussian2DFunction.Y_POSITION] = nextUniform(rng, 4, 6);
+    params[Gaussian2DFunction.X_SD] = nextUniform(rng, 1, 1.3);
 
     Gradient1Function f1 = func;
     FisherInformation[] fi;
@@ -178,7 +178,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
 
     fi = new FisherInformation[var.length];
     for (int i = var.length; i-- > 0;) {
-      var[i] = 0.9 + 0.2 * r.nextDouble();
+      var[i] = 0.9 + 0.2 * rng.nextDouble();
       fi[i] = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var[i]));
     }
 
@@ -199,7 +199,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
     TestAssertions.assertArrayTest(e, o, TestHelper.doublesAreClose(1e-6, 0));
   }
 
-  private static double nextUniform(UniformRandomProvider r, double min, double max) {
-    return min + r.nextDouble() * (max - min);
+  private static double nextUniform(UniformRandomProvider rng, double min, double max) {
+    return min + rng.nextDouble() * (max - min);
   }
 }

@@ -189,13 +189,11 @@ public abstract class HysteresisFilter extends Filter {
         getTimeName());
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 4;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     switch (index) {
@@ -210,7 +208,6 @@ public abstract class HysteresisFilter extends Filter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
@@ -228,13 +225,11 @@ public abstract class HysteresisFilter extends Filter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getDisabledParameterValue(int index) {
     throw new NotImplementedException("Parameters in hysteresis filters cannot be disabled");
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -250,7 +245,6 @@ public abstract class HysteresisFilter extends Filter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMax(parameters, 0, searchDistance);
@@ -393,14 +387,12 @@ public abstract class HysteresisFilter extends Filter {
     return ok.contains(peak);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void end() {
     ok.clear();
     ok = null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Any results between the limits (candidates) are included only if they can be traced "
@@ -409,13 +401,11 @@ public abstract class HysteresisFilter extends Filter {
         + "candidates.";
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean subsetWithFailCount() {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Chromosome<FilterScore> newChromosome(double[] sequence) {
     // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
@@ -429,7 +419,6 @@ public abstract class HysteresisFilter extends Filter {
     return create(parameters);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] getChromosomeParameters() {
     // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
@@ -443,7 +432,6 @@ public abstract class HysteresisFilter extends Filter {
     return indices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int length() {
     // Hysteresis filters remove their search and time mode parameters in their Chromosome sequence

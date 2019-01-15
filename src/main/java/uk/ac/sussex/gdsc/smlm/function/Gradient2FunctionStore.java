@@ -61,13 +61,11 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore
     this.d2yda2 = d2yda2;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise2(double[] a) {
     function2.initialise2(a);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     index = 0;
@@ -87,7 +85,6 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da, double[] d2y_da2) {
     values[index] = value;

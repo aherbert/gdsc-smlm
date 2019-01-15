@@ -69,19 +69,16 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public JurySpotFilter copy() {
     return new JurySpotFilter(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isAbsoluteIntensity() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWeighted() {
     for (final DataProcessor processor : processors) {
@@ -92,7 +89,6 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWeights(float[] weights, int width, int height) {
     for (final DataProcessor processor : processors) {
@@ -100,7 +96,6 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean hasWeights() {
     for (final DataProcessor processor : processors) {
@@ -111,7 +106,6 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Spot[] find(float[] data, int width, int height) {
     // Run all the processors and store the total maxima intensity at each index
@@ -155,7 +149,6 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     return Arrays.copyOf(spots, count);
   }
 
-  /** {@inheritDoc} */
   @Override
   public float[] preprocessData(float[] data, int width, int height) {
     // Run all the processors and store the total maxima intensity at each index
@@ -174,13 +167,11 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     return sum;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getName() {
     return "Jury";
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
@@ -190,7 +181,6 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     return list;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getSpread() {
     double max = processors[0].getSpread();

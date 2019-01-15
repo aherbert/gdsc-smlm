@@ -40,7 +40,6 @@ public class PeakResultValueParameter implements PeakResultValue {
     this.index = index;
   }
 
-  /** {@inheritDoc} */
   @Override
   public float getValue(PeakResult result) {
     return result.getParameter(index);

@@ -105,7 +105,6 @@ public abstract class Gaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getParameterName(int index) {
     return getName(index);
@@ -334,7 +333,6 @@ public abstract class Gaussian2DFunction
     this.noiseModel = noiseModel;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean canComputeWeights() {
     return (noiseModel != null);
@@ -422,7 +420,6 @@ public abstract class Gaussian2DFunction
     return -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] computeValues(double[] variables) {
     initialise0(variables);
@@ -448,19 +445,16 @@ public abstract class Gaussian2DFunction
     return new IntegralValueProcedure().getIntegral(this, a);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[][] computeJacobian(double[] variables) {
     return computeValuesAndJacobian(variables).b;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean canComputeValuesAndJacobian() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables) {
     initialise1(variables);
@@ -479,19 +473,16 @@ public abstract class Gaussian2DFunction
     return new Pair<>(values, jacobian);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return maxx * maxy;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return gradientIndices().length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
     for (int i = 0, n = size(); i < n; i++) {
@@ -499,7 +490,6 @@ public abstract class Gaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -509,7 +499,6 @@ public abstract class Gaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
     // TODO - Update these functions to support initialisation
@@ -517,7 +506,6 @@ public abstract class Gaussian2DFunction
     initialise(a);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise1(double[] a) {
     initialise(a);

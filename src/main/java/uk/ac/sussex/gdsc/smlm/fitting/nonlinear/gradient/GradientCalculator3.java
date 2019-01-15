@@ -40,7 +40,6 @@ public class GradientCalculator3 extends GradientCalculator {
     super(3);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
       NonLinearFunction func) {
@@ -106,7 +105,6 @@ public class GradientCalculator3 extends GradientCalculator {
     return checkGradients(alpha, beta, nparams, ssx);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta,
       NonLinearFunction func) {

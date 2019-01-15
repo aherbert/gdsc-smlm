@@ -80,7 +80,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
   private Label label;
   private Label label2;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -444,37 +443,31 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       return ip;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int saveChanges(int n) {
       return -1; // Not implemented
     }
 
-    /** {@inheritDoc} */
     @Override
     public int getSize() {
       return source.getFrames();
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getSliceLabel(int n) {
       return null;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getDirectory() {
       return null;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getFileName(int n) {
       return null;
     }
 
-    /** {@inheritDoc} */
     @Override
     public ImageStack sortDicom(String[] strings, String[] info, int maxDigits) {
       // Don't sort

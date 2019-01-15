@@ -107,7 +107,6 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
     super(1, SIMPSON_MAX_ITERATIONS_COUNT);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double doIntegrate() throws TooManyEvaluationsException, MaxCountExceededException {
     // This is a modification from the base SimpsonIntegrator.

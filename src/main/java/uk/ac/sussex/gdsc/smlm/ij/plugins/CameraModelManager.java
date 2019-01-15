@@ -251,7 +251,6 @@ public class CameraModelManager implements PlugIn {
   //@formatter:on
   private CameraModelManagerSettings.Builder pluginSettings;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

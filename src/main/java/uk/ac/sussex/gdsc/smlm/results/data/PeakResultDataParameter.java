@@ -42,13 +42,11 @@ public class PeakResultDataParameter extends PeakResultDataFloat {
     this.index = index;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Float getValue(PeakResult result) {
     return result.getParameter(index);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return PeakResult.getParameterName(index);

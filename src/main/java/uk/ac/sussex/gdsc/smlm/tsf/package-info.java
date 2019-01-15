@@ -35,6 +35,6 @@
  * @see <a href="https://developers.google.com/protocol-buffers/?csw=1">Google Protocol Buffers</a>
  * @see <a href="https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format">Tagged Spot File
  *      (TSF) format</a>
-  */
+ */
 
 package uk.ac.sussex.gdsc.smlm.tsf;

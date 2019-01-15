@@ -98,7 +98,6 @@ public class BlinkEstimator implements PlugIn {
   private double[] parameters;
   private boolean increaseNFittedPoints;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -620,7 +619,6 @@ public class BlinkEstimator implements PlugIn {
       super("Blinking Model");
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] getWeights() {
       // Bias the early values
@@ -725,7 +723,6 @@ public class BlinkEstimator implements PlugIn {
       return evaluate(td, parameters[0], parameters[1], parameters[2]);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       increment();
@@ -734,20 +731,6 @@ public class BlinkEstimator implements PlugIn {
         values[i] = evaluate(x.get(i), variables[0], variables[1], variables[2]);
       }
       return values;
-    }
-
-    /**
-     * Compute the Jacobian.
-     *
-     * @return the multivariate matrix function
-     */
-    public MultivariateMatrixFunction jacobian() {
-      return new MultivariateMatrixFunction() {
-        @Override
-        public double[][] value(double[] variables) {
-          return jacobian(variables);
-        }
-      };
     }
   }
 }

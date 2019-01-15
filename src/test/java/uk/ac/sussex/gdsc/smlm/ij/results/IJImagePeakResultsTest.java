@@ -146,8 +146,9 @@ public class IJImagePeakResultsTest {
     Assertions.assertArrayEquals(expecteds, actuals);
   }
 
-  private static void add(FloatProcessor fp, IJImagePeakResults r, int x, int y, float value) {
-    addValue(r, x, y, value);
+  private static void add(FloatProcessor fp, IJImagePeakResults results, int x, int y,
+      float value) {
+    addValue(results, x, y, value);
     fp.putPixelValue(x, y, fp.getPixelValue(x, y) + value);
   }
 
@@ -411,36 +412,36 @@ public class IJImagePeakResultsTest {
 
   @SeededTest
   public void canAddUsingDifferentMethods(RandomSeed seed) {
-    canAddUsingDifferentMethods(seed, 0);
+    checkCanAddUsingDifferentMethods(seed, 0);
   }
 
   @SeededTest
   public void canAddUsingDifferentMethodsEqualized(RandomSeed seed) {
-    canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_EQUALIZED);
+    checkCanAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_EQUALIZED);
   }
 
   @SeededTest
   public void canAddUsingDifferentMethodsEqualizedWeighted(RandomSeed seed) {
-    canAddUsingDifferentMethods(seed,
+    checkCanAddUsingDifferentMethods(seed,
         IJImagePeakResults.DISPLAY_EQUALIZED | IJImagePeakResults.DISPLAY_WEIGHTED);
   }
 
   @SeededTest
   public void canAddUsingDifferentMethodsMax(RandomSeed seed) {
-    canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_MAX);
+    checkCanAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_MAX);
   }
 
   @SeededTest
   public void canAddUsingDifferentMethodsReplace(RandomSeed seed) {
-    canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_REPLACE);
+    checkCanAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_REPLACE);
   }
 
   @SeededTest
   public void canAddUsingDifferentMethodsWeighted(RandomSeed seed) {
-    canAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_WEIGHTED);
+    checkCanAddUsingDifferentMethods(seed, IJImagePeakResults.DISPLAY_WEIGHTED);
   }
 
-  private void canAddUsingDifferentMethods(RandomSeed seed, int displayFlags) {
+  private void checkCanAddUsingDifferentMethods(RandomSeed seed, int displayFlags) {
     final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
     displayFlags |= IJImagePeakResults.DISPLAY_SIGNAL;
 
@@ -502,60 +503,64 @@ public class IJImagePeakResultsTest {
     Assertions.assertArrayEquals(expecteds, image[0], 1e-5f, "Single != Multi");
   }
 
-  private static void begin(IJImagePeakResults r) {
-    r.setPSF(psf);
-    r.setDisplayImage(false);
-    r.setCalibration(calibration);
-    r.begin();
+  private static void begin(IJImagePeakResults results) {
+    results.setPSF(psf);
+    results.setDisplayImage(false);
+    results.setCalibration(calibration);
+    results.begin();
   }
 
-  private static void addPeakResult(IJImagePeakResults r, float x, float y, float v) {
-    r.add(new PeakResult(x, y, v));
+  private static void addPeakResult(IJImagePeakResults results, float x, float y, float value) {
+    results.add(new PeakResult(x, y, value));
   }
 
-  private static void addPeakResult(IJImagePeakResults r, int t, float x, float y, float v) {
-    r.add(new PeakResult(t, 0, 0, 0, 0, 0, 0, createParams(x, y, v), null));
+  private static void addPeakResult(IJImagePeakResults results, int time, float x, float y,
+      float value) {
+    results.add(new PeakResult(time, 0, 0, 0, 0, 0, 0, createParams(x, y, value), null));
   }
 
-  private static float[] createParams(float x, float y, float v) {
-    return Gaussian2DPeakResultHelper.createOneAxisParams(0, v, x, y, 0, 1);
+  private static float[] createParams(float x, float y, float value) {
+    return Gaussian2DPeakResultHelper.createOneAxisParams(0, value, x, y, 0, 1);
   }
 
-  private static void addPeakResults(IJImagePeakResults r, float[] x, float[] y, float[] v) {
-    final TurboList<PeakResult> results = new TurboList<>(x.length);
+  private static void addPeakResults(IJImagePeakResults results, float[] x, float[] y,
+      float[] value) {
+    final TurboList<PeakResult> list = new TurboList<>(x.length);
     for (int i = 0; i < x.length; i++) {
-      results.add(new PeakResult(x[i], y[i], v[i]));
+      list.add(new PeakResult(x[i], y[i], value[i]));
     }
-    r.addAll(results);
+    results.addAll(list);
   }
 
-  private static void addPeakResults(IJImagePeakResults r, int[] t, float[] x, float[] y,
-      float[] v) {
-    final TurboList<PeakResult> results = new TurboList<>(x.length);
+  private static void addPeakResults(IJImagePeakResults results, int[] time, float[] x, float[] y,
+      float[] value) {
+    final TurboList<PeakResult> list = new TurboList<>(x.length);
     for (int i = 0; i < x.length; i++) {
-      results.add(new PeakResult(t[i], 0, 0, 0, 0, 0, 0, createParams(x[i], y[i], v[i]), null));
+      list.add(new PeakResult(time[i], 0, 0, 0, 0, 0, 0, createParams(x[i], y[i], value[i]), null));
     }
-    r.addAll(results);
+    results.addAll(list);
   }
 
-  private static void addValue(IJImagePeakResults r, float x, float y, float v) {
-    r.add(x, y, v);
+  private static void addValue(IJImagePeakResults results, float x, float y, float value) {
+    results.add(x, y, value);
   }
 
-  private static void addValue(IJImagePeakResults r, int t, float x, float y, float v) {
-    r.add(t, x, y, v);
+  private static void addValue(IJImagePeakResults results, int time, float x, float y,
+      float value) {
+    results.add(time, x, y, value);
   }
 
-  private static void addValues(IJImagePeakResults r, float[] x, float[] y, float[] v) {
-    r.add(x, y, v);
+  private static void addValues(IJImagePeakResults results, float[] x, float[] y, float[] value) {
+    results.add(x, y, value);
   }
 
-  private static void addValues(IJImagePeakResults r, int[] t, float[] x, float[] y, float[] v) {
-    r.add(t, x, y, v);
+  private static void addValues(IJImagePeakResults results, int[] time, float[] x, float[] y,
+      float[] value) {
+    results.add(time, x, y, value);
   }
 
-  private static float[] getImage(IJImagePeakResults r) {
-    return getImage(r.getImagePlus().getProcessor());
+  private static float[] getImage(IJImagePeakResults results) {
+    return getImage(results.getImagePlus().getProcessor());
   }
 
   private static float[] getImage(ImageProcessor ip) {

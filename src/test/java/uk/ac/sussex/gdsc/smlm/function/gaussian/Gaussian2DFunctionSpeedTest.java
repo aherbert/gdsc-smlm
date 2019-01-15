@@ -42,7 +42,6 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 /**
@@ -50,7 +49,7 @@ import java.util.logging.Logger;
  * a Gaussian 2D Function.
  */
 @SuppressWarnings({"javadoc"})
-public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object> {
+public class Gaussian2DFunctionSpeedTest {
   private static Logger logger;
   private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
@@ -80,7 +79,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
   private static double ypos = 5;
   private static double xwidth = 5;
 
-  private class Gaussian2DFunctionSpeedTestData {
+  private static class Gaussian2DFunctionSpeedTestData {
     ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();
     ArrayList<double[]> yListSinglePeak = new ArrayList<>();
     ArrayList<double[]> paramsListMultiPeak = new ArrayList<>();
@@ -92,8 +91,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
     }
   }
 
-  @Override
-  public Object apply(RandomSeed source) {
+  private static Object createData(RandomSeed source) {
     return new Gaussian2DFunctionSpeedTestData(RngUtils.create(source.getSeed()));
   }
 
@@ -111,26 +109,26 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
     }
   }
 
-  private Gaussian2DFunctionSpeedTestData ensureDataSingle(RandomSeed seed, int size) {
-    final Gaussian2DFunctionSpeedTestData data =
-        (Gaussian2DFunctionSpeedTestData) dataCache.computeIfAbsent(seed, this);
+  private static Gaussian2DFunctionSpeedTestData ensureDataSingle(RandomSeed seed, int size) {
+    final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache
+        .computeIfAbsent(seed, Gaussian2DFunctionSpeedTest::createData);
     if (data.paramsListSinglePeak.size() < size) {
       synchronized (data.paramsListSinglePeak) {
         if (data.paramsListSinglePeak.size() < size) {
-          createData(data.rand, 1, size, data.paramsListSinglePeak, data.yListSinglePeak);
+          createGaussianData(data.rand, 1, size, data.paramsListSinglePeak, data.yListSinglePeak);
         }
       }
     }
     return data;
   }
 
-  private Gaussian2DFunctionSpeedTestData ensureDataMulti(RandomSeed seed, int size) {
-    final Gaussian2DFunctionSpeedTestData data =
-        (Gaussian2DFunctionSpeedTestData) dataCache.computeIfAbsent(seed, this);
+  private static Gaussian2DFunctionSpeedTestData ensureDataMulti(RandomSeed seed, int size) {
+    final Gaussian2DFunctionSpeedTestData data = (Gaussian2DFunctionSpeedTestData) dataCache
+        .computeIfAbsent(seed, Gaussian2DFunctionSpeedTest::createData);
     if (data.paramsListMultiPeak.size() < size) {
       synchronized (data.paramsListMultiPeak) {
         if (data.paramsListMultiPeak.size() < size) {
-          createData(data.rand, 2, size, data.paramsListMultiPeak, data.yListMultiPeak);
+          createGaussianData(data.rand, 2, size, data.paramsListMultiPeak, data.yListMultiPeak);
         }
       }
     }
@@ -453,7 +451,7 @@ public class Gaussian2DFunctionSpeedTest implements Function<RandomSeed, Object>
     return y;
   }
 
-  protected static void createData(UniformRandomProvider rand, int npeaks, int iter,
+  protected static void createGaussianData(UniformRandomProvider rand, int npeaks, int iter,
       ArrayList<double[]> paramsList, ArrayList<double[]> yList) {
     while (paramsList.size() < iter) {
       final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];

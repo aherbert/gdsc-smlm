@@ -27,10 +27,12 @@ package uk.ac.sussex.gdsc.smlm.results.predicates;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
 
+import java.util.function.Predicate;
+
 /**
  * Accept results with a value within a min/max range.
  */
-public class MinMaxPeakResultPredicate implements PeakResultPredicate {
+public class MinMaxPeakResultPredicate implements Predicate<PeakResult> {
   /** The min of the value range. */
   public final float min;
 
@@ -61,7 +63,6 @@ public class MinMaxPeakResultPredicate implements PeakResultPredicate {
     this.value = value;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean test(PeakResult peakResult) {
     final float v = value.getValue(peakResult);

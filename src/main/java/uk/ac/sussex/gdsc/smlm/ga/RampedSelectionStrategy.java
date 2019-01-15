@@ -152,7 +152,6 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
     return subset;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialiseBreeding(List<? extends Chromosome<T>> individuals) {
     sorted = null;
@@ -349,7 +348,6 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
     return low;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void finishBreeding() {
     // Free memory

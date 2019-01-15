@@ -116,7 +116,6 @@ public class PoissonGammaGaussianConvolutionFunction
     return new PoissonGammaGaussianConvolutionFunction(alpha, var, true);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double likelihood(final double x, final double mu) {
     if (mu <= 0) {
@@ -208,7 +207,6 @@ public class PoissonGammaGaussianConvolutionFunction
     return pvalue;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double logLikelihood(double x, double mu) {
     if (mu <= 0) {

@@ -47,7 +47,6 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction {
     super(numberOfPeaks, maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new NBCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);

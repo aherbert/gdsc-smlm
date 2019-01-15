@@ -748,14 +748,12 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     return appearance;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorder(int[] indices) {
     ItemPointMesh.checkIndices(indices, points.length);
     reorderFast(indices);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorderFast(int[] indices) {
     changed = true;
@@ -861,19 +859,16 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     return c;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return points.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Point3f getCoordinate(int i) {
     return points[i];
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setColor(Color3f color) {
     // Delegate this to the interface implementation.
@@ -881,7 +876,6 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     setItemColor(color);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f color) {
     if (color == null) {
@@ -921,7 +915,6 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f[] color) {
     if (!hasColor()) {
@@ -967,7 +960,6 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor4(Color4f[] color) {
     if (!hasColor4()) {
@@ -992,7 +984,6 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float[] alpha) {
     if (!hasColor4()) {
@@ -1021,7 +1012,6 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float alpha) {
     if (!hasColor4()) {
@@ -1047,7 +1037,6 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getItemAlpha(float[] alpha) {
     if (!hasColor4()) {
@@ -1071,7 +1060,6 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setShaded(boolean b) {
     if (!isPointArray) {

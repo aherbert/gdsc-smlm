@@ -86,7 +86,7 @@ public class FastMLEGradient2ProcedureTest {
 
   DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
-  static final int MAX_ITER = 20000;
+  static final int maxIter = 20000;
   int blockWidth = 10;
   double background = 0.5;
   double signal = 100;
@@ -188,7 +188,7 @@ public class FastMLEGradient2ProcedureTest {
   @SeededTest
   public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
     final int iter = 10;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
 
     final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10,
         10, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -202,28 +202,30 @@ public class FastMLEGradient2ProcedureTest {
     final double[] b = new double[f1.size()];
 
     final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
+        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
 
     for (int i = 0; i < iter; i++) {
       final int ii = i;
 
-      a2[Gaussian2DFunction.BACKGROUND] = nextUniform(r, 0.1, 0.3);
-      a2[Gaussian2DFunction.SIGNAL] = nextUniform(r, 100, 300);
-      a2[Gaussian2DFunction.X_POSITION] = nextUniform(r, 3, 5);
-      a2[Gaussian2DFunction.Y_POSITION] = nextUniform(r, 3, 5);
-      a2[Gaussian2DFunction.Z_POSITION] = nextUniform(r, -2, 2);
-      a2[Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
-      a2[Gaussian2DFunction.Y_SD] = nextUniform(r, 1, 1.3);
+      a2[Gaussian2DFunction.BACKGROUND] = nextUniform(rng, 0.1, 0.3);
+      a2[Gaussian2DFunction.SIGNAL] = nextUniform(rng, 100, 300);
+      a2[Gaussian2DFunction.X_POSITION] = nextUniform(rng, 3, 5);
+      a2[Gaussian2DFunction.Y_POSITION] = nextUniform(rng, 3, 5);
+      a2[Gaussian2DFunction.Z_POSITION] = nextUniform(rng, -2, 2);
+      a2[Gaussian2DFunction.X_SD] = nextUniform(rng, 1, 1.3);
+      a2[Gaussian2DFunction.Y_SD] = nextUniform(rng, 1, 1.3);
       a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL] =
-          nextUniform(r, 100, 300);
+          nextUniform(rng, 100, 300);
       a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] =
-          nextUniform(r, 5, 7);
+          nextUniform(rng, 5, 7);
       a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] =
-          nextUniform(r, 5, 7);
+          nextUniform(rng, 5, 7);
       a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Z_POSITION] =
-          nextUniform(r, -3, 1);
-      a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] = nextUniform(r, 1, 1.3);
-      a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD] = nextUniform(r, 1, 1.3);
+          nextUniform(rng, -3, 1);
+      a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] =
+          nextUniform(rng, 1, 1.3);
+      a2[Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD] =
+          nextUniform(rng, 1, 1.3);
 
       // Simulate Poisson data
       f2.initialise0(a2);

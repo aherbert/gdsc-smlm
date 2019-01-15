@@ -42,7 +42,6 @@ public class MultiFilterShiftComponent extends MultiFilterComponent {
     this.offset = Filter.getUpperSquaredLimit(shift);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
     if (peak.getXRelativeShift2() > offset) {
@@ -51,7 +50,6 @@ public class MultiFilterShiftComponent extends MultiFilterComponent {
     return (peak.getYRelativeShift2() > offset);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getType() {
     return type;

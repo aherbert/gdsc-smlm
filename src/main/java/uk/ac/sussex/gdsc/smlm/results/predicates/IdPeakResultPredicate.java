@@ -26,10 +26,12 @@ package uk.ac.sussex.gdsc.smlm.results.predicates;
 
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
+import java.util.function.Predicate;
+
 /**
  * Test a result using the id.
  */
-public class IdPeakResultPredicate implements PeakResultPredicate {
+public class IdPeakResultPredicate implements Predicate<PeakResult> {
   /** The id. */
   private final int id;
 
@@ -42,7 +44,6 @@ public class IdPeakResultPredicate implements PeakResultPredicate {
     this.id = id;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean test(PeakResult peakResult) {
     return peakResult.getId() == id;

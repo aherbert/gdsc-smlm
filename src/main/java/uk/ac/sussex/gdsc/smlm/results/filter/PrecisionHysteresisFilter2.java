@@ -118,7 +118,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
     return ParameterType.PRECISION2.toString() + " +" + range;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using a precision threshold (uses fitted background to set noise)."
@@ -127,13 +126,11 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
         + super.getDescription();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 2 + super.getNumberOfParameters();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     if (index < super.getNumberOfParameters()) {
@@ -148,7 +145,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
@@ -158,7 +154,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
     return PrecisionFilter.DEFAULT_INCREMENT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -174,7 +169,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -195,14 +189,12 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
     return create(parameters);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new PrecisionHysteresisFilter2(parameters[0], (int) parameters[1], parameters[2],
         (int) parameters[3], parameters[4], parameters[5]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     super.weakestParameters(parameters);
@@ -213,14 +205,12 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
     parameters[5] = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
         PrecisionFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {getDefaultSearchRange(), getDefaultTimeRange(),

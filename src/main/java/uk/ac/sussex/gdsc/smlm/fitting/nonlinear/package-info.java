@@ -30,6 +30,6 @@
  * {@link uk.ac.sussex.gdsc.smlm.fitting}.
  *
  * @since 1.0.0
-  */
+ */
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;

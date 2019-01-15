@@ -102,7 +102,6 @@ public class FloatDHT2D extends FloatImage2D {
     jj = source.jj;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FloatDHT2D copy() {
     return new FloatDHT2D(this);

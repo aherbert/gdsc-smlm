@@ -158,14 +158,12 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     super(FunctionSolverType.MLE, function, tc, bounds);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void preProcess() {
     ll = llr = Double.NaN;
     isPseudoLogLikelihood = false;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double[] prepareFitValue(double[] y, double[] a) {
     firstEvaluation = true;
@@ -216,7 +214,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return FastMLEGradient2ProcedureFactory.create(y, f2);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double computeFitValue(double[] a) {
     if (lineSearchMethod != LineSearchMethod.NONE) {
@@ -321,7 +318,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void computeStep(double[] step) {
     final double[] d1 = gradientProcedure.d1;
@@ -335,7 +331,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean accept(double currentValue, double[] a, double newValue, double[] newA) {
     // Always accept the step. The Smith, et al (2010) paper used 10 steps until
@@ -345,7 +340,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean computeValue(double[] y, double[] fx, double[] a) {
     // This is over-ridden since the fx values are computed
@@ -363,7 +357,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double[] prepareFunctionValue(double[] y, double[] a) {
     y = prepareY(y);
@@ -371,7 +364,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return y;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double computeFunctionValue(double[] a) {
     ll = gradientProcedure.computeLogLikelihood(a);
@@ -397,7 +389,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void computeValues(double[] fx) {
     copyFunctionValue(fx);
@@ -455,7 +446,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return new FisherInformationMatrix(p.getLinear(), p.n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getValue() {
     // Override this to return the log likelihood since the value may not
@@ -463,7 +453,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return getLogLikelihood();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihood() {
     if (Double.isNaN(ll)) {
@@ -476,7 +465,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return ll;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihoodRatio() {
     if (Double.isNaN(llr)) {
@@ -485,7 +473,6 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver
     return llr;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getQ() {
     // Wilks theorum states the LLR approaches the chi-squared distribution for large n.

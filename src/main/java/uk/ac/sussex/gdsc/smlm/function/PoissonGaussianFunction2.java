@@ -130,7 +130,6 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
     this.usePicardApproximation = usePicardApproximation;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double likelihood(double x, double mu) {
     // convert to photons
@@ -144,12 +143,11 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
     double saddlepoint =
         (usePicardApproximation) ? PoissonGaussianFunction.picard(x, mu, sigmasquared)
             : PoissonGaussianFunction.pade(x, mu, sigmasquared);
-    saddlepoint = PoissonGaussianFunction.newton_iteration(x, mu, sigmasquared, saddlepoint);
-    final double logP = PoissonGaussianFunction.sp_approx(x, mu, sigmasquared, saddlepoint);
+    saddlepoint = PoissonGaussianFunction.newtonIteration(x, mu, sigmasquared, saddlepoint);
+    final double logP = PoissonGaussianFunction.spApprox(x, mu, sigmasquared, saddlepoint);
     return FastMath.exp(logP) * probabilityNormalisation;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double logLikelihood(double x, double mu) {
     // convert to photons
@@ -163,8 +161,8 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
     double saddlepoint =
         (usePicardApproximation) ? PoissonGaussianFunction.picard(x, mu, sigmasquared)
             : PoissonGaussianFunction.pade(x, mu, sigmasquared);
-    saddlepoint = PoissonGaussianFunction.newton_iteration(x, mu, sigmasquared, saddlepoint);
-    final double logP = PoissonGaussianFunction.sp_approx(x, mu, sigmasquared, saddlepoint);
+    saddlepoint = PoissonGaussianFunction.newtonIteration(x, mu, sigmasquared, saddlepoint);
+    final double logP = PoissonGaussianFunction.spApprox(x, mu, sigmasquared, saddlepoint);
     return logP + logNormalisation;
   }
 }

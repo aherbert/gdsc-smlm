@@ -64,11 +64,8 @@ import ij.plugin.PlugIn;
 import java.awt.AWTEvent;
 import java.awt.Label;
 import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -194,32 +191,29 @@ public class CubicSplineManager implements PlugIn {
     // spline node along each dimension, i.e. dimension length = n*3 + 1 with n the number of nodes.
     for (int k = 0; k < maxk; k++) {
       final int kk = k;
-      futures.add(threadPool.submit(new Runnable() {
-        @Override
-        public void run() {
-          final CubicSplineCalculator calc = new CubicSplineCalculator();
-          final double[] value = new double[64];
-          final int zz = 3 * kk;
-          for (int j = 0, index = 0; j < maxj; j++) {
-            // 4x4 block origin in the XY data
-            int index0 = 3 * j * maxx;
-            for (int i = 0; i < maxi; i++, index++) {
-              ticker.tick();
-              int c = 0;
-              for (int z = 0; z < 4; z++) {
-                final float[] data = psf[zz + z];
-                for (int y = 0; y < 4; y++) {
-                  for (int x = 0, ii = index0 + y * maxx; x < 4; x++) {
-                    value[c++] = data[ii++];
-                  }
+      futures.add(threadPool.submit(() -> {
+        final CubicSplineCalculator calc = new CubicSplineCalculator();
+        final double[] value = new double[64];
+        final int zz = 3 * kk;
+        for (int j = 0, index = 0; j < maxj; j++) {
+          // 4x4 block origin in the XY data
+          int index0 = 3 * j * maxx;
+          for (int i = 0; i < maxi; i++, index++) {
+            ticker.tick();
+            int count = 0;
+            for (int z = 0; z < 4; z++) {
+              final float[] data = psf[zz + z];
+              for (int y = 0; y < 4; y++) {
+                for (int x = 0, ii = index0 + y * maxx; x < 4; x++) {
+                  value[count++] = data[ii++];
                 }
               }
-              splines[kk][index] = CustomTricubicFunction.create(calc.compute(value));
-              if (singlePrecision) {
-                splines[kk][index] = splines[kk][index].toSinglePrecision();
-              }
-              index0 += 3;
             }
+            splines[kk][index] = CustomTricubicFunction.create(calc.compute(value));
+            if (singlePrecision) {
+              splines[kk][index] = splines[kk][index].toSinglePrecision();
+            }
+            index0 += 3;
           }
         }
       }));
@@ -317,8 +311,7 @@ public class CubicSplineManager implements PlugIn {
 
   private static String getName(String filename) {
     final File file = new File(filename);
-    final String name = ImageJUtils.removeExtension(file.getName());
-    return name;
+    return ImageJUtils.removeExtension(file.getName());
   }
 
   private static void saveResource(CubicSplinePSF psfModel, String filename, String name) {
@@ -392,14 +385,6 @@ public class CubicSplineManager implements PlugIn {
     return list.toArray(new String[list.size()]);
   }
 
-  private static List<String> createList(boolean includeNone) {
-    final List<String> list = new TurboList<>();
-    if (includeNone) {
-      list.add("[None]");
-    }
-    return list;
-  }
-
   /**
    * List the spline models with the a spline scale (pixel size) that is an integer scale of the
    * given nm/pixel scale.
@@ -423,20 +408,27 @@ public class CubicSplineManager implements PlugIn {
     return list.toArray(new String[list.size()]);
   }
 
-  private static int getScale(double splineSize, double nmPerPixel) {
-    if (!(splineSize > 0)) {
-      return 0;
+  private static List<String> createList(boolean includeNone) {
+    final List<String> list = new TurboList<>();
+    if (includeNone) {
+      list.add("[None]");
     }
-    final double factor = nmPerPixel / splineSize;
-    final int i = (int) Math.round(factor);
-    if (Math.abs(factor - i) < 1e-6) {
-      return i;
+    return list;
+  }
+
+  private static int getScale(double splineSize, double nmPerPixel) {
+    if (splineSize > 0) {
+      final double factor = nmPerPixel / splineSize;
+      final int i = (int) Math.round(factor);
+      if (Math.abs(factor - i) < 1e-6) {
+        return i;
+      }
     }
     return 0;
   }
 
   //@formatter:off
-  private static String[] OPTIONS = {
+  private static final String[] OPTIONS = {
       "Print all model details",
       "View a spline model",
       "Load a spline model",
@@ -446,7 +438,6 @@ public class CubicSplineManager implements PlugIn {
   //@formatter:on
   private CubicSplineManagerSettings.Builder pluginSettings;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -469,31 +460,31 @@ public class CubicSplineManager implements PlugIn {
 
     switch (pluginSettings.getOption()) {
       case 5:
-        renderCubicSpline();
+        runRenderCubicSpline();
         break;
       case 4:
-        deleteCubicSpline();
+        runDeleteCubicSpline();
         break;
       case 3:
-        loadFromDirectory();
+        runLoadFromDirectory();
         break;
       case 2:
-        loadFromFile();
+        runLoadFromFile();
         break;
       case 1:
-        viewCubicSpline();
+        runViewCubicSpline();
         break;
       default:
-        printCubicSplines();
+        runPrintCubicSplines();
     }
 
     SettingsManager.writeSettings(pluginSettings);
   }
 
-  private void renderCubicSpline() {
-    final String[] MODELS = listCubicSplines(false);
+  private void runRenderCubicSpline() {
+    final String[] modesl = listCubicSplines(false);
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    gd.addChoice("Model", modesl, pluginSettings.getSelected());
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -549,18 +540,15 @@ public class CubicSplineManager implements PlugIn {
       final TextField tfzshift = gd.getLastTextField();
       gd.addDialogListener(this);
       if (ImageJUtils.isShowGenericDialog()) {
-        gd.addAndGetButton("Reset", new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent event) {
-            pluginSettings.setXShift(0);
-            pluginSettings.setYShift(0);
-            pluginSettings.setZShift(0);
-            update();
-            // The events triggered by setting these should be ignored now
-            tfxshift.setText("0");
-            tfyshift.setText("0");
-            tfzshift.setText("0");
-          }
+        gd.addAndGetButton("Reset", event -> {
+          pluginSettings.setXShift(0);
+          pluginSettings.setYShift(0);
+          pluginSettings.setZShift(0);
+          update();
+          // The events triggered by setting these should be ignored now
+          tfxshift.setText("0");
+          tfyshift.setText("0");
+          tfzshift.setText("0");
         });
         gd.addMessage("");
         label = gd.getLastLabel();
@@ -580,52 +568,52 @@ public class CubicSplineManager implements PlugIn {
       return true;
     }
 
-    private int _scale = -1;
-    private double _xshift;
-    private double _yshift;
-    private double _zshift;
-    CubicSplineFunction f;
-    double[] a = new double[] {0, 1, 0, 0, 0}; // Intensity 1
+    private int scale = -1;
+    private double xshift;
+    private double yshift;
+    private double zshift;
+    CubicSplineFunction cspline;
+    double[] params = {0, 1, 0, 0, 0}; // Set Intensity == 1
 
     private void draw() {
-      _scale = pluginSettings.getScale();
-      _xshift = pluginSettings.getXShift();
-      _yshift = pluginSettings.getYShift();
-      _zshift = pluginSettings.getZShift();
+      scale = pluginSettings.getScale();
+      xshift = pluginSettings.getXShift();
+      yshift = pluginSettings.getYShift();
+      zshift = pluginSettings.getZShift();
 
       boolean updateCalibration = false;
-      if (f == null || f.getScale() != _scale) {
+      if (cspline == null || cspline.getScale() != scale) {
         updateCalibration = true;
-        final int padX = (int) Math.ceil(padx / _scale);
-        final int padY = (int) Math.ceil(pady / _scale);
+        final int padX = (int) Math.ceil(padx / scale);
+        final int padY = (int) Math.ceil(pady / scale);
 
         // Create a function
         final int rangeX = 1 + 2 * padX;
         final int rangeY = 1 + 2 * padY;
-        f = psfModel.createCubicSplineFunction(rangeX, rangeY, _scale);
-        a[PeakResult.X] = padX;
-        a[PeakResult.Y] = padY;
+        cspline = psfModel.createCubicSplineFunction(rangeX, rangeY, scale);
+        params[PeakResult.X] = padX;
+        params[PeakResult.Y] = padY;
       }
 
       // Render
-      final StandardValueProcedure p = new StandardValueProcedure();
+      final StandardValueProcedure valueProcedure = new StandardValueProcedure();
 
       // Put the spot in the centre of the image
-      final double[] a = this.a.clone();
+      final double[] params2 = this.params.clone();
 
       // Adjust the centre
-      final double nmPerPixel = imagePSF.getPixelSize() * _scale;
-      final double nmPerSlice = imagePSF.getPixelDepth() * _scale;
+      final double nmPerPixel = imagePSF.getPixelSize() * scale;
+      final double nmPerSlice = imagePSF.getPixelDepth() * scale;
 
-      a[PeakResult.X] += _xshift / nmPerPixel;
-      a[PeakResult.Y] += _yshift / nmPerPixel;
-      a[PeakResult.Z] += _zshift / nmPerSlice;
+      params2[PeakResult.X] += xshift / nmPerPixel;
+      params2[PeakResult.Y] += yshift / nmPerPixel;
+      params2[PeakResult.Z] += zshift / nmPerSlice;
 
-      final double[] values = p.getValues(f, a);
+      final double[] values = valueProcedure.getValues(cspline, params2);
 
       final WindowOrganiser wo = new WindowOrganiser();
       final ImagePlus imp = ImageJUtils.display(pluginSettings.getSelected() + " (slice)", values,
-          f.getMaxX(), f.getMaxY(), ImageJUtils.NO_TO_FRONT, wo);
+          cspline.getMaxX(), cspline.getMaxY(), ImageJUtils.NO_TO_FRONT, wo);
       if (wo.size() != 0) {
         updateCalibration = true;
         imp.getWindow().toFront();
@@ -651,8 +639,8 @@ public class CubicSplineManager implements PlugIn {
         new Thread(() -> {
           try {
             // Continue while the parameter is changing
-            while (_scale != pluginSettings.getScale() || _xshift != pluginSettings.getXShift()
-                || _yshift != pluginSettings.getYShift() || _zshift != pluginSettings.getZShift()) {
+            while (scale != pluginSettings.getScale() || xshift != pluginSettings.getXShift()
+                || yshift != pluginSettings.getYShift() || zshift != pluginSettings.getZShift()) {
               draw();
             }
           } finally {
@@ -664,10 +652,10 @@ public class CubicSplineManager implements PlugIn {
     }
   }
 
-  private void deleteCubicSpline() {
+  private void runDeleteCubicSpline() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    final String[] MODELS = listCubicSplines(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listCubicSplines(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -687,7 +675,7 @@ public class CubicSplineManager implements PlugIn {
     ImageJUtils.log("Deleted spline model: %s\n%s", name, resource);
   }
 
-  private static void loadFromDirectory() {
+  private static void runLoadFromDirectory() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load spline models from a directory.");
     egd.addFilenameField("Directory", directory);
@@ -698,19 +686,14 @@ public class CubicSplineManager implements PlugIn {
 
     directory = egd.getNextString();
 
-    final File[] fileList = (new File(directory)).listFiles(new FileFilter() {
-      @Override
-      public boolean accept(File pathname) {
-        return pathname.isFile();
-      }
-    });
+    final File[] fileList = (new File(directory)).listFiles(File::isFile);
 
     for (final File file : fileList) {
       loadFromFileAndSaveResource(file.getPath());
     }
   }
 
-  private static void loadFromFile() {
+  private static void runLoadFromFile() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load a spline model from file.");
     egd.addFilenameField("Filename", filename);
@@ -733,10 +716,10 @@ public class CubicSplineManager implements PlugIn {
     }
   }
 
-  private void viewCubicSpline() {
+  private void runViewCubicSpline() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    final String[] MODELS = listCubicSplines(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listCubicSplines(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.addSlider("Magnification", 1, 5, pluginSettings.getMagnification());
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -777,7 +760,7 @@ public class CubicSplineManager implements PlugIn {
     IJ.showStatus("");
   }
 
-  private static void printCubicSplines() {
+  private static void runPrintCubicSplines() {
     IJ.log(settings.toString());
   }
 }

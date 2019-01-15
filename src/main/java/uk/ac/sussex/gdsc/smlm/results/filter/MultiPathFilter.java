@@ -171,7 +171,6 @@ public class MultiPathFilter {
       isValid = new boolean[totalCandidates];
     }
 
-    /** {@inheritDoc} */
     @Override
     public void add(SelectedResult selectedResult) {
       final PreprocessedPeakResult[] results = selectedResult.results;
@@ -185,19 +184,16 @@ public class MultiPathFilter {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isFit(int candidateId) {
       return isFit[candidateId];
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isValid(int candidateId) {
       return isValid[candidateId];
     }
 
-    /** {@inheritDoc} */
     @Override
     public void pass(PreprocessedPeakResult result) {
       //// If we are debugging
@@ -210,7 +206,6 @@ public class MultiPathFilter {
       isValid[result.getCandidateId()] = true;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void passMin(PreprocessedPeakResult result) {
       // Passing the minimal filter does not mean it is valid. This would be used to store
@@ -242,32 +237,27 @@ public class MultiPathFilter {
     /** The null selected result store. */
     static final NullSelectedResultStore INSTANCE = new NullSelectedResultStore();
 
-    /** {@inheritDoc} */
     @Override
     public void add(SelectedResult selectedResult) {
       // Do nothing
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isFit(int candidateId) {
       // Make sure non-candidate fits are ignored.
       return true;
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isValid(int candidateId) {
       return false;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void pass(PreprocessedPeakResult result) {
       // Do nothing
     }
 
-    /** {@inheritDoc} */
     @Override
     public void passMin(PreprocessedPeakResult result) {
       // Do nothing
@@ -277,6 +267,7 @@ public class MultiPathFilter {
   /**
    * Allows signalling of results that have been selected during multi-path filter scoring.
    */
+  @FunctionalInterface
   public interface FractionScoreStore {
     /**
      * Add the unique Id of a result that was selected.
@@ -400,7 +391,6 @@ public class MultiPathFilter {
     return new MultiPathFilter(this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean equals(Object obj) {
     if (obj == null) {
@@ -425,7 +415,6 @@ public class MultiPathFilter {
     return this.minFilter.equals(other.minFilter);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     int hash = Double.hashCode(residualsThreshold);
@@ -2167,7 +2156,7 @@ public class MultiPathFilter {
                   scoreStore.add(result[i].getUniqueId());
                   final FractionalAssignment[] a = result[i].getAssignments(predicted++);
                   if (a != null && a.length > 0) {
-                    //assignments.addAll(Arrays.asList(a));
+                    // assignments.addAll(Arrays.asList(a));
                     assignments.addAll(new DummyCollection(a));
                   }
 
@@ -2355,13 +2344,11 @@ public class MultiPathFilter {
       this.assignments = assignments;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int size() {
       return assignments.length;
     }
 
-    /** {@inheritDoc} */
     @Override
     public Object[] toArray() {
       // Return by reference

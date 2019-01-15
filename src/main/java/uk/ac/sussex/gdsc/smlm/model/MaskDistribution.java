@@ -226,7 +226,6 @@ public class MaskDistribution implements SpatialDistribution {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] next() {
     final int randomPosition = randomGenerator.nextInt(indices.length);
@@ -240,7 +239,6 @@ public class MaskDistribution implements SpatialDistribution {
     return d;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithin(double[] xyz) {
     if (!isWithinXy(xyz)) {
@@ -249,7 +247,6 @@ public class MaskDistribution implements SpatialDistribution {
     return (xyz[2] >= minDepth && xyz[2] <= minDepth + depth);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isWithinXy(double[] xyz) {
     // Ensure XY = 0 is the centre of the image
@@ -275,7 +272,6 @@ public class MaskDistribution implements SpatialDistribution {
     return y * maxx + x;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] xyz) {
     findParticles();

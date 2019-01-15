@@ -24,13 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 
 import java.awt.Rectangle;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * Wraps peak results in memory and prevents modification of the results size.
@@ -38,6 +37,8 @@ import java.util.Collection;
  * <p>Any method that modifies the size of the results set will throw a data exception.
  */
 public class ImmutableMemoryPeakResults extends MemoryPeakResults {
+  private static final String IMMUTABLE_MESSAGE = "This results set is immutable";
+
   private boolean built;
 
   /**
@@ -69,7 +70,7 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   @Override
   public void setSource(ImageSource source) {
     if (built) {
-      throw new DataException("This results set is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setSource(source);
   }
@@ -77,7 +78,7 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   @Override
   public void setBounds(Rectangle bounds) {
     if (built) {
-      throw new DataException("This results set is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setBounds(bounds);
   }
@@ -91,7 +92,7 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   @Override
   public void setCalibration(Calibration calibration) {
     if (built) {
-      throw new DataException("This results set is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setCalibration(calibration);
   }
@@ -99,7 +100,7 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   @Override
   public void setPSF(PSF psf) {
     if (built) {
-      throw new DataException("This results set is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setPSF(psf);
   }
@@ -107,7 +108,7 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   @Override
   public void setConfiguration(String configuration) {
     if (built) {
-      throw new DataException("This results set is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setConfiguration(configuration);
   }
@@ -115,65 +116,65 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   @Override
   public void setName(String name) {
     if (built) {
-      throw new DataException("This results set is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setName(name);
   }
 
   @Override
   public void add(PeakResult result) {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
       float meanIntensity, float[] params, float[] paramsStdDev) {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void add(MemoryPeakResults results) {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void addAll(Collection<PeakResult> results) {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void addAll(PeakResult[] results) {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void addAll(PeakResultStore results) {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void removeNullResults() {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
-  public boolean removeIf(PeakResultPredicate filter) {
-    throw new DataException("This results set is immutable");
+  public boolean removeIf(Predicate<PeakResult> filter) {
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void begin() {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void end() {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public boolean isActive() {
-    throw new DataException("This results set is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override

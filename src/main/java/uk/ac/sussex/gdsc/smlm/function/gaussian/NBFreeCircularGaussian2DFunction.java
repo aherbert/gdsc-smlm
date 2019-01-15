@@ -47,7 +47,6 @@ public class NBFreeCircularGaussian2DFunction extends FreeCircularGaussian2DFunc
     super(numberOfPeaks, maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new NBFreeCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);

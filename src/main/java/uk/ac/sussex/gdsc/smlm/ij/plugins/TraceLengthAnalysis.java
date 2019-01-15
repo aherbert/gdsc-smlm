@@ -92,7 +92,6 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
   private float[] y1;
   private float[] y2;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -254,7 +253,6 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     dThreshold = gd.getNextNumber();

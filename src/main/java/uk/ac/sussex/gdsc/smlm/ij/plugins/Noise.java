@@ -84,7 +84,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
   private static final String Y_AXIS_PHOTON = "Noise (photons)";
   private String yAxisTitle;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     if (arg.equalsIgnoreCase("final")) {
@@ -102,7 +101,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     return FLAGS;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
     // Select a camera model
@@ -189,7 +187,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     algorithm = gd.getNextChoiceIndex();
@@ -297,7 +294,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     return (name.length() > 20) ? name.substring(0, 20) + "..." : name;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     // Perform all methods and add to the results
@@ -316,7 +312,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     results.add(result);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setNPasses(int passes) {
     // Do nothing

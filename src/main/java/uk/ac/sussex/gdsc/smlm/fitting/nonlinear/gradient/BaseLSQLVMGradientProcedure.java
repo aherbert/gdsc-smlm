@@ -60,7 +60,6 @@ public abstract class BaseLSQLVMGradientProcedure extends LVMGradientProcedure {
     super(y, b, func);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value) {
     // Produce a sum-of-squares

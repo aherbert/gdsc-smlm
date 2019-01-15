@@ -67,13 +67,11 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
     super(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new SingleSimpleGaussian2DFunction(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
     x0pos = a[X_POSITION];
@@ -158,7 +156,6 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

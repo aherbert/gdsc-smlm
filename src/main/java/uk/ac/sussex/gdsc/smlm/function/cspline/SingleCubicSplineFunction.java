@@ -78,25 +78,21 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
     t = (splines[0][0].isSinglePrecision()) ? new FloatTargetSpline() : new DoubleTargetSpline();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getN() {
     return 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return 5;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void initialise(double[] a, int order) {
     tb = a[PeakResult.BACKGROUND];
@@ -104,7 +100,6 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
         a[PeakResult.Z], order)) ? t : null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
     if (working == null) {
@@ -128,7 +123,6 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -156,7 +150,6 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -185,7 +178,6 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isNodeBoundary(int gradientIndex) {
     final int parameterIndex = gradientIndices[gradientIndex];

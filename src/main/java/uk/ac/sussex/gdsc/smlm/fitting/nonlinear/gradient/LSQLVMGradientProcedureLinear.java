@@ -54,7 +54,6 @@ public class LSQLVMGradientProcedureLinear extends BaseLSQLVMGradientProcedure {
     alpha = new double[n * n];
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(double value, double[] dy_da) {
     final double dy = y[++yi] - value;

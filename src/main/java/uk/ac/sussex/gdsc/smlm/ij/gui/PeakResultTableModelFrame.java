@@ -253,7 +253,6 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     return item;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void actionPerformed(ActionEvent event) {
     final Object src = event.getSource();

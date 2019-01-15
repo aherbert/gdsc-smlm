@@ -108,20 +108,20 @@ public class ErfTest {
 
   @SeededTest
   public void erf0xHasLowError(RandomSeed seed) {
-    erfxHasLowError(seed, new Erf0(), 5e-4);
+    checkErfxHasLowError(seed, new Erf0(), 5e-4);
   }
 
   @SeededTest
   public void erfxHasLowError(RandomSeed seed) {
-    erfxHasLowError(seed, new Erf(), 3e-7);
+    checkErfxHasLowError(seed, new Erf(), 3e-7);
   }
 
   @SeededTest
   public void erf2xHasLowError(RandomSeed seed) {
-    erfxHasLowError(seed, new Erf2(), 1.3e-4);
+    checkErfxHasLowError(seed, new Erf2(), 1.3e-4);
   }
 
-  private static void erfxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
+  private static void checkErfxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final int range = 8;
     double max = 0;
@@ -144,25 +144,25 @@ public class ErfTest {
 
   @Test
   public void erfApachexIndistinguishableFrom1() {
-    erfxIndistinguishableFrom1(new ApacheErf());
+    checkErfxIndistinguishableFrom1(new ApacheErf());
   }
 
   @Test
   public void erf0xIndistinguishableFrom1() {
-    erfxIndistinguishableFrom1(new Erf0());
+    checkErfxIndistinguishableFrom1(new Erf0());
   }
 
   @Test
   public void erfxIndistinguishableFrom1() {
-    erfxIndistinguishableFrom1(new Erf());
+    checkErfxIndistinguishableFrom1(new Erf());
   }
 
   @Test
   public void erf2xIndistinguishableFrom1() {
-    erfxIndistinguishableFrom1(new Erf2());
+    checkErfxIndistinguishableFrom1(new Erf2());
   }
 
-  private static void erfxIndistinguishableFrom1(BaseErf erf) {
+  private static void checkErfxIndistinguishableFrom1(BaseErf erf) {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
 
     // Find switch using a binary search
@@ -184,20 +184,20 @@ public class ErfTest {
 
   @SeededTest
   public void erf0xxHasLowError(RandomSeed seed) {
-    erfxxHasLowError(seed, new Erf0(), 4e-2);
+    checkErfxxHasLowError(seed, new Erf0(), 4e-2);
   }
 
   @SeededTest
   public void erfxxHasLowError(RandomSeed seed) {
-    erfxxHasLowError(seed, new Erf(), 7e-4);
+    checkErfxxHasLowError(seed, new Erf(), 7e-4);
   }
 
   @SeededTest
   public void erf2xxHasLowError(RandomSeed seed) {
-    erfxxHasLowError(seed, new Erf2(), 1.1e-2);
+    checkErfxxHasLowError(seed, new Erf2(), 1.1e-2);
   }
 
-  private static void erfxxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
+  private static void checkErfxxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
     final int range = 3;
@@ -229,20 +229,20 @@ public class ErfTest {
 
   @Test
   public void erf0xxHasLowErrorForUnitBlocks() {
-    erfxxHasLowErrorForUnitBlocks(new Erf0(), 5e-4);
+    checkErfxxHasLowErrorForUnitBlocks(new Erf0(), 5e-4);
   }
 
   @Test
   public void erfxxHasLowErrorForUnitBlocks() {
-    erfxxHasLowErrorForUnitBlocks(new Erf(), 5e-7);
+    checkErfxxHasLowErrorForUnitBlocks(new Erf(), 5e-7);
   }
 
   @Test
   public void erf2xxHasLowErrorForUnitBlocks() {
-    erfxxHasLowErrorForUnitBlocks(new Erf2(), 1e-4);
+    checkErfxxHasLowErrorForUnitBlocks(new Erf2(), 1e-4);
   }
 
-  private static void erfxxHasLowErrorForUnitBlocks(BaseErf erf, double expected) {
+  private static void checkErfxxHasLowErrorForUnitBlocks(BaseErf erf, double expected) {
     final int range = 8;
     double max = 0;
 
@@ -265,20 +265,20 @@ public class ErfTest {
 
   @Test
   public void erf0xxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
-    erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf0());
+    checkErfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf0());
   }
 
   @Test
   public void erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
-    erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf());
+    checkErfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf());
   }
 
   @Test
   public void erf2xxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
-    erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf2());
+    checkErfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf2());
   }
 
-  private static void erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(BaseErf erf) {
+  private static void checkErfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(BaseErf erf) {
     final int range = 5;
     double max = 0;
     double max2 = 0;
@@ -356,7 +356,7 @@ public class ErfTest {
     }
 
     @Override
-    public Object getData(int i) {
+    public Object getData(int index) {
       return null;
     }
 
@@ -419,9 +419,9 @@ public class ErfTest {
     final double denom = 1.0 / (Math.sqrt(2.0) * s);
     final double e1 = 0.5 * org.apache.commons.math3.special.Erf.erf(minx * denom, maxx * denom);
     final double e2 = 0.5 * org.apache.commons.math3.special.Erf.erf(miny * denom, maxy * denom);
-    final double e = e1 * e2;
+    final double expected = e1 * e2;
 
-    double o = 0;
+    double observed = 0;
     // Numeric integration
     final double twos2 = 2 * s * s;
     final double norm = 1 / (Math.PI * twos2);
@@ -465,12 +465,12 @@ public class ErfTest {
       // logger.fine(FunctionUtils.getSupplier("sum=%f, sum2=%f", sum, sum2);
 
       final int n = steps * steps;
-      o = norm * sum / n;
-      logger.log(TestLogUtils.getRecord(Level.INFO, "n=%d, e=%f, o=%f, error=%f", n, e, o,
-          DoubleEquality.relativeError(e, o)));
+      observed = norm * sum / n;
+      logger.log(TestLogUtils.getRecord(Level.INFO, "n=%d, e=%f, o=%f, error=%f", n, expected,
+          observed, DoubleEquality.relativeError(expected, observed)));
     }
 
-    TestAssertions.assertTest(e, o, TestHelper.doublesAreClose(1e-2, 0));
+    TestAssertions.assertTest(expected, observed, TestHelper.doublesAreClose(1e-2, 0));
   }
 
   @Test
@@ -585,7 +585,7 @@ public class ErfTest {
     }
 
     @Override
-    public Object getData(int i) {
+    public Object getData(int index) {
       return null;
     }
 

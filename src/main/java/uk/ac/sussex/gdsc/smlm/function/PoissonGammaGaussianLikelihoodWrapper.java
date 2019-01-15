@@ -74,7 +74,6 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper {
     p = new PoissonGammaGaussianFunction(alpha, s);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double computeLikelihood() {
     // Compute the negative log-likelihood
@@ -85,13 +84,11 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper {
     return ll;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double computeLikelihood(int i) {
     return -p.logLikelihood(data[i], function.eval(i));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean canComputeGradient() {
     return false;

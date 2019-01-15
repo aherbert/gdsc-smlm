@@ -95,7 +95,6 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
   @Override
   public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ValueProcedure procedure) {
     if (tB == 0) {
@@ -115,7 +114,6 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] computeValues(double[] variables) {
     initialise0(variables);

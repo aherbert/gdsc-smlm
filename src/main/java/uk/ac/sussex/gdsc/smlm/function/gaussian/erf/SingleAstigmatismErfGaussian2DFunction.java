@@ -76,7 +76,6 @@ public class SingleAstigmatismErfGaussian2DFunction
     return new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise0(double[] a) {
     tB = a[Gaussian2DFunction.BACKGROUND];
@@ -108,7 +107,6 @@ public class SingleAstigmatismErfGaussian2DFunction
         * compute1DIntegral(ONE_OVER_ROOT2 / sy, maxy, ty);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise1(double[] a) {
     create1Arrays();
@@ -130,7 +128,6 @@ public class SingleAstigmatismErfGaussian2DFunction
     createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, sy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise2(double[] a) {
     create2Arrays();
@@ -186,7 +183,6 @@ public class SingleAstigmatismErfGaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda) {
     // Unpack the predictor into the dimensions
@@ -204,7 +200,6 @@ public class SingleAstigmatismErfGaussian2DFunction
     return tB + tI * duda[1];
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
@@ -275,19 +270,16 @@ public class SingleAstigmatismErfGaussian2DFunction
     return 4;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfGradients() {
     return 5;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -307,7 +299,6 @@ public class SingleAstigmatismErfGaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -353,7 +344,6 @@ public class SingleAstigmatismErfGaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
     final int n = getNumberOfGradients();

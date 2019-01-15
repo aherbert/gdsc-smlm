@@ -93,7 +93,6 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     return ta;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorderFast(int[] indices) {
     changed = true;
@@ -139,7 +138,6 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     // this.setGeometry(ga);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f color) {
     if (color == null) {
@@ -164,7 +162,6 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f[] color) {
     this.color = null;
@@ -189,7 +186,6 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor4(Color4f[] color) {
     this.color = null;
@@ -205,7 +201,6 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float[] alpha) {
     final int size = size();
@@ -226,7 +221,6 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float alpha) {
     final int size = size();
@@ -244,7 +238,6 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getItemAlpha(float[] alpha) {
     final int size = size();

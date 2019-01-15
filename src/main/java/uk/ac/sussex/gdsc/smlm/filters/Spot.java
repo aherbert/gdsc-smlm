@@ -90,13 +90,11 @@ public class Spot implements Comparable<Spot>, Cloneable {
     return dx * dx + dy * dy;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int compareTo(Spot other) {
     return Double.compare(other.score, score);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Spot clone() {
     try {

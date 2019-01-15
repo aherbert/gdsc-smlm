@@ -65,14 +65,13 @@ public class FastLogTest {
     logger = null;
   }
 
-  ICSIFastLog iLog = ICSIFastLog.create(DataType.BOTH);
-  FFastLog fLog = new FFastLog();
-  DFastLog dLog = new DFastLog();
-  TurboLog tLog = new TurboLog();
+  ICSIFastLog icsiLog = ICSIFastLog.create(DataType.BOTH);
+  FFastLog ffastLog = new FFastLog();
+  DFastLog dfastLog = new DFastLog();
+  TurboLog turboLog = new TurboLog();
 
   //@formatter:off
-  private class MathLog extends FastLog
-  {
+  private static class MathLog extends FastLog {
     @Override
     public double getBase()  { return Math.E;}
     @Override
@@ -106,8 +105,7 @@ public class FastLogTest {
     @Override
     public double fastLog2D(double x) { return log2(x); }
   }
-  private class FastMathLog extends MathLog
-  {
+  private static class FastMathLog extends MathLog {
     @Override
     public float log(float x) {  return (float) FastMath.log(x);  }
     @Override
@@ -115,8 +113,7 @@ public class FastLogTest {
     @Override
     public double logD(double x) { return FastMath.log(x); }
   }
-  private abstract class BaseTestLog
-  {
+  private abstract static class BaseTestLog {
     FastLog fl;
     String name;
     BaseTestLog(FastLog fl) {
@@ -126,16 +123,14 @@ public class FastLogTest {
     abstract double log(double x);
     int getN() { return fl.getN(); }
   }
-  private class TestLog extends BaseTestLog
-  {
+  private static class TestLog extends BaseTestLog {
     TestLog(FastLog fl) { super(fl); }
     @Override
     float log(float x) { return fl.log(x); }
     @Override
     double log(double x) { return fl.logD(x); }
   }
-  private class TestFastLog extends BaseTestLog
-  {
+  private static class TestFastLog extends BaseTestLog {
     TestFastLog(FastLog fl) { super(fl); }
     @Override
     float log(float x) { return fl.fastLog(x); }
@@ -144,24 +139,21 @@ public class FastLogTest {
   }
   // To test Math.log(1+x).
   // This is what is used in the MLE LVM gradient calculator
-  private class Test1PLog extends BaseTestLog
-  {
+  private static class Test1PLog extends BaseTestLog {
     Test1PLog(FastLog fl) { super(fl); }
     @Override
     float log(float x) { return (float) Math.log(1+x); }
     @Override
     double log(double x) { return Math.log(1+x); }
   }
-  private class TestLog1P extends BaseTestLog
-  {
+  private static class TestLog1P extends BaseTestLog {
     TestLog1P(FastLog fl) { super(fl); }
     @Override
     float log(float x) { return (float) Math.log1p(x); }
     @Override
     double log(double x) { return Math.log1p(x); }
   }
-  private class TestLog1PApache extends BaseTestLog
-  {
+  private static class TestLog1PApache extends BaseTestLog {
     TestLog1PApache(FastLog fl) { super(fl); }
     @Override
     float log(float x) { return (float) FastMath.log1p(x); }
@@ -172,68 +164,68 @@ public class FastLogTest {
 
   @Test
   public void canComputeFFastLog_fastLog() {
-    canComputeLog(new TestFastLog(fLog), false);
+    canComputeLog(new TestFastLog(ffastLog), false);
   }
 
   @Test
   public void canComputeFFastLog_log() {
-    canComputeLog(new TestLog(fLog), true);
+    canComputeLog(new TestLog(ffastLog), true);
   }
 
   @Test
   public void canComputeDFastLog_fastLog() {
-    canComputeLog(new TestFastLog(dLog), false);
+    canComputeLog(new TestFastLog(dfastLog), false);
   }
 
   @Test
   public void canComputeDFastLog_log() {
-    canComputeLog(new TestLog(dLog), true);
+    canComputeLog(new TestLog(dfastLog), true);
   }
 
   @Test
   public void canComputeICSCFastLog_fastLog() {
-    canComputeLog(new TestFastLog(iLog), false);
+    canComputeLog(new TestFastLog(icsiLog), false);
   }
 
   @Test
   public void canComputeICSCFastLog_log() {
-    canComputeLog(new TestLog(iLog), true);
+    canComputeLog(new TestLog(icsiLog), true);
   }
 
   @Test
   public void canComputeTurboLog_fastLog() {
-    canComputeLog(new TestFastLog(tLog), false);
+    canComputeLog(new TestFastLog(turboLog), false);
   }
 
   @Test
   public void canComputeTurboLog_log() {
-    canComputeLog(new TestLog(tLog), true);
+    canComputeLog(new TestLog(turboLog), true);
   }
 
-  private static void canComputeLog(BaseTestLog f, boolean edgeCases) {
-    testLog(f, Float.NaN, edgeCases);
-    testLog(f, Float.NEGATIVE_INFINITY, edgeCases);
-    testLog(f, -Float.MAX_VALUE, edgeCases);
-    testLog(f, -Float.MIN_VALUE, edgeCases);
-    testLog(f, -2f, edgeCases);
-    testLog(f, -1f, edgeCases);
-    testLog(f, -0f, edgeCases);
-    testLog(f, 0f, edgeCases);
-    testLog(f, Float.MIN_VALUE, false); // Not enough precision to test this
-    testLog(f, 1e-10f, true);
-    testLog(f, 1f, true);
-    testLog(f, 2f, true);
-    testLog(f, 2048f, true);
-    testLog(f, Float.MAX_VALUE, true);
-    testLog(f, Float.POSITIVE_INFINITY, edgeCases);
+  private static void canComputeLog(BaseTestLog fl, boolean edgeCases) {
+    testLog(fl, Float.NaN, edgeCases);
+    testLog(fl, Float.NEGATIVE_INFINITY, edgeCases);
+    testLog(fl, -Float.MAX_VALUE, edgeCases);
+    testLog(fl, -Float.MIN_VALUE, edgeCases);
+    testLog(fl, -2f, edgeCases);
+    testLog(fl, -1f, edgeCases);
+    testLog(fl, -0f, edgeCases);
+    testLog(fl, 0f, edgeCases);
+    testLog(fl, Float.MIN_VALUE, false); // Not enough precision to test this
+    testLog(fl, 1e-10f, true);
+    testLog(fl, 1f, true);
+    testLog(fl, 2f, true);
+    testLog(fl, 2048f, true);
+    testLog(fl, Float.MAX_VALUE, true);
+    testLog(fl, Float.POSITIVE_INFINITY, edgeCases);
   }
 
-  private static void testLog(BaseTestLog f, float v, boolean test) {
-    final float e = (float) Math.log(v);
-    final float o = f.log(v);
+  private static void testLog(BaseTestLog fl, float value, boolean test) {
+    final float e = (float) Math.log(value);
+    final float o = fl.log(value);
     final float error = FloatEquality.relativeError(e, o);
     logger.log(uk.ac.sussex.gdsc.test.utils.TestLogUtils.getRecord(Level.INFO,
-        "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
+        "%s v=%g : %fl vs %s (%g)", fl.name, value, e, o, error));
     if (test) {
       if (Double.isNaN(e) && Double.isNaN(o)) {
         return;
@@ -247,69 +239,69 @@ public class FastLogTest {
 
   @Test
   public void canComputeDoubleFFast_fastLog() {
-    canComputeDoubleLog(new TestFastLog(fLog), false);
+    canComputeDoubleLog(new TestFastLog(ffastLog), false);
   }
 
   @Test
   public void canComputeDoubleFFastLog_log() {
-    canComputeDoubleLog(new TestLog(fLog), true);
+    canComputeDoubleLog(new TestLog(ffastLog), true);
   }
 
   @Test
   public void canComputeDoubleDFast_fastLog() {
-    canComputeDoubleLog(new TestFastLog(dLog), false);
+    canComputeDoubleLog(new TestFastLog(dfastLog), false);
   }
 
   @Test
   public void canComputeDoubleDFastLog_log() {
-    canComputeDoubleLog(new TestLog(dLog), true);
+    canComputeDoubleLog(new TestLog(dfastLog), true);
   }
 
   @Test
   public void canComputeDoubleICSCFast_fastLog() {
-    canComputeDoubleLog(new TestFastLog(iLog), false);
+    canComputeDoubleLog(new TestFastLog(icsiLog), false);
   }
 
   @Test
   public void canComputeDoubleICSCFastLog_log() {
-    canComputeDoubleLog(new TestLog(iLog), true);
+    canComputeDoubleLog(new TestLog(icsiLog), true);
   }
 
   @Test
   public void canComputeDoubleTurbo_fastLog() {
-    canComputeDoubleLog(new TestFastLog(tLog), false);
+    canComputeDoubleLog(new TestFastLog(turboLog), false);
   }
 
   @Test
   public void canComputeDoubleTurboLog_log() {
-    canComputeDoubleLog(new TestLog(tLog), true);
+    canComputeDoubleLog(new TestLog(turboLog), true);
   }
 
-  private static void canComputeDoubleLog(BaseTestLog f, boolean edgeCases) {
-    testDoubleLog(f, Double.NaN, edgeCases);
-    testDoubleLog(f, Double.NEGATIVE_INFINITY, edgeCases);
-    testDoubleLog(f, -Double.MAX_VALUE, edgeCases);
-    testDoubleLog(f, -Double.MIN_VALUE, edgeCases);
-    testDoubleLog(f, -2d, edgeCases);
-    testDoubleLog(f, -1d, edgeCases);
-    testDoubleLog(f, -0d, edgeCases);
-    testDoubleLog(f, 0d, edgeCases);
-    testDoubleLog(f, Double.MIN_VALUE, false); // Not enough precision to test this
-    testDoubleLog(f, 1e-10, true);
-    testDoubleLog(f, 1d, true);
-    testDoubleLog(f, 2d, true);
-    testDoubleLog(f, 2048d, true);
-    testDoubleLog(f, Double.MAX_VALUE / 2, true);
-    testDoubleLog(f, Double.MAX_VALUE, true);
-    testDoubleLog(f, Double.POSITIVE_INFINITY, edgeCases);
+  private static void canComputeDoubleLog(BaseTestLog fl, boolean edgeCases) {
+    testDoubleLog(fl, Double.NaN, edgeCases);
+    testDoubleLog(fl, Double.NEGATIVE_INFINITY, edgeCases);
+    testDoubleLog(fl, -Double.MAX_VALUE, edgeCases);
+    testDoubleLog(fl, -Double.MIN_VALUE, edgeCases);
+    testDoubleLog(fl, -2d, edgeCases);
+    testDoubleLog(fl, -1d, edgeCases);
+    testDoubleLog(fl, -0d, edgeCases);
+    testDoubleLog(fl, 0d, edgeCases);
+    testDoubleLog(fl, Double.MIN_VALUE, false); // Not enough precision to test this
+    testDoubleLog(fl, 1e-10, true);
+    testDoubleLog(fl, 1d, true);
+    testDoubleLog(fl, 2d, true);
+    testDoubleLog(fl, 2048d, true);
+    testDoubleLog(fl, Double.MAX_VALUE / 2, true);
+    testDoubleLog(fl, Double.MAX_VALUE, true);
+    testDoubleLog(fl, Double.POSITIVE_INFINITY, edgeCases);
   }
 
-  private static void testDoubleLog(BaseTestLog f, double v, boolean test) {
-    final double e = Math.log(v);
-    final double o = f.log(v);
+  private static void testDoubleLog(BaseTestLog fl, double value, boolean test) {
+    final double e = Math.log(value);
+    final double o = fl.log(value);
     final double error = DoubleEquality.relativeError(e, o);
     logger.log(uk.ac.sussex.gdsc.test.utils.TestLogUtils.getRecord(Level.INFO,
-        "%s v=%g : %f vs %s (%g)", f.name, v, e, o, error));
+        "%s v=%g : %fl vs %s (%g)", fl.name, value, e, o, error));
     if (test) {
       if (Double.isNaN(e) && Double.isNaN(o)) {
         return;
@@ -350,31 +342,39 @@ public class FastLogTest {
     // canTestFloatError(new TestFastLog(new FFastLog(n)), d, logD);
     // }
     for (int n = min; n <= max; n++) {
-      canTestFloatError(new TestFastLog(new DFastLog(n)), d, logD);
+      runCanTestFloatError(new TestFastLog(new DFastLog(n)), d, logD);
     }
     for (int n = min; n <= max; n++) {
-      canTestFloatError(new TestFastLog(new TurboLog(n)), d, logD);
+      runCanTestFloatError(new TestFastLog(new TurboLog(n)), d, logD);
     }
     for (int n = min; n <= max; n++) {
-      canTestFloatError(new TestFastLog(new TurboLog2(n)), d, logD);
+      runCanTestFloatError(new TestFastLog(new TurboLog2(n)), d, logD);
     }
   }
 
   private static float[] generateRandomFloats(RandomSeed seed, int n) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final float[] d = new float[n];
     for (int i = 0; i < d.length; i++) {
-      d[i] = nextUniformFloat(r);
+      d[i] = nextUniformFloat(rng);
     }
     return d;
   }
 
-  private static float nextUniformFloat(UniformRandomProvider r) {
-    int u = r.nextInt();
+  private static float nextUniformFloat(UniformRandomProvider rng) {
+    int uniform = rng.nextInt();
     // Mask out sign and the last bit of the exponent (avoid infinity and NaN)
-    u = BitFlagUtils.unset(u, 0x80000000 | 0x00800000);
+    uniform = BitFlagUtils.unset(uniform, 0x80000000 | 0x00800000);
     // assert ((u >> 23) & 0xff) < 255;
-    return Float.intBitsToFloat(u);
+    return Float.intBitsToFloat(uniform);
+  }
+
+  private static double nextUniformDouble(UniformRandomProvider rng) {
+    long uniform = rng.nextLong();
+    // Mask out sign and the last bit of the exponent (avoid infinity and NaN)
+    uniform &= ~(0x8000000000000000L | 0x0010000000000000L);
+    // assert ((u >> 52) & 0x7ffL) < 2047;
+    return Double.longBitsToDouble(uniform);
   }
 
   @Test
@@ -404,24 +404,24 @@ public class FastLogTest {
     // testFloatErrorRange(test, n, d, logD, 253, 255, 0);
   }
 
-  private void testFloatErrorRange(TurboList<TestFastLog> test, int n, float[] d, float[] logD,
-      int mine, int maxe, int ee) {
+  private static void testFloatErrorRange(TurboList<TestFastLog> test, int n, float[] data,
+      float[] logD, int mine, int maxe, int ee) {
     for (int e = mine; e < maxe; e += ee + 1) {
-      d = generateFloats(e, e + ee, d);
-      if (logD == null || logD.length < d.length) {
-        logD = new float[d.length];
+      data = generateFloats(e, e + ee, data);
+      if (logD == null || logD.length < data.length) {
+        logD = new float[data.length];
       }
-      for (int i = 0; i < d.length; i++) {
-        logD[i] = (float) Math.log(d[i]);
+      for (int i = 0; i < data.length; i++) {
+        logD[i] = (float) Math.log(data[i]);
       }
       logger.info(getSupplier("e=%d-%d", e, e + ee));
-      for (final TestFastLog f : test) {
-        canTestFloatError(f, d, logD);
+      for (final TestFastLog fl : test) {
+        runCanTestFloatError(fl, data, logD);
       }
     }
   }
 
-  private static float[] generateFloats(int mine, int maxe, float[] d) {
+  private static float[] generateFloats(int mine, int maxe, float[] data) {
     // Mantissa = 23-bit, Exponent = 8-bit
     final int mbits = 23;
     mine = MathUtils.clip(0, 255, mine);
@@ -431,62 +431,67 @@ public class FastLogTest {
     }
     final int mn = (1 << mbits);
     final int n = mn * (maxe - mine + 1);
-    if (d == null || d.length < n) {
-      d = new float[n];
+    if (data == null || data.length < n) {
+      data = new float[n];
     }
-    int i = 0;
+    int index = 0;
     for (int m = 0; m < mn; m++) {
       for (int e = mine; e <= maxe; e++) {
         final int bits = m | (e << 23);
         final float v = Float.intBitsToFloat(bits);
         // logger.fine(FunctionUtils.getSupplier("%g = %s", v, Integer.toBinaryString(bits));
-        d[i++] = v;
+        data[index++] = v;
       }
     }
-    return d;
+    return data;
   }
 
-  private class FPair {
-    int i = 0;
-    float f = 0;
+  private static class FPair {
+    int index;
+    float value;
   }
 
-  private class Stats {
+  private static class DPair {
+    int index;
+    double value;
+  }
+
+  private static class Stats {
     double min;
     double max;
-    double s;
+    double sum;
     double ss;
     double minv;
     double maxv;
-    int n = 1;
+    int count = 1;
 
-    Stats(double e, double v) {
-      min = max = s = e;
-      minv = maxv = v;
-      ss = e * e;
+    Stats(double exp, double value) {
+      min = max = sum = exp;
+      minv = maxv = value;
+      ss = exp * exp;
     }
 
-    void add(double e, double v) {
-      if (min > e) {
-        min = e;
-        minv = v;
-      } else if (max < e) {
-        max = e;
-        maxv = v;
+    void add(double exp, double value) {
+      if (min > exp) {
+        min = exp;
+        minv = value;
+      } else if (max < exp) {
+        max = exp;
+        maxv = value;
       }
-      s += e;
-      ss += e * e;
-      n++;
+      sum += exp;
+      ss += exp * exp;
+      count++;
     }
 
     double getMean() {
-      return s / n;
+      return sum / count;
     }
 
     double getSD() {
-      final double sd = ss - (s * s) / n;
+      final double sd = ss - (sum * sum) / count;
       if (sd > 0.0) {
-        return Math.sqrt(sd / (n - 1));
+        return Math.sqrt(sd / (count - 1));
       }
       return 0.0;
     }
@@ -497,48 +502,63 @@ public class FastLogTest {
     }
   }
 
-  private void canTestFloatError(BaseTestLog f, float[] d, float[] logD) {
+  private static void runCanTestFloatError(BaseTestLog fl, float[] data, float[] logD) {
     final FPair pair = new FPair();
-    if (!next(f, pair, d)) {
+    if (!next(fl, pair, data)) {
       return;
     }
 
-    float v = logD[pair.i - 1];
-    double delta = v - pair.f;
+    float value = logD[pair.index - 1];
+    double delta = value - pair.value;
     delta = Math.abs(delta);
     // if (delta > 1)
     // {
-    // //logger.fine(FunctionUtils.getSupplier("Big error: %f %f", v, d[pair.i-1]);
+    // //logger.fine(FunctionUtils.getSupplier("Big error: %fl %fl", v, d[pair.i-1]);
     // }
-    final Stats s1 = new Stats(delta, d[pair.i - 1]);
-    final Stats s2 =
-        (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
-    while (next(f, pair, d)) {
-      v = logD[pair.i - 1];
-      delta = v - pair.f;
+    final Stats s1 = new Stats(delta, data[pair.index - 1]);
+    final Stats s2 = (value != 0) ? new Stats(Math.abs(delta / value), data[pair.index - 1])
+        : new Stats(0, data[pair.index - 1]);
+    while (next(fl, pair, data)) {
+      value = logD[pair.index - 1];
+      delta = value - pair.value;
       delta = Math.abs(delta);
       // if (delta > 5)
       // {
-      // //logger.fine(FunctionUtils.getSupplier("Big error: [%g] %f %f %f", d[pair.i - 1], v,
-      // pair.f, v));
+      // //logger.fine(FunctionUtils.getSupplier("Big error: [%g] %fl %fl %fl", d[pair.i - 1], v,
+      // pair.fl, v));
       // }
-      s1.add(delta, d[pair.i - 1]);
-      if (v != 0) {
-        s2.add(Math.abs(delta / v), d[pair.i - 1]);
+      s1.add(delta, data[pair.index - 1]);
+      if (value != 0) {
+        s2.add(Math.abs(delta / value), data[pair.index - 1]);
       }
     }
-    logger.info(getSupplier("%s, n=%d, c=%d : %s : relative %s", f.name, f.getN(), s1.n,
+    logger.info(getSupplier("%s, n=%d, c=%d : %s : relative %s", fl.name, fl.getN(), s1.count,
         s1.summary(), s2.summary()));
   }
 
-  private static boolean next(BaseTestLog f, FPair pair, float[] d) {
-    while (pair.i < d.length) {
-      final float x = d[pair.i++];
+  private static boolean next(BaseTestLog fl, FPair pair, float[] data) {
+    while (pair.index < data.length) {
+      final float x = data[pair.index++];
       if (x == 0) {
         continue;
       }
-      pair.f = f.log(x);
-      if (pair.f != Float.NEGATIVE_INFINITY) {
+      pair.value = fl.log(x);
+      if (pair.value != Float.NEGATIVE_INFINITY) {
+        return true;
+        // logger.fine(FunctionUtils.getSupplier("%g", x);
+      }
+    }
+    return false;
+  }
+
+  private static boolean next(BaseTestLog fl, DPair pair, double[] data) {
+    while (pair.index < data.length) {
+      final double x = data[pair.index++];
+      if (x == 0) {
+        continue;
+      }
+      pair.value = fl.log(x);
+      if (pair.value != Double.NEGATIVE_INFINITY) {
         return true;
         // logger.fine(FunctionUtils.getSupplier("%g", x);
       }
@@ -552,13 +572,13 @@ public class FastLogTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final double lower = Double.MIN_VALUE;
     final double upper = Double.MAX_VALUE;
     final double[] d = new double[10000000];
     final double[] logD = new double[d.length];
     for (int i = 0; i < d.length; i++) {
-      final double v = nextUniformDouble(r);
+      final double v = nextUniformDouble(rng);
       d[i] = v;
       logD[i] = Math.log(v);
     }
@@ -580,8 +600,8 @@ public class FastLogTest {
     // canTestDoubleError(new TestFastLog(new FFastLog(n)), d, logD);
     // }
     for (int n = min; n <= max; n++) {
-      canTestDoubleError(new TestFastLog(new TurboLog(n)), d, logD);
-      canTestDoubleError(new TestFastLog(new TurboLog2(n)), d, logD);
+      runCanTestDoubleError(new TestFastLog(new TurboLog(n)), d, logD);
+      runCanTestDoubleError(new TestFastLog(new TurboLog2(n)), d, logD);
     }
   }
 
@@ -591,27 +611,19 @@ public class FastLogTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final double lower = Double.MIN_VALUE;
     final double upper = Double.MAX_VALUE;
     final double[] d = new double[100000];
     final double[] logD = new double[d.length];
     for (int i = 0; i < d.length; i++) {
-      final double v = nextUniformDouble(r);
+      final double v = nextUniformDouble(rng);
       d[i] = v;
       logD[i] = Math.log1p(v);
     }
 
-    canTestDoubleError(new Test1PLog(new MathLog()), d, logD);
-    canTestDoubleError(new TestLog1P(new MathLog()), d, logD);
-  }
-
-  private static double nextUniformDouble(UniformRandomProvider r) {
-    long u = r.nextLong();
-    // Mask out sign and the last bit of the exponent (avoid infinity and NaN)
-    u &= ~(0x8000000000000000L | 0x0010000000000000L);
-    // assert ((u >> 52) & 0x7ffL) < 2047;
-    return Double.longBitsToDouble(u);
+    runCanTestDoubleError(new Test1PLog(new MathLog()), d, logD);
+    runCanTestDoubleError(new TestLog1P(new MathLog()), d, logD);
   }
 
   @SeededTest
@@ -619,7 +631,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
 
     final TurboList<TestFastLog> test = new TurboList<>();
     final int n = 13;
@@ -637,105 +649,86 @@ public class FastLogTest {
     // testDoubleErrorRange(test, n, d, logD, 0, 255, 0);
 
     // Only a problem around min value and x==1
-    // testDoubleErrorRange(r, test, n, d, logD, 0, 2, 0);
-    testDoubleErrorRange(r, test, n, d, logD, 1021, 1026, 0);
-    testDoubleErrorRange(r, test, n, d, logD, 2045, 2047, 0);
+    // testDoubleErrorRange(rng, test, n, d, logD, 0, 2, 0);
+    testDoubleErrorRange(rng, test, n, d, logD, 1021, 1026, 0);
+    testDoubleErrorRange(rng, test, n, d, logD, 2045, 2047, 0);
   }
 
-  private void testDoubleErrorRange(UniformRandomProvider r, TurboList<TestFastLog> test, int n,
-      double[] d, double[] logD, int mine, int maxe, int ee) {
+  private static void testDoubleErrorRange(UniformRandomProvider rng, TurboList<TestFastLog> test,
+      int n, double[] data, double[] logD, int mine, int maxe, int ee) {
     for (int e = mine; e < maxe; e += ee + 1) {
-      d = generateDoubles(r, e, e + ee, d);
-      if (logD == null || logD.length < d.length) {
-        logD = new double[d.length];
+      data = generateDoubles(rng, e, e + ee, data);
+      if (logD == null || logD.length < data.length) {
+        logD = new double[data.length];
       }
-      for (int i = 0; i < d.length; i++) {
-        logD[i] = Math.log(d[i]);
+      for (int i = 0; i < data.length; i++) {
+        logD[i] = Math.log(data[i]);
       }
       logger.info(getSupplier("e=%d-%d", e, e + ee));
-      for (final TestFastLog f : test) {
-        canTestDoubleError(f, d, logD);
+      for (final TestFastLog fl : test) {
+        runCanTestDoubleError(fl, data, logD);
       }
     }
   }
 
-  private static double[] generateDoubles(UniformRandomProvider r, int mine, int maxe, double[] d) {
+  private static double[] generateDoubles(UniformRandomProvider rng, int mine, int maxe,
+      double[] data) {
     // Mantissa = 52-bit, Exponent = 11-bit
     mine = MathUtils.clip(0, 2047, mine);
     maxe = MathUtils.clip(0, 2047, maxe);
     if (mine > maxe) {
       throw new IllegalStateException();
     }
-    int i = 0;
-    while (i < d.length) {
+    int index = 0;
+    while (index < data.length) {
       // Only generate the mantissa
-      final long m = r.nextLong() & 0xfffffffffffffL;
+      final long m = rng.nextLong() & 0xfffffffffffffL;
 
-      for (long e = mine; e <= maxe && i < d.length; e++) {
+      for (long e = mine; e <= maxe && index < data.length; e++) {
         final long bits = m | (e << 52);
         final double v = Double.longBitsToDouble(bits);
         // logger.fine(FunctionUtils.getSupplier("%g = %s", v, Long.toBinaryString(bits));
-        d[i++] = v;
+        data[index++] = v;
       }
     }
-    return d;
+    return data;
   }
 
-  private class DPair {
-    int i = 0;
-    double f = 0;
-  }
-
-  private void canTestDoubleError(BaseTestLog f, double[] d, double[] logD) {
+  private static void runCanTestDoubleError(BaseTestLog fl, double[] data, double[] logD) {
     final DPair pair = new DPair();
-    if (!next(f, pair, d)) {
+    if (!next(fl, pair, data)) {
       return;
     }
 
-    double v = logD[pair.i - 1];
-    double delta = v - pair.f;
+    double value = logD[pair.index - 1];
+    double delta = value - pair.value;
     delta = Math.abs(delta);
-    final Stats s1 = new Stats(delta, d[pair.i - 1]);
-    final Stats s2 =
-        (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
-    while (next(f, pair, d)) {
-      v = logD[pair.i - 1];
-      // logger.fine(FunctionUtils.getSupplier("%g vs %g", v, pair.f);
-      delta = v - pair.f;
+    final Stats s1 = new Stats(delta, data[pair.index - 1]);
+    final Stats s2 = (value != 0) ? new Stats(Math.abs(delta / value), data[pair.index - 1])
+        : new Stats(0, data[pair.index - 1]);
+    while (next(fl, pair, data)) {
+      value = logD[pair.index - 1];
+      // logger.fine(FunctionUtils.getSupplier("%g vs %g", v, pair.fl);
+      delta = value - pair.value;
       delta = Math.abs(delta);
-      s1.add(delta, d[pair.i - 1]);
-      if (v != 0) {
-        s2.add(Math.abs(delta / v), d[pair.i - 1]);
+      s1.add(delta, data[pair.index - 1]);
+      if (value != 0) {
+        s2.add(Math.abs(delta / value), data[pair.index - 1]);
       }
     }
-    logger.info(getSupplier("%s, n=%d, c=%d : %s : relative %s", f.name, f.getN(), s1.n,
+    logger.info(getSupplier("%s, n=%d, c=%d : %s : relative %s", fl.name, fl.getN(), s1.count,
         s1.summary(), s2.summary()));
   }
 
-  private static boolean next(BaseTestLog f, DPair pair, double[] d) {
-    while (pair.i < d.length) {
-      final double x = d[pair.i++];
-      if (x == 0) {
-        continue;
-      }
-      pair.f = f.log(x);
-      if (pair.f != Double.NEGATIVE_INFINITY) {
-        return true;
-        // logger.fine(FunctionUtils.getSupplier("%g", x);
-      }
-    }
-    return false;
-  }
-
   // Speed test of float/double version verses the Math.log.
-  private abstract class DummyTimingTask extends BaseTimingTask {
+  private abstract static class DummyTimingTask extends BaseTimingTask {
     BaseTestLog log;
-    int q;
+    int qvalue;
 
-    public DummyTimingTask(String name, BaseTestLog log, int q) {
-      super(name + " " + log.name + " q=" + q);
+    public DummyTimingTask(String name, BaseTestLog log, int qvalue) {
+      super(name + " " + log.name + " q=" + qvalue);
       this.log = log;
-      this.q = q;
+      this.qvalue = qvalue;
     }
 
     @Override
@@ -744,26 +737,26 @@ public class FastLogTest {
     }
 
     @Override
-    public Object getData(int i) {
+    public Object getData(int index) {
       return null;
     }
   }
 
-  private class FloatTimingTask extends DummyTimingTask {
-    float[] x;
+  private static class FloatTimingTask extends DummyTimingTask {
+    float[] values;
 
-    public FloatTimingTask(BaseTestLog log, int q, float[] x) {
-      super("log(float)", log, q);
-      this.x = x;
+    public FloatTimingTask(BaseTestLog log, int qvalue, float[] values) {
+      super("log(float)", log, qvalue);
+      this.values = values;
     }
 
     @Override
     public Object run(Object data) {
-      final float[] r = new float[x.length];
-      for (int i = 0; i < x.length; i++) {
-        r[i] = log.log(x[i]);
+      final float[] rng = new float[values.length];
+      for (int i = 0; i < values.length; i++) {
+        rng[i] = log.log(values[i]);
       }
-      return r;
+      return rng;
     }
   }
 
@@ -774,10 +767,10 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final float[] x = new float[1000000];
     for (int i = 0; i < x.length; i++) {
-      x[i] = nextUniformFloat(r);
+      x[i] = nextUniformFloat(rng);
     }
 
     final TimingService ts = new TimingService(5);
@@ -785,9 +778,9 @@ public class FastLogTest {
     ts.execute(new FloatTimingTask(new TestLog(new FastMathLog()), 0, x));
     for (final int q : new int[] {11}) {
       final int n = 23 - q;
-      final ICSIFastLog f = ICSIFastLog.create(n, DataType.FLOAT);
-      ts.execute(new FloatTimingTask(new TestLog(f), q, x));
-      ts.execute(new FloatTimingTask(new TestFastLog(f), q, x));
+      final ICSIFastLog fl = ICSIFastLog.create(n, DataType.FLOAT);
+      ts.execute(new FloatTimingTask(new TestLog(fl), q, x));
+      ts.execute(new FloatTimingTask(new TestFastLog(fl), q, x));
       final FFastLog ff = new FFastLog(n);
       ts.execute(new FloatTimingTask(new TestLog(ff), q, x));
       ts.execute(new FloatTimingTask(new TestFastLog(ff), q, x));
@@ -811,42 +804,42 @@ public class FastLogTest {
     logger.info(ts.getReport(size));
   }
 
-  private class DoubleTimingTask extends DummyTimingTask {
-    double[] x;
+  private static class DoubleTimingTask extends DummyTimingTask {
+    double[] values;
 
-    public DoubleTimingTask(BaseTestLog log, int q, double[] x) {
-      super("log(double)", log, q);
-      this.x = x;
+    public DoubleTimingTask(BaseTestLog log, int qvalue, double[] values) {
+      super("log(double)", log, qvalue);
+      this.values = values;
     }
 
     @Override
     public Object run(Object data) {
-      final double[] r = new double[x.length];
-      for (int i = 0; i < x.length; i++) {
-        r[i] = log.log(x[i]);
+      final double[] rng = new double[values.length];
+      for (int i = 0; i < values.length; i++) {
+        rng[i] = log.log(values[i]);
       }
-      return r;
+      return rng;
     }
   }
 
-  private class DoubleToFloatTimingTask extends DummyTimingTask {
-    double[] x;
+  private static class DoubleToFloatTimingTask extends DummyTimingTask {
+    double[] values;
     float[] xf;
 
-    public DoubleToFloatTimingTask(BaseTestLog log, int q, double[] x, float[] xf) {
-      super("log((float)double)", log, q);
-      this.x = x;
+    public DoubleToFloatTimingTask(BaseTestLog log, int qvalue, double[] values, float[] xf) {
+      super("log((float)double)", log, qvalue);
+      this.values = values;
       this.xf = xf;
     }
 
     @Override
     public Object run(Object data) {
-      final double[] r = new double[x.length];
-      for (int i = 0; i < x.length; i++) {
-        r[i] = log.log((float) x[i]);
+      final double[] rng = new double[values.length];
+      for (int i = 0; i < values.length; i++) {
+        rng[i] = log.log((float) values[i]);
       }
-      // r[i] = log.log(xf[i]);
-      return r;
+      // rng[i] = log.log(xf[i]);
+      return rng;
     }
   }
 
@@ -857,36 +850,36 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final double[] x = new double[1000000];
-    for (int i = 0; i < x.length; i++) {
-      x[i] = nextUniformDouble(r);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final double[] values = new double[1000000];
+    for (int i = 0; i < values.length; i++) {
+      values[i] = nextUniformDouble(rng);
     }
 
     final TimingService ts = new TimingService(5);
-    ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
-    ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
+    ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, values));
+    ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, values));
     //// Test min acceptable precision
     // TurboLog2 tf3 = new TurboLog2(8);
     // ts.execute(new DoubleTimingTask(new TestLog(tf3), 15, x));
     // ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
     for (final int q : new int[] {11}) {
       final int n = 23 - q;
-      final ICSIFastLog f = ICSIFastLog.create(n, DataType.DOUBLE);
-      ts.execute(new DoubleTimingTask(new TestLog(f), q, x));
-      ts.execute(new DoubleTimingTask(new TestFastLog(f), q, x));
+      final ICSIFastLog fl = ICSIFastLog.create(n, DataType.DOUBLE);
+      ts.execute(new DoubleTimingTask(new TestLog(fl), q, values));
+      ts.execute(new DoubleTimingTask(new TestFastLog(fl), q, values));
       final DFastLog df = new DFastLog(n);
-      // ts.execute(new DoubleTimingTask(new DFastLog_log2(f), q, x));
-      // ts.execute(new DoubleTimingTask(new DTestFastLog2(f), q, x));
-      ts.execute(new DoubleTimingTask(new TestLog(df), q, x));
-      ts.execute(new DoubleTimingTask(new TestFastLog(df), q, x));
+      // ts.execute(new DoubleTimingTask(new DFastLog_log2(fl), q, x));
+      // ts.execute(new DoubleTimingTask(new DTestFastLog2(fl), q, x));
+      ts.execute(new DoubleTimingTask(new TestLog(df), q, values));
+      ts.execute(new DoubleTimingTask(new TestFastLog(df), q, values));
       final TurboLog tf = new TurboLog(n);
-      ts.execute(new DoubleTimingTask(new TestLog(tf), q, x));
-      ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, x));
+      ts.execute(new DoubleTimingTask(new TestLog(tf), q, values));
+      ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, values));
       // Test same precision
       final TurboLog2 tf2 = new TurboLog2(n - 1);
-      ts.execute(new DoubleTimingTask(new TestLog(tf2), q + 1, x));
-      ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q + 1, x));
+      ts.execute(new DoubleTimingTask(new TestLog(tf2), q + 1, values));
+      ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q + 1, values));
 
       //// Min acceptable precision. This is usually the same speed
       //// showing the precomputed table is optimally used for moderate n.
@@ -906,23 +899,23 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final double[] x = new double[1000000];
     for (int i = 0; i < x.length; i++) {
-      x[i] = nextUniformDouble(r);
+      x[i] = nextUniformDouble(rng);
     }
 
-    final MathLog f = new MathLog();
+    final MathLog fl = new MathLog();
 
     final TimingService ts = new TimingService(5);
-    // ts.execute(new DoubleTimingTask(new TestLog(f), 0, x));
-    ts.execute(new DoubleTimingTask(new Test1PLog(f), 0, x));
-    ts.execute(new DoubleTimingTask(new TestLog1P(f), 0, x));
-    ts.execute(new DoubleTimingTask(new TestLog1PApache(f), 0, x));
-    // ts.execute(new DoubleTimingTask(new TestLog(f), 0, x));
-    ts.execute(new DoubleTimingTask(new Test1PLog(f), 0, x));
-    ts.execute(new DoubleTimingTask(new TestLog1P(f), 0, x));
-    ts.execute(new DoubleTimingTask(new TestLog1PApache(f), 0, x));
+    // ts.execute(new DoubleTimingTask(new TestLog(fl), 0, x));
+    ts.execute(new DoubleTimingTask(new Test1PLog(fl), 0, x));
+    ts.execute(new DoubleTimingTask(new TestLog1P(fl), 0, x));
+    ts.execute(new DoubleTimingTask(new TestLog1PApache(fl), 0, x));
+    // ts.execute(new DoubleTimingTask(new TestLog(fl), 0, x));
+    ts.execute(new DoubleTimingTask(new Test1PLog(fl), 0, x));
+    ts.execute(new DoubleTimingTask(new TestLog1P(fl), 0, x));
+    ts.execute(new DoubleTimingTask(new TestLog1PApache(fl), 0, x));
 
     final int size = ts.getSize();
     ts.repeat(size);
@@ -936,11 +929,11 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final double[] x = new double[1000000];
     final float[] xf = new float[x.length];
     for (int i = 0; i < x.length; i++) {
-      x[i] = nextUniformFloat(r);
+      x[i] = nextUniformFloat(rng);
       xf[i] = (float) x[i];
     }
 

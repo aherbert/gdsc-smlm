@@ -113,7 +113,6 @@ public class SMLMTools extends PlugInFrame {
     setVisible(true);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void windowClosing(WindowEvent event) {
     Prefs.saveLocation(OPT_LOCATION, getLocation());
@@ -141,7 +140,6 @@ public class SMLMTools extends PlugInFrame {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

@@ -132,7 +132,6 @@ public class FilterAnalysis implements PlugIn {
     isHeadless = java.awt.GraphicsEnvironment.isHeadless();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

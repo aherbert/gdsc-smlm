@@ -55,25 +55,21 @@ public class NonNormaliser implements Normaliser {
     return sum;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, int size) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, float[] out, int size) {
     System.arraycopy(data, 0, out, 0, size);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, int maxx, int maxy, int border) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(float[] data, float[] out, int maxx, int maxy, int border) {
     final int width = maxx - 2 * border;
@@ -86,7 +82,6 @@ public class NonNormaliser implements Normaliser {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(double[] data, float[] out, int size) {
     for (int i = 0; i < size; i++) {
@@ -94,7 +89,6 @@ public class NonNormaliser implements Normaliser {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void normalise(double[] data, float[] out, int maxx, int maxy, int border) {
     final int xlimit = maxx - border;

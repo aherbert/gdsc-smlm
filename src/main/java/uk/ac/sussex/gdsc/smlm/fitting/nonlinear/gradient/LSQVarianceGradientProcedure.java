@@ -125,7 +125,6 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure {
     return STATUS_OK;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void execute(final double Ei, double[] Eix) {
     for (int a = 0; a < n; a++) {

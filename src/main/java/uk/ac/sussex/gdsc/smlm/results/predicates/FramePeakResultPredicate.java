@@ -26,10 +26,12 @@ package uk.ac.sussex.gdsc.smlm.results.predicates;
 
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
+import java.util.function.Predicate;
+
 /**
  * Test a result using the frame.
  */
-public class FramePeakResultPredicate implements PeakResultPredicate {
+public class FramePeakResultPredicate implements Predicate<PeakResult> {
   /** The frame. */
   private final int frame;
 
@@ -42,7 +44,6 @@ public class FramePeakResultPredicate implements PeakResultPredicate {
     this.frame = frame;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean test(PeakResult peakResult) {
     return peakResult.getFrame() == frame;

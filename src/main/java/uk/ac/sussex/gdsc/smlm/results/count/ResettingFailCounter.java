@@ -68,13 +68,11 @@ public class ResettingFailCounter extends BaseFailCounter {
     return new ResettingFailCounter(Math.max(0, allowedFailures), resetFraction);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass() {
     failCount = (int) (failCount * resetFraction);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass(int n) {
     if (n < 0) {
@@ -88,7 +86,6 @@ public class ResettingFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail() {
     if (failCount == Integer.MAX_VALUE) {
@@ -97,7 +94,6 @@ public class ResettingFailCounter extends BaseFailCounter {
     failCount++;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail(int n) {
     if (n < 0) {
@@ -109,19 +105,16 @@ public class ResettingFailCounter extends BaseFailCounter {
     failCount += n;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isOK() {
     return failCount <= allowedFailures;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FailCounter newCounter() {
     return new ResettingFailCounter(allowedFailures, resetFraction);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reset() {
     failCount = 0;

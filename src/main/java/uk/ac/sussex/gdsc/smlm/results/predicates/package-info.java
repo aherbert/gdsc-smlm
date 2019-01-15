@@ -26,6 +26,6 @@
  * Provides interface predicates for testing localisation results and utility implementations.
  *
  * @since 1.0.0
-  */
+ */
 
 package uk.ac.sussex.gdsc.smlm.results.predicates;

@@ -334,7 +334,6 @@ public class ImagePSFModel extends PSFModel {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double create3D(float[] data, final int width, final int height, final double sum,
       double x0, double x1, double x2, boolean poissonNoise) {
@@ -345,7 +344,6 @@ public class ImagePSFModel extends PSFModel {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double create3D(double[] data, final int width, final int height, final double sum,
       double x0, double x1, double x2, boolean poissonNoise) {
@@ -709,7 +707,6 @@ public class ImagePSFModel extends PSFModel {
     return x;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ImagePSFModel copy() {
     return new ImagePSFModel(this);

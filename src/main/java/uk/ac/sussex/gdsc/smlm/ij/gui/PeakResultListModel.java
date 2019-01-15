@@ -73,13 +73,11 @@ public class PeakResultListModel extends AbstractListModel<PeakResult> {
     return delegate.toArray();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getSize() {
     return delegate.size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public PeakResult getElementAt(int index) {
     return delegate.get(index);

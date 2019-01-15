@@ -103,7 +103,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       this.tifPath = tifPath;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String toString() {
       String text = String.format("path=%s, name=%s", path, name);
@@ -760,7 +759,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   }
   //@formatter:on
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1162,7 +1160,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     return imp;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     if (event != null && event.getSource() instanceof Choice) {
@@ -1176,19 +1173,16 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void imageOpened(ImagePlus imp) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void imageClosed(ImagePlus imp) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void imageUpdated(ImagePlus imp) {
     if (imp != null && imp == this.imp) {

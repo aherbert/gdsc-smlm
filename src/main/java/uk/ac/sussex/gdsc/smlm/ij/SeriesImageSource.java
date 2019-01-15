@@ -660,7 +660,6 @@ public class SeriesImageSource extends ImageSource {
    * Add source images to the queue to be read.
    */
   private class TIFFWorker extends BaseWorker {
-    /** {@inheritDoc} */
     @Override
     public void run() {
       SeekableStream ss = null;
@@ -794,7 +793,6 @@ public class SeriesImageSource extends ImageSource {
    * Read source image files into memory.
    */
   private class BufferWorker extends BaseWorker {
-    /** {@inheritDoc} */
     @Override
     public void run() {
       FileSeekableStream fs = null;
@@ -853,7 +851,6 @@ public class SeriesImageSource extends ImageSource {
    * on the next thread is faster (i.e. avoiding dynamic IFD reading when reading the pixels).
    */
   private class DecodeWorker extends BaseWorker {
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -948,7 +945,6 @@ public class SeriesImageSource extends ImageSource {
    * Read source image files into memory.
    */
   private class ReadWorker extends BaseWorker {
-    /** {@inheritDoc} */
     @Override
     public void run() {
       try {
@@ -1513,7 +1509,6 @@ public class SeriesImageSource extends ImageSource {
     return (index == 0) ? imageSize[index] : imageSize[index] - imageSize[index - 1];
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean openSource() {
     // We now require a tiff series.
@@ -1558,7 +1553,6 @@ public class SeriesImageSource extends ImageSource {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void closeSource() {
     if (threads != null) {
@@ -1794,7 +1788,6 @@ public class SeriesImageSource extends ImageSource {
     height = maxy;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected boolean initialiseSequentialRead() {
     // This should only be called once by the image source each time the series is opened.
@@ -1841,7 +1834,6 @@ public class SeriesImageSource extends ImageSource {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected Object getRawFrame(int frame) {
     if (imageSize == null || !isValid(frame)) {
@@ -1962,13 +1954,11 @@ public class SeriesImageSource extends ImageSource {
     return tiffImage;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isValid(int frame) {
     return frame > 0 && frame <= frames;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     String string = super.toString();

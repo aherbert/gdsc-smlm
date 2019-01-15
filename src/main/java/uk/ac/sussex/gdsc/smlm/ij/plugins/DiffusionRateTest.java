@@ -186,7 +186,6 @@ public class DiffusionRateTest implements PlugIn {
 
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -636,6 +635,78 @@ public class DiffusionRateTest implements PlugIn {
   }
 
   /**
+   * Plot a cumulative histogram and standard histogram of the jump distances.
+   *
+   * @param title the title
+   * @param jumpDistances the jump distances
+   * @param dimensions the number of dimensions for the jumps
+   */
+  private void plotJumpDistances(String title, DoubleData jumpDistances, int dimensions) {
+    // Cumulative histogram
+    // --------------------
+    final double[] values = jumpDistances.values();
+    String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
+    final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
+    Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
+        jdHistogram[1]);
+    ImageJUtils.display(title2, jdPlot, windowOrganiser);
+
+    // Plot the expected function
+    // This is the Chi-squared distribution: The sum of the squares of k independent
+    // standard normal random variables with k = dimensions. It is a special case of
+    // the gamma distribution. If the normals have non-unit variance the distribution
+    // is scaled.
+    // Chi ~ Gamma(k/2, 2) // using the scale parameterisation of the gamma
+    // s^2 * Chi ~ Gamma(k/2, 2*s^2)
+    // So if s^2 = 2D:
+    // 2D * Chi ~ Gamma(k/2, 4D)
+    final double estimatedD = simpleD * simpleSteps;
+    final double max = MathUtils.max(values);
+    final double[] x = SimpleArrayUtils.newArray(1000, 0, max / 1000);
+    final double k = dimensions / 2.0;
+    final double mean = 4 * estimatedD;
+
+    final GammaDistribution dist = new GammaDistribution(null, k, mean);
+
+    final double[] y = new double[x.length];
+    for (int i = 0; i < x.length; i++) {
+      y[i] = dist.cumulativeProbability(x[i]);
+    }
+
+    jdPlot.setColor(Color.red);
+    jdPlot.addPoints(x, y, Plot.LINE);
+    ImageJUtils.display(title2, jdPlot);
+
+    // Histogram
+    // ---------
+    title2 = title + " Jump " + dimensions + "D";
+    final HistogramPlot histogramPlot =
+        new HistogramPlotBuilder(title2, jumpDistances, "Distance (um^2)").build();
+    // Assume the plot works
+    histogramPlot.show(windowOrganiser);
+
+    // Recompute the expected function
+    for (int i = 0; i < x.length; i++) {
+      y[i] = dist.density(x[i]);
+    }
+
+    // Scale to have the same area
+    final double[] xvalues = histogramPlot.getPlotXValues();
+    if (xvalues.length > 1) {
+      final double area1 = jumpDistances.size() * (xvalues[1] - xvalues[0]);
+      final double area2 = dist.cumulativeProbability(x[x.length - 1]);
+      final double scale = area1 / area2;
+      for (int i = 0; i < y.length; i++) {
+        y[i] *= scale;
+      }
+    }
+    jdPlot = histogramPlot.getPlot();
+    jdPlot.setColor(Color.red);
+    jdPlot.addPoints(x, y, Plot.LINE);
+    ImageJUtils.display(histogramPlot.getPlotTitle(), jdPlot);
+  }
+
+  /**
    * Add a random Gaussian XY shift using the specified precision.
    *
    * @param xyz the xyz
@@ -905,8 +976,8 @@ public class DiffusionRateTest implements PlugIn {
     return newX;
   }
 
-  private static int round(float f) {
-    return Math.round(f);
+  private static int round(float value) {
+    return Math.round(value);
   }
 
   private static float[] getLimits(float[] x) {
@@ -1246,78 +1317,6 @@ public class DiffusionRateTest implements PlugIn {
     }
 
     return true;
-  }
-
-  /**
-   * Plot a cumulative histogram and standard histogram of the jump distances.
-   *
-   * @param title the title
-   * @param jumpDistances the jump distances
-   * @param dimensions the number of dimensions for the jumps
-   */
-  private void plotJumpDistances(String title, DoubleData jumpDistances, int dimensions) {
-    // Cumulative histogram
-    // --------------------
-    final double[] values = jumpDistances.values();
-    String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
-    final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
-    Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
-        jdHistogram[1]);
-    ImageJUtils.display(title2, jdPlot, windowOrganiser);
-
-    // Plot the expected function
-    // This is the Chi-squared distribution: The sum of the squares of k independent
-    // standard normal random variables with k = dimensions. It is a special case of
-    // the gamma distribution. If the normals have non-unit variance the distribution
-    // is scaled.
-    // Chi ~ Gamma(k/2, 2) // using the scale parameterisation of the gamma
-    // s^2 * Chi ~ Gamma(k/2, 2*s^2)
-    // So if s^2 = 2D:
-    // 2D * Chi ~ Gamma(k/2, 4D)
-    final double estimatedD = simpleD * simpleSteps;
-    final double max = MathUtils.max(values);
-    final double[] x = SimpleArrayUtils.newArray(1000, 0, max / 1000);
-    final double k = dimensions / 2.0;
-    final double mean = 4 * estimatedD;
-
-    final GammaDistribution dist = new GammaDistribution(null, k, mean);
-
-    final double[] y = new double[x.length];
-    for (int i = 0; i < x.length; i++) {
-      y[i] = dist.cumulativeProbability(x[i]);
-    }
-
-    jdPlot.setColor(Color.red);
-    jdPlot.addPoints(x, y, Plot.LINE);
-    ImageJUtils.display(title2, jdPlot);
-
-    // Histogram
-    // ---------
-    title2 = title + " Jump " + dimensions + "D";
-    final HistogramPlot histogramPlot =
-        new HistogramPlotBuilder(title2, jumpDistances, "Distance (um^2)").build();
-    // Assume the plot works
-    histogramPlot.show(windowOrganiser);
-
-    // Recompute the expected function
-    for (int i = 0; i < x.length; i++) {
-      y[i] = dist.density(x[i]);
-    }
-
-    // Scale to have the same area
-    final double[] xvalues = histogramPlot.getPlotXValues();
-    if (xvalues.length > 1) {
-      final double area1 = jumpDistances.size() * (xvalues[1] - xvalues[0]);
-      final double area2 = dist.cumulativeProbability(x[x.length - 1]);
-      final double scale = area1 / area2;
-      for (int i = 0; i < y.length; i++) {
-        y[i] *= scale;
-      }
-    }
-    jdPlot = histogramPlot.getPlot();
-    jdPlot.setColor(Color.red);
-    jdPlot.addPoints(x, y, Plot.LINE);
-    ImageJUtils.display(histogramPlot.getPlotTitle(), jdPlot);
   }
 
   private static void save(StoredDataStatistics storedDataStatistics, int dimensions,

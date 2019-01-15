@@ -208,7 +208,6 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     return super.optimize(optData);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected PointValuePair doOptimize() {
     final ConvergenceChecker<PointValuePair> checker = getConvergenceChecker();
@@ -481,7 +480,6 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
   /** Default identity preconditioner. */
   public static class IdentityPreconditioner implements Preconditioner {
-    /** {@inheritDoc} */
     @Override
     public double[] precondition(double[] variables, double[] r) {
       return r.clone();
@@ -584,7 +582,6 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
       searchDirection = direction.clone();
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double x) {
       // current point in the search direction

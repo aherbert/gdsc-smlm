@@ -102,7 +102,6 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     results.forEach((StoredPrecisionProcedure) this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void executeStoredPrecision(double precision) {
     this.precisions[counter++] = precision;
@@ -120,7 +119,6 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     results.forEach((LSEPrecisionProcedure) this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void executeLSEPrecision(double precision) {
     this.precisions[counter++] = precision;
@@ -138,7 +136,6 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     results.forEach((LSEPrecisionBProcedure) this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void executeLSEPrecisionB(double precision) {
     this.precisions[counter++] = precision;
@@ -156,7 +153,6 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     results.forEach((MLEPrecisionProcedure) this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void executeMLEPrecision(double precision) {
     this.precisions[counter++] = precision;
@@ -174,7 +170,6 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     results.forEach((MLEPrecisionBProcedure) this);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void executeMLEPrecisionB(double precision) {
     this.precisions[counter++] = precision;

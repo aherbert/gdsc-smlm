@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -35,13 +37,16 @@ import org.apache.commons.math3.util.FastMath;
  * Where:<br> c = the observed value at the pixel <br> p = the function value (expected number of
  * photons) <br> m = the gain of the pixel <br> I1 = Modified Bessel function of the first kind <br>
  *
- *
  * <p>The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera
  * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
  * amplified by a gain and then read with Gaussian noise.
  */
 public class PoissonGammaFunction
     implements LikelihoodFunction, LogLikelihoodFunction, GradientLikelihoodFunction {
+
+  // Allow parameters names [c, p, m] to match Ulbrich & Isacoff (2007).
+  // @CHECKSTYLE.OFF: ParameterNames
+
   /**
    * The on-chip gain multiplication factor.
    */
@@ -54,9 +59,7 @@ public class PoissonGammaFunction
    * @throws IllegalArgumentException if the gain is zero or below
    */
   public PoissonGammaFunction(double m) {
-    if (!(m > 0)) {
-      throw new IllegalArgumentException("Gain must be strictly positive");
-    }
+    ValidationUtils.checkArgument(m > 0, "Gain must be strictly positive: %f", m);
     this.m = m;
   }
 
@@ -95,87 +98,16 @@ public class PoissonGammaFunction
       final double x = 2 * Math.sqrt(p * c_m);
       final double _c_m_p = -c_m - p;
       if (x > 709 || _c_m_p < -709) {
-        // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi *
-        // x));
+        // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x))
         return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
       }
-      // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+      // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.i1(x)
       return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
     } else if (c == 0.0) {
       return FastMath.exp(-p) * (1 + p / m);
     } else {
       return 0;
     }
-  }
-
-  /**
-   * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
-   * for observed Poisson counts. This avoids the computation of the Dirac delta function at c=0.
-   *
-   * <p>This method is suitable for use in integration routines.
-   *
-   * <p>If c==0 then the true probability is obtained by adding Math.exp(-p).
-   *
-   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-   *
-   * @param c The count to evaluate
-   * @param p The average number of photons per pixel input to the EM-camera (must be positive)
-   * @param m The multiplication factor (gain)
-   * @return The probability function for observed Poisson counts
-   * @see #poissonGamma(double, double, double)
-   * @see #dirac(double)
-   */
-  public static double poissonGammaN(double c, double p, double m) {
-    // As above with no Dirac delta function at c=0
-
-    if (c > 0.0) {
-      final double c_m = c / m;
-      final double x = 2 * Math.sqrt(p * c_m);
-      final double _c_m_p = -c_m - p;
-      if (x > 709 || _c_m_p < -709) {
-        // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi *
-        // x));
-        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
-      }
-      // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
-      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
-    } else if (c == 0.0) {
-      // No Dirac delta function
-      return FastMath.exp(-p) * p / m;
-    } else {
-      return 0;
-    }
-  }
-
-  /**
-   * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
-   * for no observed Poisson counts. This is the Dirac delta function at c=0.
-   *
-   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-   *
-   * @param p The average number of photons per pixel input to the EM-camera (must be positive)
-   * @return The probability function for observed Poisson counts
-   * @see #poissonGamma(double, double, double)
-   */
-  public static double dirac(double p) {
-    return FastMath.exp(-p);
-  }
-
-  /**
-   * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
-   * for no observed Poisson counts. This is the Dirac delta function at c=0.
-   *
-   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-   *
-   * @param p The average number of photons per pixel input to the EM-camera (must be positive)
-   * @param gradient the gradient of the function G(c) with respect to parameter p
-   * @return The probability function for observed Poisson counts
-   * @see #poissonGamma(double, double, double)
-   */
-  public static double dirac(double p, double[] gradient) {
-    final double exp_p = FastMath.exp(-p);
-    gradient[0] = -exp_p;
-    return exp_p;
   }
 
   /**
@@ -226,7 +158,7 @@ public class PoissonGammaFunction
       // dG(c)/dp = e^(-c/m -p) . I0(2*sqrt(cp/m))/m - G(c)
 
       final double exp_c_m_p = FastMath.exp(_c_m_p);
-      // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
+      // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.i1(x);
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
@@ -239,6 +171,44 @@ public class PoissonGammaFunction
       return G;
     } else {
       gradient[0] = 0;
+      return 0;
+    }
+  }
+
+  /**
+   * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
+   * for observed Poisson counts. This avoids the computation of the Dirac delta function at c=0.
+   *
+   * <p>This method is suitable for use in integration routines.
+   *
+   * <p>If c==0 then the true probability is obtained by adding Math.exp(-p).
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * @param c The count to evaluate
+   * @param p The average number of photons per pixel input to the EM-camera (must be positive)
+   * @param m The multiplication factor (gain)
+   * @return The probability function for observed Poisson counts
+   * @see #poissonGamma(double, double, double)
+   * @see #dirac(double)
+   */
+  public static double poissonGammaN(double c, double p, double m) {
+    // As above with no Dirac delta function at c=0
+
+    if (c > 0.0) {
+      final double c_m = c / m;
+      final double x = 2 * Math.sqrt(p * c_m);
+      final double _c_m_p = -c_m - p;
+      if (x > 709 || _c_m_p < -709) {
+        // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x))
+        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
+      }
+      // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.i1(x)
+      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
+    } else if (c == 0.0) {
+      // No Dirac delta function
+      return FastMath.exp(-p) * p / m;
+    } else {
       return 0;
     }
   }
@@ -292,6 +262,37 @@ public class PoissonGammaFunction
   }
 
   /**
+   * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
+   * for no observed Poisson counts. This is the Dirac delta function at c=0.
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * @param p The average number of photons per pixel input to the EM-camera (must be positive)
+   * @return The probability function for observed Poisson counts
+   * @see #poissonGamma(double, double, double)
+   */
+  public static double dirac(double p) {
+    return FastMath.exp(-p);
+  }
+
+  /**
+   * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain
+   * for no observed Poisson counts. This is the Dirac delta function at c=0.
+   *
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+   *
+   * @param p The average number of photons per pixel input to the EM-camera (must be positive)
+   * @param gradient the gradient of the function G(c) with respect to parameter p
+   * @return The probability function for observed Poisson counts
+   * @see #poissonGamma(double, double, double)
+   */
+  public static double dirac(double p, double[] gradient) {
+    final double exp_p = FastMath.exp(-p);
+    gradient[0] = -exp_p;
+    return exp_p;
+  }
+
+  /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
    *
    * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
@@ -319,7 +320,7 @@ public class PoissonGammaFunction
         return G;
       }
       final double exp_c_m_p = FastMath.exp(_c_m_p);
-      // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
+      // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.i1(x)
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m;
       return G;
@@ -384,7 +385,7 @@ public class PoissonGammaFunction
    * Calculate the log probability density function for a Poisson-Gamma distribution model of
    * EM-gain.
    *
-   * <p>See . Nature Methods 4, 319-321, SI equation 3.
+   * <p>See Ulbrich &amp; Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
    *
    * @param c The count to evaluate
    * @param p The average number of photons per pixel input to the EM-camera (must be positive)
@@ -409,19 +410,16 @@ public class PoissonGammaFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double likelihood(final double count, final double photoelectrons) {
     return poissonGamma(count, photoelectrons, m);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double likelihood(double count, double photoelectrons, double[] gradient) {
     return poissonGamma(count, photoelectrons, m, gradient);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double logLikelihood(double count, double photoelectrons) {
     return logPoissonGamma(count, photoelectrons, m);

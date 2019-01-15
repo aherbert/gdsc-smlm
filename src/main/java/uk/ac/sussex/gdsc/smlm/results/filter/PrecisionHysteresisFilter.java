@@ -104,7 +104,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
     return ParameterType.PRECISION.toString() + " +" + range;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using a precision threshold. Any results below the lower precision "
@@ -112,13 +111,11 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
         + super.getDescription();
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 2 + super.getNumberOfParameters();
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     if (index < super.getNumberOfParameters()) {
@@ -133,7 +130,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
@@ -143,7 +139,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
     return PrecisionFilter.DEFAULT_INCREMENT;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -163,7 +158,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
   static double[] defaultRange =
       new double[] {0, 0, 0, 0, PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE};
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -183,14 +177,12 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
     return create(parameters);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new PrecisionHysteresisFilter(parameters[0], (int) parameters[1], parameters[2],
         (int) parameters[3], parameters[4], parameters[5]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     super.weakestParameters(parameters);
@@ -201,14 +193,12 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
     parameters[5] = 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
         PrecisionFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return new double[] {getDefaultSearchRange(), getDefaultTimeRange(),

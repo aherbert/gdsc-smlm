@@ -140,7 +140,6 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
     return (difference <= size * relative);
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean converged(SearchResult<T> previous, SearchResult<T> current) {
     iterations++;

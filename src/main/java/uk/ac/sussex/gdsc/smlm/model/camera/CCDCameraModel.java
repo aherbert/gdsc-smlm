@@ -118,7 +118,6 @@ public class CCDCameraModel extends FixedPixelCameraModel {
     return super.getMeanNormalisedVariance(bounds);
   }
 
-  /** {@inheritDoc} */
   @Override
   public CCDCameraModel copy() {
     return new CCDCameraModel(this);

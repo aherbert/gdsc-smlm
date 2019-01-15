@@ -104,14 +104,12 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     super(FunctionSolverType.WLSE, function, tc, bounds, maxRelativeError, maxAbsoluteError);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected LVMGradientProcedure createGradientProcedure(double[] y) {
     return WLSQLVMGradientProcedureFactory.create(y, getWeights(y.length),
         (Gradient1Function) function);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected FisherInformationMatrix computeLastFisherInformationMatrix(double[] fx) {
     // Get the values if necessary
@@ -144,13 +142,11 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver
     return new FisherInformationMatrix(p.getLinear(), p.n);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getChiSquared() {
     return value;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getQ() {
     // Value will be the Chi-squared

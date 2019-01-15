@@ -80,13 +80,26 @@ public class IdPeakResult extends PeakResult {
     this.id = id;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected IdPeakResult(IdPeakResult source) {
+    super(source);
+    this.id = source.id;
+  }
+
+  @Override
+  public IdPeakResult copy() {
+    return new IdPeakResult(this);
+  }
+
   @Override
   public boolean hasId() {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getId() {
     return id;

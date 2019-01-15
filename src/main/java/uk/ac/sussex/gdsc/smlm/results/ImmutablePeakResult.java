@@ -24,14 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.data.DataException;
-
 /**
  * Specifies a peak fitting result that cannot be modified.
  *
  * <p>Any method that modifies the result will throw a data exception.
  */
 public class ImmutablePeakResult extends AttributePeakResult {
+  private static final String IMMUTABLE_MESSAGE = "This result is immutable";
+
   private boolean built;
 
   /**
@@ -46,64 +46,64 @@ public class ImmutablePeakResult extends AttributePeakResult {
   }
 
   @Override
-  public void setBackground(float b) {
-    throw new DataException("This result is immutable");
+  public void setBackground(float background) {
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
-  public void setIntensity(float s) {
-    throw new DataException("This result is immutable");
+  public void setIntensity(float intensity) {
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setXPosition(float x) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setYPosition(float y) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setZPosition(float z) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setFrame(int frame) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setOrigX(int origX) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setOrigY(int origY) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setOrigValue(float origValue) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setError(double error) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setNoise(float noise) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void setId(int id) {
     if (built) {
-      throw new DataException("This result is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setId(id);
   }
@@ -111,7 +111,7 @@ public class ImmutablePeakResult extends AttributePeakResult {
   @Override
   public void setEndFrame(int endFrame) {
     if (built) {
-      throw new DataException("This result is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setEndFrame(endFrame);
   }
@@ -119,34 +119,34 @@ public class ImmutablePeakResult extends AttributePeakResult {
   @Override
   public void setPrecision(double precision) {
     if (built) {
-      throw new DataException("This result is immutable");
+      throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
     super.setPrecision(precision);
   }
 
   @Override
-  public void setParameter(int i, float value) {
-    throw new DataException("This result is immutable");
+  public void setParameter(int index, float value) {
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
-  public void setParameterDeviation(int i, float value) {
-    throw new DataException("This result is immutable");
+  public void setParameterDeviation(int index, float value) {
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void clearHasEndFrame() {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void clearHasId() {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   public void clearHasPrecision() {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   /**
@@ -171,11 +171,11 @@ public class ImmutablePeakResult extends AttributePeakResult {
 
   @Override
   void resizeParameters(int length) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
   void resizeParameterDeviations(int length) {
-    throw new DataException("This result is immutable");
+    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 }

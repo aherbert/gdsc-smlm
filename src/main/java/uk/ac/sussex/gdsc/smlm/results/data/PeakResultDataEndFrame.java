@@ -30,13 +30,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Gets the end frame from a result.
  */
 public class PeakResultDataEndFrame extends PeakResultDataInteger {
-  /** {@inheritDoc} */
   @Override
   public Integer getValue(PeakResult result) {
     return result.getEndFrame();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getValueName() {
     return "End Frame";

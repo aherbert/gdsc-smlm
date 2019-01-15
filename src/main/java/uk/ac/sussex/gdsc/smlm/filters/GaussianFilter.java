@@ -51,7 +51,6 @@ public class GaussianFilter extends BaseWeightedFilter {
   private double sx;
   private double sy;
 
-  /** {@inheritDoc} */
   @Override
   protected void newWeights() {
     normaliser = null;

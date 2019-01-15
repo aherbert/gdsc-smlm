@@ -156,7 +156,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   // Used for the multiMode option
   private static ArrayList<String> selected;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1406,7 +1405,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       return y;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       final double[] values = new double[x.length];
@@ -1487,7 +1485,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       return y;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       // y = ax + 4c^2
@@ -1568,7 +1565,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       return y;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] variables) {
       // When x>=1:

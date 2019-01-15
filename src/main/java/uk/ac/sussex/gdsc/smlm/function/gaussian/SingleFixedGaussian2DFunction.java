@@ -73,13 +73,11 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction {
     super(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new SingleFixedGaussian2DFunction(maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
     background = a[BACKGROUND];
@@ -117,22 +115,6 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction {
     return background + gaussian(x0, x1, dyda);
   }
 
-  private double gaussian(final int x0, final int x1, final double[] dy_da) {
-    final double dx = x0 - x0pos;
-    final double dy = x1 - x1pos;
-
-    // Calculate gradients
-
-    final double exp = FastMath.exp(aa * (dx * dx + dy * dy));
-    dy_da[1] = n * exp;
-    final double y = height * exp;
-    final double yaa2 = y * aa2;
-    dy_da[2] = yaa2 * dx;
-    dy_da[3] = yaa2 * dy;
-
-    return y;
-  }
-
   /**
    * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
    *
@@ -148,6 +130,22 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction {
     final double dy = x1 - x1pos;
 
     return background + height * FastMath.exp(aa * (dx * dx + dy * dy));
+  }
+
+  private double gaussian(final int x0, final int x1, final double[] dy_da) {
+    final double dx = x0 - x0pos;
+    final double dy = x1 - x1pos;
+
+    // Calculate gradients
+
+    final double exp = FastMath.exp(aa * (dx * dx + dy * dy));
+    dy_da[1] = n * exp;
+    final double y = height * exp;
+    final double yaa2 = y * aa2;
+    dy_da[2] = yaa2 * dx;
+    dy_da[3] = yaa2 * dy;
+
+    return y;
   }
 
   @Override
@@ -190,7 +188,6 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction {
     return 3;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int[] gradientIndices() {
     return gradientIndices;

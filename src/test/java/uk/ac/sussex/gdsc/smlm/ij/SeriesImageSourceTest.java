@@ -49,17 +49,17 @@ import java.io.IOException;
 
 @SuppressWarnings({"javadoc"})
 public class SeriesImageSourceTest {
-  int w = 10;
-  int h = 5;
-  int d = 7;
+  int width = 10;
+  int height = 5;
+  int depth = 7;
 
   @Test
-  public void canReadBigTIFFSequentially() throws IOException {
+  public void canReadBigTIFFSequentiallyLE() throws IOException {
     canReadBigTIFFSequentially(false, true);
   }
 
   @Test
-  public void canReadBigTIFFSequentiallyInMemory() throws IOException {
+  public void canReadBigTIFFSequentiallyInMemoryLE() throws IOException {
     canReadBigTIFFSequentially(true, true);
   }
 
@@ -84,11 +84,11 @@ public class SeriesImageSourceTest {
     }
     source.setReadHint(ReadHint.SEQUENTIAL);
     source.open();
-    Assertions.assertEquals(w, source.getWidth());
-    Assertions.assertEquals(h, source.getHeight());
-    Assertions.assertEquals(d * n, source.getFrames());
+    Assertions.assertEquals(width, source.getWidth());
+    Assertions.assertEquals(height, source.getHeight());
+    Assertions.assertEquals(depth * n, source.getFrames());
     for (int i = 0; i < stacks.length; i++) {
-      for (int j = 0; j < d; j++) {
+      for (int j = 0; j < depth; j++) {
         final float[] e = (float[]) stacks[i].getPixels(j + 1);
         final float[] o = source.next();
         Assertions.assertArrayEquals(e, o);
@@ -99,12 +99,12 @@ public class SeriesImageSourceTest {
   }
 
   @SeededTest
-  public void canReadBigTIFFNonSequentially(RandomSeed seed) throws IOException {
+  public void canReadBigTIFFNonSequentiallyLE(RandomSeed seed) throws IOException {
     canReadBigTIFFNonSequentially(seed, false, true);
   }
 
   @SeededTest
-  public void canReadBigTIFFNonSequentiallyInMemory(RandomSeed seed) throws IOException {
+  public void canReadBigTIFFNonSequentiallyInMemoryLE(RandomSeed seed) throws IOException {
     canReadBigTIFFNonSequentially(seed, true, true);
   }
 
@@ -129,12 +129,12 @@ public class SeriesImageSourceTest {
     }
     source.setReadHint(ReadHint.NONSEQUENTIAL);
     source.open();
-    Assertions.assertEquals(w, source.getWidth());
-    Assertions.assertEquals(h, source.getHeight());
-    Assertions.assertEquals(d * n, source.getFrames());
-    final float[][] pixels = new float[n * d][];
+    Assertions.assertEquals(width, source.getWidth());
+    Assertions.assertEquals(height, source.getHeight());
+    Assertions.assertEquals(depth * n, source.getFrames());
+    final float[][] pixels = new float[n * depth][];
     for (int i = 0, k = 0; i < stacks.length; i++) {
-      for (int j = 0; j < d; j++) {
+      for (int j = 0; j < depth; j++) {
         pixels[k++] = (float[]) stacks[i].getPixels(j + 1);
       }
     }
@@ -165,10 +165,10 @@ public class SeriesImageSourceTest {
     final int n = filenames.length;
     final ImageStack[] stacks = new ImageStack[n];
     int index = 0;
-    final int length = w * h;
+    final int length = width * height;
     for (int i = 0; i < n; i++) {
-      final ImageStack stack = new ImageStack(w, h);
-      for (int j = 0; j < d; j++) {
+      final ImageStack stack = new ImageStack(width, height);
+      for (int j = 0; j < depth; j++) {
         stack.addSlice(null, SimpleArrayUtils.newArray(length, index, 1f));
         index += length;
       }

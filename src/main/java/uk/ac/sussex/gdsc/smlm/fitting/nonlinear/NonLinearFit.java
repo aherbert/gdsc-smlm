@@ -508,7 +508,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     return initialResidualSumOfSquares;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setGradientFunction(GradientFunction function) {
     super.setGradientFunction(function);
@@ -556,7 +555,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean computeValue(double[] y, double[] fx, double[] a) {
     final int n = y.length;
@@ -615,7 +613,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     return new FisherInformationMatrix(fim);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getTotalSumOfSquares() {
     if (getType() == FunctionSolverType.LSE) {
@@ -624,7 +621,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     throw new IllegalStateException();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getChiSquared() {
     if (getType() == FunctionSolverType.WLSE) {
@@ -634,7 +630,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     throw new IllegalStateException();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihood() {
     if (getType() == FunctionSolverType.MLE && lastY != null) {
@@ -648,7 +643,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     throw new IllegalStateException();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getLogLikelihoodRatio() {
     if (getType() == FunctionSolverType.MLE) {
@@ -658,7 +652,6 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     throw new IllegalStateException();
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getQ() {
     if (getType() == FunctionSolverType.MLE) {

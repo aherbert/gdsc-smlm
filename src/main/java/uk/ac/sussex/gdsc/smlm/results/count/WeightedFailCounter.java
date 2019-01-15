@@ -74,7 +74,6 @@ public class WeightedFailCounter extends BaseFailCounter {
         Math.max(0, passDecrement));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass() {
     failCount -= passDecrement;
@@ -83,7 +82,6 @@ public class WeightedFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass(int n) {
     if (n < 0) {
@@ -95,7 +93,6 @@ public class WeightedFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail() {
     failCount += failIncrement;
@@ -104,7 +101,6 @@ public class WeightedFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail(int n) {
     if (n < 0) {
@@ -116,19 +112,16 @@ public class WeightedFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isOK() {
     return failCount <= allowedFailures;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FailCounter newCounter() {
     return new WeightedFailCounter(allowedFailures, failIncrement, passDecrement);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reset() {
     failCount = 0L;

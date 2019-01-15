@@ -62,7 +62,6 @@ public class RadialFalloffIllumination implements SpatialIllumination {
     this.pulseInterval = pulseInterval;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getPhotons(double[] xyz) {
     return photons * getIntensity(xyz);
@@ -79,7 +78,6 @@ public class RadialFalloffIllumination implements SpatialIllumination {
     return 1.0 / (1.0 + (d2 / radius2));
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] getPulsedPhotons(double[] xyz, int t) {
     final double intensity = getIntensity(xyz);

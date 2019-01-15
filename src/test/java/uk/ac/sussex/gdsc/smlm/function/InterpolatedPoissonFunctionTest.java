@@ -157,18 +157,6 @@ public class InterpolatedPoissonFunctionTest {
     }
   }
 
-  @Test
-  public void cumulativeProbabilityIsOneWithReal() {
-    for (int j = 0; j < gain.length; j++) {
-      for (int i = 0; i < photons.length; i++) {
-        if (photons[i] / gain[j] >= 4) {
-          cumulativeProbabilityIsOneWithRealAbove4(gain[j], photons[i], minRange[j][i],
-              maxRange[j][i] + 1);
-        }
-      }
-    }
-  }
-
   private static int[] cumulativeProbabilityIsOneWithInteger(final double gain, final double mu) {
     final double o = mu;
 
@@ -270,6 +258,18 @@ public class InterpolatedPoissonFunctionTest {
     final int min = Math.max(0, (int) Math.floor(gain * (mu - 3 * range)));
     final int max = (int) Math.ceil(gain * (mu + 3 * range));
     return new int[] {min, max};
+  }
+
+  @Test
+  public void cumulativeProbabilityIsOneWithReal() {
+    for (int j = 0; j < gain.length; j++) {
+      for (int i = 0; i < photons.length; i++) {
+        if (photons[i] / gain[j] >= 4) {
+          cumulativeProbabilityIsOneWithRealAbove4(gain[j], photons[i], minRange[j][i],
+              maxRange[j][i] + 1);
+        }
+      }
+    }
   }
 
   private static void cumulativeProbabilityIsOneWithRealAbove4(final double gain, final double mu,

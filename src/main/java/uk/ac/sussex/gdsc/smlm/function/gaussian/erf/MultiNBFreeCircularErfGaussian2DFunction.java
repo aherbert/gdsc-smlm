@@ -57,7 +57,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction
     return new MultiNBFreeCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda) {
     // Unpack the predictor into the dimensions
@@ -78,7 +77,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction
     return I;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double eval(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
@@ -159,7 +157,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -179,7 +176,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(Gradient2Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
@@ -204,7 +200,6 @@ public class MultiNBFreeCircularErfGaussian2DFunction
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void forEach(ExtendedGradient2Procedure procedure) {
     final int ng = getNumberOfGradients();

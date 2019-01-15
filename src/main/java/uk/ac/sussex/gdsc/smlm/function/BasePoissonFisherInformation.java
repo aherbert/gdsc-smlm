@@ -38,7 +38,6 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
    */
   public static final double MIN_MEAN = Double.longBitsToDouble(0x4000000000001L);
 
-  /** {@inheritDoc} */
   @Override
   public boolean isValid(double t) {
     return t >= MIN_MEAN;
@@ -58,7 +57,6 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
    */
   public abstract double getAlpha(double t);
 
-  /** {@inheritDoc} */
   @Override
   public BasePoissonFisherInformation clone() {
     try {

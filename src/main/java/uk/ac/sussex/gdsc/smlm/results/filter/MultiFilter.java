@@ -457,20 +457,17 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     return ParameterType.SNR.toString();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDescription() {
     return "Filter results using multiple thresholds: Signal, SNR, width, shift, "
         + "Euclidian shift, precision and Z-depth";
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getNumberOfParameters() {
     return 9;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected double getParameterValueInternal(int index) {
     switch (index) {
@@ -500,7 +497,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     return new double[] {signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
@@ -526,7 +522,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
@@ -567,7 +562,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       ShiftFilter.DEFAULT_RANGE, EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE,
       ZCoordinateFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE};
 
-  /** {@inheritDoc} */
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -578,14 +572,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
         params[6], (float) params[7], (float) params[8]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Filter create(double... parameters) {
     return new MultiFilter(parameters[0], (float) parameters[1], parameters[2], parameters[3],
         parameters[4], parameters[5], parameters[6], (float) parameters[7], (float) parameters[8]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void weakestParameters(double[] parameters) {
     setMin(parameters, 0, signal);
@@ -599,7 +591,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     setMax(parameters, 8, maxZ);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lowerBoundOrientation(int index) {
     return (index < 3 || index == 7) ? -1 : 1;
@@ -633,7 +624,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     //@formatter:on
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] upperLimit() {
     return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
@@ -642,7 +632,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
         ZCoordinateFilter.UPPER_LIMIT};
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] mutationStepRange() {
     return defaultRange;
@@ -698,7 +687,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     return maxZ;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void initialiseState() {
     // This is run after a clone() occurs.

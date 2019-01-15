@@ -126,7 +126,6 @@ public class CalibrationWriter extends CalibrationReader {
     return calibrationBuilder;
   }
 
-  /** {@inheritDoc} */
   @Override
   public CalibrationOrBuilder getCalibrationOrBuilder() {
     // If changes have been made then return the builder

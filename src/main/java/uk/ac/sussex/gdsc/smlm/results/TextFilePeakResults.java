@@ -151,7 +151,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void begin() {
     calculator = null;
@@ -228,7 +227,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     return names.toArray(new String[names.size()]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsStdDev) {
@@ -494,7 +492,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void sort() throws IOException {
     final TurboList<Result> results = new TurboList<>(size);

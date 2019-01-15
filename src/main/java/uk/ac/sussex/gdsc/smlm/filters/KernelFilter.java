@@ -47,7 +47,6 @@ public class KernelFilter extends BaseWeightedFilter {
   private Normaliser normaliser;
   private boolean convolution;
 
-  /** {@inheritDoc} */
   @Override
   protected void newWeights() {
     normaliser = null;

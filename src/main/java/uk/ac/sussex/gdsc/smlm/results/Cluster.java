@@ -345,7 +345,6 @@ public class Cluster implements Comparable<Cluster> {
     this.id = id;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int compareTo(Cluster that) {
     // Sort by ID ascending

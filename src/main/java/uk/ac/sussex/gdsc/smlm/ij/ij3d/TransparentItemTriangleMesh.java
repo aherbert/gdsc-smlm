@@ -144,7 +144,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     return result;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorderFast(int[] indices) {
     if (dirty) {
@@ -208,7 +207,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     // this.setGeometry(ga);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f color) {
     if (color == null) {
@@ -235,7 +233,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f[] color) {
     this.color = null;
@@ -264,7 +261,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor4(Color4f[] color) {
     this.color = null;
@@ -289,7 +285,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float[] alpha) {
     final int size = size();
@@ -315,7 +310,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float alpha) {
     int size = size();
@@ -338,7 +332,6 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getItemAlpha(float[] alpha) {
     final int size = size();

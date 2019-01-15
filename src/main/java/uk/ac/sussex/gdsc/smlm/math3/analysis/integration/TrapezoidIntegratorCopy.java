@@ -218,8 +218,7 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
     return s;
     }
 
-    /** {@inheritDoc} */
-    @Override
+      @Override
     protected double doIntegrate()
         throws MathIllegalArgumentException, TooManyEvaluationsException, MaxCountExceededException {
 

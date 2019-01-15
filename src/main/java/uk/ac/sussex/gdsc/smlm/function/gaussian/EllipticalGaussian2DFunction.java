@@ -61,7 +61,6 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
     peakFactors = new double[numberOfPeaks][16];
   }
 
-  /** {@inheritDoc} */
   @Override
   public Gaussian2DFunction copy() {
     return new EllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);
@@ -100,7 +99,6 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   /** The index for the y width gradient pre-factor. */
   protected static final int CY = 15;
 
-  /** {@inheritDoc} */
   @Override
   public void initialise(double[] a) {
     this.a = a;
@@ -211,6 +209,30 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   }
 
   /**
+   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public double eval(final int x) {
+    // Track the position of the parameters
+    int apos = 0;
+
+    // First parameter is the background level
+    double y = a[BACKGROUND];
+
+    // Unpack the predictor into the dimensions
+    final int x1 = x / maxx;
+    final int x0 = x % maxx;
+
+    for (int j = 0; j < numberOfPeaks; j++, apos += PARAMETERS_PER_PEAK) {
+      y += gaussian(x0, x1, apos, zeroAngle[j], peakFactors[j]);
+    }
+
+    return y;
+  }
+
+  /**
    * Compute the Gaussian at a set offset from the centre.
    *
    * @param x0 the x0 offset
@@ -264,30 +286,6 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
         y * (factors[NY] + factors[AY] * dx2 + factors[BY] * dxy + factors[CY] * dy2);
 
     dy_da[dydapos + 5] = y * (factors[AA2] * dx2 + factors[BB2] * dxy + factors[CC2] * dy2);
-
-    return y;
-  }
-
-  /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
-   *
-   * <p>{@inheritDoc}
-   */
-  @Override
-  public double eval(final int x) {
-    // Track the position of the parameters
-    int apos = 0;
-
-    // First parameter is the background level
-    double y = a[BACKGROUND];
-
-    // Unpack the predictor into the dimensions
-    final int x1 = x / maxx;
-    final int x0 = x % maxx;
-
-    for (int j = 0; j < numberOfPeaks; j++, apos += PARAMETERS_PER_PEAK) {
-      y += gaussian(x0, x1, apos, zeroAngle[j], peakFactors[j]);
-    }
 
     return y;
   }

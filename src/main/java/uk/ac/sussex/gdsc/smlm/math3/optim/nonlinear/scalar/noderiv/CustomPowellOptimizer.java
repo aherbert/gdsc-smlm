@@ -207,7 +207,6 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     this(rel, abs, lineRel, lineAbs, null, false);
   }
 
-  /** {@inheritDoc} */
   @Override
   protected PointValuePair doOptimize() {
     final GoalType goal = getGoalType();

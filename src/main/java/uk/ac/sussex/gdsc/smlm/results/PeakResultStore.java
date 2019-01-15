@@ -24,10 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.predicates.PeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * Stores peak results.
@@ -168,7 +168,7 @@ public interface PeakResultStore {
    * @param filter the filter
    * @return true, if any were removed
    */
-  boolean removeIf(PeakResultPredicate filter);
+  boolean removeIf(Predicate<PeakResult> filter);
 
   /**
    * Execute the procedure on each result in the store.
@@ -178,12 +178,12 @@ public interface PeakResultStore {
   void forEach(PeakResultProcedure procedure);
 
   /**
-   * Get a subset of the results if they match the filter.
+   * Get a subset of the results that match the filter.
    *
    * @param filter the filter
    * @return the results
    */
-  PeakResult[] subset(PeakResultPredicate filter);
+  PeakResult[] subset(Predicate<PeakResult> filter);
 
   /**
    * Returns <tt>true</tt> if this store contains the specified result. More formally, returns

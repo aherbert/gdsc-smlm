@@ -123,7 +123,6 @@ public class PCPALMAnalysis implements PlugInFilter {
   /** Area of the region cropped from the PCPALM Molecules list. */
   double croppedArea;
 
-  /** {@inheritDoc} */
   @Override
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -285,7 +284,6 @@ public class PCPALMAnalysis implements PlugInFilter {
     IJ.error(TITLE, message);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void run(ImageProcessor ip) {
     // Nothing to do

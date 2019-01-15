@@ -46,85 +46,71 @@ public class NullCoordinateStore implements CoordinateStore {
     return (coordinateStore == null) ? INSTANCE : coordinateStore;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getXYResolution() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getZResolution() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addToQueue(double x, double y, double z) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void flush() {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(double x, double y, double z) {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public void clear() {
     // Do nothing
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean contains(double x, double y, double z) {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double[] find(double x, double y, double z) {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public CoordinateStore newInstance() {
     return this;
   }
 
-  /** {@inheritDoc} */
   @Override
   public CoordinateStore resize(int minx, int miny, int maxx, int maxy) {
     return this;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getMinX() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getMinY() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getWidth() {
     return 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int getHeight() {
     return 0;

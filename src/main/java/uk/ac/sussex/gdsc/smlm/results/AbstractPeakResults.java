@@ -38,7 +38,7 @@ import java.util.Collection;
  * Abstract base class for peak results.
  */
 public abstract class AbstractPeakResults implements PeakResults {
-  /** The default for nm./pixel */
+  /** The default for nm/pixel. */
   public static final double DEFAULT_NM_PER_PIXEL = 0;
   /** The default for gain. */
   public static final double DEFAULT_GAIN = 0;
@@ -55,39 +55,33 @@ public abstract class AbstractPeakResults implements PeakResults {
   /** The calibration reader. This is encapsulated */
   private CalibrationReader calibrationReader;
 
-  /** {@inheritDoc} */
   @Override
   public void addAll(Collection<PeakResult> results) {
     // Utility function
     addAll(results.toArray(new PeakResult[results.size()]));
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addAll(PeakResultStore results) {
     // Utility function
     addAll(results.toArray());
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setSource(ImageSource source) {
     this.source = source;
   }
 
-  /** {@inheritDoc} */
   @Override
   public ImageSource getSource() {
     return source;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setBounds(Rectangle bounds) {
     this.bounds = bounds;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Rectangle getBounds() {
     return bounds;
@@ -105,14 +99,12 @@ public abstract class AbstractPeakResults implements PeakResults {
     return "";
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setCalibration(Calibration calibration) {
     this.calibration = calibration;
     calibrationReader = (calibration != null) ? new CalibrationReader(calibration) : null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Calibration getCalibration() {
     return calibration;
@@ -161,25 +153,21 @@ public abstract class AbstractPeakResults implements PeakResults {
     return (calibration != null) ? new CalibrationWriter(calibration) : new CalibrationWriter();
   }
 
-  /** {@inheritDoc} */
   @Override
   public PSF getPSF() {
     return psf;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setPSF(PSF psf) {
     this.psf = psf;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setConfiguration(String configuration) {
     this.configuration = configuration;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getConfiguration() {
     return configuration;
@@ -288,7 +276,6 @@ public abstract class AbstractPeakResults implements PeakResults {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void copySettings(PeakResults peakResults) {
     this.setSource(peakResults.getSource());

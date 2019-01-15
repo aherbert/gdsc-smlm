@@ -274,7 +274,6 @@ public class SearchDimension implements Cloneable, Dimension {
     return values[values.length - 1];
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isAtBounds(double value) {
     values();
@@ -438,7 +437,6 @@ public class SearchDimension implements Cloneable, Dimension {
     return active && increment != minIncrement && reduceFactor < 1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public SearchDimension clone() {
     try {
@@ -531,19 +529,16 @@ public class SearchDimension implements Cloneable, Dimension {
 
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMin() {
     return min;
   }
 
-  /** {@inheritDoc} */
   @Override
   public double getMax() {
     return max;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     return active;

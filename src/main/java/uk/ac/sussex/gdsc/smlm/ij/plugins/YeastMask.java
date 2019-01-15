@@ -51,7 +51,6 @@ public class YeastMask implements PlugIn {
   private static int border = 3;
   private static boolean is2D;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

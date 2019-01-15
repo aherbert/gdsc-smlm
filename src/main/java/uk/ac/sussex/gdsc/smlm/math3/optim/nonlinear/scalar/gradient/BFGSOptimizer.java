@@ -213,7 +213,6 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer {
   private static final int GRADIENT = 2;
   private static final int ROUNDOFF_ERROR = 3;
 
-  /** {@inheritDoc} */
   @Override
   protected PointValuePair doOptimize() {
     final ConvergenceChecker<PointValuePair> checker = getConvergenceChecker();

@@ -56,10 +56,6 @@ public class ErfGaussian2DFunctionVsPSFModelTest {
     }
   }
 
-  private static double nextUniform(UniformRandomProvider rng, double min, double max) {
-    return min + rng.nextDouble() * (max - min);
-  }
-
   private void computesSameAsPSFModel(double sum, double x0, double x1, double s0, double s1) {
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, width, height,
         GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -93,5 +89,9 @@ public class ErfGaussian2DFunctionVsPSFModelTest {
         }
       }
     }
+  }
+
+  private static double nextUniform(UniformRandomProvider rng, double min, double max) {
+    return min + rng.nextDouble() * (max - min);
   }
 }

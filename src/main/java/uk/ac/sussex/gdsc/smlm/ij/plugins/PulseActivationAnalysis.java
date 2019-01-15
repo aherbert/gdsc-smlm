@@ -122,6 +122,81 @@ public class PulseActivationAnalysis
     nonSpecificCorrection = correction.toArray(new Correction[correction.size()]);
   }
 
+  private static String inputOption = "";
+  // Note: Set defaults to work with the 3-channel simulation
+  private static int channels = 3;
+  private static final int MAX_CHANNELS = 3;
+
+  private static int repeatInterval = 30;
+  private static int[] startFrame = {1, 11, 21};
+  /** The crosstalk between channels. */
+  private static double[] ct = new double[6];
+  private static String[] ctNames = {"21", "31", "12", "32", "13", "23"};
+  private static final int C21 = 0;
+  private static final int C31 = 1;
+  private static final int C12 = 2;
+  private static final int C32 = 3;
+  private static final int C13 = 4;
+  private static final int C23 = 5;
+  private static int darkFramesForNewActivation = 1;
+
+  private static int targetChannel = 1;
+
+  private static double densityRadius = 35;
+  private static int minNeighbours = 5;
+  private static int specificCorrectionIndex = Correction.SUBTRACTION.ordinal();
+  private static double[] specificCorrectionCutoff = {50, 50, 50};
+  private static int nonSpecificCorrectionIndex;
+  private static double nonSpecificCorrectionCutoff = 50;
+
+  // Simulation settings
+  private RandomDataGenerator rdg;
+
+  private RandomDataGenerator getRandomDataGenerator() {
+    if (rdg == null) {
+      rdg = new RandomDataGenerator(new Well19937c());
+    }
+    return rdg;
+  }
+
+  private static int[] sim_nMolecules = {1000, 1000, 1000};
+  private static SimulationDistribution[] sim_distribution =
+      {SimulationDistribution.CIRCLE, SimulationDistribution.LINE, SimulationDistribution.POINT};
+  private static double[] sim_precision = {15, 15, 15}; // nm
+  private static int sim_cycles = 1000;
+  private static int sim_size = 256;
+  private static double sim_nmPerPixel = 100;
+  private static double sim_activationDensity = 0.1; // molecules/micrometer
+  private static double sim_nonSpecificFrequency = 0.01;
+
+  private ResultsSettings resultsSettings;
+  private ResultsSettings.Builder resultsSettingsBuilder;
+  private MemoryPeakResults results;
+  private Trace[] traces;
+
+  // The output. Used for the loop functionality
+  private PeakResultsList[] output;
+  private static final Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
+  private static final String[] magnifications;
+
+  static {
+    final ArrayList<String> list = new ArrayList<>();
+    for (int i = 1; i <= 256; i *= 2) {
+      list.add(Integer.toString(i));
+    }
+    magnifications = list.toArray(new String[list.size()]);
+  }
+
+  private static String magnification = magnifications[1];
+  private Choice magnificationChoice;
+  private Checkbox previewCheckBox;
+
+  private Activation[] specificActivations;
+  private Activation[] nonSpecificActivations;
+  private int[] counts;
+
+  private int nextPeakResultId;
+
   private enum Correction {
     //@formatter:off
     NONE{ @Override
@@ -258,75 +333,6 @@ public class PulseActivationAnalysis
     }
   }
 
-  private static String inputOption = "";
-  // Note: Set defaults to work with the 3-channel simulation
-  private static int channels = 3;
-  private static final int MAX_CHANNELS = 3;
-
-  private static int repeatInterval = 30;
-  private static int[] startFrame = {1, 11, 21};
-  // Crosstalk
-  private static double[] ct = new double[6];
-  private static String[] ctNames = {"21", "31", "12", "32", "13", "23"};
-  private static final int C21 = 0;
-  private static final int C31 = 1;
-  private static final int C12 = 2;
-  private static final int C32 = 3;
-  private static final int C13 = 4;
-  private static final int C23 = 5;
-  private static int darkFramesForNewActivation = 1;
-
-  private static int targetChannel = 1;
-
-  private static double densityRadius = 35;
-  private static int minNeighbours = 5;
-  private static int specificCorrectionIndex = Correction.SUBTRACTION.ordinal();
-  private static double[] specificCorrectionCutoff = {50, 50, 50};
-  private static int nonSpecificCorrectionIndex;
-  private static double nonSpecificCorrectionCutoff = 50;
-
-  // Simulation settings
-  private RandomDataGenerator rdg;
-
-  private RandomDataGenerator getRandomDataGenerator() {
-    if (rdg == null) {
-      rdg = new RandomDataGenerator(new Well19937c());
-    }
-    return rdg;
-  }
-
-  private static int[] sim_nMolecules = {1000, 1000, 1000};
-  private static SimulationDistribution[] sim_distribution =
-      {SimulationDistribution.CIRCLE, SimulationDistribution.LINE, SimulationDistribution.POINT};
-  private static double[] sim_precision = {15, 15, 15}; // nm
-  private static int sim_cycles = 1000;
-  private static int sim_size = 256;
-  private static double sim_nmPerPixel = 100;
-  private static double sim_activationDensity = 0.1; // molecules/micrometer
-  private static double sim_nonSpecificFrequency = 0.01;
-
-  private ResultsSettings resultsSettings;
-  private ResultsSettings.Builder resultsSettingsBuilder;
-  private MemoryPeakResults results;
-  private Trace[] traces;
-
-  // The output. Used for the loop functionality
-  private PeakResultsList[] output;
-  private static final Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
-  private static final String[] MAGNIFICATIONS;
-
-  static {
-    final ArrayList<String> list = new ArrayList<>();
-    for (int i = 1; i <= 256; i *= 2) {
-      list.add(Integer.toString(i));
-    }
-    MAGNIFICATIONS = list.toArray(new String[list.size()]);
-  }
-
-  private static String magnification = MAGNIFICATIONS[1];
-  private Choice magnificationChoice;
-  private Checkbox previewCheckBox;
-
   private class Activation implements Molecule {
     final Trace trace;
     float x;
@@ -359,19 +365,16 @@ public class PulseActivationAnalysis
       return currentChannel - 1;
     }
 
-    /** {@inheritDoc} */
     @Override
     public float getX() {
       return x;
     }
 
-    /** {@inheritDoc} */
     @Override
     public float getY() {
       return y;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int getId() {
       // Allow the ID to be updated from the original channel by using a current channel field
@@ -380,11 +383,6 @@ public class PulseActivationAnalysis
     }
   }
 
-  private Activation[] specificActivations;
-  private Activation[] nonSpecificActivations;
-  private int[] count;
-
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -576,16 +574,16 @@ public class PulseActivationAnalysis
   private void save(TurboList<Activation> list) {
     // Count the activations per channel
     // Note: Channels are 0-indexed in the activations
-    count = new int[channels];
+    counts = new int[channels];
     for (int i = list.size(); i-- > 0;) {
       final Activation result = list.getf(i);
       if (result.hasChannel()) {
-        count[result.getChannel()]++;
+        counts[result.getChannel()]++;
       }
     }
 
     // Store specific activations
-    final int sum = (int) MathUtils.sum(count);
+    final int sum = (int) MathUtils.sum(counts);
     specificActivations = new Activation[sum];
     final int nonSpecificActivationsSize = list.size() - sum;
     nonSpecificActivations = new Activation[nonSpecificActivationsSize];
@@ -630,7 +628,7 @@ public class PulseActivationAnalysis
 
     printRate("Background", nonSpecificActivationsSize, frameCount[0]);
     for (int c = 1; c <= channels; c++) {
-      printRate("Channel " + c, count[c - 1], frameCount[c]);
+      printRate("Channel " + c, counts[c - 1], frameCount[c]);
     }
   }
 
@@ -675,7 +673,7 @@ public class PulseActivationAnalysis
       return;
     }
 
-    final double[] crosstalk = computeCrosstalk(count, targetChannel - 1);
+    final double[] crosstalk = computeCrosstalk(counts, targetChannel - 1);
 
     // Store the cross talk.
     // Crosstalk from M into N is defined as the number of times the molecule that should be
@@ -1015,7 +1013,7 @@ public class PulseActivationAnalysis
 
       @Override
       public Pair<RunSettings, Object> doWork(Pair<RunSettings, Object> work) {
-        PulseActivationAnalysis.this.run(work.a);
+        PulseActivationAnalysis.this.runAnalysis(work.a);
         return work;
       }
     });
@@ -1086,7 +1084,7 @@ public class PulseActivationAnalysis
     final String buttonLabel = "Draw loop";
     gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop view");
     gd.addAndGetButton(buttonLabel, this);
-    magnificationChoice = gd.addAndGetChoice("Magnification", MAGNIFICATIONS, magnification);
+    magnificationChoice = gd.addAndGetChoice("Magnification", magnifications, magnification);
 
     gd.addDialogListener(this);
     gd.addOptionCollectedListener(this);
@@ -1151,7 +1149,6 @@ public class PulseActivationAnalysis
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     // The event is null when the NonBlockingExtendedGenericDialog is first shown
@@ -1232,7 +1229,6 @@ public class PulseActivationAnalysis
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void optionCollected(OptionCollectedEvent event) {
     resultsSettings = resultsSettingsBuilder.build();
@@ -1278,7 +1274,7 @@ public class PulseActivationAnalysis
   private TurboList<Future<?>> futures;
   private RunSettings lastRunSettings;
 
-  private synchronized void run(RunSettings runSettings) {
+  private synchronized void runAnalysis(RunSettings runSettings) {
     // This is synchronized since it updates the class results.
     // Note: We check against the last settings and only repeat what is necessary ...
 
@@ -1406,7 +1402,6 @@ public class PulseActivationAnalysis
     }
 
     lastRunSettings = runSettings;
-    runSettings = null;
 
     IJ.showStatus(String.format("%d/%s, %d/%s", count, TextUtils.pleural(traces.length, "Trace"),
         size, TextUtils.pleural(results.size(), "Result")));
@@ -1644,7 +1639,6 @@ public class PulseActivationAnalysis
       this.density = density;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       for (int i = from; i < to; i++) {
@@ -1730,7 +1724,6 @@ public class PulseActivationAnalysis
       this.dc = dc;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void run() {
       // TODO - We could do other non-specific assignments.
@@ -2079,14 +2072,6 @@ public class PulseActivationAnalysis
         MathUtils.rounded(ct[index2]), MathUtils.rounded(crosstalk[c2]));
   }
 
-  private static BinomialDistribution createBinomialDistribution(RandomGenerator rand, int n,
-      double p) {
-    if (p == 0) {
-      return null;
-    }
-    return new BinomialDistribution(rand, n, p);
-  }
-
   private int simulateActivations(RandomDataGenerator rdg, BinomialDistribution bd,
       float[][] molecules, MemoryPeakResults results, int t, double precision) {
     if (bd == null) {
@@ -2115,12 +2100,18 @@ public class PulseActivationAnalysis
     return sample.length;
   }
 
-  private int id;
+  private static BinomialDistribution createBinomialDistribution(RandomGenerator rand, int n,
+      double p) {
+    if (p == 0) {
+      return null;
+    }
+    return new BinomialDistribution(rand, n, p);
+  }
 
   private IdPeakResult createResult(int t, float x, float y) {
     // We add them as if tracing is perfect. So each peak result has a new ID.
     // This allows the output of the simulation to be used directly by the pulse analysis code.
-    final IdPeakResult r = new IdPeakResult(t, x, y, 1, ++id);
+    final IdPeakResult r = new IdPeakResult(t, x, y, 1, ++nextPeakResultId);
     r.setNoise(1); // So it appears calibrated
     return r;
   }

@@ -71,7 +71,6 @@ public class PassRateFailCounter extends BaseFailCounter {
     return new PassRateFailCounter(Math.max(0, allowedCounts), passRate);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass() {
     passCount++;
@@ -80,7 +79,6 @@ public class PassRateFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void pass(int n) {
     if (n < 0) {
@@ -92,7 +90,6 @@ public class PassRateFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail() {
     failCount++;
@@ -101,7 +98,6 @@ public class PassRateFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void fail(int n) {
     if (n < 0) {
@@ -113,20 +109,17 @@ public class PassRateFailCounter extends BaseFailCounter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isOK() {
     final double total = failCount + passCount;
     return total <= allowedCounts || passCount / total >= passRate;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FailCounter newCounter() {
     return new PassRateFailCounter(allowedCounts, passRate);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reset() {
     passCount = 0;

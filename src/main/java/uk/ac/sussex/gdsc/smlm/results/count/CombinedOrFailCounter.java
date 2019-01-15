@@ -43,13 +43,11 @@ public class CombinedOrFailCounter extends CombinedFailCounter {
     return "&&";
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isOK() {
     return c1.isOK() || c2.isOK();
   }
 
-  /** {@inheritDoc} */
   @Override
   public FailCounter newCounter() {
     return new CombinedOrFailCounter(c1.newCounter(), c2.newCounter());

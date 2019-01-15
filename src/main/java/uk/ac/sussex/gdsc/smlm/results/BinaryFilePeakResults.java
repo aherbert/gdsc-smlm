@@ -117,13 +117,11 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected String getHeaderEnd() {
     return END_HEADER;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected String[] getHeaderComments() {
     fieldNames = new PeakResultConversionHelper(null, getPSF()).getNames();
@@ -155,7 +153,6 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
     return comments;
   }
 
-  /** {@inheritDoc} */
   @Override
   protected String[] getFieldNames() {
     final ArrayList<String> names = new ArrayList<>(20);
@@ -203,7 +200,6 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsStdDev) {
@@ -216,6 +212,28 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
       try (DataOutputStream buffer = new DataOutputStream(bytes)) {
         addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity,
             params, paramsStdDev, 0.0);
+        buffer.flush();
+        writeResult(1, bytes);
+      }
+    } catch (final IOException ex) {
+      // Do nothing - This result will not be added to the file
+      return;
+    }
+  }
+
+  @Override
+  public void add(PeakResult result) {
+    if (fos == null) {
+      return;
+    }
+
+    // Buffer the output for the synchronized write method
+    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+      try (DataOutputStream buffer = new DataOutputStream(bytes)) {
+        addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(),
+            result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+            result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+            result.getParameterDeviations(), result.getPrecision());
         buffer.flush();
         writeResult(1, bytes);
       }
@@ -264,29 +282,6 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
     }
   }
 
-  @Override
-  public void add(PeakResult result) {
-    if (fos == null) {
-      return;
-    }
-
-    // Buffer the output for the synchronized write method
-    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
-      try (DataOutputStream buffer = new DataOutputStream(bytes)) {
-        addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(),
-            result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-            result.getNoise(), result.getMeanIntensity(), result.getParameters(),
-            result.getParameterDeviations(), result.getPrecision());
-        buffer.flush();
-        writeResult(1, bytes);
-      }
-    } catch (final IOException ex) {
-      // Do nothing - This result will not be added to the file
-      return;
-    }
-  }
-
-  /** {@inheritDoc} */
   @Override
   public void addAll(PeakResult[] results) {
     if (fos == null) {
@@ -338,7 +333,6 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   protected void sort() throws IOException {
     try (DataInputStream input = new DataInputStream(new FileInputStream(filename))) {
@@ -480,7 +474,6 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isBinary() {
     return true;

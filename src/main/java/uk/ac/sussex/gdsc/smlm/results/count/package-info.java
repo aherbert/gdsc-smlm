@@ -26,6 +26,6 @@
  * Provides classes to accumulate pass/fail counts and signal whether to stop a sequential analysis.
  *
  * @since 1.0.0
-  */
+ */
 
 package uk.ac.sussex.gdsc.smlm.results.count;

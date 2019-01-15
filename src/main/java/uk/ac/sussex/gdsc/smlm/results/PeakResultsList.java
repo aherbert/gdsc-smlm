@@ -86,7 +86,6 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
     return results.toArray(new PeakResults[results.size()]);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void begin() {
     for (final PeakResults peakResults : results) {
@@ -94,7 +93,6 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void add(int peak, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsStdDev) {
@@ -125,13 +123,11 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return (results.isEmpty()) ? 0 : results.get(0).size();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void end() {
     for (final PeakResults peakResults : results) {
@@ -139,7 +135,6 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isActive() {
     for (final PeakResults peakResults : this.results) {

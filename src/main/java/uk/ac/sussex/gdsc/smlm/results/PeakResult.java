@@ -24,12 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.Arrays;
 
 /**
  * Specifies a peak fitting result.
  */
-public class PeakResult implements Cloneable {
+public class PeakResult {
   /** Index of the background in the parameters array. */
   public static final int BACKGROUND = 0;
   /** Index of the intensity in the parameters array. */
@@ -44,16 +46,6 @@ public class PeakResult implements Cloneable {
   public static final int STANDARD_PARAMETERS = 5;
 
   private static final String[] NAMES = {"Background", "Intensity", "X", "Y", "Z"};
-
-  /**
-   * Gets the parameter name.
-   *
-   * @param index the index
-   * @return the parameter name
-   */
-  public static String getParameterName(int index) {
-    return NAMES[index];
-  }
 
   private int frame;
   private int origX;
@@ -73,6 +65,18 @@ public class PeakResult implements Cloneable {
    * parameters). This may be null or the same length as {@link #params}.
    */
   private float[] paramStdDevs;
+
+  /**
+   * Gets the parameter name.
+   *
+   * <p>Valid for the standard parameters ({@code index <} {@link #STANDARD_PARAMETERS}).
+   *
+   * @param index the index
+   * @return the parameter name
+   */
+  public static String getParameterName(int index) {
+    return NAMES[index];
+  }
 
   /**
    * Instantiates a new peak result.
@@ -139,6 +143,32 @@ public class PeakResult implements Cloneable {
    */
   public PeakResult(float x, float y, float intensity) {
     this(0, x, y, intensity);
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected PeakResult(PeakResult source) {
+    frame = source.frame;
+    origX = source.origX;
+    origY = source.origY;
+    origValue = source.origValue;
+    error = source.error;
+    noise = source.noise;
+    meanIntensity = source.meanIntensity;
+    params = source.params.clone();
+    paramStdDevs = ArrayUtils.clone(source.paramStdDevs);
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public PeakResult copy() {
+    return new PeakResult(this);
   }
 
   /**
@@ -750,20 +780,5 @@ public class PeakResult implements Cloneable {
    */
   void resizeParameterDeviations(int length) {
     paramStdDevs = Arrays.copyOf(paramStdDevs, length);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public PeakResult clone() {
-    try {
-      final PeakResult result = (PeakResult) super.clone();
-      result.params = params.clone();
-      if (paramStdDevs != null) {
-        result.paramStdDevs = paramStdDevs.clone();
-      }
-      return result;
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
   }
 }

@@ -45,7 +45,6 @@ public class ShowResultsHeader implements PlugIn {
   private static String inputFilename = Prefs.get(Constants.inputFilename, "");
   private static boolean raw;
 
-  /** {@inheritDoc} */
   @Override
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);

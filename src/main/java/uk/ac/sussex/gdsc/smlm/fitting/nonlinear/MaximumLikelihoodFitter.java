@@ -96,7 +96,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
       super(fun);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double[] point) {
       return fun.likelihood(point);
@@ -118,7 +117,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
       this.map = map;
     }
 
-    /** {@inheritDoc} */
     @Override
     public double value(double[] point) {
       return fun.likelihood(unmap(point));
@@ -174,7 +172,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
       super(fun);
     }
 
-    /** {@inheritDoc} */
     @Override
     public double[] value(double[] point) {
       final double[] gradient = new double[point.length];
@@ -318,7 +315,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     super(function);
   }
 
-  /** {@inheritDoc} */
   @Override
   public FitStatus computeFit(double[] y, double[] fx, double[] a, double[] parametersVariance) {
     final int n = y.length;
@@ -883,7 +879,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setBounds(double[] lowerB, double[] upperB) {
     // Extract the bounds for the parameters we are fitting
@@ -897,7 +892,6 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setConstraints(double[] lowerB, double[] upperB) {
     // Extract the bounds for the parameters we are fitting

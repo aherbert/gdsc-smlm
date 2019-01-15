@@ -153,7 +153,6 @@ public class ReferenceItemMesh extends ItemMesh {
     return ga;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void reorderFast(int[] indices) {
     changed = true;
@@ -241,7 +240,6 @@ public class ReferenceItemMesh extends ItemMesh {
     });
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f color) {
     if (color == null) {
@@ -279,7 +277,6 @@ public class ReferenceItemMesh extends ItemMesh {
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor(Color3f[] color) {
     if (!hasColor()) {
@@ -315,7 +312,6 @@ public class ReferenceItemMesh extends ItemMesh {
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemColor4(Color4f[] color) {
     if (!hasColor4()) {
@@ -340,7 +336,6 @@ public class ReferenceItemMesh extends ItemMesh {
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float[] alpha) {
     if (!hasColor4()) {
@@ -368,7 +363,6 @@ public class ReferenceItemMesh extends ItemMesh {
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setItemAlpha(float alpha) {
     if (!hasColor4()) {
@@ -393,7 +387,6 @@ public class ReferenceItemMesh extends ItemMesh {
     changed = true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getItemAlpha(float[] alpha) {
     if (!hasColor4()) {
