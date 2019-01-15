@@ -92,6 +92,6 @@ public class ErfGaussian2DFunctionVsPSFModelTest {
   }
 
   private static double nextUniform(UniformRandomProvider rng, double min, double max) {
-    return min + rng.nextDouble() * (max - min);
+    return uk.ac.sussex.gdsc.core.utils.rng.RngUtils.nextDouble(rng, min, max);
   }
 }
