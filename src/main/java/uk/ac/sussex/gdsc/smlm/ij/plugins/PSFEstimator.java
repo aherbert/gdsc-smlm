@@ -416,17 +416,17 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     final double[] params = new double[] {gf.evaluatesAngle() ? initialPeakAngle : 0,
         gf.evaluatesSD0() ? initialPeakStdDev0 : 0, gf.evaluatesSD1() ? initialPeakStdDev1 : 0, 0,
         0};
-    final double[] params_dev = new double[3];
+    final double[] paramsDev = new double[3];
     final boolean[] identical = new boolean[4];
     final double[] p = new double[] {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 
-    addToResultTable(0, 0, params, params_dev, p);
+    addToResultTable(0, 0, params, paramsDev, p);
 
-    if (!calculateStatistics(fitter, params, params_dev)) {
+    if (!calculateStatistics(fitter, params, paramsDev)) {
       return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
     }
 
-    if (!addToResultTable(1, size(), params, params_dev, p)) {
+    if (!addToResultTable(1, size(), params, paramsDev, p)) {
       return BAD_ESTIMATE;
     }
 
@@ -434,7 +434,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
 
     int iteration = 2;
     do {
-      if (!calculateStatistics(fitter, params, params_dev)) {
+      if (!calculateStatistics(fitter, params, paramsDev)) {
         return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
       }
 
@@ -447,7 +447,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
           getPairedP(sampleNew[X], sampleNew[Y], XY, p, identical);
         }
 
-        if (!addToResultTable(iteration++, size(), params, params_dev, p)) {
+        if (!addToResultTable(iteration++, size(), params, paramsDev, p)) {
           return BAD_ESTIMATE;
         }
 
@@ -584,7 +584,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     identical[i] = (p[i] > settings.getPValue());
   }
 
-  private boolean calculateStatistics(PeakFit fitter, double[] params, double[] params_dev) {
+  private boolean calculateStatistics(PeakFit fitter, double[] params, double[] paramsDev) {
     debug("  Fitting PSF");
 
     swapStatistics();
@@ -665,9 +665,9 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     // in this multi-threaded system
     debug("  Processed %d/%d slices (%d peaks)", i, slices.length, size());
 
-    setParams(ANGLE, params, params_dev, sampleNew[ANGLE]);
-    setParams(X, params, params_dev, sampleNew[X]);
-    setParams(Y, params, params_dev, sampleNew[Y]);
+    setParams(ANGLE, params, paramsDev, sampleNew[ANGLE]);
+    setParams(X, params, paramsDev, sampleNew[X]);
+    setParams(Y, params, paramsDev, sampleNew[Y]);
 
     if (settings.getShowHistograms()) {
       final HistogramPlotBuilder builder =
@@ -693,11 +693,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     return true;
   }
 
-  private static void setParams(int i, double[] params, double[] params_dev,
+  private static void setParams(int i, double[] params, double[] paramsDev,
       DescriptiveStatistics sample) {
     if (sample.getN() > 0) {
       params[i] = sample.getMean();
-      params_dev[i] = sample.getStandardDeviation();
+      paramsDev[i] = sample.getStandardDeviation();
     }
   }
 
@@ -738,13 +738,13 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     return sb.toString();
   }
 
-  private boolean addToResultTable(int iteration, int n, double[] params, double[] params_dev,
+  private boolean addToResultTable(int iteration, int n, double[] params, double[] paramsDev,
       double[] p) {
     final StringBuilder sb = new StringBuilder();
     sb.append(iteration).append('\t').append(n).append('\t');
     for (int i = 0; i < 3; i++) {
       sb.append(params[i]).append('\t');
-      sb.append(params_dev[i]).append('\t');
+      sb.append(paramsDev[i]).append('\t');
       sb.append(p[i]).append('\t');
     }
     sb.append(p[XY]).append('\t');

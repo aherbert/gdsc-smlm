@@ -191,7 +191,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
   }
 
   @Override
-  public double eval(int x, double[] dyda, double[] weight) {
+  public double evalw(int x, double[] dyda, double[] weight) {
     weight[0] = 1;
     return eval(x, dyda);
   }

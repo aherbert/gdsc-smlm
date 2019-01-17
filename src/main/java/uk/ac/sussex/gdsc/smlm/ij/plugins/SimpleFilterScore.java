@@ -32,18 +32,18 @@ import uk.ac.sussex.gdsc.smlm.results.filter.FilterScore;
  */
 public class SimpleFilterScore extends FilterScore {
   /** The result. */
-  final FilterScoreResult r;
+  final FilterScoreResult result;
 
   /**
    * Instantiates a new simple filter score.
    *
-   * @param r the result
+   * @param result the result
    * @param allSameType the all same type
    * @param criteriaPassed the criteria passed
    */
-  public SimpleFilterScore(FilterScoreResult r, boolean allSameType, boolean criteriaPassed) {
-    super(r.filter, r.score, r.criteria, allSameType, criteriaPassed);
-    this.r = r;
+  public SimpleFilterScore(FilterScoreResult result, boolean allSameType, boolean criteriaPassed) {
+    super(result.filter, result.score, result.criteria, allSameType, criteriaPassed);
+    this.result = result;
   }
 
   @Override

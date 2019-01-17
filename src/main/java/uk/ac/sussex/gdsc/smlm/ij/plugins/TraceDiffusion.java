@@ -1427,7 +1427,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     double[][] calculateJacobian() {
       // Compute the gradients using calculus differentiation:
       // y = ax + c
-      // dy_da = x
+      // dyDa = x
       final double[][] jacobian = new double[x.length][1];
 
       for (int i = 0; i < jacobian.length; ++i) {
@@ -1500,7 +1500,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     double[][] jacobian(double[] variables) {
       // Compute the gradients using calculus differentiation:
       // y = ax + 4c^2
-      // dy_da = x
+      // dyDa = x
       // dy_dc = 8c
       final double[][] jacobian = new double[x.length][2];
       final double dy_dc = 8 * variables[1];
@@ -1589,7 +1589,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     double[][] jacobian(double[] variables) {
       // Compute the gradients using calculus differentiation:
       // y = ax - a/3 + 4c^2
-      // dy_da = x - 1/3
+      // dyDa = x - 1/3
       // dy_dc = 8c
       final double[][] jacobian = new double[x.length][2];
       final double dy_dc = 8 * variables[1];

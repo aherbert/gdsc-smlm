@@ -70,7 +70,7 @@ public class GradientCalculator {
   public double findLinearised(final int[] x, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func) {
     double ssx = 0;
-    final double[] dy_da = new double[a.length];
+    final double[] dyDa = new double[a.length];
 
     for (int i = 0; i < nparams; i++) {
       beta[i] = 0;
@@ -84,7 +84,7 @@ public class GradientCalculator {
     if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.eval(x[i], dy_da, w);
+        final double dy = y[i] - func.evalw(x[i], dyDa, w);
         final double weight = getWeight(w[0]);
 
         // Compute:
@@ -95,10 +95,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nparams; j++) {
-          final double wgt = dy_da[j] * weight;
+          final double wgt = dyDa[j] * weight;
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[k];
+            alpha[j][k] += wgt * dyDa[k];
           }
 
           beta[j] += wgt * dy;
@@ -108,7 +108,7 @@ public class GradientCalculator {
       }
     } else {
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.eval(x[i], dy_da);
+        final double dy = y[i] - func.eval(x[i], dyDa);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -118,10 +118,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nparams; j++) {
-          final double wgt = dy_da[j];
+          final double wgt = dyDa[j];
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[k];
+            alpha[j][k] += wgt * dyDa[k];
           }
 
           beta[j] += wgt * dy;
@@ -162,7 +162,7 @@ public class GradientCalculator {
   public double findLinearised(final int[] x, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func, boolean[] ignore) {
     double ssx = 0;
-    final double[] dy_da = new double[a.length];
+    final double[] dyDa = new double[a.length];
 
     for (int i = 0; i < nparams; i++) {
       beta[i] = 0;
@@ -185,7 +185,7 @@ public class GradientCalculator {
     if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.eval(x[i], dy_da, w);
+        final double dy = y[i] - func.evalw(x[i], dyDa, w);
         final double weight = getWeight(w[0]);
 
         // Compute:
@@ -196,10 +196,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nnparams; j++) {
-          final double wgt = dy_da[indices[j]] * weight;
+          final double wgt = dyDa[indices[j]] * weight;
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[indices[k]];
+            alpha[j][k] += wgt * dyDa[indices[k]];
           }
 
           beta[j] += wgt * dy;
@@ -209,7 +209,7 @@ public class GradientCalculator {
       }
     } else {
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.eval(x[i], dy_da);
+        final double dy = y[i] - func.eval(x[i], dyDa);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -219,10 +219,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nnparams; j++) {
-          final double wgt = dy_da[indices[j]];
+          final double wgt = dyDa[indices[j]];
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[indices[k]];
+            alpha[j][k] += wgt * dyDa[indices[k]];
           }
 
           beta[j] += wgt * dy;
@@ -309,13 +309,13 @@ public class GradientCalculator {
    * @param func Non-linear fitting function
    * @return The sum-of-squares value for the fit.
    * @see NonLinearFunction#eval(int, double[])
-   * @see NonLinearFunction#eval(int, double[], double[])
+   * @see NonLinearFunction#evalw(int, double[], double[])
    * @see NonLinearFunction#canComputeWeights()
    */
   public double findLinearised(final int n, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func) {
     double ssx = 0;
-    final double[] dy_da = new double[a.length];
+    final double[] dyDa = new double[a.length];
 
     for (int i = 0; i < nparams; i++) {
       beta[i] = 0;
@@ -329,7 +329,7 @@ public class GradientCalculator {
     if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.eval(i, dy_da, w);
+        final double dy = y[i] - func.evalw(i, dyDa, w);
         final double weight = getWeight(w[0]);
 
         // Compute:
@@ -340,10 +340,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nparams; j++) {
-          final double wgt = dy_da[j] * weight;
+          final double wgt = dyDa[j] * weight;
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[k];
+            alpha[j][k] += wgt * dyDa[k];
           }
 
           beta[j] += wgt * dy;
@@ -353,7 +353,7 @@ public class GradientCalculator {
       }
     } else {
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.eval(i, dy_da);
+        final double dy = y[i] - func.eval(i, dyDa);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -363,10 +363,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nparams; j++) {
-          final double wgt = dy_da[j];
+          final double wgt = dyDa[j];
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[k];
+            alpha[j][k] += wgt * dyDa[k];
           }
 
           beta[j] += wgt * dy;
@@ -408,13 +408,13 @@ public class GradientCalculator {
    * @param ignore An array of size beta.length. Set the index to true to ignore the gradients.
    * @return The sum-of-squares value for the fit.
    * @see NonLinearFunction#eval(int, double[])
-   * @see NonLinearFunction#eval(int, double[], double[])
+   * @see NonLinearFunction#evalw(int, double[], double[])
    * @see NonLinearFunction#canComputeWeights()
    */
   public double findLinearised(final int n, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func, boolean[] ignore) {
     double ssx = 0;
-    final double[] dy_da = new double[a.length];
+    final double[] dyDa = new double[a.length];
 
     for (int i = 0; i < nparams; i++) {
       beta[i] = 0;
@@ -437,7 +437,7 @@ public class GradientCalculator {
     if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.eval(i, dy_da, w);
+        final double dy = y[i] - func.evalw(i, dyDa, w);
         final double weight = getWeight(w[0]);
 
         // Compute:
@@ -448,10 +448,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nnparams; j++) {
-          final double wgt = dy_da[indices[j]] * weight;
+          final double wgt = dyDa[indices[j]] * weight;
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[indices[k]];
+            alpha[j][k] += wgt * dyDa[indices[k]];
           }
 
           beta[j] += wgt * dy;
@@ -461,7 +461,7 @@ public class GradientCalculator {
       }
     } else {
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.eval(i, dy_da);
+        final double dy = y[i] - func.eval(i, dyDa);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -470,10 +470,10 @@ public class GradientCalculator {
         // the parameters
 
         for (int j = 0; j < nnparams; j++) {
-          final double wgt = dy_da[indices[j]];
+          final double wgt = dyDa[indices[j]];
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += wgt * dy_da[indices[k]];
+            alpha[j][k] += wgt * dyDa[indices[k]];
           }
 
           beta[j] += wgt * dy;
@@ -720,7 +720,7 @@ public class GradientCalculator {
    */
   public double[][] fisherInformationMatrix(final int n, final double[] a,
       final NonLinearFunction func) {
-    final double[] dy_da = new double[nparams];
+    final double[] dyDa = new double[nparams];
 
     final double[][] alpha = new double[nparams][nparams];
 
@@ -729,13 +729,13 @@ public class GradientCalculator {
     }
 
     for (int i = 0; i < n; i++) {
-      final double yi = func.eval(i, dy_da);
+      final double yi = func.eval(i, dyDa);
       if (yi > 0) {
         for (int j = 0; j < nparams; j++) {
-          final double dy_db = dy_da[j] / yi;
+          final double dy_db = dyDa[j] / yi;
 
           for (int k = 0; k <= j; k++) {
-            alpha[j][k] += dy_db * dy_da[k];
+            alpha[j][k] += dy_db * dyDa[k];
           }
         }
       }
@@ -761,40 +761,40 @@ public class GradientCalculator {
    * @param x n observations
    * @param y Data to fit
    * @param a Set of m coefficients
-   * @param df_da the gradient vector of the function's partial first derivatives with respect to
-   *        the parameters (size m)
+   * @param dfDa the gradient vector of the function's partial first derivatives with respect to the
+   *        parameters (size m)
    * @param func Non-linear fitting function
    * @return The sum-of-squares value for the fit
    */
-  public double evaluate(final int[] x, final double[] y, final double[] a, final double[] df_da,
+  public double evaluate(final int[] x, final double[] y, final double[] a, final double[] dfDa,
       final NonLinearFunction func) {
     double ssx = 0;
-    final double[] dy_da = new double[nparams];
+    final double[] dyDa = new double[nparams];
 
-    zero(df_da);
+    zero(dfDa);
 
     func.initialise(a);
 
     for (int i = 0; i < x.length; i++) {
-      final double dy = y[i] - func.eval(x[i], dy_da);
+      final double dy = y[i] - func.eval(x[i], dyDa);
 
       // Compute:
       // - the gradient vector of the function's partial first derivatives with respect to the
       // parameters
 
       for (int j = 0; j < nparams; j++) {
-        df_da[j] += dy_da[j] * dy;
+        dfDa[j] += dyDa[j] * dy;
       }
 
       ssx += dy * dy;
     }
 
-    checkGradients(df_da, nparams);
+    checkGradients(dfDa, nparams);
 
     // Apply a factor of -2 to compute the actual gradients:
     // See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
     for (int j = 0; j < nparams; j++) {
-      df_da[j] *= -2;
+      dfDa[j] *= -2;
     }
 
     return ssx;

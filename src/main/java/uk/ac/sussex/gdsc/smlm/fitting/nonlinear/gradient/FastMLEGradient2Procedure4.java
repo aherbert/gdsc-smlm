@@ -73,29 +73,29 @@ public class FastMLEGradient2Procedure4 extends FastMLEGradient2Procedure {
   }
 
   @Override
-  public void execute(double uk, double[] duk_dt, double[] d2uk_dt2) {
+  public void execute(double uk, double[] dukDt, double[] d2ukDt2) {
     u[k] = uk;
     final double xk = x[k++];
     final double xk_uk_minus1 = xk / uk - 1.0;
     final double xk_uk2 = xk / (uk * uk);
-    d1[0] += duk_dt[0] * xk_uk_minus1;
-    d1[1] += duk_dt[1] * xk_uk_minus1;
-    d1[2] += duk_dt[2] * xk_uk_minus1;
-    d1[3] += duk_dt[3] * xk_uk_minus1;
-    d2[0] += d2uk_dt2[0] * xk_uk_minus1 - duk_dt[0] * duk_dt[0] * xk_uk2;
-    d2[1] += d2uk_dt2[1] * xk_uk_minus1 - duk_dt[1] * duk_dt[1] * xk_uk2;
-    d2[2] += d2uk_dt2[2] * xk_uk_minus1 - duk_dt[2] * duk_dt[2] * xk_uk2;
-    d2[3] += d2uk_dt2[3] * xk_uk_minus1 - duk_dt[3] * duk_dt[3] * xk_uk2;
+    d1[0] += dukDt[0] * xk_uk_minus1;
+    d1[1] += dukDt[1] * xk_uk_minus1;
+    d1[2] += dukDt[2] * xk_uk_minus1;
+    d1[3] += dukDt[3] * xk_uk_minus1;
+    d2[0] += d2ukDt2[0] * xk_uk_minus1 - dukDt[0] * dukDt[0] * xk_uk2;
+    d2[1] += d2ukDt2[1] * xk_uk_minus1 - dukDt[1] * dukDt[1] * xk_uk2;
+    d2[2] += d2ukDt2[2] * xk_uk_minus1 - dukDt[2] * dukDt[2] * xk_uk2;
+    d2[3] += d2ukDt2[3] * xk_uk_minus1 - dukDt[3] * dukDt[3] * xk_uk2;
   }
 
   @Override
-  public void execute(double uk, double[] duk_dt) {
+  public void execute(double uk, double[] dukDt) {
     u[k] = uk;
     final double xk = x[k++];
     final double xk_uk_minus1 = xk / uk - 1.0;
-    d1[0] += duk_dt[0] * xk_uk_minus1;
-    d1[1] += duk_dt[1] * xk_uk_minus1;
-    d1[2] += duk_dt[2] * xk_uk_minus1;
-    d1[3] += duk_dt[3] * xk_uk_minus1;
+    d1[0] += dukDt[0] * xk_uk_minus1;
+    d1[1] += dukDt[1] * xk_uk_minus1;
+    d1[2] += dukDt[2] * xk_uk_minus1;
+    d1[3] += dukDt[3] * xk_uk_minus1;
   }
 }

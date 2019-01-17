@@ -69,38 +69,38 @@ public class MLEGradientCalculator5 extends MLEGradientCalculator {
   }
 
   @Override
-  protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da,
+  protected void compute(final double[][] alpha, final double[] beta, final double[] dfiDa,
       final double fi, final double xi) {
     final double xi_fi = xi / fi;
     final double xi_fi2 = xi_fi / fi;
     final double e = 1 - (xi_fi);
 
-    alpha[0][0] += dfi_da[0] * xi_fi2 * dfi_da[0];
+    alpha[0][0] += dfiDa[0] * xi_fi2 * dfiDa[0];
     double w;
-    w = dfi_da[1] * xi_fi2;
-    alpha[1][0] += w * dfi_da[0];
-    alpha[1][1] += w * dfi_da[1];
-    w = dfi_da[2] * xi_fi2;
-    alpha[2][0] += w * dfi_da[0];
-    alpha[2][1] += w * dfi_da[1];
-    alpha[2][2] += w * dfi_da[2];
-    w = dfi_da[3] * xi_fi2;
-    alpha[3][0] += w * dfi_da[0];
-    alpha[3][1] += w * dfi_da[1];
-    alpha[3][2] += w * dfi_da[2];
-    alpha[3][3] += w * dfi_da[3];
-    w = dfi_da[4] * xi_fi2;
-    alpha[4][0] += w * dfi_da[0];
-    alpha[4][1] += w * dfi_da[1];
-    alpha[4][2] += w * dfi_da[2];
-    alpha[4][3] += w * dfi_da[3];
-    alpha[4][4] += w * dfi_da[4];
+    w = dfiDa[1] * xi_fi2;
+    alpha[1][0] += w * dfiDa[0];
+    alpha[1][1] += w * dfiDa[1];
+    w = dfiDa[2] * xi_fi2;
+    alpha[2][0] += w * dfiDa[0];
+    alpha[2][1] += w * dfiDa[1];
+    alpha[2][2] += w * dfiDa[2];
+    w = dfiDa[3] * xi_fi2;
+    alpha[3][0] += w * dfiDa[0];
+    alpha[3][1] += w * dfiDa[1];
+    alpha[3][2] += w * dfiDa[2];
+    alpha[3][3] += w * dfiDa[3];
+    w = dfiDa[4] * xi_fi2;
+    alpha[4][0] += w * dfiDa[0];
+    alpha[4][1] += w * dfiDa[1];
+    alpha[4][2] += w * dfiDa[2];
+    alpha[4][3] += w * dfiDa[3];
+    alpha[4][4] += w * dfiDa[4];
 
-    beta[0] -= e * dfi_da[0];
-    beta[1] -= e * dfi_da[1];
-    beta[2] -= e * dfi_da[2];
-    beta[3] -= e * dfi_da[3];
-    beta[4] -= e * dfi_da[4];
+    beta[0] -= e * dfiDa[0];
+    beta[1] -= e * dfiDa[1];
+    beta[2] -= e * dfiDa[2];
+    beta[3] -= e * dfiDa[3];
+    beta[4] -= e * dfiDa[4];
   }
 
   @Override

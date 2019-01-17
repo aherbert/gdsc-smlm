@@ -57,7 +57,7 @@ public class HoltzerAstigmatismZModelTest {
   // h ~ (Ef)^(1/3) * xc
   // xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x
   // is close to zero)
-  protected double h_ = 0.0001; // (double) (Math.pow(1e-3f, 1.0 / 3));
+  protected double stepH = 0.0001; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
   @Test
   public void canStaticComputeGradient() {
@@ -89,8 +89,8 @@ public class HoltzerAstigmatismZModelTest {
       Assertions.assertEquals(s0, s2);
       Assertions.assertEquals(ds_dz[0], ds_dz2[0]);
 
-      final double uz = z + h_;
-      final double lz = z - h_;
+      final double uz = z + stepH;
+      final double lz = z - stepH;
       final double upper = HoltzerAstigmatismZModel.getS1(s, uz, one_d2, Ax, Bx, ds_duz);
       final double lower = HoltzerAstigmatismZModel.getS1(s, lz, one_d2, Ax, Bx, ds_dlz);
 

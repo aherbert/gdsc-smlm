@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 
 /**
- * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
+ * Abstract base class for a 2-dimensional Gaussian function for a configured number of peaks.
  *
  * <p>The function will calculate the value of the Gaussian and evaluate the gradient of a set of
  * parameters. The class can specify which of the following parameters the function will
@@ -60,7 +60,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
   }
 
   /**
-   * Evaluates an 2-dimensional Gaussian function for a single peak.
+   * Evaluates a 2-dimensional Gaussian function for a single peak.
    *
    * @param i Input predictor
    * @return The Gaussian value
@@ -71,11 +71,11 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
     final int y = i / maxx;
     final int x = i % maxx;
 
-    return tB + tI * deltaEx[x] * deltaEy[y];
+    return tb + tI * deltaEx[x] * deltaEy[y];
   }
 
   /**
-   * Evaluates an 2-dimensional Gaussian function for a single peak.
+   * Evaluates a 2-dimensional Gaussian function for a single peak.
    *
    * @param i Input predictor
    * @param duda Partial gradient of function with respect to each coefficient
@@ -85,7 +85,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
   public abstract double eval(final int i, final double[] duda);
 
   /**
-   * Evaluates an 2-dimensional Gaussian function for a single peak.
+   * Evaluates a 2-dimensional Gaussian function for a single peak.
    *
    * @param i Input predictor
    * @param duda Partial first gradient of function with respect to each coefficient
@@ -93,11 +93,11 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
    * @return The predicted value
    */
   @Override
-  public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
+  public abstract double eval2(final int i, final double[] duda, final double[] d2uda2);
 
   @Override
   public void forEach(ValueProcedure procedure) {
-    if (tB == 0) {
+    if (tb == 0) {
       for (int y = 0; y < maxy; y++) {
         final double tI_deltaEy = tI * deltaEy[y];
         for (int x = 0; x < maxx; x++) {
@@ -108,7 +108,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
       for (int y = 0; y < maxy; y++) {
         final double tI_deltaEy = tI * deltaEy[y];
         for (int x = 0; x < maxx; x++) {
-          procedure.execute(tB + tI_deltaEy * deltaEx[x]);
+          procedure.execute(tb + tI_deltaEy * deltaEx[x]);
         }
       }
     }
@@ -118,7 +118,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
   public double[] computeValues(double[] variables) {
     initialise0(variables);
     final double[] values = new double[size()];
-    if (tB == 0) {
+    if (tb == 0) {
       for (int y = 0, i = 0; y < maxy; y++) {
         final double tI_deltaEy = tI * deltaEy[y];
         for (int x = 0; x < maxx; x++) {
@@ -129,7 +129,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
       for (int y = 0, i = 0; y < maxy; y++) {
         final double tI_deltaEy = tI * deltaEy[y];
         for (int x = 0; x < maxx; x++) {
-          values[i++] = tB + tI_deltaEy * deltaEx[x];
+          values[i++] = tb + tI_deltaEy * deltaEx[x];
         }
       }
     }

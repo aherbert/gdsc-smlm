@@ -67,7 +67,7 @@ public class LSQLVMGradientProcedure extends BaseLSQLVMGradientProcedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     final double dy = y[++yi] - value;
 
     // Compute:
@@ -78,11 +78,11 @@ public class LSQLVMGradientProcedure extends BaseLSQLVMGradientProcedure {
     // parameters
 
     for (int j = 0, i = 0; j < n; j++) {
-      final double wgt = dy_da[j];
+      final double wgt = dyDa[j];
 
       for (int k = 0; k <= j; k++) {
-        // System.out.printf("alpha[%d] += dy_da[%d] * dy_da[%d];\n", i, j, k);
-        alpha[i++] += wgt * dy_da[k];
+        // System.out.printf("alpha[%d] += dyDa[%d] * dyDa[%d];\n", i, j, k);
+        alpha[i++] += wgt * dyDa[k];
       }
       beta[j] += wgt * dy;
     }

@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 /**
- * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks.
+ * Evaluates a 2-dimensional elliptical Gaussian function for a configured number of peaks.
  *
  * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
  * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
@@ -53,7 +53,7 @@ public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional elliptical Gaussian function for multiple peaks.
    *
    * <p>{@inheritDoc}
    */

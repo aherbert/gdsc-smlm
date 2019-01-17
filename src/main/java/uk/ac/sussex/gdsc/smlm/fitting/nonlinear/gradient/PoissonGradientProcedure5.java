@@ -47,30 +47,30 @@ public class PoissonGradientProcedure5 extends PoissonGradientProcedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     if (value > 0) {
       final double function = 1.0 / value;
 
-      data[0] += dy_da[0] * function * dy_da[0];
+      data[0] += dyDa[0] * function * dyDa[0];
       double w;
-      w = dy_da[1] * function;
-      data[1] += w * dy_da[0];
-      data[2] += w * dy_da[1];
-      w = dy_da[2] * function;
-      data[3] += w * dy_da[0];
-      data[4] += w * dy_da[1];
-      data[5] += w * dy_da[2];
-      w = dy_da[3] * function;
-      data[6] += w * dy_da[0];
-      data[7] += w * dy_da[1];
-      data[8] += w * dy_da[2];
-      data[9] += w * dy_da[3];
-      w = dy_da[4] * function;
-      data[10] += w * dy_da[0];
-      data[11] += w * dy_da[1];
-      data[12] += w * dy_da[2];
-      data[13] += w * dy_da[3];
-      data[14] += w * dy_da[4];
+      w = dyDa[1] * function;
+      data[1] += w * dyDa[0];
+      data[2] += w * dyDa[1];
+      w = dyDa[2] * function;
+      data[3] += w * dyDa[0];
+      data[4] += w * dyDa[1];
+      data[5] += w * dyDa[2];
+      w = dyDa[3] * function;
+      data[6] += w * dyDa[0];
+      data[7] += w * dyDa[1];
+      data[8] += w * dyDa[2];
+      data[9] += w * dyDa[3];
+      w = dyDa[4] * function;
+      data[10] += w * dyDa[0];
+      data[11] += w * dyDa[1];
+      data[12] += w * dyDa[2];
+      data[13] += w * dyDa[3];
+      data[14] += w * dyDa[4];
     }
   }
 

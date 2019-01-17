@@ -53,7 +53,7 @@ public class PoissonGammaGaussianConvolutionFunction
   private final double var;
   private final double sd;
   private final double range;
-  private final double var_by_2;
+  private final double twoVar;
 
   private final double logNormalisationGaussian;
 
@@ -80,7 +80,7 @@ public class PoissonGammaGaussianConvolutionFunction
       sd = variance;
       this.var = sd * sd;
     }
-    var_by_2 = var * 2;
+    twoVar = 2 * var;
 
     // Use a range to cover the Gaussian convolution
     range = 5 * this.sd;
@@ -120,7 +120,7 @@ public class PoissonGammaGaussianConvolutionFunction
   public double likelihood(final double x, final double mu) {
     if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return FastMath.exp((-x * x / var_by_2) + logNormalisationGaussian);
+      return FastMath.exp((-x * x / twoVar) + logNormalisationGaussian);
     }
 
     // Note:
@@ -155,7 +155,7 @@ public class PoissonGammaGaussianConvolutionFunction
           // Poisson-Gamma
           PoissonGammaFunction.logPoissonGamma(cmin, e, g)
               // Gaussian
-              - (MathUtils.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
+              - (MathUtils.pow2(cmin - o) / twoVar) + logNormalisationGaussian);
     }
 
     double pvalue = 0;
@@ -199,7 +199,7 @@ public class PoissonGammaGaussianConvolutionFunction
           // Poisson-Gamma
           PoissonGammaFunction.logPoissonGamma(c, e, g)
               // Gaussian
-              - (MathUtils.pow2(c - o) / var_by_2) + logNormalisationGaussian);
+              - (MathUtils.pow2(c - o) / twoVar) + logNormalisationGaussian);
     }
 
     // }
@@ -211,7 +211,7 @@ public class PoissonGammaGaussianConvolutionFunction
   public double logLikelihood(double x, double mu) {
     if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return (-x * x / var_by_2) + logNormalisationGaussian;
+      return (-x * x / twoVar) + logNormalisationGaussian;
     }
 
     final double max = x + range;

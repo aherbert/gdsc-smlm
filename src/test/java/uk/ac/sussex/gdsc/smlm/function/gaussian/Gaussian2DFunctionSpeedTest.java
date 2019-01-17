@@ -427,12 +427,12 @@ public class Gaussian2DFunctionSpeedTest {
       params[j + Gaussian2DFunction.ANGLE] = 0f; // (double) (Math.PI / 4.0); // Angle
     }
 
-    final double[] dy_da = new double[params.length];
+    final double[] dyDa = new double[params.length];
     final double[] y = new double[n];
     func.initialise(params);
     for (int i = 0; i < y.length; i++) {
       // Add random noise
-      y[i] = func.eval(i, dy_da)
+      y[i] = func.eval(i, dyDa)
           + ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() * 5f : rand.nextFloat() * 5f);
     }
 

@@ -45,6 +45,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -122,6 +123,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
@@ -160,6 +162,8 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Run different filtering methods on a set of benchmark fitting results outputting performance
@@ -936,7 +940,7 @@ public class BenchmarkFilterAnalysis
       }
 
       // Do the fit (using the current optimum filter)
-      fit.run(current.r.filter, residualsThreshold, failCount, duplicateDistance,
+      fit.run(current.result.filter, residualsThreshold, failCount, duplicateDistance,
           duplicateDistanceAbsolute);
       if (invalidBenchmarkSpotFitResults(false)) {
         return;
@@ -2637,7 +2641,7 @@ public class BenchmarkFilterAnalysis
     filterAnalysisStopWatch = StopWatch.createStarted();
     IJ.showStatus("Analysing filters ...");
     int setNumber = 0;
-    final DirectFilter currentOptimum = (optimum != null) ? optimum.r.filter : null;
+    final DirectFilter currentOptimum = (optimum != null) ? optimum.result.filter : null;
     for (final FilterSet filterSet : filterSets) {
       setNumber++;
       if (filterAnalysis(filterSet, setNumber, currentOptimum, rangeReduction) < 0) {
@@ -2896,7 +2900,7 @@ public class BenchmarkFilterAnalysis
 
   private void addToComponentAnalysisWindow(ComplexFilterScore filterScore,
       ComplexFilterScore bestFilterScore, String[] names) {
-    final FilterScoreResult result = filterScore.r;
+    final FilterScoreResult result = filterScore.result;
     final StringBuilder sb = new StringBuilder(result.text);
     sb.append('\t').append(filterScore.size);
     final int index = filterScore.index;
@@ -2978,7 +2982,7 @@ public class BenchmarkFilterAnalysis
     // Check if the filters are the same so allowing optimisation
     final boolean allSameType = filterSet.allSameType();
 
-    this.ga_resultsList = resultsList;
+    this.gaResultsList = resultsList;
 
     Chromosome<FilterScore> best = null;
     String algorithm = "";
@@ -2986,9 +2990,9 @@ public class BenchmarkFilterAnalysis
     // All the search algorithms use search dimensions.
     // Create search dimensions if needed (these are used for testing if the optimum is at the
     // limit).
-    ss_filter = null;
-    ss_lower = null;
-    ss_upper = null;
+    searchScoreFilter = null;
+    strengthLower = null;
+    strengthUpper = null;
     FixedDimension[] originalDimensions = null;
     boolean rangeInput = false;
     boolean[] disabled = null;
@@ -2996,8 +3000,8 @@ public class BenchmarkFilterAnalysis
     boolean nonInteractive = false;
     if (allSameType) {
       // There should always be 1 filter
-      ss_filter = (DirectFilter) filterSet.getFilters().get(0);
-      final int n = ss_filter.getNumberOfParameters();
+      searchScoreFilter = (DirectFilter) filterSet.getFilters().get(0);
+      final int n = searchScoreFilter.getNumberOfParameters();
 
       // Option to configure a range
       rangeInput = filterSet.getName().contains("Range");
@@ -3006,7 +3010,7 @@ public class BenchmarkFilterAnalysis
       if (rangeInput && filterSet.size() == 4) {
         originalDimensions = new FixedDimension[n];
         // This is used as min/lower/upper/max
-        final Filter minF = ss_filter;
+        final Filter minF = searchScoreFilter;
         final Filter lowerF = filterSet.getFilters().get(1);
         final Filter upperF = filterSet.getFilters().get(2);
         final Filter maxF = filterSet.getFilters().get(3);
@@ -3016,12 +3020,12 @@ public class BenchmarkFilterAnalysis
           final double upper = upperF.getParameterValue(i);
           range[i] = upper - lower;
           final double max = maxF.getParameterValue(i);
-          final double minIncrement = ss_filter.getParameterIncrement(i);
+          final double minIncrement = searchScoreFilter.getParameterIncrement(i);
           try {
             originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower, upper);
           } catch (final IllegalArgumentException ex) {
             ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
-                i, ss_filter.getParameterName(i));
+                i, searchScoreFilter.getParameterName(i));
             originalDimensions = null;
             rangeInput = false;
             break;
@@ -3032,7 +3036,7 @@ public class BenchmarkFilterAnalysis
       if (rangeInput && (filterSet.size() == 3 || filterSet.size() == 2)) {
         originalDimensions = new FixedDimension[n];
         // This is used as lower/upper[/increment]
-        final Filter lowerF = ss_filter;
+        final Filter lowerF = searchScoreFilter;
         final Filter upperF = filterSet.getFilters().get(1);
         // final Filter incF = filterSet.getFilters().get(2);
 
@@ -3049,15 +3053,15 @@ public class BenchmarkFilterAnalysis
           final double lower = lowerF.getParameterValue(i);
           final double upper = upperF.getParameterValue(i);
           range[i] = upper - lower;
-          final ParameterType type = ss_filter.getParameterType(i);
+          final ParameterType type = searchScoreFilter.getParameterType(i);
           final double min = BenchmarkSpotFit.getMin(type);
           final double max = BenchmarkSpotFit.getMax(type);
-          final double minIncrement = ss_filter.getParameterIncrement(i);
+          final double minIncrement = searchScoreFilter.getParameterIncrement(i);
           try {
             originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower, upper);
           } catch (final IllegalArgumentException ex) {
             ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
-                i, ss_filter.getParameterName(i));
+                i, searchScoreFilter.getParameterName(i));
             originalDimensions = null;
             rangeInput = false;
             break;
@@ -3071,7 +3075,7 @@ public class BenchmarkFilterAnalysis
 
         // Allow inputing a filter set (e.g. saved from previous optimisation)
         // Find the limits in the current scores
-        final double[] lower = ss_filter.getParameters().clone();
+        final double[] lower = searchScoreFilter.getParameters().clone();
         final double[] upper = lower.clone();
         // Allow the SearchSpace algorithms to be seeded with an initial population
         // for the first evaluation of the optimum. This is done when the input filter
@@ -3099,10 +3103,10 @@ public class BenchmarkFilterAnalysis
             originalDimensions[i] = new FixedDimension(lower[i]);
             continue;
           }
-          final ParameterType type = ss_filter.getParameterType(i);
+          final ParameterType type = searchScoreFilter.getParameterType(i);
           double min = BenchmarkSpotFit.getMin(type);
           double max = BenchmarkSpotFit.getMax(type);
-          final double minIncrement = ss_filter.getParameterIncrement(i);
+          final double minIncrement = searchScoreFilter.getParameterIncrement(i);
           if (min > lower[i]) {
             min = lower[i];
           }
@@ -3113,7 +3117,7 @@ public class BenchmarkFilterAnalysis
             originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower[i], upper[i]);
           } catch (final IllegalArgumentException ex) {
             ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
-                i, ss_filter.getParameterName(i));
+                i, searchScoreFilter.getParameterName(i));
             originalDimensions = null;
             break;
           }
@@ -3133,7 +3137,7 @@ public class BenchmarkFilterAnalysis
       if (originalDimensions != null) {
         // Use the current optimum if we are doing a range optimisation
         if (currentOptimum != null && rangeInput
-            && currentOptimum.getType().equals(ss_filter.getType()) && evolve != 0) {
+            && currentOptimum.getType().equals(searchScoreFilter.getType()) && evolve != 0) {
           // Suppress dialogs and use the current settings
           nonInteractive = true;
 
@@ -3165,12 +3169,12 @@ public class BenchmarkFilterAnalysis
 
         // Store the dimensions so we can do an 'at limit' check
         disabled = new boolean[originalDimensions.length];
-        ss_lower = new double[originalDimensions.length];
-        ss_upper = new double[originalDimensions.length];
+        strengthLower = new double[originalDimensions.length];
+        strengthUpper = new double[originalDimensions.length];
         for (int i = 0; i < disabled.length; i++) {
           disabled[i] = !originalDimensions[i].isActive();
-          ss_lower[i] = originalDimensions[i].lower;
-          ss_upper[i] = originalDimensions[i].upper;
+          strengthLower[i] = originalDimensions[i].lower;
+          strengthUpper[i] = originalDimensions[i].upper;
         }
       }
     } else {
@@ -3186,8 +3190,8 @@ public class BenchmarkFilterAnalysis
 
       // Remember the step size settings
       double[] stepSize = stepSizeMap.get(setNumber);
-      if (stepSize == null || stepSize.length != ss_filter.length()) {
-        stepSize = ss_filter.mutationStepRange().clone();
+      if (stepSize == null || stepSize.length != searchScoreFilter.length()) {
+        stepSize = searchScoreFilter.mutationStepRange().clone();
         for (int j = 0; j < stepSize.length; j++) {
           stepSize[j] *= delta;
         }
@@ -3203,7 +3207,7 @@ public class BenchmarkFilterAnalysis
       }
 
       GenericDialog gd = null;
-      final int[] indices = ss_filter.getChromosomeParameters();
+      final int[] indices = searchScoreFilter.getChromosomeParameters();
       boolean runAlgorithm = nonInteractive;
       if (!nonInteractive) {
         // Ask the user for the mutation step parameters.
@@ -3226,7 +3230,7 @@ public class BenchmarkFilterAnalysis
         for (int j = 0; j < indices.length; j++) {
           // Do not mutate parameters that were not expanded, i.e. the input did not vary them.
           final double step = (originalDimensions[indices[j]].isActive()) ? stepSize[j] : 0;
-          gd.addNumericField(getDialogName(prefix, ss_filter, indices[j]), step, 2);
+          gd.addNumericField(getDialogName(prefix, searchScoreFilter, indices[j]), step, 2);
         }
 
         gd.showDialog();
@@ -3270,7 +3274,7 @@ public class BenchmarkFilterAnalysis
           // A zero step size will keep the parameter but prevent range mutation.
           if (stepSize[j] < 0) {
             dimensions[indices[j]] =
-                new FixedDimension(ss_filter.getDisabledParameterValue(indices[j]));
+                new FixedDimension(searchScoreFilter.getDisabledParameterValue(indices[j]));
             disabled[indices[j]] = true;
           }
         }
@@ -3285,7 +3289,7 @@ public class BenchmarkFilterAnalysis
         final RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
         final SimpleMutator<FilterScore> mutator = new SimpleMutator<>(random, mutationRate);
         // Override the settings with the step length, a min of zero and the configured upper
-        final double[] upper = ss_filter.upperLimit();
+        final double[] upper = searchScoreFilter.upperLimit();
         mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
         final Recombiner<FilterScore> recombiner =
             new SimpleRecombiner<>(random, crossoverRate, meanChildren);
@@ -3320,21 +3324,21 @@ public class BenchmarkFilterAnalysis
               SearchSpace.sampleWithoutRounding(dimensions, populationSize - filters.size(), null);
           filters.addAll(searchSpaceToFilters(sample));
         }
-        ga_population = new Population<>(filters);
-        ga_population.setPopulationSize(populationSize);
-        ga_population.setFailureLimit(failureLimit);
+        gaPopulation = new Population<>(filters);
+        gaPopulation.setPopulationSize(populationSize);
+        gaPopulation.setFailureLimit(failureLimit);
         selectionStrategy.setTracker(this);
 
         // Evolve
         algorithm = EVOLVE[evolve];
-        ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
-        ga_iteration = 0;
-        ga_population.setTracker(this);
+        gaStatusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
+        gaIteration = 0;
+        gaPopulation.setTracker(this);
 
         createGAWindow();
         resumeFilterTimer();
 
-        best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
+        best = gaPopulation.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
         if (best != null) {
           // In case optimisation was stopped
@@ -3345,7 +3349,7 @@ public class BenchmarkFilterAnalysis
 
           // Now update the filter set for final assessment
           filterSet = new FilterSet(filterSet.getName(),
-              populationToFilters(ga_population.getIndividuals()));
+              populationToFilters(gaPopulation.getIndividuals()));
 
           // Option to save the filters
           if (saveOption) {
@@ -3368,7 +3372,7 @@ public class BenchmarkFilterAnalysis
 
       // Remember the enabled settings
       boolean[] enabled = searchRangeMap.get(setNumber);
-      final int n = ss_filter.getNumberOfParameters();
+      final int n = searchScoreFilter.getNumberOfParameters();
       if (enabled == null || enabled.length != n) {
         enabled = new boolean[n];
         Arrays.fill(enabled, true);
@@ -3404,7 +3408,7 @@ public class BenchmarkFilterAnalysis
 
         // Add choice of fields to optimise
         for (int i = 0; i < n; i++) {
-          gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
+          gd.addCheckbox(getDialogName(prefix, searchScoreFilter, i), enabled[i]);
         }
 
         gd.showDialog();
@@ -3415,7 +3419,7 @@ public class BenchmarkFilterAnalysis
         final SearchDimension[] dimensions = new SearchDimension[n];
         if (!nonInteractive) {
           if (gd == null) {
-            throw new RuntimeException("The dialog has no been shown");
+            throw new IllegalStateException("The dialog has not been shown");
           }
           rangeSearchWidth = (int) gd.getNextNumber();
           if (!isStepSearch) {
@@ -3449,11 +3453,11 @@ public class BenchmarkFilterAnalysis
             } catch (final IllegalArgumentException ex) {
               IJ.error(TITLE,
                   String.format("Unable to configure dimension [%d] %s: " + ex.getMessage(), i,
-                      ss_filter.getParameterName(i)));
+                      searchScoreFilter.getParameterName(i)));
               return -1;
             }
           } else {
-            dimensions[i] = new SearchDimension(ss_filter.getDisabledParameterValue(i));
+            dimensions[i] = new SearchDimension(searchScoreFilter.getDisabledParameterValue(i));
           }
         }
         if (disabled == null) {
@@ -3482,9 +3486,9 @@ public class BenchmarkFilterAnalysis
           resumeFilterTimer();
         } else {
           algorithm = EVOLVE[evolve] + " " + rangeSearchWidth;
-          ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
-          ga_iteration = 0;
-          es_optimum = null;
+          gaStatusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
+          gaIteration = 0;
+          filterScoreOptimum = null;
 
           final SearchSpace ss = new SearchSpace();
           ss.setTracker(this);
@@ -3518,7 +3522,7 @@ public class BenchmarkFilterAnalysis
             // In case optimisation was stopped
             IJ.resetEscape();
 
-            best = ((SimpleFilterScore) optimum.getScore()).r.filter;
+            best = ((SimpleFilterScore) optimum.getScore()).result.filter;
 
             if (seedSize > 0) {
               // Not required as the search now respects the min interval
@@ -3546,7 +3550,7 @@ public class BenchmarkFilterAnalysis
       pauseFilterTimer();
 
       boolean[] enabled = searchRangeMap.get(setNumber);
-      final int n = ss_filter.getNumberOfParameters();
+      final int n = searchScoreFilter.getNumberOfParameters();
       if (enabled == null || enabled.length != n) {
         enabled = new boolean[n];
         Arrays.fill(enabled, true);
@@ -3578,7 +3582,7 @@ public class BenchmarkFilterAnalysis
 
         // Add choice of fields to optimise
         for (int i = 0; i < n; i++) {
-          gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
+          gd.addCheckbox(getDialogName(prefix, searchScoreFilter, i), enabled[i]);
         }
 
         gd.showDialog();
@@ -3604,7 +3608,7 @@ public class BenchmarkFilterAnalysis
 
         for (int i = 0; i < n; i++) {
           if (!enabled[i]) {
-            dimensions[i] = new FixedDimension(ss_filter.getDisabledParameterValue(i));
+            dimensions[i] = new FixedDimension(searchScoreFilter.getDisabledParameterValue(i));
           }
         }
         if (disabled == null) {
@@ -3615,9 +3619,9 @@ public class BenchmarkFilterAnalysis
         }
 
         algorithm = EVOLVE[evolve];
-        ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
-        ga_iteration = 0;
-        es_optimum = null;
+        gaStatusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
+        gaIteration = 0;
+        filterScoreOptimum = null;
 
         final SearchSpace ss = new SearchSpace();
         ss.setTracker(this);
@@ -3641,7 +3645,7 @@ public class BenchmarkFilterAnalysis
           // In case optimisation was stopped
           IJ.resetEscape();
 
-          best = ((SimpleFilterScore) optimum.getScore()).r.filter;
+          best = ((SimpleFilterScore) optimum.getScore()).result.filter;
 
           // Not required as the search now respects the min interval
           // Enumerate on the min interval to produce the final filter
@@ -3728,7 +3732,7 @@ public class BenchmarkFilterAnalysis
         disabled = new boolean[originalDimensions.length];
       }
 
-      final DirectFilter filter = max.r.filter;
+      final DirectFilter filter = max.result.filter;
       final int[] indices = filter.getChromosomeParameters();
       atLimit = new char[indices.length];
       final StringBuilder sb = new StringBuilder(200);
@@ -3787,11 +3791,11 @@ public class BenchmarkFilterAnalysis
     // Note that max should never be null since this method is not run with an empty filter set
 
     // We may have no filters that pass the criteria
-    final String type = max.r.filter.getType();
+    final String type = max.result.filter.getType();
     if (!max.criteriaPassed) {
       ImageJUtils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
           MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria),
-          max.r.filter.getName());
+          max.result.filter.getName());
       return 0;
     }
 
@@ -3804,7 +3808,7 @@ public class BenchmarkFilterAnalysis
     // if (allSameType)
     // {
     final ComplexFilterScore newFilterScore =
-        new ComplexFilterScore(max.r, atLimit, algorithm, analysisStopWatch.getTime(), "", 0);
+        new ComplexFilterScore(max.result, atLimit, algorithm, analysisStopWatch.getTime(), "", 0);
     addBestFilter(type, allowDuplicates, newFilterScore);
     // }
 
@@ -3934,15 +3938,15 @@ public class BenchmarkFilterAnalysis
   private Chromosome<FilterScore> enumerateMinInterval(Chromosome<FilterScore> best,
       boolean[] enabled, int[] indices) {
     // Enumerate on the min interval to produce the final filter
-    ss_filter = (DirectFilter) best;
-    es_optimum = null;
-    SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
+    searchScoreFilter = (DirectFilter) best;
+    filterScoreOptimum = null;
+    SearchDimension[] dimensions2 = new SearchDimension[searchScoreFilter.getNumberOfParameters()];
     for (int i = 0; i < indices.length; i++) {
       final int j = indices[i];
       if (enabled[j]) {
-        final double minIncrement = ss_filter.getParameterIncrement(j);
+        final double minIncrement = searchScoreFilter.getParameterIncrement(j);
         try {
-          final double value = ss_filter.getParameterValue(j);
+          final double value = searchScoreFilter.getParameterValue(j);
           final double max = MathUtils.ceil(value, minIncrement);
           final double min = MathUtils.floor(value, minIncrement);
           dimensions2[i] = new SearchDimension(min, max, minIncrement, 1);
@@ -3950,7 +3954,7 @@ public class BenchmarkFilterAnalysis
           dimensions2[i].setIncrement(minIncrement);
         } catch (final IllegalArgumentException ex) {
           IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + ex.getMessage(),
-              j, ss_filter.getParameterName(j)));
+              j, searchScoreFilter.getParameterName(j)));
           dimensions2 = null;
           break;
         }
@@ -3960,7 +3964,7 @@ public class BenchmarkFilterAnalysis
       // Add dimensions that have been missed
       for (int i = 0; i < dimensions2.length; i++) {
         if (dimensions2[i] == null) {
-          dimensions2[i] = new SearchDimension(ss_filter.getParameterValue(i));
+          dimensions2[i] = new SearchDimension(searchScoreFilter.getParameterValue(i));
         }
       }
 
@@ -3969,7 +3973,7 @@ public class BenchmarkFilterAnalysis
       final SearchResult<FilterScore> optimum = ss.findOptimum(dimensions2, this);
 
       if (optimum != null) {
-        best = ((SimpleFilterScore) optimum.getScore()).r.filter;
+        best = ((SimpleFilterScore) optimum.getScore()).result.filter;
       }
     }
     return best;
@@ -3988,11 +3992,11 @@ public class BenchmarkFilterAnalysis
    */
   private ComplexFilterScore parameterAnalysis(boolean nonInteractive,
       ComplexFilterScore currentOptimum, double rangeReduction) {
-    this.ga_resultsList = resultsList;
+    this.gaResultsList = resultsList;
     String algorithm = "";
 
     // All the search algorithms use search dimensions.
-    ss_filter = currentOptimum.r.filter;
+    searchScoreFilter = currentOptimum.result.filter;
     final FixedDimension[] originalDimensions = new FixedDimension[3];
     double[] point = createParameters();
     final String[] names = {"Fail count", "Residuals threshold", "Duplicate distance"};
@@ -4066,8 +4070,8 @@ public class BenchmarkFilterAnalysis
       if (!nonInteractive) {
         // Ask the user for the search parameters.
         gd = new GenericDialog(TITLE);
-        gd.addMessage(
-            "Configure the " + SEARCH[searchParam] + " algorithm for " + ss_filter.getType());
+        gd.addMessage("Configure the " + SEARCH[searchParam] + " algorithm for "
+            + searchScoreFilter.getType());
         gd.addSlider("Width", 1, 5, pRangeSearchWidth);
         if (!isStepSearch) {
           gd.addNumericField("Max_iterations", pMaxIterations, 0);
@@ -4135,9 +4139,9 @@ public class BenchmarkFilterAnalysis
           resumeParameterTimer();
         } else {
           algorithm = SEARCH[searchParam] + " " + pRangeSearchWidth;
-          ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
-          ga_iteration = 0;
-          p_optimum = null;
+          gaStatusPrefix = algorithm + " " + searchScoreFilter.getName() + " ... ";
+          gaIteration = 0;
+          parameterScoreOptimum = null;
 
           final SearchSpace ss = new SearchSpace();
           ss.setTracker(this);
@@ -4190,8 +4194,8 @@ public class BenchmarkFilterAnalysis
       if (!nonInteractive) {
         // Ask the user for the search parameters.
         gd = new GenericDialog(TITLE);
-        gd.addMessage(
-            "Configure the " + SEARCH[searchParam] + " algorithm for " + ss_filter.getType());
+        gd.addMessage("Configure the " + SEARCH[searchParam] + " algorithm for "
+            + searchScoreFilter.getType());
         gd.addNumericField("Max_iterations", pMaxIterations, 0);
         gd.addNumericField("Converged_count", pConvergedCount, 0);
         gd.addNumericField("Samples", pEnrichmentSamples, 0);
@@ -4214,9 +4218,9 @@ public class BenchmarkFilterAnalysis
         }
 
         algorithm = SEARCH[searchParam];
-        ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
-        ga_iteration = 0;
-        p_optimum = null;
+        gaStatusPrefix = algorithm + " " + searchScoreFilter.getName() + " ... ";
+        gaIteration = 0;
+        parameterScoreOptimum = null;
 
         final SearchSpace ss = new SearchSpace();
         ss.setTracker(this);
@@ -4286,9 +4290,9 @@ public class BenchmarkFilterAnalysis
         resumeParameterTimer();
       } else {
         algorithm = SEARCH[searchParam];
-        ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
-        ga_iteration = 0;
-        p_optimum = null;
+        gaStatusPrefix = algorithm + " " + searchScoreFilter.getName() + " ... ";
+        gaIteration = 0;
+        parameterScoreOptimum = null;
 
         final SearchSpace ss = new SearchSpace();
 
@@ -4308,7 +4312,7 @@ public class BenchmarkFilterAnalysis
       }
     }
 
-    IJ.showStatus("Analysing " + ss_filter.getName() + " ...");
+    IJ.showStatus("Analysing " + searchScoreFilter.getName() + " ...");
 
     // Update the parameters using the optimum
     failCount = (int) Math.round(point[0]);
@@ -4331,12 +4335,12 @@ public class BenchmarkFilterAnalysis
     // an ss_filter.clone() issue,
     // i.e. multi-threading use of the filter clone is not working.
     // Or it could be that the optimisation produced params off the min-interval grid
-    final FilterScoreResult scoreResult = scoreFilter(ss_filter);
+    final FilterScoreResult scoreResult = scoreFilter(searchScoreFilter);
     if (optimum != null) {
       if (scoreResult.score != optimum.getScore().score
           && scoreResult.criteria != optimum.getScore().criteria) {
-        final ParameterScoreResult r = scoreFilter((DirectFilter) ss_filter.clone(), minimalFilter,
-            failCount, residualsThreshold, duplicateDistance,
+        final ParameterScoreResult r = scoreFilter((DirectFilter) searchScoreFilter.clone(),
+            minimalFilter, failCount, residualsThreshold, duplicateDistance,
             createCoordinateStore(duplicateDistance), false);
 
         System.out.printf("Weird re- score of the filter: %f!=%f or %f!=%f (%f:%f)\n",
@@ -4398,30 +4402,32 @@ public class BenchmarkFilterAnalysis
       if (max.criteriaPassed) {
         ImageJUtils.log(
             "Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
-            ss_filter.getName(), MathUtils.rounded((invertScore) ? -max.score : max.score),
+            searchScoreFilter.getName(), MathUtils.rounded((invertScore) ? -max.score : max.score),
             MathUtils.rounded((invertCriteria) ? -minCriteria : minCriteria),
             limitFailCount + limitRange, sb.toString());
       } else {
         ImageJUtils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
-            ss_filter.getName(), MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria),
+            searchScoreFilter.getName(),
+            MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria),
             limitFailCount + limitRange, sb.toString());
       }
     }
 
     // We may have no filters that pass the criteria
-    final String type = max.r.filter.getType();
+    final String type = max.result.filter.getType();
     if (!max.criteriaPassed) {
       ImageJUtils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
           MathUtils.rounded((invertCriteria) ? -max.criteria : max.criteria),
-          max.r.filter.getName());
+          max.result.filter.getName());
       return null;
     }
 
     // Update without duplicates
     final boolean allowDuplicates = false;
     // Re-use the atLimit and algorithm for the input optimum
-    final ComplexFilterScore newFilterScore = new ComplexFilterScore(max.r, currentOptimum.atLimit,
-        currentOptimum.algorithm, currentOptimum.time, algorithm, analysisStopWatch.getTime());
+    final ComplexFilterScore newFilterScore =
+        new ComplexFilterScore(max.result, currentOptimum.atLimit, currentOptimum.algorithm,
+            currentOptimum.time, algorithm, analysisStopWatch.getTime());
     addBestFilter(type, allowDuplicates, newFilterScore);
 
     // Add spacer at end of each result set
@@ -4635,7 +4641,7 @@ public class BenchmarkFilterAnalysis
   private FilterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
       boolean createTextResult, CoordinateStore coordinateStore) {
     final FractionClassificationResult r =
-        scoreFilter(filter, minFilter, ga_resultsListToScore, coordinateStore);
+        scoreFilter(filter, minFilter, gaResultsListToScore, coordinateStore);
 
     // // DEBUG - Test if the two methods produce the same results
     // FractionClassificationResult r2 = scoreFilter(filter, minFilter,
@@ -4692,9 +4698,8 @@ public class BenchmarkFilterAnalysis
     final MultiPathFilter multiPathFilter =
         new MultiPathFilter(filter, minFilter, residualsThreshold);
 
-    final FractionClassificationResult r =
-        multiPathFilter.fractionScoreSubset(ga_resultsListToScore,
-            ConsecutiveFailCounter.create(failCount), nActual, null, null, coordinateStore);
+    final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(gaResultsListToScore,
+        ConsecutiveFailCounter.create(failCount), nActual, null, null, coordinateStore);
 
     final double score = getScore(r);
     final double criteria = getCriteria(r);
@@ -5769,7 +5774,7 @@ public class BenchmarkFilterAnalysis
     }
 
     public DirectFilter getFilter() {
-      return r.filter;
+      return result.filter;
     }
 
     public char atLimit(int i) {
@@ -5834,7 +5839,7 @@ public class BenchmarkFilterAnalysis
         return true;
       }
       if (IJ.escapePressed()) {
-        ImageJUtils.log("STOPPED " + ga_statusPrefix);
+        ImageJUtils.log("STOPPED " + gaStatusPrefix);
         IJ.resetEscape(); // Allow the plugin to continue processing
         return true;
       }
@@ -5931,7 +5936,7 @@ public class BenchmarkFilterAnalysis
       }
       // Stop if interrupted
       if (IJ.escapePressed()) {
-        ImageJUtils.log("STOPPED " + ga_statusPrefix);
+        ImageJUtils.log("STOPPED " + gaStatusPrefix);
         IJ.resetEscape(); // Allow the plugin to continue processing
         return true;
       }
@@ -6036,12 +6041,12 @@ public class BenchmarkFilterAnalysis
   }
 
   // Used to implement the FitnessFunction interface
-  private String ga_statusPrefix = "";
-  private Population<FilterScore> ga_population;
+  private String gaStatusPrefix = "";
+  private Population<FilterScore> gaPopulation;
 
   // Used to set the strength on a filter
-  private double[] ss_lower;
-  private double[] ss_upper;
+  private double[] strengthLower;
+  private double[] strengthUpper;
 
   /**
    * Sets the strength on all the filters.
@@ -6050,10 +6055,10 @@ public class BenchmarkFilterAnalysis
    * @return the filter set
    */
   private FilterSet setStrength(FilterSet filterSet) {
-    if (ss_lower != null) {
+    if (strengthLower != null) {
       for (final Filter f : filterSet.getFilters()) {
         final DirectFilter df = (DirectFilter) f;
-        df.setStrength(df.computeStrength(ss_lower, ss_upper));
+        df.setStrength(df.computeStrength(strengthLower, strengthUpper));
       }
     }
     return filterSet;
@@ -6066,11 +6071,11 @@ public class BenchmarkFilterAnalysis
    * @return the filter set
    */
   private FilterSet setUncomputedStrength(FilterSet filterSet) {
-    if (ss_lower != null) {
+    if (strengthLower != null) {
       for (final Filter f : filterSet.getFilters()) {
         final DirectFilter df = (DirectFilter) f;
         if (Float.isNaN(df.getStrength())) {
-          df.setStrength(df.computeStrength(ss_lower, ss_upper));
+          df.setStrength(df.computeStrength(strengthLower, strengthUpper));
         }
       }
     }
@@ -6078,13 +6083,13 @@ public class BenchmarkFilterAnalysis
   }
 
   // Used for the scoring of filter sets
-  private MultiPathFitResults[] ga_resultsList;
-  private MultiPathFitResults[] ga_resultsListToScore;
-  private boolean ga_subset;
-  private int ga_iteration;
-  private DirectFilter ss_filter;
-  private FilterScoreResult[] ga_scoreResults;
-  private int ga_scoreIndex;
+  private MultiPathFitResults[] gaResultsList;
+  private MultiPathFitResults[] gaResultsListToScore;
+  private boolean gaSubset;
+  private int gaIteration;
+  private DirectFilter searchScoreFilter;
+  private FilterScoreResult[] gaScoreResults;
+  private int gaScoreIndex;
 
   private class ScoreJob {
     final DirectFilter filter;
@@ -6140,8 +6145,9 @@ public class BenchmarkFilterAnalysis
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING, "Interrupted!",
+            ex);
+        Thread.currentThread().interrupt();
       } finally {
         finished = true;
       }
@@ -6176,7 +6182,7 @@ public class BenchmarkFilterAnalysis
       this.jobs = jobs;
       this.scoreResults = scoreResults;
       this.createTextResult = createTextResult;
-      this.filter = (DirectFilter) ss_filter.clone();
+      this.filter = (DirectFilter) searchScoreFilter.clone();
       this.minFilter = (minimalFilter != null) ? (DirectFilter) minimalFilter.clone() : null;
       getBounds();
       this.gridCoordinateStore =
@@ -6197,8 +6203,9 @@ public class BenchmarkFilterAnalysis
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING, "Interrupted!",
+            ex);
+        Thread.currentThread().interrupt();
       } finally {
         finished = true;
       }
@@ -6308,7 +6315,10 @@ public class BenchmarkFilterAnalysis
         try {
           threads.get(i).join();
         } catch (final InterruptedException ex) {
-          ex.printStackTrace();
+          Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING,
+              "Interrupted!", ex);
+          Thread.currentThread().interrupt();
+          throw new ConcurrentRuntimeException("Unexpected interruption", ex);
         }
       }
       threads.clear();
@@ -6337,8 +6347,8 @@ public class BenchmarkFilterAnalysis
       return null;
     }
 
-    ga_resultsListToScore = ga_resultsList;
-    ga_subset = false;
+    gaResultsListToScore = gaResultsList;
+    gaSubset = false;
 
     ParameterScoreResult[] scoreResults = new ParameterScoreResult[points.length];
 
@@ -6347,7 +6357,7 @@ public class BenchmarkFilterAnalysis
       final int failCount = (int) Math.round(points[0][0]);
       final double residualsThreshold = points[0][1];
       final double duplicateDistance = points[0][2];
-      scoreResults[0] = scoreFilter(ss_filter, minimalFilter, failCount, residualsThreshold,
+      scoreResults[0] = scoreFilter(searchScoreFilter, minimalFilter, failCount, residualsThreshold,
           duplicateDistance, createCoordinateStore(duplicateDistance), createTextResult);
     } else {
       // Multi-thread score all the result
@@ -6383,7 +6393,10 @@ public class BenchmarkFilterAnalysis
         try {
           threads.get(i).join();
         } catch (final InterruptedException ex) {
-          ex.printStackTrace();
+          Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING,
+              "Interrupted!", ex);
+          Thread.currentThread().interrupt();
+          throw new ConcurrentRuntimeException("Unexpected interruption", ex);
         }
       }
       threads.clear();
@@ -6408,7 +6421,10 @@ public class BenchmarkFilterAnalysis
     try {
       jobs.put(job);
     } catch (final InterruptedException ex) {
-      throw new RuntimeException("Unexpected interruption", ex);
+      Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING, "Interrupted!",
+          ex);
+      Thread.currentThread().interrupt();
+      throw new ConcurrentRuntimeException("Unexpected interruption", ex);
     }
   }
 
@@ -6420,8 +6436,8 @@ public class BenchmarkFilterAnalysis
    */
   private void initialiseScoring(FilterSet filterSet) {
     // Initialise with the candidate true and false negative scores
-    ga_resultsListToScore = ga_resultsList;
-    ga_subset = false;
+    gaResultsListToScore = gaResultsList;
+    gaSubset = false;
 
     if (filterSet.size() < 2) {
       return;
@@ -6480,10 +6496,10 @@ public class BenchmarkFilterAnalysis
 
     final Filter weakest = filterSet.createWeakestFilter();
     if (weakest != null) {
-      ga_subset = true;
+      gaSubset = true;
 
-      ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter)
-          .filterSubset(ga_resultsList, ConsecutiveFailCounter.create(failCount), true);
+      gaResultsListToScore = createMPF((DirectFilter) weakest, minimalFilter)
+          .filterSubset(gaResultsList, ConsecutiveFailCounter.create(failCount), true);
 
       // MultiPathFilter.resetValidationFlag(ga_resultsListToScore);
 
@@ -6499,17 +6515,17 @@ public class BenchmarkFilterAnalysis
    * Finish scoring and reset the subset.
    */
   private void finishScoring() {
-    if (ga_subset) {
+    if (gaSubset) {
       // Reset the validation flag
-      MultiPathFilter.resetValidationFlag(ga_resultsListToScore);
+      MultiPathFilter.resetValidationFlag(gaResultsListToScore);
     }
   }
 
   @Override
   public void initialise(List<? extends Chromosome<FilterScore>> individuals) {
-    ga_iteration++;
-    ga_scoreIndex = 0;
-    ga_scoreResults =
+    gaIteration++;
+    gaScoreIndex = 0;
+    gaScoreResults =
         scoreFilters(setStrength(new FilterSet(populationToFilters(individuals))), false);
   }
 
@@ -6534,7 +6550,7 @@ public class BenchmarkFilterAnalysis
     }
     if (searchSpace != null) {
       for (int i = 0; i < searchSpace.length; i++) {
-        filters.add(ss_filter.create(searchSpace[i]));
+        filters.add(searchScoreFilter.create(searchSpace[i]));
       }
     }
     return filters;
@@ -6543,13 +6559,13 @@ public class BenchmarkFilterAnalysis
   @Override
   public FilterScore fitness(Chromosome<FilterScore> chromosome) {
     // In case the user aborted with Escape
-    if (ga_scoreResults == null) {
+    if (gaScoreResults == null) {
       return null;
     }
 
     // Assume that fitness will be called in the order of the individuals passed to the initialise
     // function.
-    final FilterScoreResult scoreResult = ga_scoreResults[ga_scoreIndex++];
+    final FilterScoreResult scoreResult = gaScoreResults[gaScoreIndex++];
 
     // Set this to null and it will be removed at the next population selection
     if (scoreResult.score == 0) {
@@ -6562,7 +6578,7 @@ public class BenchmarkFilterAnalysis
   @Override
   public void shutdown() {
     // Report the score for the best filter
-    final List<? extends Chromosome<FilterScore>> individuals = ga_population.getIndividuals();
+    final List<? extends Chromosome<FilterScore>> individuals = gaPopulation.getIndividuals();
 
     FilterScore max = null;
     for (final Chromosome<FilterScore> c : individuals) {
@@ -6581,28 +6597,25 @@ public class BenchmarkFilterAnalysis
     // This filter may not have been part of the scored subset so use the entire results set for
     // reporting
     final FractionClassificationResult r =
-        scoreFilter(filter, minimalFilter, ga_resultsList, coordinateStore);
+        scoreFilter(filter, minimalFilter, gaResultsList, coordinateStore);
 
     final StringBuilder text = createResult(filter, r);
-    add(text, ga_iteration);
+    add(text, gaIteration);
     gaWindow.append(text.toString());
   }
 
-  private SimpleFilterScore es_optimum;
-  private SimpleParameterScore p_optimum;
+  private SimpleFilterScore filterScoreOptimum;
+  private SimpleParameterScore parameterScoreOptimum;
 
   private class ParameterScoreFunction implements FullScoreFunction<FilterScore> {
     @Override
     public SearchResult<FilterScore> findOptimum(double[][] points) {
-      ga_iteration++;
-      SimpleParameterScore max = p_optimum;
+      gaIteration++;
+      SimpleParameterScore max = parameterScoreOptimum;
 
       // Sort points to allow the CoordinateStore to be reused with the same duplicate distance
-      Arrays.sort(points, new Comparator<double[]>() {
-        @Override
-        public int compare(double[] o1, double[] o2) {
-          return BenchmarkFilterAnalysis.compare(o1[2], o2[2]);
-        }
+      Arrays.sort(points, (o1, o2) -> {
+        return BenchmarkFilterAnalysis.compare(o1[2], o2[2]);
       });
 
       final ParameterScoreResult[] scoreResults = scoreFilters(points, showResultsTable);
@@ -6613,8 +6626,8 @@ public class BenchmarkFilterAnalysis
 
       for (int index = 0; index < scoreResults.length; index++) {
         final ParameterScoreResult scoreResult = scoreResults[index];
-        final SimpleParameterScore result =
-            new SimpleParameterScore(ss_filter, scoreResult, scoreResult.criteria >= minCriteria);
+        final SimpleParameterScore result = new SimpleParameterScore(searchScoreFilter, scoreResult,
+            scoreResult.criteria >= minCriteria);
         if (result.compareTo(max) < 0) {
           max = result;
         }
@@ -6634,12 +6647,12 @@ public class BenchmarkFilterAnalysis
         }
       }
 
-      p_optimum = max;
+      parameterScoreOptimum = max;
 
       // Add the best filter to the table
       // This filter may not have been part of the scored subset so use the entire results set for
       // reporting
-      final double[] parameters = max.r.parameters;
+      final double[] parameters = max.result.parameters;
       final int failCount = (int) Math.round(parameters[0]);
       final double residualsThreshold = parameters[1];
       final double duplicateDistance = parameters[2];
@@ -6647,14 +6660,14 @@ public class BenchmarkFilterAnalysis
       // System.out.println(Arrays.toString(parameters));
 
       final MultiPathFilter multiPathFilter =
-          new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
+          new MultiPathFilter(searchScoreFilter, minimalFilter, residualsThreshold);
       final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          ga_resultsListToScore, ConsecutiveFailCounter.create(failCount), nActual, null, null,
+          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), nActual, null, null,
           createCoordinateStore(duplicateDistance));
 
-      final StringBuilder text = createResult(ss_filter, r,
+      final StringBuilder text = createResult(searchScoreFilter, r,
           buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
-      add(text, ga_iteration);
+      add(text, gaIteration);
       gaWindow.append(text.toString());
 
       return new SearchResult<>(parameters, max);
@@ -6662,8 +6675,8 @@ public class BenchmarkFilterAnalysis
 
     @Override
     public SearchResult<FilterScore>[] score(double[][] points) {
-      ga_iteration++;
-      SimpleParameterScore max = p_optimum;
+      gaIteration++;
+      SimpleParameterScore max = parameterScoreOptimum;
 
       // Sort points to allow the CoordinateStore to be reused with the same duplicate distance
       Arrays.sort(points, new Comparator<double[]>() {
@@ -6683,8 +6696,8 @@ public class BenchmarkFilterAnalysis
       final SearchResult<FilterScore>[] scores = new SearchResult[scoreResults.length];
       for (int index = 0; index < scoreResults.length; index++) {
         final ParameterScoreResult scoreResult = scoreResults[index];
-        final SimpleParameterScore result =
-            new SimpleParameterScore(ss_filter, scoreResult, scoreResult.criteria >= minCriteria);
+        final SimpleParameterScore result = new SimpleParameterScore(searchScoreFilter, scoreResult,
+            scoreResult.criteria >= minCriteria);
         if (result.compareTo(max) < 0) {
           max = result;
         }
@@ -6705,24 +6718,24 @@ public class BenchmarkFilterAnalysis
         }
       }
 
-      p_optimum = max;
+      parameterScoreOptimum = max;
 
       // Add the best filter to the table
       // This filter may not have been part of the scored subset so use the entire results set for
       // reporting
-      final double[] parameters = max.r.parameters;
+      final double[] parameters = max.result.parameters;
       final int failCount = (int) Math.round(parameters[0]);
       final double residualsThreshold = parameters[1];
       final double duplicateDistance = parameters[2];
       final MultiPathFilter multiPathFilter =
-          new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
+          new MultiPathFilter(searchScoreFilter, minimalFilter, residualsThreshold);
       final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          ga_resultsListToScore, ConsecutiveFailCounter.create(failCount), nActual, null, null,
+          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), nActual, null, null,
           createCoordinateStore(duplicateDistance));
 
-      final StringBuilder text = createResult(ss_filter, r,
+      final StringBuilder text = createResult(searchScoreFilter, r,
           buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
-      add(text, ga_iteration);
+      add(text, gaIteration);
       gaWindow.append(text.toString());
 
       return scores;
@@ -6746,8 +6759,8 @@ public class BenchmarkFilterAnalysis
 
   @Override
   public SearchResult<FilterScore> findOptimum(double[][] points) {
-    ga_iteration++;
-    SimpleFilterScore max = es_optimum;
+    gaIteration++;
+    SimpleFilterScore max = filterScoreOptimum;
 
     final FilterScoreResult[] scoreResults =
         scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
@@ -6765,17 +6778,17 @@ public class BenchmarkFilterAnalysis
       }
     }
 
-    es_optimum = max;
+    filterScoreOptimum = max;
 
     // Add the best filter to the table
     // This filter may not have been part of the scored subset so use the entire results set for
     // reporting
-    final DirectFilter filter = max.r.filter;
+    final DirectFilter filter = max.result.filter;
     final FractionClassificationResult r =
-        scoreFilter(filter, minimalFilter, ga_resultsList, coordinateStore);
+        scoreFilter(filter, minimalFilter, gaResultsList, coordinateStore);
 
     final StringBuilder text = createResult(filter, r);
-    add(text, ga_iteration);
+    add(text, gaIteration);
     gaWindow.append(text.toString());
 
     return new SearchResult<>(filter.getParameters(), max);
@@ -6783,8 +6796,8 @@ public class BenchmarkFilterAnalysis
 
   @Override
   public SearchResult<FilterScore>[] score(double[][] points) {
-    ga_iteration++;
-    SimpleFilterScore max = es_optimum;
+    gaIteration++;
+    SimpleFilterScore max = filterScoreOptimum;
 
     final FilterScoreResult[] scoreResults =
         scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
@@ -6802,20 +6815,20 @@ public class BenchmarkFilterAnalysis
       if (result.compareTo(max) < 0) {
         max = result;
       }
-      scores[index] = new SearchResult<>(result.r.filter.getParameters(), result);
+      scores[index] = new SearchResult<>(result.result.filter.getParameters(), result);
     }
 
-    es_optimum = max;
+    filterScoreOptimum = max;
 
     // Add the best filter to the table
     // This filter may not have been part of the scored subset so use the entire results set for
     // reporting
-    final DirectFilter filter = max.r.filter;
+    final DirectFilter filter = max.result.filter;
     final FractionClassificationResult r =
-        scoreFilter(filter, minimalFilter, ga_resultsList, coordinateStore);
+        scoreFilter(filter, minimalFilter, gaResultsList, coordinateStore);
 
     final StringBuilder text = createResult(filter, r);
-    add(text, ga_iteration);
+    add(text, gaIteration);
     gaWindow.append(text.toString());
 
     return scores;
@@ -6909,7 +6922,7 @@ public class BenchmarkFilterAnalysis
 
   @Override
   public void status(String format, Object... args) {
-    IJ.showStatus(ga_statusPrefix + String.format(format, args));
+    IJ.showStatus(gaStatusPrefix + String.format(format, args));
   }
 
   @Override

@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a single peak.
+ * Evaluates a 2-dimensional Gaussian function for a single peak.
  *
  * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
  * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
@@ -100,7 +100,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+   * Evaluates a 2-dimensional circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
    */
@@ -117,7 +117,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+   * Evaluates a 2-dimensional circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
    */
@@ -133,7 +133,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
     return background + height * FastMath.exp(aa * (dx * dx + dy * dy));
   }
 
-  private double gaussian(final int x0, final int x1, final double[] dy_da) {
+  private double gaussian(final int x0, final int x1, final double[] dyDa) {
     final double dx = x0 - x0pos;
     final double dy = x1 - x1pos;
 
@@ -141,13 +141,13 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
 
     final double aadx2dy2 = aa * (dx * dx + dy * dy);
     final double exp = FastMath.exp(aadx2dy2);
-    dy_da[1] = n * exp;
+    dyDa[1] = n * exp;
     final double y = height * exp;
     final double yaa2 = y * aa2;
-    dy_da[2] = yaa2 * dx;
-    dy_da[3] = yaa2 * dy;
+    dyDa[2] = yaa2 * dx;
+    dyDa[3] = yaa2 * dy;
 
-    dy_da[4] = ax * y * (1 + aadx2dy2);
+    dyDa[4] = ax * y * (1 + aadx2dy2);
 
     return y;
   }

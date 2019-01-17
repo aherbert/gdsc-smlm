@@ -68,12 +68,12 @@ public class DoubleDHT2DTest {
 
   static FloatProcessor createQuadrantsProcessor(int w, int h) {
     final int w_2 = w / 2;
-    final int h_2 = h / 2;
+    final int stepH2 = h / 2;
     final FloatProcessor fp = new FloatProcessor(w, h);
-    fill(fp, w_2, 0, w_2, h_2, 1);
-    fill(fp, 0, 0, w_2, h_2, 2);
-    fill(fp, 0, h_2, w_2, h_2, 3);
-    fill(fp, w_2, h_2, w_2, h_2, 4);
+    fill(fp, w_2, 0, w_2, stepH2, 1);
+    fill(fp, 0, 0, w_2, stepH2, 2);
+    fill(fp, 0, stepH2, w_2, stepH2, 3);
+    fill(fp, w_2, stepH2, w_2, stepH2, 4);
     return fp;
   }
 

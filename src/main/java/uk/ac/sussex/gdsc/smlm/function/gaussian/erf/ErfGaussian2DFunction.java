@@ -27,10 +27,11 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
+import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
- * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
+ * Abstract base class for a 2-dimensional Gaussian function for a configured number of peaks.
  *
  * <p>The function will calculate the value of the Gaussian and evaluate the gradient of a set of
  * parameters. The class can specify which of the following parameters the function will
@@ -54,36 +55,45 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
   protected double[] deltaEy;
 
   /** The background. */
-  protected double tB;
+  protected double tb;
 
   // Required for the first gradients
 
   /** The x position pre-factors for first-order partial derivatives. */
-  protected double[] du_dtx;
+  protected double[] duDtx;
   /** The y position pre-factors for first-order partial derivatives. */
-  protected double[] du_dty;
+  protected double[] duDty;
   /** The sx pre-factors for first-order partial derivatives. */
-  protected double[] du_dtsx;
+  protected double[] duDtsx;
   /** The sy pre-factors for first-order partial derivatives. */
-  protected double[] du_dtsy;
+  protected double[] duDtsy;
 
   // Required for the second gradients
 
   /** The x position pre-factors for second-order partial derivatives. */
-  protected double[] d2u_dtx2;
+  protected double[] d2uDtx2;
   /** The y position pre-factors for second-order partial derivatives. */
-  protected double[] d2u_dty2;
+  protected double[] d2uDty2;
   /** The sx pre-factors for second-order partial derivatives. */
-  protected double[] d2u_dtsx2;
+  protected double[] d2uDtsx2;
   /** The sy pre-factors for second-order partial derivatives. */
-  protected double[] d2u_dtsy2;
+  protected double[] d2uDtsy2;
 
   // Required for the extended second gradients
 
   /** The x pre-factors for extended second-order partial derivatives. */
-  protected double[] d2deltaEx_dtsxdx;
+  protected double[] d2deltaExDtsxDx;
   /** The y pre-factors for extended second-order partial derivatives. */
-  protected double[] d2deltaEy_dtsydy;
+  protected double[] d2deltaEyDtsyDy;
+
+  /** The erf function. */
+  private ErfFunction erfFunction = ErfFunction.FAST;
+
+  /**
+   * The instance of the error function. This should not be null. It is updated when the Erf
+   * function property is changed.
+   */
+  private ErrorFunction errorFunction = FastErrorFunction.INSTANCE;
 
   /**
    * Define the error function used.
@@ -96,13 +106,14 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
     COMMONS_MATH;
   }
 
-  private ErfFunction erfFunction = ErfFunction.FAST;
-
-  private static interface ErrorFunction {
+  @FunctionalInterface
+  private interface ErrorFunction {
     public double erf(double x);
   }
 
   private static class FastErrorFunction implements ErrorFunction {
+    static final FastErrorFunction INSTANCE = new FastErrorFunction();
+
     @Override
     public double erf(double x) {
       return uk.ac.sussex.gdsc.smlm.function.Erf.erf(x);
@@ -110,16 +121,13 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
   }
 
   private static class CommontsMathErrorFunction implements ErrorFunction {
+    static final CommontsMathErrorFunction INSTANCE = new CommontsMathErrorFunction();
+
     @Override
     public double erf(double x) {
       return org.apache.commons.math3.special.Erf.erf(x);
     }
   }
-
-  private static final FastErrorFunction fastErrorFunction = new FastErrorFunction();
-  private static final CommontsMathErrorFunction commontsMathErrorFunction =
-      new CommontsMathErrorFunction();
-  private ErrorFunction errorFunction = fastErrorFunction;
 
   /**
    * Instantiates a new erf gaussian 2D function.
@@ -140,26 +148,26 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
    * Creates the arrays needed to compute the first-order partial derivatives.
    */
   protected void create1Arrays() {
-    if (du_dtx != null) {
+    if (duDtx != null) {
       return;
     }
-    du_dtx = new double[deltaEx.length];
-    du_dty = new double[deltaEy.length];
-    du_dtsx = new double[deltaEx.length];
-    du_dtsy = new double[deltaEy.length];
+    duDtx = new double[deltaEx.length];
+    duDty = new double[deltaEy.length];
+    duDtsx = new double[deltaEx.length];
+    duDtsy = new double[deltaEy.length];
   }
 
   /**
    * Creates the arrays needed to compute the first and second order partial derivatives.
    */
   protected void create2Arrays() {
-    if (d2u_dtx2 != null) {
+    if (d2uDtx2 != null) {
       return;
     }
-    d2u_dtx2 = new double[deltaEx.length];
-    d2u_dty2 = new double[deltaEy.length];
-    d2u_dtsx2 = new double[deltaEx.length];
-    d2u_dtsy2 = new double[deltaEy.length];
+    d2uDtx2 = new double[deltaEx.length];
+    d2uDty2 = new double[deltaEy.length];
+    d2uDtsx2 = new double[deltaEx.length];
+    d2uDtsy2 = new double[deltaEy.length];
     create1Arrays();
   }
 
@@ -167,11 +175,11 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
    * Creates the arrays needed to compute the first and extended second order partial derivatives.
    */
   protected void createEx2Arrays() {
-    if (d2deltaEx_dtsxdx != null) {
+    if (d2deltaExDtsxDx != null) {
       return;
     }
-    d2deltaEx_dtsxdx = new double[deltaEx.length];
-    d2deltaEy_dtsydy = new double[deltaEy.length];
+    d2deltaExDtsxDx = new double[deltaEx.length];
+    d2deltaEyDtsyDy = new double[deltaEy.length];
     create2Arrays();
   }
 
@@ -189,17 +197,6 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
     return false;
   }
 
-  /**
-   * Evaluates an 2-dimensional Gaussian function for a single peak.
-   *
-   * @param i Input predictor
-   * @param duda Partial first gradient of function with respect to each coefficient
-   * @param d2uda2 Partial second gradient of function with respect to each coefficient
-   * @return The predicted value
-   */
-  @Override
-  public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
-
   // Force new implementation from the base Gaussian2DFunction
   @Override
   public abstract void forEach(Gradient1Procedure procedure);
@@ -212,41 +209,31 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
   }
 
   // Force new implementation from the base Gaussian2DFunction
+  // (which just calls NonLinearFunction#initialise(double[]))
   @Override
   public abstract void initialise0(double[] a);
 
   // Force new implementation from the base Gaussian2DFunction
+  // (which just calls NonLinearFunction#initialise(double[]))
   @Override
   public abstract void initialise1(double[] a);
 
   /**
-   * Get the absolute of a value.
+   * Evaluates a 2-dimensional Gaussian function for a given input predictor (x) and partial
+   * gradients for each of the coefficients (a).
    *
-   * @param value the value
-   * @return the absolute value
-   */
-  protected static double abs(double value) {
-    // return Math.abs(d);
-    return (value <= 0.0D) ? 0.0d - value : value;
-  }
-
-  /**
-   * Safe divide the numerator by the denominator. If the numerator is zero then zero is returned
-   * avoiding a potential divide by zero producing a NaN. This can happen when computing gradients
-   * if the numerator and denominator are both zero.
+   * <p>Note: This is a logical extension of the support for the {@link NonLinearFunction} interface
+   * to allow access to the second order derivatives using an input predictor. The function should
+   * first be initialised using {@link Gradient2Function#initialise2(double[])}.
    *
-   * @param numerator the numerator
-   * @param denominator the denominator
-   * @return the double
+   * @param x Predictor
+   * @param dyda First order partial gradient of function with respect to each coefficient
+   *        identified by {@link #gradientIndices()}
+   * @param d2yda2 Second order partial gradient of function with respect to each coefficient
+   *        identified by {@link #gradientIndices()}
+   * @return The predicted value y
    */
-  protected static double safeDivide(double numerator, double denominator) {
-    // Note: This could be used when computing gradients:
-    // e.g. final double du_dty_tI = du_dty / tI;
-    // => final double du_dty_tI = safeDivide(du_dty, tI);
-    // Currently this is not performed as the ERF functions are used in the context
-    // of bounded parameters so avoiding bad parameters, e.g. tI being zero.
-    return (numerator == 0) ? 0 : numerator / denominator;
-  }
+  public abstract double eval2(final int x, final double[] dyda, final double[] d2yda2);
 
   /**
    * Gets the erf function.
@@ -266,10 +253,10 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
   public void setErfFunction(ErfFunction erfFunction) {
     switch (erfFunction) {
       case COMMONS_MATH:
-        errorFunction = commontsMathErrorFunction;
+        errorFunction = CommontsMathErrorFunction.INSTANCE;
         break;
       case FAST:
-        errorFunction = fastErrorFunction;
+        errorFunction = FastErrorFunction.INSTANCE;
         break;
       default:
         throw new IllegalArgumentException("Unknown error function: " + erfFunction);
@@ -284,7 +271,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
    *
    * <p>Uses the configured implementation (see {@link #getErfFunction()}). </p>
    *
-   * <p>The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
+   * <p>The value returned is always between -1 and 1 (inclusive). If {@code Math.abs(x) > 40}, then
    * {@code erf(x)} is indistinguishable from either 1 or -1 as a double, so the appropriate extreme
    * value is returned. </p>
    *
@@ -299,12 +286,12 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
    * Compute the 1D integral from 0 to n. This is the sum of the Gaussian function using the error
    * function for all of the pixels from 0 to n.
    *
-   * @param one_sSqrt2 one over (s times sqrt(2))
+   * @param oneOverSsqrt2 one over (s times sqrt(2))
    * @param n the n
    * @param u the mean of the Gaussian
    * @return the integral
    */
-  protected double compute1DIntegral(double one_sSqrt2, int n, double u) {
-    return 0.5 * (erf((n - u) * one_sSqrt2) - erf(-u * one_sSqrt2));
+  protected double compute1DIntegral(double oneOverSsqrt2, int n, double u) {
+    return 0.5 * (erf((n - u) * oneOverSsqrt2) - erf(-u * oneOverSsqrt2));
   }
 }

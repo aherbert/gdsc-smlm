@@ -116,16 +116,18 @@ public class UnivariateLikelihoodFisherInformationCalculator
     final double[] data = new double[n * (n + 1) / 2];
     gf.initialise1(parameters);
     gf.forEach(new Gradient1Procedure() {
+      // @CHECKSTYLE.OFF: MemberName
       int k = -1;
+      // @CHECKSTYLE.ON: MemberName
 
       @Override
-      public void execute(double v, double[] dv_dt) {
+      public void execute(double value, double[] dvDt) {
         k++;
-        if (!fi[k].isValid(v)) {
+        if (!fi[k].isValid(value)) {
           return;
         }
         // Get the Fisher information of the value
-        final double f = fi[k].getFisherInformation(v);
+        final double f = fi[k].getFisherInformation(value);
         if (f == 0) {
           // No summation
           return;
@@ -136,9 +138,9 @@ public class UnivariateLikelihoodFisherInformationCalculator
 
         // Compute the actual matrix data
         for (int i = 0, c = 0; i < n; i++) {
-          final double wgt = f * dv_dt[i];
+          final double wgt = f * dvDt[i];
           for (int j = 0; j <= i; j++) {
-            data[c++] += wgt * dv_dt[j];
+            data[c++] += wgt * dvDt[j];
           }
         }
       }

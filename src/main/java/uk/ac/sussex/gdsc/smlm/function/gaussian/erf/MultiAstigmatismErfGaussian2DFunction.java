@@ -40,13 +40,13 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
   // Required for the z-depth gradients
 
   /** The x|z pre-factors for first-order partial derivatives. */
-  protected double[] dtsx_dtz;
+  protected double[] dtsxDtz;
   /** The x|z pre-factors for first-order partial derivatives. */
-  protected double[] d2tsx_dtz2;
+  protected double[] d2tsxDtz2;
   /** The y|z pre-factors for second-order partial derivatives. */
-  protected double[] dtsy_dtz;
+  protected double[] dtsyDtz;
   /** The y|z pre-factors for second-order partial derivatives. */
-  protected double[] d2tsy_dtz2;
+  protected double[] d2tsyDtz2;
 
   /**
    * Constructor.
@@ -66,28 +66,28 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
   @Override
   protected void create1Arrays() {
-    if (du_dtx != null) {
+    if (duDtx != null) {
       return;
     }
-    du_dtx = new double[deltaEx.length];
-    du_dty = new double[deltaEy.length];
-    du_dtsx = new double[deltaEx.length];
-    du_dtsy = new double[deltaEy.length];
-    dtsx_dtz = new double[deltaEx.length];
-    dtsy_dtz = new double[deltaEy.length];
+    duDtx = new double[deltaEx.length];
+    duDty = new double[deltaEy.length];
+    duDtsx = new double[deltaEx.length];
+    duDtsy = new double[deltaEy.length];
+    dtsxDtz = new double[deltaEx.length];
+    dtsyDtz = new double[deltaEy.length];
   }
 
   @Override
   protected void create2Arrays() {
-    if (d2u_dtx2 != null) {
+    if (d2uDtx2 != null) {
       return;
     }
-    d2u_dtx2 = new double[deltaEx.length];
-    d2u_dty2 = new double[deltaEy.length];
-    d2u_dtsx2 = new double[deltaEx.length];
-    d2u_dtsy2 = new double[deltaEy.length];
-    d2tsx_dtz2 = new double[deltaEx.length];
-    d2tsy_dtz2 = new double[deltaEy.length];
+    d2uDtx2 = new double[deltaEx.length];
+    d2uDty2 = new double[deltaEy.length];
+    d2uDtsx2 = new double[deltaEx.length];
+    d2uDtsy2 = new double[deltaEy.length];
+    d2tsxDtz2 = new double[deltaEx.length];
+    d2tsyDtz2 = new double[deltaEy.length];
     create1Arrays();
   }
 
@@ -103,7 +103,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
   @Override
   public void initialise0(double[] a) {
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    tb = a[Gaussian2DFunction.BACKGROUND];
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
@@ -139,8 +139,8 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
   @Override
   public void initialise1(double[] a) {
     create1Arrays();
-    final double[] ds_dz = new double[1];
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    final double[] dsDz = new double[1];
+    tb = a[Gaussian2DFunction.BACKGROUND];
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
@@ -150,20 +150,20 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
       // We can pre-compute part of the derivatives for position and sd in arrays
       // since the Gaussian is XY separable
-      final double sx = zModel.getSx(tz, ds_dz);
-      dtsx_dtz[n] = ds_dz[0];
-      final double sy = zModel.getSy(tz, ds_dz);
-      dtsy_dtz[n] = ds_dz[0];
-      createFirstOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, tx, sx);
-      createFirstOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, ty, sy);
+      final double sx = zModel.getSx(tz, dsDz);
+      dtsxDtz[n] = dsDz[0];
+      final double sy = zModel.getSy(tz, dsDz);
+      dtsyDtz[n] = dsDz[0];
+      createFirstOrderTables(n, maxx, tI[n], deltaEx, duDtx, duDtsx, tx, sx);
+      createFirstOrderTables(n, maxy, tI[n], deltaEy, duDty, duDtsy, ty, sy);
     }
   }
 
   @Override
   public void initialise2(double[] a) {
     create2Arrays();
-    final double[] ds_dz = new double[2];
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    final double[] dsDz = new double[2];
+    tb = a[Gaussian2DFunction.BACKGROUND];
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
@@ -173,24 +173,22 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
       // We can pre-compute part of the derivatives for position and sd in arrays
       // since the Gaussian is XY separable
-      final double sx = zModel.getSx2(tz, ds_dz);
-      dtsx_dtz[n] = ds_dz[0];
-      d2tsx_dtz2[n] = ds_dz[1];
-      final double sy = zModel.getSy2(tz, ds_dz);
-      dtsy_dtz[n] = ds_dz[0];
-      d2tsy_dtz2[n] = ds_dz[1];
-      createSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx,
-          sx);
-      createSecondOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty,
-          sy);
+      final double sx = zModel.getSx2(tz, dsDz);
+      dtsxDtz[n] = dsDz[0];
+      d2tsxDtz2[n] = dsDz[1];
+      final double sy = zModel.getSy2(tz, dsDz);
+      dtsyDtz[n] = dsDz[0];
+      d2tsyDtz2[n] = dsDz[1];
+      createSecondOrderTables(n, maxx, tI[n], deltaEx, duDtx, duDtsx, d2uDtx2, d2uDtsx2, tx, sx);
+      createSecondOrderTables(n, maxy, tI[n], deltaEy, duDty, duDtsy, d2uDty2, d2uDtsy2, ty, sy);
     }
   }
 
   @Override
   public void initialiseExtended2(double[] a) {
     createEx2Arrays();
-    final double[] ds_dz = new double[2];
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    final double[] dsDz = new double[2];
+    tb = a[Gaussian2DFunction.BACKGROUND];
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
@@ -200,26 +198,26 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
       // We can pre-compute part of the derivatives for position and sd in arrays
       // since the Gaussian is XY separable
-      final double sx = zModel.getSx2(tz, ds_dz);
-      dtsx_dtz[n] = ds_dz[0];
-      d2tsx_dtz2[n] = ds_dz[1];
-      final double sy = zModel.getSy2(tz, ds_dz);
-      dtsy_dtz[n] = ds_dz[0];
-      d2tsy_dtz2[n] = ds_dz[1];
-      createExSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2,
-          d2deltaEx_dtsxdx, tx, sx);
-      createExSecondOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2,
-          d2deltaEy_dtsydy, ty, sy);
+      final double sx = zModel.getSx2(tz, dsDz);
+      dtsxDtz[n] = dsDz[0];
+      d2tsxDtz2[n] = dsDz[1];
+      final double sy = zModel.getSy2(tz, dsDz);
+      dtsyDtz[n] = dsDz[0];
+      d2tsyDtz2[n] = dsDz[1];
+      createExSecondOrderTables(n, maxx, tI[n], deltaEx, duDtx, duDtsx, d2uDtx2, d2uDtsx2,
+          d2deltaExDtsxDx, tx, sx);
+      createExSecondOrderTables(n, maxy, tI[n], deltaEy, duDty, duDtsy, d2uDty2, d2uDtsy2,
+          d2deltaEyDtsyDy, ty, sy);
     }
     // Pre-apply the gradient mapping from width to z
     for (int x = 0; x < maxx; x++) {
       for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
-        d2deltaEx_dtsxdx[xx] *= dtsx_dtz[n];
+        d2deltaExDtsxDx[xx] *= dtsxDtz[n];
       }
     }
     for (int y = 0; y < maxy; y++) {
       for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
-        d2deltaEy_dtsydy[yy] *= dtsy_dtz[n];
+        d2deltaEyDtsyDy[yy] *= dtsyDtz[n];
       }
     }
   }
@@ -233,19 +231,19 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
     duda[0] = 1.0;
-    double I = tB;
+    double I = tb;
     for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a++];
-      duda[a++] = du_dtx[xx] * deltaEy[yy];
-      duda[a++] = du_dty[yy] * deltaEx[xx];
-      duda[a++] = du_dtsx[xx] * deltaEy[yy] * dtsx_dtz[n] + du_dtsy[yy] * deltaEx[xx] * dtsy_dtz[n];
+      duda[a++] = duDtx[xx] * deltaEy[yy];
+      duda[a++] = duDty[yy] * deltaEx[xx];
+      duda[a++] = duDtsx[xx] * deltaEy[yy] * dtsxDtz[n] + duDtsy[yy] * deltaEx[xx] * dtsyDtz[n];
     }
     return I;
   }
 
   @Override
-  public double eval(final int i, final double[] duda, final double[] d2uda2) {
+  public double eval2(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
     int yy = i / maxx;
     int xx = i % maxx;
@@ -254,29 +252,29 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     // Use pre-computed gradients
     duda[0] = 1.0;
     d2uda2[0] = 0;
-    double I = tB;
+    double I = tb;
     for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
-      final double du_dsx = du_dtsx[xx] * deltaEy[yy];
-      final double du_dsy = du_dtsy[yy] * deltaEx[xx];
+      final double du_dsx = duDtsx[xx] * deltaEy[yy];
+      final double du_dsy = duDtsy[yy] * deltaEx[xx];
 
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a];
       d2uda2[a++] = 0;
-      duda[a] = du_dtx[xx] * deltaEy[yy];
-      d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
-      duda[a] = du_dty[yy] * deltaEx[xx];
-      d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-      duda[a] = du_dsx * dtsx_dtz[n] + du_dsy * dtsy_dtz[n];
+      duda[a] = duDtx[xx] * deltaEy[yy];
+      d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
+      duda[a] = duDty[yy] * deltaEx[xx];
+      d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
+      duda[a] = du_dsx * dtsxDtz[n] + du_dsy * dtsyDtz[n];
       //@formatter:off
       d2uda2[a++] =
-          d2u_dtsx2[xx] * deltaEy[yy] * dtsx_dtz[n] * dtsx_dtz[n] +
-          du_dsx * d2tsx_dtz2[n] +
-          d2u_dtsy2[yy] * deltaEx[xx] * dtsy_dtz[n] * dtsy_dtz[n] +
-          du_dsy * d2tsy_dtz2[n] +
+          d2uDtsx2[xx] * deltaEy[yy] * dtsxDtz[n] * dtsxDtz[n] +
+          du_dsx * d2tsxDtz2[n] +
+          d2uDtsy2[yy] * deltaEx[xx] * dtsyDtz[n] * dtsyDtz[n] +
+          du_dsy * d2tsyDtz2[n] +
           // Add the equivalent term we add in the circular version.
           // Note: this is not in the Smith, et al (2010) paper but is
           // in the GraspJ source code and it works in JUnit tests.
-          2 * du_dtsx[xx] * dtsx_dtz[n] * du_dtsy[yy] * dtsy_dtz[n] / tI[n];
+          2 * duDtsx[xx] * dtsxDtz[n] * duDtsy[yy] * dtsyDtz[n] / tI[n];
       //@formatter:on
     }
     return I;
@@ -325,18 +323,18 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     final double[] du_dtsy_by_dtsy_dtz = new double[numberOfPeaks];
     for (int y = 0; y < maxy; y++) {
       for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
-        deltaEy_by_dtsx_dtz[n] = deltaEy[yy] * dtsx_dtz[n];
-        du_dtsy_by_dtsy_dtz[n] = du_dtsy[yy] * dtsy_dtz[n];
+        deltaEy_by_dtsx_dtz[n] = deltaEy[yy] * dtsxDtz[n];
+        du_dtsy_by_dtsy_dtz[n] = duDtsy[yy] * dtsyDtz[n];
       }
 
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
-          duda[a++] = du_dtx[xx] * deltaEy[yy];
-          duda[a++] = du_dty[yy] * deltaEx[xx];
-          duda[a++] = du_dtsx[xx] * deltaEy_by_dtsx_dtz[n] + du_dtsy_by_dtsy_dtz[n] * deltaEx[xx];
+          duda[a++] = duDtx[xx] * deltaEy[yy];
+          duda[a++] = duDty[yy] * deltaEx[xx];
+          duda[a++] = duDtsx[xx] * deltaEy_by_dtsx_dtz[n] + du_dtsy_by_dtsy_dtz[n] * deltaEx[xx];
         }
         procedure.execute(I, duda);
       }
@@ -352,9 +350,9 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     final double[] dtsy_dtz_2 = new double[numberOfPeaks];
     final double[] two_dtsx_dtz_by_dtsy_dtz_tI = new double[numberOfPeaks];
     for (int n = 0; n < numberOfPeaks; n++) {
-      dtsx_dtz_2[n] = dtsx_dtz[n] * dtsx_dtz[n];
-      dtsy_dtz_2[n] = dtsy_dtz[n] * dtsy_dtz[n];
-      two_dtsx_dtz_by_dtsy_dtz_tI[n] = 2 * dtsx_dtz[n] * dtsy_dtz[n] / tI[n];
+      dtsx_dtz_2[n] = dtsxDtz[n] * dtsxDtz[n];
+      dtsy_dtz_2[n] = dtsyDtz[n] * dtsyDtz[n];
+      two_dtsx_dtz_by_dtsy_dtz_tI[n] = 2 * dtsxDtz[n] * dtsyDtz[n] / tI[n];
     }
     final double[] deltaEy_by_dtsx_dtz_2 = new double[numberOfPeaks];
     final double[] d2u_dtsy2_by_dtsy_dtz_2 = new double[numberOfPeaks];
@@ -362,34 +360,34 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     for (int y = 0; y < maxy; y++) {
       for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
         deltaEy_by_dtsx_dtz_2[n] = deltaEy[yy] * dtsx_dtz_2[n];
-        d2u_dtsy2_by_dtsy_dtz_2[n] = d2u_dtsy2[yy] * dtsy_dtz_2[n];
-        two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] = two_dtsx_dtz_by_dtsy_dtz_tI[n] * du_dtsy[yy];
+        d2u_dtsy2_by_dtsy_dtz_2[n] = d2uDtsy2[yy] * dtsy_dtz_2[n];
+        two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] = two_dtsx_dtz_by_dtsy_dtz_tI[n] * duDtsy[yy];
       }
 
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
-          final double du_dsx = du_dtsx[xx] * deltaEy[yy];
-          final double du_dsy = du_dtsy[yy] * deltaEx[xx];
+          final double du_dsx = duDtsx[xx] * deltaEy[yy];
+          final double du_dsy = duDtsy[yy] * deltaEx[xx];
 
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
-          duda[a] = du_dtx[xx] * deltaEy[yy];
-          d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
-          duda[a] = du_dty[yy] * deltaEx[xx];
-          d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-          duda[a] = du_dsx * dtsx_dtz[n] + du_dsy * dtsy_dtz[n];
+          duda[a] = duDtx[xx] * deltaEy[yy];
+          d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
+          duda[a] = duDty[yy] * deltaEx[xx];
+          d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
+          duda[a] = du_dsx * dtsxDtz[n] + du_dsy * dtsyDtz[n];
           //@formatter:off
           d2uda2[a++] =
-              d2u_dtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] +
-              du_dsx * d2tsx_dtz2[n] +
+              d2uDtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] +
+              du_dsx * d2tsxDtz2[n] +
               d2u_dtsy2_by_dtsy_dtz_2[n] * deltaEx[xx] +
-              du_dsy * d2tsy_dtz2[n] +
+              du_dsy * d2tsyDtz2[n] +
               // Add the equivalent term we add in the circular version.
               // Note: this is not in the Smith, et al (2010) paper but is
               // in the GraspJ source code and it works in JUnit tests.
               //2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
-              two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * du_dtsx[xx];
+              two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * duDtsx[xx];
           //@formatter:on
         }
         procedure.execute(I, duda, d2uda2);
@@ -403,10 +401,10 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     final double[] duda = new double[ng];
     final double[] d2udadb = new double[ng * ng];
     duda[0] = 1.0;
-    final double[] du_dtsx_tI = new double[du_dtsx.length];
+    final double[] du_dtsx_tI = new double[duDtsx.length];
     for (int x = 0; x < maxx; x++) {
       for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
-        du_dtsx_tI[xx] = du_dtsx[xx] / tI[n];
+        du_dtsx_tI[xx] = duDtsx[xx] / tI[n];
       }
     }
     final double[] du_dty_tI = new double[numberOfPeaks];
@@ -422,33 +420,33 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     final double[] dtsx_dtz_tI = new double[numberOfPeaks];
     final double[] dtsy_dtz_tI = new double[numberOfPeaks];
     for (int n = 0; n < numberOfPeaks; n++) {
-      dtsx_dtz_2[n] = dtsx_dtz[n] * dtsx_dtz[n];
-      dtsy_dtz_2[n] = dtsy_dtz[n] * dtsy_dtz[n];
-      two_dtsx_dtz_by_dtsy_dtz_tI[n] = 2 * dtsx_dtz[n] * dtsy_dtz[n] / tI[n];
-      dtsx_dtz_tI[n] = dtsx_dtz[n] / tI[n];
-      dtsy_dtz_tI[n] = dtsy_dtz[n] / tI[n];
+      dtsx_dtz_2[n] = dtsxDtz[n] * dtsxDtz[n];
+      dtsy_dtz_2[n] = dtsyDtz[n] * dtsyDtz[n];
+      two_dtsx_dtz_by_dtsy_dtz_tI[n] = 2 * dtsxDtz[n] * dtsyDtz[n] / tI[n];
+      dtsx_dtz_tI[n] = dtsxDtz[n] / tI[n];
+      dtsy_dtz_tI[n] = dtsyDtz[n] / tI[n];
     }
 
     for (int y = 0; y < maxy; y++) {
       for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
-        du_dty_tI[n] = du_dty[yy] / tI[n];
-        du_dtsy_by_dtsy_dtz_tI[n] = du_dtsy[yy] * dtsy_dtz_tI[n];
-        du_dty_by_dtsx_dtz_tI[n] = du_dty[yy] * dtsx_dtz_tI[n];
+        du_dty_tI[n] = duDty[yy] / tI[n];
+        du_dtsy_by_dtsy_dtz_tI[n] = duDtsy[yy] * dtsy_dtz_tI[n];
+        du_dty_by_dtsx_dtz_tI[n] = duDty[yy] * dtsx_dtz_tI[n];
         deltaEy_by_dtsx_dtz_2[n] = deltaEy[yy] * dtsx_dtz_2[n];
-        d2u_dtsy2_by_dtsy_dtz_2[n] = d2u_dtsy2[yy] * dtsy_dtz_2[n];
-        two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] = two_dtsx_dtz_by_dtsy_dtz_tI[n] * du_dtsy[yy];
+        d2u_dtsy2_by_dtsy_dtz_2[n] = d2uDtsy2[yy] * dtsy_dtz_2[n];
+        two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] = two_dtsx_dtz_by_dtsy_dtz_tI[n] * duDtsy[yy];
       }
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
-          final double du_dsx = du_dtsx[xx] * deltaEy[yy];
-          final double du_dsy = du_dtsy[yy] * deltaEx[xx];
+          final double du_dsx = duDtsx[xx] * deltaEy[yy];
+          final double du_dsy = duDtsy[yy] * deltaEx[xx];
 
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a];
-          duda[a + 1] = du_dtx[xx] * deltaEy[yy];
-          duda[a + 2] = du_dty[yy] * deltaEx[xx];
-          duda[a + 3] = du_dsx * dtsx_dtz[n] + du_dsy * dtsy_dtz[n];
+          duda[a + 1] = duDtx[xx] * deltaEy[yy];
+          duda[a + 2] = duDty[yy] * deltaEx[xx];
+          duda[a + 3] = du_dsx * dtsxDtz[n] + du_dsy * dtsyDtz[n];
 
           // Compute all the partial second order derivatives
           final double tI = this.tI[n];
@@ -469,12 +467,12 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
           // X,Signal
           d2udadb[kk] = d2udadb[k + 1];
           // X,X
-          d2udadb[kk + 1] = d2u_dtx2[xx] * deltaEy[yy];
+          d2udadb[kk + 1] = d2uDtx2[xx] * deltaEy[yy];
           // X,Y
-          d2udadb[kk + 2] = du_dtx[xx] * du_dty_tI[n];
+          d2udadb[kk + 2] = duDtx[xx] * du_dty_tI[n];
           // X,Z
           d2udadb[kk + 3] =
-              deltaEy[yy] * d2deltaEx_dtsxdx[xx] + du_dtx[xx] * du_dtsy_by_dtsy_dtz_tI[n];
+              deltaEy[yy] * d2deltaExDtsxDx[xx] + duDtx[xx] * du_dtsy_by_dtsy_dtz_tI[n];
 
           final int kkk = kk + ng;
           // Y,Signal
@@ -482,10 +480,10 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
           // Y,X
           d2udadb[kkk + 1] = d2udadb[kk + 2];
           // Y,Y
-          d2udadb[kkk + 2] = d2u_dty2[yy] * deltaEx[xx];
+          d2udadb[kkk + 2] = d2uDty2[yy] * deltaEx[xx];
           // X,Z
           d2udadb[kkk + 3] =
-              du_dtsx[xx] * du_dty_by_dtsx_dtz_tI[n] + deltaEx[xx] * d2deltaEy_dtsydy[yy];
+              duDtsx[xx] * du_dty_by_dtsx_dtz_tI[n] + deltaEx[xx] * d2deltaEyDtsyDy[yy];
 
           final int kkkk = kkk + ng;
           // Z,Signal
@@ -497,15 +495,15 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
           // Z,Z
           //@formatter:off
           d2udadb[kkkk + 3] =
-              d2u_dtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] +
-              du_dsx * d2tsx_dtz2[n] +
+              d2uDtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] +
+              du_dsx * d2tsxDtz2[n] +
               d2u_dtsy2_by_dtsy_dtz_2[n] * deltaEx[xx] +
-              du_dsy * d2tsy_dtz2[n] +
+              du_dsy * d2tsyDtz2[n] +
               // Add the equivalent term we add in the circular version.
               // Note: this is not in the Smith, et al (2010) paper but is
               // in the GraspJ source code and it works in JUnit tests.
               //2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
-              two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * du_dtsx[xx];
+              two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * duDtsx[xx];
           //@formatter:on
         }
         procedure.executeExtended(I, duda, d2udadb);

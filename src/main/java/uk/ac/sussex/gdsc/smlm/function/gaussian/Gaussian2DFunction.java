@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 /**
- * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
+ * Abstract base class for a 2-dimensional Gaussian function for a configured number of peaks.
  *
  * <p>The function will calculate the value of the Gaussian and evaluate the gradient of a set of
  * parameters. The class can specify which of the following parameters the function will
@@ -262,7 +262,7 @@ public abstract class Gaussian2DFunction
   /**
    * Produce an output predicted value for a given set of input predictors (x) and coefficients (a).
    *
-   * <p>Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+   * <p>Evaluates a 2-dimensional elliptical Gaussian function for a single peak.
    *
    * <p>The first coefficient is the Gaussian background level. The coefficients are then packed for
    * each peak using the indices specified in the Gaussian2DFunction class.
@@ -277,7 +277,7 @@ public abstract class Gaussian2DFunction
   /**
    * Produce an output predicted value for a given set of input predictors (x) and coefficients (a).
    *
-   * <p>Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+   * <p>Evaluates a 2-dimensional elliptical Gaussian function for a single peak.
    *
    * <p>The first coefficient is the Gaussian background level. The coefficients are then packed for
    * each peak using the indices specified in the Gaussian2DFunction class.
@@ -297,7 +297,7 @@ public abstract class Gaussian2DFunction
    * @throws NullPointerException if the noise model is null
    */
   @Override
-  public double eval(final int x, final double[] dyda, final double[] weight) {
+  public double evalw(final int x, final double[] dyda, final double[] weight) {
     final double value = eval(x, dyda);
     weight[0] = noiseModel.variance(value);
     return value;
@@ -325,7 +325,7 @@ public abstract class Gaussian2DFunction
   }
 
   /**
-   * Set the noise model used in {@link #eval(int, double[], double[])}.
+   * Set the noise model used in {@link #evalw(int, double[], double[])}.
    *
    * @param noiseModel the noise model to set
    */
@@ -342,7 +342,7 @@ public abstract class Gaussian2DFunction
    * Build the index array that maps the gradient index back to the original parameter index.
    *
    * <pre>
-   * a[indices[i]] += dy_da[i]
+   * a[indices[i]] += dyDa[i]
    * </pre>
    *
    * @param numberOfPeaks the number of peaks

@@ -32,9 +32,9 @@ public interface ExtendedGradient2Procedure {
    * Executes this procedure.
    *
    * @param value the value of the function
-   * @param dy_da Partial first derivative of function with respect to each coefficient (a)
-   * @param d2y_dadb Partial second derivative of function with respect to each coefficient pair
+   * @param dyDa Partial first derivative of function with respect to each coefficient (a)
+   * @param d2yDaDb Partial second derivative of function with respect to each coefficient pair
    *        (a,b). Packed linearly with size n*n with n the number of coefficients.
    */
-  void executeExtended(double value, double[] dy_da, double[] d2y_dadb);
+  void executeExtended(double value, double[] dyDa, double[] d2yDaDb);
 }

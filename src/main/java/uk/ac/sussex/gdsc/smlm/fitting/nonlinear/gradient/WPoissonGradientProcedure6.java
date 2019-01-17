@@ -55,36 +55,36 @@ public class WPoissonGradientProcedure6 extends WPoissonGradientProcedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     // Note: Ignore the value
     final double w = this.w[yi++];
-    data[0] += dy_da[0] * w * dy_da[0];
+    data[0] += dyDa[0] * w * dyDa[0];
     double wgt;
-    wgt = dy_da[1] * w;
-    data[1] += wgt * dy_da[0];
-    data[2] += wgt * dy_da[1];
-    wgt = dy_da[2] * w;
-    data[3] += wgt * dy_da[0];
-    data[4] += wgt * dy_da[1];
-    data[5] += wgt * dy_da[2];
-    wgt = dy_da[3] * w;
-    data[6] += wgt * dy_da[0];
-    data[7] += wgt * dy_da[1];
-    data[8] += wgt * dy_da[2];
-    data[9] += wgt * dy_da[3];
-    wgt = dy_da[4] * w;
-    data[10] += wgt * dy_da[0];
-    data[11] += wgt * dy_da[1];
-    data[12] += wgt * dy_da[2];
-    data[13] += wgt * dy_da[3];
-    data[14] += wgt * dy_da[4];
-    wgt = dy_da[5] * w;
-    data[15] += wgt * dy_da[0];
-    data[16] += wgt * dy_da[1];
-    data[17] += wgt * dy_da[2];
-    data[18] += wgt * dy_da[3];
-    data[19] += wgt * dy_da[4];
-    data[20] += wgt * dy_da[5];
+    wgt = dyDa[1] * w;
+    data[1] += wgt * dyDa[0];
+    data[2] += wgt * dyDa[1];
+    wgt = dyDa[2] * w;
+    data[3] += wgt * dyDa[0];
+    data[4] += wgt * dyDa[1];
+    data[5] += wgt * dyDa[2];
+    wgt = dyDa[3] * w;
+    data[6] += wgt * dyDa[0];
+    data[7] += wgt * dyDa[1];
+    data[8] += wgt * dyDa[2];
+    data[9] += wgt * dyDa[3];
+    wgt = dyDa[4] * w;
+    data[10] += wgt * dyDa[0];
+    data[11] += wgt * dyDa[1];
+    data[12] += wgt * dyDa[2];
+    data[13] += wgt * dyDa[3];
+    data[14] += wgt * dyDa[4];
+    wgt = dyDa[5] * w;
+    data[15] += wgt * dyDa[0];
+    data[16] += wgt * dyDa[1];
+    data[17] += wgt * dyDa[2];
+    data[18] += wgt * dyDa[3];
+    data[19] += wgt * dyDa[4];
+    data[20] += wgt * dyDa[5];
   }
 
   @Override

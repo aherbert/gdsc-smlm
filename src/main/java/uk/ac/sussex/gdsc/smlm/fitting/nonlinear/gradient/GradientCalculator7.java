@@ -44,7 +44,7 @@ public class GradientCalculator7 extends GradientCalculator {
   public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
       NonLinearFunction func) {
     double ssx = 0;
-    final double[] dy_da = new double[7];
+    final double[] dyDa = new double[7];
 
     alpha[0][0] = 0;
     alpha[1][0] = 0;
@@ -88,88 +88,88 @@ public class GradientCalculator7 extends GradientCalculator {
     if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.eval(x[i], dy_da, w);
+        final double dy = y[i] - func.evalw(x[i], dyDa, w);
         final double weight = getWeight(w[0]);
 
-        alpha[0][0] += dy_da[0] * weight * dy_da[0];
-        alpha[1][0] += dy_da[1] * weight * dy_da[0];
-        alpha[1][1] += dy_da[1] * weight * dy_da[1];
-        alpha[2][0] += dy_da[2] * weight * dy_da[0];
-        alpha[2][1] += dy_da[2] * weight * dy_da[1];
-        alpha[2][2] += dy_da[2] * weight * dy_da[2];
-        alpha[3][0] += dy_da[3] * weight * dy_da[0];
-        alpha[3][1] += dy_da[3] * weight * dy_da[1];
-        alpha[3][2] += dy_da[3] * weight * dy_da[2];
-        alpha[3][3] += dy_da[3] * weight * dy_da[3];
-        alpha[4][0] += dy_da[4] * weight * dy_da[0];
-        alpha[4][1] += dy_da[4] * weight * dy_da[1];
-        alpha[4][2] += dy_da[4] * weight * dy_da[2];
-        alpha[4][3] += dy_da[4] * weight * dy_da[3];
-        alpha[4][4] += dy_da[4] * weight * dy_da[4];
-        alpha[5][0] += dy_da[5] * weight * dy_da[0];
-        alpha[5][1] += dy_da[5] * weight * dy_da[1];
-        alpha[5][2] += dy_da[5] * weight * dy_da[2];
-        alpha[5][3] += dy_da[5] * weight * dy_da[3];
-        alpha[5][4] += dy_da[5] * weight * dy_da[4];
-        alpha[5][5] += dy_da[5] * weight * dy_da[5];
-        alpha[6][0] += dy_da[6] * weight * dy_da[0];
-        alpha[6][1] += dy_da[6] * weight * dy_da[1];
-        alpha[6][2] += dy_da[6] * weight * dy_da[2];
-        alpha[6][3] += dy_da[6] * weight * dy_da[3];
-        alpha[6][4] += dy_da[6] * weight * dy_da[4];
-        alpha[6][5] += dy_da[6] * weight * dy_da[5];
-        alpha[6][6] += dy_da[6] * weight * dy_da[6];
+        alpha[0][0] += dyDa[0] * weight * dyDa[0];
+        alpha[1][0] += dyDa[1] * weight * dyDa[0];
+        alpha[1][1] += dyDa[1] * weight * dyDa[1];
+        alpha[2][0] += dyDa[2] * weight * dyDa[0];
+        alpha[2][1] += dyDa[2] * weight * dyDa[1];
+        alpha[2][2] += dyDa[2] * weight * dyDa[2];
+        alpha[3][0] += dyDa[3] * weight * dyDa[0];
+        alpha[3][1] += dyDa[3] * weight * dyDa[1];
+        alpha[3][2] += dyDa[3] * weight * dyDa[2];
+        alpha[3][3] += dyDa[3] * weight * dyDa[3];
+        alpha[4][0] += dyDa[4] * weight * dyDa[0];
+        alpha[4][1] += dyDa[4] * weight * dyDa[1];
+        alpha[4][2] += dyDa[4] * weight * dyDa[2];
+        alpha[4][3] += dyDa[4] * weight * dyDa[3];
+        alpha[4][4] += dyDa[4] * weight * dyDa[4];
+        alpha[5][0] += dyDa[5] * weight * dyDa[0];
+        alpha[5][1] += dyDa[5] * weight * dyDa[1];
+        alpha[5][2] += dyDa[5] * weight * dyDa[2];
+        alpha[5][3] += dyDa[5] * weight * dyDa[3];
+        alpha[5][4] += dyDa[5] * weight * dyDa[4];
+        alpha[5][5] += dyDa[5] * weight * dyDa[5];
+        alpha[6][0] += dyDa[6] * weight * dyDa[0];
+        alpha[6][1] += dyDa[6] * weight * dyDa[1];
+        alpha[6][2] += dyDa[6] * weight * dyDa[2];
+        alpha[6][3] += dyDa[6] * weight * dyDa[3];
+        alpha[6][4] += dyDa[6] * weight * dyDa[4];
+        alpha[6][5] += dyDa[6] * weight * dyDa[5];
+        alpha[6][6] += dyDa[6] * weight * dyDa[6];
 
-        beta[0] += dy_da[0] * weight * dy;
-        beta[1] += dy_da[1] * weight * dy;
-        beta[2] += dy_da[2] * weight * dy;
-        beta[3] += dy_da[3] * weight * dy;
-        beta[4] += dy_da[4] * weight * dy;
-        beta[5] += dy_da[5] * weight * dy;
-        beta[6] += dy_da[6] * weight * dy;
+        beta[0] += dyDa[0] * weight * dy;
+        beta[1] += dyDa[1] * weight * dy;
+        beta[2] += dyDa[2] * weight * dy;
+        beta[3] += dyDa[3] * weight * dy;
+        beta[4] += dyDa[4] * weight * dy;
+        beta[5] += dyDa[5] * weight * dy;
+        beta[6] += dyDa[6] * weight * dy;
 
         ssx += dy * dy * weight;
       }
     } else {
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.eval(x[i], dy_da);
+        final double dy = y[i] - func.eval(x[i], dyDa);
 
-        alpha[0][0] += dy_da[0] * dy_da[0];
-        alpha[1][0] += dy_da[1] * dy_da[0];
-        alpha[1][1] += dy_da[1] * dy_da[1];
-        alpha[2][0] += dy_da[2] * dy_da[0];
-        alpha[2][1] += dy_da[2] * dy_da[1];
-        alpha[2][2] += dy_da[2] * dy_da[2];
-        alpha[3][0] += dy_da[3] * dy_da[0];
-        alpha[3][1] += dy_da[3] * dy_da[1];
-        alpha[3][2] += dy_da[3] * dy_da[2];
-        alpha[3][3] += dy_da[3] * dy_da[3];
-        alpha[4][0] += dy_da[4] * dy_da[0];
-        alpha[4][1] += dy_da[4] * dy_da[1];
-        alpha[4][2] += dy_da[4] * dy_da[2];
-        alpha[4][3] += dy_da[4] * dy_da[3];
-        alpha[4][4] += dy_da[4] * dy_da[4];
-        alpha[5][0] += dy_da[5] * dy_da[0];
-        alpha[5][1] += dy_da[5] * dy_da[1];
-        alpha[5][2] += dy_da[5] * dy_da[2];
-        alpha[5][3] += dy_da[5] * dy_da[3];
-        alpha[5][4] += dy_da[5] * dy_da[4];
-        alpha[5][5] += dy_da[5] * dy_da[5];
-        alpha[6][0] += dy_da[6] * dy_da[0];
-        alpha[6][1] += dy_da[6] * dy_da[1];
-        alpha[6][2] += dy_da[6] * dy_da[2];
-        alpha[6][3] += dy_da[6] * dy_da[3];
-        alpha[6][4] += dy_da[6] * dy_da[4];
-        alpha[6][5] += dy_da[6] * dy_da[5];
-        alpha[6][6] += dy_da[6] * dy_da[6];
+        alpha[0][0] += dyDa[0] * dyDa[0];
+        alpha[1][0] += dyDa[1] * dyDa[0];
+        alpha[1][1] += dyDa[1] * dyDa[1];
+        alpha[2][0] += dyDa[2] * dyDa[0];
+        alpha[2][1] += dyDa[2] * dyDa[1];
+        alpha[2][2] += dyDa[2] * dyDa[2];
+        alpha[3][0] += dyDa[3] * dyDa[0];
+        alpha[3][1] += dyDa[3] * dyDa[1];
+        alpha[3][2] += dyDa[3] * dyDa[2];
+        alpha[3][3] += dyDa[3] * dyDa[3];
+        alpha[4][0] += dyDa[4] * dyDa[0];
+        alpha[4][1] += dyDa[4] * dyDa[1];
+        alpha[4][2] += dyDa[4] * dyDa[2];
+        alpha[4][3] += dyDa[4] * dyDa[3];
+        alpha[4][4] += dyDa[4] * dyDa[4];
+        alpha[5][0] += dyDa[5] * dyDa[0];
+        alpha[5][1] += dyDa[5] * dyDa[1];
+        alpha[5][2] += dyDa[5] * dyDa[2];
+        alpha[5][3] += dyDa[5] * dyDa[3];
+        alpha[5][4] += dyDa[5] * dyDa[4];
+        alpha[5][5] += dyDa[5] * dyDa[5];
+        alpha[6][0] += dyDa[6] * dyDa[0];
+        alpha[6][1] += dyDa[6] * dyDa[1];
+        alpha[6][2] += dyDa[6] * dyDa[2];
+        alpha[6][3] += dyDa[6] * dyDa[3];
+        alpha[6][4] += dyDa[6] * dyDa[4];
+        alpha[6][5] += dyDa[6] * dyDa[5];
+        alpha[6][6] += dyDa[6] * dyDa[6];
 
-        beta[0] += dy_da[0] * dy;
-        beta[1] += dy_da[1] * dy;
-        beta[2] += dy_da[2] * dy;
-        beta[3] += dy_da[3] * dy;
-        beta[4] += dy_da[4] * dy;
-        beta[5] += dy_da[5] * dy;
-        beta[6] += dy_da[6] * dy;
+        beta[0] += dyDa[0] * dy;
+        beta[1] += dyDa[1] * dy;
+        beta[2] += dyDa[2] * dy;
+        beta[3] += dyDa[3] * dy;
+        beta[4] += dyDa[4] * dy;
+        beta[5] += dyDa[5] * dy;
+        beta[6] += dyDa[6] * dy;
 
         ssx += dy * dy;
       }
@@ -209,7 +209,7 @@ public class GradientCalculator7 extends GradientCalculator {
   public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta,
       NonLinearFunction func) {
     double ssx = 0;
-    final double[] dy_da = new double[7];
+    final double[] dyDa = new double[7];
 
     alpha[0][0] = 0;
     alpha[1][0] = 0;
@@ -253,88 +253,88 @@ public class GradientCalculator7 extends GradientCalculator {
     if (func.canComputeWeights()) {
       final double[] w = new double[1];
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.eval(i, dy_da, w);
+        final double dy = y[i] - func.evalw(i, dyDa, w);
         final double weight = getWeight(w[0]);
 
-        alpha[0][0] += dy_da[0] * weight * dy_da[0];
-        alpha[1][0] += dy_da[1] * weight * dy_da[0];
-        alpha[1][1] += dy_da[1] * weight * dy_da[1];
-        alpha[2][0] += dy_da[2] * weight * dy_da[0];
-        alpha[2][1] += dy_da[2] * weight * dy_da[1];
-        alpha[2][2] += dy_da[2] * weight * dy_da[2];
-        alpha[3][0] += dy_da[3] * weight * dy_da[0];
-        alpha[3][1] += dy_da[3] * weight * dy_da[1];
-        alpha[3][2] += dy_da[3] * weight * dy_da[2];
-        alpha[3][3] += dy_da[3] * weight * dy_da[3];
-        alpha[4][0] += dy_da[4] * weight * dy_da[0];
-        alpha[4][1] += dy_da[4] * weight * dy_da[1];
-        alpha[4][2] += dy_da[4] * weight * dy_da[2];
-        alpha[4][3] += dy_da[4] * weight * dy_da[3];
-        alpha[4][4] += dy_da[4] * weight * dy_da[4];
-        alpha[5][0] += dy_da[5] * weight * dy_da[0];
-        alpha[5][1] += dy_da[5] * weight * dy_da[1];
-        alpha[5][2] += dy_da[5] * weight * dy_da[2];
-        alpha[5][3] += dy_da[5] * weight * dy_da[3];
-        alpha[5][4] += dy_da[5] * weight * dy_da[4];
-        alpha[5][5] += dy_da[5] * weight * dy_da[5];
-        alpha[6][0] += dy_da[6] * weight * dy_da[0];
-        alpha[6][1] += dy_da[6] * weight * dy_da[1];
-        alpha[6][2] += dy_da[6] * weight * dy_da[2];
-        alpha[6][3] += dy_da[6] * weight * dy_da[3];
-        alpha[6][4] += dy_da[6] * weight * dy_da[4];
-        alpha[6][5] += dy_da[6] * weight * dy_da[5];
-        alpha[6][6] += dy_da[6] * weight * dy_da[6];
+        alpha[0][0] += dyDa[0] * weight * dyDa[0];
+        alpha[1][0] += dyDa[1] * weight * dyDa[0];
+        alpha[1][1] += dyDa[1] * weight * dyDa[1];
+        alpha[2][0] += dyDa[2] * weight * dyDa[0];
+        alpha[2][1] += dyDa[2] * weight * dyDa[1];
+        alpha[2][2] += dyDa[2] * weight * dyDa[2];
+        alpha[3][0] += dyDa[3] * weight * dyDa[0];
+        alpha[3][1] += dyDa[3] * weight * dyDa[1];
+        alpha[3][2] += dyDa[3] * weight * dyDa[2];
+        alpha[3][3] += dyDa[3] * weight * dyDa[3];
+        alpha[4][0] += dyDa[4] * weight * dyDa[0];
+        alpha[4][1] += dyDa[4] * weight * dyDa[1];
+        alpha[4][2] += dyDa[4] * weight * dyDa[2];
+        alpha[4][3] += dyDa[4] * weight * dyDa[3];
+        alpha[4][4] += dyDa[4] * weight * dyDa[4];
+        alpha[5][0] += dyDa[5] * weight * dyDa[0];
+        alpha[5][1] += dyDa[5] * weight * dyDa[1];
+        alpha[5][2] += dyDa[5] * weight * dyDa[2];
+        alpha[5][3] += dyDa[5] * weight * dyDa[3];
+        alpha[5][4] += dyDa[5] * weight * dyDa[4];
+        alpha[5][5] += dyDa[5] * weight * dyDa[5];
+        alpha[6][0] += dyDa[6] * weight * dyDa[0];
+        alpha[6][1] += dyDa[6] * weight * dyDa[1];
+        alpha[6][2] += dyDa[6] * weight * dyDa[2];
+        alpha[6][3] += dyDa[6] * weight * dyDa[3];
+        alpha[6][4] += dyDa[6] * weight * dyDa[4];
+        alpha[6][5] += dyDa[6] * weight * dyDa[5];
+        alpha[6][6] += dyDa[6] * weight * dyDa[6];
 
-        beta[0] += dy_da[0] * weight * dy;
-        beta[1] += dy_da[1] * weight * dy;
-        beta[2] += dy_da[2] * weight * dy;
-        beta[3] += dy_da[3] * weight * dy;
-        beta[4] += dy_da[4] * weight * dy;
-        beta[5] += dy_da[5] * weight * dy;
-        beta[6] += dy_da[6] * weight * dy;
+        beta[0] += dyDa[0] * weight * dy;
+        beta[1] += dyDa[1] * weight * dy;
+        beta[2] += dyDa[2] * weight * dy;
+        beta[3] += dyDa[3] * weight * dy;
+        beta[4] += dyDa[4] * weight * dy;
+        beta[5] += dyDa[5] * weight * dy;
+        beta[6] += dyDa[6] * weight * dy;
 
         ssx += dy * dy * weight;
       }
     } else {
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.eval(i, dy_da);
+        final double dy = y[i] - func.eval(i, dyDa);
 
-        alpha[0][0] += dy_da[0] * dy_da[0];
-        alpha[1][0] += dy_da[1] * dy_da[0];
-        alpha[1][1] += dy_da[1] * dy_da[1];
-        alpha[2][0] += dy_da[2] * dy_da[0];
-        alpha[2][1] += dy_da[2] * dy_da[1];
-        alpha[2][2] += dy_da[2] * dy_da[2];
-        alpha[3][0] += dy_da[3] * dy_da[0];
-        alpha[3][1] += dy_da[3] * dy_da[1];
-        alpha[3][2] += dy_da[3] * dy_da[2];
-        alpha[3][3] += dy_da[3] * dy_da[3];
-        alpha[4][0] += dy_da[4] * dy_da[0];
-        alpha[4][1] += dy_da[4] * dy_da[1];
-        alpha[4][2] += dy_da[4] * dy_da[2];
-        alpha[4][3] += dy_da[4] * dy_da[3];
-        alpha[4][4] += dy_da[4] * dy_da[4];
-        alpha[5][0] += dy_da[5] * dy_da[0];
-        alpha[5][1] += dy_da[5] * dy_da[1];
-        alpha[5][2] += dy_da[5] * dy_da[2];
-        alpha[5][3] += dy_da[5] * dy_da[3];
-        alpha[5][4] += dy_da[5] * dy_da[4];
-        alpha[5][5] += dy_da[5] * dy_da[5];
-        alpha[6][0] += dy_da[6] * dy_da[0];
-        alpha[6][1] += dy_da[6] * dy_da[1];
-        alpha[6][2] += dy_da[6] * dy_da[2];
-        alpha[6][3] += dy_da[6] * dy_da[3];
-        alpha[6][4] += dy_da[6] * dy_da[4];
-        alpha[6][5] += dy_da[6] * dy_da[5];
-        alpha[6][6] += dy_da[6] * dy_da[6];
+        alpha[0][0] += dyDa[0] * dyDa[0];
+        alpha[1][0] += dyDa[1] * dyDa[0];
+        alpha[1][1] += dyDa[1] * dyDa[1];
+        alpha[2][0] += dyDa[2] * dyDa[0];
+        alpha[2][1] += dyDa[2] * dyDa[1];
+        alpha[2][2] += dyDa[2] * dyDa[2];
+        alpha[3][0] += dyDa[3] * dyDa[0];
+        alpha[3][1] += dyDa[3] * dyDa[1];
+        alpha[3][2] += dyDa[3] * dyDa[2];
+        alpha[3][3] += dyDa[3] * dyDa[3];
+        alpha[4][0] += dyDa[4] * dyDa[0];
+        alpha[4][1] += dyDa[4] * dyDa[1];
+        alpha[4][2] += dyDa[4] * dyDa[2];
+        alpha[4][3] += dyDa[4] * dyDa[3];
+        alpha[4][4] += dyDa[4] * dyDa[4];
+        alpha[5][0] += dyDa[5] * dyDa[0];
+        alpha[5][1] += dyDa[5] * dyDa[1];
+        alpha[5][2] += dyDa[5] * dyDa[2];
+        alpha[5][3] += dyDa[5] * dyDa[3];
+        alpha[5][4] += dyDa[5] * dyDa[4];
+        alpha[5][5] += dyDa[5] * dyDa[5];
+        alpha[6][0] += dyDa[6] * dyDa[0];
+        alpha[6][1] += dyDa[6] * dyDa[1];
+        alpha[6][2] += dyDa[6] * dyDa[2];
+        alpha[6][3] += dyDa[6] * dyDa[3];
+        alpha[6][4] += dyDa[6] * dyDa[4];
+        alpha[6][5] += dyDa[6] * dyDa[5];
+        alpha[6][6] += dyDa[6] * dyDa[6];
 
-        beta[0] += dy_da[0] * dy;
-        beta[1] += dy_da[1] * dy;
-        beta[2] += dy_da[2] * dy;
-        beta[3] += dy_da[3] * dy;
-        beta[4] += dy_da[4] * dy;
-        beta[5] += dy_da[5] * dy;
-        beta[6] += dy_da[6] * dy;
+        beta[0] += dyDa[0] * dy;
+        beta[1] += dyDa[1] * dy;
+        beta[2] += dyDa[2] * dy;
+        beta[3] += dyDa[3] * dy;
+        beta[4] += dyDa[4] * dy;
+        beta[5] += dyDa[5] * dy;
+        beta[6] += dyDa[6] * dy;
 
         ssx += dy * dy;
       }
@@ -390,11 +390,11 @@ public class GradientCalculator7 extends GradientCalculator {
    *
    * @param alpha the alpha
    * @param beta the beta
-   * @param dfi_da the gradient of the function with respect to each parameter a
+   * @param dfiDa the gradient of the function with respect to each parameter a
    * @param fi the function value at index i
    * @param xi the data value at index i
    */
-  protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da,
+  protected void compute(final double[][] alpha, final double[] beta, final double[] dfiDa,
       final double fi, final double xi) {
     final double xi_fi = xi / fi;
     final double xi_fi2 = xi_fi / fi;
@@ -409,17 +409,17 @@ public class GradientCalculator7 extends GradientCalculator {
     // parameters
 
     for (int k = 0; k < nparams; k++) {
-      final double w = dfi_da[k] * xi_fi2;
+      final double w = dfiDa[k] * xi_fi2;
 
       for (int l = 0; l <= k; l++) {
         // This is the non-optimised version:
-        // alpha[j][k] += dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
-        alpha[k][l] += w * dfi_da[l];
+        // alpha[j][k] += dyDa[j] * dyDa[k] * y[i] / (ymod * ymod);
+        alpha[k][l] += w * dfiDa[l];
       }
 
       // This is the non-optimised version:
-      // beta[j] -= (1 - y[i] / ymod) * dy_da[j];
-      beta[k] -= e * dfi_da[k];
+      // beta[j] -= (1 - y[i] / ymod) * dyDa[j];
+      beta[k] -= e * dfiDa[k];
     }
   }
 

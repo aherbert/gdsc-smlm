@@ -29,10 +29,6 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"deprecation", "javadoc"})
 public class CalibrationTest {
-  double[] test_a = {100, 130, 160};
-  double[] test_s = {80, 100, 140};
-  double[] test_N = {1, 10, 30, 100, 1000};
-  double[] test_b2 = {0, 1, 2, 4, 8};
   int minpoints = 3;
   int maxpoints = 20;
 

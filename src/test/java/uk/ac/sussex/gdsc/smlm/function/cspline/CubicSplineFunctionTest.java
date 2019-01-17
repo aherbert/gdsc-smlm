@@ -85,7 +85,7 @@ public abstract class CubicSplineFunctionTest {
   // h ~ (Ef)^(1/3) * xc
   // xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x
   // is close to zero)
-  protected double h_ = 0.0001; // (double) (Math.pow(1e-3f, 1.0 / 3));
+  protected double stepH = 0.0001; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
   protected int[] testx = new int[] {4, 5, 6};
   protected int[] testy = new int[] {4, 5, 6};
@@ -338,7 +338,7 @@ public abstract class CubicSplineFunctionTest {
               final double xx = a[targetParameter];
 
               // Get h to minimise roundoff error
-              final double h = Precision.representableDelta(xx, h_);
+              final double h = Precision.representableDelta(xx, stepH);
 
               // Evaluate at (x+h) and (x-h)
               a[targetParameter] = xx + h;
@@ -448,7 +448,7 @@ public abstract class CubicSplineFunctionTest {
               final double xx = a[targetParameter];
 
               // Get h to minimise roundoff error
-              final double h = Precision.representableDelta(xx, h_);
+              final double h = Precision.representableDelta(xx, stepH);
 
               // Evaluate at (x+h) and (x-h)
               a[targetParameter] = xx + h;
@@ -612,7 +612,7 @@ public abstract class CubicSplineFunctionTest {
                       final double xx = a[targetParameter];
 
                       // Get h to minimise roundoff error
-                      final double h = Precision.representableDelta(xx, h_);
+                      final double h = Precision.representableDelta(xx, stepH);
 
                       // Evaluate at (x+h) and (x-h)
                       a[targetParameter] = xx + h;
@@ -740,7 +740,7 @@ public abstract class CubicSplineFunctionTest {
                       final double xx = a[targetParameter];
 
                       // Get h to minimise roundoff error
-                      final double h = Precision.representableDelta(xx, h_);
+                      final double h = Precision.representableDelta(xx, stepH);
 
                       // Evaluate at (x+h) and (x-h)
                       a[targetParameter] = xx + h;
@@ -879,12 +879,12 @@ public abstract class CubicSplineFunctionTest {
     }
 
     @Override
-    public void execute(double value, double[] dy_da) {
+    public void execute(double value, double[] dyDa) {
       s += value;
     }
 
     @Override
-    public void execute(double value, double[] dy_da, double[] d2y_da2) {
+    public void execute(double value, double[] dyDa, double[] d2yDa2) {
       s += value;
     }
   }

@@ -83,9 +83,9 @@ public class PSFModelGradient1FunctionTest {
               int i = 0;
 
               @Override
-              public void execute(double value, double[] dy_da) {
+              public void execute(double value, double[] dyDa) {
                 vo[i] = value;
-                go[i] = dy_da.clone();
+                go[i] = dyDa.clone();
                 i++;
               }
             });
@@ -99,9 +99,9 @@ public class PSFModelGradient1FunctionTest {
               int i = 0;
 
               @Override
-              public void execute(double value, double[] dy_da) {
+              public void execute(double value, double[] dyDa) {
                 ve[i] = value;
-                ge[i] = dy_da.clone();
+                ge[i] = dyDa.clone();
                 i++;
               }
             });

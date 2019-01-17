@@ -806,8 +806,8 @@ public abstract class BlockFilter extends BaseWeightedFilter {
 
         // Sweep neighbourhood -
         // No check for boundaries as this should be an internal sweep.
-        for (final int offset_d : offset) {
-          sum += wdata[index + offset_d];
+        for (final int shift : offset) {
+          sum += wdata[index + shift];
         }
 
         buffer[index] = (float) sum;

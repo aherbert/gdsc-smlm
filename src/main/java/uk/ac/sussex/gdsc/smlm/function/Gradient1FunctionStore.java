@@ -102,10 +102,10 @@ public class Gradient1FunctionStore extends ValueFunctionStore
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     values[index] = value;
-    System.arraycopy(dy_da[index], 0, dyda[index], 0, length);
+    System.arraycopy(dyDa[index], 0, dyda[index], 0, length);
     index++;
-    procedure.execute(value, dy_da);
+    procedure.execute(value, dyDa);
   }
 }

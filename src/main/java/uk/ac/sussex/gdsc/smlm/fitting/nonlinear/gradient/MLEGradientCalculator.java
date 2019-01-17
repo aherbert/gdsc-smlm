@@ -66,7 +66,7 @@ public class MLEGradientCalculator extends GradientCalculator {
   public double findLinearised(final int[] x, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func) {
     double chisq = 0;
-    final double[] dfi_da = new double[nparams];
+    final double[] dfiDa = new double[nparams];
 
     zero(alpha, beta);
 
@@ -82,7 +82,7 @@ public class MLEGradientCalculator extends GradientCalculator {
       // function to produce 0 for all evaluations. To cope with this we heavily
       // penalise the chisq value.
       // Optimally the function should be bounded to always produce a positive number.
-      final double fi = func.eval(i, dfi_da);
+      final double fi = func.eval(i, dfiDa);
 
       if (fi <= 0) {
         // We assume xi is positive
@@ -92,16 +92,16 @@ public class MLEGradientCalculator extends GradientCalculator {
         }
 
         // We ignore this contribution to the gradient for stability
-        // compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
+        // compute(alpha, beta, dfiDa, Double.MIN_VALUE, xi);
 
 
         // We assume y[i] is positive but must handle zero
       } else if (xi <= 0.0) {
         chisq += fi;
-        compute0(beta, dfi_da, fi);
+        compute0(beta, dfiDa, fi);
       } else {
         chisq += (fi - xi - xi * Math.log(fi / xi));
-        compute(alpha, beta, dfi_da, fi, xi);
+        compute(alpha, beta, dfiDa, fi, xi);
       }
     }
 
@@ -123,7 +123,7 @@ public class MLEGradientCalculator extends GradientCalculator {
   public double findLinearised(final int[] x, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func, boolean[] ignore) {
     double chisq = 0;
-    final double[] dfi_da = new double[nparams];
+    final double[] dfiDa = new double[nparams];
 
     zero(alpha, beta);
 
@@ -148,7 +148,7 @@ public class MLEGradientCalculator extends GradientCalculator {
       // function to produce 0 for all evaluations. To cope with this we heavily
       // penalise the chisq value.
       // Optimally the function should be bounded to always produce a positive number.
-      final double fi = func.eval(i, dfi_da);
+      final double fi = func.eval(i, dfiDa);
 
       if (fi <= 0) {
         // We assume xi is positive
@@ -158,7 +158,7 @@ public class MLEGradientCalculator extends GradientCalculator {
         }
 
         // We ignore this contribution to the gradient for stability
-        // compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
+        // compute(alpha, beta, dfiDa, Double.MIN_VALUE, xi);
       } else {
         // We assume y[i] is positive but must handle zero
         if (xi <= 0.0) {
@@ -167,7 +167,7 @@ public class MLEGradientCalculator extends GradientCalculator {
           chisq += (fi - xi - xi * Math.log(fi / xi));
         }
 
-        compute(alpha, beta, dfi_da, fi, xi, indices, nnparams);
+        compute(alpha, beta, dfiDa, fi, xi, indices, nnparams);
       }
     }
 
@@ -261,7 +261,7 @@ public class MLEGradientCalculator extends GradientCalculator {
   public double findLinearised(final int n, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func) {
     double chisq = 0;
-    final double[] dfi_da = new double[nparams];
+    final double[] dfiDa = new double[nparams];
 
     zero(alpha, beta);
 
@@ -277,7 +277,7 @@ public class MLEGradientCalculator extends GradientCalculator {
       // function to produce 0 for all evaluations. To cope with this we heavily
       // penalise the chisq value.
       // Optimally the function should be bounded to always produce a positive number.
-      final double fi = func.eval(i, dfi_da);
+      final double fi = func.eval(i, dfiDa);
 
       if (fi <= 0) {
         // We assume xi is positive
@@ -287,15 +287,15 @@ public class MLEGradientCalculator extends GradientCalculator {
         }
 
         // We ignore this contribution to the gradient for stability
-        // compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
+        // compute(alpha, beta, dfiDa, Double.MIN_VALUE, xi);
 
         // We assume y[i] is positive but must handle zero
       } else if (xi <= 0.0) {
         chisq += fi;
-        compute0(beta, dfi_da, fi);
+        compute0(beta, dfiDa, fi);
       } else {
         chisq += (fi - xi - xi * Math.log(fi / xi));
-        compute(alpha, beta, dfi_da, fi, xi);
+        compute(alpha, beta, dfiDa, fi, xi);
       }
 
       // checkGradients(alpha, beta, nparams, 0);
@@ -303,7 +303,7 @@ public class MLEGradientCalculator extends GradientCalculator {
       // {
       // System.out.printf("Bad gradients generated: %s / %function : %s\n", Double.toString(fi),
       // xi,
-      // Arrays.toString(dfi_da));
+      // Arrays.toString(dfiDa));
       // return 0;
       // }
     }
@@ -324,7 +324,7 @@ public class MLEGradientCalculator extends GradientCalculator {
   public double findLinearised(final int n, final double[] y, final double[] a,
       final double[][] alpha, final double[] beta, final NonLinearFunction func, boolean[] ignore) {
     double chisq = 0;
-    final double[] dfi_da = new double[nparams];
+    final double[] dfiDa = new double[nparams];
 
     zero(alpha, beta);
 
@@ -349,7 +349,7 @@ public class MLEGradientCalculator extends GradientCalculator {
       // function to produce 0 for all evaluations. To cope with this we heavily
       // penalise the chisq value.
       // Optimally the function should be bounded to always produce a positive number.
-      final double fi = func.eval(i, dfi_da);
+      final double fi = func.eval(i, dfiDa);
 
       if (fi <= 0) {
         // We assume xi is positive
@@ -359,7 +359,7 @@ public class MLEGradientCalculator extends GradientCalculator {
         }
 
         // We ignore this contribution to the gradient for stability
-        // compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
+        // compute(alpha, beta, dfiDa, Double.MIN_VALUE, xi);
       } else {
         // We assume y[i] is positive but must handle zero
         if (xi <= 0.0) {
@@ -368,7 +368,7 @@ public class MLEGradientCalculator extends GradientCalculator {
           chisq += (fi - xi - xi * Math.log(fi / xi));
         }
 
-        compute(alpha, beta, dfi_da, fi, xi, indices, nnparams);
+        compute(alpha, beta, dfiDa, fi, xi, indices, nnparams);
       }
 
       // checkGradients(alpha, beta, nparams, 0);
@@ -376,7 +376,7 @@ public class MLEGradientCalculator extends GradientCalculator {
       // {
       // System.out.printf("Bad gradients generated: %s / %function : %s\n", Double.toString(fi),
       // xi,
-      // Arrays.toString(dfi_da));
+      // Arrays.toString(dfiDa));
       // return 0;
       // }
     }
@@ -485,11 +485,11 @@ public class MLEGradientCalculator extends GradientCalculator {
    *
    * @param alpha the alpha
    * @param beta the beta
-   * @param dfi_da the gradient of the function with respect to each parameter a
+   * @param dfiDa the gradient of the function with respect to each parameter a
    * @param fi the function value at index i
    * @param xi the data value at index i
    */
-  protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da,
+  protected void compute(final double[][] alpha, final double[] beta, final double[] dfiDa,
       final double fi, final double xi) {
     final double xi_fi = xi / fi;
     final double xi_fi2 = xi_fi / fi;
@@ -506,19 +506,19 @@ public class MLEGradientCalculator extends GradientCalculator {
     // parameters
 
     for (int k = 0; k < nparams; k++) {
-      final double w = dfi_da[k] * xi_fi2;
+      final double w = dfiDa[k] * xi_fi2;
 
       for (int l = 0; l <= k; l++) {
         // This is the non-optimised version:
-        // alpha[k][l] += dfi_da[k] * dfi_da[l] * xi / (fi * fi);
-        alpha[k][l] += w * dfi_da[l];
+        // alpha[k][l] += dfiDa[k] * dfiDa[l] * xi / (fi * fi);
+        alpha[k][l] += w * dfiDa[l];
       }
 
       // This is the non-optimised version:
-      // beta[k] -= (1 - xi / fi) * dfi_da[k];
-      beta[k] -= e * dfi_da[k];
+      // beta[k] -= (1 - xi / fi) * dfiDa[k];
+      beta[k] -= e * dfiDa[k];
       // + summation:
-      // beta[k] += e * dfi_da[k];
+      // beta[k] += e * dfiDa[k];
     }
   }
 
@@ -527,13 +527,13 @@ public class MLEGradientCalculator extends GradientCalculator {
    *
    * @param alpha the alpha
    * @param beta the beta
-   * @param dfi_da the gradient of the function with respect to each parameter a
+   * @param dfiDa the gradient of the function with respect to each parameter a
    * @param fi the function value at index i
    * @param xi the data value at index i
    * @param indices the indices
    * @param nnparams the nnparams
    */
-  protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da,
+  protected void compute(final double[][] alpha, final double[] beta, final double[] dfiDa,
       final double fi, final double xi, int[] indices, int nnparams) {
     final double xi_fi = xi / fi;
     final double xi_fi2 = xi_fi / fi;
@@ -548,13 +548,13 @@ public class MLEGradientCalculator extends GradientCalculator {
     // parameters
 
     for (int k = 0; k < nnparams; k++) {
-      final double w = dfi_da[indices[k]] * xi_fi2;
+      final double w = dfiDa[indices[k]] * xi_fi2;
 
       for (int l = 0; l <= k; l++) {
-        alpha[k][l] += w * dfi_da[indices[l]];
+        alpha[k][l] += w * dfiDa[indices[l]];
       }
 
-      beta[k] -= e * dfi_da[k];
+      beta[k] -= e * dfiDa[k];
     }
   }
 
@@ -562,14 +562,14 @@ public class MLEGradientCalculator extends GradientCalculator {
    * Compute the matrix alpha and vector beta when the data value is zero.
    *
    * @param beta the beta
-   * @param dfi_da the gradient of the function with respect to each parameter a
+   * @param dfiDa the gradient of the function with respect to each parameter a
    * @param fi the function value at index i
    */
-  protected void compute0(final double[] beta, final double[] dfi_da, final double fi) {
+  protected void compute0(final double[] beta, final double[] dfiDa, final double fi) {
     // Assume xi is zero. This removes most of the computation
 
     for (int k = 0; k < nparams; k++) {
-      beta[k] -= dfi_da[k];
+      beta[k] -= dfiDa[k];
     }
   }
 
@@ -595,18 +595,18 @@ public class MLEGradientCalculator extends GradientCalculator {
    * @param x n observations
    * @param y Data to fit
    * @param a Set of m coefficients
-   * @param df_da the gradient vector of the function's partial first derivatives with respect to
-   *        the parameters (size m)
+   * @param dfDa the gradient vector of the function's partial first derivatives with respect to the
+   *        parameters (size m)
    * @param func Non-linear fitting function
    * @return The MLE chi-squared value
    */
   @Override
-  public double evaluate(final int[] x, final double[] y, final double[] a, final double[] df_da,
+  public double evaluate(final int[] x, final double[] y, final double[] a, final double[] dfDa,
       final NonLinearFunction func) {
     double chisq = 0;
-    final double[] dfi_da = new double[nparams];
+    final double[] dfiDa = new double[nparams];
 
-    zero(df_da);
+    zero(dfDa);
 
     func.initialise(a);
 
@@ -620,7 +620,7 @@ public class MLEGradientCalculator extends GradientCalculator {
       // function to produce 0 for all evaluations. To cope with this we heavily
       // penalise the chisq value.
       // Optimally the function should be bounded to always produce a positive number.
-      final double fi = func.eval(i, dfi_da);
+      final double fi = func.eval(i, dfiDa);
 
       if (fi <= 0) {
         // We assume xi is positive
@@ -633,7 +633,7 @@ public class MLEGradientCalculator extends GradientCalculator {
         // final double e = 1 - (xi / Double.MIN_VALUE);
         // for (int k = 0; k < nparams; k++)
         // {
-        // df_da[k] += e * dfi_da[k];
+        // dfDa[k] += e * dfiDa[k];
         // }
       } else {
         // We assume y[i] is positive but must handle zero
@@ -647,20 +647,20 @@ public class MLEGradientCalculator extends GradientCalculator {
 
         // Compute:
         // Laurence &amp; Chromy (2010) Nature Methods 7, 338-339, SI, Equation 6
-        // df_da - the gradient vector of the function's partial first derivatives with respect to
+        // dfDa - the gradient vector of the function's partial first derivatives with respect to
         // the parameters
 
         for (int k = 0; k < nparams; k++) {
-          df_da[k] += e * dfi_da[k];
+          dfDa[k] += e * dfiDa[k];
         }
       }
     }
 
-    checkGradients(df_da, nparams);
+    checkGradients(dfDa, nparams);
 
     // Move the factor of 2 to the end
     for (int j = 0; j < nparams; j++) {
-      df_da[j] *= 2;
+      dfDa[j] *= 2;
     }
     return chisq * 2;
   }

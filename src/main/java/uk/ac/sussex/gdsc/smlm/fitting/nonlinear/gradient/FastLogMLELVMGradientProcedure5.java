@@ -56,7 +56,7 @@ public class FastLogMLELVMGradientProcedure5 extends FastLogMLELVMGradientProced
   }
 
   @Override
-  public void execute(double fi, double[] dfi_da) {
+  public void execute(double fi, double[] dfiDa) {
     ++yi;
     if (fi > 0.0) {
       final double xi = y[yi];
@@ -69,39 +69,39 @@ public class FastLogMLELVMGradientProcedure5 extends FastLogMLELVMGradientProced
         final double xi_fi2 = xi / fi / fi;
         final double e = 1 - (xi / fi);
 
-        beta[0] -= e * dfi_da[0];
-        beta[1] -= e * dfi_da[1];
-        beta[2] -= e * dfi_da[2];
-        beta[3] -= e * dfi_da[3];
-        beta[4] -= e * dfi_da[4];
+        beta[0] -= e * dfiDa[0];
+        beta[1] -= e * dfiDa[1];
+        beta[2] -= e * dfiDa[2];
+        beta[3] -= e * dfiDa[3];
+        beta[4] -= e * dfiDa[4];
 
-        alpha[0] += dfi_da[0] * xi_fi2 * dfi_da[0];
+        alpha[0] += dfiDa[0] * xi_fi2 * dfiDa[0];
         double w;
-        w = dfi_da[1] * xi_fi2;
-        alpha[1] += w * dfi_da[0];
-        alpha[2] += w * dfi_da[1];
-        w = dfi_da[2] * xi_fi2;
-        alpha[3] += w * dfi_da[0];
-        alpha[4] += w * dfi_da[1];
-        alpha[5] += w * dfi_da[2];
-        w = dfi_da[3] * xi_fi2;
-        alpha[6] += w * dfi_da[0];
-        alpha[7] += w * dfi_da[1];
-        alpha[8] += w * dfi_da[2];
-        alpha[9] += w * dfi_da[3];
-        w = dfi_da[4] * xi_fi2;
-        alpha[10] += w * dfi_da[0];
-        alpha[11] += w * dfi_da[1];
-        alpha[12] += w * dfi_da[2];
-        alpha[13] += w * dfi_da[3];
-        alpha[14] += w * dfi_da[4];
+        w = dfiDa[1] * xi_fi2;
+        alpha[1] += w * dfiDa[0];
+        alpha[2] += w * dfiDa[1];
+        w = dfiDa[2] * xi_fi2;
+        alpha[3] += w * dfiDa[0];
+        alpha[4] += w * dfiDa[1];
+        alpha[5] += w * dfiDa[2];
+        w = dfiDa[3] * xi_fi2;
+        alpha[6] += w * dfiDa[0];
+        alpha[7] += w * dfiDa[1];
+        alpha[8] += w * dfiDa[2];
+        alpha[9] += w * dfiDa[3];
+        w = dfiDa[4] * xi_fi2;
+        alpha[10] += w * dfiDa[0];
+        alpha[11] += w * dfiDa[1];
+        alpha[12] += w * dfiDa[2];
+        alpha[13] += w * dfiDa[3];
+        alpha[14] += w * dfiDa[4];
       } else {
         value += fi;
-        beta[0] -= dfi_da[0];
-        beta[1] -= dfi_da[1];
-        beta[2] -= dfi_da[2];
-        beta[3] -= dfi_da[3];
-        beta[4] -= dfi_da[4];
+        beta[0] -= dfiDa[0];
+        beta[1] -= dfiDa[1];
+        beta[2] -= dfiDa[2];
+        beta[3] -= dfiDa[3];
+        beta[4] -= dfiDa[4];
       }
     }
   }

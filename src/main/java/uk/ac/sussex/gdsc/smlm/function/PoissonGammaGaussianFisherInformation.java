@@ -599,7 +599,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
    *
    * <p>This can be called when an infinite sum has occurred on the unscaled A^2/P integral.
    *
-   * @param t the t
+   * @param t the mean
    * @return the double
    */
   private static double extremeLimit(double t) {
@@ -699,30 +699,30 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
    * gradient of the upper bound.
    *
    * @param G the previous computed point value
-   * @param dG_dp the previous computed point gradient
+   * @param dGDp the previous computed point gradient
    * @param lower the lower bound
    * @param mid the mid point
    * @param upper the upper bound
    * @return the double
    */
-  private double add(double t, double G, double[] dG_dp, double lower, double mid, double upper) {
+  private double add(double t, double G, double[] dGDp, double lower, double mid, double upper) {
     // TODO - does this need refinement?
 
     // Do a single Simpson sum (f0 + 4 * fxi + fn).
     double sG = G;
-    double sA = dG_dp[0];
-    G = PoissonGammaFunction.unscaledPoissonGammaPartial(mid, t, m, dG_dp);
+    double sA = dGDp[0];
+    G = PoissonGammaFunction.unscaledPoissonGammaPartial(mid, t, m, dGDp);
     sG += 4 * G;
-    sA += 4 * dG_dp[0];
-    G = PoissonGammaFunction.unscaledPoissonGammaPartial(upper, t, m, dG_dp);
-    final double h_3 = (upper - lower) / 6;
-    listP.add((sG + G) * h_3);
-    listA.add((sA + dG_dp[0]) * h_3);
+    sA += 4 * dGDp[0];
+    G = PoissonGammaFunction.unscaledPoissonGammaPartial(upper, t, m, dGDp);
+    final double hOver3 = (upper - lower) / 6;
+    listP.add((sG + G) * hOver3);
+    listA.add((sA + dGDp[0]) * hOver3);
     return G;
   }
 
   private abstract static class IntegrationProcedure implements DoubleConvolutionValueProcedure {
-    int i;
+    int index;
 
     protected double getF(double pz, double az) {
       // Compute with respect to the ultimate limit
@@ -749,15 +749,15 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
     @Override
     public boolean execute(double pz, double az) {
-      ++i;
+      ++index;
       if (pz > 0) {
         // Simpson's rule.
         // This computes the sum as:
         // h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-        if (i % 2 == 0) {
-          sum2 += getF(pz, az);
+        if (index % 2 == 0) {
+          sum2 += super.getF(pz, az);
         } else {
-          sum4 += getF(pz, az);
+          sum4 += super.getF(pz, az);
         }
       }
       return true;
@@ -780,15 +780,15 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
     @Override
     public boolean execute(double pz, double az) {
-      ++i;
+      ++index;
       if (pz > 0) {
         // Simpson's 3/8 rule based on cubic interpolation has a lower error.
         // This computes the sum as:
         // 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-        if (i % 3 == 0) {
-          sum2 += getF(pz, az);
+        if (index % 3 == 0) {
+          sum2 += super.getF(pz, az);
         } else {
-          sum3 += getF(pz, az);
+          sum3 += super.getF(pz, az);
         }
       }
       return true;
@@ -811,10 +811,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       // Simpson's rule.
       // This computes the sum as:
       // h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-      if (++i % 2 == 0) {
-        sum2 += getF(pz, az);
+      if (++index % 2 == 0) {
+        sum2 += super.getF(pz, az);
       } else {
-        sum4 += getF(pz, az);
+        sum4 += super.getF(pz, az);
       }
       return true;
     }
@@ -827,10 +827,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       // Simpson's 3/8 rule based on cubic interpolation has a lower error.
       // This computes the sum as:
       // 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-      if (++i % 3 == 0) {
-        sum2 += getF(pz, az);
+      if (++index % 3 == 0) {
+        sum2 += super.getF(pz, az);
       } else {
-        sum3 += getF(pz, az);
+        sum3 += super.getF(pz, az);
       }
       return true;
     }
@@ -858,13 +858,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     // the distribution p that can be removed are unknown without convolution.
     // So the resulting convolution output is checked for zero.
 
-    //@formatter:off
-    final IntegrationProcedure ip = (use38)
-        ? (unchecked) ? new UncheckedSimpson38IntegrationProcedure()
-                  : new Simpson38IntegrationProcedure()
-        : (unchecked) ? new UncheckedSimpsonIntegrationProcedure()
-                  : new SimpsonIntegrationProcedure();
-    //@formatter:on
+    final IntegrationProcedure ip = createProcedure(unchecked);
 
     Convolution.convolve(g, p, a, scale, ip);
 
@@ -875,16 +869,20 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     return ip.getSum();
   }
 
+  private IntegrationProcedure createProcedure(final boolean unchecked) {
+    if (use38) {
+      return (unchecked) ? new UncheckedSimpson38IntegrationProcedure()
+          : new Simpson38IntegrationProcedure();
+    }
+    return (unchecked) ? new UncheckedSimpsonIntegrationProcedure()
+        : new SimpsonIntegrationProcedure();
+  }
+
   private static double getF(double P, double A) {
-    // if (NumberUtils.isSubNormal(P))
-    // System.out.printf("Sub-normal: P=%s A=%s\n", P, A);
     if (P == 0) {
       return 0;
     }
-    final double result = MathUtils.pow2(A) / P;
-    // if (result > 1)
-    // System.out.printf("Strange: P=%s A=%s result=%s\n", P, A, result);
-    return result;
+    return MathUtils.pow2(A) / P;
   }
 
   /**
@@ -1163,7 +1161,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     final double dirac = PoissonGammaFunction.dirac(t);
 
     final UnivariateFunction f = new UnivariateFunction() {
-      double[] dG_dp = new double[1];
+      double[] dgDp = new double[1];
 
       @Override
       public double value(double x) {
@@ -1171,16 +1169,12 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         // is known for relative height analysis.
         double G;
         if (x == 0) {
-          dG_dp[0] = dirac / m;
-          G = dG_dp[0] * t;
-
-          // System.out.printf("m=%g s=%g u=%g max=%s %s\n", m, s, t, 0, getF(G, dG_dp[0]));
-          // G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
-          // g-=dirac;
+          dgDp[0] = dirac / m;
+          G = dgDp[0] * t;
         } else {
-          G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
+          G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dgDp);
         }
-        return getF(G, dG_dp[0]);
+        return getF(G, dgDp[0]);
       }
     };
 
@@ -1235,12 +1229,12 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
 
     final UnivariateFunction f = new UnivariateFunction() {
-      double[] dG_dp = new double[1];
+      double[] dgDp = new double[1];
 
       @Override
       public double value(double x) {
-        final double G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
-        return getF(G, dG_dp[0]);
+        final double G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dgDp);
+        return getF(G, dgDp[0]);
       }
     };
 

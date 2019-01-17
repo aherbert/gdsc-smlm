@@ -61,7 +61,7 @@ public interface NonLinearFunction extends GradientFunction {
    * @throws NullPointerException If the output weight argument is null
    * @throws ArrayIndexOutOfBoundsException If the output weight argument is length 0
    */
-  double eval(final int x, final double[] dyda, final double[] w);
+  double evalw(final int x, final double[] dyda, final double[] w);
 
   /**
    * The non-linear fitting function. Produce an output predicted value for a given input predictor
@@ -77,7 +77,7 @@ public interface NonLinearFunction extends GradientFunction {
   /**
    * Check if the function can compute weights.
    *
-   * @return True if the {@link #eval(int, double[], double[])} can compute weights other than 1
+   * @return True if the {@link #evalw(int, double[], double[])} can compute weights other than 1
    */
   boolean canComputeWeights();
 }

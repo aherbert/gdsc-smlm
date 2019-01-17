@@ -90,18 +90,18 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
   }
 
   @Override
-  public void executeExtended(double uk, double[] duk_dt, double[] d2uk_dtds) {
+  public void executeExtended(double uk, double[] dukDt, double[] d2ukDtDs) {
     u[k] = uk;
     final double xk = x[k++];
 
     final double xk_uk_minus1 = xk / uk - 1.0;
     final double xk_uk2 = xk / (uk * uk);
     for (int i = 0, index = 0; i < n; i++) {
-      d1[i] += duk_dt[i] * xk_uk_minus1;
+      d1[i] += dukDt[i] * xk_uk_minus1;
 
       for (int j = 0, k = i * n; j <= i; j++, index++, k++) {
         // This requires the partial second derivative with respect to i and j
-        J[index] += d2uk_dtds[k] * xk_uk_minus1 - duk_dt[i] * duk_dt[j] * xk_uk2;
+        J[index] += d2ukDtDs[k] * xk_uk_minus1 - dukDt[i] * dukDt[j] * xk_uk2;
       }
     }
   }

@@ -139,14 +139,14 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     values[index++] = value;
-    p1.execute(value, dy_da);
+    p1.execute(value, dyDa);
   }
 
   @Override
-  public void execute(double value, double[] dy_da, double[] d2y_da2) {
+  public void execute(double value, double[] dyDa, double[] d2yDa2) {
     values[index++] = value;
-    p2.execute(value, dy_da, d2y_da2);
+    p2.execute(value, dyDa, d2yDa2);
   }
 }

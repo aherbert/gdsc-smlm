@@ -87,19 +87,19 @@ public class PoissonLikelihoodWrapperTest {
   // h ~ (Ef)^(1/3) * xc
   // xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x
   // is close to zero)
-  final double h_ = 0.01; // (double) (Math.pow(1e-3f, 1.0 / 3));
+  final double stepH = 0.01; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
   int[] testx = new int[] {4, 5, 6};
   int[] testy = new int[] {4, 5, 6};
   // Do not test zero background since this is an edge case for the likelihood function
-  double[] testbackground_ = new double[] {10, 400};
+  double[] testbackgroundOptions = new double[] {10, 400};
 
-  double[] testsignal1_ = new double[] {15, 55, 105};
-  double[] testcx1_ = new double[] {4.9, 5.3};
-  double[] testcy1_ = new double[] {4.8, 5.2};
-  double[] testcz1_ = new double[] {-1.5, 1.0};
-  double[][] testw1_ = new double[][] {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
-  double[] testangle1_ = new double[] {Math.PI / 5, Math.PI / 3};
+  double[] testsignal1Options = new double[] {15, 55, 105};
+  double[] testcx1Options = new double[] {4.9, 5.3};
+  double[] testcy1Options = new double[] {4.8, 5.2};
+  double[] testcz1Options = new double[] {-1.5, 1.0};
+  double[][] testw1Options = new double[][] {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
+  double[] testangle1Options = new double[] {Math.PI / 5, Math.PI / 3};
 
   double[] testbackground;
   double[] testsignal1;
@@ -163,13 +163,13 @@ public class PoissonLikelihoodWrapperTest {
   private void functionComputesGradientPerDatum(int flags) {
     final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
     // Setup
-    testbackground = testbackground_;
-    testsignal1 = testsignal1_;
-    testcx1 = testcx1_;
-    testcy1 = testcy1_;
-    testcz1 = testcz1_;
-    testw1 = testw1_;
-    testangle1 = testangle1_;
+    testbackground = testbackgroundOptions;
+    testsignal1 = testsignal1Options;
+    testcx1 = testcx1Options;
+    testcy1 = testcy1Options;
+    testcz1 = testcz1Options;
+    testw1 = testw1Options;
+    testangle1 = testangle1Options;
     if (!f1.evaluatesBackground()) {
       testbackground = new double[] {testbackground[0]};
     }
@@ -226,7 +226,7 @@ public class PoissonLikelihoodWrapperTest {
     final int[] indices = f1.gradientIndices();
     final int gradientIndex = findGradientIndex(f1, targetParameter);
     final double[] dyda = new double[indices.length];
-    double[] a;
+    double[] params;
 
     PoissonLikelihoodWrapper ff1;
 
@@ -241,10 +241,11 @@ public class PoissonLikelihoodWrapperTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
                   // Create y as a function we would want to move towards
-                  final double[] a2 = a.clone();
+                  final double[] a2 = params.clone();
                   a2[targetParameter] *= 1.1;
                   f1.initialise(a2);
                   final double[] data = new double[maxx * maxx];
@@ -252,27 +253,27 @@ public class PoissonLikelihoodWrapperTest {
                     data[i] = f1.eval(i);
                   }
 
-                  ff1 = new PoissonLikelihoodWrapper(f1, a, data, n, alpha);
+                  ff1 = new PoissonLikelihoodWrapper(f1, params, data, n, alpha);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
-                  final double xx = a[targetParameter];
+                  final double xx = params[targetParameter];
 
                   // Get h to minimise roundoff error
-                  final double h = Precision.representableDelta(xx, h_);
+                  final double h = Precision.representableDelta(xx, stepH);
 
                   for (final int x : testx) {
                     for (final int y : testy) {
                       final int i = y * maxx + x;
-                      a[targetParameter] = xx;
-                      ff1.likelihood(getVariables(indices, a), dyda, i);
+                      params[targetParameter] = xx;
+                      ff1.likelihood(getVariables(indices, params), dyda, i);
 
                       // Evaluate at (x+h) and (x-h)
-                      a[targetParameter] = xx + h;
-                      final double value2 = ff1.likelihood(getVariables(indices, a), i);
+                      params[targetParameter] = xx + h;
+                      final double value2 = ff1.likelihood(getVariables(indices, params), i);
 
-                      a[targetParameter] = xx - h;
-                      final double value3 = ff1.likelihood(getVariables(indices, a), i);
+                      params[targetParameter] = xx - h;
+                      final double value3 = ff1.likelihood(getVariables(indices, params), i);
 
                       final double gradient = (value2 - value3) / (2 * h);
                       boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex])
@@ -361,13 +362,13 @@ public class PoissonLikelihoodWrapperTest {
 
   private void functionComputesGradient(int flags) {
     final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
-    testbackground = testbackground_;
-    testsignal1 = testsignal1_;
-    testcx1 = testcx1_;
-    testcy1 = testcy1_;
-    testcz1 = testcz1_;
-    testw1 = testw1_;
-    testangle1 = testangle1_;
+    testbackground = testbackgroundOptions;
+    testsignal1 = testsignal1Options;
+    testcx1 = testcx1Options;
+    testcy1 = testcy1Options;
+    testcz1 = testcz1Options;
+    testw1 = testw1Options;
+    testangle1 = testangle1Options;
     if (!f1.evaluatesBackground()) {
       testbackground = new double[] {testbackground[0]};
     }
@@ -426,7 +427,7 @@ public class PoissonLikelihoodWrapperTest {
     final int[] indices = f1.gradientIndices();
     final int gradientIndex = findGradientIndex(f1, targetParameter);
     final double[] dyda = new double[indices.length];
-    double[] a;
+    double[] params;
 
     PoissonLikelihoodWrapper ff1;
 
@@ -441,10 +442,11 @@ public class PoissonLikelihoodWrapperTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
                   // Create y as a function we would want to move towards
-                  final double[] a2 = a.clone();
+                  final double[] a2 = params.clone();
                   a2[targetParameter] *= 1.3;
                   f1.initialise(a2);
                   final double[] data = new double[maxx * maxx];
@@ -452,23 +454,23 @@ public class PoissonLikelihoodWrapperTest {
                     data[i] = f1.eval(i);
                   }
 
-                  ff1 = new PoissonLikelihoodWrapper(f1, a, data, n, alpha);
+                  ff1 = new PoissonLikelihoodWrapper(f1, params, data, n, alpha);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
-                  final double xx = a[targetParameter];
+                  final double xx = params[targetParameter];
 
                   // Get h to minimise roundoff error
-                  final double h = Precision.representableDelta(xx, h_);
+                  final double h = Precision.representableDelta(xx, stepH);
 
-                  ff1.likelihood(getVariables(indices, a), dyda);
+                  ff1.likelihood(getVariables(indices, params), dyda);
 
                   // Evaluate at (x+h) and (x-h)
-                  a[targetParameter] = xx + h;
-                  final double value2 = ff1.likelihood(getVariables(indices, a));
+                  params[targetParameter] = xx + h;
+                  final double value2 = ff1.likelihood(getVariables(indices, params));
 
-                  a[targetParameter] = xx - h;
-                  final double value3 = ff1.likelihood(getVariables(indices, a));
+                  params[targetParameter] = xx - h;
+                  final double value3 = ff1.likelihood(getVariables(indices, params));
 
                   final double gradient = (value2 - value3) / (2 * h);
                   boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex])
@@ -507,10 +509,10 @@ public class PoissonLikelihoodWrapperTest {
     return variables;
   }
 
-  private static int findGradientIndex(Gaussian2DFunction f, int targetParameter) {
-    final int i = f.findGradientIndex(targetParameter);
-    Assertions.assertTrue(i >= 0, "Cannot find gradient index");
-    return i;
+  private static int findGradientIndex(Gaussian2DFunction func, int targetParameter) {
+    final int index = func.findGradientIndex(targetParameter);
+    Assertions.assertTrue(index >= 0, "Cannot find gradient index");
+    return index;
   }
 
   double[] createParameters(double... args) {
@@ -528,7 +530,7 @@ public class PoissonLikelihoodWrapperTest {
   }
 
   private static void cumulativeProbabilityIsOneWithIntegerData(final double mu) {
-    double p = 0;
+    double pvalue = 0;
     int x = 0;
 
     // Evaluate an initial range.
@@ -539,10 +541,10 @@ public class PoissonLikelihoodWrapperTest {
       for (; x <= max; x++) {
         final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
         // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
-        p += pp;
+        pvalue += pp;
       }
-      if (p > 1.01) {
-        Assertions.fail("P > 1: " + p);
+      if (pvalue > 1.01) {
+        Assertions.fail("P > 1: " + pvalue);
       }
     }
 
@@ -552,13 +554,13 @@ public class PoissonLikelihoodWrapperTest {
     for (;; x++) {
       final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
       // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
-      p += pp;
-      if (pp / p < changeTolerance) {
+      pvalue += pp;
+      if (pp / pvalue < changeTolerance) {
         break;
       }
     }
-    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f, max=%d", mu, p, x));
-    Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
+    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f, max=%d", mu, pvalue, x));
+    Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
   }
 
   @Test
@@ -572,19 +574,17 @@ public class PoissonLikelihoodWrapperTest {
   }
 
   private static void cumulativeProbabilityIsOneWithRealData(final double mu, int max) {
-    double p = 0;
-
     final SimpsonIntegrator in = new SimpsonIntegrator();
 
-    p = in.integrate(20000, new UnivariateFunction() {
+    final double pvalue = in.integrate(20000, new UnivariateFunction() {
       @Override
       public double value(double x) {
         return PoissonLikelihoodWrapper.likelihood(mu, x);
       }
     }, 0, max);
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f", mu, p));
-    Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
+    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f", mu, pvalue));
+    Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
   }
 
   @Test
@@ -620,7 +620,12 @@ public class PoissonLikelihoodWrapperTest {
       }
 
       @Override
-      public double eval(int x, double[] dyda, double[] w) {
+      public double evalw(int x, double[] dyda, double[] weights) {
+        return 0;
+      }
+
+      @Override
+      public double evalw(int x, double[] weights) {
         return 0;
       }
 
@@ -640,44 +645,39 @@ public class PoissonLikelihoodWrapperTest {
       }
 
       @Override
-      public double evalw(int x, double[] w) {
-        return 0;
-      }
-
-      @Override
       public int getNumberOfGradients() {
         return 0;
       }
     };
-    PoissonLikelihoodWrapper f =
+    PoissonLikelihoodWrapper func =
         new PoissonLikelihoodWrapper(nlf, a, Arrays.copyOf(k, n), n, alpha);
 
     // Keep evaluating up until no difference
     final double changeTolerance = 1e-6;
     double total = 0;
-    double p = 0;
-    int i = 0;
-    while (i < n) {
-      final double nll = f.computeLikelihood(i);
-      final double nll2 = f.computeLikelihood(g, i);
-      i++;
+    double pvalue = 0;
+    int index = 0;
+    while (index < n) {
+      final double nll = func.computeLikelihood(index);
+      final double nll2 = func.computeLikelihood(g, index);
+      index++;
       Assertions.assertEquals(nll, nll2, 1e-10, "computeLikelihood(i)");
       total += nll;
       final double pp = FastMath.exp(-nll);
       // logger.fine(FunctionUtils.getSupplier("mu=%f, o=%f, i=%d, pp=%f", mu, mu / alpha, i, pp);
-      p += pp;
-      if (p > 0.5 && pp / p < changeTolerance) {
+      pvalue += pp;
+      if (pvalue > 0.5 && pp / pvalue < changeTolerance) {
         break;
       }
     }
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, limit=%d, p=%f", mu, limit, p));
-    Assertions.assertEquals(1, p, 0.02, () -> String.format("mu=%f", mu));
+    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, limit=%d, p=%f", mu, limit, pvalue));
+    Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
 
     // Check the function can compute the same total
-    f = new PoissonLikelihoodWrapper(nlf, a, k, i, alpha);
-    final double sum = f.computeLikelihood();
-    final double sum2 = f.computeLikelihood(g);
+    func = new PoissonLikelihoodWrapper(nlf, a, k, index, alpha);
+    final double sum = func.computeLikelihood();
+    final double sum2 = func.computeLikelihood(g);
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
     TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");

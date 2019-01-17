@@ -116,13 +116,13 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     if (value > 0.0) {
       final double function = 1.0 / value;
       for (int j = 0, i = 0; j < n; j++) {
-        final double wgt = function * dy_da[j];
+        final double wgt = function * dyDa[j];
         for (int k = 0; k <= j; k++) {
-          data[i++] += wgt * dy_da[k];
+          data[i++] += wgt * dyDa[k];
         }
       }
     }

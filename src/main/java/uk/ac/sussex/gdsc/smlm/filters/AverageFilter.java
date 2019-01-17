@@ -795,8 +795,8 @@ public class AverageFilter {
 
         // Sweep neighbourhood -
         // No check for boundaries as this should be an internal sweep.
-        for (final int offset_d : offset) {
-          sum += data[index + offset_d];
+        for (final int shift : offset) {
+          sum += data[index + shift];
         }
 
         newData[index] = sum * divisor;

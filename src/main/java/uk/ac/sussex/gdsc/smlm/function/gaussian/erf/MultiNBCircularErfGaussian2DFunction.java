@@ -64,39 +64,39 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
-    double I = tB;
+    double I = tb;
     for (int n = 0, a = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a++];
-      duda[a++] = du_dtx[xx] * deltaEy[yy];
-      duda[a++] = du_dty[yy] * deltaEx[xx];
-      duda[a++] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
+      duda[a++] = duDtx[xx] * deltaEy[yy];
+      duda[a++] = duDty[yy] * deltaEx[xx];
+      duda[a++] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
     }
     return I;
   }
 
   @Override
-  public double eval(final int i, final double[] duda, final double[] d2uda2) {
+  public double eval2(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
     int yy = i / maxx;
     int xx = i % maxx;
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
-    double I = tB;
+    double I = tb;
     for (int n = 0, a = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a];
       d2uda2[a++] = 0;
-      duda[a] = du_dtx[xx] * deltaEy[yy];
-      d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
-      duda[a] = du_dty[yy] * deltaEx[xx];
-      d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-      duda[a] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
+      duda[a] = duDtx[xx] * deltaEy[yy];
+      d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
+      duda[a] = duDty[yy] * deltaEx[xx];
+      d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
+      duda[a] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
       //@formatter:off
-      d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] +
-                d2u_dtsy2[yy] * deltaEx[xx] +
-                2 * du_dtsx[xx] * du_dtsy[yy] / tI[n];
+      d2uda2[a++] = d2uDtsx2[xx] * deltaEy[yy] +
+                d2uDtsy2[yy] * deltaEx[xx] +
+                2 * duDtsx[xx] * duDtsy[yy] / tI[n];
       //@formatter:on
     }
     return I;
@@ -139,7 +139,7 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
 
   @Override
   public void forEach(ValueProcedure procedure) {
-    if (tB == 0 && numberOfPeaks == 2) {
+    if (tb == 0 && numberOfPeaks == 2) {
       // Specialised implementation without a background.
       // (This function is likely to be used to compute the Gaussian integral
       // without a background.)
@@ -162,13 +162,13 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     final double[] duda = new double[getNumberOfGradients()];
     for (int y = 0; y < maxy; y++) {
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
-          duda[a++] = du_dtx[xx] * deltaEy[yy];
-          duda[a++] = du_dty[yy] * deltaEx[xx];
-          duda[a++] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
+          duda[a++] = duDtx[xx] * deltaEy[yy];
+          duda[a++] = duDty[yy] * deltaEx[xx];
+          duda[a++] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
         }
         // invalidGradients(duda);
         procedure.execute(I, duda);
@@ -183,22 +183,22 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     final double[] two_du_dtsy_tI = new double[numberOfPeaks];
     for (int y = 0; y < maxy; y++) {
       for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
-        two_du_dtsy_tI[n] = 2 * this.du_dtsy[yy] / tI[n];
+        two_du_dtsy_tI[n] = 2 * this.duDtsy[yy] / tI[n];
       }
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
-          duda[a] = du_dtx[xx] * deltaEy[yy];
-          d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
-          duda[a] = du_dty[yy] * deltaEx[xx];
-          d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-          duda[a] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
+          duda[a] = duDtx[xx] * deltaEy[yy];
+          d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
+          duda[a] = duDty[yy] * deltaEx[xx];
+          d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
+          duda[a] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
           //@formatter:off
-          d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy] +
-                  d2u_dtsy2[yy] * deltaEx[xx] +
-                    du_dtsx[xx] * two_du_dtsy_tI[n];
+          d2uda2[a++] = d2uDtsx2[xx] * deltaEy[yy] +
+                  d2uDtsy2[yy] * deltaEx[xx] +
+                    duDtsx[xx] * two_du_dtsy_tI[n];
           //@formatter:on
         }
         procedure.execute(I, duda, d2uda2);
@@ -211,10 +211,10 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     final int ng = getNumberOfGradients();
     final double[] duda = new double[ng];
     final double[] d2udadb = new double[ng * ng];
-    final double[] du_dtsx_tI = new double[du_dtsx.length];
+    final double[] du_dtsx_tI = new double[duDtsx.length];
     for (int x = 0; x < maxx; x++) {
       for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
-        du_dtsx_tI[xx] = du_dtsx[xx] / tI[n];
+        du_dtsx_tI[xx] = duDtsx[xx] / tI[n];
       }
     }
     final double[] du_dty_tI = new double[numberOfPeaks];
@@ -222,18 +222,18 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
     final double[] two_du_dtsy_tI = new double[numberOfPeaks];
     for (int y = 0; y < maxy; y++) {
       for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
-        du_dty_tI[n] = du_dty[yy] / tI[n];
-        du_dtsy_tI[n] = du_dtsy[yy] / tI[n];
-        two_du_dtsy_tI[n] = 2 * du_dtsy[yy] / tI[n];
+        du_dty_tI[n] = duDty[yy] / tI[n];
+        du_dtsy_tI[n] = duDtsy[yy] / tI[n];
+        two_du_dtsy_tI[n] = 2 * duDtsy[yy] / tI[n];
       }
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a];
-          duda[a + 1] = du_dtx[xx] * deltaEy[yy];
-          duda[a + 2] = du_dty[yy] * deltaEx[xx];
-          duda[a + 3] = du_dtsx[xx] * deltaEy[yy] + du_dtsy[yy] * deltaEx[xx];
+          duda[a + 1] = duDtx[xx] * deltaEy[yy];
+          duda[a + 2] = duDty[yy] * deltaEx[xx];
+          duda[a + 3] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
 
           // Compute all the partial second order derivatives
           final double tI = this.tI[n];
@@ -252,11 +252,11 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
           // X,Signal
           d2udadb[kk] = d2udadb[k + 1];
           // X,X
-          d2udadb[kk + 1] = d2u_dtx2[xx] * deltaEy[yy];
+          d2udadb[kk + 1] = d2uDtx2[xx] * deltaEy[yy];
           // X,Y
-          d2udadb[kk + 2] = du_dtx[xx] * du_dty_tI[n];
+          d2udadb[kk + 2] = duDtx[xx] * du_dty_tI[n];
           // X,X SD
-          d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx] + du_dtx[xx] * du_dtsy_tI[n];
+          d2udadb[kk + 3] = deltaEy[yy] * d2deltaExDtsxDx[xx] + duDtx[xx] * du_dtsy_tI[n];
 
           final int kkk = kk + ng;
           // Y,Signal
@@ -264,9 +264,9 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
           // Y,X
           d2udadb[kkk + 1] = d2udadb[kk + 2];
           // Y,Y
-          d2udadb[kkk + 2] = d2u_dty2[yy] * deltaEx[xx];
+          d2udadb[kkk + 2] = d2uDty2[yy] * deltaEx[xx];
           // Y,X SD
-          d2udadb[kkk + 3] = du_dty[yy] * du_dtsx_tI[xx] + deltaEx[xx] * d2deltaEy_dtsydy[yy];
+          d2udadb[kkk + 3] = duDty[yy] * du_dtsx_tI[xx] + deltaEx[xx] * d2deltaEyDtsyDy[yy];
 
           final int kkkk = kkk + ng;
           // X SD,Signal
@@ -277,9 +277,9 @@ public class MultiNBCircularErfGaussian2DFunction extends MultiCircularErfGaussi
           d2udadb[kkkk + 2] = d2udadb[kkk + 3];
           // X SD,X SD
           //@formatter:off
-          d2udadb[kkkk + 3] = d2u_dtsx2[xx] * deltaEy[yy] +
-                            d2u_dtsy2[yy] * deltaEx[xx] +
-                            du_dtsx[xx] * two_du_dtsy_tI[n];
+          d2udadb[kkkk + 3] = d2uDtsx2[xx] * deltaEy[yy] +
+                            d2uDtsy2[yy] * deltaEx[xx] +
+                            duDtsx[xx] * two_du_dtsy_tI[n];
             //@formatter:on
         }
         procedure.executeExtended(I, duda, d2udadb);

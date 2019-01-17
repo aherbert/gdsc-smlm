@@ -36,12 +36,10 @@ import java.util.Arrays;
 /**
  * This class represents a list of repeated shapes in the universe that can be added to a scene. It
  * provides basic functionality for displayed Content.
- *
- * @author Alex Herbert
  */
 public abstract class ItemGroup extends Group implements ItemShape {
   /** The default colour. */
-  protected final Color3f DEFAULT_COLOUR = new Color3f(0, 1, 0);
+  protected static final Color3f DEFAULT_COLOUR = new Color3f(0, 1, 0);
 
   /** The list of points. */
   protected Point3f[] points;
@@ -53,7 +51,7 @@ public abstract class ItemGroup extends Group implements ItemShape {
    */
   public ItemGroup(final Point3f[] points) {
     if (points == null) {
-      throw new NullPointerException("Points must not be null");
+      throw new NullPointerException("Points must  not be null");
     }
     this.points = points;
   }

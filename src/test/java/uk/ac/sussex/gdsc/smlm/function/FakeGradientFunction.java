@@ -139,7 +139,7 @@ public class FakeGradientFunction
         for (int j = nparams; j-- > 0;) {
           gradient[j] = rng.nextDouble() * x + y;
         }
-        // System.out.println(Arrays.toString(dy_da));
+        // System.out.println(Arrays.toString(dyDa));
         procedure.execute(rng.nextDouble(), gradient);
       }
     }
@@ -157,7 +157,7 @@ public class FakeGradientFunction
           gradient1[j] = rng.nextDouble() * x + y;
           gradient2[j] = rng.nextDouble() * x + y;
         }
-        // System.out.println(Arrays.toString(dy_da));
+        // System.out.println(Arrays.toString(dyDa));
         procedure.execute(rng.nextDouble(), gradient1, gradient2);
       }
     }
@@ -178,7 +178,7 @@ public class FakeGradientFunction
           gradient2[j] = rng.nextDouble() * x + y;
         }
 
-        // System.out.println(Arrays.toString(dy_da));
+        // System.out.println(Arrays.toString(dyDa));
         procedure.executeExtended(rng.nextDouble(), gradient1, gradient2);
       }
     }
@@ -192,7 +192,7 @@ public class FakeGradientFunction
     for (int j = nparams; j-- > 0;) {
       dyda[j] = rng.nextDouble() * x + y;
     }
-    // System.out.println(Arrays.toString(dy_da));
+    // System.out.println(Arrays.toString(dyDa));
     return rng.nextDouble();
   }
 
@@ -202,7 +202,7 @@ public class FakeGradientFunction
   }
 
   @Override
-  public double eval(int x, double[] dyda, double[] weight) {
+  public double evalw(int x, double[] dyda, double[] weight) {
     throw new NotImplementedException();
   }
 

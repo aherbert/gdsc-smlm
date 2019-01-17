@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a single peak.
+ * Evaluates a 2-dimensional Gaussian function for a single peak.
  *
  * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
  * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
@@ -99,7 +99,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
+   * Evaluates a 2-dimensional fixed circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
    */
@@ -113,7 +113,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
+   * Evaluates a 2-dimensional fixed circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
    */
@@ -129,15 +129,15 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction {
     return background + height * FastMath.exp(aa * (dx * dx + dy * dy));
   }
 
-  private double gaussian(final int x0, final int x1, final double[] dy_da) {
+  private double gaussian(final int x0, final int x1, final double[] dyDa) {
     final double dx = x0 - x0pos;
     final double dy = x1 - x1pos;
 
     // Calculate gradients
     final double y = height * FastMath.exp(aa * (dx * dx + dy * dy));
     final double yaa2 = y * aa2;
-    dy_da[0] = yaa2 * dx;
-    dy_da[1] = yaa2 * dy;
+    dyDa[0] = yaa2 * dx;
+    dyDa[1] = yaa2 * dy;
 
     return y;
   }

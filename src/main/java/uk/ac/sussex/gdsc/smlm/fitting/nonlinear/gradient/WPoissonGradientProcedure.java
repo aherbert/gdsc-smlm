@@ -149,13 +149,13 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     // Note: Ignore the value
     final double w = this.w[yi++];
     for (int j = 0, i = 0; j < n; j++) {
-      final double wgt = dy_da[j] * w;
+      final double wgt = dyDa[j] * w;
       for (int k = 0; k <= j; k++) {
-        data[i++] += wgt * dy_da[k];
+        data[i++] += wgt * dyDa[k];
       }
     }
   }

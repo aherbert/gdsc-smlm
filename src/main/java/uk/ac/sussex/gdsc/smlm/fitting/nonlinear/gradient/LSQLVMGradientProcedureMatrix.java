@@ -55,7 +55,7 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     final double dy = y[++yi] - value;
 
     // Compute:
@@ -66,10 +66,10 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure {
     // parameters
 
     for (int j = 0; j < n; j++) {
-      final double wgt = dy_da[j];
+      final double wgt = dyDa[j];
 
       for (int k = 0; k <= j; k++) {
-        alpha[j][k] += wgt * dy_da[k];
+        alpha[j][k] += wgt * dyDa[k];
       }
 
       beta[j] += wgt * dy;

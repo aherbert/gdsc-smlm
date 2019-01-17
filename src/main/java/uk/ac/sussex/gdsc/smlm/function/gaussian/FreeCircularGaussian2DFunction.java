@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
+ * Evaluates a 2-dimensional Gaussian function for a configured number of peaks.
  *
  * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
  * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
@@ -160,7 +160,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional elliptical Gaussian function for multiple peaks.
    *
    * <p>{@inheritDoc}
    */
@@ -188,7 +188,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional elliptical Gaussian function for multiple peaks.
    *
    * <p>{@inheritDoc}
    */
@@ -216,14 +216,14 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
    *
    * @param x0 the x0 offset
    * @param x1 the x1 offset
-   * @param dy_da the first-order gradient
+   * @param dyDa the first-order gradient
    * @param apos the parameter position for the current peak
    * @param dydapos the gradient position for the current peak
    * @param zeroAngle set to true if the Gaussian has no rotation angle
    * @param factors the factors
    * @return the Gaussian value
    */
-  protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos,
+  protected double gaussian(final int x0, final int x1, final double[] dyDa, final int apos,
       final int dydapos, boolean zeroAngle, final double[] factors) {
     final double dx = x0 - a[apos + X_POSITION];
     final double dy = x1 - a[apos + Y_POSITION];
@@ -238,14 +238,14 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
 
     if (zeroAngle) {
       final double exp = FastMath.exp(aa * dx2 + cc * dy2);
-      dy_da[dydapos] = factors[N] * exp;
+      dyDa[dydapos] = factors[N] * exp;
       final double y = factors[HEIGHT] * exp;
 
-      dy_da[dydapos + 1] = y * (-2.0 * aa * dx);
-      dy_da[dydapos + 2] = y * (-2.0 * cc * dy);
+      dyDa[dydapos + 1] = y * (-2.0 * aa * dx);
+      dyDa[dydapos + 2] = y * (-2.0 * cc * dy);
 
-      dy_da[dydapos + 3] = y * (factors[NX] + factors[AX] * dx2);
-      dy_da[dydapos + 4] = y * (factors[NY] + factors[CY] * dy2);
+      dyDa[dydapos + 3] = y * (factors[NX] + factors[AX] * dx2);
+      dyDa[dydapos + 4] = y * (factors[NY] + factors[CY] * dy2);
 
       return y;
     }
@@ -253,15 +253,15 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
     final double bb = factors[BB];
 
     final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-    dy_da[dydapos] = factors[N] * exp;
+    dyDa[dydapos] = factors[N] * exp;
     final double y = factors[HEIGHT] * exp;
 
-    dy_da[dydapos + 1] = y * (-2.0 * aa * dx - bb * dy);
-    dy_da[dydapos + 2] = y * (-2.0 * cc * dy - bb * dx);
+    dyDa[dydapos + 1] = y * (-2.0 * aa * dx - bb * dy);
+    dyDa[dydapos + 2] = y * (-2.0 * cc * dy - bb * dx);
 
-    dy_da[dydapos + 3] =
+    dyDa[dydapos + 3] =
         y * (factors[NX] + factors[AX] * dx2 + factors[BX] * dxy + factors[CX] * dy2);
-    dy_da[dydapos + 4] =
+    dyDa[dydapos + 4] =
         y * (factors[NY] + factors[AY] * dx2 + factors[BY] * dxy + factors[CY] * dy2);
 
     return y;

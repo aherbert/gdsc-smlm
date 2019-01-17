@@ -202,7 +202,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     }
   }
 
-  private static void calculateRollingSums(FloatProcessor ip, double[] s_, double[] ss) {
+  private static void calculateRollingSums(FloatProcessor ip, double[] sum, double[] sumSq) {
     // Compute the rolling sum and sum of squares
     // s(u,v) = f(u,v) + s(u-1,v) + s(u,v-1) - s(u-1,v-1)
     // ss(u,v) = f(u,v) * f(u,v) + ss(u-1,v) + ss(u,v-1) - ss(u-1,v-1)
@@ -214,29 +214,29 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     final double[] data = Tools.toDouble(originalData);
 
     // First row
-    double cs_ = 0; // Column sum
+    double cs = 0; // Column sum
     double css = 0; // Column sum-squares
     for (int i = 0; i < maxx; i++) {
-      cs_ += data[i];
+      cs += data[i];
       css += data[i] * data[i];
-      s_[i] = cs_;
-      ss[i] = css;
+      sum[i] = cs;
+      sumSq[i] = css;
     }
 
     // Remaining rows:
     // sum = rolling sum of row + sum of row above
     for (int y = 1; y < maxy; y++) {
       int i = y * maxx;
-      cs_ = 0;
+      cs = 0;
       css = 0;
 
       // Remaining columns
       for (int x = 0; x < maxx; x++, i++) {
-        cs_ += data[i];
+        cs += data[i];
         css += data[i] * data[i];
 
-        s_[i] = s_[i - maxx] + cs_;
-        ss[i] = ss[i - maxx] + css;
+        sum[i] = sum[i - maxx] + cs;
+        sumSq[i] = sumSq[i - maxx] + css;
       }
     }
   }

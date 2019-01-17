@@ -518,7 +518,7 @@ public class GradientCalculatorSpeedTest {
         return u;
       }
       @Override
-      public double eval(int x, double[] dyda, double[] w) { return 0; }
+      public double evalw(int x, double[] dyda, double[] w) { return 0; }
       @Override
       public double evalw(int x, double[] w) { return 0; }
       @Override

@@ -110,14 +110,14 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
     if (!psf.getValueAndGradient(width, height, x0, x1, x2, v, g)) {
       throw new ComputationException("Unable to compute value and gradient");
     }
-    final double[] df_da = new double[5];
-    df_da[0] = 1;
+    final double[] dfDa = new double[5];
+    dfDa[0] = 1;
     for (int i = 0; i < v.length; i++) {
-      df_da[1] = v[i];
-      df_da[2] = m * g[i][0];
-      df_da[3] = m * g[i][1];
-      df_da[4] = m * g[i][2];
-      procedure.execute(c + m * v[i], df_da);
+      dfDa[1] = v[i];
+      dfDa[2] = m * g[i][0];
+      dfDa[3] = m * g[i][1];
+      dfDa[4] = m * g[i][2];
+      procedure.execute(c + m * v[i], dfDa);
     }
   }
 

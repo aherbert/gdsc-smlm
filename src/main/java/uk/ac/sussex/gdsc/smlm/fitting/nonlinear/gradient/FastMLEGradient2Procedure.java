@@ -148,20 +148,20 @@ public class FastMLEGradient2Procedure
    * per the Smith, et al (2010) paper.
    */
   @Override
-  public void execute(double uk, double[] duk_dt, double[] d2uk_dt2) {
+  public void execute(double uk, double[] dukDt, double[] d2ukDt2) {
     u[k] = uk;
     final double xk = x[k++];
     if (xk == 0) {
       for (int i = 0; i < n; i++) {
-        d1[i] -= duk_dt[i];
-        d2[i] -= d2uk_dt2[i];
+        d1[i] -= dukDt[i];
+        d2[i] -= d2ukDt2[i];
       }
     } else {
       final double xk_uk_minus1 = xk / uk - 1.0;
       final double xk_uk2 = xk / (uk * uk);
       for (int i = 0; i < n; i++) {
-        d1[i] += duk_dt[i] * xk_uk_minus1;
-        d2[i] += d2uk_dt2[i] * xk_uk_minus1 - duk_dt[i] * duk_dt[i] * xk_uk2;
+        d1[i] += dukDt[i] * xk_uk_minus1;
+        d2[i] += d2ukDt2[i] * xk_uk_minus1 - dukDt[i] * dukDt[i] * xk_uk2;
       }
     }
   }
@@ -172,17 +172,17 @@ public class FastMLEGradient2Procedure
    * <p>Variables are named as per the Smith, et al (2010) paper.
    */
   @Override
-  public void execute(double uk, double[] duk_dt) {
+  public void execute(double uk, double[] dukDt) {
     u[k] = uk;
     final double xk = x[k++];
     if (xk == 0) {
       for (int i = 0; i < n; i++) {
-        d1[i] -= duk_dt[i];
+        d1[i] -= dukDt[i];
       }
     } else {
       final double xk_uk_minus1 = xk / uk - 1.0;
       for (int i = 0; i < n; i++) {
-        d1[i] += duk_dt[i] * xk_uk_minus1;
+        d1[i] += dukDt[i] * xk_uk_minus1;
       }
     }
   }

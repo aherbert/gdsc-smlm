@@ -114,10 +114,10 @@ public class OffsetFunctionTest {
       int i = 0;
 
       @Override
-      public void execute(double value, double[] dy_da) {
+      public void execute(double value, double[] dyDa) {
         v[i++] = value;
-        for (int j = 0; j < dy_da.length; j++) {
-          dyda[j] += dy_da[j];
+        for (int j = 0; j < dyDa.length; j++) {
+          dyda[j] += dyDa[j];
         }
       }
     });
@@ -168,11 +168,11 @@ public class OffsetFunctionTest {
       int i = 0;
 
       @Override
-      public void execute(double value, double[] dy_da, double[] d2y_da2) {
+      public void execute(double value, double[] dyDa, double[] d2yDa2) {
         v[i++] = value;
-        for (int j = 0; j < dy_da.length; j++) {
-          dyda[j] += dy_da[j];
-          d2yda2[j] += d2y_da2[j];
+        for (int j = 0; j < dyDa.length; j++) {
+          dyda[j] += dyDa[j];
+          d2yda2[j] += d2yDa2[j];
         }
       }
     });

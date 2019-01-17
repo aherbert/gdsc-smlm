@@ -36,8 +36,8 @@ public interface GradientLikelihoodFunction extends LikelihoodFunction {
    *
    * @param o The observed value (x)
    * @param t The parameter value (θ)
-   * @param dp_dt the gradient d P(X=x|θ) dθ
+   * @param dpDt the gradient d P(X=x|θ) dθ
    * @return The likelihood
    */
-  double likelihood(final double o, final double t, final double[] dp_dt);
+  double likelihood(final double o, final double t, final double[] dpDt);
 }

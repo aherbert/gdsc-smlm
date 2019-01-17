@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
+ * Evaluates a 2-dimensional Gaussian function for a configured number of peaks.
  *
  * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
  * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
@@ -92,7 +92,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional fixed circular Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional fixed circular Gaussian function for multiple peaks.
    *
    * <p>{@inheritDoc}
    */
@@ -120,7 +120,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional fixed circular Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional fixed circular Gaussian function for multiple peaks.
    *
    * <p>{@inheritDoc}
    */
@@ -148,13 +148,13 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
    *
    * @param x0 the x0 offset
    * @param x1 the x1 offset
-   * @param dy_da the first-order gradient
+   * @param dyDa the first-order gradient
    * @param apos the parameter position for the current peak
    * @param dydapos the gradient position for the current peak
    * @param factors the factors
    * @return the Gaussian value
    */
-  protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos,
+  protected double gaussian(final int x0, final int x1, final double[] dyDa, final int apos,
       final int dydapos, final double[] factors) {
     final double dx = x0 - a[apos + X_POSITION];
     final double dy = x1 - a[apos + Y_POSITION];
@@ -163,11 +163,11 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
 
     final double aadx2dy2 = factors[AA] * (dx * dx + dy * dy);
     final double exp = FastMath.exp(aadx2dy2);
-    dy_da[dydapos] = factors[N] * exp;
+    dyDa[dydapos] = factors[N] * exp;
     final double y = factors[HEIGHT] * exp;
     final double yaa2 = y * factors[AA2];
-    dy_da[dydapos + 1] = yaa2 * dx;
-    dy_da[dydapos + 2] = yaa2 * dy;
+    dyDa[dydapos + 1] = yaa2 * dx;
+    dyDa[dydapos + 2] = yaa2 * dy;
 
     return y;
   }

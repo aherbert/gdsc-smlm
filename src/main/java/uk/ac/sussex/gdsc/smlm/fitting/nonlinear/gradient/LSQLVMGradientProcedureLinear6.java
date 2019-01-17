@@ -54,37 +54,37 @@ public class LSQLVMGradientProcedureLinear6 extends LSQLVMGradientProcedureLinea
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     final double dy = y[++yi] - value;
 
-    alpha[0] += dy_da[0] * dy_da[0];
-    alpha[1] += dy_da[0] * dy_da[1];
-    alpha[2] += dy_da[0] * dy_da[2];
-    alpha[3] += dy_da[0] * dy_da[3];
-    alpha[4] += dy_da[0] * dy_da[4];
-    alpha[5] += dy_da[0] * dy_da[5];
-    alpha[7] += dy_da[1] * dy_da[1];
-    alpha[8] += dy_da[1] * dy_da[2];
-    alpha[9] += dy_da[1] * dy_da[3];
-    alpha[10] += dy_da[1] * dy_da[4];
-    alpha[11] += dy_da[1] * dy_da[5];
-    alpha[14] += dy_da[2] * dy_da[2];
-    alpha[15] += dy_da[2] * dy_da[3];
-    alpha[16] += dy_da[2] * dy_da[4];
-    alpha[17] += dy_da[2] * dy_da[5];
-    alpha[21] += dy_da[3] * dy_da[3];
-    alpha[22] += dy_da[3] * dy_da[4];
-    alpha[23] += dy_da[3] * dy_da[5];
-    alpha[28] += dy_da[4] * dy_da[4];
-    alpha[29] += dy_da[4] * dy_da[5];
-    alpha[35] += dy_da[5] * dy_da[5];
+    alpha[0] += dyDa[0] * dyDa[0];
+    alpha[1] += dyDa[0] * dyDa[1];
+    alpha[2] += dyDa[0] * dyDa[2];
+    alpha[3] += dyDa[0] * dyDa[3];
+    alpha[4] += dyDa[0] * dyDa[4];
+    alpha[5] += dyDa[0] * dyDa[5];
+    alpha[7] += dyDa[1] * dyDa[1];
+    alpha[8] += dyDa[1] * dyDa[2];
+    alpha[9] += dyDa[1] * dyDa[3];
+    alpha[10] += dyDa[1] * dyDa[4];
+    alpha[11] += dyDa[1] * dyDa[5];
+    alpha[14] += dyDa[2] * dyDa[2];
+    alpha[15] += dyDa[2] * dyDa[3];
+    alpha[16] += dyDa[2] * dyDa[4];
+    alpha[17] += dyDa[2] * dyDa[5];
+    alpha[21] += dyDa[3] * dyDa[3];
+    alpha[22] += dyDa[3] * dyDa[4];
+    alpha[23] += dyDa[3] * dyDa[5];
+    alpha[28] += dyDa[4] * dyDa[4];
+    alpha[29] += dyDa[4] * dyDa[5];
+    alpha[35] += dyDa[5] * dyDa[5];
 
-    beta[0] += dy_da[0] * dy;
-    beta[1] += dy_da[1] * dy;
-    beta[2] += dy_da[2] * dy;
-    beta[3] += dy_da[3] * dy;
-    beta[4] += dy_da[4] * dy;
-    beta[5] += dy_da[5] * dy;
+    beta[0] += dyDa[0] * dy;
+    beta[1] += dyDa[1] * dy;
+    beta[2] += dyDa[2] * dy;
+    beta[3] += dyDa[3] * dy;
+    beta[4] += dyDa[4] * dy;
+    beta[5] += dyDa[5] * dy;
 
     this.value += dy * dy;
   }

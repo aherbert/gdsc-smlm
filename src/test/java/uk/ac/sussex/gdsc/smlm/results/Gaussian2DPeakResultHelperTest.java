@@ -70,10 +70,10 @@ public class Gaussian2DPeakResultHelperTest {
     logger = null;
   }
 
-  double[] test_a = {100, 130, 160};
-  double[] test_s = {80, 100, 140};
-  double[] test_N = {1, 10, 30, 100, 1000};
-  double[] test_b2 = {0, 1, 2, 4, 8};
+  double[] testA = {100, 130, 160};
+  double[] testS = {80, 100, 140};
+  double[] testN = {1, 10, 30, 100, 1000};
+  double[] testB2 = {0, 1, 2, 4, 8};
   int minpoints = 3;
   int maxpoints = 20;
 
@@ -85,12 +85,12 @@ public class Gaussian2DPeakResultHelperTest {
       min = 3;
       max = 20;
     }
-    for (final double a : test_a) {
-      for (final double s : test_s) {
-        for (final double N : test_N) {
-          for (final double b2 : test_b2) {
+    for (final double a : testA) {
+      for (final double s : testS) {
+        for (final double n : testN) {
+          for (final double b2 : testB2) {
             for (int points = min; points <= max; points++) {
-              Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
+              Gaussian2DPeakResultHelper.getMLVarianceX(a, s, n, b2, true, points);
             }
           }
         }
@@ -105,19 +105,19 @@ public class Gaussian2DPeakResultHelperTest {
 
     final double[] sum = new double[maxpoints + 1];
     int count = 0;
-    for (final double a : test_a) {
-      for (final double s : test_s) {
-        for (final double N : test_N) {
-          for (final double b2 : test_b2) {
+    for (final double a : testA) {
+      for (final double s : testS) {
+        for (final double n : testN) {
+          for (final double b2 : testB2) {
             count++;
-            final double e = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, 30);
+            final double e = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, n, b2, true, 30);
             for (int points = minpoints; points <= maxpoints; points++) {
-              final double o = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
+              final double o = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, n, b2, true, points);
               final double error = DoubleEquality.relativeError(e, o);
               sum[points] += error;
               if (error > 1e-2) {
                 Assertions.fail(String.format("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f",
-                    a, s, N, b2, points, e, o, error));
+                    a, s, n, b2, points, e, o, error));
               }
             }
           }
@@ -141,10 +141,10 @@ public class Gaussian2DPeakResultHelperTest {
     // Warm-up
     for (final double a : new double[] {108}) {
       for (final double s : new double[] {120}) {
-        for (final double N : new double[] {50, 100, 300}) {
+        for (final double n : new double[] {50, 100, 300}) {
           for (final double b2 : new double[] {0.5, 1, 2}) {
             for (int points = 3; points <= 20; points++) {
-              Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
+              Gaussian2DPeakResultHelper.getMLVarianceX(a, s, n, b2, true, points);
             }
           }
         }
@@ -160,17 +160,17 @@ public class Gaussian2DPeakResultHelperTest {
 
     for (final double a : new double[] {108}) {
       for (final double s : new double[] {120}) {
-        for (final double N : new double[] {50, 100, 300}) {
+        for (final double n : new double[] {50, 100, 300}) {
           for (final double b2 : new double[] {0.5, 1, 2}) {
             long min = Long.MAX_VALUE;
             for (int points = 3; points <= 20; points++) {
-              long t = System.nanoTime();
+              long nanos = System.nanoTime();
               for (int i = 0; i < 1000; i++) {
-                Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
+                Gaussian2DPeakResultHelper.getMLVarianceX(a, s, n, b2, true, points);
               }
-              t = time[points] = System.nanoTime() - t;
-              if (min > t) {
-                min = t;
+              nanos = time[points] = System.nanoTime() - nanos;
+              if (min > nanos) {
+                min = nanos;
               }
             }
             // Proportional weighting to the calculation that takes the longest
@@ -300,8 +300,9 @@ public class Gaussian2DPeakResultHelperTest {
     }
   }
 
-  private static void assertEquals(double e, double o, DoubleDoubleBiPredicate predicate) {
-    TestAssertions.assertTest(e, o, predicate);
+  private static void assertEquals(double expected, double observed,
+      DoubleDoubleBiPredicate predicate) {
+    TestAssertions.assertTest(expected, observed, predicate);
   }
 
   @SeededTest
@@ -314,15 +315,15 @@ public class Gaussian2DPeakResultHelperTest {
       final double sx = rg.nextDouble() * 2;
       final double sy = rg.nextDouble() * 2;
       final double p = rg.nextDouble();
-      double e = intensity * p
+      double expected = intensity * p
           / (Math.PI * MathUtils.pow2(Gaussian2DPeakResultHelper.inverseCumulative2D(p)) * sx * sy);
-      double o = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, p);
-      assertEquals(e, o, predicate);
+      double observed = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, p);
+      assertEquals(expected, observed, predicate);
 
       // Test fixed versions verse dynamic
-      e = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, 0.5);
-      o = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensity, sx, sy);
-      assertEquals(e, o, predicate);
+      expected = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, 0.5);
+      observed = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensity, sx, sy);
+      assertEquals(expected, observed, predicate);
     }
   }
 }

@@ -152,7 +152,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private static final String TITLE = "PeakFit";
 
   private static int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-  private int plugin_flags;
+  private int pluginFlags;
   private int singleFrame;
   private ImagePlus imp;
 
@@ -277,7 +277,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
   public int setup(String arg, ImagePlus imp) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-    plugin_flags = FLAGS;
+    pluginFlags = FLAGS;
     extraOptions = ImageJUtils.isExtraOptions();
 
     maximaIdentification = (arg != null && arg.contains("spot"));
@@ -316,7 +316,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       }
 
       imageSource = results.getSource();
-      plugin_flags |= NO_IMAGE_REQUIRED;
+      pluginFlags |= NO_IMAGE_REQUIRED;
     } else if (runSeries) {
       imp = null;
       // Select input folder
@@ -349,7 +349,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       // }
       imageSource = seriesImageSource;
 
-      plugin_flags |= NO_IMAGE_REQUIRED;
+      pluginFlags |= NO_IMAGE_REQUIRED;
     } else {
       if (imp == null) {
         IJ.noImage();
@@ -960,7 +960,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     if (imp != null) {
       // Store whether the user selected to process all the images.
-      final int flags = IJ.setupDialog(imp, plugin_flags);
+      final int flags = IJ.setupDialog(imp, pluginFlags);
 
       // Check if cancelled
       if ((flags & DONE) != 0) {
@@ -1041,7 +1041,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // Return the plugin flags (without the DOES_STACKS flag).
     // The call to run(ImageProcessor) will process the image in 'this.imp' so we only want a
     // single call to be made.
-    return plugin_flags;
+    return pluginFlags;
   }
 
   /**
@@ -3149,7 +3149,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
         // This is used for running via other code calling PeakFit methods,
         // i.e. not as an ImageJ plugin.
-      } else if (plugin_flags == 0) {
+      } else if (pluginFlags == 0) {
         resultsFilename = resultsSettings.getResultsFilename();
       }
       final PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings,

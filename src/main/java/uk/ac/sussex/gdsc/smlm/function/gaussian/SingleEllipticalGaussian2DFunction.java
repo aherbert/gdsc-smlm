@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+ * Evaluates a 2-dimensional elliptical Gaussian function for a single peak.
  *
  * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
  * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
@@ -184,7 +184,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+   * Evaluates a 2-dimensional elliptical Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
    */
@@ -201,7 +201,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
+   * Evaluates a 2-dimensional elliptical Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
    */
@@ -220,7 +220,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
     return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
   }
 
-  private double gaussian(final int x0, final int x1, final double[] dy_da) {
+  private double gaussian(final int x0, final int x1, final double[] dyDa) {
     final double dx = x0 - x0pos;
     final double dy = x1 - x1pos;
     final double dx2 = dx * dx;
@@ -230,31 +230,31 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction {
     // Calculate gradients
     if (zeroAngle) {
       final double exp = FastMath.exp(aa * dx2 + cc * dy2);
-      dy_da[1] = n * exp;
+      dyDa[1] = n * exp;
       final double y = height * exp;
 
-      dy_da[2] = y * (-2.0 * aa * dx);
-      dy_da[3] = y * (-2.0 * cc * dy);
+      dyDa[2] = y * (-2.0 * aa * dx);
+      dyDa[3] = y * (-2.0 * cc * dy);
 
-      dy_da[4] = y * (nx + ax * dx2);
-      dy_da[5] = y * (ny + cy * dy2);
+      dyDa[4] = y * (nx + ax * dx2);
+      dyDa[5] = y * (ny + cy * dy2);
 
-      dy_da[6] = y * (bb2 * dxy);
+      dyDa[6] = y * (bb2 * dxy);
 
       return y;
     }
 
     final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-    dy_da[1] = n * exp;
+    dyDa[1] = n * exp;
     final double y = height * exp;
 
-    dy_da[2] = y * (-2.0 * aa * dx - bb * dy);
-    dy_da[3] = y * (-2.0 * cc * dy - bb * dx);
+    dyDa[2] = y * (-2.0 * aa * dx - bb * dy);
+    dyDa[3] = y * (-2.0 * cc * dy - bb * dx);
 
-    dy_da[4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
-    dy_da[5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
+    dyDa[4] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+    dyDa[5] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
 
-    dy_da[6] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
+    dyDa[6] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
     return y;
   }

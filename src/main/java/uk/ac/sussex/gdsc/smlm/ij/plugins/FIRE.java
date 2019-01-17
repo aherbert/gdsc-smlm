@@ -123,7 +123,6 @@ import java.awt.Scrollbar;
 import java.awt.TextField;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1487,7 +1486,7 @@ public class FIRE implements PlugIn {
     // Check if we can sample precision values
     final boolean sampleDecay = precision != null && FIRE.sampleDecay;
 
-    double[] exp_decay;
+    double[] expDecay;
     if (sampleDecay) {
       // Random sample of precision values from the distribution is used to
       // construct the decay curve
@@ -1514,16 +1513,16 @@ public class FIRE implements PlugIn {
         hq[i] /= n;
       }
 
-      exp_decay = new double[q.length];
-      exp_decay[0] = 1;
+      expDecay = new double[q.length];
+      expDecay[0] = 1;
       for (int i = 1; i < q.length; i++) {
         final double sinc_q = sinc(Math.PI * q[i]);
-        exp_decay[i] = sinc_q * sinc_q * hq[i];
+        expDecay[i] = sinc_q * sinc_q * hq[i];
       }
     } else {
       // Note: The sigma mean and std should be in the units of super-resolution
       // pixels so scale to SR pixels
-      exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel,
+      expDecay = computeExpDecay(histogram.mean / images.nmPerPixel,
           histogram.sigma / images.nmPerPixel, q);
     }
 
@@ -1533,13 +1532,13 @@ public class FIRE implements PlugIn {
       // Note: This computes the log then smooths it
       final double bandwidth = 0.1;
       final int robustness = 0;
-      final double[] l = new double[exp_decay.length];
+      final double[] l = new double[expDecay.length];
       for (int i = 0; i < l.length; i++) {
         // Original Matlab code computes the log for each array.
         // This is equivalent to a single log on the fraction of the two.
         // Perhaps the two log method is more numerically stable.
         // l[i] = Math.log(Math.abs(frcnum[i])) - Math.log(exp_decay[i]);
-        l[i] = Math.log(Math.abs(frcnum[i] / exp_decay[i]));
+        l[i] = Math.log(Math.abs(frcnum[i] / expDecay[i]));
       }
       try {
         final LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
@@ -1551,13 +1550,13 @@ public class FIRE implements PlugIn {
     } else {
       // Note: This smooths the curve before computing the log
 
-      final double[] norm = new double[exp_decay.length];
+      final double[] norm = new double[expDecay.length];
       for (int i = 0; i < norm.length; i++) {
-        norm[i] = frcnum[i] / exp_decay[i];
+        norm[i] = frcnum[i] / expDecay[i];
       }
       // Median window of 5 == radius of 2
       final DoubleMedianWindow mw = DoubleMedianWindow.wrap(norm, 2);
-      smooth = new double[exp_decay.length];
+      smooth = new double[expDecay.length];
       for (int i = 0; i < norm.length; i++) {
         smooth[i] = Math.log(Math.abs(mw.getMedian()));
         mw.increment();
@@ -1652,7 +1651,7 @@ public class FIRE implements PlugIn {
               * Math.sqrt(meanSumOfSquares - estimate[1] / (4 * Math.PI * Math.PI));
         }
 
-        exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel,
+        expDecay = computeExpDecay(histogram.mean / images.nmPerPixel,
             histogram.sigma / images.nmPerPixel, q);
       }
 
@@ -1663,7 +1662,7 @@ public class FIRE implements PlugIn {
       // However it will proceed downhill so if the initial point is wrong then
       // it will find a sub-optimal result.
       final UnivariateOptimizer o = new BrentOptimizer(1e-3, 1e-6);
-      final Plateauness f = new Plateauness(frcnum, exp_decay, low, high);
+      final Plateauness f = new Plateauness(frcnum, expDecay, low, high);
       UnivariatePointValuePair p = null;
       p = findMin(p, o, f, qValue, 0.1);
       p = findMin(p, o, f, qValue, 0.2);
@@ -1796,8 +1795,8 @@ public class FIRE implements PlugIn {
     }
   }
 
-  private class Plateauness implements UnivariateFunction, MultivariateFunction {
-    final double frcnum_noisevar = 0.1;
+  private static class Plateauness implements UnivariateFunction, MultivariateFunction {
+    static final double frcnumNoiseVar = 0.1;
     final double[] pre;
     final double n2;
 
@@ -1805,18 +1804,18 @@ public class FIRE implements PlugIn {
      * Instantiates a new plateauness.
      *
      * @param frcnum the scaled FRC numerator
-     * @param exp_decay the precomputed exponential decay (hq)
+     * @param expDecay the precomputed exponential decay (hq)
      * @param low the lower bound of the array for optimisation
      * @param high the higher bound of the array for optimisation
      */
-    Plateauness(double[] frcnum, double[] exp_decay, int low, int high) {
+    Plateauness(double[] frcnum, double[] expDecay, int low, int high) {
       // Precompute
       pre = new double[high - low];
       for (int i = 0; i < pre.length; i++) {
         final int index = i + low;
-        pre[i] = frcnum[index] / exp_decay[index];
+        pre[i] = frcnum[index] / expDecay[index];
       }
-      n2 = frcnum_noisevar * frcnum_noisevar;
+      n2 = frcnumNoiseVar * frcnumNoiseVar;
     }
 
     @Override
@@ -1824,12 +1823,12 @@ public class FIRE implements PlugIn {
       if (qValue < 1e-16) {
         qValue = 1e-16;
       }
-      double v = 0;
+      double value = 0;
       for (int i = 0; i < pre.length; i++) {
         // Original cost function. Note that each observation has a
         // contribution of 0 to 1.
         final double diff = (pre[i] / qValue) - 1;
-        v += 1 - FastMath.exp(-diff * diff / n2);
+        value += 1 - FastMath.exp(-diff * diff / n2);
 
         // Modified cost function so that the magnitude of difference over or
         // under 1 is penalised the same. This has a problem if FRC numerator
@@ -1838,7 +1837,7 @@ public class FIRE implements PlugIn {
         // double diff = Math.abs(pre[i]) / qValue;
         // v += Math.abs(Math.log(diff));
       }
-      return v;
+      return value;
     }
 
     @Override
@@ -1847,12 +1846,12 @@ public class FIRE implements PlugIn {
     }
   }
 
-  private class MultiPlateauness implements MultivariateFunction {
-    final double frcnum_noisevar = 0.1;
+  private static class MultiPlateauness implements MultivariateFunction {
+    static final double frcnumNoiseVar = 0.1;
+    static final double FOUR_PI2 = 4 * Math.PI * Math.PI;
     final double[] pre;
     final double[] q2;
     final double n2;
-    final double four_pi2 = 4 * Math.PI * Math.PI;
 
     @SuppressWarnings("unused")
     final double[] q;
@@ -1881,7 +1880,7 @@ public class FIRE implements PlugIn {
         pre[i] = frcnum[index] / (sinc_q * sinc_q);
         q2[i] = q[index] * q[index];
       }
-      n2 = frcnum_noisevar * frcnum_noisevar;
+      n2 = frcnumNoiseVar * frcnumNoiseVar;
     }
 
     @Override
@@ -1895,8 +1894,8 @@ public class FIRE implements PlugIn {
       }
 
       // Fast computation of a subset of hq
-      final double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
-      final double factor = -four_pi2 * mean * mean;
+      final double eight_pi2_s2 = 2 * FOUR_PI2 * sigma * sigma;
+      final double factor = -FOUR_PI2 * mean * mean;
 
       // Check
       // double[] hq2 = FRC.computeHq(q, mean, sigma);

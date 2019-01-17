@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 
 /**
- * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
+ * Abstract base class for a 2-dimensional Gaussian function for a configured number of peaks.
  *
  * <p>The function will calculate the value of the Gaussian and evaluate the gradient of a set of
  * parameters. The class can specify which of the following parameters the function will
@@ -107,7 +107,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional Gaussian function for multiple peaks.
    *
    * @param i Input predictor
    * @return The Gaussian value
@@ -118,7 +118,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
     int yy = i / maxx;
     int xx = i % maxx;
 
-    double I = tB;
+    double I = tb;
     for (int n = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       I += tI[n] * deltaEx[xx] * deltaEy[yy];
     }
@@ -126,7 +126,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional Gaussian function for multiple peaks.
    *
    * @param i Input predictor
    * @param duda Partial gradient of function with respect to each coefficient
@@ -136,7 +136,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   public abstract double eval(final int i, final double[] duda);
 
   /**
-   * Evaluates an 2-dimensional Gaussian function for multiple peaks.
+   * Evaluates a 2-dimensional Gaussian function for multiple peaks.
    *
    * @param i Input predictor
    * @param duda Partial first gradient of function with respect to each coefficient
@@ -144,13 +144,13 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
    * @return The predicted value
    */
   @Override
-  public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
+  public abstract double eval2(final int i, final double[] duda, final double[] d2uda2);
 
   @Override
   public void forEach(ValueProcedure procedure) {
     // Unroll for the number of peaks
     if (numberOfPeaks == 2) {
-      if (tB == 0) {
+      if (tb == 0) {
         for (int y = 0; y < maxy; y++) {
           // Pre-compute
           final double tI_deltaEy0 = tI[0] * deltaEy[y];
@@ -167,7 +167,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
           final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
           for (int x = 0; x < maxx; x++) {
-            procedure.execute(tB + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
+            procedure.execute(tb + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
           }
         }
       }
@@ -180,7 +180,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         }
 
         for (int x = 0; x < maxx; x++) {
-          double I = tB;
+          double I = tb;
           for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
             I += tI_deltaEy[n] * deltaEx[xx];
           }
@@ -190,7 +190,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         // No pre-compute
         // for (int x = 0; x < maxx; x++)
         // {
-        // double I = tB;
+        // double I = tb;
         // for (int n = 0, xx = x, yy = y; n < numberOfPeaks; n++, xx += maxx, yy += maxy)
         // I += tI[n] * deltaEx[xx] * deltaEy[yy];
         // procedure.execute(I);
@@ -205,7 +205,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
     final double[] values = new double[size()];
     // Unroll for the number of peaks
     if (numberOfPeaks == 2) {
-      if (tB == 0) {
+      if (tb == 0) {
         for (int y = 0, i = 0; y < maxy; y++) {
           // Pre-compute
           final double tI_deltaEy0 = tI[0] * deltaEy[y];
@@ -222,7 +222,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
           final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
 
           for (int x = 0; x < maxx; x++) {
-            values[i++] = (tB + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
+            values[i++] = (tb + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
           }
         }
       }
@@ -235,7 +235,7 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         }
 
         for (int x = 0; x < maxx; x++) {
-          double I = tB;
+          double I = tb;
           for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
             I += tI_deltaEy[n] * deltaEx[xx];
           }

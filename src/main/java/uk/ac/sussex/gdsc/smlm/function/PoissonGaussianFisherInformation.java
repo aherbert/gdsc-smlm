@@ -511,8 +511,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
   private abstract static class IntegrationProcedure implements ConvolutionValueProcedure {
     final int scale;
-    final double[] pz_1;
-    int i;
+    final double[] pz1;
+    int counter;
 
     IntegrationProcedure(int scale) {
       this.scale = scale;
@@ -524,15 +524,15 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
       // A(z) = P(z-1)
 
       // Store p(z-1). This is initialised to 0.
-      pz_1 = new double[scale];
+      pz1 = new double[scale];
     }
 
     @Override
     public boolean execute(double pz) {
-      final int index = i % scale;
-      i++;
-      final double az = pz_1[index];
-      pz_1[index] = pz;
+      final int index = counter % scale;
+      counter++;
+      final double az = pz1[index];
+      pz1[index] = pz;
       if (pz > 0) {
         // Compute with respect to the ultimate limit.
         // Both az and pz should be < 1
@@ -561,7 +561,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
       // Simpson's rule.
       // This computes the sum as:
       // h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-      if (i % 2 == 0) {
+      if (counter % 2 == 0) {
         sum2 += f;
       } else {
         sum4 += f;
@@ -592,7 +592,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
       // Simpson's 3/8 rule based on cubic interpolation has a lower error.
       // This computes the sum as:
       // 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-      if (i % 3 == 0) {
+      if (counter % 3 == 0) {
         sum2 += f;
       } else {
         sum3 += f;

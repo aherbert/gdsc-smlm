@@ -45,7 +45,6 @@ import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 import gnu.trove.list.array.TDoubleArrayList;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
@@ -87,6 +86,8 @@ public class SCMOSLikelihoodWrapperTest {
     logger = null;
   }
 
+  static final double P_LIMIT = 0.999999;
+
   private final double[] photons = {1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000};
 
   DoubleEquality eqPerDatum = new DoubleEquality(5e12, 0.01);
@@ -107,18 +108,18 @@ public class SCMOSLikelihoodWrapperTest {
   // h ~ (Ef)^(1/3) * xc
   // xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x
   // is close to zero)
-  private final double h_ = 0.01; // (double) (Math.pow(1e-3f, 1.0 / 3));
+  private final double stepH = 0.01; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
   private final int[] testx = {4, 5, 6};
   private final int[] testy = {4, 5, 6};
   // Do not test zero background since this is an edge case for the likelihood function
-  private final double[] testbackground_ = {0.1, 1, 10};
-  private final double[] testsignal1_ = {15, 55, 105};
-  private final double[] testangle1_ = {Math.PI / 5, Math.PI / 3};
-  private final double[] testcx1_ = {4.9, 5.3};
-  private final double[] testcy1_ = {4.8, 5.2};
-  private final double[] testcz1_ = {-1.5, 1.0};
-  private final double[][] testw1_ = {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
+  private final double[] testbackgroundOptions = {0.1, 1, 10};
+  private final double[] testsignal1Options = {15, 55, 105};
+  private final double[] testangle1Options = {Math.PI / 5, Math.PI / 3};
+  private final double[] testcx1Options = {4.9, 5.3};
+  private final double[] testcy1Options = {4.8, 5.2};
+  private final double[] testcz1Options = {-1.5, 1.0};
+  private final double[][] testw1Options = {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
 
   private double[] testbackground;
   private double[] testsignal1;
@@ -138,8 +139,8 @@ public class SCMOSLikelihoodWrapperTest {
 
   private static class SCMOSLikelihoodWrapperTestData {
     float[] var;
-    float[] g;
-    float[] o;
+    float[] gain;
+    float[] offset;
     float[] sd;
   }
 
@@ -147,8 +148,8 @@ public class SCMOSLikelihoodWrapperTest {
     final int n = maxx * maxx;
     final SCMOSLikelihoodWrapperTestData data = new SCMOSLikelihoodWrapperTestData();
     data.var = new float[n];
-    data.g = new float[n];
-    data.o = new float[n];
+    data.gain = new float[n];
+    data.offset = new float[n];
     data.sd = new float[n];
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
     final CustomPoissonDistribution pd =
@@ -156,10 +157,10 @@ public class SCMOSLikelihoodWrapperTest {
     final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, G, G_SD);
     final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
     for (int i = 0; i < n; i++) {
-      data.o[i] = pd.sample();
+      data.offset[i] = pd.sample();
       data.var[i] = (float) ed.sample();
       data.sd[i] = (float) Math.sqrt(data.var[i]);
-      data.g[i] = (float) gs.sample();
+      data.gain[i] = (float) gs.sample();
     }
     return data;
   }
@@ -207,14 +208,13 @@ public class SCMOSLikelihoodWrapperTest {
   private void functionComputesGradientPerDatum(RandomSeed seed, int flags) {
     final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
     // Setup
-    // Setup
-    testbackground = testbackground_;
-    testsignal1 = testsignal1_;
-    testcx1 = testcx1_;
-    testcy1 = testcy1_;
-    testcz1 = testcz1_;
-    testw1 = testw1_;
-    testangle1 = testangle1_;
+    testbackground = testbackgroundOptions;
+    testsignal1 = testsignal1Options;
+    testcx1 = testcx1Options;
+    testcy1 = testcy1Options;
+    testcz1 = testcz1Options;
+    testw1 = testw1Options;
+    testangle1 = testangle1Options;
     if (!f1.evaluatesBackground()) {
       testbackground = new double[] {testbackground[0]};
     }
@@ -272,7 +272,7 @@ public class SCMOSLikelihoodWrapperTest {
     final int[] indices = f1.gradientIndices();
     final int gradientIndex = findGradientIndex(f1, targetParameter);
     final double[] dyda = new double[indices.length];
-    double[] a;
+    double[] params;
 
     SCMOSLikelihoodWrapper ff1;
 
@@ -283,8 +283,8 @@ public class SCMOSLikelihoodWrapperTest {
     final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
         .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
-    final float[] g = testData.g;
-    final float[] o = testData.o;
+    final float[] g = testData.gain;
+    final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final CustomPoissonDistribution pd =
@@ -298,10 +298,11 @@ public class SCMOSLikelihoodWrapperTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
                   // Create y as a function we would want to move towards
-                  final double[] a2 = a.clone();
+                  final double[] a2 = params.clone();
                   a2[targetParameter] *= 1.1;
                   f1.initialise(a2);
                   final double[] data = new double[n];
@@ -312,27 +313,27 @@ public class SCMOSLikelihoodWrapperTest {
                     data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
                   }
 
-                  ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
+                  ff1 = new SCMOSLikelihoodWrapper(f1, params, data, n, var, g, o);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
-                  final double xx = a[targetParameter];
+                  final double xx = params[targetParameter];
 
                   // Get h to minimise roundoff error
-                  final double h = Precision.representableDelta(xx, h_);
+                  final double h = Precision.representableDelta(xx, stepH);
 
                   for (final int x : testx) {
                     for (final int y : testy) {
                       final int i = y * maxx + x;
-                      a[targetParameter] = xx;
-                      ff1.likelihood(getVariables(indices, a), dyda, i);
+                      params[targetParameter] = xx;
+                      ff1.likelihood(getVariables(indices, params), dyda, i);
 
                       // Evaluate at (x+h) and (x-h)
-                      a[targetParameter] = xx + h;
-                      final double value2 = ff1.likelihood(getVariables(indices, a), i);
+                      params[targetParameter] = xx + h;
+                      final double value2 = ff1.likelihood(getVariables(indices, params), i);
 
-                      a[targetParameter] = xx - h;
-                      final double value3 = ff1.likelihood(getVariables(indices, a), i);
+                      params[targetParameter] = xx - h;
+                      final double value3 = ff1.likelihood(getVariables(indices, params), i);
 
                       final double gradient = (value2 - value3) / (2 * h);
                       boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex])
@@ -416,13 +417,13 @@ public class SCMOSLikelihoodWrapperTest {
   private void functionComputesGradient(RandomSeed seed, int flags) {
     final Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, maxx, maxx, flags, null);
     // Setup
-    testbackground = testbackground_;
-    testsignal1 = testsignal1_;
-    testcx1 = testcx1_;
-    testcy1 = testcy1_;
-    testcz1 = testcz1_;
-    testw1 = testw1_;
-    testangle1 = testangle1_;
+    testbackground = testbackgroundOptions;
+    testsignal1 = testsignal1Options;
+    testcx1 = testcx1Options;
+    testcy1 = testcy1Options;
+    testcz1 = testcz1Options;
+    testw1 = testw1Options;
+    testangle1 = testangle1Options;
     if (!f1.evaluatesBackground()) {
       testbackground = new double[] {testbackground[0]};
     }
@@ -481,7 +482,7 @@ public class SCMOSLikelihoodWrapperTest {
     final int[] indices = f1.gradientIndices();
     final int gradientIndex = findGradientIndex(f1, targetParameter);
     final double[] dyda = new double[indices.length];
-    double[] a;
+    double[] params;
 
     SCMOSLikelihoodWrapper ff1;
 
@@ -492,8 +493,8 @@ public class SCMOSLikelihoodWrapperTest {
     final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
         .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
-    final float[] g = testData.g;
-    final float[] o = testData.o;
+    final float[] g = testData.gain;
+    final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final CustomPoissonDistribution pd =
@@ -507,10 +508,11 @@ public class SCMOSLikelihoodWrapperTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
                   // Create y as a function we would want to move towards
-                  final double[] a2 = a.clone();
+                  final double[] a2 = params.clone();
                   a2[targetParameter] *= 1.3;
                   f1.initialise(a2);
                   final double[] data = new double[n];
@@ -521,23 +523,23 @@ public class SCMOSLikelihoodWrapperTest {
                     data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
                   }
 
-                  ff1 = new SCMOSLikelihoodWrapper(f1, a, data, n, var, g, o);
+                  ff1 = new SCMOSLikelihoodWrapper(f1, params, data, n, var, g, o);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
-                  final double xx = a[targetParameter];
+                  final double xx = params[targetParameter];
 
                   // Get h to minimise roundoff error
-                  final double h = Precision.representableDelta(xx, h_);
+                  final double h = Precision.representableDelta(xx, stepH);
 
-                  ff1.likelihood(getVariables(indices, a), dyda);
+                  ff1.likelihood(getVariables(indices, params), dyda);
 
                   // Evaluate at (x+h) and (x-h)
-                  a[targetParameter] = xx + h;
-                  final double value2 = ff1.likelihood(getVariables(indices, a));
+                  params[targetParameter] = xx + h;
+                  final double value2 = ff1.likelihood(getVariables(indices, params));
 
-                  a[targetParameter] = xx - h;
-                  final double value3 = ff1.likelihood(getVariables(indices, a));
+                  params[targetParameter] = xx - h;
+                  final double value3 = ff1.likelihood(getVariables(indices, params));
 
                   final double gradient = (value2 - value3) / (2 * h);
                   boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex])
@@ -577,17 +579,15 @@ public class SCMOSLikelihoodWrapperTest {
     return variables;
   }
 
-  private static int findGradientIndex(Gaussian2DFunction f, int targetParameter) {
-    final int i = f.findGradientIndex(targetParameter);
-    Assertions.assertTrue(i >= 0, "Cannot find gradient index");
-    return i;
+  private static int findGradientIndex(Gaussian2DFunction func, int targetParameter) {
+    final int index = func.findGradientIndex(targetParameter);
+    Assertions.assertTrue(index >= 0, "Cannot find gradient index");
+    return index;
   }
 
   double[] createParameters(double... args) {
     return args;
   }
-
-  double P_LIMIT = 0.999999;
 
   @Test
   public void cumulativeProbabilityIsOneWithRealDataForCountAbove8() {
@@ -607,30 +607,20 @@ public class SCMOSLikelihoodWrapperTest {
     }
   }
 
-  private void cumulativeProbabilityIsOneWithRealData(final double mu, double min, double max,
-      boolean test) {
-    double p = 0;
-
+  private static void cumulativeProbabilityIsOneWithRealData(final double mu, double min,
+      double max, boolean test) {
     // Test using a standard Poisson-Gaussian convolution
     // min = -max;
     // final PoissonGaussianFunction pgf = PoissonGaussianFunction.createWithVariance(1, 1, VAR);
 
     final UnivariateIntegrator in = new SimpsonIntegrator();
 
-    p = in.integrate(20000, new UnivariateFunction() {
-      @Override
-      public double value(double x) {
-        double v;
-        v = SCMOSLikelihoodWrapper.likelihood(mu, VAR, G, O, x);
-        // v = pgf.probability(x, mu);
-        // TestLog.fine(logger,"x=%f, v=%f", x, v);
-        return v;
-      }
-    }, min, max);
+    final double pvalue =
+        in.integrate(20000, x -> SCMOSLikelihoodWrapper.likelihood(mu, VAR, G, O, x), min, max);
 
     // TestLog.fine(logger,"mu=%f, p=%f", mu, p);
     if (test) {
-      Assertions.assertEquals(P_LIMIT, p, 0.02, () -> "mu=" + mu);
+      Assertions.assertEquals(P_LIMIT, pvalue, 0.02, () -> "mu=" + mu);
     }
   }
 
@@ -641,7 +631,7 @@ public class SCMOSLikelihoodWrapperTest {
     }
   }
 
-  private void instanceLikelihoodMatches(final double mu, boolean test) {
+  private static void instanceLikelihoodMatches(final double mu, boolean test) {
     // Determine upper limit for a Poisson
     final int limit = new PoissonDistribution(mu).inverseCumulativeProbability(P_LIMIT);
 
@@ -673,7 +663,12 @@ public class SCMOSLikelihoodWrapperTest {
       }
 
       @Override
-      public double eval(int x, double[] dyda, double[] w) {
+      public double evalw(int x, double[] dyda, double[] weight) {
+        return 0;
+      }
+
+      @Override
+      public double evalw(int x, double[] weight) {
         return 0;
       }
 
@@ -693,28 +688,23 @@ public class SCMOSLikelihoodWrapperTest {
       }
 
       @Override
-      public double evalw(int x, double[] w) {
-        return 0;
-      }
-
-      @Override
       public int getNumberOfGradients() {
         return 0;
       }
     };
-    SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
+    SCMOSLikelihoodWrapper func = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
 
     final IntArrayFormatSupplier msg1 = new IntArrayFormatSupplier("computeLikelihood @ %d", 1);
     final IntArrayFormatSupplier msg2 =
         new IntArrayFormatSupplier("computeLikelihood+gradient @ %d", 1);
     double total = 0;
-    double p = 0;
+    double pvalue = 0;
     double maxp = 0;
     int maxi = 0;
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < n; i++) {
-      final double nll = f.computeLikelihood(i);
-      final double nll2 = f.computeLikelihood(gradient, i);
+      final double nll = func.computeLikelihood(i);
+      final double nll2 = func.computeLikelihood(gradient, i);
       final double nll3 =
           SCMOSLikelihoodWrapper.negativeLogLikelihood(mu, var[i], g[i], o[i], k[i]);
       total += nll;
@@ -726,7 +716,7 @@ public class SCMOSLikelihoodWrapperTest {
         maxi = i;
         // TestLog.fine(logger,"mu=%f, e=%f, k=%f, pp=%f", mu, mu * G + O, k[i], pp);
       }
-      p += pp * step;
+      pvalue += pp * step;
     }
 
     // Expected max of the distribution is the mode of the Poisson distribution.
@@ -745,21 +735,21 @@ public class SCMOSLikelihoodWrapperTest {
     TestAssertions.assertTest(kmax, k[maxi], TestHelper.doublesAreClose(1e-3, 0), "k-max");
 
     if (test) {
-      Assertions.assertEquals(P_LIMIT, p, 0.02, () -> "mu=" + mu);
+      Assertions.assertEquals(P_LIMIT, pvalue, 0.02, () -> "mu=" + mu);
     }
 
     // Check the function can compute the same total
     double sum;
     double sum2;
-    sum = f.computeLikelihood();
-    sum2 = f.computeLikelihood(gradient);
+    sum = func.computeLikelihood();
+    sum2 = func.computeLikelihood(gradient);
     TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
     TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");
 
     // Check the function can compute the same total after duplication
-    f = f.build(nlf, a);
-    sum = f.computeLikelihood();
-    sum2 = f.computeLikelihood(gradient);
+    func = func.build(nlf, a);
+    sum = func.computeLikelihood();
+    sum2 = func.computeLikelihood(gradient);
     TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
     TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");
   }
@@ -771,7 +761,7 @@ public class SCMOSLikelihoodWrapperTest {
   }
 
   private abstract class BaseNonLinearFunction implements NonLinearFunction {
-    double[] a;
+    double[] params;
     String name;
 
     BaseNonLinearFunction(String name) {
@@ -779,8 +769,8 @@ public class SCMOSLikelihoodWrapperTest {
     }
 
     @Override
-    public void initialise(double[] a) {
-      this.a = a;
+    public void initialise(double[] params) {
+      this.params = params;
     }
 
     @Override
@@ -789,7 +779,12 @@ public class SCMOSLikelihoodWrapperTest {
     }
 
     @Override
-    public double eval(int x, double[] dyda, double[] w) {
+    public double evalw(int x, double[] dyda, double[] weight) {
+      return 0;
+    }
+
+    @Override
+    public double evalw(int x, double[] weight) {
       return 0;
     }
 
@@ -801,11 +796,6 @@ public class SCMOSLikelihoodWrapperTest {
     @Override
     public boolean canComputeWeights() {
       return false;
-    }
-
-    @Override
-    public double evalw(int x, double[] w) {
-      return 0;
     }
 
     @Override
@@ -821,22 +811,22 @@ public class SCMOSLikelihoodWrapperTest {
     canComputePValue(seed,new BaseNonLinearFunction("Linear")
     {
       @Override
-      public double eval(int x) {  return a[0] * (x-n2); }
+      public double eval(int x) {  return params[0] * (x-n2); }
     });
     canComputePValue(seed,new BaseNonLinearFunction("Quadratic")
     {
       @Override
-      public double eval(int x) {  return a[0] * (x-n2) * (x-n2); }
+      public double eval(int x) {  return params[0] * (x-n2) * (x-n2); }
     });
     canComputePValue(seed,new BaseNonLinearFunction("Linear+C")
     {
       @Override
-      public double eval(int x) {  return 10 * a[0] + (x-n2); }
+      public double eval(int x) {  return 10 * params[0] + (x-n2); }
     });
     canComputePValue(seed,new BaseNonLinearFunction("Gaussian")
     {
       @Override
-      public double eval(int x) {  return 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
+      public double eval(int x) {  return 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (params[0] * params[0])); }
     });
     //@formatter:on
   }
@@ -854,8 +844,8 @@ public class SCMOSLikelihoodWrapperTest {
     final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
         .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
-    final float[] g = testData.g;
-    final float[] o = testData.o;
+    final float[] g = testData.gain;
+    final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final CustomPoissonDistribution pd =
@@ -864,12 +854,12 @@ public class SCMOSLikelihoodWrapperTest {
 
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
     for (int i = 0; i < n; i++) {
-      double u = nlf.eval(i);
-      if (u > 0) {
-        pd.setMeanUnsafe(u);
-        u = pd.sample();
+      double mean = nlf.eval(i);
+      if (mean > 0) {
+        pd.setMeanUnsafe(mean);
+        mean = pd.sample();
       }
-      k[i] = u * g[i] + o[i] + gs.sample() * sd[i];
+      k[i] = mean * g[i] + o[i] + gs.sample() * sd[i];
     }
 
     final SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);

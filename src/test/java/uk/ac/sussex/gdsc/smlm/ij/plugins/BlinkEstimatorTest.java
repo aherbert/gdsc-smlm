@@ -92,12 +92,12 @@ public class BlinkEstimatorTest {
   final double pDelete = 0;
   final double pAdd = 0;
 
-  int LOW = 0;
-  int MEDIUM = 1;
-  int HIGH = 2;
+  static final int LOW = 0;
+  static final int MEDIUM = 1;
+  static final int HIGH = 2;
 
-  int MIN_FITTED_POINTS = 5;
-  int MAX_FITTED_POINTS = 15;
+  static final int MIN_FITTED_POINTS = 5;
+  static final int MAX_FITTED_POINTS = 15;
   double[] nBlinks = {0.5, 1.5, 4};
   double[] tOn = {1.5, 3, 8};
   double[] tOff = {2.5, 5, 10};

@@ -54,8 +54,8 @@ public class PoissonGaussianConvolutionFunction
 
   private final double var;
   private final double s;
-  private final double var_by_2;
-  private final double sqrt_var_by_2;
+  private final double twoVar;
+  private final double sqrtTwoVar;
 
   private final double logNormalisationGaussian;
 
@@ -83,8 +83,8 @@ public class PoissonGaussianConvolutionFunction
       s = variance;
       this.var = s * s;
     }
-    var_by_2 = var * 2;
-    sqrt_var_by_2 = Math.sqrt(var_by_2);
+    twoVar = 2 * var;
+    sqrtTwoVar = Math.sqrt(twoVar);
 
     // Determine the normalisation factor A in the event that the probability
     // distribution is being used as a discrete distribution.
@@ -184,7 +184,7 @@ public class PoissonGaussianConvolutionFunction
       for (int q = qmin; q <= qmax; q++) {
         final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
         final double x = getX(D, q);
-        final double logGaussian = -(MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian;
+        final double logGaussian = -(MathUtils.pow2(x) / twoVar) + logNormalisationGaussian;
         p += FastMath.exp(logPoisson + logGaussian);
       }
     }
@@ -213,7 +213,7 @@ public class PoissonGaussianConvolutionFunction
     // This may not be precise enough.
     // Absolute error is <3e-7. Not sure what relative error is.
     // The standard CDF is much slower.
-    return Erf.erf(x / sqrt_var_by_2);
+    return Erf.erf(x / sqrtTwoVar);
   }
 
   /**
@@ -269,7 +269,7 @@ public class PoissonGaussianConvolutionFunction
         // p += FastMath.exp(logPoisson - logGaussian);
         p += FastMath.exp(logPoisson
             // Gaussian
-            - (MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian);
+            - (MathUtils.pow2(x) / twoVar) + logNormalisationGaussian);
       }
     }
     return Math.log(p);

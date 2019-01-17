@@ -55,44 +55,44 @@ public class WLSQLVMGradientProcedure6 extends WLSQLVMGradientProcedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     final double dy = y[++yi] - value;
     final double w = this.w[yi];
     this.value += dy * dy * w;
 
     double wgt;
-    wgt = dy_da[0] * w;
-    alpha[0] += wgt * dy_da[0];
+    wgt = dyDa[0] * w;
+    alpha[0] += wgt * dyDa[0];
     beta[0] += wgt * dy;
-    wgt = dy_da[1] * w;
-    alpha[1] += wgt * dy_da[0];
-    alpha[2] += wgt * dy_da[1];
+    wgt = dyDa[1] * w;
+    alpha[1] += wgt * dyDa[0];
+    alpha[2] += wgt * dyDa[1];
     beta[1] += wgt * dy;
-    wgt = dy_da[2] * w;
-    alpha[3] += wgt * dy_da[0];
-    alpha[4] += wgt * dy_da[1];
-    alpha[5] += wgt * dy_da[2];
+    wgt = dyDa[2] * w;
+    alpha[3] += wgt * dyDa[0];
+    alpha[4] += wgt * dyDa[1];
+    alpha[5] += wgt * dyDa[2];
     beta[2] += wgt * dy;
-    wgt = dy_da[3] * w;
-    alpha[6] += wgt * dy_da[0];
-    alpha[7] += wgt * dy_da[1];
-    alpha[8] += wgt * dy_da[2];
-    alpha[9] += wgt * dy_da[3];
+    wgt = dyDa[3] * w;
+    alpha[6] += wgt * dyDa[0];
+    alpha[7] += wgt * dyDa[1];
+    alpha[8] += wgt * dyDa[2];
+    alpha[9] += wgt * dyDa[3];
     beta[3] += wgt * dy;
-    wgt = dy_da[4] * w;
-    alpha[10] += wgt * dy_da[0];
-    alpha[11] += wgt * dy_da[1];
-    alpha[12] += wgt * dy_da[2];
-    alpha[13] += wgt * dy_da[3];
-    alpha[14] += wgt * dy_da[4];
+    wgt = dyDa[4] * w;
+    alpha[10] += wgt * dyDa[0];
+    alpha[11] += wgt * dyDa[1];
+    alpha[12] += wgt * dyDa[2];
+    alpha[13] += wgt * dyDa[3];
+    alpha[14] += wgt * dyDa[4];
     beta[4] += wgt * dy;
-    wgt = dy_da[5] * w;
-    alpha[15] += wgt * dy_da[0];
-    alpha[16] += wgt * dy_da[1];
-    alpha[17] += wgt * dy_da[2];
-    alpha[18] += wgt * dy_da[3];
-    alpha[19] += wgt * dy_da[4];
-    alpha[20] += wgt * dy_da[5];
+    wgt = dyDa[5] * w;
+    alpha[15] += wgt * dyDa[0];
+    alpha[16] += wgt * dyDa[1];
+    alpha[17] += wgt * dyDa[2];
+    alpha[18] += wgt * dyDa[3];
+    alpha[19] += wgt * dyDa[4];
+    alpha[20] += wgt * dyDa[5];
     beta[5] += wgt * dy;
   }
 

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 /**
@@ -31,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
  */
 public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
   private final NonLinearFunction fun;
-  private final double[] a;
+  private final double[] params;
   private final int n;
   private final int[] gradientIndices;
 
@@ -41,18 +42,15 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
    * array will be fixed.
    *
    * @param fun The function
-   * @param a The parameters
+   * @param params The parameters
    * @param n The number of data points to evaluate
    */
-  public NonLinearFunctionWrapper(NonLinearFunction fun, double[] a, int n) {
+  public NonLinearFunctionWrapper(NonLinearFunction fun, double[] params, int n) {
     this.fun = fun;
-    this.a = a.clone();
+    this.params = params.clone();
     this.n = n;
     // This wrapper will evaluate all the indices that are not fixed
-    gradientIndices = new int[fun.getNumberOfGradients()];
-    for (int i = 0; i < gradientIndices.length; i++) {
-      gradientIndices[i] = i;
-    }
+    gradientIndices = SimpleArrayUtils.natural(fun.getNumberOfGradients());
   }
 
   /**
@@ -62,11 +60,11 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
    */
   @Override
   public void initialise(double[] variables) {
-    final int[] gradientIndices = fun.gradientIndices();
-    for (int i = 0; i < gradientIndices.length; i++) {
-      a[gradientIndices[i]] = variables[i];
+    final int[] gi = fun.gradientIndices();
+    for (int i = 0; i < gi.length; i++) {
+      params[gi[i]] = variables[i];
     }
-    fun.initialise(a);
+    fun.initialise(params);
   }
 
   @Override
@@ -90,13 +88,13 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
   }
 
   @Override
-  public double eval(int x, double[] dyda, double[] w) {
-    return fun.eval(x, dyda, w);
+  public double evalw(int x, double[] dyda, double[] weight) {
+    return fun.evalw(x, dyda, weight);
   }
 
   @Override
-  public double evalw(int x, double[] w) {
-    return fun.eval(x, w);
+  public double evalw(int x, double[] weight) {
+    return fun.eval(x, weight);
   }
 
   @Override

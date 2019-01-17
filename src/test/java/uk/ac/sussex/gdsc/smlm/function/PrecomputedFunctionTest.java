@@ -82,9 +82,9 @@ public class PrecomputedFunctionTest {
       int i = 0;
 
       @Override
-      public void execute(double value, double[] dy_da) {
+      public void execute(double value, double[] dyDa) {
         v[i] = value;
-        g1[i] = dy_da;
+        g1[i] = dyDa;
         i++;
       }
     });
@@ -120,10 +120,10 @@ public class PrecomputedFunctionTest {
       int i = 0;
 
       @Override
-      public void execute(double value, double[] dy_da, double[] d2y_da2) {
+      public void execute(double value, double[] dyDa, double[] d2yDa2) {
         v[i] = value;
-        g1[i] = dy_da;
-        g2[i] = d2y_da2;
+        g1[i] = dyDa;
+        g2[i] = d2yDa2;
         i++;
       }
     });

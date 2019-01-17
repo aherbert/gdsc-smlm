@@ -36,6 +36,9 @@ import org.apache.commons.math3.util.FastMath;
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
 public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFunction {
+  // Allow underscores in the variables used during computation
+  // @CHECKSTYLE.OFF: ParameterName|LocalVariableName
+
   /**
    * Constructor.
    *
@@ -61,15 +64,15 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
   @Override
   public void initialise0(double[] a) {
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    tb = a[Gaussian2DFunction.BACKGROUND];
 
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
       final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-      final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-      final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
+      final double tsx = Math.abs(a[i + Gaussian2DFunction.X_SD]);
+      final double tsy = Math.abs(a[i + Gaussian2DFunction.Y_SD]);
 
       createDeltaETable(n, maxx, ONE_OVER_ROOT2 / tsx, deltaEx, tx);
       createDeltaETable(n, maxy, ONE_OVER_ROOT2 / tsy, deltaEy, ty);
@@ -84,8 +87,8 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
       final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-      final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-      final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
+      final double tsx = Math.abs(a[i + Gaussian2DFunction.X_SD]);
+      final double tsy = Math.abs(a[i + Gaussian2DFunction.Y_SD]);
       sum += tI * compute1DIntegral(ONE_OVER_ROOT2 / tsx, maxx, tx)
           * compute1DIntegral(ONE_OVER_ROOT2 / tsy, maxy, ty);
     }
@@ -95,61 +98,59 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
   @Override
   public void initialise1(double[] a) {
     create1Arrays();
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    tb = a[Gaussian2DFunction.BACKGROUND];
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
       final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-      final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-      final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
+      final double tsx = Math.abs(a[i + Gaussian2DFunction.X_SD]);
+      final double tsy = Math.abs(a[i + Gaussian2DFunction.Y_SD]);
 
       // We can pre-compute part of the derivatives for position and sd in arrays
       // since the Gaussian is XY separable
-      createFirstOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, tx, tsx);
-      createFirstOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, ty, tsy);
+      createFirstOrderTables(n, maxx, tI[n], deltaEx, duDtx, duDtsx, tx, tsx);
+      createFirstOrderTables(n, maxy, tI[n], deltaEy, duDty, duDtsy, ty, tsy);
     }
   }
 
   @Override
   public void initialise2(double[] a) {
     create2Arrays();
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    tb = a[Gaussian2DFunction.BACKGROUND];
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
       final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-      final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-      final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
+      final double tsx = Math.abs(a[i + Gaussian2DFunction.X_SD]);
+      final double tsy = Math.abs(a[i + Gaussian2DFunction.Y_SD]);
 
       // We can pre-compute part of the derivatives for position and sd in arrays
       // since the Gaussian is XY separable
-      createSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx,
-          tsx);
-      createSecondOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty,
-          tsy);
+      createSecondOrderTables(n, maxx, tI[n], deltaEx, duDtx, duDtsx, d2uDtx2, d2uDtsx2, tx, tsx);
+      createSecondOrderTables(n, maxy, tI[n], deltaEy, duDty, duDtsy, d2uDty2, d2uDtsy2, ty, tsy);
     }
   }
 
   @Override
   public void initialiseExtended2(double[] a) {
     createEx2Arrays();
-    tB = a[Gaussian2DFunction.BACKGROUND];
+    tb = a[Gaussian2DFunction.BACKGROUND];
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       tI[n] = a[i + Gaussian2DFunction.SIGNAL];
       // Pre-compute the offset by 0.5
       final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
       final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-      final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-      final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
+      final double tsx = Math.abs(a[i + Gaussian2DFunction.X_SD]);
+      final double tsy = Math.abs(a[i + Gaussian2DFunction.Y_SD]);
 
       // We can pre-compute part of the derivatives for position and sd in arrays
       // since the Gaussian is XY separable
-      createExSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2,
-          d2deltaEx_dtsxdx, tx, tsx);
-      createExSecondOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2,
-          d2deltaEy_dtsydy, ty, tsy);
+      createExSecondOrderTables(n, maxx, tI[n], deltaEx, duDtx, duDtsx, d2uDtx2, d2uDtsx2,
+          d2deltaExDtsxDx, tx, tsx);
+      createExSecondOrderTables(n, maxy, tI[n], deltaEy, duDty, duDtsy, d2uDty2, d2uDtsy2,
+          d2deltaEyDtsyDy, ty, tsy);
     }
   }
 
@@ -185,15 +186,15 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
    * @param tI the target intensity
    * @param deltaE the delta E for dimension 0 (difference between the error function at the start
    *        and end of each pixel)
-   * @param du_dx the first order x derivative for dimension 0
-   * @param du_ds the first order s derivative for dimension 0
+   * @param duDx the first order x derivative for dimension 0
+   * @param duDs the first order s derivative for dimension 0
    * @param u the mean of the Gaussian for dimension 0
    * @param s the standard deviation of the Gaussian for dimension 0
    */
-  protected void createFirstOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx,
-      double[] du_ds, double u, double s) {
+  protected void createFirstOrderTables(int n, int max, double tI, double[] deltaE, double[] duDx,
+      double[] duDs, double u, double s) {
     createFirstOrderTables(n, max, ONE_OVER_ROOT2 / s, 0.5 / (s * s), tI * ONE_OVER_ROOT2PI / s,
-        tI * ONE_OVER_ROOT2PI / (s * s), deltaE, du_dx, du_ds, u);
+        tI * ONE_OVER_ROOT2PI / (s * s), deltaE, duDx, duDs, u);
   }
 
   /**
@@ -207,12 +208,12 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
    * @param I_ssSqrt2pi the intensity over (s^2 * sqrt(2*pi))
    * @param deltaE the delta E for dimension 0 (difference between the error function at the start
    *        and end of each pixel)
-   * @param du_dx the first order x derivative for dimension 0
-   * @param du_ds the first order s derivative for dimension 0
+   * @param duDx the first order x derivative for dimension 0
+   * @param duDs the first order s derivative for dimension 0
    * @param u the mean of the Gaussian for dimension 0
    */
   protected void createFirstOrderTables(int n, int max, double one_sSqrt2, double one_2ss,
-      double I_sSqrt2pi, double I_ssSqrt2pi, double[] deltaE, double[] du_dx, double[] du_ds,
+      double I_sSqrt2pi, double I_ssSqrt2pi, double[] deltaE, double[] duDx, double[] duDs,
       double u) {
     // For documentation see SingleFreeCircularErfGaussian2DFunction.createSecondOrderTables(...)
 
@@ -227,9 +228,9 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
       erf_x_minus = erf_x_plus;
 
       final double exp_x_plus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
-      du_dx[j] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
+      duDx[j] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
       // Compute: I0 * G21(xk)
-      du_ds[j] = I_ssSqrt2pi * (x_u_m12 * exp_x_minus - x_u_p12 * exp_x_plus);
+      duDs[j] = I_ssSqrt2pi * (x_u_m12 * exp_x_minus - x_u_p12 * exp_x_plus);
 
       exp_x_minus = exp_x_plus;
     }
@@ -243,23 +244,23 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
    * @param tI the target intensity
    * @param deltaE the delta E for dimension 0 (difference between the error function at the start
    *        and end of each pixel)
-   * @param du_dx the first order x derivative for dimension 0
-   * @param du_ds the first order s derivative for dimension 0
-   * @param d2u_dx2 the second order x derivative for dimension 0
-   * @param d2u_ds2 the second order s derivative for dimension 0
+   * @param duDx the first order x derivative for dimension 0
+   * @param duDs the first order s derivative for dimension 0
+   * @param d2uDx2 the second order x derivative for dimension 0
+   * @param d2uDs2 the second order s derivative for dimension 0
    * @param u the mean of the Gaussian for dimension 0
    * @param s the standard deviation of the Gaussian for dimension 0
    */
-  protected void createSecondOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx,
-      double[] du_ds, double[] d2u_dx2, double[] d2u_ds2, double u, double s) {
+  protected void createSecondOrderTables(int n, int max, double tI, double[] deltaE, double[] duDx,
+      double[] duDs, double[] d2uDx2, double[] d2uDs2, double u, double s) {
     final double ss = s * s;
     final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
     final double one_ssSqrt2pi = ONE_OVER_ROOT2PI / ss;
     final double one_sssSqrt2pi = one_sSqrt2pi / ss;
     final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
     createSecondOrderTables(n, max, tI, ONE_OVER_ROOT2 / s, 0.5 / ss, tI * one_sSqrt2pi,
-        tI * one_ssSqrt2pi, tI * one_sssSqrt2pi, ss, one_sssSqrt2pi, one_sssssSqrt2pi, deltaE,
-        du_dx, du_ds, d2u_dx2, d2u_ds2, u);
+        tI * one_ssSqrt2pi, tI * one_sssSqrt2pi, ss, one_sssSqrt2pi, one_sssssSqrt2pi, deltaE, duDx,
+        duDs, d2uDx2, d2uDs2, u);
   }
 
   /**
@@ -278,16 +279,16 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
    * @param one_sssssSqrt2pi one over (s^5 * sqrt(2*pi))
    * @param deltaE the delta E for dimension 0 (difference between the error function at the start
    *        and end of each pixel)
-   * @param du_dx the first order x derivative for dimension 0
-   * @param du_ds the first order s derivative for dimension 0
-   * @param d2u_dx2 the second order x derivative for dimension 0
-   * @param d2u_ds2 the second order s derivative for dimension 0
+   * @param duDx the first order x derivative for dimension 0
+   * @param duDs the first order s derivative for dimension 0
+   * @param d2uDx2 the second order x derivative for dimension 0
+   * @param d2uDs2 the second order s derivative for dimension 0
    * @param u the mean of the Gaussian for dimension 0
    */
   protected void createSecondOrderTables(int n, int max, double tI, double one_sSqrt2,
       double one_2ss, double I_sSqrt2pi, double I_ssSqrt2pi, double I_sssSqrt2pi, double ss,
-      double one_sssSqrt2pi, double one_sssssSqrt2pi, double[] deltaE, double[] du_dx,
-      double[] du_ds, double[] d2u_dx2, double[] d2u_ds2, double u) {
+      double one_sssSqrt2pi, double one_sssssSqrt2pi, double[] deltaE, double[] duDx, double[] duDs,
+      double[] d2uDx2, double[] d2uDs2, double u) {
     // Note: The paper by Smith, et al computes the integral for the kth pixel centred at (x,y)
     // If x=u then the Erf will be evaluated at x-u+0.5 - x-u-0.5 => integral from -0.5 to 0.5.
     // This code sets the first pixel at (0,0).
@@ -314,13 +315,13 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
       erf_x_minus = erf_x_plus;
 
       final double exp_x_plus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
-      du_dx[j] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
+      duDx[j] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
       // Compute: I0 * G21(xk)
       final double pre2 = (x_u_m12 * exp_x_minus - x_u_p12 * exp_x_plus);
-      du_ds[j] = I_ssSqrt2pi * pre2;
+      duDs[j] = I_ssSqrt2pi * pre2;
 
       // Second derivatives
-      d2u_dx2[j] = I_sssSqrt2pi * pre2;
+      d2uDx2[j] = I_sssSqrt2pi * pre2;
 
       // Compute G31(xk)
       final double G31 = one_sssSqrt2pi * pre2;
@@ -328,7 +329,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
       // Compute G53(xk)
       final double G53 = one_sssssSqrt2pi
           * (MathUtils.pow3(x_u_m12) * exp_x_minus - MathUtils.pow3(x_u_p12) * exp_x_plus);
-      d2u_ds2[j] = tI * (G53 - 2 * G31);
+      d2uDs2[j] = tI * (G53 - 2 * G31);
 
       exp_x_minus = exp_x_plus;
     }
@@ -342,16 +343,16 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
    * @param tI the target intensity
    * @param deltaE the delta E for dimension 0 (difference between the error function at the start
    *        and end of each pixel)
-   * @param du_dx the first order x derivative for dimension 0
-   * @param du_ds the first order s derivative for dimension 0
-   * @param d2u_dx2 the second order x derivative for dimension 0
-   * @param d2u_ds2 the second order s derivative for dimension 0
+   * @param duDx the first order x derivative for dimension 0
+   * @param duDs the first order s derivative for dimension 0
+   * @param d2uDx2 the second order x derivative for dimension 0
+   * @param d2uDs2 the second order s derivative for dimension 0
    * @param d2deltaE_dsdx the second order deltaE s,x derivative for dimension 0
    * @param u the mean of the Gaussian for dimension 0
    * @param s the standard deviation of the Gaussian for dimension 0
    */
   protected void createExSecondOrderTables(int n, int max, double tI, double[] deltaE,
-      double[] du_dx, double[] du_ds, double[] d2u_dx2, double[] d2u_ds2, double[] d2deltaE_dsdx,
+      double[] duDx, double[] duDs, double[] d2uDx2, double[] d2uDs2, double[] d2deltaE_dsdx,
       double u, double s) {
     final double ss = s * s;
     final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
@@ -359,8 +360,8 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     final double one_sssSqrt2pi = one_sSqrt2pi / ss;
     final double one_sssssSqrt2pi = one_sssSqrt2pi / ss;
     createExSecondOrderTables(n, max, tI, ONE_OVER_ROOT2 / s, 0.5 / ss, tI * one_sSqrt2pi,
-        tI * one_ssSqrt2pi, tI * one_sssSqrt2pi, ss, one_sssSqrt2pi, one_sssssSqrt2pi, deltaE,
-        du_dx, du_ds, d2u_dx2, d2u_ds2, d2deltaE_dsdx, u);
+        tI * one_ssSqrt2pi, tI * one_sssSqrt2pi, ss, one_sssSqrt2pi, one_sssssSqrt2pi, deltaE, duDx,
+        duDs, d2uDx2, d2uDs2, d2deltaE_dsdx, u);
   }
 
   /**
@@ -379,17 +380,17 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
    * @param one_sssssSqrt2pi one over (s^5 * sqrt(2*pi))
    * @param deltaE the delta E for dimension 0 (difference between the error function at the start
    *        and end of each pixel)
-   * @param du_dx the first order x derivative for dimension 0
-   * @param du_ds the first order s derivative for dimension 0
-   * @param d2u_dx2 the second order x derivative for dimension 0
-   * @param d2u_ds2 the second order s derivative for dimension 0
+   * @param duDx the first order x derivative for dimension 0
+   * @param duDs the first order s derivative for dimension 0
+   * @param d2uDx2 the second order x derivative for dimension 0
+   * @param d2uDs2 the second order s derivative for dimension 0
    * @param d2deltaE_dsdx the second order deltaE s,x derivative for dimension 0
    * @param u the mean of the Gaussian for dimension 0
    */
   protected void createExSecondOrderTables(int n, int max, double tI, double one_sSqrt2,
       double one_2ss, double I_sSqrt2pi, double I_ssSqrt2pi, double I_sssSqrt2pi, double ss,
-      double one_sssSqrt2pi, double one_sssssSqrt2pi, double[] deltaE, double[] du_dx,
-      double[] du_ds, double[] d2u_dx2, double[] d2u_ds2, double[] d2deltaE_dsdx, double u) {
+      double one_sssSqrt2pi, double one_sssssSqrt2pi, double[] deltaE, double[] duDx, double[] duDs,
+      double[] d2uDx2, double[] d2uDs2, double[] d2deltaE_dsdx, double u) {
     // Note: The paper by Smith, et al computes the integral for the kth pixel centred at (x,y)
     // If x=u then the Erf will be evaluated at x-u+0.5 - x-u-0.5 => integral from -0.5 to 0.5.
     // This code sets the first pixel at (0,0).
@@ -416,13 +417,13 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
       erf_x_minus = erf_x_plus;
 
       final double exp_x_plus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
-      du_dx[j] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
+      duDx[j] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
       // Compute: I0 * G21(xk)
       final double pre2 = (x_u_m12 * exp_x_minus - x_u_p12 * exp_x_plus);
-      du_ds[j] = I_ssSqrt2pi * pre2;
+      duDs[j] = I_ssSqrt2pi * pre2;
 
       // Second derivatives
-      d2u_dx2[j] = I_sssSqrt2pi * pre2;
+      d2uDx2[j] = I_sssSqrt2pi * pre2;
 
       // Compute G31(xk)
       final double G31 = one_sssSqrt2pi * pre2;
@@ -433,7 +434,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
       // Compute G53(xk)
       final double G53 = one_sssssSqrt2pi
           * (MathUtils.pow3(x_u_m12) * exp_x_minus - MathUtils.pow3(x_u_p12) * exp_x_plus);
-      d2u_ds2[j] = tI * (G53 - 2 * G31);
+      d2uDs2[j] = tI * (G53 - 2 * G31);
 
       exp_x_minus = exp_x_plus;
     }
@@ -448,20 +449,20 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
     duda[0] = 1.0;
-    double I = tB;
+    double I = tb;
     for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a++];
-      duda[a++] = du_dtx[xx] * deltaEy[yy];
-      duda[a++] = du_dty[yy] * deltaEx[xx];
-      duda[a++] = du_dtsx[xx] * deltaEy[yy];
-      duda[a++] = du_dtsy[yy] * deltaEx[xx];
+      duda[a++] = duDtx[xx] * deltaEy[yy];
+      duda[a++] = duDty[yy] * deltaEx[xx];
+      duda[a++] = duDtsx[xx] * deltaEy[yy];
+      duda[a++] = duDtsy[yy] * deltaEx[xx];
     }
     return I;
   }
 
   @Override
-  public double eval(final int i, final double[] duda, final double[] d2uda2) {
+  public double eval2(final int i, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
     int yy = i / maxx;
     int xx = i % maxx;
@@ -470,19 +471,19 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     // Use pre-computed gradients
     duda[0] = 1.0;
     d2uda2[0] = 0;
-    double I = tB;
+    double I = tb;
     for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
       I += tI[n] * duda[a];
       d2uda2[a++] = 0;
-      duda[a] = du_dtx[xx] * deltaEy[yy];
-      d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
-      duda[a] = du_dty[yy] * deltaEx[xx];
-      d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-      duda[a] = du_dtsx[xx] * deltaEy[yy];
-      d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy];
-      duda[a] = du_dtsy[yy] * deltaEx[xx];
-      d2uda2[a++] = d2u_dtsy2[yy] * deltaEx[xx];
+      duda[a] = duDtx[xx] * deltaEy[yy];
+      d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
+      duda[a] = duDty[yy] * deltaEx[xx];
+      d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
+      duda[a] = duDtsx[xx] * deltaEy[yy];
+      d2uda2[a++] = d2uDtsx2[xx] * deltaEy[yy];
+      duda[a] = duDtsy[yy] * deltaEx[xx];
+      d2uda2[a++] = d2uDtsy2[yy] * deltaEx[xx];
     }
     return I;
   }
@@ -544,7 +545,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     // duda[8] = du_dty[yy] * deltaEx[xx];
     // duda[9] = du_dtsx[xx] * deltaEy[yy];
     // duda[10] = du_dtsy[yy] * deltaEx[xx];
-    // procedure.execute(tB + tI[0] * duda[1] + tI[1] * duda[6], duda);
+    // procedure.execute(tb + tI[0] * duda[1] + tI[1] * duda[6], duda);
     // }
     // }
     // }
@@ -552,14 +553,14 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     // {
     for (int y = 0; y < maxy; y++) {
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
-          duda[a++] = du_dtx[xx] * deltaEy[yy];
-          duda[a++] = du_dty[yy] * deltaEx[xx];
-          duda[a++] = du_dtsx[xx] * deltaEy[yy];
-          duda[a++] = du_dtsy[yy] * deltaEx[xx];
+          duda[a++] = duDtx[xx] * deltaEy[yy];
+          duda[a++] = duDty[yy] * deltaEx[xx];
+          duda[a++] = duDtsx[xx] * deltaEy[yy];
+          duda[a++] = duDtsy[yy] * deltaEx[xx];
         }
         procedure.execute(I, duda);
       }
@@ -573,18 +574,18 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     duda[0] = 1.0;
     for (int y = 0; y < maxy; y++) {
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a++];
-          duda[a] = du_dtx[xx] * deltaEy[yy];
-          d2uda2[a++] = d2u_dtx2[xx] * deltaEy[yy];
-          duda[a] = du_dty[yy] * deltaEx[xx];
-          d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
-          duda[a] = du_dtsx[xx] * deltaEy[yy];
-          d2uda2[a++] = d2u_dtsx2[xx] * deltaEy[yy];
-          duda[a] = du_dtsy[yy] * deltaEx[xx];
-          d2uda2[a++] = d2u_dtsy2[yy] * deltaEx[xx];
+          duda[a] = duDtx[xx] * deltaEy[yy];
+          d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
+          duda[a] = duDty[yy] * deltaEx[xx];
+          d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
+          duda[a] = duDtsx[xx] * deltaEy[yy];
+          d2uda2[a++] = d2uDtsx2[xx] * deltaEy[yy];
+          duda[a] = duDtsy[yy] * deltaEx[xx];
+          d2uda2[a++] = d2uDtsy2[yy] * deltaEx[xx];
         }
         procedure.execute(I, duda, d2uda2);
       }
@@ -597,28 +598,28 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
     final double[] duda = new double[ng];
     final double[] d2udadb = new double[ng * ng];
     duda[0] = 1.0;
-    final double[] du_dtsx_tI = new double[du_dtsx.length];
+    final double[] du_dtsx_tI = new double[duDtsx.length];
     for (int x = 0; x < maxx; x++) {
       for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
-        du_dtsx_tI[xx] = du_dtsx[xx] / tI[n];
+        du_dtsx_tI[xx] = duDtsx[xx] / tI[n];
       }
     }
     final double[] du_dty_tI = new double[numberOfPeaks];
     final double[] du_dtsy_tI = new double[numberOfPeaks];
     for (int y = 0; y < maxy; y++) {
       for (int n = 0, yy = y; n < numberOfPeaks; n++, yy += maxy) {
-        du_dty_tI[n] = du_dty[yy] / tI[n];
-        du_dtsy_tI[n] = du_dtsy[yy] / tI[n];
+        du_dty_tI[n] = duDty[yy] / tI[n];
+        du_dtsy_tI[n] = duDtsy[yy] / tI[n];
       }
       for (int x = 0; x < maxx; x++) {
-        double I = tB;
+        double I = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
           I += tI[n] * duda[a];
-          duda[a + 1] = du_dtx[xx] * deltaEy[yy];
-          duda[a + 2] = du_dty[yy] * deltaEx[xx];
-          duda[a + 3] = du_dtsx[xx] * deltaEy[yy];
-          duda[a + 4] = du_dtsy[yy] * deltaEx[xx];
+          duda[a + 1] = duDtx[xx] * deltaEy[yy];
+          duda[a + 2] = duDty[yy] * deltaEx[xx];
+          duda[a + 3] = duDtsx[xx] * deltaEy[yy];
+          duda[a + 4] = duDtsy[yy] * deltaEx[xx];
 
           // Compute all the partial second order derivatives
           final double tI = this.tI[n];
@@ -641,13 +642,13 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
           // X,Signal
           d2udadb[kk] = d2udadb[k + 1];
           // X,X
-          d2udadb[kk + 1] = d2u_dtx2[xx] * deltaEy[yy];
+          d2udadb[kk + 1] = d2uDtx2[xx] * deltaEy[yy];
           // X,Y
-          d2udadb[kk + 2] = du_dtx[xx] * du_dty_tI[n];
+          d2udadb[kk + 2] = duDtx[xx] * du_dty_tI[n];
           // X,X SD
-          d2udadb[kk + 3] = deltaEy[yy] * d2deltaEx_dtsxdx[xx];
+          d2udadb[kk + 3] = deltaEy[yy] * d2deltaExDtsxDx[xx];
           // X,Y SD
-          d2udadb[kk + 4] = du_dtx[xx] * du_dtsy_tI[n];
+          d2udadb[kk + 4] = duDtx[xx] * du_dtsy_tI[n];
 
           final int kkk = kk + ng;
           // Y,Signal
@@ -655,11 +656,11 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
           // Y,X
           d2udadb[kkk + 1] = d2udadb[kk + 2];
           // Y,Y
-          d2udadb[kkk + 2] = d2u_dty2[yy] * deltaEx[xx];
+          d2udadb[kkk + 2] = d2uDty2[yy] * deltaEx[xx];
           // Y,X SD
-          d2udadb[kkk + 3] = du_dty[yy] * du_dtsx_tI[xx];
+          d2udadb[kkk + 3] = duDty[yy] * du_dtsx_tI[xx];
           // Y,Y SD
-          d2udadb[kkk + 4] = deltaEx[xx] * d2deltaEy_dtsydy[yy];
+          d2udadb[kkk + 4] = deltaEx[xx] * d2deltaEyDtsyDy[yy];
 
           final int kkkk = kkk + ng;
           // X SD,Signal
@@ -669,9 +670,9 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
           // X SD,Y
           d2udadb[kkkk + 2] = d2udadb[kkk + 3];
           // X SD,X SD
-          d2udadb[kkkk + 3] = d2u_dtsx2[xx] * deltaEy[yy];
+          d2udadb[kkkk + 3] = d2uDtsx2[xx] * deltaEy[yy];
           // X SD,Y SD
-          d2udadb[kkkk + 4] = du_dtsy[yy] * du_dtsx_tI[xx];
+          d2udadb[kkkk + 4] = duDtsy[yy] * du_dtsx_tI[xx];
 
           final int kkkkk = kkkk + ng;
           // Y SD,Signal
@@ -683,7 +684,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
           // Y SD,X SD
           d2udadb[kkkkk + 3] = d2udadb[kkkk + 4];
           // Y SD,Y SD
-          d2udadb[kkkkk + 4] = d2u_dtsy2[yy] * deltaEx[xx];
+          d2udadb[kkkkk + 4] = d2uDtsy2[yy] * deltaEx[xx];
 
         }
         procedure.executeExtended(I, duda, d2udadb);

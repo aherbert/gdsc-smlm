@@ -54,30 +54,30 @@ public class LSQLVMGradientProcedureMatrix5 extends LSQLVMGradientProcedureMatri
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     final double dy = y[++yi] - value;
 
-    alpha[0][0] += dy_da[0] * dy_da[0];
-    alpha[1][0] += dy_da[1] * dy_da[0];
-    alpha[1][1] += dy_da[1] * dy_da[1];
-    alpha[2][0] += dy_da[2] * dy_da[0];
-    alpha[2][1] += dy_da[2] * dy_da[1];
-    alpha[2][2] += dy_da[2] * dy_da[2];
-    alpha[3][0] += dy_da[3] * dy_da[0];
-    alpha[3][1] += dy_da[3] * dy_da[1];
-    alpha[3][2] += dy_da[3] * dy_da[2];
-    alpha[3][3] += dy_da[3] * dy_da[3];
-    alpha[4][0] += dy_da[4] * dy_da[0];
-    alpha[4][1] += dy_da[4] * dy_da[1];
-    alpha[4][2] += dy_da[4] * dy_da[2];
-    alpha[4][3] += dy_da[4] * dy_da[3];
-    alpha[4][4] += dy_da[4] * dy_da[4];
+    alpha[0][0] += dyDa[0] * dyDa[0];
+    alpha[1][0] += dyDa[1] * dyDa[0];
+    alpha[1][1] += dyDa[1] * dyDa[1];
+    alpha[2][0] += dyDa[2] * dyDa[0];
+    alpha[2][1] += dyDa[2] * dyDa[1];
+    alpha[2][2] += dyDa[2] * dyDa[2];
+    alpha[3][0] += dyDa[3] * dyDa[0];
+    alpha[3][1] += dyDa[3] * dyDa[1];
+    alpha[3][2] += dyDa[3] * dyDa[2];
+    alpha[3][3] += dyDa[3] * dyDa[3];
+    alpha[4][0] += dyDa[4] * dyDa[0];
+    alpha[4][1] += dyDa[4] * dyDa[1];
+    alpha[4][2] += dyDa[4] * dyDa[2];
+    alpha[4][3] += dyDa[4] * dyDa[3];
+    alpha[4][4] += dyDa[4] * dyDa[4];
 
-    beta[0] += dy_da[0] * dy;
-    beta[1] += dy_da[1] * dy;
-    beta[2] += dy_da[2] * dy;
-    beta[3] += dy_da[3] * dy;
-    beta[4] += dy_da[4] * dy;
+    beta[0] += dyDa[0] * dy;
+    beta[1] += dyDa[1] * dy;
+    beta[2] += dyDa[2] * dy;
+    beta[3] += dyDa[3] * dy;
+    beta[4] += dyDa[4] * dy;
 
     this.value += dy * dy;
   }

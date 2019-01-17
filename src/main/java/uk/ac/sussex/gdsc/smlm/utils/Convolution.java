@@ -43,6 +43,7 @@ public class Convolution {
   /**
    * Interface to handle a convolution value.
    */
+  @FunctionalInterface
   public interface ConvolutionValueProcedure {
     /**
      * Executes this procedure.
@@ -56,6 +57,7 @@ public class Convolution {
   /**
    * Interface to handle two convolution valuess.
    */
+  @FunctionalInterface
   public interface DoubleConvolutionValueProcedure {
     /**
      * Executes this procedure.

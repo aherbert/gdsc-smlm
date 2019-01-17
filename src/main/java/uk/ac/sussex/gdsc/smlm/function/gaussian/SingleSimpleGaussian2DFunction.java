@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import org.apache.commons.math3.util.FastMath;
 
 /**
- * Evaluates an 2-dimensional Gaussian function for a single peak.
+ * Evaluates a 2-dimensional Gaussian function for a single peak.
  *
  * <p>The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear
  * index into 2-dimensional data. The dimensions of the data must be specified to allow unpacking to
@@ -100,7 +100,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
   }
 
   /**
-   * Evaluates an 2-dimensional circular Gaussian function for a single peak.
+   * Evaluates a 2-dimensional circular Gaussian function for a single peak.
    *
    * <p>{@inheritDoc}
    */

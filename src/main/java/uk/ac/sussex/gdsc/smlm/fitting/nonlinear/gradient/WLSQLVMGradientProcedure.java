@@ -74,7 +74,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure {
   }
 
   @Override
-  public void execute(double value, double[] dy_da) {
+  public void execute(double value, double[] dyDa) {
     final double dy = y[++yi] - value;
     final double w = this.w[yi];
     this.value += dy * dy * w;
@@ -87,10 +87,10 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure {
     // parameters
 
     for (int j = 0, i = 0; j < n; j++) {
-      final double wgt = dy_da[j] * w;
+      final double wgt = dyDa[j] * w;
 
       for (int k = 0; k <= j; k++) {
-        alpha[i++] += wgt * dy_da[k];
+        alpha[i++] += wgt * dyDa[k];
       }
       beta[j] += wgt * dy;
     }

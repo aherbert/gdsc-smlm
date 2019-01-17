@@ -51,7 +51,7 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure {
   }
 
   @Override
-  public void execute(double fi, double[] dfi_da) {
+  public void execute(double fi, double[] dfiDa) {
     ++yi;
     // Function must produce a strictly positive output.
     // ---
@@ -70,16 +70,16 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure {
         final double xi_fi2 = xi / fi / fi;
         final double e = 1 - (xi / fi);
         for (int k = 0, i = 0; k < n; k++) {
-          beta[k] -= e * dfi_da[k];
-          final double w = dfi_da[k] * xi_fi2;
+          beta[k] -= e * dfiDa[k];
+          final double w = dfiDa[k] * xi_fi2;
           for (int l = 0; l <= k; l++) {
-            alpha[i++] += w * dfi_da[l];
+            alpha[i++] += w * dfiDa[l];
           }
         }
       } else {
         value += fi;
         for (int k = 0; k < n; k++) {
-          beta[k] -= dfi_da[k];
+          beta[k] -= dfiDa[k];
         }
       }
     }

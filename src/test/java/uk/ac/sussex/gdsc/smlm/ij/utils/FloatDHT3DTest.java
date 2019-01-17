@@ -78,22 +78,22 @@ public class FloatDHT3DTest {
 
   static ImageStack createOctantsStack(int w, int h, int d) {
     final int w_2 = w / 2;
-    final int h_2 = h / 2;
+    final int stepH2 = h / 2;
     final int d_2 = d / 2;
     final ImageStack stack = new ImageStack(w, h, d);
     final FloatProcessor fp = new FloatProcessor(w, h);
     final float[] pixels = (float[]) fp.getPixels();
-    fill(fp, w_2, 0, w_2, h_2, 1);
-    fill(fp, 0, 0, w_2, h_2, 2);
-    fill(fp, 0, h_2, w_2, h_2, 3);
-    fill(fp, w_2, h_2, w_2, h_2, 4);
+    fill(fp, w_2, 0, w_2, stepH2, 1);
+    fill(fp, 0, 0, w_2, stepH2, 2);
+    fill(fp, 0, stepH2, w_2, stepH2, 3);
+    fill(fp, w_2, stepH2, w_2, stepH2, 4);
     for (int z = 0; z < d_2; z++) {
       stack.setPixels(pixels.clone(), 1 + z);
     }
-    fill(fp, w_2, 0, w_2, h_2, 5);
-    fill(fp, 0, 0, w_2, h_2, 6);
-    fill(fp, 0, h_2, w_2, h_2, 7);
-    fill(fp, w_2, h_2, w_2, h_2, 8);
+    fill(fp, w_2, 0, w_2, stepH2, 5);
+    fill(fp, 0, 0, w_2, stepH2, 6);
+    fill(fp, 0, stepH2, w_2, stepH2, 7);
+    fill(fp, w_2, stepH2, w_2, stepH2, 8);
     for (int z = d_2; z < d; z++) {
       stack.setPixels(pixels.clone(), 1 + z);
     }

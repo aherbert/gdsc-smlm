@@ -185,25 +185,32 @@ public class PoissonCalculatorTest {
 
       PoissonFunction fun;
       switch (function) {
-        //@formatter:off
         case 2:
-          fun = new PoissonFunction(mu) { @Override
-          double likelihood(double mu, double x) {
-              return PoissonCalculator.fastLikelihood(mu, x, FastLogFactory.getFastLog());  } };
+          fun = new PoissonFunction(mu) {
+            @Override
+            double likelihood(double mu, double x) {
+              return PoissonCalculator.fastLikelihood(mu, x, FastLogFactory.getFastLog());
+            }
+          };
           break;
         case 1:
-          fun = new PoissonFunction(mu) { @Override
-          double likelihood(double mu, double x) {
-              return PoissonCalculator.fastLikelihood(mu, x);  } };
+          fun = new PoissonFunction(mu) {
+            @Override
+            double likelihood(double mu, double x) {
+              return PoissonCalculator.fastLikelihood(mu, x);
+            }
+          };
           break;
         case 0:
-          fun = new PoissonFunction(mu) { @Override
-          double likelihood(double mu, double x) {
-              return PoissonCalculator.likelihood(mu, x);  } };
+          fun = new PoissonFunction(mu) {
+            @Override
+            double likelihood(double mu, double x) {
+              return PoissonCalculator.likelihood(mu, x);
+            }
+          };
           break;
         default:
           throw new IllegalStateException();
-        //@formatter:on
       }
 
       cumulativeProbabilityIsOneWithRealData(min, max, mu >= 4, fun);
@@ -249,7 +256,12 @@ public class PoissonCalculatorTest {
     }
 
     @Override
-    public double eval(int x, double[] dyda, double[] weights) {
+    public double evalw(int x, double[] dyda, double[] weights) {
+      return 0;
+    }
+
+    @Override
+    public double evalw(int x, double[] weights) {
       return 0;
     }
 
@@ -264,11 +276,6 @@ public class PoissonCalculatorTest {
     }
 
     @Override
-    public double evalw(int x, double[] weights) {
-      return 0;
-    }
-
-    @Override
     public int getNumberOfGradients() {
       return 1;
     }
@@ -278,18 +285,18 @@ public class PoissonCalculatorTest {
   public void canComputeLogLikelihoodRatio(RandomSeed seed) {
     final double n2 = maxx * maxx * 0.5;
     // Functions must produce a strictly positive output so add background
-    //@formatter:off
-    canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic")
-    {
+    canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic") {
       @Override
-      public double eval(int x) {  return 0.1 + params[0] * (x-n2) * (x-n2); }
+      public double eval(int x) {
+        return 0.1 + params[0] * (x - n2) * (x - n2);
+      }
     });
-    canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Gaussian")
-    {
+    canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Gaussian") {
       @Override
-      public double eval(int x) {  return 0.1 + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0])); }
+      public double eval(int x) {
+        return 0.1 + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
+      }
     });
-    //@formatter:on
   }
 
   private static void canComputeLogLikelihoodRatio(RandomSeed seed, BaseNonLinearFunction nlf) {
@@ -414,18 +421,18 @@ public class PoissonCalculatorTest {
   public void canComputeFastLog_LogLikelihoodRatio(RandomSeed seed) {
     final double n2 = maxx * maxx * 0.5;
     // Functions must produce a strictly positive output so add background
-    //@formatter:off
-    canComputeFastLog_LogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic")
-    {
+    canComputeFastLog_LogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic") {
       @Override
-      public double eval(int x) {  return 0.1 + params[0] * (x-n2) * (x-n2); }
+      public double eval(int x) {
+        return 0.1 + params[0] * (x - n2) * (x - n2);
+      }
     });
-    canComputeFastLog_LogLikelihoodRatio(seed,new BaseNonLinearFunction("Gaussian")
-    {
+    canComputeFastLog_LogLikelihoodRatio(seed, new BaseNonLinearFunction("Gaussian") {
       @Override
-      public double eval(int x) {  return 0.1 + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0])); }
+      public double eval(int x) {
+        return 0.1 + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
+      }
     });
-    //@formatter:on
   }
 
   private static void canComputeFastLog_LogLikelihoodRatio(RandomSeed seed,
@@ -466,40 +473,41 @@ public class PoissonCalculatorTest {
     final double n3 = n * 0.33;
     final double n4 = n * 0.66;
     // Functions must produce a strictly positive output so add background
-    //@formatter:off
     cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(seed,
-    new BaseNonLinearFunction("Quadratic")
-    {
-      @Override
-      public double eval(int x) {  return 0.1 + params[0] * (x-n2) * (x-n2); }
-    },
-    new BaseNonLinearFunction("Quadratic")
-    {
-      @Override
-      public double eval(int x) {  return 0.2 + 0.5 * params[0] * (x-n3) * (x-n3); }
-    },
-    new BaseNonLinearFunction("Quadratic")
-    {
-      @Override
-      public double eval(int x) {  return 0.3 + 0.75 * params[0] * (x-n4) * (x-n4); }
-    });
+        new BaseNonLinearFunction("Quadratic") {
+          @Override
+          public double eval(int x) {
+            return 0.1 + params[0] * (x - n2) * (x - n2);
+          }
+        }, new BaseNonLinearFunction("Quadratic") {
+          @Override
+          public double eval(int x) {
+            return 0.2 + 0.5 * params[0] * (x - n3) * (x - n3);
+          }
+        }, new BaseNonLinearFunction("Quadratic") {
+          @Override
+          public double eval(int x) {
+            return 0.3 + 0.75 * params[0] * (x - n4) * (x - n4);
+          }
+        });
     cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(seed,
-    new BaseNonLinearFunction("Gaussian")
-    {
-      @Override
-      public double eval(int x) {  return 0.1 + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0])); }
-    },
-    new BaseNonLinearFunction("Gaussian")
-    {
-      @Override
-      public double eval(int x) {  return 0.2 + 50 * FastMath.exp(-0.5 * MathUtils.pow2(x - n3) / (params[0] * params[0])); }
-    },
-    new BaseNonLinearFunction("Gaussian")
-    {
-      @Override
-      public double eval(int x) {  return 0.3 + 75 * FastMath.exp(-0.5 * MathUtils.pow2(x - n4) / (params[0] * params[0])); }
-    });
-    //@formatter:on
+        new BaseNonLinearFunction("Gaussian") {
+          @Override
+          public double eval(int x) {
+            return 0.1
+                + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
+          }
+        }, new BaseNonLinearFunction("Gaussian") {
+          @Override
+          public double eval(int x) {
+            return 0.2 + 50 * FastMath.exp(-0.5 * MathUtils.pow2(x - n3) / (params[0] * params[0]));
+          }
+        }, new BaseNonLinearFunction("Gaussian") {
+          @Override
+          public double eval(int x) {
+            return 0.3 + 75 * FastMath.exp(-0.5 * MathUtils.pow2(x - n4) / (params[0] * params[0]));
+          }
+        });
   }
 
   private static void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(RandomSeed seed,
