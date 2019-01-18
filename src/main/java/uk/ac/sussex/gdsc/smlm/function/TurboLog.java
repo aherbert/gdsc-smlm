@@ -100,7 +100,9 @@ public class TurboLog extends FastLog {
   }
 
   /** The number of bits to remove from a float mantissa. */
+  // @CHECKSTYLE.OFF: MemberName
   private final int q;
+  // @CHECKSTYLE.ON: MemberName
   /** The number of bits to remove from a double mantissa. */
   private final int qd;
   /**
@@ -299,23 +301,23 @@ public class TurboLog extends FastLog {
    * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
    * significant digit is always 0.
    *
-   * @param m the mantissa (already bit shifted by 1)
+   * @param mantissa the mantissa (already bit shifted by 1)
    * @return the log(x)
    */
-  protected float computeSubnormal(int m) {
+  protected float computeSubnormal(int mantissa) {
     // Normalize the subnormal number.
     // The unbiased exponent starts at -127.
     // Shift the mantissa until it is a binary number
     // with a leading 1: 1.10101010...
 
-    int e = -127;
-    while ((m & 0x800000) == 0) {
-      --e;
-      m <<= 1;
+    int exp = -127;
+    while ((mantissa & 0x800000) == 0) {
+      --exp;
+      mantissa <<= 1;
     }
 
     // Remove the leading 1
-    return logMantissa[(m & 0x7fffff) >>> q] + e * LN2F;
+    return logMantissa[(mantissa & 0x7fffff) >>> q] + exp * LN2F;
   }
 
   /**
@@ -327,23 +329,23 @@ public class TurboLog extends FastLog {
    * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
    * significant digit is always 0.
    *
-   * @param m the mantissa (already bit shifted by 1)
+   * @param mantissa the mantissa (already bit shifted by 1)
    * @return the log(x)
    */
-  protected double computeSubnormal(long m) {
+  protected double computeSubnormal(long mantissa) {
     // Normalize the subnormal number.
     // The unbiased exponent starts at -1023.
     // Shift the mantissa until it is a binary number
     // with a leading 1: 1.10101010...
 
-    int e = -1023;
-    while ((m & 0x0010000000000000L) == 0) {
-      --e;
-      m <<= 1;
+    int exp = -1023;
+    while ((mantissa & 0x0010000000000000L) == 0) {
+      --exp;
+      mantissa <<= 1;
     }
 
     // Remove the leading 1
-    return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2;
+    return logMantissa[(int) ((mantissa & 0xfffffffffffffL) >>> qd)] + exp * LN2;
   }
 
   /**
@@ -355,23 +357,23 @@ public class TurboLog extends FastLog {
    * <p>No rounding to be done on sub-normal as the mantissa is shifted {@code << 1} so the least
    * significant digit is always 0.
    *
-   * @param m the mantissa (already bit shifted by 1)
+   * @param mantissa the mantissa (already bit shifted by 1)
    * @return the log(x)
    */
-  protected float computeSubnormalF(long m) {
+  protected float computeSubnormalF(long mantissa) {
     // Normalize the subnormal number.
     // The unbiased exponent starts at -1023.
     // Shift the mantissa until it is a binary number
     // with a leading 1: 1.10101010...
 
-    int e = -1023;
-    while ((m & 0x0010000000000000L) == 0) {
-      --e;
-      m <<= 1;
+    int exp = -1023;
+    while ((mantissa & 0x0010000000000000L) == 0) {
+      --exp;
+      mantissa <<= 1;
     }
 
     // Remove the leading 1
-    return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2F;
+    return logMantissa[(int) ((mantissa & 0xfffffffffffffL) >>> qd)] + exp * LN2F;
   }
 
   /**

@@ -31,7 +31,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  * <p><a
  * href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
-public abstract class BasePoissonFisherInformation implements FisherInformation, Cloneable {
+public abstract class BasePoissonFisherInformation implements FisherInformation {
   /**
    * The lowest value for the mean that can be computed. This is the lowest value where the
    * reciprocal is not infinity
@@ -39,8 +39,8 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
   public static final double MIN_MEAN = Double.longBitsToDouble(0x4000000000001L);
 
   @Override
-  public boolean isValid(double t) {
-    return t >= MIN_MEAN;
+  public boolean isValid(double theta) {
+    return theta >= MIN_MEAN;
   }
 
   /**
@@ -48,29 +48,19 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
    * to the Fisher information of a pure Poisson distribution:
    *
    * <pre>
-   * alpha = FI / (Poisson FI) = FI * t
+   * alpha = FI / (Poisson FI) = FI * theta
    * </pre>
    *
-   * @param t parameter θ of a distribution that models X
+   * @param theta parameter θ of a distribution that models X
    * @return the alpha scale
    * @throws IllegalArgumentException if the parameter is not in the valid range
    */
-  public abstract double getAlpha(double t);
-
-  @Override
-  public BasePoissonFisherInformation clone() {
-    try {
-      final BasePoissonFisherInformation fi = (BasePoissonFisherInformation) super.clone();
-      fi.postClone();
-      return fi;
-    } catch (final CloneNotSupportedException ex) {
-      // Should not happen
-      return null;
-    }
-  }
+  public abstract double getAlpha(double theta);
 
   /**
-   * Run any actions after clone, for example creating new instance fields if they cannot be shared.
+   * Create a copy.
+   *
+   * @return the copy
    */
-  protected abstract void postClone();
+  public abstract BasePoissonFisherInformation copy();
 }

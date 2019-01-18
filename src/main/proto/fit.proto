@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 // ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
-// Authors: Alex Herbert, 2017 
+// Authors: Alex Herbert, 2017
 // License: GPL V3
 package uk.ac.sussex.gdsc.smlm.data.config;
 
@@ -23,10 +23,10 @@ enum FitSolver {
 	// Uses a configurable noise model for the probability density function of the data.
 	MLE = 3;
 	// Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-	// Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor. 
+	// Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor.
 	FAST_MLE = 4;
 	// Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-	// Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation. 
+	// Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation.
 	BACKTRACKING_FAST_MLE = 5;
 }
 
@@ -63,12 +63,12 @@ enum SearchMethod
 // that defined by the first derivative gradient.
 enum LineSearchMethod
 {
-	// Do nothing to handle the incorrect orientation. The default solver action is taken. 
+	// Do nothing to handle the incorrect orientation. The default solver action is taken.
 	// This may cause the search to take an invalid move or it may error.
 	NONE = 0;	
 	// Ignore any search direction that is in the opposite direction to the first derivative gradient.
 	IGNORE = 1;	
-	// Progressively ignore any search direction that is in the opposite direction to the 
+	// Progressively ignore any search direction that is in the opposite direction to the
 	// first derivative gradient. Do this in order of the magnitude of the error.
 	PARTIAL_IGNORE = 2;
 }
@@ -76,11 +76,11 @@ enum LineSearchMethod
 // Define the method to use for precision calculation.
 enum PrecisionMethod
 {
-	// Not available. The results may have been loaded from a source where the precision was computed 
-	// using another method, or the results may have no precision. 
+	// Not available. The results may have been loaded from a source where the precision was computed
+	// using another method, or the results may have no precision.
 	PRECISION_METHOD_NA = 0;
 	// Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
-	// The background noise component (b2) is computed using the variance of the fit region. 
+	// The background noise component (b2) is computed using the variance of the fit region.
 	// Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
 	// with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
 	// but can be used to approximate localisation precision on any spot-type PSF. There are formulas
@@ -91,16 +91,16 @@ enum PrecisionMethod
 	// Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
 	// with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
 	// but can be used to approximate localisation precision on any spot-type PSF. There are formulas
-	// for least squares or maximum likelihood estimators.     
+	// for least squares or maximum likelihood estimators.
 	MORTENSEN_LOCAL_BACKGROUND = 2;
-	// Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
-	// Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
+	// Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of
+	// Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
 	// uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
-	// to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
+	// to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS
 	// camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
 	// Note that this formula is good when the number of photons is high. Due to the approximation
-	// of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
-	// Fisher information is poor when the number of photons is low, leading to an approximation 
+	// of Gaussian noise as a Poisson distribution the likelihood function used to generate the
+	// Fisher information is poor when the number of photons is low, leading to an approximation
 	// of the true CRLB of a Poisson-Gaussian distribution.
 	// This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
 	// for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
@@ -121,8 +121,8 @@ message FitSolverSettings {
 	FitSolver fit_solver = 4;
 	// Set to true to use a fixed number of iterations during fitting
 	bool fixed_iterations = 5;
-	// The maximum/fixed iterations to use during fitting. 
-	// If not using fixed iterations then fitting will fail if this limit is reached. 
+	// The maximum/fixed iterations to use during fitting.
+	// If not using fixed iterations then fitting will fail if this limit is reached.
 	int32 max_iterations = 6;
 	// The relative threshold for convergence on the function score. Set to negative to disable.
 	double relative_threshold = 7;
@@ -138,10 +138,10 @@ message FitSolverSettings {
 	
 	// The search method to use for the configurable maximum likelihood estimator
 	SearchMethod search_method = 12;
-	// Set to true to use the function gradient during line minimisation, i.e. find the 
+	// Set to true to use the function gradient during line minimisation, i.e. find the
 	// parameters where the gradient is zero. The default is the to minimise the function value.
 	bool gradient_line_minimisation = 13;
-	// Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+	// Set to true to model the camera noise in the configurable maximum likelihood estimator.
 	bool model_camera = 14;
 	// The maximum number of function evaluations in the configurable maximum likelihood estimator.
 	int32 max_function_evaluations = 15;
@@ -159,7 +159,7 @@ message FitSolverSettings {
 
 // Define the settings for filtering fit results.
 message FilterSettings {
-	// Computation of precision using the local background has been removed and 
+	// Computation of precision using the local background has been removed and
 	// replaced by precision method
 	reserved 5;
 	reserved "precision_using_background";
@@ -190,7 +190,7 @@ message FilterSettings {
 	double max_z = 13;
 }
 	
-// Define the settings for fitting. These settings are used to fit a PSF to an 
+// Define the settings for fitting. These settings are used to fit a PSF to an
 // extracted region from the input data and validate the fit.
 message FitSettings {
 	// The fit solver settings
@@ -230,7 +230,7 @@ enum DataFilterMethod
 message RelativeParameter {
 	// The value of the parameter
 	double value = 1;
-	// Set to true to use the absolute value. The default is relative to the PSF width. 
+	// Set to true to use the absolute value. The default is relative to the PSF width.
 	bool absolute = 2;
 }
 
@@ -273,7 +273,7 @@ enum NoiseEstimatorMethod {
 
 // Define the settings for the fit engine. These settings are used to identify
 // candidates in the input data, extract regions for fitting, fit using various
-// methods (single, multiple, doublet) and select the best fit. 
+// methods (single, multiple, doublet) and select the best fit.
 message FitEngineSettings {
 	// The fit settings
 	FitSettings fit_settings = 1;
@@ -281,14 +281,14 @@ message FitEngineSettings {
 	// the method for estimating noise in the entire frame
 	NoiseEstimatorMethod noise_method = 2;
 	
-	// The data filter settings 
+	// The data filter settings
 	DataFilterSettings data_filter_settings = 3;	
 
 	// The square radius to use to identify local maxima (candidates)
 	RelativeParameter search = 4;
-	// The border to ignore at the edge of the image 
+	// The border to ignore at the edge of the image
 	RelativeParameter border = 5;
-	// The square radius to use for fitting around each candidate 
+	// The square radius to use for fitting around each candidate
 	RelativeParameter fitting = 6;
 	
 	// Set to true to include neighbours during fitting
@@ -304,7 +304,7 @@ message FitEngineSettings {
 	// Set to negative to disable.
 	int32 failures_limit = 11;
 	
-	// The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+	// The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
 	// this threshold then stop fitting of the remaining candidates. Set to zero to disable.
 	double pass_rate = 12;
 }

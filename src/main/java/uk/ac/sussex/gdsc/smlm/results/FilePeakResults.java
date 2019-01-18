@@ -125,7 +125,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
       sb.append(String.format("#Name %s%n", singleLine(getName())));
     }
     if (getSource() != null) {
-      sb.append(String.format("#Source %s%n", singleLine(getSource().toXML())));
+      sb.append(String.format("#Source %s%n", singleLine(getSource().toXml())));
     }
     if (getBounds() != null) {
       sb.append(String.format("#Bounds x%d y%d w%d h%d%n", getBounds().x, getBounds().y,
@@ -137,8 +137,8 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     if (!TextUtils.isNullOrEmpty(getConfiguration())) {
       sb.append(String.format("#Configuration %s%n", singleLine(getConfiguration())));
     }
-    if (getPSF() != null) {
-      addMessage(sb, printer, "PSF", getPSF());
+    if (getPsf() != null) {
+      addMessage(sb, printer, "PSF", getPsf());
     }
 
     // Add any extra comments

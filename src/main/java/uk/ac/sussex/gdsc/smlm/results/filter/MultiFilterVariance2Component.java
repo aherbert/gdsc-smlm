@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Precision with local background.
  */
-public class MultiFilterVariance2Component extends MultiFilterComponent {
+public class MultiFilterVariance2Component implements MultiFilterComponent {
   private final double variance;
 
   /**

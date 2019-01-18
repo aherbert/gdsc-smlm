@@ -59,11 +59,11 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.GUIProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
@@ -788,7 +788,7 @@ public final class SettingsManager {
     // This is fail fast
     boolean result = writeSettings(fitEngineConfiguration.getFitEngineSettings(), flags);
     result &= writeSettings(fitConfig.getCalibration(), flags);
-    result &= writeSettings(fitConfig.getPSF(), flags);
+    result &= writeSettings(fitConfig.getPsf(), flags);
     return result;
   }
 
@@ -871,8 +871,8 @@ public final class SettingsManager {
    * @param flags the flags
    * @return the PSF
    */
-  public static PSF readPSF(int flags) {
-    return new ConfigurationReader<>(PSFProtosHelper.defaultOneAxisGaussian2DPSF).read(flags);
+  public static PSF readPsf(int flags) {
+    return new ConfigurationReader<>(PsfProtosHelper.defaultOneAxisGaussian2DPSF).read(flags);
   }
 
   /**
@@ -901,8 +901,8 @@ public final class SettingsManager {
    * @param flags the flags
    * @return the GUIFilterSettings
    */
-  public static GUIFilterSettings readGUIFilterSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultGUIFilterSettings).read(flags);
+  public static GUIFilterSettings readGuiFilterSettings(int flags) {
+    return new ConfigurationReader<>(GuiProtosHelper.defaultGUIFilterSettings).read(flags);
   }
 
   /**
@@ -911,8 +911,8 @@ public final class SettingsManager {
    * @param flags the flags
    * @return the PSFCalculatorSettings
    */
-  public static PSFCalculatorSettings readPSFCalculatorSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultPSFCalculatorSettings).read(flags);
+  public static PSFCalculatorSettings readPsfCalculatorSettings(int flags) {
+    return new ConfigurationReader<>(GuiProtosHelper.defaultPSFCalculatorSettings).read(flags);
   }
 
   /**
@@ -921,8 +921,8 @@ public final class SettingsManager {
    * @param flags the flags
    * @return the PSFEstimatorSettings
    */
-  public static PSFEstimatorSettings readPSFEstimatorSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultPSFEstimatorSettings).read(flags);
+  public static PSFEstimatorSettings readPsfEstimatorSettings(int flags) {
+    return new ConfigurationReader<>(GuiProtosHelper.defaultPSFEstimatorSettings).read(flags);
   }
 
   /**
@@ -932,7 +932,7 @@ public final class SettingsManager {
    * @return the CreateDataSettings
    */
   public static CreateDataSettings readCreateDataSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultCreateDataSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultCreateDataSettings).read(flags);
   }
 
   /**
@@ -942,7 +942,7 @@ public final class SettingsManager {
    * @return the LoadLocalisationsSettings
    */
   public static LoadLocalisationsSettings readLoadLocalisationsSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultLoadLocalisationsSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultLoadLocalisationsSettings).read(flags);
   }
 
   /**
@@ -952,7 +952,7 @@ public final class SettingsManager {
    * @return the ClusteringSettings
    */
   public static ClusteringSettings readClusteringSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultClusteringSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultClusteringSettings).read(flags);
   }
 
   /**
@@ -962,7 +962,7 @@ public final class SettingsManager {
    * @return the OpticsSettings
    */
   public static OpticsSettings readOpticsSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultOpticsSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultOpticsSettings).read(flags);
   }
 
   /**
@@ -972,7 +972,7 @@ public final class SettingsManager {
    * @return the ConfigurationTemplateSettings
    */
   public static ConfigurationTemplateSettings readConfigurationTemplateSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultConfigurationTemplateSettings)
+    return new ConfigurationReader<>(GuiProtosHelper.defaultConfigurationTemplateSettings)
         .read(flags);
   }
 
@@ -996,7 +996,7 @@ public final class SettingsManager {
   public static FitEngineConfiguration readFitEngineConfiguration(int flags) {
     final FitEngineSettings fitEngineSettings = readFitEngineSettings(flags);
     final Calibration calibration = readCalibration(flags);
-    final PSF psf = readPSF(flags);
+    final PSF psf = readPsf(flags);
     return new FitEngineConfiguration(fitEngineSettings, calibration, psf);
   }
 
@@ -1027,7 +1027,7 @@ public final class SettingsManager {
    * @return the NucleusMaskSettings
    */
   public static NucleusMaskSettings readNucleusMaskSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultNucleusMaskSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultNucleusMaskSettings).read(flags);
   }
 
   /**
@@ -1036,8 +1036,8 @@ public final class SettingsManager {
    * @param flags the flags
    * @return the PSFCreatorSettings
    */
-  public static PSFCreatorSettings readPSFCreatorSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultPSFCreatorSettings).read(flags);
+  public static PSFCreatorSettings readPsfCreatorSettings(int flags) {
+    return new ConfigurationReader<>(GuiProtosHelper.defaultPSFCreatorSettings).read(flags);
   }
 
   /**
@@ -1047,7 +1047,7 @@ public final class SettingsManager {
    * @return the CameraModelManagerSettings
    */
   public static CameraModelManagerSettings readCameraModelManagerSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultCameraModelManagerSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultCameraModelManagerSettings).read(flags);
   }
 
   /**
@@ -1057,7 +1057,7 @@ public final class SettingsManager {
    * @return the CameraModelAnalysisSettings
    */
   public static CameraModelAnalysisSettings readCameraModelAnalysisSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultCameraModelAnalysisSettings)
+    return new ConfigurationReader<>(GuiProtosHelper.defaultCameraModelAnalysisSettings)
         .read(flags);
   }
 
@@ -1071,7 +1071,7 @@ public final class SettingsManager {
   public static CameraModelFisherInformationAnalysisSettings
       readCameraModelFisherInformationAnalysisSettings(int flags) {
     return new ConfigurationReader<>(
-        GUIProtosHelper.defaultCameraModelFisherInformationAnalysisSettings).read(flags);
+        GuiProtosHelper.defaultCameraModelFisherInformationAnalysisSettings).read(flags);
   }
 
   /**
@@ -1081,7 +1081,7 @@ public final class SettingsManager {
    * @return the CubicSplineManagerSettings
    */
   public static CubicSplineManagerSettings readCubicSplineManagerSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultCubicSplineManagerSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultCubicSplineManagerSettings).read(flags);
   }
 
   /**
@@ -1091,7 +1091,7 @@ public final class SettingsManager {
    * @return the FailCountManagerSettings
    */
   public static FailCountManagerSettings readFailCountManagerSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultFailCountManagerSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultFailCountManagerSettings).read(flags);
   }
 
   /**
@@ -1111,7 +1111,7 @@ public final class SettingsManager {
    * @return the AstigmatismModelManagerSettings
    */
   public static AstigmatismModelManagerSettings readAstigmatismModelManagerSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultAstigmatismModelManagerSettings)
+    return new ConfigurationReader<>(GuiProtosHelper.defaultAstigmatismModelManagerSettings)
         .read(flags);
   }
 
@@ -1142,7 +1142,7 @@ public final class SettingsManager {
    * @return the ImageJ3DResultsViewerSettings
    */
   public static ImageJ3DResultsViewerSettings readImageJ3DResultsViewerSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultImageJ3DResultsViewerSettings)
+    return new ConfigurationReader<>(GuiProtosHelper.defaultImageJ3DResultsViewerSettings)
         .read(flags);
   }
 
@@ -1153,7 +1153,7 @@ public final class SettingsManager {
    * @return the SpotFitSettings
    */
   public static SpotFitSettings readSpotFitSettings(int flags) {
-    return new ConfigurationReader<>(GUIProtosHelper.defaultSpotFitSettings).read(flags);
+    return new ConfigurationReader<>(GuiProtosHelper.defaultSpotFitSettings).read(flags);
   }
 
   /**
@@ -1310,8 +1310,8 @@ public final class SettingsManager {
    * @param message the message
    * @return the JSON string
    */
-  public static String toJSON(MessageOrBuilder message) {
-    return toJSON(message, 0);
+  public static String toJson(MessageOrBuilder message) {
+    return toJson(message, 0);
   }
 
   /**
@@ -1321,9 +1321,9 @@ public final class SettingsManager {
    * @param flags the flags
    * @return the JSON string
    */
-  public static String toJSON(MessageOrBuilder message, int flags) {
+  public static String toJson(MessageOrBuilder message, int flags) {
     final StringBuilder sb = new StringBuilder();
-    if (toJSON(message, sb, flags)) {
+    if (toJson(message, sb, flags)) {
       return sb.toString();
     }
     return null;
@@ -1339,8 +1339,8 @@ public final class SettingsManager {
    * @param flags the flags
    * @return True if written
    */
-  public static boolean toJSON(MessageOrBuilder message, String filename, int flags) {
-    return toJSON(message, new File(filename), flags);
+  public static boolean toJson(MessageOrBuilder message, String filename, int flags) {
+    return toJson(message, new File(filename), flags);
   }
 
   /**
@@ -1353,9 +1353,9 @@ public final class SettingsManager {
    * @param flags the flags
    * @return True if written
    */
-  public static boolean toJSON(MessageOrBuilder message, File file, int flags) {
+  public static boolean toJson(MessageOrBuilder message, File file, int flags) {
     try (PrintStream fs = new PrintStream(file)) {
-      return toJSON(message, fs, flags);
+      return toJson(message, fs, flags);
     } catch (final FileNotFoundException ex) {
       logWriteError(flags, ex);
     }
@@ -1370,7 +1370,7 @@ public final class SettingsManager {
    * @param flags the flags
    * @return the JSON string
    */
-  public static boolean toJSON(MessageOrBuilder message, Appendable output, int flags) {
+  public static boolean toJson(MessageOrBuilder message, Appendable output, int flags) {
     try {
       if (printer == null) {
         printer = JsonFormat.printer();
@@ -1400,8 +1400,8 @@ public final class SettingsManager {
    * @param builder the builder
    * @return true, if successful
    */
-  public static boolean fromJSON(String json, Message.Builder builder) {
-    return fromJSON(json, builder, 0);
+  public static boolean fromJson(String json, Message.Builder builder) {
+    return fromJson(json, builder, 0);
   }
 
   /**
@@ -1412,8 +1412,8 @@ public final class SettingsManager {
    * @param flags the flags
    * @return true, if successful
    */
-  public static boolean fromJSON(String json, Message.Builder builder, int flags) {
-    return fromJSON(new StringReader(json), builder, flags);
+  public static boolean fromJson(String json, Message.Builder builder, int flags) {
+    return fromJson(new StringReader(json), builder, flags);
   }
 
   /**
@@ -1424,9 +1424,9 @@ public final class SettingsManager {
    * @param flags the flags
    * @return true, if successful
    */
-  public static boolean fromJSON(File file, Message.Builder builder, int flags) {
+  public static boolean fromJson(File file, Message.Builder builder, int flags) {
     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-      return fromJSON(reader, builder, flags);
+      return fromJson(reader, builder, flags);
     } catch (final IOException ex) {
       logReadError(flags, ex);
     }
@@ -1441,7 +1441,7 @@ public final class SettingsManager {
    * @param flags the flags
    * @return true, if successful
    */
-  public static boolean fromJSON(Reader reader, Message.Builder builder, int flags) {
+  public static boolean fromJson(Reader reader, Message.Builder builder, int flags) {
     try {
       if (parser == null) {
         parser = JsonFormat.parser();

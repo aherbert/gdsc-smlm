@@ -27,7 +27,12 @@ package uk.ac.sussex.gdsc.smlm.results;
 /**
  * Contains helper functions for working with peak results.
  */
-public class PeakResultHelper {
+public final class PeakResultHelper {
+  /**
+   * No public constructor.
+   */
+  private PeakResultHelper() {}
+
   /**
    * Convert the local background to an estimate of noise. Local background and noise are in ADU
    * count units.
@@ -39,19 +44,19 @@ public class PeakResultHelper {
    * the gain. E.G.
    *
    * <pre>
-   * return Math.sqrt((background / gain) * ((emCCD) ? 2 : 1)) * gain;
+   * return Math.sqrt((background / gain) * ((emCcd) ? 2 : 1)) * gain;
    * </pre>
    *
    * @param background the background
    * @param gain the gain
-   * @param emCCD True if an emCCD camera
+   * @param emCcd True if an emCcd camera
    * @return the noise estimate
    */
-  public static double localBackgroundToNoise(double background, double gain, boolean emCCD) {
+  public static double localBackgroundToNoise(double background, double gain, boolean emCcd) {
     if (background <= 0) {
       return 0;
     }
-    return Math.sqrt((background / gain) * ((emCCD) ? 2 : 1)) * gain;
+    return Math.sqrt((background / gain) * ((emCcd) ? 2 : 1)) * gain;
   }
 
   /**
@@ -63,18 +68,18 @@ public class PeakResultHelper {
    * if the data was taken on an EM-CCD camera. The square root is the noise in photons.
    *
    * <pre>
-   * return Math.sqrt((background) * ((emCCD) ? 2 : 1));
+   * return Math.sqrt((background) * ((emCcd) ? 2 : 1));
    * </pre>
    *
    * @param background the background
-   * @param emCCD True if an emCCD camera
+   * @param emCcd True if an emCcd camera
    * @return the noise estimate
    */
-  public static double localBackgroundToNoise(double background, boolean emCCD) {
+  public static double localBackgroundToNoise(double background, boolean emCcd) {
     if (background <= 0) {
       return 0;
     }
-    return Math.sqrt((background) * ((emCCD) ? 2 : 1));
+    return Math.sqrt((background) * ((emCcd) ? 2 : 1));
   }
 
   /**
@@ -85,16 +90,16 @@ public class PeakResultHelper {
    *
    * @param noise the noise
    * @param gain the gain
-   * @param emCCD True if an emCCD camera
+   * @param emCcd True if an emCcd camera
    * @return the local background estimate
    */
-  public static double noiseToLocalBackground(double noise, double gain, boolean emCCD) {
+  public static double noiseToLocalBackground(double noise, double gain, boolean emCcd) {
     if (noise <= 0) {
       return 0;
     }
     noise /= gain;
     noise *= noise;
-    if (emCCD) {
+    if (emCcd) {
       noise /= 2;
     }
     return noise * gain;
@@ -107,15 +112,15 @@ public class PeakResultHelper {
    * {@link #localBackgroundToNoise(double, boolean)}.
    *
    * @param noise the noise
-   * @param emCCD True if an emCCD camera
+   * @param emCcd True if an emCcd camera
    * @return the local background estimate
    */
-  public static double noiseToLocalBackground(double noise, boolean emCCD) {
+  public static double noiseToLocalBackground(double noise, boolean emCcd) {
     if (noise <= 0) {
       return 0;
     }
     noise *= noise;
-    if (emCCD) {
+    if (emCcd) {
       noise /= 2;
     }
     return noise;

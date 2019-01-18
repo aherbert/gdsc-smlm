@@ -48,7 +48,7 @@ public class DoubleDHT3DTest {
   static final int zDepth = 5;
   private static QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-  private static DoubleDHT3D createData(double cx, double cy, double cz) {
+  private static DoubleDht3D createData(double cx, double cy, double cz) {
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
         GaussianFunctionFactory.FIT_ASTIGMATISM, zModel);
     final int length = size * size;
@@ -64,24 +64,24 @@ public class DoubleDHT3DTest {
       a[Gaussian2DFunction.Z_POSITION] = z - cz;
       p.getValues(f, a, data, z * length);
     }
-    return new DoubleDHT3D(size, size, size, data, false);
+    return new DoubleDht3D(size, size, size, data, false);
   }
 
-  private static DoubleDHT3D createData() {
+  private static DoubleDht3D createData() {
     return createData(centre, centre, centre);
   }
 
-  private static DoubleDHT3D createOctants(int w, int h, int d) {
-    return new DoubleDHT3D(FloatDHT3DTest.createOctantsStack(w, h, d));
+  private static DoubleDht3D createOctants(int w, int h, int d) {
+    return new DoubleDht3D(FloatDHT3DTest.createOctantsStack(w, h, d));
   }
 
   @Test
   public void canSwapOctants() {
-    DoubleDHT3D dht;
+    DoubleDht3D dht;
 
     // Simple test
     final double[] data = new double[] {2, 1, 3, 4, 6, 5, 7, 8};
-    dht = new DoubleDHT3D(2, 2, 2, data.clone(), false);
+    dht = new DoubleDht3D(2, 2, 2, data.clone(), false);
     dht.swapOctants();
     checkOctants(data, dht.getData());
 
@@ -97,9 +97,9 @@ public class DoubleDHT3DTest {
           final ImageStack stack = dht.getImageStack();
           // uk.ac.sussex.gdsc.core.ij.Utils.display("Test", stack);
           dht.swapOctants();
-          FloatDHT3D.swapOctants(stack);
+          FloatDht3D.swapOctants(stack);
 
-          final double[] e = new DoubleDHT3D(stack).getData();
+          final double[] e = new DoubleDht3D(stack).getData();
           final double[] o = dht.getData();
 
           checkOctants(in, o);
@@ -127,18 +127,18 @@ public class DoubleDHT3DTest {
 
   @Test
   public void canConvolveAndDeconvolve() {
-    final DoubleDHT3D dht = createData();
+    final DoubleDht3D dht = createData();
     final double[] pixels = dht.getData().clone();
     dht.transform();
 
-    final DoubleDHT3D copy = dht.copy();
+    final DoubleDht3D copy = dht.copy();
     copy.initialiseFastMultiply();
 
-    final DoubleDHT3D convolved = dht.multiply(dht);
-    final DoubleDHT3D deconvolved = convolved.divide(dht);
+    final DoubleDht3D convolved = dht.multiply(dht);
+    final DoubleDht3D deconvolved = convolved.divide(dht);
 
-    final DoubleDHT3D convolved2 = dht.multiply(copy);
-    final DoubleDHT3D deconvolved2 = convolved.divide(copy);
+    final DoubleDht3D convolved2 = dht.multiply(copy);
+    final DoubleDht3D deconvolved2 = convolved.divide(copy);
 
     Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
     Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
@@ -162,10 +162,10 @@ public class DoubleDHT3DTest {
 
   @Test
   public void canCorrelate() {
-    final DoubleDHT3D dht = createData();
+    final DoubleDht3D dht = createData();
     dht.transform();
 
-    final DoubleDHT3D copy = dht.copy();
+    final DoubleDht3D copy = dht.copy();
     copy.initialiseFastMultiply();
 
     // Centre of power spectrum
@@ -174,11 +174,11 @@ public class DoubleDHT3DTest {
     for (int z = -1; z <= 1; z++) {
       for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
-          final DoubleDHT3D dht2 = createData(centre + x, centre + y, centre + z);
+          final DoubleDht3D dht2 = createData(centre + x, centre + y, centre + z);
           dht2.transform();
 
-          final DoubleDHT3D correlation = dht2.conjugateMultiply(dht);
-          final DoubleDHT3D correlation2 = dht2.conjugateMultiply(copy);
+          final DoubleDht3D correlation = dht2.conjugateMultiply(dht);
+          final DoubleDht3D correlation2 = dht2.conjugateMultiply(copy);
           Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
 
           correlation.inverseTransform();
@@ -206,17 +206,17 @@ public class DoubleDHT3DTest {
 
   @Test
   public void canConvertToDFT() {
-    final DoubleDHT3D dht = createData();
+    final DoubleDht3D dht = createData();
     final double[] input = dht.getData().clone();
     dht.transform();
 
-    final DoubleImage3D[] result = dht.toDFT(null, null);
+    final DoubleImage3D[] result = dht.toDft(null, null);
 
     final double rel = 1e-14;
     final double abs = 1e-14;
 
     // Test reverse transform
-    final DoubleDHT3D dht2 = DoubleDHT3D.fromDFT(result[0], result[1], null);
+    final DoubleDht3D dht2 = DoubleDht3D.fromDft(result[0], result[1], null);
 
     final double[] e = dht.getData();
     final double[] o = dht2.getData();

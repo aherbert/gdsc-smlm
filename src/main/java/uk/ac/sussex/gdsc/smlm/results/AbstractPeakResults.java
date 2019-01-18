@@ -154,12 +154,12 @@ public abstract class AbstractPeakResults implements PeakResults {
   }
 
   @Override
-  public PSF getPSF() {
+  public PSF getPsf() {
     return psf;
   }
 
   @Override
-  public void setPSF(PSF psf) {
+  public void setPsf(PSF psf) {
     this.psf = psf;
   }
 
@@ -219,8 +219,8 @@ public abstract class AbstractPeakResults implements PeakResults {
    *
    * @return true, if successful
    */
-  public boolean isCCDCamera() {
-    return (calibration != null && calibrationReader.isCCDCamera());
+  public boolean isCcdCamera() {
+    return (calibration != null && calibrationReader.isCcdCamera());
   }
 
   /**
@@ -231,8 +231,8 @@ public abstract class AbstractPeakResults implements PeakResults {
    * @deprecated Replaced by the camera type
    */
   @Deprecated
-  public boolean isEMCCD() {
-    return (calibration != null && calibrationReader.isCCDCamera()) ? calibrationReader.isEMCCD()
+  public boolean isEmCcd() {
+    return (calibration != null && calibrationReader.isCcdCamera()) ? calibrationReader.isEmCcd()
         : DEFAULT_EMCCD;
   }
 
@@ -245,7 +245,7 @@ public abstract class AbstractPeakResults implements PeakResults {
    */
   public boolean isCalibratedForPrecision() {
     if (calibration != null) {
-      if (!calibrationReader.isCCDCamera()) {
+      if (!calibrationReader.isCcdCamera()) {
         return false;
       }
       final DistanceUnit du = calibrationReader.getDistanceUnit();
@@ -281,7 +281,7 @@ public abstract class AbstractPeakResults implements PeakResults {
     this.setSource(peakResults.getSource());
     this.setBounds(peakResults.getBounds());
     this.setCalibration(peakResults.getCalibration());
-    this.setPSF(peakResults.getPSF());
+    this.setPsf(peakResults.getPsf());
     this.setConfiguration(peakResults.getConfiguration());
     this.setName(peakResults.getName());
   }

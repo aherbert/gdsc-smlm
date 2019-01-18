@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineCalculator;
 import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
 
 import ij.ImageStack;
 import ij.process.ImageProcessor;
@@ -94,14 +94,14 @@ public class Image3DAligner {
       new SimpleBounds(new double[3], SimpleArrayUtils.newDoubleArray(3, 1));
 
   /** Set a maximum step length at 1 pixel scaled to the spline dimensions. */
-  private static final BFGSOptimizer.StepLength stepLength =
-      new BFGSOptimizer.StepLength(SimpleArrayUtils.newDoubleArray(3, 1.0 / 3));
+  private static final BfgsOptimizer.StepLength stepLength =
+      new BfgsOptimizer.StepLength(SimpleArrayUtils.newDoubleArray(3, 1.0 / 3));
   /**
    * This is the cut-off for the maximum gradient relative to the function value. When gradients are
    * too small then the optimisation will end.
    */
-  private static final BFGSOptimizer.GradientTolerance gradientTolerance =
-      new BFGSOptimizer.GradientTolerance(1e-6);
+  private static final BfgsOptimizer.GradientTolerance gradientTolerance =
+      new BfgsOptimizer.GradientTolerance(1e-6);
 
   /**
    * The search mode for sub-pixel refinement.
@@ -133,10 +133,10 @@ public class Image3DAligner {
   /** The number of rows by columns of the discrete Hartley transform. */
   private int nrByNc;
 
-  private DHTData reference;
+  private DhtData reference;
 
   // Not thread safe as they are used for the target image
-  private DHTData target;
+  private DhtData target;
   private double[] buffer;
   private double[] region;
   private double frequencyDomainCorrelationError;
@@ -149,8 +149,8 @@ public class Image3DAligner {
 
   private CubicSplineCalculator calc;
 
-  private class DHTData {
-    DoubleDHT3D dht;
+  private class DhtData {
+    DoubleDht3D dht;
     double[] input;
     double[] sum;
     double[] sumSq;
@@ -164,11 +164,11 @@ public class Image3DAligner {
     int iy;
     int iz;
 
-    DHTData(DoubleDHT3D dht, int width, int height, int depth) {
-      setDHT(dht, width, height, depth);
+    DhtData(DoubleDht3D dht, int width, int height, int depth) {
+      setDht(dht, width, height, depth);
     }
 
-    void setDHT(DoubleDHT3D dht, int width, int height, int depth) {
+    void setDht(DoubleDht3D dht, int width, int height, int depth) {
       this.dht = dht;
       sum = resize(sum);
       sumSq = resize(sumSq);
@@ -294,7 +294,7 @@ public class Image3DAligner {
     Image3D.checkSize(nc, nr, ns, true);
     nrByNc = nr * nc;
     // Window and pad the reference
-    setReference(createDHT(image, reference));
+    setReference(createDht(image, reference));
   }
 
 
@@ -321,10 +321,10 @@ public class Image3DAligner {
     ns = MathUtils.nextPow2(Math.max(depth, image.getSize()));
     nrByNc = nr * nc;
     // Window and pad the reference
-    setReference(createDHT(image, reference));
+    setReference(createDht(image, reference));
   }
 
-  private void setReference(DHTData dhtData) {
+  private void setReference(DhtData dhtData) {
     reference = dhtData;
     if (fastMultiply) {
       reference.dht.initialiseFastMultiply();
@@ -361,28 +361,28 @@ public class Image3DAligner {
     throw new IllegalArgumentException("No data in 3D image");
   }
 
-  private DHTData createDHT(ImageStack image, DHTData dhtData) {
+  private DhtData createDht(ImageStack image, DhtData dhtData) {
     if (image.getBitDepth() != 32) {
-      return createDHT(new FloatImage3D(image), dhtData);
+      return createDht(new FloatImage3D(image), dhtData);
     }
 
     // Shift mean to 0 with optional window
     final int width = image.getWidth();
     final int height = image.getHeight();
     final int depth = image.getSize();
-    final double[] wx = createXWindow(width);
-    final double[] wy = createYWindow(height);
-    final double[] wz = createZWindow(depth);
+    final double[] lwx = createXWindow(width);
+    final double[] lwy = createYWindow(height);
+    final double[] lwz = createZWindow(depth);
 
     // We need to compute the weighted centre
     final double[] sum = new double[2];
 
     for (int z = 0; z < depth; z++) {
       final float[] pixels = (float[]) image.getPixels(1 + z);
-      if (wz[z] == 0) {
+      if (lwz[z] == 0) {
         // Special case happens with Tukey window at the ends
       } else {
-        calculateWeightedCentre(pixels, width, height, wx, wy, wz[z], sum);
+        calculateWeightedCentre(pixels, width, height, lwx, lwy, lwz[z], sum);
       }
     }
 
@@ -390,15 +390,15 @@ public class Image3DAligner {
 
     for (int z = 0; z < depth; z++) {
       final float[] pixels = (float[]) image.getPixels(1 + z);
-      if (wz[z] == 0) {
+      if (lwz[z] == 0) {
         // Special case happens with Tukey window at the ends
         Arrays.fill(pixels, 0);
       } else {
-        applyWindow(pixels, width, height, wx, wy, wz[z], shift);
+        applyWindow(pixels, width, height, lwx, lwy, lwz[z], shift);
       }
     }
 
-    DoubleDHT3D dht;
+    DoubleDht3D dht;
 
     // Pad into the desired data size.
     // We always do this so the data is reused
@@ -411,39 +411,39 @@ public class Image3DAligner {
       dest = dhtData.dht.getData();
       Arrays.fill(dest, 0);
     }
-    dht = new DoubleDHT3D(nc, nr, ns, dest, false);
+    dht = new DoubleDht3D(nc, nr, ns, dest, false);
     final int ix = getInsert(nc, width);
     final int iy = getInsert(nr, height);
     final int iz = getInsert(ns, depth);
     dht.insert(ix, iy, iz, image);
 
     if (dhtData == null) {
-      dhtData = new DHTData(dht, width, height, depth);
+      dhtData = new DhtData(dht, width, height, depth);
     } else {
-      dhtData.setDHT(dht, width, height, depth);
+      dhtData.setDht(dht, width, height, depth);
     }
 
-    return prepareDHT(dhtData);
+    return prepareDht(dhtData);
   }
 
-  private DHTData createDHT(Image3D image, DHTData dhtData) {
+  private DhtData createDht(Image3D image, DhtData dhtData) {
     // Shift mean to 0 with optional window
     final int width = image.getWidth();
     final int height = image.getHeight();
     final int depth = image.getSize();
-    final double[] wx = createXWindow(width);
-    final double[] wy = createYWindow(height);
-    final double[] wz = createZWindow(depth);
+    final double[] lwx = createXWindow(width);
+    final double[] lwy = createYWindow(height);
+    final double[] lwz = createZWindow(depth);
     final int inc = image.nrByNc;
 
     // We need to compute the weighted centre
     final double[] sum = new double[2];
 
     for (int z = 0, i = 0; z < depth; z++) {
-      if (wz[z] == 0) {
+      if (lwz[z] == 0) {
         // Special case happens with Tukey window at the ends
       } else {
-        calculateWeightedCentre(image, i, width, height, wx, wy, wz[z], sum);
+        calculateWeightedCentre(image, i, width, height, lwx, lwy, lwz[z], sum);
       }
       i += inc;
     }
@@ -451,20 +451,18 @@ public class Image3DAligner {
     final double shift = sum[0] / sum[1];
 
     for (int z = 0, i = 0; z < depth; z++) {
-      if (wz[z] == 0) {
+      if (lwz[z] == 0) {
         // Special case happens with Tukey window at the ends
         for (int j = 0; j < inc; j++) {
           image.set(i++, 0);
         }
       } else {
-        applyWindow(image, i, width, height, wx, wy, wz[z], shift);
+        applyWindow(image, i, width, height, lwx, lwy, lwz[z], shift);
         i += inc;
       }
     }
 
-    // System.out.printf("Sum = %g => %g\n", sum[0], Maths.sum(pixels));
-
-    DoubleDHT3D dht;
+    DoubleDht3D dht;
 
     // Pad into the desired data size.
     // We always do this to handle input of float/double Image3D data.
@@ -477,19 +475,19 @@ public class Image3DAligner {
       dest = dhtData.dht.getData();
       Arrays.fill(dest, 0);
     }
-    dht = new DoubleDHT3D(nc, nr, ns, dest, false);
+    dht = new DoubleDht3D(nc, nr, ns, dest, false);
     final int ix = getInsert(nc, width);
     final int iy = getInsert(nr, height);
     final int iz = getInsert(ns, depth);
     dht.insert(ix, iy, iz, image);
 
     if (dhtData == null) {
-      dhtData = new DHTData(dht, width, height, depth);
+      dhtData = new DhtData(dht, width, height, depth);
     } else {
-      dhtData.setDHT(dht, width, height, depth);
+      dhtData.setDht(dht, width, height, depth);
     }
 
-    return prepareDHT(dhtData);
+    return prepareDht(dhtData);
   }
 
   private double[] createXWindow(int n) {
@@ -589,8 +587,8 @@ public class Image3DAligner {
    * @param dhtData the dht data
    * @return the DHT data
    */
-  private static DHTData prepareDHT(DHTData dhtData) {
-    final DoubleDHT3D dht = dhtData.dht;
+  private static DhtData prepareDht(DhtData dhtData) {
+    final DoubleDht3D dht = dhtData.dht;
     final double[] sum = dhtData.sum;
     final double[] sumSq = dhtData.sumSq;
 
@@ -682,7 +680,7 @@ public class Image3DAligner {
     }
 
     // Maintain the sign information
-    return Math.round(value * scale); // / scale;
+    return Math.round(value * scale); // / scale
   }
 
 
@@ -721,7 +719,7 @@ public class Image3DAligner {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
-    target = createDHT(image, target);
+    target = createDht(image, target);
     return align(target, refinements, 1e-2);
   }
 
@@ -746,7 +744,7 @@ public class Image3DAligner {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
-    target = createDHT(image, target);
+    target = createDht(image, target);
     return align(target, refinements, error);
   }
 
@@ -784,7 +782,7 @@ public class Image3DAligner {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
-    target = createDHT(image, target);
+    target = createDht(image, target);
     return align(target, refinements, 1e-2);
   }
 
@@ -809,7 +807,7 @@ public class Image3DAligner {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
-    target = createDHT(image, target);
+    target = createDht(image, target);
     return align(target, refinements, error);
   }
 
@@ -825,9 +823,9 @@ public class Image3DAligner {
    * @throws IllegalArgumentException If any dimension is less than 2, or if larger than the
    *         initialised reference
    */
-  private double[] align(DHTData target, int refinements, double error) {
+  private double[] align(DhtData target, int refinements, double error) {
     // Multiply by the reference. This allows the reference to be shared across threads.
-    final DoubleDHT3D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
+    final DoubleDht3D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
     buffer = correlation.getData(); // Store for reuse
     correlation.inverseTransform();
     correlation.swapOctants();
@@ -988,9 +986,8 @@ public class Image3DAligner {
               corr = 0;
             }
           } else {
+            // Leave as raw for debugging, i.e. do not clip to range [-1:1]
             corr = numerator / Math.sqrt(denominator1 * denominator2);
-            // Leave as raw for debugging
-            // R = Maths.clip(-1, 1, R);
           }
 
           buffer[base + c] = corr;
@@ -1005,9 +1002,6 @@ public class Image3DAligner {
             // This occurs when the correlation sum XY is incorrect.
             // The other terms are exact due to the quantisation to integer data.
             // It is likely to occur at the bounds.
-
-            System.out.printf("Bad normalisation [%d,%d,%d] = %g  (overlap=%g)\n", c, r, s, corr,
-                (double) n / size);
             continue;
           }
 
@@ -1090,7 +1084,7 @@ public class Image3DAligner {
         try {
           final SplineFunction sf = new SplineFunction(f, origin);
 
-          final BFGSOptimizer optimiser = new BFGSOptimizer(
+          final BfgsOptimizer optimiser = new BfgsOptimizer(
               // Use a simple check on the relative value change and
               // set the number of refinements
               new SimpleValueChecker(relativeThreshold, -1, refinements));
@@ -1134,7 +1128,7 @@ public class Image3DAligner {
    * @param correlation the correlation
    * @param maxi the index of the maximum correlation
    */
-  private void checkCorrelation(DHTData target, DoubleDHT3D correlation, int maxi) {
+  private void checkCorrelation(DhtData target, DoubleDht3D correlation, int maxi) {
     if (target.input == null || reference.input == null) {
       // No check possible
       return;
@@ -1176,8 +1170,6 @@ public class Image3DAligner {
         }
       }
     }
-
-    // System.out.printf("Raw %d,%d,%d = %g\n", xyz[0], xyz[1], xyz[1], o);
 
     frequencyDomainCorrelationError =
         DoubleEquality.relativeError(frequencyCorrelation, spatialCorrelation);

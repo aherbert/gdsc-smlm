@@ -1126,7 +1126,7 @@ public class CameraModelAnalysis
       case POISSON_GAUSSIAN_PMF:
         final PoissonGaussianConvolutionFunction f1 =
             PoissonGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
-        f1.setComputePMF(model == Model.POISSON_GAUSSIAN_PMF);
+        f1.setComputePmf(model == Model.POISSON_GAUSSIAN_PMF);
         return f1;
       case POISSON_GAUSSIAN_APPROX:
         return PoissonGaussianFunction2.createWithStandardDeviation(alpha, noise);

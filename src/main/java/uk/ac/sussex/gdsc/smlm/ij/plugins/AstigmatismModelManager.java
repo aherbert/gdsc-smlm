@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSetti
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
@@ -487,8 +487,8 @@ public class AstigmatismModelManager implements PlugIn {
 
     SettingsManager.writeSettings(pluginSettings);
 
-    if (fitConfig.getPSFType() != PSFType.TWO_AXIS_GAUSSIAN_2D) {
-      IJ.error(TITLE, "PSF must be " + PSFProtosHelper.getName(PSFType.TWO_AXIS_GAUSSIAN_2D));
+    if (fitConfig.getPsfType() != PSFType.TWO_AXIS_GAUSSIAN_2D) {
+      IJ.error(TITLE, "PSF must be " + PsfProtosHelper.getName(PSFType.TWO_AXIS_GAUSSIAN_2D));
       return false;
     }
 
@@ -503,7 +503,7 @@ public class AstigmatismModelManager implements PlugIn {
 
     pluginSettings.setFitEngineSettings(config.getFitEngineSettings());
     pluginSettings.setCalibration(fitConfig.getCalibration());
-    pluginSettings.setPsf(fitConfig.getPSF());
+    pluginSettings.setPsf(fitConfig.getPsf());
     SettingsManager.writeSettings(pluginSettings);
 
     return true;
@@ -557,7 +557,7 @@ public class AstigmatismModelManager implements PlugIn {
     calibration.setNmPerPixel(gd.getNextNumber());
     calibration.setExposureTime(100); // Arbitrary
     fitConfig.setCalibration(calibration.getCalibration());
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     config.setFitting(gd.getNextNumber());
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
     pluginSettings.setLogFitProgress(gd.getNextBoolean());
@@ -575,9 +575,9 @@ public class AstigmatismModelManager implements PlugIn {
     // Check arguments
     try {
       Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
-      Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
-      if (fitConfig.getPSF().getParametersCount() > 1) {
-        Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+      Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
+      if (fitConfig.getPsf().getParametersCount() > 1) {
+        Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
       }
       Parameters.isAboveZero("Fitting_width", config.getFitting());
 
@@ -637,7 +637,7 @@ public class AstigmatismModelManager implements PlugIn {
     // Create a fit engine
     results = new MemoryPeakResults();
     results.setCalibration(fitConfig.getCalibration());
-    results.setPSF(fitConfig.getPSF());
+    results.setPsf(fitConfig.getPsf());
     results.setSortAfterEnd(true);
     results.begin();
     final int threadCount = Prefs.getThreads();
@@ -1273,7 +1273,7 @@ public class AstigmatismModelManager implements PlugIn {
       // Save the widths in the fit configuration
       fitConfig.setInitialPeakStdDev0(parameters[P_S0X]);
       fitConfig.setInitialPeakStdDev1(parameters[P_S0Y]);
-      pluginSettings.setPsf(fitConfig.getPSF());
+      pluginSettings.setPsf(fitConfig.getPsf());
       SettingsManager.writeSettings(pluginSettings);
     }
 
@@ -1353,7 +1353,7 @@ public class AstigmatismModelManager implements PlugIn {
     pluginSettings.setFilename(gd.getNextString());
 
     final AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
-    if (!SettingsManager.fromJSON(new File(pluginSettings.getFilename()), model, 0)) {
+    if (!SettingsManager.fromJson(new File(pluginSettings.getFilename()), model, 0)) {
       return;
     }
 
@@ -1380,7 +1380,7 @@ public class AstigmatismModelManager implements PlugIn {
       return;
     }
 
-    if (!SettingsManager.toJSON(model, new File(pluginSettings.getFilename()), 0)) {
+    if (!SettingsManager.toJson(model, new File(pluginSettings.getFilename()), 0)) {
       IJ.error(TITLE, "Failed to export astigmatism model: " + name);
       return;
     }
@@ -1632,7 +1632,7 @@ public class AstigmatismModelManager implements PlugIn {
    */
   public static AstigmatismModel convert(AstigmatismModel model, DistanceUnit zDistanceUnit,
       DistanceUnit widthDistanceUnit) throws ConversionException {
-    return PSFProtosHelper.convert(model, zDistanceUnit, widthDistanceUnit);
+    return PsfProtosHelper.convert(model, zDistanceUnit, widthDistanceUnit);
   }
 
   private void deleteModel() {

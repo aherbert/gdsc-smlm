@@ -70,7 +70,7 @@ public final class CalibrationProtosHelper {
    * @param cameraType the camera type
    * @return true, if is CCD camera type
    */
-  public static boolean isCCDCameraType(CameraType cameraType) {
+  public static boolean isCcdCameraType(CameraType cameraType) {
     return cameraType == CameraType.EMCCD || cameraType == CameraType.CCD;
   }
 

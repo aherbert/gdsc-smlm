@@ -104,28 +104,28 @@ public final class CustomContentHelper {
    */
   public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list) {
     // Compact the vertices to a set of vertices and faces
-    final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
+    final TObjectIntHashMap<Point3f> map = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
     final TurboList<Point3f> vertices = new TurboList<>(list.size());
     final TIntArrayList faces = new TIntArrayList(list.size());
     int index = 0;
     // Process triangles
     for (int i = 0; i < list.size(); i += 3) {
-      index = addFace(m, vertices, faces, list.get(i), index);
-      index = addFace(m, vertices, faces, list.get(i + 1), index);
-      index = addFace(m, vertices, faces, list.get(i + 2), index);
+      index = addFace(map, vertices, faces, list.get(i), index);
+      index = addFace(map, vertices, faces, list.get(i + 1), index);
+      index = addFace(map, vertices, faces, list.get(i + 2), index);
     }
 
     return new Pair<>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
   }
 
-  private static int addFace(TObjectIntHashMap<Point3f> m, TurboList<Point3f> vertices,
-      TIntArrayList faces, Point3f p, int index) {
+  private static int addFace(TObjectIntHashMap<Point3f> map, TurboList<Point3f> vertices,
+      TIntArrayList faces, Point3f point, int index) {
     // Add the point if it is not in the set of vertices.
     // Get the index associated with the vertex.
-    int value = m.putIfAbsent(p, index);
+    int value = map.putIfAbsent(point, index);
     if (value == -1) {
       // Store the points in order
-      vertices.add(p);
+      vertices.add(point);
       value = index++;
     }
     faces.add(value);
@@ -184,11 +184,6 @@ public final class CustomContentHelper {
       sumy += p.y;
       sumz += p.z;
     }
-
-    //// In the middle of the bounds
-    // center.x = (max.x + min.x) / 2;
-    // center.y = (max.y + min.y) / 2;
-    // center.z = (max.z + min.z) / 2;
 
     // Weighted
     final int n = points.length;

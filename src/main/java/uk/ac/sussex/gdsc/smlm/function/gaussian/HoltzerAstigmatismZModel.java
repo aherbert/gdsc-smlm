@@ -62,16 +62,16 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
    * @param s0x The width in the x focal plane
    * @param s0y The width in the y focal plane
    * @param gamma the gamma parameter (half the distance between the focal planes)
-   * @param d the depth of focus
+   * @param depth the depth of focus
    * @param ax Empirical constant A for the x-astigmatism of the PSF
    * @param bx Empirical constant B for the x-astigmatism of the PSF
    * @param ay Empirical constant A for the y-astigmatism of the PSF
    * @param by Empirical constant B for the y-astigmatism of the PSF
    * @return the holtzer astimatism Z model
    */
-  public static HoltzerAstigmatismZModel create(double s0x, double s0y, double gamma, double d,
+  public static HoltzerAstigmatismZModel create(double s0x, double s0y, double gamma, double depth,
       double ax, double bx, double ay, double by) {
-    final double d2 = d * d;
+    final double d2 = depth * depth;
     return new HoltzerAstigmatismZModel(s0x, s0y, gamma, 1.0 / d2, ax, bx, ay, by);
   }
 
@@ -103,6 +103,9 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
     this.by = by;
   }
 
+  // Allow names 'a' and 'b'
+  // @CHECKSTYLE.OFF: ParameterName
+
   /**
    * Gets the standard deviation, first and second derivatives for the z-depth.
    *
@@ -127,10 +130,6 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
     dsdz[1] = s0 * ((oneOverD2 * (2 + a * 6 * z + b * 12 * z2)) / (2 * s)
         - pow2(oneOverD2 * (2 * z + a * 3 * z2 + b * 4 * z3)) / (4 * s * s * s));
     return s0 * s;
-  }
-
-  private static double pow2(final double d) {
-    return d * d;
   }
 
   /**
@@ -172,6 +171,12 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
     final double z4 = z2 * z2;
     // Eq. 17a
     return s0 * Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
+  }
+
+  // @CHECKSTYLE.ON: ParameterName
+
+  private static double pow2(final double value) {
+    return value * value;
   }
 
   @Override

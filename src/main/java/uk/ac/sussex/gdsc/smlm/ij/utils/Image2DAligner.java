@@ -87,10 +87,10 @@ public class Image2DAligner {
   private int nrByNc;
 
   /** The reference. */
-  private DHTData reference;
+  private DhtData reference;
 
   // Not thread safe as they are used for the target image
-  private DHTData target;
+  private DhtData target;
   private double[] buffer;
   private double[] region;
   private double frequencyDomainCorrelationError;
@@ -100,8 +100,8 @@ public class Image2DAligner {
   private double[] wx;
   private double[] wy;
 
-  private class DHTData {
-    DoubleDHT2D dht;
+  private class DhtData {
+    DoubleDht2D dht;
     double[] input;
     double[] sum;
     double[] sumSq;
@@ -113,11 +113,11 @@ public class Image2DAligner {
     int ix;
     int iy;
 
-    DHTData(DoubleDHT2D dht, int width, int height) {
-      setDHT(dht, width, height);
+    DhtData(DoubleDht2D dht, int width, int height) {
+      setDht(dht, width, height);
     }
 
-    void setDHT(DoubleDHT2D dht, int width, int height) {
+    void setDht(DoubleDht2D dht, int width, int height) {
       this.dht = dht;
       sum = resize(sum);
       sumSq = resize(sumSq);
@@ -232,7 +232,7 @@ public class Image2DAligner {
     nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
     nrByNc = nr * nc;
     // Window and pad the reference
-    setReference(createDHT(image, reference));
+    setReference(createDht(image, reference));
   }
 
   /**
@@ -255,7 +255,7 @@ public class Image2DAligner {
     nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
     nrByNc = nr * nc;
     // Window and pad the reference
-    setReference(createDHT(image, reference));
+    setReference(createDht(image, reference));
   }
 
   /**
@@ -263,7 +263,7 @@ public class Image2DAligner {
    *
    * @param dhtData the new reference
    */
-  private void setReference(DHTData dhtData) {
+  private void setReference(DhtData dhtData) {
     reference = dhtData;
     if (fastMultiply) {
       dhtData.dht.initialiseFastMultiply();
@@ -314,9 +314,9 @@ public class Image2DAligner {
    * @param dhtData the dht data
    * @return the DHT data
    */
-  private DHTData createDHT(ImageProcessor image, DHTData dhtData) {
+  private DhtData createDht(ImageProcessor image, DhtData dhtData) {
     if (image.getBitDepth() != 32) {
-      return createDHT(new FloatImage2D(image), dhtData);
+      return createDht(new FloatImage2D(image), dhtData);
     }
 
     // Shift mean to 0 with optional window
@@ -335,7 +335,7 @@ public class Image2DAligner {
 
     applyWindow(pixels, width, height, wx, wy, shift);
 
-    DoubleDHT2D dht;
+    DoubleDht2D dht;
 
     // Pad into the desired data size.
     // We always do this so the data is reused
@@ -347,39 +347,37 @@ public class Image2DAligner {
       dest = dhtData.dht.getData();
       Arrays.fill(dest, 0);
     }
-    dht = new DoubleDHT2D(nc, nr, dest, false);
+    dht = new DoubleDht2D(nc, nr, dest, false);
     final int ix = getInsert(nc, width);
     final int iy = getInsert(nr, height);
     dht.insert(ix, iy, image);
 
     if (dhtData == null) {
-      dhtData = new DHTData(dht, width, height);
+      dhtData = new DhtData(dht, width, height);
     } else {
-      dhtData.setDHT(dht, width, height);
+      dhtData.setDht(dht, width, height);
     }
 
-    return prepareDHT(dhtData);
+    return prepareDht(dhtData);
   }
 
-  private DHTData createDHT(Image2D image, DHTData dhtData) {
+  private DhtData createDht(Image2D image, DhtData dhtData) {
     // Shift mean to 0 with optional window
     final int width = image.getWidth();
     final int height = image.getHeight();
-    final double[] wx = createXWindow(width);
-    final double[] wy = createYWindow(height);
+    final double[] lwx = createXWindow(width);
+    final double[] lwy = createYWindow(height);
 
     // We need to compute the weighted centre
     final double[] sum = new double[2];
 
-    calculateWeightedCentre(image, width, height, wx, wy, sum);
+    calculateWeightedCentre(image, width, height, lwx, lwy, sum);
 
     final double shift = sum[0] / sum[1];
 
-    applyWindow(image, width, height, wx, wy, shift);
+    applyWindow(image, width, height, lwx, lwy, shift);
 
-    // System.out.printf("Sum = %g => %g\n", sum[0], Maths.sum(pixels));
-
-    DoubleDHT2D dht;
+    DoubleDht2D dht;
 
     // Pad into the desired data size.
     // We always do this to handle input of float/double Image2D data.
@@ -391,18 +389,18 @@ public class Image2DAligner {
       dest = dhtData.dht.getData();
       Arrays.fill(dest, 0);
     }
-    dht = new DoubleDHT2D(nc, nr, dest, false);
+    dht = new DoubleDht2D(nc, nr, dest, false);
     final int ix = getInsert(nc, width);
     final int iy = getInsert(nr, height);
     dht.insert(ix, iy, image);
 
     if (dhtData == null) {
-      dhtData = new DHTData(dht, width, height);
+      dhtData = new DhtData(dht, width, height);
     } else {
-      dhtData.setDHT(dht, width, height);
+      dhtData.setDht(dht, width, height);
     }
 
-    return prepareDHT(dhtData);
+    return prepareDht(dhtData);
   }
 
   private double[] createXWindow(int n) {
@@ -483,8 +481,8 @@ public class Image2DAligner {
    * @param dhtData the dht data
    * @return the DHT data
    */
-  private static DHTData prepareDHT(DHTData dhtData) {
-    final DoubleDHT2D dht = dhtData.dht;
+  private static DhtData prepareDht(DhtData dhtData) {
+    final DoubleDht2D dht = dhtData.dht;
     final double[] sum = dhtData.sum;
     final double[] sumSq = dhtData.sumSq;
 
@@ -593,7 +591,7 @@ public class Image2DAligner {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
-    target = createDHT(image, target);
+    target = createDht(image, target);
     return align(target, refinements);
   }
 
@@ -628,7 +626,7 @@ public class Image2DAligner {
       throw new IllegalArgumentException("Image is larger than the initialised reference");
     }
 
-    target = createDHT(image, target);
+    target = createDht(image, target);
     return align(target, refinements);
   }
 
@@ -642,9 +640,9 @@ public class Image2DAligner {
    * @throws IllegalArgumentException If any dimension is less than 2, or if larger than the
    *         initialised reference
    */
-  private double[] align(DHTData target, int refinements) {
+  private double[] align(DhtData target, int refinements) {
     // Multiply by the reference. This allows the reference to be shared across threads.
-    final DoubleDHT2D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
+    final DoubleDht2D correlation = target.dht.conjugateMultiply(reference.dht, buffer);
     buffer = correlation.getData(); // Store for reuse
     correlation.inverseTransform();
     correlation.swapQuadrants();
@@ -773,9 +771,8 @@ public class Image2DAligner {
             corr = 0;
           }
         } else {
+          // Leave as raw for debugging, i.e. do not clip to range [-1:1]
           corr = numerator / Math.sqrt(denominator1 * denominator2);
-          // Leave as raw for debugging
-          // R = Maths.clip(-1, 1, R);
         }
 
         buffer[base + c] = corr;
@@ -790,9 +787,6 @@ public class Image2DAligner {
           // This occurs when the correlation sum XY is incorrect.
           // The other terms are exact due to the quantisation to integer data.
           // It is likely to occur at the bounds.
-
-          System.out.printf("Bad normalisation [%d,%d] = %g  (overlap=%g)\n", c, r, corr,
-              (double) n / size);
           continue;
         }
 
@@ -867,7 +861,7 @@ public class Image2DAligner {
    * @param correlation the correlation
    * @param maxi the index of the maximum correlation
    */
-  private void checkCorrelation(DHTData target, DoubleDHT2D correlation, int maxi) {
+  private void checkCorrelation(DhtData target, DoubleDht2D correlation, int maxi) {
     if (target.input == null || reference.input == null) {
       // No check possible
       return;
@@ -904,8 +898,6 @@ public class Image2DAligner {
         spatialCorrelation += tar[ti++] * ref[ri++];
       }
     }
-
-    // System.out.printf("Raw %d,%d = %g\n", xy[0], xy[1], o);
 
     frequencyDomainCorrelationError =
         DoubleEquality.relativeError(frequencyCorrelation, spatialCorrelation);
@@ -944,7 +936,6 @@ public class Image2DAligner {
 
     // This has been adapted from Image2D to compute the twos sums together
 
-    // int xw_yh = reference.dht.getIndex(x_w_1, y_h_1);
     final int xw_yh = yh1 * nc + xw1;
     result[0] = 0;
     result[1] = 0;
@@ -989,11 +980,10 @@ public class Image2DAligner {
     double range = 0.5;
     while (refinements-- > 0) {
       final double previous = centre[2];
-      if (performCubicFit(fp, range, centre)) {
-        // The centre moved. Check convergence.
-        if ((centre[2] - previous) / centre[2] < relativeThreshold) {
-          break;
-        }
+      if (performCubicFit(fp, range, centre)
+          // The centre moved. Check convergence.
+          && (centre[2] - previous) / centre[2] < relativeThreshold) {
+        break;
       }
       range /= 2;
     }
@@ -1076,11 +1066,10 @@ public class Image2DAligner {
     double range = 0.5;
     while (refinements-- > 0) {
       final double previous = centre[2];
-      if (performCubicSearch(surface, nodes, range, centre, y, iy)) {
-        // The centre moved. Check convergence.
-        if ((centre[2] - previous) / centre[2] < relativeThreshold) {
-          break;
-        }
+      if (performCubicSearch(surface, nodes, range, centre, y, iy)
+          // The centre moved. Check convergence.
+          && (centre[2] - previous) / centre[2] < relativeThreshold) {
+        break;
       }
       range /= 2;
     }
@@ -1103,8 +1092,6 @@ public class Image2DAligner {
    */
   private static boolean performCubicSearch(Image2D surface, CachedBicubicInterpolator[][] nodes,
       double range, double[] centre, double[] y, int[] iy) {
-    // for debugging
-    // FloatProcessor fp = (FloatProcessor) surface.getImageProcessor();
 
     // Pre-compute the node position and the fraction between 0-1 for y values
     for (int j = -1, k = 0, l = 0; j <= 1; j++, k++) {
@@ -1131,8 +1118,6 @@ public class Image2DAligner {
         }
         final double value =
             nodes[ix][iy[k]].getValue(x, x2, x3, y[k * 3], y[k * 3 + 1], y[k * 3 + 2]);
-        // double v2 = fp.getBicubicInterpolatedPixel(ix + 1 + x, iy[k] + 1 + y[k * 3], fp);
-        // System.out.printf("%g vs %g @ %g,%g\n", v, v2, x + ix, iy[k] + y[k * 3]);
         if (centre[2] < value) {
           // Add back the node index to get the correct x/y-values
           centre[0] = x + ix;
@@ -1142,7 +1127,6 @@ public class Image2DAligner {
         }
       }
     }
-    // System.out.printf("Centre %g,%g = %g\n", centre[0], centre[1], centre[2]);
     return moved;
   }
 

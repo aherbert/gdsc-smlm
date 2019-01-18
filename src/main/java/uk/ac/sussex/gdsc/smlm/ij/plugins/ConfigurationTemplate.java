@@ -178,7 +178,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       // Check if we can update from the file
       if (file != null && file.lastModified() != timestamp) {
         final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
-        if (SettingsManager.fromJSON(file, builder, 0)) {
+        if (SettingsManager.fromJson(file, builder, 0)) {
           this.settings = builder.build();
           timestamp = file.lastModified();
         }
@@ -194,7 +194,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     public boolean save(File file) {
       boolean result = false;
       if (file != null) {
-        result = SettingsManager.toJSON(settings, file, SettingsManager.FLAG_JSON_WHITESPACE);
+        result = SettingsManager.toJson(settings, file, SettingsManager.FLAG_JSON_WHITESPACE);
         timestamp = file.lastModified();
       }
       return result;
@@ -408,7 +408,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     }
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     final File file = new File(path);
-    if (SettingsManager.fromJSON(file, builder, 0)) {
+    if (SettingsManager.fromJson(file, builder, 0)) {
       addTemplate(name, builder.build(), TemplateType.CUSTOM, file, tifPath);
     }
   }
@@ -425,7 +425,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
     try (InputStreamReader reader = new InputStreamReader(templateStream)) {
       final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
-      if (SettingsManager.fromJSON(reader, builder, 0
+      if (SettingsManager.fromJson(reader, builder, 0
       // SettingsManager.FLAG_SILENT
       )) {
         addTemplate(template.name, builder.build(), TemplateType.RESOURCE, null, template.tifPath);
@@ -545,7 +545,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
       try (InputStreamReader reader = new InputStreamReader(templateStream)) {
         builder.clear();
-        if (SettingsManager.fromJSON(reader, builder, 0
+        if (SettingsManager.fromJson(reader, builder, 0
         // SettingsManager.FLAG_SILENT
         )) {
           count++;
@@ -947,7 +947,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     for (final String path : selected) {
       builder.clear();
       final File file = new File(newDirectory, path);
-      if (SettingsManager.fromJSON(file, builder, 0)) {
+      if (SettingsManager.fromJson(file, builder, 0)) {
         count++;
         final String name = ImageJUtils.removeExtension(file.getName());
         // Assume the Tif image will be detected automatically

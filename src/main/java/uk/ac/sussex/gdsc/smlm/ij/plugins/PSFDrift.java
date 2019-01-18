@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.Offset;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePSFHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.model.ImagePSFModel;
+import uk.ac.sussex.gdsc.smlm.model.ImagePsfModel;
 
 import gnu.trove.list.array.TDoubleArrayList;
 
@@ -158,7 +158,7 @@ public class PSFDrift implements PlugIn {
    */
   private class Worker implements Runnable {
     volatile boolean finished;
-    final ImagePSFModel psf;
+    final ImagePsfModel psf;
     final BlockingQueue<Job> jobs;
     final FitConfiguration fitConfig2;
     final double sx;
@@ -174,13 +174,13 @@ public class PSFDrift implements PlugIn {
     private double[] lc;
     private double[] uc;
 
-    public Worker(BlockingQueue<Job> jobs, ImagePSFModel psf, int width,
+    public Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width,
         FitConfiguration fitConfig) {
       this.jobs = jobs;
       this.psf = psf.copy();
       this.fitConfig2 = fitConfig.clone();
-      sx = fitConfig.getInitialXSD();
-      sy = fitConfig.getInitialYSD();
+      sx = fitConfig.getInitialXSd();
+      sy = fitConfig.getInitialYSd();
       a = psfSettings.getPixelSize() * scale;
       xy = PSFDrift.getStartPoints();
       w = width;
@@ -358,14 +358,14 @@ public class PSFDrift implements PlugIn {
       // }
 
       // Q. Should we do width bounds checking?
-      if (fitConfig2.isXSDFitting()) {
+      if (fitConfig2.isXSdFitting()) {
         if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD]
             || params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD]) {
           // System.out.printf("Failed to fit x-width: %f\n", params[Gaussian2DFunction.X_SD]);
           return false;
         }
       }
-      if (fitConfig2.isYSDFitting()) {
+      if (fitConfig2.isYSdFitting()) {
         if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD]
             || params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD]) {
           // System.out.printf("Failed to fit y-width: %f\n", params[Gaussian2DFunction.Y_SD]);
@@ -432,7 +432,7 @@ public class PSFDrift implements PlugIn {
     recallLimit = gd.getNextNumber();
     regionSize = (int) Math.abs(gd.getNextNumber());
     backgroundFitting = gd.getNextBoolean();
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
     fitConfig.setMinWidthFactor(gd.getNextNumber());
     fitConfig.setMaxWidthFactor(gd.getNextNumber());
@@ -474,7 +474,7 @@ public class PSFDrift implements PlugIn {
     // FitEngineConfiguration to pass to the PeakFit method
     final FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
     final FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
-        SettingsManager.readCalibration(0), PSFProtosHelper.defaultOneAxisGaussian2DPSF);
+        SettingsManager.readCalibration(0), PsfProtosHelper.defaultOneAxisGaussian2DPSF);
     config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
     if (!PeakFit.configurePSFModel(config)) {
       return;
@@ -525,7 +525,7 @@ public class PSFDrift implements PlugIn {
     startSlice = (startSlice < 1) ? 1 : (startSlice > nSlices) ? nSlices : startSlice;
     endSlice = (endSlice < 1) ? 1 : (endSlice > nSlices) ? nSlices : endSlice;
 
-    final ImagePSFModel psf = createImagePSF(startSlice, endSlice, scale);
+    final ImagePsfModel psf = createImagePSF(startSlice, endSlice, scale);
 
     final int minz = startSlice - psfSettings.getCentreImage();
     final int maxz = endSlice - psfSettings.getCentreImage();
@@ -879,7 +879,7 @@ public class PSFDrift implements PlugIn {
     plot.addPoints(x2, y2, shape);
   }
 
-  private ImagePSFModel createImagePSF(int lower, int upper, double scale) {
+  private ImagePsfModel createImagePSF(int lower, int upper, double scale) {
     final int zCentre = psfSettings.getCentreImage();
 
     final double unitsPerPixel = 1.0 / scale;
@@ -888,8 +888,8 @@ public class PSFDrift implements PlugIn {
     // Extract data uses index not slice number as arguments so subtract 1
     final double noiseFraction = 1e-3;
     final float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
-    final ImagePSFModel model =
-        new ImagePSFModel(image, zCentre - lower, unitsPerPixel, unitsPerSlice, noiseFraction);
+    final ImagePsfModel model =
+        new ImagePsfModel(image, zCentre - lower, unitsPerPixel, unitsPerSlice, noiseFraction);
 
     // Add the calibrated centres
     final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
@@ -1059,10 +1059,10 @@ public class PSFDrift implements PlugIn {
     }
 
     final int size = imp.getStackSize();
-    final ImagePSFModel psf = createImagePSF(1, size, 1);
+    final ImagePsfModel psf = createImagePSF(1, size, 1);
 
-    final double[] w0 = psf.getAllHWHM0();
-    final double[] w1 = psf.getAllHWHM1();
+    final double[] w0 = psf.getAllHwhm0();
+    final double[] w1 = psf.getAllHwhm1();
 
     // Get current centre
     final int centre = psfSettings.getCentreImage();

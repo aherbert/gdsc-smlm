@@ -106,7 +106,7 @@ public class ResettingFailCounter extends BaseFailCounter {
   }
 
   @Override
-  public boolean isOK() {
+  public boolean isOk() {
     return failCount <= allowedFailures;
   }
 

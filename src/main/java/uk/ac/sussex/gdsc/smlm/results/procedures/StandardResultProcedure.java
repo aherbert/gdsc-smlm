@@ -36,17 +36,17 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 //@formatter:off
 public class StandardResultProcedure extends UnitResultProcedure implements
     BResultProcedure,
-    BIXYResultProcedure,
-    BIXYZResultProcedure,
+    BixyResultProcedure,
+    BixyzResultProcedure,
     IResultProcedure,
-    IXYResultProcedure,
-    IXYRResultProcedure,
-    IXYZResultProcedure,
+    IxyResultProcedure,
+    IxyrResultProcedure,
+    IxyzResultProcedure,
     TResultProcedure,
-    TXYResultProcedure,
-    XYResultProcedure,
-    XYRResultProcedure,
-    XYZResultProcedure,
+    TxyResultProcedure,
+    XyResultProcedure,
+    XyrResultProcedure,
+    XyzResultProcedure,
     ZResultProcedure {
   //@formatter:on
 
@@ -145,17 +145,17 @@ public class StandardResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getBIXY() {
+  public void getBixy() {
     counter = 0;
     allocateB();
     allocateI();
     allocateX();
     allocateY();
-    results.forEach(getIntensityUnit(), getDistanceUnit(), (BIXYResultProcedure) this);
+    results.forEach(getIntensityUnit(), getDistanceUnit(), (BixyResultProcedure) this);
   }
 
   @Override
-  public void executeBIXY(float background, float intensity, float x, float y) {
+  public void executeBixy(float background, float intensity, float x, float y) {
     this.background[counter] = background;
     this.intensity[counter] = intensity;
     this.x[counter] = x;
@@ -168,18 +168,18 @@ public class StandardResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getBIXYZ() {
+  public void getBixyz() {
     counter = 0;
     allocateB();
     allocateI();
     allocateX();
     allocateY();
     allocateZ();
-    results.forEach(getIntensityUnit(), getDistanceUnit(), (BIXYZResultProcedure) this);
+    results.forEach(getIntensityUnit(), getDistanceUnit(), (BixyzResultProcedure) this);
   }
 
   @Override
-  public void executeBIXYZ(float background, float intensity, float x, float y, float z) {
+  public void executeBixyz(float background, float intensity, float x, float y, float z) {
     this.background[counter] = background;
     this.intensity[counter] = intensity;
     this.x[counter] = x;
@@ -210,16 +210,16 @@ public class StandardResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getIXY() {
+  public void getIxy() {
     counter = 0;
     allocateI();
     allocateX();
     allocateY();
-    results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYResultProcedure) this);
+    results.forEach(getIntensityUnit(), getDistanceUnit(), (IxyResultProcedure) this);
   }
 
   @Override
-  public void executeIXY(float intensity, float x, float y) {
+  public void executeIxy(float intensity, float x, float y) {
     this.intensity[counter] = intensity;
     this.x[counter] = x;
     this.y[counter] = y;
@@ -231,17 +231,17 @@ public class StandardResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getIXYR() {
+  public void getIxyr() {
     counter = 0;
     allocateI();
     allocateX();
     allocateY();
     allocateR();
-    results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYRResultProcedure) this);
+    results.forEach(getIntensityUnit(), getDistanceUnit(), (IxyrResultProcedure) this);
   }
 
   @Override
-  public void executeIXYR(float intensity, float x, float y, PeakResult result) {
+  public void executeIxyr(float intensity, float x, float y, PeakResult result) {
     this.intensity[counter] = intensity;
     this.x[counter] = x;
     this.y[counter] = y;
@@ -254,17 +254,17 @@ public class StandardResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getIXYZ() {
+  public void getIxyz() {
     counter = 0;
     allocateI();
     allocateX();
     allocateY();
     allocateZ();
-    results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYZResultProcedure) this);
+    results.forEach(getIntensityUnit(), getDistanceUnit(), (IxyzResultProcedure) this);
   }
 
   @Override
-  public void executeIXYZ(float intensity, float x, float y, float z) {
+  public void executeIxyz(float intensity, float x, float y, float z) {
     this.intensity[counter] = intensity;
     this.x[counter] = x;
     this.y[counter] = y;
@@ -293,16 +293,16 @@ public class StandardResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getTXY() {
+  public void getTxy() {
     counter = 0;
     allocateT();
     allocateX();
     allocateY();
-    results.forEach(getDistanceUnit(), (TXYResultProcedure) this);
+    results.forEach(getDistanceUnit(), (TxyResultProcedure) this);
   }
 
   @Override
-  public void executeTXY(int frame, float x, float y) {
+  public void executeTxy(int frame, float x, float y) {
     this.frame[counter] = frame;
     this.x[counter] = x;
     this.y[counter] = y;
@@ -318,11 +318,11 @@ public class StandardResultProcedure extends UnitResultProcedure implements
     counter = 0;
     allocateX();
     allocateY();
-    results.forEach(getDistanceUnit(), (XYResultProcedure) this);
+    results.forEach(getDistanceUnit(), (XyResultProcedure) this);
   }
 
   @Override
-  public void executeXY(float x, float y) {
+  public void executeXy(float x, float y) {
     this.x[counter] = x;
     this.y[counter] = y;
     counter++;
@@ -333,16 +333,16 @@ public class StandardResultProcedure extends UnitResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getXYR() {
+  public void getXyr() {
     counter = 0;
     allocateX();
     allocateY();
     allocateR();
-    results.forEach(getDistanceUnit(), (XYRResultProcedure) this);
+    results.forEach(getDistanceUnit(), (XyrResultProcedure) this);
   }
 
   @Override
-  public void executeXYR(float x, float y, PeakResult result) {
+  public void executeXyr(float x, float y, PeakResult result) {
     this.x[counter] = x;
     this.y[counter] = y;
     peakResults[counter] = result;
@@ -359,11 +359,11 @@ public class StandardResultProcedure extends UnitResultProcedure implements
     allocateX();
     allocateY();
     allocateZ();
-    results.forEach(getDistanceUnit(), (XYZResultProcedure) this);
+    results.forEach(getDistanceUnit(), (XyzResultProcedure) this);
   }
 
   @Override
-  public void executeXYZ(float x, float y, float z) {
+  public void executeXyz(float x, float y, float z) {
     this.x[counter] = x;
     this.y[counter] = y;
     this.z[counter] = z;

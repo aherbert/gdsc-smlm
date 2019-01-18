@@ -38,8 +38,9 @@ package uk.ac.sussex.gdsc.smlm.function;
  * ({@code e>>1}) when the input value {@code x} is close to 1. So the algorithm detects values
  * close to 1 and uses {@code Math.log(double)} instead.
  *
- * <p>This is a copy of TurboLog but implements rounding on the mantissa. This allows this class to
- * achieve the same error as TurboLog(n) using (n-1), i.e. half the table size.
+ * <p>This is a copy of {@link TurboLog} but implements rounding on the mantissa. This allows this
+ * class to achieve the same error as TurboLog(n) using (n-1), i.e. half the table size at a slight
+ * speed penalty.
  *
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-
@@ -47,7 +48,9 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class TurboLog2 extends TurboLog {
   /** The number of bits to remove from a float mantissa. */
+  // @CHECKSTYLE.OFF: MemberName
   private final int q;
+  // @CHECKSTYLE.ON: MemberName
   /** The number of bits to remove from a double mantissa. */
   private final int qd;
   /**

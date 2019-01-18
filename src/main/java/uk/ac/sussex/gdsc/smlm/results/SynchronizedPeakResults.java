@@ -192,16 +192,16 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults {
   }
 
   @Override
-  public void setPSF(PSF psf) {
+  public void setPsf(PSF psf) {
     synchronized (lock) {
-      peakResults.setPSF(psf);
+      peakResults.setPsf(psf);
     }
   }
 
   @Override
-  public PSF getPSF() {
+  public PSF getPsf() {
     synchronized (lock) {
-      return peakResults.getPSF();
+      return peakResults.getPsf();
     }
   }
 

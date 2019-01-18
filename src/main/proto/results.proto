@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 // ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
-// Authors: Alex Herbert, 2017 
+// Authors: Alex Herbert, 2017
 // License: GPL V3
 package uk.ac.sussex.gdsc.smlm.data.config;
 
@@ -20,17 +20,17 @@ enum ResultsImageType {
 	DRAW_FRAME_NUMBER = 3;
 	// Draw each localisation using the fitted PSF
 	DRAW_FITTED_PSF = 4;
-	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with 
-	// the width equal to the localisation precision 
+	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with
+	// the width equal to the localisation precision
 	DRAW_LOCALISATIONS_PRECISION = 5;
-	// Draw each localisation as a Gaussian 2D spot using the signal intensity with 
-	// the width equal to the localisation precision 
+	// Draw each localisation as a Gaussian 2D spot using the signal intensity with
+	// the width equal to the localisation precision
 	DRAW_INTENSITY_PRECISION = 6;
-	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with the 
-	// width equal to the specified average localisation precision 
+	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with the
+	// width equal to the specified average localisation precision
 	DRAW_LOCALISATIONS_AVERAGE_PRECISION = 7;
-	// Draw each localisation as a Gaussian 2D spot using the signal intensity with 
-	// the width equal to the specified average localisation precision 
+	// Draw each localisation as a Gaussian 2D spot using the signal intensity with
+	// the width equal to the specified average localisation precision
 	DRAW_INTENSITY_AVERAGE_PRECISION = 8;
 	// Draw each localisation using the fit error as the intensity
 	DRAW_FIT_ERROR = 9;

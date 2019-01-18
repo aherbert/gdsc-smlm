@@ -97,26 +97,26 @@ public class WPoissonGradientProcedureTest {
     final double[] var = dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData);
     final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
     Assertions.assertEquals(
-        WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(6)).getClass(),
+        WPoissonGradientProcedureUtils.create(y, var, new DummyGradientFunction(6)).getClass(),
         WPoissonGradientProcedure6.class);
     Assertions.assertEquals(
-        WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(5)).getClass(),
+        WPoissonGradientProcedureUtils.create(y, var, new DummyGradientFunction(5)).getClass(),
         WPoissonGradientProcedure5.class);
     Assertions.assertEquals(
-        WPoissonGradientProcedureFactory.create(y, var, new DummyGradientFunction(4)).getClass(),
+        WPoissonGradientProcedureUtils.create(y, var, new DummyGradientFunction(4)).getClass(),
         WPoissonGradientProcedure4.class);
   }
 
   @SeededTest
-  public void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed) {
-    poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 4);
-    poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 5);
-    poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 6);
-    poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 11);
-    poissonGradientProcedureComputesSameAsWLSQGradientProcedure(seed, 21);
+  public void poissonGradientProcedureComputesSameAsWLsqGradientProcedure(RandomSeed seed) {
+    poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 4);
+    poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 5);
+    poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 6);
+    poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 11);
+    poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 21);
   }
 
-  private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(RandomSeed seed,
+  private void poissonGradientProcedureComputesSameAsWLsqGradientProcedure(RandomSeed seed,
       int nparams) {
     final double[] var = dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData);
 
@@ -128,21 +128,21 @@ public class WPoissonGradientProcedureTest {
     createFakeParams(rng, nparams, iter, paramsList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-    final IntArrayFormatSupplier msgOA =
+    final IntArrayFormatSupplier msgOa =
         getMessage(nparams, "[%d] Observations: Not same alpha @ %d");
-    final IntArrayFormatSupplier msgOAl =
+    final IntArrayFormatSupplier msgOal =
         getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
 
     for (int i = 0; i < paramsList.size(); i++) {
       final double[] y = createFakeData(rng);
-      final WPoissonGradientProcedure p1 = WPoissonGradientProcedureFactory.create(y, var, func);
+      final WPoissonGradientProcedure p1 = WPoissonGradientProcedureUtils.create(y, var, func);
       p1.computeFisherInformation(paramsList.get(i));
-      final WLSQLVMGradientProcedure p2 = new WLSQLVMGradientProcedure(y, var, func);
+      final WLsqLvmGradientProcedure p2 = new WLsqLvmGradientProcedure(y, var, func);
       p2.gradient(paramsList.get(i));
 
       // Exactly the same ...
-      Assertions.assertArrayEquals(p1.data, p2.alpha, msgOA.set(1, i));
-      Assertions.assertArrayEquals(p1.getLinear(), p2.getAlphaLinear(), msgOAl.set(1, i));
+      Assertions.assertArrayEquals(p1.data, p2.alpha, msgOa.set(1, i));
+      Assertions.assertArrayEquals(p1.getLinear(), p2.getAlphaLinear(), msgOal.set(1, i));
     }
   }
 
@@ -224,7 +224,7 @@ public class WPoissonGradientProcedureTest {
       final WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
       p1.computeFisherInformation(paramsList.get(i));
 
-      final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, v, func);
+      final WPoissonGradientProcedure p2 = WPoissonGradientProcedureUtils.create(y, v, func);
       p2.computeFisherInformation(paramsList.get(i));
 
       // Exactly the same ...
@@ -273,7 +273,7 @@ public class WPoissonGradientProcedureTest {
       final WPoissonGradientProcedure p1 = new WPoissonGradientProcedure(y, v, func);
       p1.computeFisherInformation(paramsList.get(i));
 
-      final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, v, func);
+      final WPoissonGradientProcedure p2 = WPoissonGradientProcedureUtils.create(y, v, func);
       p2.computeFisherInformation(paramsList.get(i));
 
       // Check they are the same
@@ -302,7 +302,7 @@ public class WPoissonGradientProcedureTest {
       void run() {
         for (int i = 0, k = 0; i < paramsList.size(); i++) {
           final WPoissonGradientProcedure p2 =
-              WPoissonGradientProcedureFactory.create(yList.get(i), v, func);
+              WPoissonGradientProcedureUtils.create(yList.get(i), v, func);
           for (int j = loops; j-- > 0;) {
             p2.computeFisherInformation(paramsList.get(k++ % iter));
           }
@@ -317,14 +317,14 @@ public class WPoissonGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsFasterThanWLSEGradientProcedure(RandomSeed seed) {
-    gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 4);
-    gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 5);
-    gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 6);
-    gradientProcedureIsFasterThanWLSEGradientProcedure(seed, 11);
+  public void gradientProcedureIsFasterThanWLseGradientProcedure(RandomSeed seed) {
+    gradientProcedureIsFasterThanWLseGradientProcedure(seed, 4);
+    gradientProcedureIsFasterThanWLseGradientProcedure(seed, 5);
+    gradientProcedureIsFasterThanWLseGradientProcedure(seed, 6);
+    gradientProcedureIsFasterThanWLseGradientProcedure(seed, 11);
   }
 
-  private void gradientProcedureIsFasterThanWLSEGradientProcedure(RandomSeed seed,
+  private void gradientProcedureIsFasterThanWLseGradientProcedure(RandomSeed seed,
       final int nparams) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
@@ -341,10 +341,10 @@ public class WPoissonGradientProcedureTest {
     final IntArrayFormatSupplier msg = new IntArrayFormatSupplier("M [%d]", 1);
     for (int i = 0; i < paramsList.size(); i++) {
       final double[] y = yList.get(i);
-      final WLSQLVMGradientProcedure p1 = WLSQLVMGradientProcedureFactory.create(y, var, func);
+      final WLsqLvmGradientProcedure p1 = WLsqLvmGradientProcedureUtils.create(y, var, func);
       p1.gradient(paramsList.get(i));
 
-      final WPoissonGradientProcedure p2 = WPoissonGradientProcedureFactory.create(y, var, func);
+      final WPoissonGradientProcedure p2 = WPoissonGradientProcedureUtils.create(y, var, func);
       p2.computeFisherInformation(paramsList.get(i));
 
       // Check they are the same
@@ -359,8 +359,8 @@ public class WPoissonGradientProcedureTest {
       @Override
       void run() {
         for (int i = 0, k = 0; i < paramsList.size(); i++) {
-          final WLSQLVMGradientProcedure p1 =
-              WLSQLVMGradientProcedureFactory.create(yList.get(i), var, func);
+          final WLsqLvmGradientProcedure p1 =
+              WLsqLvmGradientProcedureUtils.create(yList.get(i), var, func);
           for (int j = loops; j-- > 0;) {
             p1.gradient(paramsList.get(k++ % iter));
           }
@@ -374,7 +374,7 @@ public class WPoissonGradientProcedureTest {
       void run() {
         for (int i = 0, k = 0; i < paramsList.size(); i++) {
           final WPoissonGradientProcedure p2 =
-              WPoissonGradientProcedureFactory.create(yList.get(i), var, func);
+              WPoissonGradientProcedureUtils.create(yList.get(i), var, func);
           for (int j = loops; j-- > 0;) {
             p2.computeFisherInformation(paramsList.get(k++ % iter));
           }
@@ -383,7 +383,7 @@ public class WPoissonGradientProcedureTest {
     };
     final long time2 = t2.getTime();
 
-    logger.log(TestLogUtils.getTimingRecord("WLSQLVMGradientProcedure " + nparams, time1,
+    logger.log(TestLogUtils.getTimingRecord("WLsqLvmGradientProcedure " + nparams, time1,
         "WPoissonGradientProcedure", time2));
   }
 

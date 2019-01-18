@@ -85,7 +85,8 @@ public class Counter {
    * @return the new count
    */
   public int incrementAndGet(int value) {
-    return count += value;
+    count += value;
+    return count;
   }
 
   /**
@@ -141,7 +142,8 @@ public class Counter {
    * @return the new count
    */
   public int decrementAndGet(int value) {
-    return count -= value;
+    count -= value;
+    return count;
   }
 
   /**

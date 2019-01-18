@@ -164,45 +164,45 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
   }
 
   @Override
-  public double eval(final int i, final double[] duda) {
+  public double eval(final int x, final double[] duda) {
     // Unpack the predictor into the dimensions
-    final int y = i / maxx;
-    final int x = i % maxx;
+    final int yy = x / maxx;
+    final int xx = x % maxx;
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
     duda[0] = 1.0;
-    duda[1] = deltaEx[x] * deltaEy[y];
-    duda[2] = duDtx[x] * deltaEy[y];
-    duda[3] = duDty[y] * deltaEx[x];
-    duda[4] = duDtsx[x] * deltaEy[y] + duDtsy[y] * deltaEx[x];
+    duda[1] = deltaEx[xx] * deltaEy[yy];
+    duda[2] = duDtx[xx] * deltaEy[yy];
+    duda[3] = duDty[yy] * deltaEx[xx];
+    duda[4] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
 
     return tb + tI * duda[1];
   }
 
   @Override
-  public double eval2(final int i, final double[] duda, final double[] d2uda2) {
+  public double eval2(final int x, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
-    final int y = i / maxx;
-    final int x = i % maxx;
+    final int yy = x / maxx;
+    final int xx = x % maxx;
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
     duda[0] = 1.0;
-    duda[1] = deltaEx[x] * deltaEy[y];
-    duda[2] = duDtx[x] * deltaEy[y];
-    duda[3] = duDty[y] * deltaEx[x];
-    duda[4] = duDtsx[x] * deltaEy[y] + duDtsy[y] * deltaEx[x];
+    duda[1] = deltaEx[xx] * deltaEy[yy];
+    duda[2] = duDtx[xx] * deltaEy[yy];
+    duda[3] = duDty[yy] * deltaEx[xx];
+    duda[4] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
     d2uda2[0] = 0;
     d2uda2[1] = 0;
-    d2uda2[2] = d2uDtx2[x] * deltaEy[y];
-    d2uda2[3] = d2uDty2[y] * deltaEx[x];
+    d2uda2[2] = d2uDtx2[xx] * deltaEy[yy];
+    d2uda2[3] = d2uDty2[yy] * deltaEx[xx];
     // Working example of this in GraspJ source code:
     // https://github.com/isman7/graspj/blob/master/graspj/src/main/java/eu/brede/graspj/opencl/src/functions/psfmodel_derivatives_sigma.cl
     //@formatter:off
-    d2uda2[4] = d2uDtsx2[x] * deltaEy[y] +
-            d2uDtsy2[y] * deltaEx[x] +
-            2 * duDtsx[x] * duDtsy[y] / tI;
+    d2uda2[4] = d2uDtsx2[xx] * deltaEy[yy] +
+            d2uDtsy2[yy] * deltaEx[xx] +
+            2 * duDtsx[xx] * duDtsy[yy] / tI;
     //@formatter:on
 
     return tb + tI * duda[1];

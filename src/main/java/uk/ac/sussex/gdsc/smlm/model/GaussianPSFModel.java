@@ -38,7 +38,7 @@ import org.apache.commons.math3.special.Erf;
 /**
  * Contains methods for generating models of a Point Spread Function using a Gaussian approximation.
  */
-public class GaussianPSFModel extends PSFModel {
+public class GaussianPSFModel extends PsfModel {
   private double s0;
   private double s1;
   private AstigmatismZModel zModel;

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
@@ -42,11 +43,8 @@ public class GridCoordinateStore implements CoordinateStore {
     int size;
     double[] list = new double[3];
 
-    // Not needed as we only create lists in the constructor when the timestamp is zero
-    // CoordinateList()
-    // {
-    // refresh();
-    // }
+    // A constructor to copy the timestamp is not needed as we only create lists in the
+    // parent constructor when the timestamp is zero.
 
     void add(double x, double y, double z) {
       if (list.length == size) {
@@ -127,7 +125,7 @@ public class GridCoordinateStore implements CoordinateStore {
       height = 0;
     }
 
-    setXYResolution(xyResolution);
+    setXyResolution(xyResolution);
     setZResolution(zResolution);
     this.minx = minx;
     this.miny = miny;
@@ -139,7 +137,7 @@ public class GridCoordinateStore implements CoordinateStore {
     createGrid();
   }
 
-  private void setXYResolution(double xyResolution) {
+  private void setXyResolution(double xyResolution) {
     this.xyResolution = xyResolution;
     this.blockResolution = Math.max(MINIMUM_BLOCK_SIZE, xyResolution);
     this.xy2 = xyResolution * xyResolution;
@@ -237,7 +235,7 @@ public class GridCoordinateStore implements CoordinateStore {
    *
    * @param xyResolution The new XY resolution
    */
-  public void changeXYResolution(double xyResolution) {
+  public void changeXyResolution(double xyResolution) {
     clear();
 
     if (xyResolution == this.xyResolution || xyResolution < 0 && this.xyResolution < 0) {
@@ -245,7 +243,7 @@ public class GridCoordinateStore implements CoordinateStore {
       return;
     }
 
-    setXYResolution(xyResolution);
+    setXyResolution(xyResolution);
 
     this.xBlocks = getBlock(width) + 1;
     this.yBlocks = getBlock(height) + 1;
@@ -269,7 +267,7 @@ public class GridCoordinateStore implements CoordinateStore {
   }
 
   @Override
-  public double getXYResolution() {
+  public double getXyResolution() {
     return xyResolution;
   }
 
@@ -438,7 +436,7 @@ public class GridCoordinateStore implements CoordinateStore {
   }
 
   @Override
-  public double[] find(final double x, final double y, final double z) {
+  public @Nullable double[] find(final double x, final double y, final double z) {
     if (!isActive) {
       return null;
     }
@@ -463,8 +461,8 @@ public class GridCoordinateStore implements CoordinateStore {
         }
         final double[] list = l.list;
         for (int i = 0; i < size; i += 3) {
-          double d = distance2(x, y, list[i], list[i + 1]);
-          if (d <= xy2) {
+          double dist = distance2(x, y, list[i], list[i + 1]);
+          if (dist <= xy2) {
             if (!is2D) {
               // z resolution is not negative and we check that
               final double dd = distance(z, list[i + 2]);
@@ -472,11 +470,11 @@ public class GridCoordinateStore implements CoordinateStore {
                 continue;
               }
               // Get a combined Euclidean squared distance
-              d += MathUtils.pow2(dd);
+              dist += MathUtils.pow2(dd);
             }
 
-            if (d < min) {
-              min = d;
+            if (dist < min) {
+              min = dist;
               match[0] = list[i];
               match[1] = list[i + 1];
               match[2] = list[i + 2];

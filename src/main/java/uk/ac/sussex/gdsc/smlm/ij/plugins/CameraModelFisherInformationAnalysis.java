@@ -63,7 +63,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Color;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
@@ -80,6 +79,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   private static final String TITLE = "Camera Model Fisher Information Analysis";
 
   private static final String[] POINT_OPTION = {"None", "X", "Circle", "Box", "Cross"};
+
+  /** The maximum number of fisher information curves to save to file. */
+  private static final int MAX_DATA_TO_FILE = 10;
 
   /**
    * The camera type.
@@ -147,14 +149,14 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   }
 
   //@formatter:on
-  private static CameraType[] cameraTypeValues = CameraType.values();
+  private static final CameraType[] cameraTypeValues = CameraType.values();
 
-  private static String[] CAMERA_TYPES = SettingsManager.getNames((Object[]) cameraTypeValues);
+  private static final String[] cameraTypes = SettingsManager.getNames((Object[]) cameraTypeValues);
 
   /**
    * Class for hashing the Fisher information settings.
    */
-  private static class FIKey {
+  private static class FiKey {
     // This is not part of the hashcode.
     // It is used to ensure only the latest computations are saved to disk.
     final long age = System.currentTimeMillis();
@@ -163,17 +165,17 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     final double gain;
     final double noise;
 
-    public FIKey(int type, double gain, double noise) {
+    public FiKey(int type, double gain, double noise) {
       this.type = type;
       this.gain = gain;
       this.noise = noise;
     }
 
-    public FIKey(PoissonFisherInformationData d) {
-      this(d.getType(), d.getGain(), d.getNoise());
+    public FiKey(PoissonFisherInformationData data) {
+      this(data.getType(), data.getGain(), data.getNoise());
     }
 
-    public FIKey(CameraType type, double gain, double noise) {
+    public FiKey(CameraType type, double gain, double noise) {
       this(type.ordinal(), gain, noise);
     }
 
@@ -186,19 +188,19 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
 
     @Override
-    public boolean equals(Object o) {
-      if (this == o) {
+    public boolean equals(Object obj) {
+      if (this == obj) {
         return true;
       }
       // null check
-      if (o == null) {
+      if (obj == null) {
         return false;
       }
       // type check and cast
-      if (getClass() != o.getClass()) {
+      if (getClass() != obj.getClass()) {
         return false;
       }
-      final FIKey key = (FIKey) o;
+      final FiKey key = (FiKey) obj;
       // field comparison
       return type == key.type && gain == key.gain && noise == key.noise;
     }
@@ -209,9 +211,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
     @Override
     public String toString() {
-      final CameraType type = getType();
-      String name = type.getShortName();
-      switch (type) {
+      final CameraType cameraType = getType();
+      String name = cameraType.getShortName();
+      switch (cameraType) {
         case CCD:
         case CCD_APPROXIMATION:
         case EM_CCD:
@@ -222,14 +224,14 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
   }
 
-  private static HashMap<FIKey, PoissonFisherInformationData> cache = new HashMap<>();
+  private static HashMap<FiKey, PoissonFisherInformationData> cache = new HashMap<>();
 
   static {
     final PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<>(
         PoissonFisherInformationCache.getDefaultInstance()).read();
     if (cacheData != null) {
       for (final PoissonFisherInformationData data : cacheData.getDataList()) {
-        cache.put(new FIKey(data), data);
+        cache.put(new FiKey(data), data);
       }
     }
   }
@@ -241,7 +243,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
    * @param log10photons the log 10 photons
    * @param alpha the alpha
    */
-  private static void save(FIKey key, double[] log10photons, double[] alpha) {
+  private static void save(FiKey key, double[] log10photons, double[] alpha) {
     final CameraType type = key.getType();
     if (type.isFast()) {
       return;
@@ -252,34 +254,33 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       // so assume we must merge the lists.
       // Note: The lists must be sorted.
       final AlphaSample[] list1 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
-      // AlphaSample[] list2 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
       final TurboList<AlphaSample> list = new TurboList<>(list1.length + log10photons.length);
-      int i = 0;
-      int j = 0;
+      int i1 = 0;
+      int i2 = 0;
       final AlphaSample.Builder a2 = AlphaSample.newBuilder();
-      while (i < list1.length && j < log10photons.length) {
-        final AlphaSample a1 = list1[i];
-        final double mean = log10photons[j];
+      while (i1 < list1.length && i2 < log10photons.length) {
+        final AlphaSample a1 = list1[i1];
+        final double mean = log10photons[i2];
         if (a1.getLog10Mean() == mean) {
           list.add(a1);
-          i++;
-          j++;
+          i1++;
+          i2++;
         } else if (a1.getLog10Mean() < mean) {
           list.add(a1);
-          i++;
+          i1++;
         } else {
           // (a1.getLog10Mean() > mean)
           a2.setLog10Mean(mean);
-          a2.setAlpha(alpha[j++]);
+          a2.setAlpha(alpha[i2++]);
           list.add(a2.build());
         }
       }
-      while (i < list1.length) {
-        list.add(list1[i++]);
+      while (i1 < list1.length) {
+        list.add(list1[i1++]);
       }
-      while (j < log10photons.length) {
-        a2.setLog10Mean(log10photons[j]);
-        a2.setAlpha(alpha[j++]);
+      while (i2 < log10photons.length) {
+        a2.setLog10Mean(log10photons[i2]);
+        a2.setAlpha(alpha[i2++]);
         list.add(a2.build());
       }
       final PoissonFisherInformationData.Builder b = data.toBuilder();
@@ -287,7 +288,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       b.addAllAlphaSample(list);
       data = b.build();
 
-      // System.out.println(data);
     } else {
       final PoissonFisherInformationData.Builder b = PoissonFisherInformationData.newBuilder();
       final AlphaSample.Builder sample = AlphaSample.newBuilder();
@@ -307,33 +307,29 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     if (type == CameraType.EM_CCD) {
       final int t = type.ordinal();
       // Get the EM-CCD keys
-      final TurboList<FIKey> list = new TurboList<>(cache.size());
-      for (final FIKey k : cache.keySet()) {
+      final TurboList<FiKey> list = new TurboList<>(cache.size());
+      for (final FiKey k : cache.keySet()) {
         if (k.type == t) {
           list.add(k);
         }
       }
-      final int MAX = 10;
-      if (list.size() > MAX) {
+      if (list.size() > MAX_DATA_TO_FILE) {
         // Sort by age
-        list.sort(new Comparator<FIKey>() {
-          @Override
-          public int compare(FIKey o1, FIKey o2) {
-            // Youngest first
-            return -Long.compare(o1.age, o2.age);
-          }
+        list.sort((o1, o2) -> {
+          // Youngest first
+          return -Long.compare(o1.age, o2.age);
         });
       }
       final PoissonFisherInformationCache.Builder cacheData =
           PoissonFisherInformationCache.newBuilder();
-      for (int i = Math.min(list.size(), MAX); i-- > 0;) {
+      for (int i = Math.min(list.size(), MAX_DATA_TO_FILE); i-- > 0;) {
         cacheData.addData(cache.get(list.getf(i)));
       }
       SettingsManager.writeSettings(cacheData);
     }
   }
 
-  private static PoissonFisherInformationData load(FIKey key) {
+  private static PoissonFisherInformationData load(FiKey key) {
     return cache.get(key);
   }
 
@@ -361,7 +357,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
    */
   public static PoissonFisherInformationData loadData(CameraType type, double gain, double noise,
       double relativeError) {
-    final FIKey key = new FIKey(type, gain, noise);
+    final FiKey key = new FiKey(type, gain, noise);
     PoissonFisherInformationData data = load(key);
     if (data == null && relativeError > 0 && relativeError < 0.1) {
       // Fuzzy matching
@@ -412,7 +408,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     if (type == null || type.isFast()) {
       return null;
     }
-    final FIKey key = new FIKey(type, gain, noise);
+    final FiKey key = new FiKey(type, gain, noise);
     PoissonFisherInformationData data = load(key);
     if (data == null && relativeError > 0 && relativeError < 0.1) {
       // Fuzzy matching
@@ -487,10 +483,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     gd.addSlider("Min_exponent", -50, 4, settings.getMinExponent());
     gd.addSlider("Max_exponent", -10, 4, settings.getMaxExponent());
     gd.addSlider("Sub_divisions", 0, 10, settings.getSubDivisions());
-    gd.addChoice("Camera_1_type", CAMERA_TYPES, settings.getCamera1Type());
+    gd.addChoice("Camera_1_type", cameraTypes, settings.getCamera1Type());
     gd.addNumericField("Camera_1_gain", settings.getCamera1Gain(), 2);
     gd.addNumericField("Camera_1_noise", settings.getCamera1Noise(), 2);
-    gd.addChoice("Camera_2_type", CAMERA_TYPES, settings.getCamera2Type());
+    gd.addChoice("Camera_2_type", cameraTypes, settings.getCamera2Type());
     gd.addNumericField("Camera_2_gain", settings.getCamera2Gain(), 2);
     gd.addNumericField("Camera_2_noise", settings.getCamera2Noise(), 2);
     gd.addChoice("Plot_point", POINT_OPTION, settings.getPointOption());
@@ -529,8 +525,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     final CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
     final CameraType type2 = CameraType.forNumber(settings.getCamera2Type());
 
-    final FIKey key1 = new FIKey(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
-    final FIKey key2 = new FIKey(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
+    final FiKey key1 = new FiKey(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
+    final FiKey key2 = new FiKey(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
 
     final BasePoissonFisherInformation f1 = createPoissonFisherInformation(key1);
     if (f1 == null) {
@@ -710,7 +706,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     wo.tile();
   }
 
-  private static BasePoissonFisherInformation createPoissonFisherInformation(FIKey key) {
+  private static BasePoissonFisherInformation createPoissonFisherInformation(FiKey key) {
     switch (key.getType()) {
       case CCD:
         return createPoissonGaussianFisherInformation(key.noise / key.gain);
@@ -725,7 +721,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
   }
 
-  private static String getName(FIKey key) {
+  private static String getName(FiKey key) {
     final CameraType type = key.getType();
     String name = type.getShortName();
     switch (type) {
@@ -738,15 +734,16 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
   }
 
-  private static PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(double s) {
-    if (s < 0) {
+  private static PoissonGaussianFisherInformation
+      createPoissonGaussianFisherInformation(double sd) {
+    if (sd < 0) {
       IJ.error(TITLE, "CCD noise must be positive");
       return null;
     }
 
     final int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
     // sampling <<= 2;
-    final PoissonGaussianFisherInformation fi = new PoissonGaussianFisherInformation(s, sampling);
+    final PoissonGaussianFisherInformation fi = new PoissonGaussianFisherInformation(sd, sampling);
     // fi.setCumulativeProbability(1 - 1e-12);
     // fi.setMinRange(5);
     fi.setMeanThreshold(1000);
@@ -754,21 +751,21 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   }
 
   private static PoissonGaussianApproximationFisherInformation
-      createPoissonGaussianApproximationFisherInformation(double s) {
-    if (s <= 0) {
+      createPoissonGaussianApproximationFisherInformation(double sd) {
+    if (sd <= 0) {
       IJ.error(TITLE, "CCD noise must be positive");
       return null;
     }
-    return new PoissonGaussianApproximationFisherInformation(s);
+    return new PoissonGaussianApproximationFisherInformation(sd);
   }
 
   private static PoissonGammaGaussianFisherInformation
-      createPoissonGammaGaussianFisherInformation(double m, double s) {
-    if (s < 0) {
+      createPoissonGammaGaussianFisherInformation(double gain, double sd) {
+    if (sd < 0) {
       IJ.error(TITLE, "EM CCD noise must be positive");
       return null;
     }
-    if (m <= 0) {
+    if (gain <= 0) {
       IJ.error(TITLE, "EM CCD gain must be positive");
       return null;
     }
@@ -776,7 +773,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     final int sampling = PoissonGammaGaussianFisherInformation.DEFAULT_SAMPLING;
     // sampling = 2;
     final PoissonGammaGaussianFisherInformation fi =
-        new PoissonGammaGaussianFisherInformation(m, s, sampling);
+        new PoissonGammaGaussianFisherInformation(gain, sd, sampling);
     // fi.setRelativeProbabilityThreshold(1e-6);
     // fi.setMinRange(10);
     // fi.setMaxIterations(3);
@@ -812,7 +809,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   }
 
   private double[] getAlpha(final double[] photons, double[] exp,
-      final BasePoissonFisherInformation fi, FIKey key) {
+      final BasePoissonFisherInformation fi, FiKey key) {
     final CameraType type = key.getType();
     final double[] alpha = new double[photons.length];
     if (!type.isFast()) {
@@ -862,15 +859,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         for (int i = 0; i < index.length; i += nPerThread) {
           final int start = i;
           final int end = Math.min(index.length, i + nPerThread);
-          futures.add(es.submit(new Runnable() {
-            @Override
-            public void run() {
-              final BasePoissonFisherInformation fi2 = fi.clone();
-              for (int ii = start; ii < end; ii++) {
-                final int j = index[ii];
-                alpha[j] = fi2.getAlpha(photons[j]);
-                ticker.tick();
-              }
+          futures.add(es.submit(() -> {
+            final BasePoissonFisherInformation fi2 = fi.copy();
+            for (int ii = start; ii < end; ii++) {
+              final int j = index[ii];
+              alpha[j] = fi2.getAlpha(photons[j]);
+              ticker.tick();
             }
           }));
         }
@@ -912,11 +906,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       return fisherI;
     }
     // This should not matter as the interpolation is only used between the ends of the range
-    BasePoissonFisherInformation upperFI = fisherI;
+    BasePoissonFisherInformation upperFi = fisherI;
     if (type == CameraType.EM_CCD) {
-      upperFI = new HalfPoissonFisherInformation();
+      upperFi = new HalfPoissonFisherInformation();
     }
-    return new InterpolatedPoissonFisherInformation(logU, alpha1, type.isLowerFixedI(), upperFI);
+    return new InterpolatedPoissonFisherInformation(logU, alpha1, type.isLowerFixedI(), upperFi);
   }
 
   private static int getPointShape(int pointOption) {
@@ -961,11 +955,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     // Build a list of curve stored in the cache
     final String[] names = new String[cache.size()];
     final PoissonFisherInformationData[] datas = new PoissonFisherInformationData[cache.size()];
-    int c = 0;
-    for (final Entry<FIKey, PoissonFisherInformationData> e : cache.entrySet()) {
-      names[c] = e.getKey().toString();
-      datas[c] = e.getValue();
-      c++;
+    int count = 0;
+    for (final Entry<FiKey, PoissonFisherInformationData> e : cache.entrySet()) {
+      names[count] = e.getKey().toString();
+      datas[count] = e.getValue();
+      count++;
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -980,15 +974,15 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     cachePlot = names[index];
 
     final PoissonFisherInformationData data = datas[index];
-    final FIKey key = new FIKey(data);
+    final FiKey key = new FiKey(data);
 
-    c = 0;
+    count = 0;
     final double[] exp = new double[data.getAlphaSampleCount()];
     final double[] alpha = new double[data.getAlphaSampleCount()];
     for (final AlphaSample s : data.getAlphaSampleList()) {
-      exp[c] = s.getLog10Mean();
-      alpha[c] = s.getAlpha();
-      c++;
+      exp[count] = s.getLog10Mean();
+      alpha[count] = s.getAlpha();
+      count++;
     }
     // Just in case
     // Sort.sortArrays(alpha, exp, true);

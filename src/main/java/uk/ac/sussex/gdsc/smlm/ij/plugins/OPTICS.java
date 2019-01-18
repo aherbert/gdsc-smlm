@@ -62,8 +62,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.OpticsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJTablePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.IdPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -1965,7 +1965,7 @@ public class OPTICS implements PlugIn {
 
   private class ImageResultsWorker extends BaseWorker
       implements MouseListener, ClusterSelectedHandler {
-    IJImagePeakResults image;
+    ImageJImagePeakResults image;
     int lastOutlineMode = -1;
     Overlay outline;
     int lastSpanningTreeMode = -1;
@@ -2098,7 +2098,7 @@ public class OPTICS implements PlugIn {
           // Display the results ...
 
           final Rectangle bounds = results.getBounds();
-          image = new IJImagePeakResults(results.getName() + " " + pluginTitle, bounds,
+          image = new ImageJImagePeakResults(results.getName() + " " + pluginTitle, bounds,
               (float) settings.getImageScale());
           // Options to control rendering
           image.copySettings(results);
@@ -2155,7 +2155,7 @@ public class OPTICS implements PlugIn {
             image.getImagePlus().getProcessor().setColorModel(lut);
 
             // Add in a single batch
-            sp.getIXY();
+            sp.getIxy();
             final OrderProvider op =
                 (order == null) ? new OrderProvider() : new RealOrderProvider(order);
             final int[] clusters = clusteringResult.getClusters();
@@ -2400,22 +2400,22 @@ public class OPTICS implements PlugIn {
       final ImageMode imageMode = ImageMode.get(inputSettings.getImageMode());
       if (imageMode.canBeWeighted()) {
         if (inputSettings.getWeighted()) {
-          displayFlags |= IJImagePeakResults.DISPLAY_WEIGHTED;
+          displayFlags |= ImageJImagePeakResults.DISPLAY_WEIGHTED;
         }
         if (inputSettings.getEqualised()) {
-          displayFlags |= IJImagePeakResults.DISPLAY_EQUALIZED;
+          displayFlags |= ImageJImagePeakResults.DISPLAY_EQUALIZED;
         }
       }
 
       if (imageMode == ImageMode.CLUSTER_ID || imageMode == ImageMode.CLUSTER_DEPTH
           || imageMode == ImageMode.CLUSTER_ORDER || imageMode == ImageMode.LOOP) {
-        displayFlags = IJImagePeakResults.DISPLAY_MAX;
+        displayFlags = ImageJImagePeakResults.DISPLAY_MAX;
       }
 
       if (imageMode.isMapped()) {
-        displayFlags |= IJImagePeakResults.DISPLAY_MAPPED;
+        displayFlags |= ImageJImagePeakResults.DISPLAY_MAPPED;
         if (imageMode == ImageMode.LOOP) {
-          displayFlags |= IJImagePeakResults.DISPLAY_MAP_ZERO;
+          displayFlags |= ImageJImagePeakResults.DISPLAY_MAP_ZERO;
         }
       }
       return displayFlags;
@@ -3046,7 +3046,7 @@ public class OPTICS implements PlugIn {
     CachedClusteringResult clusteringResult;
 
     boolean display = true;
-    IJTablePeakResults table;
+    ImageJTablePeakResults table;
     TextWindow tw;
     Rectangle bounds;
 
@@ -3129,7 +3129,7 @@ public class OPTICS implements PlugIn {
 
       // Create the table if needed
       if (tw == null) {
-        table = new IJTablePeakResults(false, pluginTitle, true);
+        table = new ImageJTablePeakResults(false, pluginTitle, true);
         table.setTableTitle(pluginTitle + " Selected Clusters");
         table.copySettings(results);
         table.setDistanceUnit(DistanceUnit.NM);

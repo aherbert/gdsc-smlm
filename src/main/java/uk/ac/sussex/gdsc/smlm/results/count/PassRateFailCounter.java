@@ -110,7 +110,7 @@ public class PassRateFailCounter extends BaseFailCounter {
   }
 
   @Override
-  public boolean isOK() {
+  public boolean isOk() {
     final double total = failCount + passCount;
     return total <= allowedCounts || passCount / total >= passRate;
   }

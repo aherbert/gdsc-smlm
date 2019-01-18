@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
@@ -522,8 +524,8 @@ public class PeakResult {
    * @see #getMeanIntensity()
    * @see #getNoise()
    */
-  public float getSNR() {
-    return meanIntensity / noise;
+  public float getSnr() {
+    return MathUtils.div0(meanIntensity, noise);
   }
 
   /**

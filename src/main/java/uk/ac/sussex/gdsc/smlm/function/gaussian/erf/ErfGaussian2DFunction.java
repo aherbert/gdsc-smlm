@@ -288,10 +288,10 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
    *
    * @param oneOverSsqrt2 one over (s times sqrt(2))
    * @param n the n
-   * @param u the mean of the Gaussian
+   * @param mean the mean of the Gaussian
    * @return the integral
    */
-  protected double compute1DIntegral(double oneOverSsqrt2, int n, double u) {
-    return 0.5 * (erf((n - u) * oneOverSsqrt2) - erf(-u * oneOverSsqrt2));
+  protected double compute1DIntegral(double oneOverSsqrt2, int n, double mean) {
+    return 0.5 * (erf((n - mean) * oneOverSsqrt2) - erf(-mean * oneOverSsqrt2));
   }
 }

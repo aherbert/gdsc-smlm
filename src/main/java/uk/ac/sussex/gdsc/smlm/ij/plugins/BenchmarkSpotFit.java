@@ -68,7 +68,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 import uk.ac.sussex.gdsc.smlm.results.SynchronizedPeakResults;
@@ -91,9 +91,9 @@ import uk.ac.sussex.gdsc.smlm.results.filter.PeakFractionalAssignment;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ResultAssignment;
-import uk.ac.sussex.gdsc.smlm.results.filter.SNRFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.SignalFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter2;
 
@@ -767,8 +767,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       showProgress();
 
       // Extract the data
-      data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(),
-          null, data);
+      data = ImageJImageConverter.getData(stack.getPixels(frame), stack.getWidth(),
+          stack.getHeight(), null, data);
 
       FilterCandidates candidates = filterCandidates.get(frame);
       final int totalCandidates = candidates.spots.length;
@@ -1100,7 +1100,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
             + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
             + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \n"
             + "Configure the fitting:",
-        MathUtils.rounded(simulationParameters.s), MathUtils.rounded(getSa())));
+        MathUtils.rounded(simulationParameters.sd), MathUtils.rounded(getSa())));
 
     gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
     gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
@@ -1115,7 +1115,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     // Collect options for fitting
     final double sa = getSa();
-    fitConfig.setInitialPeakStdDev(MathUtils.round(sa / simulationParameters.a));
+    fitConfig.setInitialPeakStdDev(MathUtils.round(sa / simulationParameters.pixelPitch));
     PeakFit.addPSFOptions(gd, fitConfig);
     PeakFit.addFittingOptions(gd, fitEngineConfigurationProvider);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
@@ -1133,7 +1133,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       cbBenchmark = gd.addAndGetCheckbox("Benchmark_settings", useBenchmarkSettings);
     }
 
-    gd.addTextAreas(XmlUtils.convertQuotes(multiFilter.toXML()), null, 6, 60);
+    gd.addTextAreas(XmlUtils.convertQuotes(multiFilter.toXml()), null, 6, 60);
 
     textFailLimit = gd.addAndGetNumericField("Fail_limit", config.getFailuresLimit(), 0);
     cbIncludeNeighbours = gd.addAndGetCheckbox("Include_neighbours", config.isIncludeNeighbours());
@@ -1169,7 +1169,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
           final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
           final double residualsThreshold = tmp.getResidualsThreshold();
           taFilterXml.setText(
-              new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold).toXML());
+              new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold).toXml());
         }
       }
     }
@@ -1188,7 +1188,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     signalFactor = Math.abs(gd.getNextNumber());
     lowerSignalFactor = Math.abs(gd.getNextNumber());
 
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     config.setFitting(gd.getNextNumber());
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
 
@@ -1227,7 +1227,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         myMultiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
       }
     } else {
-      myMultiFilter = MultiPathFilter.fromXML(xml);
+      myMultiFilter = MultiPathFilter.fromXml(xml);
 
       config.setFailuresLimit(failLimit);
       config.setIncludeNeighbours(includeNeighbours);
@@ -1292,13 +1292,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     // Distances relative to sa (not s) as this is the same as the BenchmarkSpotFilter plugin
-    distanceInPixels = distance * sa / simulationParameters.a;
-    lowerDistanceInPixels = lowerDistance * sa / simulationParameters.a;
+    distanceInPixels = distance * sa / simulationParameters.pixelPitch;
+    lowerDistanceInPixels = lowerDistance * sa / simulationParameters.pixelPitch;
 
     // Copy simulation defaults if a new simulation
     if (lastId != simulationParameters.id) {
       // This is needed to configure the fit solver
-      fitConfig.setNmPerPixel(simulationParameters.a);
+      fitConfig.setNmPerPixel(simulationParameters.pixelPitch);
       fitConfig.setGain(simulationParameters.gain);
       fitConfig.setQuantumEfficiency(simulationParameters.qe);
       fitConfig.setReadNoise(simulationParameters.readNoise);
@@ -1674,7 +1674,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       }
     }
 
-    final double nmPerPixel = simulationParameters.a;
+    final double nmPerPixel = simulationParameters.pixelPitch;
     double tp = 0;
     double fp = 0;
     int failcTP = 0;
@@ -1812,7 +1812,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults,
         NullFailCounter.INSTANCE, this.results.size(), assignments, scoreStore,
         CoordinateStoreFactory.create(0, 0, imp.getWidth(), imp.getHeight(),
-            config.convertUsingHWHMax(config.getDuplicateDistanceParameter())));
+            config.convertUsingHwhMax(config.getDuplicateDistanceParameter())));
 
     // double nPredicted = fractionResult.getTruePositives() + fractionResult.getFalsePositives();
 
@@ -1829,8 +1829,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
         final double precision = Math.sqrt(r.getLocationVariance());
         final double signal = r.getSignal();
-        final double snr = r.getSNR();
-        final double width = r.getXSDFactor();
+        final double snr = r.getSnr();
+        final double width = r.getXSdFactor();
         final double xShift = r.getXRelativeShift2();
         final double yShift = r.getYRelativeShift2();
         // Since these two are combined for filtering and the max is what matters.
@@ -1860,8 +1860,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         }
         final double precision = Math.sqrt(r.getLocationVariance());
         final double signal = r.getSignal();
-        final double snr = r.getSNR();
-        final double width = r.getXSDFactor();
+        final double snr = r.getSnr();
+        final double width = r.getXSdFactor();
         final double xShift = r.getXRelativeShift2();
         final double yShift = r.getYRelativeShift2();
         // Since these two are combined for filtering and the max is what matters.
@@ -1906,16 +1906,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     sb.append(h).append('\t');
     sb.append(n).append('\t');
     final double density = ((double) n / imp.getStackSize()) / (w * h)
-        / (simulationParameters.a * simulationParameters.a / 1e6);
+        / (simulationParameters.pixelPitch * simulationParameters.pixelPitch / 1e6);
     sb.append(MathUtils.rounded(density)).append('\t');
     sb.append(MathUtils.rounded(signal)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.s)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.a)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.sd)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.pixelPitch)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.depth)).append('\t');
     sb.append(simulationParameters.fixedDepth).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.gain)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.readNoise)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.b)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.background)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.noise)).append('\t');
 
     if (simulationParameters.fullSimulation) {
@@ -1923,7 +1923,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     sb.append(MathUtils.rounded(signal / simulationParameters.noise)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.s / simulationParameters.a)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.sd / simulationParameters.pixelPitch))
+        .append('\t');
 
     sb.append(spotFilter.getDescription());
 
@@ -2118,7 +2119,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Round the ranges
     final double[] interval = new double[stats[0].length];
     interval[FILTER_SIGNAL] = SignalFilter.DEFAULT_INCREMENT;
-    interval[FILTER_SNR] = SNRFilter.DEFAULT_INCREMENT;
+    interval[FILTER_SNR] = SnrFilter.DEFAULT_INCREMENT;
     interval[FILTER_MIN_WIDTH] = WidthFilter2.DEFAULT_MIN_INCREMENT;
     interval[FILTER_MAX_WIDTH] = WidthFilter.DEFAULT_INCREMENT;
     interval[FILTER_SHIFT] = ShiftFilter.DEFAULT_INCREMENT;
@@ -2173,7 +2174,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     summaryTable.append(sb.toString());
 
     if (saveFilterRange) {
-      GUIFilterSettings filterSettings = SettingsManager.readGUIFilterSettings(0);
+      GUIFilterSettings filterSettings = SettingsManager.readGuiFilterSettings(0);
 
       String filename = (silent) ? filterSettings.getFilterSetFilename()
           : ImageJUtils.getFilename("Filter_range_file", filterSettings.getFilterSetFilename());
@@ -2291,8 +2292,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       final double precision = Math.sqrt(result.getLocationVariance());
 
       final double signal = result.getSignal();
-      final double snr = result.getSNR();
-      final double width = result.getXSDFactor();
+      final double snr = result.getSnr();
+      final double width = result.getXSdFactor();
       final double xShift = result.getXRelativeShift2();
       final double yShift = result.getYRelativeShift2();
       // Since these two are combined for filtering and the max is what matters.
@@ -2762,8 +2763,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   private double getSa() {
-    final double sa =
-        PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a);
+    final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.sd,
+        simulationParameters.pixelPitch);
     return sa;
   }
 
@@ -2776,7 +2777,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   public static boolean updateConfiguration(FitEngineConfiguration pConfig) {
     final FitConfiguration pFitConfig = pConfig.getFitConfiguration();
 
-    pFitConfig.setPSF(pFitConfig.getPSF());
+    pFitConfig.setPsf(pFitConfig.getPsf());
     pFitConfig.setFitSolverSettings(pFitConfig.getFitSolverSettings());
     pFitConfig.setFilterSettings(pFitConfig.getFilterSettings());
 
@@ -2840,7 +2841,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       }
 
       // Update the dialog
-      taFilterXml.setText(myMultiFilter.toXML());
+      taFilterXml.setText(myMultiFilter.toXml());
       textFailLimit.setText("" + failLimit);
       cbIncludeNeighbours.setState(includeNeighbours);
       textNeighbourHeight.setText(MathUtils.rounded(neighbourHeightThrehsold));

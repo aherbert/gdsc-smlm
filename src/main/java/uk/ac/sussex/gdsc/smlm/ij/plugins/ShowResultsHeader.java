@@ -90,7 +90,7 @@ public class ShowResultsHeader implements PlugIn {
     found |= show("Bounds", reader.getBounds());
     found |= show("Source", reader.getSource());
     found |= show("Calibration", reader.getCalibration());
-    found |= show("PSF", reader.getPSF());
+    found |= show("PSF", reader.getPsf());
     found |= show("Configuration", reader.getConfiguration());
     if (!found) {
       IJ.error(TITLE, "No header information found in file: " + inputFilename);
@@ -101,9 +101,9 @@ public class ShowResultsHeader implements PlugIn {
     if (data == null) {
       return false;
     }
-    String text = (data instanceof String) ? (String) data : XStreamUtils.toXML(data);
+    String text = (data instanceof String) ? (String) data : XStreamUtils.toXml(data);
     if (text.startsWith("{")) {
-      text = uk.ac.sussex.gdsc.smlm.utils.JSONUtils.simplify(text);
+      text = uk.ac.sussex.gdsc.smlm.utils.JsonUtils.simplify(text);
     } else if (text.startsWith("<")) {
       text = uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(text);
     }

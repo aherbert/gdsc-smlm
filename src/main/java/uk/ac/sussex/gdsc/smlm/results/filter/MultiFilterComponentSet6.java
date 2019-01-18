@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSet6 extends MultiFilterComponentSet {
+public class MultiFilterComponentSet6 implements MultiFilterComponentSet {
   private MultiFilterComponent component0;
   private final MultiFilterComponent component1;
   private final MultiFilterComponent component2;
@@ -40,13 +40,27 @@ public class MultiFilterComponentSet6 extends MultiFilterComponentSet {
    *
    * @param components the components
    */
-  public MultiFilterComponentSet6(MultiFilterComponent[] components) {
+  MultiFilterComponentSet6(MultiFilterComponent[] components) {
     this.component0 = components[0];
     this.component1 = components[1];
     this.component2 = components[2];
     this.component3 = components[3];
     this.component4 = components[4];
     this.component5 = components[5];
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  MultiFilterComponentSet6(MultiFilterComponentSet6 source) {
+    this.component0 = source.component0;
+    this.component1 = source.component1;
+    this.component2 = source.component2;
+    this.component3 = source.component3;
+    this.component4 = source.component4;
+    this.component5 = source.component5;
   }
 
   @Override
@@ -81,7 +95,12 @@ public class MultiFilterComponentSet6 extends MultiFilterComponentSet {
   }
 
   @Override
-  void replace0(MultiFilterComponent c) {
-    component0 = c;
+  public void replace0(MultiFilterComponent component) {
+    component0 = component;
+  }
+
+  @Override
+  public MultiFilterComponentSet copy() {
+    return new MultiFilterComponentSet6(this);
   }
 }

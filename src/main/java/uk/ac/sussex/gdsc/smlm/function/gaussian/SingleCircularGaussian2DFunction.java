@@ -50,7 +50,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
   protected double x1pos;
 
   /** The amplitude./height normalisation: 1/(2*pi*sx*sy). */
-  protected double n;
+  protected double norm;
   /** The amplitude./height. */
   protected double height;
   /** x0 position pre-factor. */
@@ -86,8 +86,8 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
     final double sx = a[X_SD];
     final double sx2 = sx * sx;
 
-    n = ONE_OVER_TWO_PI / sx2;
-    height = a[SIGNAL] * n;
+    norm = ONE_OVER_TWO_PI / sx2;
+    height = a[SIGNAL] * norm;
 
     // All prefactors are negated since the Gaussian uses the exponential to the negative:
     // (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
@@ -141,7 +141,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction {
 
     final double aadx2dy2 = aa * (dx * dx + dy * dy);
     final double exp = FastMath.exp(aadx2dy2);
-    dyDa[1] = n * exp;
+    dyDa[1] = norm * exp;
     final double y = height * exp;
     final double yaa2 = y * aa2;
     dyDa[2] = yaa2 * dx;

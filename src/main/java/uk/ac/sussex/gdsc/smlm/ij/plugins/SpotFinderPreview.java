@@ -52,7 +52,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
@@ -87,7 +87,6 @@ import ij.process.ImageProcessor;
 import ij.process.LUT;
 
 import java.awt.AWTEvent;
-import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Label;
@@ -320,7 +319,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     // model = new FakePerPixelCameraModel(0, 1, 1);
     // fitConfig.setCameraModel(model);
 
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
@@ -377,7 +376,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     // Only do this if the settings changed
     final Calibration calibration = fitConfig.getCalibration();
     final FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
-    final PSF psf = fitConfig.getPSF();
+    final PSF psf = fitConfig.getPsf();
 
     boolean newCameraModel = filter == null;
     if (!calibration.equals(lastCalibration)) {
@@ -871,9 +870,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     }
 
     // Do not use set() as we support merging a partial PSF
-    fitConfig.mergePSF(psf);
+    fitConfig.mergePsf(psf);
 
-    textPSF.select(PSFProtosHelper.getName(fitConfig.getPSFType()));
+    textPSF.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }
 
   /**

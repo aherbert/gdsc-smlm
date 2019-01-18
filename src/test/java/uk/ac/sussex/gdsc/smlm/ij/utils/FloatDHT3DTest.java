@@ -49,7 +49,7 @@ public class FloatDHT3DTest {
   static final int zDepth = 5;
   static QuadraticAstigmatismZModel zModel = new QuadraticAstigmatismZModel(gamma, zDepth);
 
-  private static FloatDHT3D createData(double cx, double cy, double cz) {
+  private static FloatDht3D createData(double cx, double cy, double cz) {
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
         GaussianFunctionFactory.FIT_ASTIGMATISM, zModel);
     final int length = size * size;
@@ -65,15 +65,15 @@ public class FloatDHT3DTest {
       a[Gaussian2DFunction.Z_POSITION] = z - cz;
       p.getValues(f, a, data, z * length);
     }
-    return new FloatDHT3D(size, size, size, data, false);
+    return new FloatDht3D(size, size, size, data, false);
   }
 
-  private static FloatDHT3D createData() {
+  private static FloatDht3D createData() {
     return createData(centre, centre, centre);
   }
 
-  private static FloatDHT3D createOctants(int w, int h, int d) {
-    return new FloatDHT3D(createOctantsStack(w, h, d));
+  private static FloatDht3D createOctants(int w, int h, int d) {
+    return new FloatDht3D(createOctantsStack(w, h, d));
   }
 
   static ImageStack createOctantsStack(int w, int h, int d) {
@@ -108,11 +108,11 @@ public class FloatDHT3DTest {
 
   @Test
   public void canSwapOctants() {
-    FloatDHT3D dht;
+    FloatDht3D dht;
 
     // Simple test
     final float[] data = new float[] {2, 1, 3, 4, 6, 5, 7, 8};
-    dht = new FloatDHT3D(2, 2, 2, data.clone(), false);
+    dht = new FloatDht3D(2, 2, 2, data.clone(), false);
     dht.swapOctants();
     checkOctants(data, dht.getData());
 
@@ -128,9 +128,9 @@ public class FloatDHT3DTest {
           final ImageStack stack = dht.getImageStack();
           // uk.ac.sussex.gdsc.core.ij.Utils.display("Test", stack);
           dht.swapOctants();
-          FloatDHT3D.swapOctants(stack);
+          FloatDht3D.swapOctants(stack);
 
-          final float[] e = new FloatDHT3D(stack).getData();
+          final float[] e = new FloatDht3D(stack).getData();
           final float[] o = dht.getData();
 
           checkOctants(in, o);
@@ -158,18 +158,18 @@ public class FloatDHT3DTest {
 
   @Test
   public void canConvolveAndDeconvolve() {
-    final FloatDHT3D dht = createData();
+    final FloatDht3D dht = createData();
     final float[] pixels = dht.getData().clone();
     dht.transform();
 
-    final FloatDHT3D copy = dht.copy();
+    final FloatDht3D copy = dht.copy();
     copy.initialiseFastMultiply();
 
-    final FloatDHT3D convolved = dht.multiply(dht);
-    final FloatDHT3D deconvolved = convolved.divide(dht);
+    final FloatDht3D convolved = dht.multiply(dht);
+    final FloatDht3D deconvolved = convolved.divide(dht);
 
-    final FloatDHT3D convolved2 = dht.multiply(copy);
-    final FloatDHT3D deconvolved2 = convolved.divide(copy);
+    final FloatDht3D convolved2 = dht.multiply(copy);
+    final FloatDht3D deconvolved2 = convolved.divide(copy);
 
     Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
     Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
@@ -193,10 +193,10 @@ public class FloatDHT3DTest {
 
   @Test
   public void canCorrelate() {
-    final FloatDHT3D dht = createData();
+    final FloatDht3D dht = createData();
     dht.transform();
 
-    final FloatDHT3D copy = dht.copy();
+    final FloatDht3D copy = dht.copy();
     copy.initialiseFastMultiply();
 
     // Centre of power spectrum
@@ -205,11 +205,11 @@ public class FloatDHT3DTest {
     for (int z = -1; z <= 1; z++) {
       for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
-          final FloatDHT3D dht2 = createData(centre + x, centre + y, centre + z);
+          final FloatDht3D dht2 = createData(centre + x, centre + y, centre + z);
           dht2.transform();
 
-          final FloatDHT3D correlation = dht2.conjugateMultiply(dht);
-          final FloatDHT3D correlation2 = dht2.conjugateMultiply(copy);
+          final FloatDht3D correlation = dht2.conjugateMultiply(dht);
+          final FloatDht3D correlation2 = dht2.conjugateMultiply(copy);
           Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
 
           correlation.inverseTransform();
@@ -237,17 +237,17 @@ public class FloatDHT3DTest {
 
   @Test
   public void canConvertToDFT() {
-    final FloatDHT3D dht = createData();
+    final FloatDht3D dht = createData();
     final float[] input = dht.getData().clone();
     dht.transform();
 
-    final FloatImage3D[] result = dht.toDFT(null, null);
+    final FloatImage3D[] result = dht.toDft(null, null);
 
     final float rel = 1e-6f;
     final float abs = 1e-6f;
 
     // Test reverse transform
-    final FloatDHT3D dht2 = FloatDHT3D.fromDFT(result[0], result[1], null);
+    final FloatDht3D dht2 = FloatDht3D.fromDft(result[0], result[1], null);
 
     final float[] e = dht.getData();
     final float[] o = dht2.getData();

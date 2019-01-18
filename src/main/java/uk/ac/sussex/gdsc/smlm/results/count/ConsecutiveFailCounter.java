@@ -88,7 +88,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter {
   }
 
   @Override
-  public boolean isOK() {
+  public boolean isOk() {
     return failCount <= allowedFailures;
   }
 

@@ -170,35 +170,35 @@ public abstract class Gaussian2DFunctionTest {
 
     Assertions.assertEquals(gf.getNPeaks(), npeaks, "Incorrect number of peaks");
 
-    int p = 0;
+    int count = 0;
     if (gf.evaluatesBackground()) {
-      Assertions.assertEquals(0, gradientIndices[p++], "Background");
+      Assertions.assertEquals(0, gradientIndices[count++], "Background");
     }
     for (int peak = 1, i = 1; peak <= npeaks; peak++, i += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
       final int ii = i;
       if (gf.evaluatesSignal()) {
-        Assertions.assertEquals(i, gradientIndices[p++], () -> Gaussian2DFunction.getName(ii));
+        Assertions.assertEquals(i, gradientIndices[count++], () -> Gaussian2DFunction.getName(ii));
       }
       if (gf.evaluatesPosition()) {
-        Assertions.assertEquals(i + 1, gradientIndices[p++],
+        Assertions.assertEquals(i + 1, gradientIndices[count++],
             () -> Gaussian2DFunction.getName(ii + 1));
-        Assertions.assertEquals(i + 2, gradientIndices[p++],
+        Assertions.assertEquals(i + 2, gradientIndices[count++],
             () -> Gaussian2DFunction.getName(ii + 2));
       }
       if (gf.evaluatesZ()) {
-        Assertions.assertEquals(i + 3, gradientIndices[p++],
+        Assertions.assertEquals(i + 3, gradientIndices[count++],
             () -> Gaussian2DFunction.getName(ii + 3));
       }
       if (gf.evaluatesSD0()) {
-        Assertions.assertEquals(i + 4, gradientIndices[p++],
+        Assertions.assertEquals(i + 4, gradientIndices[count++],
             () -> Gaussian2DFunction.getName(ii + 4));
       }
       if (gf.evaluatesSD1()) {
-        Assertions.assertEquals(i + 5, gradientIndices[p++],
+        Assertions.assertEquals(i + 5, gradientIndices[count++],
             () -> Gaussian2DFunction.getName(ii + 5));
       }
       if (gf.evaluatesAngle()) {
-        Assertions.assertEquals(i + 6, gradientIndices[p++],
+        Assertions.assertEquals(i + 6, gradientIndices[count++],
             () -> Gaussian2DFunction.getName(ii + 6));
       }
     }
@@ -206,21 +206,21 @@ public abstract class Gaussian2DFunctionTest {
 
   @Test
   public void factoryCreatesCorrectFunction() {
-    Gaussian2DFunction f;
+    Gaussian2DFunction func;
 
     if (f2 != null) {
-      f = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
-      Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function2");
+      func = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
+      Assertions.assertTrue(func.getClass() == f2.getClass(), "Incorrect function2");
     } else {
-      f = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
-      Assertions.assertTrue(f.getClass() == f1.getClass(), "Incorrect function1");
+      func = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
+      Assertions.assertTrue(func.getClass() == f1.getClass(), "Incorrect function1");
     }
   }
 
   @Test
   public void functionComputesTargetWithAndWithoutGradient() {
     final double[] dyda = new double[f1.gradientIndices().length];
-    double[] a;
+    double[] params;
 
     boolean record = logger.isLoggable(Level.INFO);
 
@@ -232,15 +232,16 @@ public abstract class Gaussian2DFunctionTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 
-                  f1.initialise(a);
+                  f1.initialise(params);
 
                   // Test the frozen version
-                  final int flags = GaussianFunctionFactory.freeze(this.flags, zModel, a);
+                  final int flags = GaussianFunctionFactory.freeze(this.flags, zModel, params);
                   final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, f1.getMaxX(),
                       f1.getMaxY(), flags, zModel);
-                  f.initialise(a);
+                  f.initialise(params);
                   if (record) {
                     record = false;
                     logger.log(TestLogUtils.getRecord(Level.INFO, "%s %d frozen to %s",
@@ -321,7 +322,7 @@ public abstract class Gaussian2DFunctionTest {
     final int gradientIndex = findGradientIndex(f1, targetParameter);
     final double[] dyda = new double[f1.gradientIndices().length];
     final double[] dyda2 = new double[dyda.length];
-    double[] a;
+    double[] params;
 
     final Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
     final Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
@@ -335,22 +336,23 @@ public abstract class Gaussian2DFunctionTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
-                  f1.initialise(a);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  f1.initialise(params);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
-                  final double xx = a[targetParameter];
+                  final double xx = params[targetParameter];
 
                   // Get h to minimise roundoff error
                   final double h = Precision.representableDelta(xx, stepH);
 
                   // Evaluate at (x+h) and (x-h)
-                  a[targetParameter] = xx + h;
-                  f1a.initialise(a.clone());
+                  params[targetParameter] = xx + h;
+                  f1a.initialise(params.clone());
 
-                  a[targetParameter] = xx - h;
-                  f1b.initialise(a.clone());
+                  params[targetParameter] = xx - h;
+                  f1b.initialise(params.clone());
 
                   for (final int x : testx) {
                     for (final int y : testy) {
@@ -391,10 +393,10 @@ public abstract class Gaussian2DFunctionTest {
     });
   }
 
-  protected int findGradientIndex(Gaussian2DFunction f, int targetParameter) {
-    final int i = f.findGradientIndex(targetParameter);
-    Assertions.assertTrue(i >= 0, "Cannot find gradient index");
-    return i;
+  protected int findGradientIndex(Gaussian2DFunction func, int targetParameter) {
+    final int index = func.findGradientIndex(targetParameter);
+    Assertions.assertTrue(index >= 0, "Cannot find gradient index");
+    return index;
   }
 
   @Test
@@ -404,7 +406,7 @@ public abstract class Gaussian2DFunctionTest {
     }
 
     final double[] dyda = new double[f2.gradientIndices().length];
-    double[] a;
+    double[] params;
 
     boolean record = logger.isLoggable(Level.INFO);
 
@@ -423,17 +425,17 @@ public abstract class Gaussian2DFunctionTest {
                         for (final double cz2 : testcz2) {
                           for (final double[] w2 : testw2) {
                             for (final double angle2 : testangle2) {
-                              a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
-                                  angle1, signal2, cx2, cy2, cz2, w2[0], w2[1], angle2);
+                              params = createParameters(background, signal1, cx1, cy1, cz1, w1[0],
+                                  w1[1], angle1, signal2, cx2, cy2, cz2, w2[0], w2[1], angle2);
 
-                              f2.initialise(a);
+                              f2.initialise(params);
 
                               // Test the frozen version
                               final int flags =
-                                  GaussianFunctionFactory.freeze(this.flags, zModel, a);
+                                  GaussianFunctionFactory.freeze(this.flags, zModel, params);
                               final Gaussian2DFunction f = GaussianFunctionFactory.create2D(2,
                                   f2.getMaxX(), f2.getMaxY(), flags, zModel);
-                              f.initialise(a);
+                              f.initialise(params);
                               if (record) {
                                 record = false;
                                 logger.log(TestLogUtils.getRecord(Level.INFO, "%s %d frozen to %s",
@@ -543,7 +545,7 @@ public abstract class Gaussian2DFunctionTest {
     final int gradientIndex = findGradientIndex(f2, targetParameter);
     final double[] dyda = new double[f2.gradientIndices().length];
     final double[] dyda2 = new double[dyda.length];
-    double[] a;
+    double[] params;
 
     final Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
     final Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
@@ -564,25 +566,25 @@ public abstract class Gaussian2DFunctionTest {
                         for (final double cz2 : testcz2) {
                           for (final double[] w2 : testw2) {
                             for (final double angle2 : testangle2) {
-                              a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
-                                  angle1, signal2, cx2, cy2, cz2, w2[0], w2[1], angle2);
+                              params = createParameters(background, signal1, cx1, cy1, cz1, w1[0],
+                                  w1[1], angle1, signal2, cx2, cy2, cz2, w2[0], w2[1], angle2);
 
-                              f2.initialise(a);
+                              f2.initialise(params);
 
                               // Numerically solve gradient.
                               // Calculate the step size h to be an exact numerical
                               // representation
-                              final double xx = a[targetParameter];
+                              final double xx = params[targetParameter];
 
                               // Get h to minimise roundoff error
                               final double h = Precision.representableDelta(xx, stepH);
 
                               // Evaluate at (x+h) and (x-h)
-                              a[targetParameter] = xx + h;
-                              f2a.initialise(a.clone());
+                              params[targetParameter] = xx + h;
+                              f2a.initialise(params.clone());
 
-                              a[targetParameter] = xx - h;
-                              f2b.initialise(a.clone());
+                              params[targetParameter] = xx - h;
+                              f2b.initialise(params.clone());
 
                               for (final int x : testx) {
                                 for (final int y : testy) {

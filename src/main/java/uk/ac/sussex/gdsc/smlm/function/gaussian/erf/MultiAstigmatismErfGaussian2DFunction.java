@@ -223,42 +223,42 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
   }
 
   @Override
-  public double eval(final int i, final double[] duda) {
+  public double eval(final int x, final double[] duda) {
     // Unpack the predictor into the dimensions
-    int yy = i / maxx;
-    int xx = i % maxx;
+    int yy = x / maxx;
+    int xx = x % maxx;
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
     duda[0] = 1.0;
-    double I = tb;
+    double value = tb;
     for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       duda[a] = deltaEx[xx] * deltaEy[yy];
-      I += tI[n] * duda[a++];
+      value += tI[n] * duda[a++];
       duda[a++] = duDtx[xx] * deltaEy[yy];
       duda[a++] = duDty[yy] * deltaEx[xx];
       duda[a++] = duDtsx[xx] * deltaEy[yy] * dtsxDtz[n] + duDtsy[yy] * deltaEx[xx] * dtsyDtz[n];
     }
-    return I;
+    return value;
   }
 
   @Override
-  public double eval2(final int i, final double[] duda, final double[] d2uda2) {
+  public double eval2(final int x, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
-    int yy = i / maxx;
-    int xx = i % maxx;
+    int yy = x / maxx;
+    int xx = x % maxx;
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
     duda[0] = 1.0;
     d2uda2[0] = 0;
-    double I = tb;
+    double value = tb;
     for (int n = 0, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
       final double du_dsx = duDtsx[xx] * deltaEy[yy];
       final double du_dsy = duDtsy[yy] * deltaEx[xx];
 
       duda[a] = deltaEx[xx] * deltaEy[yy];
-      I += tI[n] * duda[a];
+      value += tI[n] * duda[a];
       d2uda2[a++] = 0;
       duda[a] = duDtx[xx] * deltaEy[yy];
       d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
@@ -277,7 +277,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
           2 * duDtsx[xx] * dtsxDtz[n] * duDtsy[yy] * dtsyDtz[n] / tI[n];
       //@formatter:on
     }
-    return I;
+    return value;
   }
 
   @Override
@@ -328,15 +328,15 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
       }
 
       for (int x = 0; x < maxx; x++) {
-        double I = tb;
+        double value = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           duda[a] = deltaEx[xx] * deltaEy[yy];
-          I += tI[n] * duda[a++];
+          value += tI[n] * duda[a++];
           duda[a++] = duDtx[xx] * deltaEy[yy];
           duda[a++] = duDty[yy] * deltaEx[xx];
           duda[a++] = duDtsx[xx] * deltaEy_by_dtsx_dtz[n] + du_dtsy_by_dtsy_dtz[n] * deltaEx[xx];
         }
-        procedure.execute(I, duda);
+        procedure.execute(value, duda);
       }
     }
   }
@@ -365,13 +365,13 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
       }
 
       for (int x = 0; x < maxx; x++) {
-        double I = tb;
+        double value = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           final double du_dsx = duDtsx[xx] * deltaEy[yy];
           final double du_dsy = duDtsy[yy] * deltaEx[xx];
 
           duda[a] = deltaEx[xx] * deltaEy[yy];
-          I += tI[n] * duda[a++];
+          value += tI[n] * duda[a++];
           duda[a] = duDtx[xx] * deltaEy[yy];
           d2uda2[a++] = d2uDtx2[xx] * deltaEy[yy];
           duda[a] = duDty[yy] * deltaEx[xx];
@@ -390,7 +390,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
               two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * duDtsx[xx];
           //@formatter:on
         }
-        procedure.execute(I, duda, d2uda2);
+        procedure.execute(value, duda, d2uda2);
       }
     }
   }
@@ -437,13 +437,13 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
         two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] = two_dtsx_dtz_by_dtsy_dtz_tI[n] * duDtsy[yy];
       }
       for (int x = 0; x < maxx; x++) {
-        double I = tb;
+        double value = tb;
         for (int n = 0, xx = x, yy = y, a = 1; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
           final double du_dsx = duDtsx[xx] * deltaEy[yy];
           final double du_dsy = duDtsy[yy] * deltaEx[xx];
 
           duda[a] = deltaEx[xx] * deltaEy[yy];
-          I += tI[n] * duda[a];
+          value += tI[n] * duda[a];
           duda[a + 1] = duDtx[xx] * deltaEy[yy];
           duda[a + 2] = duDty[yy] * deltaEx[xx];
           duda[a + 3] = du_dsx * dtsxDtz[n] + du_dsy * dtsyDtz[n];
@@ -506,7 +506,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
               two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * duDtsx[xx];
           //@formatter:on
         }
-        procedure.executeExtended(I, duda, d2udadb);
+        procedure.executeExtended(value, duda, d2udadb);
       }
     }
   }

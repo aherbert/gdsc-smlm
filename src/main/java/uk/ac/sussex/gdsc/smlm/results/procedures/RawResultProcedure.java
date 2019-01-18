@@ -32,10 +32,10 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  */
 //@formatter:off
 public class RawResultProcedure extends AbstractResultProcedure implements
-    BIXYZResultProcedure,
+    BixyzResultProcedure,
     IResultProcedure,
     BResultProcedure,
-    XYZResultProcedure {
+    XyzResultProcedure {
   //@formatter:on
 
   /** The background. */
@@ -67,18 +67,18 @@ public class RawResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units is not possible
    */
-  public void getBIXYZ() {
+  public void getBixyz() {
     counter = 0;
     this.background = allocate(this.background);
     this.intensity = allocate(this.intensity);
     this.x = allocate(this.x);
     this.y = allocate(this.y);
     this.z = allocate(this.z);
-    results.forEachNative((BIXYZResultProcedure) this);
+    results.forEachNative((BixyzResultProcedure) this);
   }
 
   @Override
-  public void executeBIXYZ(float background, float intensity, float x, float y, float z) {
+  public void executeBixyz(float background, float intensity, float x, float y, float z) {
     this.background[counter] = background;
     this.intensity[counter] = intensity;
     this.x[counter] = x;
@@ -131,11 +131,11 @@ public class RawResultProcedure extends AbstractResultProcedure implements
     this.x = allocate(this.x);
     this.y = allocate(this.y);
     this.z = allocate(this.z);
-    results.forEachNative((XYZResultProcedure) this);
+    results.forEachNative((XyzResultProcedure) this);
   }
 
   @Override
-  public void executeXYZ(float x, float y, float z) {
+  public void executeXyz(float x, float y, float z) {
     this.x[counter] = x;
     this.y[counter] = y;
     this.z[counter] = z;

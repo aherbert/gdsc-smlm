@@ -40,7 +40,7 @@ public class XStreamUtils {
    * @param obj the object
    * @return XML string representation
    */
-  public static String toXML(Object obj) {
+  public static String toXml(Object obj) {
     init();
     if (xs != null) {
       try {
@@ -58,7 +58,7 @@ public class XStreamUtils {
    * @param xml the xml
    * @return the object
    */
-  public static Object fromXML(String xml) {
+  public static Object fromXml(String xml) {
     init();
     if (xs != null) {
       try {

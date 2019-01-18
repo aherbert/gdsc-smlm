@@ -314,8 +314,8 @@ public class CameraModelManager implements PlugIn {
 
     // Select the model
     gd = new GenericDialog(TITLE);
-    final String[] MODELS = listCameraModels(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listCameraModels(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -367,8 +367,8 @@ public class CameraModelManager implements PlugIn {
 
   private void runDeleteCameraModel() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    final String[] MODELS = listCameraModels(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listCameraModels(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -436,8 +436,8 @@ public class CameraModelManager implements PlugIn {
 
   private void runViewCameraModel() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    final String[] MODELS = listCameraModels(false);
-    gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+    final String[] models = listCameraModels(false);
+    gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

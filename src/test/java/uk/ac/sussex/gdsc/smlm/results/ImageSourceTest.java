@@ -734,10 +734,10 @@ public class ImageSourceTest {
     source.setName(name);
     source.setFreeMemoryOnClose(true);
 
-    final String xml = source.toXML();
+    final String xml = source.toXml();
     // System.out.println(xml);
 
-    final MemoryImageSource source2 = (MemoryImageSource) ImageSource.fromXML(xml);
+    final MemoryImageSource source2 = (MemoryImageSource) ImageSource.fromXml(xml);
 
     Assertions.assertEquals(w, source2.getWidth());
     Assertions.assertEquals(h, source2.getHeight());

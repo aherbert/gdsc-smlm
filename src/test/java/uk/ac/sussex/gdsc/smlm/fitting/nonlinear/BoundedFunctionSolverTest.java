@@ -318,7 +318,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
       bounds.setDynamicClamp(clamping == 2);
       bsolver.setBounds(bounds);
     }
-    solver.setMLE(mle);
+    solver.setMle(mle);
     solver.setInitialLambda(1);
     return solver;
   }

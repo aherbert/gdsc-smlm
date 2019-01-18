@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultValueParameter;
 import uk.ac.sussex.gdsc.smlm.results.predicates.MinMaxPeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PassPeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.MinMaxResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -99,8 +99,8 @@ public class CropResults implements PlugIn {
 
     // Build a list of all images with a region ROI
     titles = new TurboList<>(WindowManager.getWindowCount());
-    for (final int imageID : ImageJUtils.getIdList()) {
-      final ImagePlus imp = WindowManager.getImage(imageID);
+    for (final int imageId : ImageJUtils.getIdList()) {
+      final ImagePlus imp = WindowManager.getImage(imageId);
       if (imp != null && imp.getRoi() != null && imp.getRoi().isArea()) {
         titles.add(imp.getTitle());
       }
@@ -378,7 +378,7 @@ public class CropResults implements PlugIn {
     final Predicate<PeakResult> testZ = getZFilter();
 
     if (bounds.getWidth() > 0 && bounds.getHeight() > 0) {
-      results.forEach(DistanceUnit.PIXEL, (XYRResultProcedure) (x, y, result) -> {
+      results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
         if (bounds.contains(x, y) && testZ.test(result)) {
           newResults.add(result);
         }
@@ -474,7 +474,7 @@ public class CropResults implements PlugIn {
 
     final Predicate<PeakResult> testZ = getZFilter();
 
-    results.forEach(DistanceUnit.PIXEL, (XYRResultProcedure) (x, y, result) -> {
+    results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
       if (roiTest.test(x * xscale, y * yscale) && testZ.test(result)) {
         newResults.add(result);
       }

@@ -52,7 +52,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction {
   /** Set to true if the Gaussian has no rotation angle. */
   protected boolean zeroAngle;
   /** The amplitude./height normalisation: 1/(2*pi*sx*sy). */
-  protected double n;
+  protected double norm;
   /** The amplitude./height. */
   protected double height;
   /** x0 position pre-factor. */
@@ -110,8 +110,8 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction {
     final double sx3 = sx2 * sx;
     final double sy3 = sy2 * sy;
 
-    n = ONE_OVER_TWO_PI / (sx * sy);
-    height = a[SIGNAL] * n;
+    norm = ONE_OVER_TWO_PI / (sx * sy);
+    height = a[SIGNAL] * norm;
 
     // All prefactors are negated since the Gaussian uses the exponential to the negative:
     // (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
@@ -210,7 +210,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction {
     // Calculate gradients
     if (zeroAngle) {
       final double exp = FastMath.exp(aa * dx2 + cc * dy2);
-      dyDa[1] = n * exp;
+      dyDa[1] = norm * exp;
       final double y = height * exp;
 
       dyDa[2] = y * (-2.0 * aa * dx);
@@ -222,7 +222,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction {
     }
 
     final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-    dyDa[1] = n * exp;
+    dyDa[1] = norm * exp;
     final double y = height * exp;
 
     dyDa[2] = y * (-2.0 * aa * dx - bb * dy);

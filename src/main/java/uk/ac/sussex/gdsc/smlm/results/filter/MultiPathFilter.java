@@ -632,7 +632,7 @@ public class MultiPathFilter {
     } else {
       // The single fit is OK.
       doDoublet =
-          (residualsThreshold < 1 && multiPathResult.getSingleQAScore() > residualsThreshold);
+          (residualsThreshold < 1 && multiPathResult.getSingleQaScore() > residualsThreshold);
     }
 
     // We reached here with:
@@ -733,7 +733,7 @@ public class MultiPathFilter {
    * @param singleDoubletResults the doublet results
    * @return the preprocessed peak result[]
    */
-  private static PreprocessedPeakResult[] rank(PreprocessedPeakResult[] multiResults,
+  private static @Nullable PreprocessedPeakResult[] rank(PreprocessedPeakResult[] multiResults,
       PreprocessedPeakResult[] multiDoubletResults, PreprocessedPeakResult[] singleResults,
       PreprocessedPeakResult[] singleDoubletResults) {
     if (multiResults == null && multiDoubletResults == null && singleResults == null
@@ -779,7 +779,7 @@ public class MultiPathFilter {
    * @param store the store
    * @return The results that are accepted; or null
    */
-  public final SelectedResult select(final MultiPathFitResult multiPathResult,
+  public final @Nullable SelectedResult select(final MultiPathFitResult multiPathResult,
       boolean validateCandidates, SelectedResultStore store) {
     final int candidateId = multiPathResult.getCandidateId();
 
@@ -858,7 +858,7 @@ public class MultiPathFilter {
     } else {
       // The single fit is OK.
       doDoublet =
-          (residualsThreshold < 1 && multiPathResult.getSingleQAScore() > residualsThreshold);
+          (residualsThreshold < 1 && multiPathResult.getSingleQaScore() > residualsThreshold);
     }
 
     // We reached here with:
@@ -979,7 +979,7 @@ public class MultiPathFilter {
       // continue;
       // }
 
-      final boolean evaluateFit = failCounter.isOK();
+      final boolean evaluateFit = failCounter.isOk();
       if (evaluateFit || store.isValid(multiPathResult.getCandidateId())) {
         // if (out != null)
         // {
@@ -1132,7 +1132,7 @@ public class MultiPathFilter {
   }
 
   private boolean isSuitableForDoubletFit(MultiPathFitResult multiPathResult, FitResult fitResult,
-      boolean singleQA) {
+      boolean singleQa) {
     // Check there is a fit result
     if (fitResult == null || fitResult.status != 0 || fitResult.results == null) {
       return false;
@@ -1154,8 +1154,8 @@ public class MultiPathFilter {
 
     if (validationResults[0] == 0) {
       // The peak was valid so check the residuals
-      return ((singleQA) ? multiPathResult.getSingleQAScore()
-          : multiPathResult.getMultiQAScore()) > residualsThreshold;
+      return ((singleQa) ? multiPathResult.getSingleQaScore()
+          : multiPathResult.getMultiQaScore()) > residualsThreshold;
     }
 
     // Check if it failed due to width
@@ -1169,10 +1169,10 @@ public class MultiPathFilter {
 
     // Check the width is reasonable given the size of the fitted region.
     //@formatter:off
-    if (  firstResult.getXSDFactor() < 1 || // Not a wide spot
-        firstResult.getXSD() > multiPathResult.getWidth() || // width covers more than the region
-        firstResult.getYSDFactor() < 1 || // Not a wide spot
-        firstResult.getYSD() > multiPathResult.getHeight()
+    if (  firstResult.getXSdFactor() < 1 || // Not a wide spot
+        firstResult.getXSd() > multiPathResult.getWidth() || // width covers more than the region
+        firstResult.getYSdFactor() < 1 || // Not a wide spot
+        firstResult.getYSd() > multiPathResult.getHeight()
       )
      {
       return false;
@@ -1180,8 +1180,8 @@ public class MultiPathFilter {
     }
 
     // Check the quadrant analysis on the fit residuals
-    if (((singleQA) ? multiPathResult.getSingleQAScore()
-        : multiPathResult.getMultiQAScore()) < residualsThreshold) {
+    if (((singleQa) ? multiPathResult.getSingleQaScore()
+        : multiPathResult.getMultiQaScore()) < residualsThreshold) {
       return false;
     }
 
@@ -1224,7 +1224,7 @@ public class MultiPathFilter {
    * @param store the store
    * @return The new results that pass the filter
    */
-  public PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult,
+  public @Nullable PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult,
       boolean validateCandidates, SelectedResultStore store) {
     return acceptAll(candidateId, fitResult, validateCandidates, store, false);
   }
@@ -1243,7 +1243,7 @@ public class MultiPathFilter {
    * @param precomputed True if this is a subset with pre-computed validation results
    * @return The new results that pass the filter
    */
-  public PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult,
+  public @Nullable PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult,
       boolean validateCandidates, SelectedResultStore store, boolean precomputed) {
     if (fitResult == null || fitResult.results == null) {
       return null;
@@ -1320,12 +1320,10 @@ public class MultiPathFilter {
   private void getValidationResults(boolean precomputed, final PreprocessedPeakResult[] results) {
     validationResults = new int[results.length];
     for (int i = 0; i < results.length; i++) {
-      if (precomputed) {
-        if (results[i].getValidationResult() != 0) {
-          // System.out.println("Ignored");
-          validationResults[i] = results[i].getValidationResult();
-          continue;
-        }
+      if (precomputed && results[i].getValidationResult() != 0) {
+        // System.out.println("Ignored");
+        validationResults[i] = results[i].getValidationResult();
+        continue;
       }
       validationResults[i] = filter.validate(results[i]);
     }
@@ -1344,7 +1342,7 @@ public class MultiPathFilter {
    * @param store the store
    * @return The new results that pass the filter
    */
-  public PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult,
+  public @Nullable PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult,
       boolean validateCandidates, SelectedResultStore store) {
     return acceptAny(candidateId, fitResult, validateCandidates, store, false);
   }
@@ -1363,7 +1361,7 @@ public class MultiPathFilter {
    * @param precomputed True if this is a subset with pre-computed validation results
    * @return The new results that pass the filter
    */
-  public PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult,
+  public @Nullable PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult,
       boolean validateCandidates, SelectedResultStore store, boolean precomputed) {
     if (fitResult == null || fitResult.results == null) {
       return null;
@@ -1389,8 +1387,8 @@ public class MultiPathFilter {
    * @param store the store
    * @return The new results that pass the filter
    */
-  private PreprocessedPeakResult[] acceptAnyInternal(int candidateId, final FitResult fitResult,
-      boolean validateCandidates, SelectedResultStore store) {
+  private @Nullable PreprocessedPeakResult[] acceptAnyInternal(int candidateId,
+      final FitResult fitResult, boolean validateCandidates, SelectedResultStore store) {
     if (fitResult == null || fitResult.results == null) {
       return null;
     }
@@ -1478,8 +1476,9 @@ public class MultiPathFilter {
    * @param candidateId the candidate id
    * @return The new results that pass the filter
    */
-  private PreprocessedPeakResult[] acceptAnyDoublet(final MultiPathFitResult multiPathResult,
-      boolean validateCandidates, SelectedResultStore store, final int candidateId) {
+  private @Nullable PreprocessedPeakResult[] acceptAnyDoublet(
+      final MultiPathFitResult multiPathResult, boolean validateCandidates,
+      SelectedResultStore store, final int candidateId) {
     final FitResult multiDoubletFitResult = multiPathResult.getMultiDoubletFitResult();
     if (multiDoubletFitResult == null || multiDoubletFitResult.results == null) {
       return null;
@@ -1612,7 +1611,7 @@ public class MultiPathFilter {
           lastId = multiPathResult.getCandidateId();
         }
 
-        final boolean evaluateFit = failCounter.isOK();
+        final boolean evaluateFit = failCounter.isOk();
         if (evaluateFit || store.isValid(multiPathResult.getCandidateId())) {
           // if (out != null)
           // {
@@ -1789,7 +1788,7 @@ public class MultiPathFilter {
    *        fits before the current candidate)
    * @return the filtered results
    */
-  private MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults,
+  private @Nullable MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults,
       final FailCounter failCounter, boolean setup, boolean subset) {
     if (setup) {
       setup();
@@ -1813,7 +1812,7 @@ public class MultiPathFilter {
         lastId = multiPathResult.getCandidateId();
       }
 
-      final boolean evaluateFit = failCounter.isOK();
+      final boolean evaluateFit = failCounter.isOk();
       if (evaluateFit || store.isValid(multiPathResult.getCandidateId())) {
         // Evaluate the result.
         // This allows storing more estimates in the store even if we are past the failures limit.
@@ -2136,7 +2135,7 @@ public class MultiPathFilter {
           lastId = multiPathResult.getCandidateId();
         }
 
-        final boolean evaluateFit = failCounter.isOK();
+        final boolean evaluateFit = failCounter.isOk();
         if (evaluateFit || store.isValid(multiPathResult.getCandidateId())) {
           // Assess the result if we are below the fail limit or have an estimate
           final PreprocessedPeakResult[] result = accept(multiPathResult, true, store, subset);
@@ -2362,12 +2361,12 @@ public class MultiPathFilter {
   }
 
   /**
-   * To XML.
+   * Convert to an XML representation.
    *
    * @return An XML representation of this object
    */
-  public String toXML() {
-    return FilterXStreamUtils.toXML(this);
+  public String toXml() {
+    return FilterXStreamUtils.toXml(this);
   }
 
   /**
@@ -2376,9 +2375,9 @@ public class MultiPathFilter {
    * @param xml the xml
    * @return the filter (or null)
    */
-  public static @Nullable MultiPathFilter fromXML(String xml) {
+  public static @Nullable MultiPathFilter fromXml(String xml) {
     try {
-      return (MultiPathFilter) FilterXStreamUtils.fromXML(xml);
+      return (MultiPathFilter) FilterXStreamUtils.fromXml(xml);
     } catch (final ClassCastException ex) {
       // Ignore
     }

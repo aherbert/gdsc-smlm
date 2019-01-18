@@ -32,9 +32,9 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
@@ -72,19 +72,19 @@ public final class Gaussian2DPeakResultHelper {
    */
   public static final int AMPLITUDE = 0x00000001;
   /**
-   * Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[], float)} function.
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getLsePrecision(float[], float)} function.
    */
   public static final int LSE_PRECISION = 0x00000002;
   /**
-   * Flag for the {@link Gaussian2DPeakResultCalculator#getLSEPrecision(float[])} function.
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getLsePrecision(float[])} function.
    */
   public static final int LSE_PRECISION_X = 0x00000004;
   /**
-   * Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[], float)} function.
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getMlePrecision(float[], float)} function.
    */
   public static final int MLE_PRECISION = 0x00000008;
   /**
-   * Flag for the {@link Gaussian2DPeakResultCalculator#getMLEPrecision(float[])} function.
+   * Flag for the {@link Gaussian2DPeakResultCalculator#getMlePrecision(float[])} function.
    */
   public static final int MLE_PRECISION_X = 0x00000010;
   /**
@@ -146,7 +146,7 @@ public final class Gaussian2DPeakResultHelper {
      * @see #create(PSF, CalibrationReader, int)
      */
     public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationReader calibration) {
-      final int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
+      final int[] indices = PsfHelper.getGaussian2DWxWyIndices(psf);
       isx = indices[0];
       isy = indices[1];
       oneAxisSD = isx == isy;
@@ -237,7 +237,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getLSEPrecision(float[] params, float noise) {
+    public double getLsePrecision(float[] params, float noise) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -253,7 +253,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getLSEPrecision(float[] params) {
+    public double getLsePrecision(float[] params) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -270,7 +270,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getLSEVariance(float[] params, float noise) {
+    public double getLseVariance(float[] params, float noise) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -286,7 +286,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getLSEVariance(float[] params) {
+    public double getLseVariance(float[] params) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -303,7 +303,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getMLEPrecision(float[] params, float noise) {
+    public double getMlePrecision(float[] params, float noise) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -319,7 +319,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getMLEPrecision(float[] params) {
+    public double getMlePrecision(float[] params) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -336,7 +336,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getMLEVariance(float[] params, float noise) {
+    public double getMleVariance(float[] params, float noise) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -352,7 +352,7 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getMLEVariance(float[] params) {
+    public double getMleVariance(float[] params) {
       // Try to create the converter
       if (toPhoton == null) {
         checkPrecisionCalibration();
@@ -405,14 +405,14 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getLSEPrecision(float[] params, float noise) {
+    public double getLsePrecision(float[] params, float noise) {
       return Gaussian2DPeakResultHelper.getPrecision(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCcd);
     }
 
     @Override
-    public double getLSEPrecision(float[] params) {
+    public double getLsePrecision(float[] params) {
       return Gaussian2DPeakResultHelper.getPrecisionX(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]),
@@ -420,14 +420,14 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getLSEVariance(float[] params, float noise) {
+    public double getLseVariance(float[] params, float noise) {
       return Gaussian2DPeakResultHelper.getVariance(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCcd);
     }
 
     @Override
-    public double getLSEVariance(float[] params) {
+    public double getLseVariance(float[] params) {
       return Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]),
@@ -435,14 +435,14 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getMLEPrecision(float[] params, float noise) {
+    public double getMlePrecision(float[] params, float noise) {
       return Gaussian2DPeakResultHelper.getMLPrecision(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCcd);
     }
 
     @Override
-    public double getMLEPrecision(float[] params) {
+    public double getMlePrecision(float[] params) {
       return Gaussian2DPeakResultHelper.getMLPrecisionX(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]),
@@ -450,14 +450,14 @@ public final class Gaussian2DPeakResultHelper {
     }
 
     @Override
-    public double getMLEVariance(float[] params, float noise) {
+    public double getMleVariance(float[] params, float noise) {
       return Gaussian2DPeakResultHelper.getMLVariance(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCcd);
     }
 
     @Override
-    public double getMLEVariance(float[] params) {
+    public double getMleVariance(float[] params) {
       return Gaussian2DPeakResultHelper.getMLVarianceX(nmPerPixel,
           toNM.convert(getStandardDeviation(params)),
           toPhoton.convert(params[PeakResult.INTENSITY]),
@@ -550,16 +550,16 @@ public final class Gaussian2DPeakResultHelper {
       helper.getAmplitude(PARAMS);
     }
     if (BitFlagUtils.anySet(flags, LSE_PRECISION)) {
-      helper.getLSEPrecision(PARAMS, 0);
+      helper.getLsePrecision(PARAMS, 0);
     }
     if (BitFlagUtils.anySet(flags, LSE_PRECISION_X)) {
-      helper.getLSEPrecision(PARAMS);
+      helper.getLsePrecision(PARAMS);
     }
     if (BitFlagUtils.anySet(flags, MLE_PRECISION)) {
-      helper.getMLEPrecision(PARAMS, 0);
+      helper.getMlePrecision(PARAMS, 0);
     }
     if (BitFlagUtils.anySet(flags, MLE_PRECISION_X)) {
-      helper.getMLEPrecision(PARAMS);
+      helper.getMlePrecision(PARAMS);
     }
     if (BitFlagUtils.anySet(flags, PIXEL_AMPLITUDE)) {
       helper.getPixelAmplitude(PARAMS);

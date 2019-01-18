@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureUtils;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.OffsetGradient2Function;
@@ -99,11 +99,11 @@ public abstract class BaseFunctionSolverTest {
   static {
     // Keep SNR reasonable. This should be an "easy" test since the bounds
     // for a correct answer are strict.
-    final double minSNR = 10;
+    final double minSnr = 10;
     final double sd = 1.3;
     final double mean = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal[0], sd, sd);
     // snr = mean/background => background = mean/snr
-    params[Gaussian2DFunction.BACKGROUND] = mean / minSNR;
+    params[Gaussian2DFunction.BACKGROUND] = mean / minSnr;
     params[Gaussian2DFunction.X_POSITION] = size / 2;
     params[Gaussian2DFunction.Y_POSITION] = size / 2;
     params[Gaussian2DFunction.X_SD] = sd;
@@ -284,10 +284,11 @@ public abstract class BaseFunctionSolverTest {
       }
       if (report) {
         // Compute the CRLB for a Poisson process
-        final PoissonGradientProcedure gp = PoissonGradientProcedureFactory
+        final PoissonGradientProcedure gp = PoissonGradientProcedureUtils
             .create((Gradient1Function) ((BaseFunctionSolver) solver).getGradientFunction());
         gp.computeFisherInformation(expected);
-        final FisherInformationMatrix f = new FisherInformationMatrix(gp.getLinear(), gp.n);
+        final FisherInformationMatrix f =
+            new FisherInformationMatrix(gp.getLinear(), gp.numberOfGradients);
         crlb = f.crlbSqrt();
         // Compute the deviations.
         // Note this is not the same as the CRLB as the fit is repeated
@@ -357,7 +358,7 @@ public abstract class BaseFunctionSolverTest {
       solver.setWeights(getWeights(seed, noiseModel));
     }
 
-    final int LOOPS = 5;
+    final int loops = 5;
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final StoredDataStatistics[] stats = new StoredDataStatistics[6];
     final String[] statName = {"Signal", "X", "Y"};
@@ -386,7 +387,7 @@ public abstract class BaseFunctionSolverTest {
         solver2.setBounds(lower, upper);
       }
 
-      for (int loop = LOOPS; loop-- > 0;) {
+      for (int loop = loops; loop-- > 0;) {
         final double[] data = drawGaussian(expected, noise, noiseModel, rg);
 
         for (int i = 0; i < stats.length; i++) {
@@ -516,9 +517,9 @@ public abstract class BaseFunctionSolverTest {
     // p));
   }
 
-  private static void compare(double[] o1, double[] e1, double[] o2, double[] e2, int i,
+  private static void compare(double[] o1, double[] e1, double[] o2, double[] e2, int index,
       Statistics stats1, Statistics stats2) {
-    compare(o1[i], e1[i], o2[i], e2[i], stats1, stats2);
+    compare(o1[index], e1[index], o2[index], e2[index], stats1, stats2);
   }
 
   private static void compare(double o1, double e1, double o2, double e2, Statistics stats1,
@@ -674,29 +675,31 @@ public abstract class BaseFunctionSolverTest {
     final Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);
     solver1.setGradientFunction(f2);
     solver2.setGradientFunction(f2);
-    double[] a = p12.clone();
-    double[] e = new double[a.length];
-    double[] o = new double[a.length];
-    solver1.fit(data, null, a, e);
+    double[] params = p12.clone();
+    double[] expected = new double[params.length];
+    double[] observed = new double[params.length];
+    solver1.fit(data, null, params, expected);
     // System.out.TestLog.fine(logger,"a="+Arrays.toString(a));
-    solver2.computeDeviations(data, a, o);
+    solver2.computeDeviations(data, params, observed);
 
     // System.out.TestLog.fine(logger,"e2="+Arrays.toString(e));
     // System.out.TestLog.fine(logger,"o2="+Arrays.toString(o));
-    Assertions.assertArrayEquals(o, e, "Fit 2 peaks and deviations 2 peaks do not match");
+    Assertions.assertArrayEquals(observed, expected,
+        "Fit 2 peaks and deviations 2 peaks do not match");
 
     // Try again with y-fit values
-    a = p12.clone();
+    params = p12.clone();
     final double[] o1 = new double[f2.size()];
     final double[] o2 = new double[o1.length];
-    solver1.fit(data, o1, a, e);
+    solver1.fit(data, o1, params, expected);
     // System.out.TestLog.fine(logger,"a="+Arrays.toString(a));
-    solver2.computeValue(data, o2, a);
+    solver2.computeValue(data, o2, params);
 
-    Assertions.assertArrayEquals(o, e, "Fit 2 peaks with yFit and deviations 2 peaks do not match");
+    Assertions.assertArrayEquals(observed, expected,
+        "Fit 2 peaks with yFit and deviations 2 peaks do not match");
 
     final StandardValueProcedure p = new StandardValueProcedure();
-    double[] ev = p.getValues(f2, a);
+    double[] ev = p.getValues(f2, params);
     Assertions.assertArrayEquals(ev, o1, 1e-8, "Fit 2 peaks yFit");
     Assertions.assertArrayEquals(ev, o2, 1e-8, "computeValue 2 peaks yFit");
 
@@ -707,13 +710,13 @@ public abstract class BaseFunctionSolverTest {
           (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);
       final Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
       solver1.setGradientFunction(pf1);
-      a = p1.clone();
-      e = new double[a.length];
-      solver1.fit(data, null, a, e);
+      params = p1.clone();
+      expected = new double[params.length];
+      solver1.fit(data, null, params, expected);
 
       final double[] a2 = p12.clone(); // To copy the second peak
-      System.arraycopy(a, 0, a2, 0, a.length); // Add the same fitted first peak
-      solver2.computeDeviations(data, a2, o);
+      System.arraycopy(params, 0, a2, 0, params.length); // Add the same fitted first peak
+      solver2.computeDeviations(data, a2, observed);
       // System.out.TestLog.fine(logger,"e1p1=" + Arrays.toString(e));
       // System.out.TestLog.fine(logger,"o2=" + Arrays.toString(o));
 
@@ -722,33 +725,33 @@ public abstract class BaseFunctionSolverTest {
       int ok = 0;
       int fail = 0;
       final StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < e.length; i++) {
-        if (e[i] <= o[i]) {
+      for (int i = 0; i < expected.length; i++) {
+        if (expected[i] <= observed[i]) {
           ok++;
           continue;
         }
         fail++;
         sb.append(String.format(
             "Fit 1 peak + 1 precomputed is higher than deviations 2 peaks %s: %s > %s",
-            Gaussian2DFunction.getName(i), e[i], o[i]));
+            Gaussian2DFunction.getName(i), expected[i], observed[i]));
       }
       if (fail > ok) {
         Assertions.fail(sb.toString());
       }
 
       // Try again with y-fit values
-      a = p1.clone();
+      params = p1.clone();
       Arrays.fill(o1, 0);
       Arrays.fill(o2, 0);
-      o = new double[a.length];
-      solver1.fit(data, o1, a, o);
+      observed = new double[params.length];
+      solver1.fit(data, o1, params, observed);
       solver2.computeValue(data, o2, a2);
 
-      Assertions.assertArrayEquals(o, e, 1e-8,
+      Assertions.assertArrayEquals(observed, expected, 1e-8,
           "Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + "
               + "1 precomputed do not match");
 
-      ev = p.getValues(pf1, a);
+      ev = p.getValues(pf1, params);
       Assertions.assertArrayEquals(ev, o1, 1e-8, "Fit 1 peak + 1 precomputed yFit");
       Assertions.assertArrayEquals(ev, o2, 1e-8, "computeValue 1 peak + 1 precomputed yFit");
     }
@@ -781,9 +784,9 @@ public abstract class BaseFunctionSolverTest {
     final Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);
     solver1.setGradientFunction(f2);
     solver2.setGradientFunction(f2);
-    double[] a = p12.clone();
-    solver1.fit(data, null, a, null);
-    solver2.computeValue(data, null, a);
+    double[] params = p12.clone();
+    solver1.fit(data, null, params, null);
+    solver2.computeValue(data, null, params);
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
 
@@ -794,17 +797,17 @@ public abstract class BaseFunctionSolverTest {
     final double[] o1 = new double[f2.size()];
     final double[] o2 = new double[o1.length];
 
-    solver1.fit(data, o1, a, null);
-    solver2.computeValue(data, o2, a);
+    solver1.fit(data, o1, params, null);
+    solver2.computeValue(data, o2, params);
 
     v1 = solver1.getValue();
     v2 = solver2.getValue();
     TestAssertions.assertTest(v1, v2, predicate, "Fit 2 peaks and computeValue with yFit");
 
     final StandardValueProcedure p = new StandardValueProcedure();
-    double[] e = p.getValues(f2, a);
-    Assertions.assertArrayEquals(e, o1, 1e-8, "Fit 2 peaks yFit");
-    Assertions.assertArrayEquals(e, o2, 1e-8, "computeValue 2 peaks yFit");
+    double[] expected = p.getValues(f2, params);
+    Assertions.assertArrayEquals(expected, o1, 1e-8, "Fit 2 peaks yFit");
+    Assertions.assertArrayEquals(expected, o2, 1e-8, "computeValue 2 peaks yFit");
 
     if (solver1 instanceof SteppingFunctionSolver) {
       // fit with 1 peak + 1 precomputed using the known params.
@@ -815,9 +818,9 @@ public abstract class BaseFunctionSolverTest {
       solver1.setGradientFunction(pf1);
       solver2.setGradientFunction(pf1);
 
-      a = p1.clone();
-      solver1.fit(data, null, a, null);
-      solver2.computeValue(data, null, a);
+      params = p1.clone();
+      solver1.fit(data, null, params, null);
+      solver2.computeValue(data, null, params);
 
       v1 = solver1.getValue();
       v2 = solver2.getValue();
@@ -826,17 +829,17 @@ public abstract class BaseFunctionSolverTest {
       Arrays.fill(o1, 0);
       Arrays.fill(o2, 0);
 
-      solver1.fit(data, o1, a, null);
-      solver2.computeValue(data, o2, a);
+      solver1.fit(data, o1, params, null);
+      solver2.computeValue(data, o2, params);
 
       v1 = solver1.getValue();
       v2 = solver2.getValue();
       TestAssertions.assertTest(v1, v2, predicate,
           "Fit 1 peak + 1 precomputed and computeValue with yFit");
 
-      e = p.getValues(pf1, a);
-      Assertions.assertArrayEquals(e, o1, 1e-8, "Fit 1 peak + 1 precomputed yFit");
-      Assertions.assertArrayEquals(e, o2, 1e-8, "computeValue 1 peak + 1 precomputed yFit");
+      expected = p.getValues(pf1, params);
+      Assertions.assertArrayEquals(expected, o1, 1e-8, "Fit 1 peak + 1 precomputed yFit");
+      Assertions.assertArrayEquals(expected, o2, 1e-8, "computeValue 1 peak + 1 precomputed yFit");
     }
   }
 }

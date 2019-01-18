@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
@@ -37,7 +38,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -73,7 +74,7 @@ public class FitEngineConfiguration implements Cloneable {
    */
   public FitEngineConfiguration() {
     this(FitProtosHelper.defaultFitEngineSettings, CalibrationProtosHelper.defaultCalibration,
-        PSFProtosHelper.defaultOneAxisGaussian2DPSF);
+        PsfProtosHelper.defaultOneAxisGaussian2DPSF);
   }
 
   /**
@@ -167,7 +168,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Gets the search parameter.
    *
    * @return the size of the region to search for local maxima. The actual window is calculated
-   *         dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *         dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    */
   public RelativeParameter getSearchParameter() {
     return fitEngineSettings.getSearch();
@@ -177,7 +178,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Gets the size of the region to search for local maxima.
    *
    * @return the size of the region to search for local maxima. The actual window is calculated
-   *         dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *         dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    */
   public double getSearch() {
     return fitEngineSettings.getSearch().getValue();
@@ -187,7 +188,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Sets the size of the region to search for local maxima.
    *
    * @param search the size of the region to search for local maxima. The actual window is
-   *        calculated dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *        calculated dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    */
   public void setSearch(double search) {
     fitEngineSettings.getSearchBuilder().setValue(search);
@@ -197,7 +198,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Sets the size of the region to search for local maxima.
    *
    * @param search the size of the region to search for local maxima. The actual window is
-   *        calculated dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *        calculated dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    * @param absolute the absolute flag
    */
   public void setSearch(double search, boolean absolute) {
@@ -226,7 +227,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Gets the size of the border region to ignore.
    *
    * @return the border the size of the border region to ignore. The actual window is calculated
-   *         dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *         dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    */
   public RelativeParameter getBorderParameter() {
     return fitEngineSettings.getBorder();
@@ -236,7 +237,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Gets the size of the border region to ignore.
    *
    * @return the border the size of the border region to ignore. The actual window is calculated
-   *         dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *         dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    */
   public double getBorder() {
     return fitEngineSettings.getBorder().getValue();
@@ -246,7 +247,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Sets the size of the border region to ignore.
    *
    * @param border the size of the border region to ignore. The actual window is calculated
-   *        dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *        dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    */
   public void setBorder(double border) {
     fitEngineSettings.getBorderBuilder().setValue(border);
@@ -256,7 +257,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Sets the size of the border region to ignore.
    *
    * @param border the size of the border region to ignore. The actual window is calculated
-   *        dynamically in conjunction with the peak widths using {@link #getHWHMMax()}.
+   *        dynamically in conjunction with the peak widths using {@link #getHwhmMax()}.
    * @param absolute the absolute flag
    */
   public void setBorder(double border, boolean absolute) {
@@ -285,7 +286,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Gets the size of the window used for fitting around a maxima.
    *
    * @return the size of the window used for fitting around a maxima. The actual window is
-   *         calculated dynamically in conjunction with the peak widths using {@link #getSDMax()}.
+   *         calculated dynamically in conjunction with the peak widths using {@link #getSdMax()}.
    */
   public RelativeParameter getFittingParameter() {
     return fitEngineSettings.getFitting();
@@ -295,7 +296,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Gets the size of the window used for fitting around a maxima.
    *
    * @return the size of the window used for fitting around a maxima. The actual window is
-   *         calculated dynamically in conjunction with the peak widths using {@link #getSDMax()}.
+   *         calculated dynamically in conjunction with the peak widths using {@link #getSdMax()}.
    */
   public double getFitting() {
     return fitEngineSettings.getFitting().getValue();
@@ -305,7 +306,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Sets the size of the window used for fitting around a maxima.
    *
    * @param fitting the size of the window used for fitting around a maxima. The actual window is
-   *        calculated dynamically in conjunction with the peak widths using {@link #getSDMax()}.
+   *        calculated dynamically in conjunction with the peak widths using {@link #getSdMax()}.
    */
   public void setFitting(double fitting) {
     fitEngineSettings.getFittingBuilder().setValue(fitting);
@@ -315,7 +316,7 @@ public class FitEngineConfiguration implements Cloneable {
    * Sets the size of the window used for fitting around a maxima.
    *
    * @param fitting the size of the window used for fitting around a maxima. The actual window is
-   *        calculated dynamically in conjunction with the peak widths using {@link #getSDMax()}.
+   *        calculated dynamically in conjunction with the peak widths using {@link #getSdMax()}.
    * @param absolute the absolute flag
    */
   public void setFitting(double fitting, boolean absolute) {
@@ -560,26 +561,10 @@ public class FitEngineConfiguration implements Cloneable {
   public FitEngineConfiguration clone() {
     // Manual copy using the current proto objects
     final FitEngineConfiguration clone = new FitEngineConfiguration(getFitEngineSettings(),
-        getFitConfiguration().getCalibration(), getFitConfiguration().getPSF());
+        getFitConfiguration().getCalibration(), getFitConfiguration().getPsf());
     // Copy anything else not in a proto object
     clone.getFitConfiguration().copySettings(getFitConfiguration());
     return clone;
-
-    // // This is not a complete duplicate. The settings builder objects with the
-    // // underlying configuration will be the same between all instances.
-    // try
-    // {
-    // FitEngineConfiguration f = (FitEngineConfiguration) super.clone();
-    // // Ensure the object is duplicated and not passed by reference.
-    // if (fitConfiguration != null)
-    // f.fitConfiguration = fitConfiguration.clone();
-    // return f;
-    // }
-    // catch (CloneNotSupportedException e)
-    // {
-    // // Ignore
-    // }
-    // return null;
   }
 
   /**
@@ -613,39 +598,25 @@ public class FitEngineConfiguration implements Cloneable {
     b.setDataFilterType(dataFilterType);
 
     // Resize the filter arrays to discard unused filters
-    final int n;
     switch (dataFilterType) {
       case JURY:
         return;
 
       case DIFFERENCE:
-        n = 2;
+        truncateFilters(b, 2);
         break;
 
       case SINGLE:
       default:
-        n = 1;
-    }
-    truncateFilters(b, n);
-  }
-
-  private static void truncateFilters(DataFilterSettings.Builder b, int n) {
-    while (b.getDataFiltersCount() > n) {
-      b.removeDataFilters(b.getDataFiltersCount() - 1);
+        truncateFilters(b, 1);
     }
   }
 
-  // /**
-  // * @param n
-  // * The filter number
-  // * @return the filter to apply to the data before identifying local maxima
-  // */
-  // public DataFilter getDataFilter(int n)
-  // {
-  // if (n < this.fitEngineSettings.getDataFilterSettings().getDataFiltersCount())
-  // return this.fitEngineSettings.getDataFilterSettings().getDataFilter(n);
-  // return null;
-  // }
+  private static void truncateFilters(DataFilterSettings.Builder builder, int size) {
+    while (builder.getDataFiltersCount() > size) {
+      builder.removeDataFilters(builder.getDataFiltersCount() - 1);
+    }
+  }
 
   /**
    * Gets the data filter count.
@@ -766,7 +737,6 @@ public class FitEngineConfiguration implements Cloneable {
   public void setDataFilter(DataFilterMethod dataFilterMethod, double smooth, boolean absolute,
       int n) {
     final DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
-    // truncateFilters(b, n + 1);
     final DataFilter.Builder b2 =
         (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
     b2.setDataFilterMethod(dataFilterMethod);
@@ -787,7 +757,6 @@ public class FitEngineConfiguration implements Cloneable {
    */
   public void setDataFilter(DataFilterMethod dataFilterMethod, double smooth, int n) {
     final DataFilterSettings.Builder b = fitEngineSettings.getDataFilterSettingsBuilder();
-    // truncateFilters(b, n + 1);
     final DataFilter.Builder b2 =
         (b.getDataFiltersCount() == n) ? b.addDataFiltersBuilder() : b.getDataFiltersBuilder(n);
     b2.setDataFilterMethod(dataFilterMethod);
@@ -801,9 +770,9 @@ public class FitEngineConfiguration implements Cloneable {
    *
    * @param dataFilter the data filter
    * @param smooth the size of the smoothing window. The actual window is calculated dynamically in
-   *        conjunction with the peak widths using {@link #getHWHMMin()}.
+   *        conjunction with the peak widths using {@link #getHwhmMin()}.
    * @param absolute Set to true to use the absolute value. Otherwise compute relative to
-   *        {@link #getHWHMMin()}.
+   *        {@link #getHwhmMin()}.
    * @param n The filter number
    */
   public void setDataFilter(int dataFilter, double smooth, boolean absolute, int n) {
@@ -819,7 +788,7 @@ public class FitEngineConfiguration implements Cloneable {
    *
    * @param dataFilter the data filter
    * @param smooth the size of the smoothing window. The actual window is calculated dynamically in
-   *        conjunction with the peak widths using {@link #getHWHMMin()}.
+   *        conjunction with the peak widths using {@link #getHwhmMin()}.
    * @param n The filter number
    */
   public void setDataFilter(int dataFilter, double smooth, int n) {
@@ -853,7 +822,7 @@ public class FitEngineConfiguration implements Cloneable {
    */
   public int getFittingWidth() {
     // Region for peak fitting
-    int fitting = (int) Math.ceil(convertUsingSDMax(getFittingParameter()));
+    int fitting = (int) Math.ceil(convertUsingSdMax(getFittingParameter()));
     if (fitting < 2) {
       fitting = 2;
     }
@@ -879,8 +848,8 @@ public class FitEngineConfiguration implements Cloneable {
     // Respect the absolute parameter absolute flag for all the distances.
 
     // Get the half-width at half maximum
-    final double hwhmMin = getHWHMMin();
-    final double hwhmMax = getHWHMMax();
+    final double hwhmMin = getHwhmMin();
+    final double hwhmMax = getHwhmMax();
 
     // Note: rounding to 2 decimal places is a simple method for removing small errors
     // in floating point precision from creating an incorrect integer
@@ -938,7 +907,7 @@ public class FitEngineConfiguration implements Cloneable {
    *
    * @return the SD min
    */
-  public double getSDMin() {
+  public double getSdMin() {
     final double[] w = fitConfiguration.getGaussian2DWxWy();
 
     final double initialPeakStdDev0 = w[0];
@@ -964,9 +933,9 @@ public class FitEngineConfiguration implements Cloneable {
    *
    * @return the HWHM min
    */
-  public double getHWHMMin() {
+  public double getHwhmMin() {
     // Get the half-width at half maximim
-    return Gaussian2DFunction.SD_TO_HWHM_FACTOR * getSDMin();
+    return Gaussian2DFunction.SD_TO_HWHM_FACTOR * getSdMin();
   }
 
   /**
@@ -977,7 +946,7 @@ public class FitEngineConfiguration implements Cloneable {
    *
    * @return the SD max
    */
-  public double getSDMax() {
+  public double getSdMax() {
     final double[] w = fitConfiguration.getGaussian2DWxWy();
 
     final double initialPeakStdDev0 = w[0];
@@ -1003,22 +972,23 @@ public class FitEngineConfiguration implements Cloneable {
    *
    * @return the HWHM max
    */
-  public double getHWHMMax() {
+  public double getHwhmMax() {
     // Get the half-width at half maximim
-    return Gaussian2DFunction.SD_TO_HWHM_FACTOR * getSDMax();
+    return Gaussian2DFunction.SD_TO_HWHM_FACTOR * getSdMax();
   }
 
   /**
    * Convert the relative parameter using the scale. If the parameter is absolute then return the
    * unscaled value.
    *
-   * @param p the p
+   * @param parameter the parameter
    * @param scale the scale
    * @param decimalPlaces the decimal places to round the scaled number (set to negative to ignore)
    * @return the double
    */
-  public static double convert(RelativeParameter p, double scale, int decimalPlaces) {
-    return (p.getAbsolute()) ? p.getValue() : round(p.getValue() * scale, decimalPlaces);
+  public static double convert(RelativeParameter parameter, double scale, int decimalPlaces) {
+    return (parameter.getAbsolute()) ? parameter.getValue()
+        : round(parameter.getValue() * scale, decimalPlaces);
   }
 
   /**
@@ -1035,31 +1005,31 @@ public class FitEngineConfiguration implements Cloneable {
   /**
    * Convert using half-width half-max as the scale.
    *
-   * @param p the p
+   * @param parameter the parameter
    * @return the converted value
    */
-  public double convertUsingHWHMax(RelativeParameter p) {
-    return (p.getAbsolute()) ? p.getValue() : p.getValue() * getHWHMMax();
+  public double convertUsingHwhMax(RelativeParameter parameter) {
+    return (parameter.getAbsolute()) ? parameter.getValue() : parameter.getValue() * getHwhmMax();
   }
 
   /**
-   * Convert using half-width half-max as the scale.
+   * Convert using half-width half-min as the scale.
    *
-   * @param p the p
+   * @param parameter the parameter
    * @return the converted value
    */
-  public double convertUsingHWHMin(RelativeParameter p) {
-    return (p.getAbsolute()) ? p.getValue() : p.getValue() * getHWHMMin();
+  public double convertUsingHwhMin(RelativeParameter parameter) {
+    return (parameter.getAbsolute()) ? parameter.getValue() : parameter.getValue() * getHwhmMin();
   }
 
   /**
    * Convert using SD max as the scale.
    *
-   * @param p the p
+   * @param parameter the parameter
    * @return the converted value
    */
-  public double convertUsingSDMax(RelativeParameter p) {
-    return (p.getAbsolute()) ? p.getValue() : p.getValue() * getSDMax();
+  public double convertUsingSdMax(RelativeParameter parameter) {
+    return (parameter.getAbsolute()) ? parameter.getValue() : parameter.getValue() * getSdMax();
   }
 
   /**
@@ -1080,9 +1050,8 @@ public class FitEngineConfiguration implements Cloneable {
     }
   }
 
-  private static double getSmoothingWindow(DataFilter f, double hwhmMin) {
-    // return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
-    final RelativeParameter rp = f.getParameters(0);
+  private static double getSmoothingWindow(DataFilter filter, double hwhmMin) {
+    final RelativeParameter rp = filter.getParameters(0);
 
     // Q. Why is this rounded. Is it just to make a nicer number?
     return convert(rp, hwhmMin, 2);
@@ -1123,7 +1092,7 @@ public class FitEngineConfiguration implements Cloneable {
         return new GaussianDataProcessor(border, parameter);
 
       default:
-        throw new RuntimeException("Not yet implemented: " + dataFilter.toString());
+        throw new NotImplementedException("Not yet implemented: " + dataFilter.toString());
     }
   }
 

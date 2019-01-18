@@ -80,8 +80,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.RawResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYZResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyzResultProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 import uk.ac.sussex.gdsc.smlm.utils.Triplet;
 
@@ -1373,17 +1373,17 @@ public class ImageJ3DResultsViewer implements PlugIn, UniverseListener {
       ImageJ3DResultsViewerSettingsOrBuilder settings) {
     final TurboList<Point3f> points = new TurboList<>(results.size());
     if (results.is3D()) {
-      results.forEach(DistanceUnit.NM, new XYZResultProcedure() {
+      results.forEach(DistanceUnit.NM, new XyzResultProcedure() {
         @Override
-        public void executeXYZ(float x, float y, float z) {
+        public void executeXyz(float x, float y, float z) {
           points.addf(new Point3f(x, y, z));
         }
       });
     } else {
-      results.forEach(DistanceUnit.NM, new XYResultProcedure() {
+      results.forEach(DistanceUnit.NM, new XyResultProcedure() {
 
         @Override
-        public void executeXY(float x, float y) {
+        public void executeXy(float x, float y) {
           points.addf(new Point3f(x, y, 0));
         }
       });

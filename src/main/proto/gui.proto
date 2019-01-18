@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 // ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
-// Authors: Alex Herbert, 2017 
+// Authors: Alex Herbert, 2017
 // License: GPL V3
 package uk.ac.sussex.gdsc.smlm.data.config;
 
@@ -149,7 +149,7 @@ message CreateDataSettings {
 
 	// The camera type.
 	CameraType camera_type = 80;
-	// The camera model name. This should contain all the information required to 
+	// The camera model name. This should contain all the information required to
 	// load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
 	string camera_model_name = 81;
 	bool random_crop = 82;
@@ -366,15 +366,15 @@ message DefaultTemplateSettings {
 message ConfigurationTemplateSettings {
 // The option for the Template Manager
 	int32 option = 1;
-	// Set to true to select from a list of standard templates 
+	// Set to true to select from a list of standard templates
 	bool select_standard_templates = 2;
-	// Set to true to select templates from a configuration directory 
+	// Set to true to select templates from a configuration directory
 	bool select_custom_directory = 3;
 	// The configuration directory
 	string configuration_directory = 4;
-	// Used for the multiMode option to select standard templates 
+	// Used for the multiMode option to select standard templates
 	repeated string selected_standard_templates = 5;
-	// Used for the multiMode option to select custom templates 
+	// Used for the multiMode option to select custom templates
 	repeated string selected_custom_templates = 6;
 	// The template to view
 	string template = 7;

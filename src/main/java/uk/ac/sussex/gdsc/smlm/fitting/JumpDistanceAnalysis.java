@@ -437,7 +437,7 @@ public class JumpDistanceAnalysis {
           (int) (4 + Math.floor(3 * Math.log(function.x.length))));
 
       // Iterate this for stability in the initial guess
-      final CMAESOptimizer cmaesOptimizer = createCMAESOptimizer();
+      final CMAESOptimizer cmaesOptimizer = createCmaesOptimizer();
 
       for (int i = 0; i <= fitRestarts; i++) {
         // Try from the initial guess
@@ -646,8 +646,8 @@ public class JumpDistanceAnalysis {
    * @param jumpDistances The jump distances (in um^2)
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  public double[][] fitJumpDistancesMLE(double[] jumpDistances) {
-    return fitJumpDistancesMLE(jumpDistances, null);
+  public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances) {
+    return fitJumpDistancesMle(jumpDistances, null);
   }
 
   /**
@@ -667,7 +667,7 @@ public class JumpDistanceAnalysis {
    *        not null.
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  public double[][] fitJumpDistancesMLE(double[] jumpDistances, double[][] jdHistogram) {
+  public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances, double[][] jdHistogram) {
     resetFitResult();
     if (jumpDistances == null || jumpDistances.length == 0) {
       return null;
@@ -697,7 +697,7 @@ public class JumpDistanceAnalysis {
     int best = -1;
 
     if (minN == 1) {
-      final double[][] fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, 1);
+      final double[][] fit = doFitJumpDistancesMle(jumpDistances, estimatedD, 1);
       if (fit != null) {
         coefficients[0] = fit[0];
         fractions[0] = fit[1];
@@ -712,7 +712,7 @@ public class JumpDistanceAnalysis {
     // Vary n from 2 to N. Stop when the fit fails or the fit is worse.
     int bestMulti = -1;
     for (int n = Math.max(1, minN - 1); n < maxN; n++) {
-      final double[][] fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, n + 1);
+      final double[][] fit = doFitJumpDistancesMle(jumpDistances, estimatedD, n + 1);
       if (fit == null) {
         break;
       }
@@ -781,8 +781,8 @@ public class JumpDistanceAnalysis {
    * @param n The number of species in the mixed population
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  public double[][] fitJumpDistancesMLE(double[] jumpDistances, int n) {
-    return fitJumpDistancesMLE(jumpDistances, null, n);
+  public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances, int n) {
+    return fitJumpDistancesMle(jumpDistances, null, n);
   }
 
   /**
@@ -797,7 +797,8 @@ public class JumpDistanceAnalysis {
    * @param n The number of species in the mixed population
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  public double[][] fitJumpDistancesMLE(double[] jumpDistances, double[][] jdHistogram, int n) {
+  public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances, double[][] jdHistogram,
+      int n) {
     resetFitResult();
     if (jumpDistances == null || jumpDistances.length == 0) {
       return null;
@@ -816,7 +817,7 @@ public class JumpDistanceAnalysis {
       jdHistogram = cumulativeHistogram(jumpDistances);
     }
 
-    final double[][] fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, n);
+    final double[][] fit = doFitJumpDistancesMle(jumpDistances, estimatedD, n);
     if (fit != null) {
       saveFitCurve(fit, jdHistogram);
     }
@@ -834,7 +835,8 @@ public class JumpDistanceAnalysis {
    * @param n The number of species in the mixed population
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  private double[][] doFitJumpDistancesMLE(double[] jumpDistances, double estimatedD, int n) {
+  private @Nullable double[][] doFitJumpDistancesMle(double[] jumpDistances, double estimatedD,
+      int n) {
     final MaxEval maxEval = new MaxEval(20000);
     final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
     calibrated = isCalibrated();
@@ -931,7 +933,7 @@ public class JumpDistanceAnalysis {
           (int) (4 + Math.floor(3 * Math.log(function.x.length))));
 
       // Iterate this for stability in the initial guess
-      final CMAESOptimizer cmaesOptimizer = createCMAESOptimizer();
+      final CMAESOptimizer cmaesOptimizer = createCmaesOptimizer();
 
       for (int i = 0; i <= fitRestarts; i++) {
         // Try from the initial guess
@@ -1051,12 +1053,12 @@ public class JumpDistanceAnalysis {
     return new CustomPowellOptimizer(rel, abs, positionChecker, basisConvergence);
   }
 
-  private static CMAESOptimizer createCMAESOptimizer() {
+  private static CMAESOptimizer createCmaesOptimizer() {
     final double rel = 1e-8;
     final double abs = 1e-10;
     final int maxIterations = 2000;
-    final double stopFitness = 0; // Double.NEGATIVE_INFINITY;
-    final boolean isActiveCMA = true;
+    final double stopFitness = 0;
+    final boolean isActiveCma = true;
     final int diagonalOnly = 20;
     final int checkFeasableCount = 1;
     final RandomGenerator random = new Well19937c();
@@ -1064,7 +1066,7 @@ public class JumpDistanceAnalysis {
     final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(rel, abs);
 
     // Iterate this for stability in the initial guess
-    return new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
+    return new CMAESOptimizer(maxIterations, stopFitness, isActiveCma, diagonalOnly,
         checkFeasableCount, random, generateStatistics, checker);
   }
 
@@ -1523,14 +1525,12 @@ public class JumpDistanceAnalysis {
       double sum = 0;
       double total = 0;
       for (int i = 0; i < numberOfFractions; i++) {
-        // final double f = getF(params[i * 2]);
-        // final double fourD = 4 * getD(params[i * 2 + 1]);
         final double f = params[i * 2];
         final double fourD = 4 * params[i * 2 + 1];
         sum += (f / fourD) * FastMath.exp(-x / fourD);
         total += f;
       }
-      return sum / total;
+      return MathUtils.div0(sum, total);
     }
 
     /**
@@ -1540,19 +1540,19 @@ public class JumpDistanceAnalysis {
      * @return the values
      */
     double[] evaluateAll(double[] params) {
+      // First sum the fractions
       double total = 0;
-      final double[] f_d = new double[numberOfFractions];
+      final double[] fOver4D = new double[numberOfFractions];
       for (int i = 0; i < numberOfFractions; i++) {
-        // f_d[i] = getF(params[i * 2]);
-        f_d[i] = params[i * 2];
-        total += f_d[i];
+        fOver4D[i] = params[i * 2];
+        total += fOver4D[i];
       }
 
+      // Normalise the fractions to 1
       final double[] fourD = new double[numberOfFractions];
       for (int i = 0; i < numberOfFractions; i++) {
-        // fourD[i] = 4 * getD(params[i * 2 + 1]);
         fourD[i] = 4 * params[i * 2 + 1];
-        f_d[i] = (f_d[i] / total) / fourD[i];
+        fOver4D[i] = (fOver4D[i] / total) / fourD[i];
       }
 
       // Compute the probability:
@@ -1561,7 +1561,7 @@ public class JumpDistanceAnalysis {
       for (int i = 0; i < x.length; i++) {
         double sum = 0;
         for (int j = 0; j < numberOfFractions; j++) {
-          sum += f_d[j] * FastMath.exp(-x[i] / fourD[j]);
+          sum += fOver4D[j] * FastMath.exp(-x[i] / fourD[j]);
         }
         values[i] = sum;
       }
@@ -1577,13 +1577,13 @@ public class JumpDistanceAnalysis {
       }
       // Debug the call from the optimiser
       if (DEBUG_OPTIMISER) {
-        final double[] F = new double[numberOfFractions];
-        final double[] D = new double[numberOfFractions];
+        final double[] f = new double[numberOfFractions];
+        final double[] d = new double[numberOfFractions];
         for (int i = 0; i < numberOfFractions; i++) {
-          F[i] = params[i * 2];
-          D[i] = params[i * 2 + 1];
+          f[i] = params[i * 2];
+          d[i] = params[i * 2 + 1];
         }
-        System.out.printf("%s : %s = %f\n", Arrays.toString(F), Arrays.toString(D), ll);
+        System.out.printf("%s : %s = %f\n", Arrays.toString(f), Arrays.toString(d), ll);
       }
       return ll;
     }
@@ -1718,13 +1718,15 @@ public class JumpDistanceAnalysis {
       }
 
       final double[] fraction = new double[numberOfFractions];
-      final double[] total_f = new double[numberOfFractions];
-      final double[] f_total = new double[numberOfFractions];
+      // (sum(f) - f) / sum(f)^2
+      final double[] totalMfOverTotal2 = new double[numberOfFractions];
+      // -f / sum(f)^2
+      final double[] fOverTotal2 = new double[numberOfFractions];
       for (int i = 0; i < numberOfFractions; i++) {
         fraction[i] = f[i] / total;
         // Because we use y = 1 - sum(a) all coefficients are inverted
-        total_f[i] = -1 * (total - f[i]) / (total * total);
-        f_total[i] = -1 * -f[i] / (total * total);
+        totalMfOverTotal2[i] = -1 * (total - f[i]) / (total * total);
+        fOverTotal2[i] = -1 * -f[i] / (total * total);
       }
 
       final double[][] jacobian = new double[x.length][variables.length];
@@ -1740,12 +1742,12 @@ public class JumpDistanceAnalysis {
           jacobian[i][j * 2 + 1] = fraction[j] * FastMath.exp(b[j]) * b[j] / variables[j * 2 + 1];
 
           // Gradient for the fraction f
-          jacobian[i][j * 2] = total_f[j] * FastMath.exp(b[j]);
+          jacobian[i][j * 2] = totalMfOverTotal2[j] * FastMath.exp(b[j]);
           for (int k = 0; k < numberOfFractions; k++) {
             if (j == k) {
               continue;
             }
-            jacobian[i][j * 2] += f_total[k] * FastMath.exp(b[k]);
+            jacobian[i][j * 2] += fOverTotal2[k] * FastMath.exp(b[k]);
           }
         }
       }

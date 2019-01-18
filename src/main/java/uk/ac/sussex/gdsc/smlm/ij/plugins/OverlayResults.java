@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJTablePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultView;
@@ -210,7 +210,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
       }
       clearError();
 
-      final IJTablePeakResults table;
+      final ImageJTablePeakResults table;
       TIntHashSet selectedId = null;
       if (showTable) {
         final boolean hasId = results.hasId();
@@ -235,7 +235,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
 
         // New table
         is3D = is3D || results.is3D();
-        table = new IJTablePeakResults(false);
+        table = new ImageJTablePeakResults(false);
         table.setTableTitle(TITLE);
         table.copySettings(results);
         table.setClearAtStart(true);

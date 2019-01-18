@@ -78,10 +78,10 @@ public class GradientCalculator6 extends GradientCalculator {
     func.initialise(a);
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wgt = new double[1];
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.evalw(x[i], dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(x[i], dyDa, wgt);
+        final double weight = getWeight(wgt[0]);
 
         alpha[0][0] += dyDa[0] * weight * dyDa[0];
         alpha[1][0] += dyDa[1] * weight * dyDa[0];
@@ -213,10 +213,10 @@ public class GradientCalculator6 extends GradientCalculator {
     func.initialise(a);
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wgt = new double[1];
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.evalw(i, dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(i, dyDa, wgt);
+        final double weight = getWeight(wgt[0]);
 
         alpha[0][0] += dyDa[0] * weight * dyDa[0];
         alpha[1][0] += dyDa[1] * weight * dyDa[0];

@@ -73,7 +73,7 @@ public class GaussianPSFModelTest {
     final double[] o2 = new double[maxx * maxy];
     final double[][] g = new double[maxx * maxy][];
 
-    final PSFModel psf = new GaussianPSFModel(zModel);
+    final PsfModel psf = new GaussianPSFModel(zModel);
 
     final double c = maxx * 0.5;
     for (int i = -1; i <= 1; i++) {
@@ -136,7 +136,7 @@ public class GaussianPSFModelTest {
     final double[][] g2 = new double[maxx * maxy][3];
     final double[] dx = new double[] {1e-4, 1e-4, 1e-4};
 
-    final PSFModel psf = new GaussianPSFModel(zModel);
+    final PsfModel psf = new GaussianPSFModel(zModel);
 
     final double c = maxx * 0.5;
     for (int i = -1; i <= 1; i++) {
@@ -190,7 +190,7 @@ public class GaussianPSFModelTest {
     final double[] o = new double[maxx * maxy];
     final double[] o2 = new double[maxx * maxy];
 
-    final PSFModel psf = new GaussianPSFModel(zModel);
+    final PsfModel psf = new GaussianPSFModel(zModel);
     final GaussianPSFModel psf2 = new GaussianPSFModel(zModel);
     psf2.setRange(40);
 

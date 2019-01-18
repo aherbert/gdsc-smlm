@@ -58,13 +58,13 @@ public class MultiPathFitResult {
    * The score from residuals analysis on the residuals of the multi fit. This can be used to choose
    * if the doublet fit should be considered.
    */
-  private double multiQAScore = -1;
+  private double multiQaScore = -1;
 
   /**
    * The score from residuals analysis on the residuals of the single fit. This can be used to
    * choose if the doublet fit should be considered.
    */
-  private double singleQAScore = -1;
+  private double singleQaScore = -1;
 
   /**
    * The results from the multi-fit. It is expected that one result will be true for isNewResult()
@@ -198,8 +198,8 @@ public class MultiPathFitResult {
     width = source.width;
     height = source.height;
     candidateId = source.candidateId;
-    multiQAScore = source.multiQAScore;
-    singleQAScore = source.singleQAScore;
+    multiQaScore = source.multiQaScore;
+    singleQaScore = source.singleQaScore;
     if (copyResults) {
       multiFitResult = copyResult(source.multiFitResult);
       multiDoubletFitResult = copyResult(source.multiDoubletFitResult);
@@ -331,17 +331,17 @@ public class MultiPathFitResult {
    *
    * @return the multi QA score
    */
-  public double getMultiQAScore() {
-    return multiQAScore;
+  public double getMultiQaScore() {
+    return multiQaScore;
   }
 
   /**
    * Sets the multi quadrant analysis (QA) score.
    *
-   * @param multiQAScore the new multi QA score
+   * @param multiQaScore the new multi QA score
    */
-  protected void setMultiQAScore(double multiQAScore) {
-    this.multiQAScore = multiQAScore;
+  protected void setMultiQaScore(double multiQaScore) {
+    this.multiQaScore = multiQaScore;
   }
 
   /**
@@ -385,17 +385,17 @@ public class MultiPathFitResult {
    *
    * @return the single QA score
    */
-  public double getSingleQAScore() {
-    return singleQAScore;
+  public double getSingleQaScore() {
+    return singleQaScore;
   }
 
   /**
    * Sets the single quadrant analysis (QA) score.
    *
-   * @param singleQAScore the new single QA score
+   * @param singleQaScore the new single QA score
    */
-  protected void setSingleQAScore(double singleQAScore) {
-    this.singleQAScore = singleQAScore;
+  protected void setSingleQaScore(double singleQaScore) {
+    this.singleQaScore = singleQaScore;
   }
 
   /**

@@ -190,10 +190,10 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults 
   }
 
   @Override
-  public void setPSF(PSF psf) {
-    super.setPSF(psf);
+  public void setPsf(PSF psf) {
+    super.setPsf(psf);
     for (final PeakResults peakResults : results) {
-      peakResults.setPSF(psf);
+      peakResults.setPsf(psf);
     }
   }
 

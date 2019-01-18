@@ -39,20 +39,21 @@ public class HalfPoissonFisherInformation extends BasePoissonFisherInformation {
    * is 1/(2*mean).
    */
   @Override
-  public double getFisherInformation(double t) {
-    if (t <= 0) {
+  public double getFisherInformation(double theta) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    return 0.5 / t;
+    return 0.5 / theta;
   }
 
   @Override
-  public double getAlpha(double t) {
+  public double getAlpha(double theta) {
     return 0.5;
   }
 
   @Override
-  protected void postClone() {
-    // Nothing to do.
+  public HalfPoissonFisherInformation copy() {
+    // No state so no need to copy
+    return this;
   }
 }

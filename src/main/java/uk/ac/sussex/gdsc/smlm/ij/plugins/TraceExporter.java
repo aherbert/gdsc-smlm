@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 
 import gnu.trove.set.hash.TIntHashSet;
@@ -299,7 +299,7 @@ public class TraceExporter implements PlugIn {
 
       @SuppressWarnings("resource")
       final BufferedWriter writer = out;
-      results.forEach(DistanceUnit.UM, (XYRResultProcedure) (x, y, result) -> {
+      results.forEach(DistanceUnit.UM, (XyrResultProcedure) (x, y, result) -> {
         try {
           if (result.hasEndFrame()) {
             final String sId = Integer.toString(result.getId());

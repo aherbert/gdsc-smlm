@@ -225,7 +225,7 @@ public class DrawClusters implements PlugIn {
           values[i] = -roi.getLength();
           break;
         case 5: // Mean Square Displacement
-          values[i] = -traces[i].getMSD();
+          values[i] = -traces[i].getMsd();
           break;
         case 6: // Mean / Frame
           values[i] = -traces[i].getMeanDistance();

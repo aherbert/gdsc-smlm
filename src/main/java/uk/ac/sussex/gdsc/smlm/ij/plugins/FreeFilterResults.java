@@ -31,8 +31,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.filter.ANRFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.AndFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.AnrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.CoordinateFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.EShiftFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
@@ -44,16 +44,16 @@ import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter2;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionHysteresisFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.SBRFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.SNRFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.SNRHysteresisFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SbrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.SignalFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SnrHysteresisFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.TraceFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter2;
-import uk.ac.sussex.gdsc.smlm.results.filter.XYWidthFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.XYWidthFilter2;
+import uk.ac.sussex.gdsc.smlm.results.filter.XyWidthFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.XyWidthFilter2;
 
 import ij.IJ;
 import ij.plugin.PlugIn;
@@ -101,7 +101,7 @@ public class FreeFilterResults implements PlugIn, ItemListener {
     }
 
     // Filter results
-    final Filter filter = Filter.fromXML(filterSettings.getFreeFilter());
+    final Filter filter = Filter.fromXml(filterSettings.getFreeFilter());
     if (filter != null) {
       final MemoryPeakResults newResults = filter.filter(results);
       if (newResults.size() > 0) {
@@ -121,7 +121,7 @@ public class FreeFilterResults implements PlugIn, ItemListener {
     gd.addMessage("Select a dataset to filter");
     ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
-    filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
+    filterSettings = SettingsManager.readGuiFilterSettings(0).toBuilder();
 
     String text;
     try {
@@ -177,17 +177,17 @@ public class FreeFilterResults implements PlugIn, ItemListener {
     IJ.log("");
     demo(new WidthFilter(2));
     demo(new WidthFilter2(0.7, 2));
-    demo(new XYWidthFilter(2));
-    demo(new XYWidthFilter2(0.7, 2));
-    demo(new SBRFilter(15));
+    demo(new XyWidthFilter(2));
+    demo(new XyWidthFilter2(0.7, 2));
+    demo(new SbrFilter(15));
     demo(new ShiftFilter(0.7));
     demo(new EShiftFilter(0.8));
     demo(new SignalFilter(1000));
-    demo(new SNRFilter(10));
-    demo(new ANRFilter(11));
+    demo(new SnrFilter(10));
+    demo(new AnrFilter(11));
     demo(new PrecisionFilter(30));
     demo(new PrecisionFilter2(30));
-    demo(new SNRHysteresisFilter(50, 1, 2, 1, 10, 20));
+    demo(new SnrHysteresisFilter(50, 1, 2, 1, 10, 20));
     demo(new PrecisionHysteresisFilter(2, 0, 1, 0, 20, 30));
     demo(new TraceFilter(0.5, 1));
     demo(new CoordinateFilter(15.5f, 234.5f, 80.99f, 133f));
@@ -200,15 +200,15 @@ public class FreeFilterResults implements PlugIn, ItemListener {
 
     comment("Combined filters");
     IJ.log("");
-    demo(new AndFilter(new SNRFilter(10), new WidthFilter(2)));
-    demo(new OrFilter(new SNRFilter(10), new PrecisionFilter(30)));
-    demo(new OrFilter(new AndFilter(new SNRFilter(10), new PrecisionFilter(30)),
+    demo(new AndFilter(new SnrFilter(10), new WidthFilter(2)));
+    demo(new OrFilter(new SnrFilter(10), new PrecisionFilter(30)));
+    demo(new OrFilter(new AndFilter(new SnrFilter(10), new PrecisionFilter(30)),
         new TraceFilter(0.5, 1)));
   }
 
   private static void demo(Filter filter) {
     comment(filter.getClass().getSimpleName() + ": " + filter.getDescription());
-    IJ.log(filter.toXML());
+    IJ.log(filter.toXml());
     IJ.log("");
   }
 

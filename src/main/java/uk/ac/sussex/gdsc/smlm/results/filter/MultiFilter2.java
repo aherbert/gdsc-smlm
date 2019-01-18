@@ -68,11 +68,11 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter {
   @Override
   protected void setupCalculator(MemoryPeakResults peakResults) {
     try {
-      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPsf(),
           peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION_X);
       useBackground = true;
     } catch (final ConfigurationException ex) {
-      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPsf(),
           peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
       useBackground = false;
     }
@@ -86,9 +86,9 @@ public class MultiFilter2 extends MultiFilter implements IMultiFilter {
   @Override
   protected double getVariance(PeakResult peak) {
     if (useBackground) {
-      return calculator.getLSEVariance(peak.getParameters());
+      return calculator.getLseVariance(peak.getParameters());
     }
-    return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
+    return calculator.getLseVariance(peak.getParameters(), peak.getNoise());
   }
 
   @Override

@@ -89,7 +89,7 @@ public class ItemGroupNode extends ContentNode {
   }
 
   @Override
-  public void lutUpdated(final int[] r, final int[] g, final int[] b, final int[] a) {
+  public void lutUpdated(final int[] red, final int[] green, final int[] blue, final int[] alpha) {
     // do nothing
   }
 

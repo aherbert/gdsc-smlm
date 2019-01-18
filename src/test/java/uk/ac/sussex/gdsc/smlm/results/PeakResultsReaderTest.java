@@ -29,9 +29,9 @@ import uk.ac.sussex.gdsc.core.utils.rng.RadixStringSampler;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -252,70 +252,70 @@ public class PeakResultsReaderTest {
 
   // -=-=-=-=-
 
-  // Note: For MALK we cannot do all the tests as the format only contains X,Y,T,I
+  // Note: For Malk we cannot do all the tests as the format only contains X,Y,T,I
 
   @SeededTest
-  public void writeMALKMatchesRead(RandomSeed seed) {
+  public void writeMalkMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, false, ResultsFileFormat.MALK, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeSequentialMALKMatchesRead(RandomSeed seed) {
+  public void writeSequentialMalkMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.MALK, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeMALKWithSortMatchesRead(RandomSeed seed) {
+  public void writeMalkWithSortMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, false, ResultsFileFormat.MALK, false, false, false, true, false);
   }
 
   @SeededTest
-  public void writeSequentialMALKWithSortMatchesRead(RandomSeed seed) {
+  public void writeSequentialMalkWithSortMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.MALK, false, false, false, true, false);
   }
 
   // -=-=-=-=-
 
-  // Note: For TSF we cannot specify as binary because the widths are converted into a
+  // Note: For Tsf we cannot specify as binary because the widths are converted into a
   // different format and then back again.
 
   @SeededTest
-  public void writeTSFMatchesRead(RandomSeed seed) {
+  public void writeTsfMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeSequentialTSFMatchesRead(RandomSeed seed) {
+  public void writeSequentialTsfMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.TSF, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeTSFWithDeviationsMatchesRead(RandomSeed seed) {
+  public void writeTsfWithDeviationsMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, true, false, false, false, false);
   }
 
   @SeededTest
-  public void writeTSFWithEndFrameMatchesRead(RandomSeed seed) {
+  public void writeTsfWithEndFrameMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, true, false, false, false);
   }
 
   @SeededTest
-  public void writeTSFWithIdMatchesRead(RandomSeed seed) {
+  public void writeTsfWithIdMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, true, false, false);
   }
 
   @SeededTest
-  public void writeTSFWithPrecisionMatchesRead(RandomSeed seed) {
+  public void writeTsfWithPrecisionMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, false, true, false);
   }
 
   @SeededTest
-  public void writeTSFWithCombinationsMatchesRead(RandomSeed seed) {
+  public void writeTsfWithCombinationsMatchesRead(RandomSeed seed) {
     writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.TSF, false);
   }
 
@@ -414,7 +414,7 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void readWithMALKIsFasterThanText(RandomSeed seed) {
+  public void readWithMalkIsFasterThanText(RandomSeed seed) {
     readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TEXT, false,
         ResultsFileFormat.MALK, false, 2);
   }
@@ -426,13 +426,13 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void readWithBinaryIsFasterThanTSF(RandomSeed seed) {
+  public void readWithBinaryIsFasterThanTsf(RandomSeed seed) {
     readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TSF, false,
         ResultsFileFormat.BINARY, false, 20);
   }
 
   @SeededTest
-  public void canConvertMalkToNMAndPhotons(RandomSeed seed) {
+  public void canConvertMalkToNmAndPhotons(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
@@ -441,7 +441,7 @@ public class PeakResultsReaderTest {
     cal.setDistanceUnit(DistanceUnit.PIXEL);
     cal.setIntensityUnit(IntensityUnit.COUNT);
     out.setCalibration(cal.getCalibration());
-    out.setPSF(PSFHelper.create(PSFType.CUSTOM));
+    out.setPsf(PsfHelper.create(PSFType.CUSTOM));
 
     final String filename = createFile();
 
@@ -492,7 +492,7 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void canReadTSFIntoPreferredUnits(RandomSeed seed) {
+  public void canReadTsfIntoPreferredUnits(RandomSeed seed) {
     canReadIntoPreferredUnits(seed, ResultsFileFormat.TSF);
   }
 
@@ -524,21 +524,21 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void canReadTextAndSimplifyGaussian2DPSF(RandomSeed seed) {
-    canReadAndSimplifyGaussian2DPSF(seed, ResultsFileFormat.TEXT);
+  public void canReadTextAndSimplifyGaussian2DPsf(RandomSeed seed) {
+    canReadAndSimplifyGaussian2DPsf(seed, ResultsFileFormat.TEXT);
   }
 
   @SeededTest
-  public void canReadBinaryAndSimplifyGaussian2DPSF(RandomSeed seed) {
-    canReadAndSimplifyGaussian2DPSF(seed, ResultsFileFormat.BINARY);
+  public void canReadBinaryAndSimplifyGaussian2DPsf(RandomSeed seed) {
+    canReadAndSimplifyGaussian2DPsf(seed, ResultsFileFormat.BINARY);
   }
 
   @SeededTest
-  public void canReadTSFAndSimplifyGaussian2DPSF(RandomSeed seed) {
-    canReadAndSimplifyGaussian2DPSF(seed, ResultsFileFormat.TSF);
+  public void canReadTsfAndSimplifyGaussian2DPsf(RandomSeed seed) {
+    canReadAndSimplifyGaussian2DPsf(seed, ResultsFileFormat.TSF);
   }
 
-  private static void canReadAndSimplifyGaussian2DPSF(RandomSeed seed,
+  private static void canReadAndSimplifyGaussian2DPsf(RandomSeed seed,
       ResultsFileFormat fileFormat) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final MemoryPeakResults out = createResults(rg, 1, false, false, false, false);
@@ -554,7 +554,7 @@ public class PeakResultsReaderTest {
     out.setCalibration(cal.getCalibration());
 
     // Remove angle
-    final int ia = PSFHelper.getGaussian2DAngleIndex(out.getPSF());
+    final int ia = PsfHelper.getGaussian2DAngleIndex(out.getPsf());
     out.forEach(new PeakResultProcedure() {
       @Override
       public void execute(PeakResult peakResult) {
@@ -569,9 +569,9 @@ public class PeakResultsReaderTest {
     MemoryPeakResults in = readFile(filename, false, false);
 
     // Change to two-axis PSF
-    out.setPSF(PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D));
+    out.setPsf(PsfHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D));
     final int twoAxisLength =
-        PSFHelper.getParameterCount(out.getPSF()) + PeakResult.STANDARD_PARAMETERS;
+        PsfHelper.getParameterCount(out.getPsf()) + PeakResult.STANDARD_PARAMETERS;
     out.forEach(new PeakResultProcedure() {
       @Override
       public void execute(PeakResult peakResult) {
@@ -582,7 +582,7 @@ public class PeakResultsReaderTest {
     checkEqual(fileFormat, false, false, false, false, false, out, in);
 
     // Remove sy
-    final int[] indices = PSFHelper.getGaussian2DWxWyIndices(out.getPSF());
+    final int[] indices = PsfHelper.getGaussian2DWxWyIndices(out.getPsf());
     final int isx = indices[0];
     final int isy = indices[1];
     out.forEach(new PeakResultProcedure() {
@@ -598,9 +598,9 @@ public class PeakResultsReaderTest {
     in = readFile(filename, false, false);
 
     // Change to one-axis PSF
-    out.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
+    out.setPsf(PsfHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
     final int oneAxisLength =
-        PSFHelper.getParameterCount(out.getPSF()) + PeakResult.STANDARD_PARAMETERS;
+        PsfHelper.getParameterCount(out.getPsf()) + PeakResult.STANDARD_PARAMETERS;
     out.forEach(new PeakResultProcedure() {
       @Override
       public void execute(PeakResult peakResult) {
@@ -652,7 +652,7 @@ public class PeakResultsReaderTest {
       cal.setDistanceUnit(DistanceUnit.NM);
       cal.setIntensityUnit(IntensityUnit.PHOTON);
       out.setCalibration(cal.getCalibration());
-      out.setPSF(PSFHelper.create(PSFType.CUSTOM));
+      out.setPsf(PsfHelper.create(PSFType.CUSTOM));
     }
     if (fileFormat == ResultsFileFormat.TSF) {
       final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
@@ -897,8 +897,8 @@ public class PeakResultsReaderTest {
       Assertions.assertNull(c2, "Calibration");
     }
 
-    final PSF p1 = expectedResults.getPSF();
-    final PSF p2 = actualResults.getPSF();
+    final PSF p1 = expectedResults.getPsf();
+    final PSF p2 = actualResults.getPsf();
     if (p1 != null) {
       Assertions.assertNotNull(p2, "PSF");
       Assertions.assertTrue(p1.equals(p2), "PSF");
@@ -914,7 +914,7 @@ public class PeakResultsReaderTest {
     final boolean extended = showEndFrame || showId || showPrecision;
 
     final MemoryPeakResults results =
-        new MemoryPeakResults(PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
+        new MemoryPeakResults(PsfHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
     while (size-- > 0) {
       final int startFrame = rg.nextInt(size + 1);
       final int origX = rg.nextInt(256);
@@ -996,10 +996,10 @@ public class PeakResultsReaderTest {
             new TextFilePeakResults(filename, showDeviations, showEndFrame, showId, showPrecision);
         break;
       case TSF:
-        out = new TSFPeakResultsWriter(filename);
+        out = new TsfPeakResultsWriter(filename);
         break;
       case MALK:
-        out = new MALKFilePeakResults(filename);
+        out = new MalkFilePeakResults(filename);
         break;
       default:
         throw new NotImplementedException("Unsupported file format: " + fileFormat);

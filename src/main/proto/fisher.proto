@@ -7,7 +7,7 @@ package uk.ac.sussex.gdsc.smlm.data.config;
 
 option java_outer_classname = "FisherProtos";
 
-// Repeated fields use a non-pleural name for clarity in the Message.toString() method  
+// Repeated fields use a non-pleural name for clarity in the Message.toString() method
 
 // Contains a single entry for relative Fisher information compared to that of
 // a random Poisson process (1/mean).

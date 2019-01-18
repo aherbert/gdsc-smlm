@@ -86,10 +86,10 @@ public class GradientCalculator7 extends GradientCalculator {
     func.initialise(a);
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wgt = new double[1];
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.evalw(x[i], dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(x[i], dyDa, wgt);
+        final double weight = getWeight(wgt[0]);
 
         alpha[0][0] += dyDa[0] * weight * dyDa[0];
         alpha[1][0] += dyDa[1] * weight * dyDa[0];
@@ -251,10 +251,10 @@ public class GradientCalculator7 extends GradientCalculator {
     func.initialise(a);
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wgt = new double[1];
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.evalw(i, dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(i, dyDa, wgt);
+        final double weight = getWeight(wgt[0]);
 
         alpha[0][0] += dyDa[0] * weight * dyDa[0];
         alpha[1][0] += dyDa[1] * weight * dyDa[0];
@@ -409,12 +409,12 @@ public class GradientCalculator7 extends GradientCalculator {
     // parameters
 
     for (int k = 0; k < nparams; k++) {
-      final double w = dfiDa[k] * xi_fi2;
+      final double wgt = dfiDa[k] * xi_fi2;
 
       for (int l = 0; l <= k; l++) {
         // This is the non-optimised version:
         // alpha[j][k] += dyDa[j] * dyDa[k] * y[i] / (ymod * ymod);
-        alpha[k][l] += w * dfiDa[l];
+        alpha[k][l] += wgt * dfiDa[l];
       }
 
       // This is the non-optimised version:

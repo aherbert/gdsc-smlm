@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 /**
- * Specifies the fitting configuration for Gaussian 2D fitting.
+ * Specifies the fitting configuration and validation for Gaussian 2D fitting.
  */
 public interface Gaussian2DFitConfiguration {
   /**
@@ -71,14 +71,14 @@ public interface Gaussian2DFitConfiguration {
    *
    * @return true, if is XSD fitting
    */
-  boolean isXSDFitting();
+  boolean isXSdFitting();
 
   /**
    * Checks if is YSD fitting.
    *
    * @return true, if is YSD fitting
    */
-  boolean isYSDFitting();
+  boolean isYSdFitting();
 
   /**
    * Checks if is angle fitting.
@@ -105,14 +105,14 @@ public interface Gaussian2DFitConfiguration {
    *
    * @return the initial XSD
    */
-  double getInitialXSD();
+  double getInitialXSd();
 
   /**
    * Gets the initial guess for the YSD parameter.
    *
    * @return the initial YSD
    */
-  double getInitialYSD();
+  double getInitialYSd();
 
   /**
    * Gets the initial guess for the angle parameter.
@@ -146,13 +146,13 @@ public interface Gaussian2DFitConfiguration {
    * Check peaks to see if the fit was sensible. This is called after fitting so that the parameters
    * can be checked.
    *
-   * @param nPeaks The number of peaks
+   * @param peakCount The number of peaks
    * @param initialParams The initial peak parameters
    * @param params The fitted peak parameters
    * @param paramDevs the fitted peak parameters variances (can be null)
    * @return the fit status
    */
-  FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramDevs);
+  FitStatus validateFit(int peakCount, double[] initialParams, double[] params, double[] paramDevs);
 
   /**
    * Gets the validation data. This can be set within the validateFit function.

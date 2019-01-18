@@ -319,10 +319,10 @@ public class CalibrationReader {
    *
    * @return true, if successful
    */
-  public boolean isCCDCamera() {
+  public boolean isCcdCamera() {
     final CalibrationOrBuilder c = getCalibrationOrBuilder();
     if (c.hasCameraCalibration()) {
-      return CalibrationProtosHelper.isCCDCameraType(c.getCameraCalibration().getCameraType());
+      return CalibrationProtosHelper.isCcdCameraType(c.getCameraCalibration().getCameraType());
     }
     return false;
   }
@@ -332,7 +332,7 @@ public class CalibrationReader {
    *
    * @return true, if the camera type was an Electron Multiplying (EM) CCD
    */
-  public boolean isEMCCD() {
+  public boolean isEmCcd() {
     return getCameraType() == CameraType.EMCCD;
   }
 
@@ -341,7 +341,7 @@ public class CalibrationReader {
    *
    * @return true, if the camera type was a standard CCD.
    */
-  public boolean isCCD() {
+  public boolean isCcd() {
     return getCameraType() == CameraType.CCD;
   }
 
@@ -350,7 +350,7 @@ public class CalibrationReader {
    *
    * @return true, if the camera type was a sCMOS.
    */
-  public boolean isSCMOS() {
+  public boolean isScmos() {
     return getCameraType() == CameraType.SCMOS;
   }
 

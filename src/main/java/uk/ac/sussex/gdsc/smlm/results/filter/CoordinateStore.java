@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows checking for
  * duplicates. The XY and Z resolution can be different.
@@ -34,7 +36,7 @@ public interface CoordinateStore {
    *
    * @return the XY resolution
    */
-  double getXYResolution();
+  double getXyResolution();
 
   /**
    * Gets the Z resolution of the store. If negative then this is ignored and the store behaves as
@@ -93,6 +95,7 @@ public interface CoordinateStore {
    * @param z the z
    * @return the coordinate closer than the resolution (or null)
    */
+  @Nullable
   double[] find(double x, double y, double z);
 
   /**

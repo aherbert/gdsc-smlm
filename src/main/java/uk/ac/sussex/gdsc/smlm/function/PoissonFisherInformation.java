@@ -38,33 +38,34 @@ public class PoissonFisherInformation extends BasePoissonFisherInformation {
    * is 1/mean.
    */
   @Override
-  public double getFisherInformation(double t) {
-    if (t <= 0) {
+  public double getFisherInformation(double theta) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    return 1.0 / t;
+    return 1.0 / theta;
   }
 
   /**
    * Gets the Poisson Fisher information.
    *
-   * @param t the poisson mean
+   * @param theta the poisson mean
    * @return the poisson Fisher information
    */
-  public static double getPoissonI(double t) {
-    if (t <= 0) {
+  public static double getPoissonI(double theta) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    return 1.0 / t;
+    return 1.0 / theta;
   }
 
   @Override
-  public double getAlpha(double t) {
+  public double getAlpha(double theta) {
     return 1;
   }
 
   @Override
-  protected void postClone() {
-    // Nothing to do.
+  public PoissonFisherInformation copy() {
+    // No state so no need to copy
+    return this;
   }
 }

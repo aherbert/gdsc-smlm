@@ -28,8 +28,8 @@ import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.smlm.filters.FHTFilter;
-import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
+import uk.ac.sussex.gdsc.smlm.filters.FhtFilter;
+import uk.ac.sussex.gdsc.smlm.filters.FhtFilter.Operation;
 import uk.ac.sussex.gdsc.smlm.filters.KernelFilter;
 import uk.ac.sussex.gdsc.smlm.filters.ZeroKernelFilter;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -77,7 +77,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private int lastFilter = -1;
   private boolean lastZero;
   private KernelFilter kf;
-  private FHTFilter ff;
+  private FhtFilter ff;
   private ImagePlus dataImp;
   private ImagePlus kernelImp;
 
@@ -107,7 +107,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
       kf.convolve(data, w, h, border);
     } else {
       // Use a clone for thread safety
-      final FHTFilter f = (ticker.getTotal() > 1) ? ff.copy() : ff;
+      final FhtFilter f = (ticker.getTotal() > 1) ? ff.copy() : ff;
       f.filter(data, w, h, border);
     }
     if (ticker.getTotal() == 1) {
@@ -202,7 +202,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
           final int kw = fp.getWidth();
           final int kh = fp.getHeight();
           final float[] kernel = (float[]) fp.getPixels();
-          ff = new FHTFilter(kernel, kw, kh);
+          ff = new FhtFilter(kernel, kw, kh);
           ff.initialiseKernel(dataImp.getWidth(), dataImp.getHeight());
         }
         ff.setOperation(operation);

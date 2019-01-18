@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.AndFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.SNRFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 
 import ij.IJ;
@@ -214,7 +214,7 @@ public class CreateFilters implements PlugIn, ItemListener {
   }
 
   private static String getName(StringBuilder sb) {
-    final Filter f = Filter.fromXML(sb.toString());
+    final Filter f = Filter.fromXml(sb.toString());
     if (f != null) {
       return f.getType().replaceAll("&", "&amp;");
     }
@@ -251,7 +251,7 @@ public class CreateFilters implements PlugIn, ItemListener {
     gd.addMessage("Create a set of filters for use in the Filter Analysis plugin.\n"
         + "Attributes will be enumerated if they are of the form 'min:max:increment'");
 
-    filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
+    filterSettings = SettingsManager.readGuiFilterSettings(0).toBuilder();
 
     gd.addTextAreas(filterSettings.getFilterTemplate(), null, 20, 80);
     gd.addCheckbox("Enumerate_early attributes first", enumerateEarly);
@@ -301,23 +301,23 @@ public class CreateFilters implements PlugIn, ItemListener {
 
     comment("Single filters");
     IJ.log("");
-    demo(new SNRFilter(10), new String[] {"10:20:1"});
+    demo(new SnrFilter(10), new String[] {"10:20:1"});
     demo(new PrecisionFilter(30), new String[] {"30:50:2"});
     IJ.log("");
 
     comment("Combined filters");
     IJ.log("");
-    demo(new AndFilter(new SNRFilter(10), new WidthFilter(2)),
+    demo(new AndFilter(new SnrFilter(10), new WidthFilter(2)),
         new String[] {"10:20:1", "1.5:2.5:0.2"});
     demo(
-        new OrFilter(new PrecisionFilter(30), new AndFilter(new SNRFilter(10), new WidthFilter(2))),
+        new OrFilter(new PrecisionFilter(30), new AndFilter(new SnrFilter(10), new WidthFilter(2))),
         new String[] {"30:40:2", "10:20:1", "1.5:2.5:0.2"});
     IJ.log("");
   }
 
   private void demo(Filter filter, String... attributeSubstitutions) {
     // Create the filter XML
-    String xml = filter.toXML();
+    String xml = filter.toXml();
     if (attributeSubstitutions != null) {
       // Process the XML substituting attributes in the order they occur using a SAX parser.
       // Write the new XMl to a buffer.

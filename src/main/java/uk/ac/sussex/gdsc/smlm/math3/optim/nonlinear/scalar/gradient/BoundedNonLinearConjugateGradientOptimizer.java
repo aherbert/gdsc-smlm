@@ -117,10 +117,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    * close enough of the optimum whether the Polak-Ribière formula may not converge in rare cases.
    * On the other hand, the Polak-Ribière formula is often faster when it does converge.
    * Polak-Ribière is often used.
-   *
-   * @since 2.0
    */
-  public static enum Formula {
+  public enum Formula {
     /** Fletcher-Reeves formula. */
     FLETCHER_REEVES,
     /** Polak-Ribière formula. */
@@ -218,22 +216,22 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     sign = (goal == GoalType.MINIMIZE) ? -1 : 1;
     double[] unbounded = point.clone();
     applyBounds(point);
-    double[] r = computeObjectiveGradient(point);
-    checkGradients(r, unbounded);
+    double[] gradient = computeObjectiveGradient(point);
+    checkGradients(gradient, unbounded);
 
     if (goal == GoalType.MINIMIZE) {
       for (int i = 0; i < n; i++) {
-        r[i] = -r[i];
+        gradient[i] = -gradient[i];
       }
     }
 
     // Initial search direction.
-    double[] steepestDescent = preconditioner.precondition(point, r);
+    double[] steepestDescent = preconditioner.precondition(point, gradient);
     double[] searchDirection = steepestDescent.clone();
 
     double delta = 0;
     for (int i = 0; i < n; ++i) {
-      delta += r[i] * searchDirection[i];
+      delta += gradient[i] * searchDirection[i];
     }
 
     // Used for non-gradient based line search
@@ -307,21 +305,21 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
       }
       unbounded = point.clone();
       applyBounds(point);
-      r = computeObjectiveGradient(point);
-      checkGradients(r, unbounded);
+      gradient = computeObjectiveGradient(point);
+      checkGradients(gradient, unbounded);
 
       if (goal == GoalType.MINIMIZE) {
         for (int i = 0; i < n; ++i) {
-          r[i] = -r[i];
+          gradient[i] = -gradient[i];
         }
       }
 
       // Compute beta.
       final double deltaOld = delta;
-      final double[] newSteepestDescent = preconditioner.precondition(point, r);
+      final double[] newSteepestDescent = preconditioner.precondition(point, gradient);
       delta = 0;
       for (int i = 0; i < n; ++i) {
-        delta += r[i] * newSteepestDescent[i];
+        delta += gradient[i] * newSteepestDescent[i];
       }
 
       if (delta == 0) {
@@ -335,8 +333,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
           break;
         case POLAK_RIBIERE:
           double deltaMid = 0;
-          for (int i = 0; i < r.length; ++i) {
-            deltaMid += r[i] * steepestDescent[i];
+          for (int i = 0; i < gradient.length; ++i) {
+            deltaMid += gradient[i] * steepestDescent[i];
           }
           beta = (delta - deltaMid) / deltaOld;
           break;
@@ -390,18 +388,19 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   /**
    * Finds the upper bound b ensuring bracketing of a root between a and b.
    *
-   * @param f function whose root must be bracketed.
+   * @param func function whose root must be bracketed.
    * @param a lower bound of the interval.
-   * @param h initial step to try.
+   * @param initialStep initial step to try.
    * @return b such that f(a) and f(b) have opposite signs.
    * @throws MathIllegalStateException if no bracket can be found.
    */
-  private static double findUpperBound(final UnivariateFunction f, final double a, final double h) {
-    final double yA = f.value(a);
+  private static double findUpperBound(final UnivariateFunction func, final double a,
+      final double initialStep) {
+    final double yA = func.value(a);
     double yB = yA;
-    for (double step = h; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB)) {
+    for (double step = initialStep; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB)) {
       final double b = a + step;
-      yB = f.value(b);
+      yB = func.value(b);
       if (yA * yB <= 0) {
         return b;
       }
@@ -416,17 +415,17 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   /**
    * Finds the upper bound b ensuring bracketing of a root between a and b.
    *
-   * @param f function whose root must be bracketed.
-   * @param a lower bound of the interval.
-   * @param h initial step to try.
+   * @param func function whose root must be bracketed.
+   * @param lower lower bound of the interval.
+   * @param initialStep initial step to try.
    * @return b such that f(a) and f(b) have opposite signs.
    * @throws MathIllegalStateException if no bracket can be found.
    */
   @SuppressWarnings("unused")
-  private double findUpperBoundWithChecks(final UnivariateFunction f, final double a,
-      final double h) {
+  private double findUpperBoundWithChecks(final UnivariateFunction func, final double lower,
+      final double initialStep) {
     noBracket = false;
-    final double yA = f.value(a);
+    final double yA = func.value(lower);
 
     // Check we have a gradient. This should be true unless something slipped by.
     if (Double.isNaN(yA)) {
@@ -436,11 +435,11 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
     double yB = yA;
     double lastB = Double.NaN;
-    for (double step = h; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB)) {
-      double b = a + step;
-      yB = f.value(b);
+    for (double step = initialStep; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB)) {
+      double upper = lower + step;
+      yB = func.value(upper);
       if (yA * yB <= 0) {
-        return b;
+        return upper;
       }
 
       if (Double.isNaN(yB)) {
@@ -457,13 +456,13 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
         // We made no valid steps. Do an inner loop reducing the step size until we find a point
         // with a valid gradient
         for (step *= 0.1; step > Double.MIN_VALUE; step *= 0.1) {
-          b = a + step;
-          yB = f.value(b);
+          upper = lower + step;
+          yB = func.value(upper);
           if (yA * yB <= 0) {
-            return b;
+            return upper;
           }
           if (!Double.isNaN(yB)) {
-            lastB = b;
+            lastB = upper;
           }
         }
         if (lastB != Double.NaN) {
@@ -473,7 +472,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
         throw new MathIllegalStateException(
             LocalizedFormats.UNABLE_TO_BRACKET_OPTIMUM_IN_LINE_SEARCH);
       }
-      lastB = b;
+      lastB = upper;
     }
     throw new MathIllegalStateException(LocalizedFormats.UNABLE_TO_BRACKET_OPTIMUM_IN_LINE_SEARCH);
   }
@@ -481,8 +480,8 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   /** Default identity preconditioner. */
   public static class IdentityPreconditioner implements Preconditioner {
     @Override
-    public double[] precondition(double[] variables, double[] r) {
-      return r.clone();
+    public double[] precondition(double[] variables, double[] direction) {
+      return direction.clone();
     }
   }
 
@@ -522,26 +521,21 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     /**
      * Find the minimum of the function {@code f(p + alpha * d)}.
      *
-     * @param p Starting point.
-     * @param d Search direction.
+     * @param point Starting point.
+     * @param direction Search direction.
      * @return the optimum.
      * @throws org.apache.commons.math3.exception.TooManyEvaluationsException if the number of
      *         evaluations is exceeded.
      */
-    public UnivariatePointValuePair search(final double[] p, final double[] d) {
-      final int n = p.length;
-      final UnivariateFunction f = new UnivariateFunction() {
-        @Override
-        public double value(double alpha) {
-          final double[] x = new double[n];
-          for (int i = 0; i < n; i++) {
-            x[i] = p[i] + alpha * d[i];
-          }
-          applyBounds(x);
-          final double obj =
-              BoundedNonLinearConjugateGradientOptimizer.this.computeObjectiveValue(x);
-          return obj;
+    public UnivariatePointValuePair search(final double[] point, final double[] direction) {
+      final int n = point.length;
+      final UnivariateFunction f = alpha -> {
+        final double[] x = new double[n];
+        for (int i = 0; i < n; i++) {
+          x[i] = point[i] + alpha * direction[i];
         }
+        applyBounds(x);
+        return BoundedNonLinearConjugateGradientOptimizer.this.computeObjectiveValue(x);
       };
 
       final GoalType goal = BoundedNonLinearConjugateGradientOptimizer.this.getGoalType();
@@ -563,7 +557,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    * <p>The function represented by this class is the dot product of the objective function gradient
    * and the search direction. Its value is zero when the gradient is orthogonal to the search
    * direction, i.e. when the objective function value is a local extremum along the search
-   * direction. </p>
+   * direction.
    */
   private class LineSearchFunction implements UnivariateFunction {
     /** Current point. */
@@ -679,43 +673,43 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    * Check if the point falls outside configured bounds truncating the gradient to zero if it is
    * moving further outside the bounds.
    *
-   * @param r the r
+   * @param gradient the gradient
    * @param point the point
    * @return true if NaN gradients
    */
-  private boolean checkGradients(double[] r, double[] point) {
-    return checkGradients(r, point, sign);
+  private boolean checkGradients(double[] gradient, double[] point) {
+    return checkGradients(gradient, point, sign);
   }
 
   /**
    * Check if the point falls outside configured bounds truncating the gradient to zero if it is
    * moving further outside the bounds (defined by the sign of the search direction).
    *
-   * @param r the r
+   * @param gradient the gradient
    * @param point the point
    * @param sign the sign
    * @return true if NaN gradients
    */
-  private boolean checkGradients(double[] r, double[] point, final double sign) {
+  private boolean checkGradients(double[] gradient, double[] point, final double sign) {
     if (isUpper) {
       for (int i = 0; i < point.length; i++) {
-        if (point[i] >= upper[i] && Math.signum(r[i]) == sign) {
-          r[i] = 0;
+        if (point[i] >= upper[i] && Math.signum(gradient[i]) == sign) {
+          gradient[i] = 0;
         }
       }
     }
     if (isLower) {
       for (int i = 0; i < point.length; i++) {
-        if (point[i] <= lower[i] && Math.signum(r[i]) == -sign) {
-          r[i] = 0;
+        if (point[i] <= lower[i] && Math.signum(gradient[i]) == -sign) {
+          gradient[i] = 0;
         }
       }
     }
     boolean isNaN = false;
     for (int i = 0; i < point.length; i++) {
-      if (Double.isNaN(r[i])) {
+      if (Double.isNaN(gradient[i])) {
         isNaN = true;
-        r[i] = 0;
+        gradient[i] = 0;
       }
     }
     return isNaN;

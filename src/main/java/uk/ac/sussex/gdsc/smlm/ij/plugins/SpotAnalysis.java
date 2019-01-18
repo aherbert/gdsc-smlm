@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
@@ -42,12 +42,12 @@ import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.utils.ImageROIPainter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -744,7 +744,7 @@ public class SpotAnalysis extends PlugInFrame
         final float miny = areaBounds.y;
         final float maxy = miny + areaBounds.height;
 
-        r.forEach(DistanceUnit.PIXEL, (XYRResultProcedure) (x, y, result) -> {
+        r.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
           if (result.getXPosition() >= minx && result.getXPosition() <= maxx
               && result.getYPosition() >= miny && result.getYPosition() <= maxy) {
             candidateFrames.add(result.getFrame());
@@ -1264,8 +1264,8 @@ public class SpotAnalysis extends PlugInFrame
 
       // Fit the PSF using a Gaussian
       final FitConfiguration fitConfiguration = new FitConfiguration();
-      fitConfiguration.setPSF(PSFProtosHelper.defaultOneAxisGaussian2DPSF);
-      fitConfiguration.setFixedPSF(true);
+      fitConfiguration.setPsf(PsfProtosHelper.defaultOneAxisGaussian2DPSF);
+      fitConfiguration.setFixedPsf(true);
       fitConfiguration.setBackgroundFitting(true);
       fitConfiguration.setSignalStrength(0);
       fitConfiguration.setCoordinateShift(rawImp.getWidth() / 4.0f);
@@ -1287,7 +1287,7 @@ public class SpotAnalysis extends PlugInFrame
         final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
         rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s",
             MathUtils.rounded(spotSignal, 4), MathUtils.rounded(spotSignal / noise, 3)));
-        ImageROIPainter.addRoi(rawImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
+        ImageRoiPainter.addRoi(rawImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
             params[Gaussian2DFunction.Y_POSITION]));
       } else {
         rawFittedLabel.setText("");
@@ -1314,7 +1314,7 @@ public class SpotAnalysis extends PlugInFrame
         final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
         blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s",
             MathUtils.rounded(spotSignal, 4), MathUtils.rounded(spotSignal / noise, 3)));
-        ImageROIPainter.addRoi(blurImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
+        ImageRoiPainter.addRoi(blurImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
             params[Gaussian2DFunction.Y_POSITION]));
       } else {
         blurFittedLabel.setText("");

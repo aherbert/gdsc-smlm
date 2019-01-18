@@ -180,10 +180,10 @@ public class GaussianFilterTest {
   }
 
   private class DPFilter extends GFilter {
-    DPGaussianFilter gf = new DPGaussianFilter();
+    DpGaussianFilter gf = new DpGaussianFilter();
 
     DPFilter(boolean internal) {
-      super(DPGaussianFilter.class.getSimpleName(), internal);
+      super(DpGaussianFilter.class.getSimpleName(), internal);
     }
 
     @Override

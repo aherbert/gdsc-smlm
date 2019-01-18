@@ -50,16 +50,16 @@ public class PoissonGaussianConvolutionFunction
   /**
    * The on-chip gain multiplication factor.
    */
-  final double g;
+  final double gain;
 
   private final double var;
-  private final double s;
+  private final double sd;
   private final double twoVar;
   private final double sqrtTwoVar;
 
   private final double logNormalisationGaussian;
 
-  private boolean computePMF;
+  private boolean computePmf;
 
   /**
    * Instantiates a new poisson gaussian convolution function.
@@ -75,13 +75,13 @@ public class PoissonGaussianConvolutionFunction
     }
     alpha = Math.abs(alpha);
 
-    this.g = 1.0 / alpha;
+    this.gain = 1.0 / alpha;
     if (isVariance) {
-      s = Math.sqrt(variance);
+      sd = Math.sqrt(variance);
       this.var = variance;
     } else {
-      s = variance;
-      this.var = s * s;
+      sd = variance;
+      this.var = sd * sd;
     }
     twoVar = 2 * var;
     sqrtTwoVar = Math.sqrt(twoVar);
@@ -95,13 +95,13 @@ public class PoissonGaussianConvolutionFunction
    * Creates the with standard deviation.
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
-   * @param s The standard deviation of the Gaussian distribution at readout
+   * @param sd The standard deviation of the Gaussian distribution at readout
    * @return the poisson gaussian function 2
    * @throws IllegalArgumentException if the variance is zero or below
    */
   public static PoissonGaussianConvolutionFunction createWithStandardDeviation(final double alpha,
-      final double s) {
-    return new PoissonGaussianConvolutionFunction(alpha, s, false);
+      final double sd) {
+    return new PoissonGaussianConvolutionFunction(alpha, sd, false);
   }
 
   /**
@@ -120,18 +120,18 @@ public class PoissonGaussianConvolutionFunction
   /**
    * {@inheritDoc}
    *
-   * <p>The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true
+   * <p>The output is a PDF or PMF depending on the value of {@link #isComputePmf()}. If set to true
    * the function does not error if the input x is non-integer.
    *
-   * @see #isComputePMF()
+   * @see #isComputePmf()
    */
   @Override
   public double likelihood(double observed, double mu) {
     if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      if (computePMF) {
+      if (computePmf) {
         final double x = Math.round(observed);
-        return (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+        return (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
       }
       return FastMath.exp((-0.5 * observed * observed / var) + logNormalisationGaussian);
     }
@@ -147,11 +147,11 @@ public class PoissonGaussianConvolutionFunction
     // I.e. when the Gaussian probability is zero then the Poisson is not relevant.
     // Use +/- 5 SD
     // x = D - q*g => q = (D-x) / g
-    int qmax = (int) Math.ceil((D + 5 * s) / g);
+    int qmax = (int) Math.ceil((D + 5 * sd) / gain);
     if (qmax < 0) {
       return 0;
     }
-    int qmin = (int) Math.floor((D - 5 * s) / g);
+    int qmin = (int) Math.floor((D - 5 * sd) / gain);
     if (qmin < 0) {
       qmin = 0;
       // Collision check to avoid double computing
@@ -168,24 +168,24 @@ public class PoissonGaussianConvolutionFunction
     logFactorial.ensureRange(qmin, qmax);
 
     final double logu = Math.log(u);
-    double p = 0;
+    double pvalue = 0;
 
     // Optionally use the error function for a full convolution between
     // the Poisson PMF and Gaussian PDF
-    if (computePMF) {
+    if (computePmf) {
       for (int q = qmin; q <= qmax; q++) {
         final double poisson = FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
         // Use Gaussian CDF
         final double x = getX(D, q);
-        final double gaussian = (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
-        p += poisson * gaussian;
+        final double gaussian = (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
+        pvalue += poisson * gaussian;
       }
     } else {
       for (int q = qmin; q <= qmax; q++) {
         final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
         final double x = getX(D, q);
         final double logGaussian = -(MathUtils.pow2(x) / twoVar) + logNormalisationGaussian;
-        p += FastMath.exp(logPoisson + logGaussian);
+        pvalue += FastMath.exp(logPoisson + logGaussian);
       }
     }
 
@@ -193,14 +193,16 @@ public class PoissonGaussianConvolutionFunction
     // Note: This is needed when using this as a discrete probability distribution,
     // e.g. input observed count is integer
 
-    return p;
+    return pvalue;
   }
 
+  // @CHECKSTYLE.OFF
   private double getX(final double D, int q) {
     // Do not round to compute the convolution point x
     // return Math.round(D - q * g)
-    return D - q * g;
+    return D - q * gain;
   }
+  // @CHECKSTYLE.ON
 
   /**
    * Gaussian CDF.
@@ -208,7 +210,7 @@ public class PoissonGaussianConvolutionFunction
    * @param x the x
    * @return the cumulative density
    */
-  double gaussianCDF(final double x) {
+  double gaussianCdf(final double x) {
     // return org.apache.commons.math3.special.Erf.erf(x / sqrt_var_by_2)
     // This may not be precise enough.
     // Absolute error is <3e-7. Not sure what relative error is.
@@ -219,10 +221,10 @@ public class PoissonGaussianConvolutionFunction
   /**
    * {@inheritDoc}
    *
-   * <p>The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true
+   * <p>The output is a PDF or PMF depending on the value of {@link #isComputePmf()}. If set to true
    * the function does not error if the input x is non-integer.
    *
-   * @see #isComputePMF()
+   * @see #isComputePmf()
    */
   @Override
   public double logLikelihood(double observed, double mu) {
@@ -230,19 +232,19 @@ public class PoissonGaussianConvolutionFunction
 
     if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      if (computePMF) {
+      if (computePmf) {
         final double x = Math.round(observed);
-        return Math.log((gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5);
+        return Math.log((gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5);
       }
       return (-0.5 * observed * observed / var) + logNormalisationGaussian;
     }
     final double u = mu; // expected photoelectrons
     final double D = observed; // Camera counts
-    int qmax = (int) Math.ceil((D + 5 * s) / g);
+    int qmax = (int) Math.ceil((D + 5 * sd) / gain);
     if (qmax < 0) {
       return Double.NEGATIVE_INFINITY;
     }
-    int qmin = (int) Math.floor((D - 5 * s) / g);
+    int qmin = (int) Math.floor((D - 5 * sd) / gain);
     if (qmin < 0) {
       qmin = 0;
       // Collision check to avoid double computing
@@ -252,14 +254,14 @@ public class PoissonGaussianConvolutionFunction
     }
     logFactorial.ensureRange(qmin, qmax);
     final double logu = Math.log(u);
-    double p = 0;
-    if (computePMF) {
+    double pvalue = 0;
+    if (computePmf) {
       for (int q = qmin; q <= qmax; q++) {
         final double poisson = FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
         // Use Gaussian CDF
         final double x = getX(D, q);
-        final double gaussian = (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
-        p += poisson * gaussian;
+        final double gaussian = (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
+        pvalue += poisson * gaussian;
       }
     } else {
       for (int q = qmin; q <= qmax; q++) {
@@ -267,12 +269,12 @@ public class PoissonGaussianConvolutionFunction
         final double x = getX(D, q);
         // final double logGaussian = (MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian;
         // p += FastMath.exp(logPoisson - logGaussian);
-        p += FastMath.exp(logPoisson
+        pvalue += FastMath.exp(logPoisson
             // Gaussian
             - (MathUtils.pow2(x) / twoVar) + logNormalisationGaussian);
       }
     }
-    return Math.log(p);
+    return Math.log(pvalue);
   }
 
   /**
@@ -284,8 +286,8 @@ public class PoissonGaussianConvolutionFunction
    *
    * @return true, if computing a PMF(X=x).
    */
-  public boolean isComputePMF() {
-    return computePMF;
+  public boolean isComputePmf() {
+    return computePmf;
   }
 
   /**
@@ -293,11 +295,12 @@ public class PoissonGaussianConvolutionFunction
    * Poisson PMF.
    *
    * <p>The default is a PDF(X=x). If set to true the function {@link #likelihood(double, double)}
-   * does not error if the input x is non-integer.
+   * does not error if the input x is non-integer (even though this would not be valid for a strict
+   * PMF).
    *
-   * @param computePMF the new use CDF flag
+   * @param computePmf the new compute PMF flag
    */
-  public void setComputePMF(boolean computePMF) {
-    this.computePMF = computePMF;
+  public void setComputePmf(boolean computePmf) {
+    this.computePmf = computePmf;
   }
 }

@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -47,9 +47,9 @@ import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJTablePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 import ij.IJ;
@@ -107,7 +107,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   private FitResult fitResult;
   private double chiSquared;
 
-  private IJTablePeakResults results;
+  private ImageJTablePeakResults results;
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -171,7 +171,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     psfTypeValues = d.toArray(new PSFType[d.size()]);
     psfTypeNames = new String[psfTypeValues.length];
     for (int i = 0; i < psfTypeValues.length; i++) {
-      psfTypeNames[i] = PSFProtosHelper.getName(psfTypeValues[i]);
+      psfTypeNames[i] = PsfProtosHelper.getName(psfTypeValues[i]);
     }
   }
 
@@ -208,7 +208,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     gd.addSlider("Border", 0, 15, border);
 
     gd.addMessage("--- Gaussian fitting ---");
-    gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(getPSFType()));
+    gd.addChoice("PSF", getPSFTypeNames(), PsfProtosHelper.getName(getPSFType()));
     gd.addCheckbox("Fit_background", fitBackground);
     gd.addNumericField("Max_iterations", maxIterations, 0);
     gd.addNumericField("Relative_threshold", relativeThreshold, -3);
@@ -356,7 +356,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     final Rectangle bounds = ip.getRoi();
 
     // Crop to the ROI
-    final float[] data = IJImageConverter.getData(ip);
+    final float[] data = ImageJImageConverter.getData(ip);
 
     final int width = bounds.width;
     final int height = bounds.height;
@@ -426,7 +426,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     final Rectangle bounds = ip.getRoi();
 
     // Crop to the ROI
-    final float[] data = IJImageConverter.getData(ip);
+    final float[] data = ImageJImageConverter.getData(ip);
 
     final int width = bounds.width;
     final int height = bounds.height;
@@ -471,14 +471,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       return;
     }
 
-    results =
-        new IJTablePeakResults(showDeviations, imp.getTitle() + " [" + imp.getCurrentSlice() + "]");
+    results = new ImageJTablePeakResults(showDeviations,
+        imp.getTitle() + " [" + imp.getCurrentSlice() + "]");
     final CalibrationWriter cw = new CalibrationWriter();
     cw.setIntensityUnit(IntensityUnit.COUNT);
     cw.setDistanceUnit(DistanceUnit.PIXEL);
     cw.setAngleUnit(AngleUnit.RADIAN);
     results.setCalibration(cw.getCalibration());
-    results.setPSF(PSFProtosHelper.getDefaultPSF(getPSFType()));
+    results.setPsf(PsfProtosHelper.getDefaultPsf(getPSFType()));
     results.setShowFittingData(true);
     results.setAngleUnit(AngleUnit.DEGREE);
     results.begin();
@@ -853,7 +853,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   private Gaussian2DFitter createGaussianFitter(boolean simpleFiltering) {
     final FitConfiguration config = new FitConfiguration();
     config.setFitSolver(FitSolver.LVM_LSE);
-    config.setPSF(PSFProtosHelper.getDefaultPSF(getPSFType()));
+    config.setPsf(PsfProtosHelper.getDefaultPsf(getPSFType()));
     config.setMaxIterations(getMaxIterations());
     config.setRelativeThreshold(relativeThreshold);
     config.setAbsoluteThreshold(absoluteThreshold);

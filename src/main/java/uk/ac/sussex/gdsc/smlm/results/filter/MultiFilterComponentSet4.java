@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSet4 extends MultiFilterComponentSet {
+public class MultiFilterComponentSet4 implements MultiFilterComponentSet {
   private MultiFilterComponent component0;
   private final MultiFilterComponent component1;
   private final MultiFilterComponent component2;
@@ -38,11 +38,23 @@ public class MultiFilterComponentSet4 extends MultiFilterComponentSet {
    *
    * @param components the components
    */
-  public MultiFilterComponentSet4(MultiFilterComponent[] components) {
+  MultiFilterComponentSet4(MultiFilterComponent[] components) {
     this.component0 = components[0];
     this.component1 = components[1];
     this.component2 = components[2];
     this.component3 = components[3];
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  MultiFilterComponentSet4(MultiFilterComponentSet4 source) {
+    this.component0 = source.component0;
+    this.component1 = source.component1;
+    this.component2 = source.component2;
+    this.component3 = source.component3;
   }
 
   @Override
@@ -71,7 +83,12 @@ public class MultiFilterComponentSet4 extends MultiFilterComponentSet {
   }
 
   @Override
-  void replace0(MultiFilterComponent c) {
-    component0 = c;
+  public void replace0(MultiFilterComponent component) {
+    component0 = component;
+  }
+
+  @Override
+  public MultiFilterComponentSet copy() {
+    return new MultiFilterComponentSet4(this);
   }
 }

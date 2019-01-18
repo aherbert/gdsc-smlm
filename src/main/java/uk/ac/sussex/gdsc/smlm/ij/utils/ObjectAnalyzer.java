@@ -141,7 +141,7 @@ public class ObjectAnalyzer {
       // Look for non-zero values that are not already in an object
       if (maskImage[i] != 0 && objectMask[i] == 0) {
         maxObject++;
-        final int size = expandObjectXY(maskImage, objectMask, i, maxObject, ppList);
+        final int size = expandObjectXy(maskImage, objectMask, i, maxObject, ppList);
         if (sizes.length == maxObject) {
           sizes = Arrays.copyOf(sizes, (int) (maxObject * 1.5));
         }
@@ -171,7 +171,7 @@ public class ObjectAnalyzer {
    * Searches from the specified point to find all coordinates of the same value and assigns them to
    * given maximum ID.
    */
-  private int expandObjectXY(final int[] image, final int[] objectMask, final int index0,
+  private int expandObjectXy(final int[] image, final int[] objectMask, final int index0,
       final int id, int[][] ppList) {
     objectMask[index0] = id; // mark first point
     int listI = 0; // index of current search element in the list

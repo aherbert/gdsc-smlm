@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.Molecule;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
@@ -394,7 +394,7 @@ public class BlinkEstimator implements PlugIn {
     double fittedAverage = 0;
 
     try {
-      final PCPALMMolecules fitter = new PCPALMMolecules();
+      final PcPalmMolecules fitter = new PcPalmMolecules();
       final ArrayList<Molecule> molecules = fitter.extractLocalisations(results);
       final String title = (verbose) ? TITLE + " Localisation Precision" : null;
 

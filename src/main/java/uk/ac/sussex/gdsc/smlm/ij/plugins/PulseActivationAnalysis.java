@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.Cluster.CentroidMethod;
@@ -58,7 +58,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import ij.CompositeImage;
@@ -1789,7 +1789,7 @@ public class PulseActivationAnalysis
       double nmPerPixel, double gain) {
     final ResultsImageSettings s = resultsSettings.getResultsImageSettings();
     if (s.getImageType() != ResultsImageType.DRAW_NONE) {
-      final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
+      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
           s.getImageType(), s.getWeighted(), s.getEqualised(), title, bounds, nmPerPixel, gain,
           s.getScale(), s.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
       image.setLiveImage(false);
@@ -1811,7 +1811,7 @@ public class PulseActivationAnalysis
 
   private static ImageProcessor getImage(PeakResultsList peakResultsList) {
     final PeakResults[] list = peakResultsList.toArray();
-    final IJImagePeakResults image = (IJImagePeakResults) list[1];
+    final ImageJImagePeakResults image = (ImageJImagePeakResults) list[1];
     return image.getImagePlus().getProcessor();
   }
 
@@ -1877,7 +1877,7 @@ public class PulseActivationAnalysis
       r.addAll(list);
 
       // Draw the unmixed activations
-      final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
+      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
           ResultsImageType.DRAW_LOCALISATIONS, true, true, title, bounds, sim_nmPerPixel, 1,
           1024.0 / sim_size, 0, ResultsImageMode.IMAGE_ADD);
       image.setCalibration(calibration);
@@ -2234,9 +2234,9 @@ public class PulseActivationAnalysis
 
       // The first result is the memory results
       final MemoryPeakResults results = (MemoryPeakResults) output[i].getOutput(0);
-      results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
+      results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
         @Override
-        public void executeXYR(float xx, float yy, PeakResult result) {
+        public void executeXyr(float xx, float yy, PeakResult result) {
           if (r.contains(xx, yy)) {
             add(o, (xx - x) * magnification, (yy - y) * magnification, color);
           }

@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Shift.
  */
-public class MultiFilterShiftComponent extends MultiFilterComponent {
+public class MultiFilterShiftComponent implements MultiFilterComponent {
   private static final int type =
       IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 

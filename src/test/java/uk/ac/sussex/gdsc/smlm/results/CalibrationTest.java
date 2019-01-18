@@ -40,7 +40,7 @@ public class CalibrationTest {
     c.getExposureTime();
     c.getReadNoise();
     c.getBias();
-    c.isEmCCD();
+    c.isEmCcd();
     c.getAmplification();
   }
 
@@ -52,7 +52,7 @@ public class CalibrationTest {
     c.setExposureTime(3);
     c.setReadNoise(4);
     c.setBias(5);
-    c.setEmCCD(true);
+    c.setEmCcd(true);
     c.setAmplification(6);
 
     c.getNmPerPixel();
@@ -60,7 +60,7 @@ public class CalibrationTest {
     c.getExposureTime();
     c.getReadNoise();
     c.getBias();
-    c.isEmCCD();
+    c.isEmCcd();
     c.getAmplification();
   }
 
@@ -102,7 +102,7 @@ public class CalibrationTest {
   @Test
   public void isEmCCDThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
-      new Calibration(true).isEmCCD();
+      new Calibration(true).isEmCcd();
     });
   }
 
@@ -221,9 +221,9 @@ public class CalibrationTest {
   public void getEmCCDThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
-      c.setEmCCD(true);
-      c.clearHasEMCCD();
-      c.isEmCCD();
+      c.setEmCcd(true);
+      c.clearHasEmCcd();
+      c.isEmCcd();
     });
   }
 

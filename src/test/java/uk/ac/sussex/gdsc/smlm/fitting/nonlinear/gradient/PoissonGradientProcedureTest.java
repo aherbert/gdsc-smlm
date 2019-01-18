@@ -90,13 +90,13 @@ public class PoissonGradientProcedureTest {
   @SeededTest
   public void gradientProcedureFactoryCreatesOptimisedProcedures() {
     Assertions.assertEquals(
-        PoissonGradientProcedureFactory.create(new DummyGradientFunction(6)).getClass(),
+        PoissonGradientProcedureUtils.create(new DummyGradientFunction(6)).getClass(),
         PoissonGradientProcedure6.class);
     Assertions.assertEquals(
-        PoissonGradientProcedureFactory.create(new DummyGradientFunction(5)).getClass(),
+        PoissonGradientProcedureUtils.create(new DummyGradientFunction(5)).getClass(),
         PoissonGradientProcedure5.class);
     Assertions.assertEquals(
-        PoissonGradientProcedureFactory.create(new DummyGradientFunction(4)).getClass(),
+        PoissonGradientProcedureUtils.create(new DummyGradientFunction(4)).getClass(),
         PoissonGradientProcedure4.class);
   }
 
@@ -117,26 +117,26 @@ public class PoissonGradientProcedureTest {
     final int n = blockWidth * blockWidth;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-    final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+    final GradientCalculator calc = GradientCalculatorUtils.newCalculator(nparams, false);
 
     // Create messages
-    final IntArrayFormatSupplier msgOAl =
+    final IntArrayFormatSupplier msgOal =
         getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
-    final IntArrayFormatSupplier msgOAm =
+    final IntArrayFormatSupplier msgOam =
         getMessage(nparams, "[%d] Observations: Not same alpha matrix @ %d");
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
 
     for (int i = 0; i < paramsList.size(); i++) {
-      final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(func);
+      final PoissonGradientProcedure p = PoissonGradientProcedureUtils.create(func);
       p.computeFisherInformation(paramsList.get(i));
       final double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
       // Not exactly the same ...
       final double[] al = p.getLinear();
-      TestAssertions.assertArrayTest(al, new DenseMatrix64F(m).data, predicate, msgOAl.set(1, i));
+      TestAssertions.assertArrayTest(al, new DenseMatrix64F(m).data, predicate, msgOal.set(1, i));
 
       final double[][] am = p.getMatrix();
-      TestAssertions.assertArrayTest(am, m, predicate, msgOAm.set(1, i));
+      TestAssertions.assertArrayTest(am, m, predicate, msgOam.set(1, i));
     }
   }
 
@@ -204,14 +204,14 @@ public class PoissonGradientProcedureTest {
     final int n = blockWidth * blockWidth;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
-    final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+    final GradientCalculator calc = GradientCalculatorUtils.newCalculator(nparams, false);
 
     for (int i = 0; i < paramsList.size(); i++) {
       calc.fisherInformationMatrix(n, paramsList.get(i), func);
     }
 
     for (int i = 0; i < paramsList.size(); i++) {
-      final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(func);
+      final PoissonGradientProcedure p = PoissonGradientProcedureUtils.create(func);
       p.computeFisherInformation(paramsList.get(i));
     }
 
@@ -223,7 +223,7 @@ public class PoissonGradientProcedureTest {
       @Override
       void run() {
         for (int i = 0, k = 0; i < iter; i++) {
-          final GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
+          final GradientCalculator calc = GradientCalculatorUtils.newCalculator(nparams, false);
           for (int j = loops; j-- > 0;) {
             calc.fisherInformationMatrix(n, paramsList.get(k++ % iter), func);
           }
@@ -236,7 +236,7 @@ public class PoissonGradientProcedureTest {
       @Override
       void run() {
         for (int i = 0, k = 0; i < iter; i++) {
-          final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(func);
+          final PoissonGradientProcedure p = PoissonGradientProcedureUtils.create(func);
           for (int j = loops; j-- > 0;) {
             p.computeFisherInformation(paramsList.get(k++ % iter));
           }
@@ -279,24 +279,24 @@ public class PoissonGradientProcedureTest {
     }
 
     // Create messages
-    final IntArrayFormatSupplier msgOAl =
+    final IntArrayFormatSupplier msgOal =
         getMessage(nparams, "[%d] Observations: Not same alpha linear @ %d");
-    final IntArrayFormatSupplier msgOAm =
+    final IntArrayFormatSupplier msgOam =
         getMessage(nparams, "[%d] Observations: Not same alpha matrix @ %d");
 
     for (int i = 0; i < paramsList.size(); i++) {
       final PoissonGradientProcedure p1 = new PoissonGradientProcedure(func);
       p1.computeFisherInformation(paramsList.get(i));
 
-      final PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
+      final PoissonGradientProcedure p2 = PoissonGradientProcedureUtils.create(func);
       p2.computeFisherInformation(paramsList.get(i));
 
       // Exactly the same ...
-      Assertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), msgOAl.set(1, i));
+      Assertions.assertArrayEquals(p1.getLinear(), p2.getLinear(), msgOal.set(1, i));
 
       final double[][] am1 = p1.getMatrix();
       final double[][] am2 = p2.getMatrix();
-      Assertions.assertArrayEquals(am1, am2, msgOAm.set(1, i));
+      Assertions.assertArrayEquals(am1, am2, msgOam.set(1, i));
     }
   }
 
@@ -341,7 +341,7 @@ public class PoissonGradientProcedureTest {
       p1.computeFisherInformation(paramsList.get(i));
       p1.computeFisherInformation(paramsList.get(i));
 
-      final PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
+      final PoissonGradientProcedure p2 = PoissonGradientProcedureUtils.create(func);
       p2.computeFisherInformation(paramsList.get(i));
       p2.computeFisherInformation(paramsList.get(i));
 
@@ -370,7 +370,7 @@ public class PoissonGradientProcedureTest {
       @Override
       void run() {
         for (int i = 0, k = 0; i < paramsList.size(); i++) {
-          final PoissonGradientProcedure p2 = PoissonGradientProcedureFactory.create(func);
+          final PoissonGradientProcedure p2 = PoissonGradientProcedureUtils.create(func);
           for (int j = loops; j-- > 0;) {
             p2.computeFisherInformation(paramsList.get(k++ % iter));
           }
@@ -409,10 +409,10 @@ public class PoissonGradientProcedureTest {
       a[Gaussian2DFunction.X_SD] = nextUniform(rng, 1, 1.3);
       a[Gaussian2DFunction.Y_SD] = nextUniform(rng, 1, 1.3);
 
-      final PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(func);
+      final PoissonGradientProcedure p1 = PoissonGradientProcedureUtils.create(func);
       p1.computeFisherInformation(a);
 
-      final PoissonGradientProcedure p2 = PoissonGradientProcedureFactory
+      final PoissonGradientProcedure p2 = PoissonGradientProcedureUtils
           .create(OffsetGradient1Function.wrapGradient1Function(func, b));
       p2.computeFisherInformation(a);
 
@@ -442,7 +442,7 @@ public class PoissonGradientProcedureTest {
     final int size = 10;
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
         GaussianFunctionFactory.FIT_ERF_CIRCLE, null);
-    final PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f);
+    final PoissonGradientProcedure p = PoissonGradientProcedureUtils.create(f);
     final int ix = f.findGradientIndex(Gaussian2DFunction.X_POSITION);
     final int iy = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
     final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -458,7 +458,8 @@ public class PoissonGradientProcedureTest {
             for (final double y : x_) {
               params[Gaussian2DFunction.Y_POSITION] = y;
               p.computeFisherInformation(params);
-              final FisherInformationMatrix m1 = new FisherInformationMatrix(p.getLinear(), p.n);
+              final FisherInformationMatrix m1 =
+                  new FisherInformationMatrix(p.getLinear(), p.numberOfGradients);
               final double[] crlb = m1.crlb();
               if (crlb == null) {
                 Assertions.fail("No variance");

@@ -73,7 +73,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 
   @Override
   protected GeometryArray createGeometry() {
-    if (mesh == null || mesh.size() == 0) {
+    if (mesh == null || mesh.isEmpty()) {
       return null;
     }
     final int size = size();
@@ -180,8 +180,8 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
   }
 
   @Override
-  public Point3f getCoordinate(int i) {
-    return mesh.get(i);
+  public Point3f getCoordinate(int index) {
+    return mesh.get(index);
   }
 
   @Override

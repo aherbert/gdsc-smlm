@@ -32,11 +32,11 @@ public enum FileFormat {
   /** SMLM Text. */
     SMLM_TEXT{
       @Override public String getName() { return "SMLM Text"; }
-        @Override public boolean isSMLM(){return true;}},
+        @Override public boolean isSmlm(){return true;}},
     /** SMLM Binary. */
     SMLM_BINARY{
         @Override public String getName() { return "SMLM Binary"; }
-        @Override public boolean isSMLM(){return true;}},
+        @Override public boolean isSmlm(){return true;}},
     /** RapidSTORM. */
     RAPID_STORM{ @Override public String getName() { return "RapidSTORM"; }},
     /** NSTORM. */
@@ -68,7 +68,7 @@ public enum FileFormat {
    *
    * @return true, if is a GDSC SMLM format
    */
-  public boolean isSMLM() {
+  public boolean isSmlm() {
     return false;
   }
 }

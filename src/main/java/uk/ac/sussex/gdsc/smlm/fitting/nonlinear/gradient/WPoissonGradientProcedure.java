@@ -42,7 +42,7 @@ import java.util.Arrays;
  */
 public class WPoissonGradientProcedure implements Gradient1Procedure {
   /** The weights. */
-  protected final double[] w;
+  protected final double[] wgt;
 
   /** The function. */
   protected final Gradient1Function func;
@@ -50,7 +50,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
   /**
    * The number of gradients.
    */
-  public final int n;
+  public final int numberOfGradients;
 
   /** Working space for the Fisher information matrix (size n * (n + 1) / 2). */
   protected double[] data;
@@ -68,10 +68,10 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
   public WPoissonGradientProcedure(final double[] y, final double[] var,
       final Gradient1Function func) {
     this.func = func;
-    this.n = func.getNumberOfGradients();
+    this.numberOfGradients = func.getNumberOfGradients();
 
     final int n = y.length;
-    w = new double[n];
+    wgt = new double[n];
 
     // From Ruisheng, et al (2017):
     // Total noise = variance + max(di, 0) + 1
@@ -79,11 +79,11 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
     if (var != null && var.length == n) {
       // Include the variance in the weight. Assume variance is positive.
       for (int i = 0; i < n; i++) {
-        w[i] = (y[i] > 0) ? 1.0 / (var[i] + y[i] + 1.0) : 1.0 / (var[i] + 1.0);
+        wgt[i] = (y[i] > 0) ? 1.0 / (var[i] + y[i] + 1.0) : 1.0 / (var[i] + 1.0);
       }
     } else {
       for (int i = 0; i < n; i++) {
-        w[i] = (y[i] > 0) ? 1.0 / (y[i] + 1.0) : 1.0;
+        wgt[i] = (y[i] > 0) ? 1.0 / (y[i] + 1.0) : 1.0;
       }
     }
   }
@@ -131,7 +131,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
   public void computeFisherInformation(final double[] a) {
     yi = 0;
     if (data == null) {
-      data = new double[n * (n + 1) / 2];
+      data = new double[numberOfGradients * (numberOfGradients + 1) / 2];
     } else {
       initialiseWorkingMatrix();
     }
@@ -151,11 +151,11 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
   @Override
   public void execute(double value, double[] dyDa) {
     // Note: Ignore the value
-    final double w = this.w[yi++];
-    for (int j = 0, i = 0; j < n; j++) {
-      final double wgt = dyDa[j] * w;
+    final double weight = this.wgt[yi++];
+    for (int j = 0, i = 0; j < numberOfGradients; j++) {
+      final double dw = dyDa[j] * weight;
       for (int k = 0; k <= j; k++) {
-        data[i++] += wgt * dyDa[k];
+        data[i++] += dw * dyDa[k];
       }
     }
   }
@@ -180,7 +180,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * @return the alpha
    */
   public double[][] getMatrix() {
-    final double[][] a = new double[n][n];
+    final double[][] a = new double[numberOfGradients][numberOfGradients];
     getMatrix(a);
     return a;
   }
@@ -191,7 +191,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * @param matrix the matrix
    */
   public void getMatrix(double[][] matrix) {
-    GradientProcedureHelper.getMatrix(data, matrix, n);
+    GradientProcedureHelper.getMatrix(data, matrix, numberOfGradients);
   }
 
   /**
@@ -200,7 +200,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * @return the alpha
    */
   public double[] getLinear() {
-    final double[] a = new double[n * n];
+    final double[] a = new double[numberOfGradients * numberOfGradients];
     getLinear(a);
     return a;
   }
@@ -211,7 +211,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * @param matrix the matrix
    */
   public void getLinear(double[] matrix) {
-    GradientProcedureHelper.getMatrix(data, matrix, n);
+    GradientProcedureHelper.getMatrix(data, matrix, numberOfGradients);
   }
 
   /**

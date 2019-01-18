@@ -33,6 +33,9 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.util.FastMath;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * This is a function to compute the likelihood assuming a Poisson-Gamma-Gaussian distribution.
  *
@@ -66,7 +69,41 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
   public static final double MIN_READ_NOISE = 1e-3;
 
   /** Math.sqrt(2 * Math.PI). */
-  private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
+  private static final double SQRT_2PI = Math.sqrt(2 * Math.PI);
+
+  /** The convolution mode. */
+  private ConvolutionMode convolutionMode = ConvolutionMode.APPROXIMATION;
+
+  /** The pmf mode flag for the convolution of the Dirac delta function at c=0. */
+  private boolean pmfMode = true;
+
+  /**
+   * The scale of the Gamma distribution (e.g. the on-chip gain multiplication factor)
+   */
+  private final double gain;
+  /**
+   * The standard deviation of the Gaussian (e.g. Width of the noise distribution in the EMCCD
+   * output)
+   */
+  private final double sigma;
+
+  /** The two sigma 2. */
+  private final double twoSigma2;
+
+  /** The sqrt 2 sigma 2. */
+  private final double sqrt2sigma2;
+
+  /** The sqrt 2 pi sigma 2. */
+  private final double sqrt2piSigma2;
+
+  /** The minimum probability. */
+  private double minimumProbability = Double.MIN_VALUE;
+
+  /** The integrator. */
+  private UnivariateIntegrator integrator;
+
+  /** The kernel. */
+  private double[] kernel;
 
   /**
    * Define the convolution mode for combining the Poisson-Gamma PMF with the Gaussian PDF.
@@ -106,80 +143,46 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     LEGENDRE_GAUSS_PDF
   }
 
-  private class PGGFunction implements UnivariateFunction {
-    int i;
-    final double o;
-    final double e;
+  private class PggFunction implements UnivariateFunction {
+    int counter;
+    final double obs;
+    final double exp;
 
-    public PGGFunction(double o, double e) {
-      this.o = o;
-      this.e = e;
+    public PggFunction(double obs, double exp) {
+      this.obs = obs;
+      this.exp = exp;
     }
 
     @Override
-    public double value(double u) {
-      i++;
-      final double pg = PoissonGammaFunction.poissonGammaN(u, e, m);
-      return (pg == 0) ? 0 : pg * gaussianPDF(u - o);
+    public double value(double count) {
+      counter++;
+      final double pg = PoissonGammaFunction.poissonGammaN(count, exp, gain);
+      return (pg == 0) ? 0 : pg * gaussianPdf(count - obs);
     }
   }
-
-  /** The convolution mode. */
-  private ConvolutionMode convolutionMode = ConvolutionMode.APPROXIMATION;
-
-  /** The pmf mode flag for the convolution of the Dirac delta function at c=0. */
-  private boolean pmfMode = true;
-
-  /**
-   * The scale of the Gamma distribution (e.g. the on-chip gain multiplication factor)
-   */
-  private final double m;
-  /**
-   * The standard deviation of the Gaussian (e.g. Width of the noise distribution in the EMCCD
-   * output)
-   */
-  private final double sigma;
-
-  /** The two sigma 2. */
-  private final double twoSigma2;
-
-  /** The sqrt 2 sigma 2. */
-  private final double sqrt2sigma2;
-
-  /** The sqrt 2 pi sigma 2. */
-  private final double sqrt2piSigma2;
-
-  /** The minimum probability. */
-  private double minimumProbability = Double.MIN_VALUE;
-
-  /** The integrator. */
-  private UnivariateIntegrator integrator;
-
-  /** The kernel. */
-  private double[] kernel;
 
   /**
    * Instantiates a new poisson gamma gaussian function.
    *
    * @param alpha Inverse gain of the EMCCD chip
-   * @param s The Gaussian standard deviation at readout
+   * @param sd The Gaussian standard deviation at readout
    * @throws IllegalArgumentException If the gain is below 1 (the Gamma distribution is not modelled
    *         for a scale below 1).
    */
-  public PoissonGammaGaussianFunction(double alpha, double s) {
+  public PoissonGammaGaussianFunction(double alpha, double sd) {
     if (!(alpha > 0 && alpha <= 1)) {
       throw new IllegalArgumentException("Gain must be above 1");
     }
-    this.m = 1.0 / alpha;
-    s = Math.abs(s);
+    this.gain = 1.0 / alpha;
+    sd = Math.abs(sd);
     // Ignore tiny read noise
-    if (s < MIN_READ_NOISE) {
+    if (sd < MIN_READ_NOISE) {
       sigma = twoSigma2 = sqrt2sigma2 = sqrt2piSigma2 = 0;
     } else {
-      sigma = s;
-      twoSigma2 = 2 * s * s;
-      sqrt2sigma2 = Math.sqrt(2 * s * s);
-      sqrt2piSigma2 = Math.sqrt(2 * Math.PI * s * s);
+      sigma = sd;
+      twoSigma2 = 2 * sd * sd;
+      sqrt2sigma2 = Math.sqrt(2 * sd * sd);
+      sqrt2piSigma2 = Math.sqrt(2 * Math.PI * sd * sd);
     }
   }
 
@@ -192,7 +195,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * <p>The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
    */
   @Override
-  public double likelihood(final double o, final double e) {
+  public double likelihood(final double obs, final double exp) {
     // This did not speed up MLE fitting so has been commented out.
     // // When the observed ADUs and expected ADUs are much higher than the sigma then
     // // there is no point in convolving with a Gaussian
@@ -210,17 +213,17 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     if (sigma == 0) {
       // No convolution with a Gaussian. Simply evaluate for a Poisson-Gamma distribution.
       // This can handle e<=0.
-      return checkMinProbability(PoissonGammaFunction.poissonGamma(o, e, m));
+      return checkMinProbability(PoissonGammaFunction.poissonGamma(obs, exp, gain));
     }
 
     // If no Poisson mean then just use the Gaussian (Poisson-Gamma p=1 at x=0, p=0 otherwise)
-    if (e <= 0) {
+    if (exp <= 0) {
       // Output as PMF
-      return checkMinProbability(gaussianCDF(o - 0.5, o + 0.5));
+      return checkMinProbability(gaussianCdf(obs - 0.5, obs + 0.5));
     }
 
     if (convolutionMode == ConvolutionMode.APPROXIMATION) {
-      return mortensenApproximation(o, e);
+      return mortensenApproximation(obs, exp);
     }
 
     ConvolutionMode mode = convolutionMode;
@@ -229,11 +232,11 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     // Gaussian should be adequately sampled using a nxSD around the function value.
     // Find a bracket around the value.
     final double range = 5 * sigma;
-    final double upperu = o + range;
+    final double upperu = obs + range;
     if (upperu < 0) {
       return 0;
     }
-    double loweru = o - range;
+    double loweru = obs - range;
     if (loweru < 0) {
       loweru = 0;
       // Edge case
@@ -242,7 +245,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
       }
     }
 
-    double p = 0;
+    double pvalue = 0;
 
     // PDF method does not work for small sigma
     if (mode == ConvolutionMode.DISCRETE_PDF && sigma < 1) {
@@ -260,14 +263,14 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
       // Perform a simple convolution at point o with the kernel
       for (int i = 0, j = -g.length / 2; i < g.length; i++, j++) {
-        final double u = o - j;
+        final double u = obs - j;
         if (u >= 0.5) {
           // This approximates [u-0.5 to u+0.5] as a single point
-          p += PoissonGammaFunction.poissonGammaN(u, e, m) * g[i];
+          pvalue += PoissonGammaFunction.poissonGammaN(u, exp, gain) * g[i];
         } else if (u >= 0) {
           // Only count [0 to u+0.5] as a single point as the Poisson-Gamma
           // function is a step at x=0
-          p += PoissonGammaFunction.poissonGammaN(u, e, m) * g[i] * (0.5 + u);
+          pvalue += PoissonGammaFunction.poissonGammaN(u, exp, gain) * g[i] * (0.5 + u);
         }
       }
     } else if (mode == ConvolutionMode.DISCRETE_PMF) {
@@ -290,38 +293,38 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
       double pg;
       // This is the CDF of the Gaussian
-      double g;
+      double gauss;
 
       // If at zero then the Poisson-Gamma PMF approximation for u=0
       // is the integral from 0 to 0.5
       if (lower == 0) {
         // Lower = -0.5
-        final double prevPG = PoissonGammaFunction.poissonGammaN(0, e, m);
-        final double prevG = gaussianErf(-0.5 - o);
+        final double prevPg = PoissonGammaFunction.poissonGammaN(0, exp, gain);
+        final double prevGauss = gaussianErf(-0.5 - obs);
         // Upper = 0.5
-        pg = PoissonGammaFunction.poissonGammaN(0.5, p, m);
-        g = gaussianErf(0.5 - o);
-        final double sum =
-            (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, e, m)) / 12
-                : (prevPG + pg) / 4;
-        p += sum * (g - prevG) / 2;
+        pg = PoissonGammaFunction.poissonGammaN(0.5, pvalue, gain);
+        gauss = gaussianErf(0.5 - obs);
+        final double sum = (doSimpson)
+            ? (prevPg + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, exp, gain)) / 12
+            : (prevPg + pg) / 4;
+        pvalue += sum * (gauss - prevGauss) / 2;
         lower++;
       } else {
-        pg = PoissonGammaFunction.poissonGammaN(lower - 0.5, e, m);
-        g = gaussianErf(lower - 0.5 - o);
+        pg = PoissonGammaFunction.poissonGammaN(lower - 0.5, exp, gain);
+        gauss = gaussianErf(lower - 0.5 - obs);
       }
 
       // For the rest of the range the Poisson-Gamma PMF approximation for u
       // is the integral from u-0.5 to u+0.5
       for (int u = lower; u <= upper; u++) {
-        final double prevPG = pg;
-        final double prevG = g;
-        pg = PoissonGammaFunction.poissonGammaN(u + 0.5, e, m);
-        g = gaussianErf(u + 0.5 - o);
+        final double prevPg = pg;
+        final double prevGauss = gauss;
+        pg = PoissonGammaFunction.poissonGammaN(u + 0.5, exp, gain);
+        gauss = gaussianErf(u + 0.5 - obs);
         final double sum =
-            (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(u, e, m)) / 6
-                : (prevPG + pg) / 2;
-        p += sum * (g - prevG) / 2;
+            (doSimpson) ? (prevPg + pg + 4 * PoissonGammaFunction.poissonGammaN(u, exp, gain)) / 6
+                : (prevPg + pg) / 2;
+        pvalue += sum * (gauss - prevGauss) / 2;
       }
     } else {
       // Use integrator
@@ -335,15 +338,15 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
       // is large as it uses fewer points.
 
       // Specify the function to integrate.
-      final PGGFunction f = new PGGFunction(o, e);
+      final PggFunction f = new PggFunction(obs, exp);
 
       try {
-        p += createIntegrator().integrate(2000, f, loweru, upperu);
+        pvalue += createIntegrator().integrate(2000, f, loweru, upperu);
       } catch (final TooManyEvaluationsException ex) {
-        System.out.printf("Integration failed: o=%g, e=%g, eval=%d\n", o, e, f.i);
-        return mortensenApproximation(o, e);
+        Logger.getLogger(getClass().getName()).log(Level.WARNING,
+            () -> String.format("Integration failed: o=%g, e=%g, eval=%d\n", obs, exp, f.counter));
+        return mortensenApproximation(obs, exp);
       }
-      // System.out.printf("Integration eval=%d\n", f.i);
     }
 
     // Special case:
@@ -359,20 +362,20 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     // then use the Gaussian PDF convolution.
 
     if (pmfMode) {
-      final double erf2 = gaussianErf(-o + 0.5);
+      final double erf2 = gaussianErf(-obs + 0.5);
       if (erf2 != -1) {
         // Assume u==0
-        p += PoissonGammaFunction.dirac(e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
+        pvalue += PoissonGammaFunction.dirac(exp) * (erf2 - gaussianErf(-obs - 0.5)) * 0.5;
       }
     } else {
-      p += PoissonGammaFunction.dirac(e) * gaussianPDF(-o);
+      pvalue += PoissonGammaFunction.dirac(exp) * gaussianPdf(-obs);
     }
 
-    return checkMinProbability(p);
+    return checkMinProbability(pvalue);
   }
 
-  private double checkMinProbability(double p) {
-    return (p > minimumProbability) ? p : minimumProbability;
+  private double checkMinProbability(double pvalue) {
+    return (pvalue > minimumProbability) ? pvalue : minimumProbability;
   }
 
   /**
@@ -402,22 +405,22 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     // This is the value of the Poisson-Gamma at c=0:
     // PoissonGammaFunction.poissonGammaN(0, eta, m);
     final double exp_eta = FastMath.exp(-eta);
-    final double f0 = exp_eta * eta / m;
+    final double f0 = exp_eta * eta / gain;
 
     // ?
-    final double fp0 = f0 * 0.5 * (eta - 2) / m;
+    final double fp0 = f0 * 0.5 * (eta - 2) / gain;
 
     // The cumulative normal distribution of the read noise
     // at the observed count
-    final double conv0 = gaussianCDF(cij);
+    final double conv0 = gaussianCdf(cij);
 
     // [Noise * Gaussian PMF at observed count] +
     // [observed count * cumulative distribution of read noise at observed count]
     // [sigma*FastMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
-    final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
+    final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / SQRT_2PI + cij * conv0;
 
     // ?
-    double temp = f0 * conv0 + fp0 * conv1 + exp_eta * gaussianPDF(cij);
+    double temp = f0 * conv0 + fp0 * conv1 + exp_eta * gaussianPdf(cij);
 
     // // TESTING
     // // Simple method:
@@ -432,7 +435,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     // // and the result is the Poisson-Gamma. Perhaps this is what the above code is doing.
 
     if (cij > 0.0) {
-      temp += PoissonGammaFunction.poissonGammaN(cij, eta, m) - f0 - fp0 * cij;
+      temp += PoissonGammaFunction.poissonGammaN(cij, eta, gain) - f0 - fp0 * cij;
     }
 
     // XXX : Debugging: Store the smallest likelihood we ever see.
@@ -452,15 +455,15 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    *
    * <p>The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
    *
-   * @param o The observed count
-   * @param e The expected count
+   * @param obs The observed count
+   * @param exp The expected count
    * @return The log-likelihood
    *
    * @see #likelihood(double, double)
    */
   @Override
-  public double logLikelihood(final double o, final double e) {
-    return Math.log(likelihood(o, e));
+  public double logLikelihood(final double obs, final double exp) {
+    return Math.log(likelihood(obs, exp));
   }
 
   /**
@@ -469,7 +472,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * @param x the x
    * @return the density
    */
-  double gaussianPDF(final double x) {
+  double gaussianPdf(final double x) {
     return FastMath.exp(-(x * x) / twoSigma2) / sqrt2piSigma2;
   }
 
@@ -479,7 +482,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * @param x the x
    * @return the cumulative density
    */
-  double gaussianCDF(final double x) {
+  double gaussianCdf(final double x) {
     // return 0.5 * (1 + org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2));
     // This may not be precise enough.
     // Absolute error is <3e-7. Not sure what relative error is.
@@ -494,7 +497,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * @param x2 the x 2
    * @return the cumulative density
    */
-  double gaussianCDF(final double x, final double x2) {
+  double gaussianCdf(final double x, final double x2) {
     // return 0.5 * (org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2, x2 / sqrt2sigma2));
     // This may not be precise enough.
     // Absolute error is <3e-7. Not sure what relative error is.
@@ -522,7 +525,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * @return the alpha
    */
   public double getAlpha() {
-    return 1 / m;
+    return 1 / gain;
   }
 
   /**
@@ -548,10 +551,10 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * Sets the minimum probability that will ever be returned. Setting this above zero allows the use
    * of Math.log() on the likelihood value.
    *
-   * @param p the new minimum probability
+   * @param probability the new minimum probability
    */
-  public void setMinimumProbability(double p) {
-    this.minimumProbability = p;
+  public void setMinimumProbability(double probability) {
+    this.minimumProbability = probability;
   }
 
   /**
@@ -600,8 +603,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
   }
 
   private UnivariateIntegrator createIntegrator() {
-    UnivariateIntegrator i = integrator;
-    if (i == null) {
+    UnivariateIntegrator in = integrator;
+    if (in == null) {
       // This is the integrator for the Poisson-Gamma when observed count x>=1
       // i.e. not at the boundary x=0.
 
@@ -617,8 +620,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
           // => 5 for 1 iterations
           // => 9 for 2 iterations
           minimalIterationCount = 1;
-          i = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
-              CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+          in = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy,
+              minimalIterationCount, CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
           break;
 
         case LEGENDRE_GAUSS_PDF:
@@ -631,7 +634,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
           minimalIterationCount = 1;
           final int maximalIterationCount = 32;
           final int integrationpoints = 8;
-          i = new IterativeLegendreGaussIntegrator(integrationpoints, relativeAccuracy,
+          in = new IterativeLegendreGaussIntegrator(integrationpoints, relativeAccuracy,
               absoluteAccuracy, minimalIterationCount, maximalIterationCount);
           break;
 
@@ -639,16 +642,16 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
           throw new IllegalStateException();
       }
 
-      integrator = i;
+      integrator = in;
     }
-    return i;
+    return in;
   }
 
   private double[] createKernel(int range) {
-    double[] g = kernel;
-    if (g == null) {
-      kernel = g = GaussianKernel.makeGaussianKernel(sigma, range, true);
+    double[] knl = kernel;
+    if (knl == null) {
+      kernel = knl = GaussianKernel.makeGaussianKernel(sigma, range, true);
     }
-    return g;
+    return knl;
   }
 }

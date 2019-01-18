@@ -65,7 +65,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.GUIProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
@@ -84,14 +84,14 @@ import uk.ac.sussex.gdsc.smlm.filters.BlockMeanFilter;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePSF;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePsf;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePSFHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
 import uk.ac.sussex.gdsc.smlm.ij.utils.Image2DAligner;
 import uk.ac.sussex.gdsc.smlm.ij.utils.Image3DAligner;
-import uk.ac.sussex.gdsc.smlm.model.camera.CCDCameraModel;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
+import uk.ac.sussex.gdsc.smlm.model.camera.CcdCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.SynchronizedPeakResults;
@@ -274,7 +274,7 @@ public class PSFCreator implements PlugInFilter {
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    settings = SettingsManager.readPSFCreatorSettings(0).toBuilder();
+    settings = SettingsManager.readPsfCreatorSettings(0).toBuilder();
 
     guessScale();
 
@@ -538,7 +538,7 @@ public class PSFCreator implements PlugInFilter {
     final Statistics averageRange = new Statistics();
     final MemoryPeakResults allResults = new MemoryPeakResults();
     allResults.setCalibration(fitConfig.getCalibration());
-    allResults.setPSF(fitConfig.getPSF());
+    allResults.setPsf(fitConfig.getPsf());
     allResults.setName(TITLE);
     allResults.setBounds(new Rectangle(0, 0, width, height));
     MemoryPeakResults.addResults(allResults);
@@ -856,7 +856,7 @@ public class PSFCreator implements PlugInFilter {
     // Create a fit engine
     final MemoryPeakResults results = new MemoryPeakResults();
     results.setCalibration(fitConfig.getCalibration());
-    results.setPSF(fitConfig.getPSF());
+    results.setPsf(fitConfig.getPsf());
     results.setSortAfterEnd(true);
     results.begin();
     final int threadCount = Prefs.getThreads();
@@ -1624,8 +1624,8 @@ public class PSFCreator implements PlugInFilter {
     fitConfig = config.getFitConfiguration();
     nmPerPixel = fitConfig.getCalibrationReader().getNmPerPixel();
     if (settings.getRadius() < 5
-        * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD())) {
-      settings.setRadius(5 * FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD()));
+        * FastMath.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())) {
+      settings.setRadius(5 * FastMath.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd()));
       ImageJUtils.log("Radius is less than 5 * PSF standard deviation, increasing to %s",
           MathUtils.rounded(settings.getRadius()));
     }
@@ -1633,7 +1633,7 @@ public class PSFCreator implements PlugInFilter {
 
     settings.setFitEngineSettings(config.getFitEngineSettings());
     settings.setCalibration(fitConfig.getCalibration());
-    settings.setPsf(fitConfig.getPSF());
+    settings.setPsf(fitConfig.getPsf());
     SettingsManager.writeSettings(settings);
 
     return true;
@@ -1815,7 +1815,7 @@ public class PSFCreator implements PlugInFilter {
     final ImageStack newStack = new ImageStack(width, height, stack.getSize());
     for (int slice = 1; slice <= stack.getSize(); slice++) {
       newStack.setPixels(
-          IJImageConverter.getData(stack.getPixels(slice), width, height, null, null), slice);
+          ImageJImageConverter.getData(stack.getPixels(slice), width, height, null, null), slice);
     }
     return newStack;
   }
@@ -1855,7 +1855,7 @@ public class PSFCreator implements PlugInFilter {
     final double shift = fitConfig.getCoordinateShiftFactor();
 
     // Scale the PSF
-    final PSF.Builder psf = fitConfig.getPSF().toBuilder();
+    final PSF.Builder psf = fitConfig.getPsf().toBuilder();
     for (int i = 0; i < psf.getParametersCount(); i++) {
       final PSFParameter param = psf.getParameters(i);
       if (param.getUnit() == PSFParameterUnit.DISTANCE) {
@@ -1864,7 +1864,7 @@ public class PSFCreator implements PlugInFilter {
         psf.setParameters(i, b);
       }
     }
-    fitConfig.setPSF(psf.build());
+    fitConfig.setPsf(psf.build());
 
     // Need to be updated after the widths have been set
     fitConfig.setCoordinateShiftFactor(shift);
@@ -1896,7 +1896,7 @@ public class PSFCreator implements PlugInFilter {
 
     // Set limits for the fit
     final float maxWidth =
-        (float) (FastMath.max(fitConfig.getInitialXSD(), fitConfig.getInitialYSD())
+        (float) (FastMath.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())
             * settings.getMagnification() * 4);
     final float maxSignal = 2; // PSF is normalised to 1
 
@@ -2590,7 +2590,7 @@ public class PSFCreator implements PlugInFilter {
     }
 
     CameraModel cameraModel = null;
-    if (calibration.isSCMOS()) {
+    if (calibration.isScmos()) {
       cameraModel = CameraModelManager.load(calibration.getCameraModelName());
       if (cameraModel == null) {
         IJ.error(TITLE, "No camera model");
@@ -2598,7 +2598,7 @@ public class PSFCreator implements PlugInFilter {
       }
       cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), null, true);
     } else {
-      cameraModel = new CCDCameraModel(calibration.getBias(), 1);
+      cameraModel = new CcdCameraModel(calibration.getBias(), 1);
     }
 
     // Extract the image data for processing as float
@@ -3013,7 +3013,7 @@ public class PSFCreator implements PlugInFilter {
       if (!TextUtils.isNullOrEmpty(settings.getSplineFilename())) {
         // Save the result ...
         IJ.showStatus("Creating cubic spline");
-        final CubicSplinePSF cubicSplinePSF = CubicSplineManager.createCubicSpline(imagePsf,
+        final CubicSplinePsf cubicSplinePSF = CubicSplineManager.createCubicSpline(imagePsf,
             psfImp.getImageStack(), settings.getSinglePrecision());
 
         IJ.showStatus("Saving cubic spline");
@@ -3071,7 +3071,7 @@ public class PSFCreator implements PlugInFilter {
       final int y = centres[i].getYint();
       final Rectangle bounds = ie.getBoxRegionBounds(x, y, boxRadius);
       for (int z = 0; z < image.length; z++) {
-        psf[z] = IJImageConverter.getData(image[z], w, h, bounds, psf[z]);
+        psf[z] = ImageJImageConverter.getData(image[z], w, h, bounds, psf[z]);
       }
 
       if (settings.getInteractiveMode()) {
@@ -4276,7 +4276,7 @@ public class PSFCreator implements PlugInFilter {
         @Override
         public void actionPerformed(ActionEvent event) {
           final boolean interactive = PSFCreator.this.settings.getInteractiveMode();
-          final PSFCreatorSettings defaults = GUIProtosHelper.defaultPSFCreatorSettings;
+          final PSFCreatorSettings defaults = GuiProtosHelper.defaultPSFCreatorSettings;
           int t = 0;
           int c = 0;
           tf.get(t++).setText(Double.toString(defaults.getAnalysisWindow()));

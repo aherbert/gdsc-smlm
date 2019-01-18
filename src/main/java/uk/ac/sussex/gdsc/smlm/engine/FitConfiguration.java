@@ -45,29 +45,29 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.LineSearchMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitConfiguration;
-import uk.ac.sussex.gdsc.smlm.fitting.MLEScaledFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.MleScaledFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BacktrackingFastMleSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LSELVMSteppingFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MLELVMSteppingFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LseLvmSteppingFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LvmSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MleLvmSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.ParameterBounds;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.ToleranceChecker;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.WLseLvmSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.OffsetFunctionFactory;
@@ -75,9 +75,9 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
-import uk.ac.sussex.gdsc.smlm.model.camera.CCDCameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
-import uk.ac.sussex.gdsc.smlm.model.camera.EMCCDCameraModel;
+import uk.ac.sussex.gdsc.smlm.model.camera.CcdCameraModel;
+import uk.ac.sussex.gdsc.smlm.model.camera.EmCcdCameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.NullCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -90,7 +90,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.FilterType;
 import uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
-import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterCRLB;
+import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterCrlb;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
 
@@ -124,8 +124,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   private double nmPerPixel;
   private double gain;
   private double signalToPhotons;
-  private boolean emCCD;
-  private boolean isMLE;
+  private boolean emCcd;
+  private boolean isMle;
   private double noise;
   private double minWidthFactor = 0.5;
   /**
@@ -151,7 +151,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   private DirectFilter directFilter;
   private int filterResult;
   private boolean widthEnabled;
-  private float offset;
+  private float shiftOffset;
   private double varianceThreshold;
   private int filterSetupFlags;
   private FilterSetupData[] filterSetupData;
@@ -167,7 +167,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    */
   public FitConfiguration() {
     this(FitProtosHelper.defaultFitSettings, CalibrationProtosHelper.defaultCalibration,
-        PSFProtosHelper.defaultOneAxisGaussian2DPSF);
+        PsfProtosHelper.defaultOneAxisGaussian2DPSF);
   }
 
   /**
@@ -266,7 +266,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       dynamicPeakResult = new DynamicPeakResult();
     }
     updateCalibration();
-    updatePSF(true);
+    updatePsf(true);
     updateFitSolverSettings();
     updateFilterSettings();
   }
@@ -369,7 +369,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
     nmPerPixel = calibration.getNmPerPixel();
     gain = calibration.getCountPerPhoton();
-    emCCD = calibration.isEMCCD();
+    emCcd = calibration.isEmCcd();
 
     if (isRawFit()) {
       // No camera calibration so assume raw data is in photons
@@ -391,7 +391,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return the PSF
    */
-  public PSF getPSF() {
+  public PSF getPsf() {
     return psf.build();
   }
 
@@ -400,9 +400,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @param psf the new PSF
    */
-  public void mergePSF(PSF psf) {
+  public void mergePsf(PSF psf) {
     this.psf.mergeFrom(psf);
-    updatePSF(true);
+    updatePsf(true);
   }
 
   /**
@@ -410,12 +410,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @param psf the new psf
    */
-  public void setPSF(PSF psf) {
+  public void setPsf(PSF psf) {
     this.psf.clear().mergeFrom(psf);
-    updatePSF(true);
+    updatePsf(true);
   }
 
-  private void updatePSF(boolean resetAstigmatismModel) {
+  private void updatePsf(boolean resetAstigmatismModel) {
     invalidateGaussianFunction();
 
     // Reset the astigmatism model. It will be dynamically created from the PSF settings.
@@ -432,7 +432,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         paramCount = 8; // The PSF stores the full astigmatism model
         break;
       case ONE_AXIS_GAUSSIAN_2D:
-        if (isFixedPSF()) {
+        if (isFixedPsf()) {
           flags = GaussianFunctionFactory.FIT_ERF_FIXED;
         } else {
           flags = GaussianFunctionFactory.FIT_ERF_CIRCLE;
@@ -450,7 +450,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       default:
         throw new IllegalStateException("FitSettings must be a Gaussian 2D PSF");
     }
-    isTwoAxisGaussian2D = PSFHelper.isTwoAxisGaussian2D(psfType);
+    isTwoAxisGaussian2D = PsfHelper.isTwoAxisGaussian2D(psfType);
 
     final boolean changed = psf.getParametersCount() > paramCount;
     if (changed) {
@@ -460,8 +460,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
       // Updated names when changing from two-axis to one axis
       if (psf.getParametersCount() == 1) {
-        psf.getParametersBuilder(PSFHelper.INDEX_SX)
-            .setName(PSFProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SX)
+        psf.getParametersBuilder(PsfHelper.INDEX_SX)
+            .setName(PsfProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SX)
                 .getName());
       }
     }
@@ -471,27 +471,27 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       // Create a dummy Sx
       final PSFParameter.Builder p = psf.addParametersBuilder();
       p.setName(
-          PSFProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SX).getName());
+          PsfProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SX).getName());
       p.setValue(1);
       p.setUnit(PSFParameterUnit.DISTANCE);
     }
     if (psf.getParametersCount() == 1 && paramCount > 1) {
       // Rename S to Sx
-      psf.getParametersBuilder(PSFHelper.INDEX_SX).setName(
-          PSFProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SX).getName());
+      psf.getParametersBuilder(PsfHelper.INDEX_SX).setName(
+          PsfProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SX).getName());
 
       // Duplicate the Sx to Sy
       final PSFParameter.Builder p = psf.addParametersBuilder();
       p.setName(
-          PSFProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PSFHelper.INDEX_SY).getName());
-      p.setValue(psf.getParameters(PSFHelper.INDEX_SX).getValue());
+          PsfProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SY).getName());
+      p.setValue(psf.getParameters(PsfHelper.INDEX_SX).getValue());
       p.setUnit(PSFParameterUnit.DISTANCE);
     }
     if (psf.getParametersCount() == 2 && paramCount > 2) {
       // Create a dummy angle
       final PSFParameter.Builder p = psf.addParametersBuilder();
-      p.setName(PSFProtosHelper.defaultTwoAxisAndThetaGaussian2DPSF
-          .getParameters(PSFHelper.INDEX_THETA).getName());
+      p.setName(PsfProtosHelper.defaultTwoAxisAndThetaGaussian2DPSF
+          .getParameters(PsfHelper.INDEX_THETA).getName());
       p.setUnit(PSFParameterUnit.ANGLE);
     }
 
@@ -588,7 +588,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     if (TextUtils.isNullOrEmpty(xml)) {
       return;
     }
-    final Filter f = Filter.fromXML(xml);
+    final Filter f = Filter.fromXml(xml);
     if (f == null || !(f instanceof DirectFilter)) {
       // Throw to ensure the filter is OK
       throw new IllegalStateException("Unrecognised smart filter: " + xml);
@@ -605,7 +605,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   @Override
   public FitConfiguration clone() {
     // Make a new initialised instance. This will have new settings builder objects.
-    return new FitConfiguration(getFitSettings(), getCalibration(), getPSF()).copySettings(this);
+    return new FitConfiguration(getFitSettings(), getCalibration(), getPsf()).copySettings(this);
 
     // // This is not a complete duplicate. The settings builder objects with the
     // // underlying configuration will be the same between all instances.
@@ -649,7 +649,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     // Support cloning the initialised state from IDirectFilter.setup(...)
     directFilter = other.getSmartFilter(); // This is a clone
     widthEnabled = other.widthEnabled;
-    offset = other.offset;
+    shiftOffset = other.shiftOffset;
     varianceThreshold = other.varianceThreshold;
     filterSetupFlags = other.filterSetupFlags;
     filterSetupData = other.filterSetupData;
@@ -758,7 +758,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     if (psf.getPsfType() != PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D) {
       throw new IllegalStateException("Not a 2 axis and theta Gaussian 2D PSF");
     }
-    psf.getParametersBuilder(PSFHelper.INDEX_THETA).setValue(initialAngle);
+    psf.getParametersBuilder(PsfHelper.INDEX_THETA).setValue(initialAngle);
   }
 
   /**
@@ -772,7 +772,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     if (psf.getPsfType() != PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D) {
       throw new IllegalStateException("Not a 2 axis and theta Gaussian 2D PSF");
     }
-    return psf.getParameters(PSFHelper.INDEX_THETA).getValue();
+    return psf.getParameters(PsfHelper.INDEX_THETA).getValue();
   }
 
   /**
@@ -780,7 +780,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return the PSF type
    */
-  public PSFType getPSFType() {
+  public PSFType getPsfType() {
     return psf.getPsfType();
   }
 
@@ -789,7 +789,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return the PSF type value
    */
-  public int getPSFTypeValue() {
+  public int getPsfTypeValue() {
     return psf.getPsfTypeValue();
   }
 
@@ -803,9 +803,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @param psfType the new PSF type
    */
-  public void setPSFType(PSFType psfType) {
+  public void setPsfType(PSFType psfType) {
     psf.setPsfType(psfType);
-    updatePSF(true);
+    updatePsf(true);
   }
 
   /**
@@ -815,9 +815,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *        for all dimensions
    */
   public void setInitialPeakStdDev(double initialPeakStdDev) {
-    psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev);
+    psf.getParametersBuilder(PsfHelper.INDEX_SX).setValue(initialPeakStdDev);
     if (isTwoAxisGaussian2D) {
-      psf.getParametersBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev);
+      psf.getParametersBuilder(PsfHelper.INDEX_SY).setValue(initialPeakStdDev);
     }
     astigmatismZModel = null;
     updateCoordinateShift();
@@ -832,7 +832,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *        fit for dimension 0
    */
   public void setInitialPeakStdDev0(double initialPeakStdDev0) {
-    psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev0);
+    psf.getParametersBuilder(PsfHelper.INDEX_SX).setValue(initialPeakStdDev0);
     astigmatismZModel = null;
     updateCoordinateShift();
   }
@@ -846,9 +846,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    */
   public double getInitialPeakStdDev() {
     if (isTwoAxisGaussian2D) {
-      return Gaussian2DPeakResultHelper.getStandardDeviation(getInitialXSD(), getInitialYSD());
+      return Gaussian2DPeakResultHelper.getStandardDeviation(getInitialXSd(), getInitialYSd());
     }
-    return getInitialXSD();
+    return getInitialXSd();
   }
 
   /**
@@ -859,11 +859,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *         constructed
    */
   @Override
-  public double getInitialXSD() {
+  public double getInitialXSd() {
     if (getAstigmatismZModel() != null) {
       return astigmatismZModel.getSx(0);
     }
-    return psf.getParameters(PSFHelper.INDEX_SX).getValue();
+    return psf.getParameters(PsfHelper.INDEX_SX).getValue();
   }
 
   /**
@@ -878,7 +878,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     if (!isTwoAxisGaussian2D) {
       throw new IllegalStateException("Not a 2 axis Gaussian 2D PSF");
     }
-    psf.getParametersBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev1);
+    psf.getParametersBuilder(PsfHelper.INDEX_SY).setValue(initialPeakStdDev1);
     astigmatismZModel = null;
     updateCoordinateShift();
   }
@@ -891,14 +891,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *         constructed
    */
   @Override
-  public double getInitialYSD() {
+  public double getInitialYSd() {
     if (getAstigmatismZModel() != null) {
       return astigmatismZModel.getSy(0);
     }
     if (isTwoAxisGaussian2D) {
-      return psf.getParameters(PSFHelper.INDEX_SY).getValue();
+      return psf.getParameters(PsfHelper.INDEX_SY).getValue();
     }
-    return getInitialXSD();
+    return getInitialXSd();
   }
 
   /**
@@ -1095,7 +1095,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @return True if fitting the peak width in dimension 0.
    */
   @Override
-  public boolean isXSDFitting() {
+  public boolean isXSdFitting() {
     return (flags & GaussianFunctionFactory.FIT_X_WIDTH) != 0;
   }
 
@@ -1105,7 +1105,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @return True if fitting the peak width in dimension 1.
    */
   @Override
-  public boolean isYSDFitting() {
+  public boolean isYSdFitting() {
     return (flags & GaussianFunctionFactory.FIT_Y_WIDTH) != 0;
   }
 
@@ -1115,9 +1115,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @param fixed the new fixed PSF
    */
-  public void setFixedPSF(boolean fixed) {
+  public void setFixedPsf(boolean fixed) {
     fitSolverSettings.setFixedPsf(fixed);
-    updatePSF(true);
+    updatePsf(true);
   }
 
   /**
@@ -1126,7 +1126,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return the fixed PSF
    */
-  public boolean isFixedPSF() {
+  public boolean isFixedPsf() {
     return fitSolverSettings.getFixedPsf();
   }
 
@@ -1177,7 +1177,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       try {
         widthMax = getWidthMax();
       } catch (final ConfigurationException ex) {
-        if (getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
+        if (getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
           throw ex;
         }
         // This is OK as the full astigmatism model may not have been set yet.
@@ -1200,9 +1200,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *         constructed
    */
   public double getWidthMax() {
-    double widthMax = getInitialXSD();
+    double widthMax = getInitialXSd();
     if (isTwoAxisGaussian2D) {
-      widthMax = Math.max(widthMax, getInitialYSD());
+      widthMax = Math.max(widthMax, getInitialYSd());
     }
     return widthMax;
   }
@@ -1343,7 +1343,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         // XXX - Determine if precision filtering for SCMOS is valid.
         // For now we leave this in but it may have to be changed to have a precision
         // computed during the fit which is stored for validation.
-        if (nmPerPixel > 0 && gain > 0 && (calibration.isCCDCamera() || calibration.isSCMOS())) {
+        if (nmPerPixel > 0 && gain > 0 && (calibration.isCcdCamera() || calibration.isScmos())) {
           this.precisionThreshold = MathUtils.pow2(getPrecisionThreshold());
         }
         break;
@@ -1353,7 +1353,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       default:
         break;
     }
-    isMLE = isMLE();
+    isMle = isMle();
   }
 
   /**
@@ -1432,10 +1432,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
   }
 
-  private class VarianceSelectorCRLB extends BaseVarianceSelector {
+  private class VarianceSelectorCrlb extends BaseVarianceSelector {
     @Override
     double getLocationVariance(PreprocessedPeakResult peak) {
-      return peak.getLocationVarianceCRLB();
+      return peak.getLocationVarianceCrlb();
     }
   }
 
@@ -1459,7 +1459,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         varianceSelector = new VarianceSelector2();
         break;
       case POISSON_CRLB:
-        varianceSelector = new VarianceSelectorCRLB();
+        varianceSelector = new VarianceSelectorCrlb();
         break;
       default:
         method = PrecisionMethod.PRECISION_METHOD_NA;
@@ -1634,7 +1634,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   private void updateZFilter() {
     // Check if the PSF is 3D but avoid exceptions from creating the z-model
-    zEnabled = getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE
+    zEnabled = getPsfTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE
         // is3D() // This can throw
         && (getMaxZ() != 0 || getMinZ() != 0) && (getMinZ() <= getMaxZ());
   }
@@ -2320,7 +2320,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     // Check widths
-    if (isXSDFitting()) {
+    if (isXSdFitting()) {
       boolean badWidth = false;
       double xfactor = 0;
       double yfactor = 0;
@@ -2404,35 +2404,35 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     if (precisionUsingBackground) {
       // Check using the formula which uses the estimated background.
       // This allows for better filtering when the background is variable, e.g. when imaging cells.
-      if (isMLE) {
+      if (isMle) {
         try {
           // This may be slow due to the integration required within the formula.
           variance = Gaussian2DPeakResultHelper.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal,
-              Math.max(0, localBackground), emCCD);
+              Math.max(0, localBackground), emCcd);
         } catch (final Exception ex) {
           // Catch all exceptions. They are likely to be a TooManyIterationsException and other
           // problems with the integration
           variance = Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, nmPerPixel * sd, signal,
-              Math.max(0, localBackground), emCCD);
+              Math.max(0, localBackground), emCcd);
         }
       } else {
         variance = Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, nmPerPixel * sd, signal,
-            Math.max(0, localBackground), emCCD);
+            Math.max(0, localBackground), emCcd);
       }
-    } else if (isMLE) {
+    } else if (isMle) {
       try {
         // This may be slow due to the integration required within the formula.
         variance = Gaussian2DPeakResultHelper.getMLVariance(nmPerPixel, nmPerPixel * sd, signal,
-            noise, emCCD);
+            noise, emCcd);
       } catch (final Exception ex) {
         // Catch all exceptions. They are likely to be a TooManyIterationsException and other
         // problems with the integration
         variance = Gaussian2DPeakResultHelper.getVariance(nmPerPixel, nmPerPixel * sd, signal,
-            noise, emCCD);
+            noise, emCcd);
       }
     } else {
       variance =
-          Gaussian2DPeakResultHelper.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCCD);
+          Gaussian2DPeakResultHelper.getVariance(nmPerPixel, nmPerPixel * sd, signal, noise, emCcd);
     }
     return variance;
   }
@@ -2468,7 +2468,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @param paramsDev the params dev
    */
   public void updateVariance(double[] paramsDev) {
-    if (emCCD && paramsDev != null) {
+    if (emCcd && paramsDev != null) {
       // Scale all
       for (int i = 0; i < paramsDev.length; i++) {
         paramsDev[i] *= 2;
@@ -2495,7 +2495,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     float offsety;
     double var;
     double var2;
-    double varCRLB;
+    double varCrlb;
 
     DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params,
         double[] paramsDev, PeakResultValidationData peakResultValidationData,
@@ -2505,7 +2505,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     DynamicPeakResult() {
-      var = var2 = varCRLB = -1;
+      var = var2 = varCrlb = -1;
     }
 
     /**
@@ -2535,7 +2535,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       this.newResult = resultType == ResultType.NEW;
       this.offsetx = offsetx;
       this.offsety = offsety;
-      var = var2 = varCRLB = -1;
+      var = var2 = varCrlb = -1;
       // Map the width parameters using the z-model
       if (getAstigmatismZModel() != null) {
         final double z = getZ();
@@ -2631,7 +2631,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       // We do not use the local background so set as zero
       if (var == -1) {
         var = FitConfiguration.this.getVariance(0,
-            params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, getSD(), false);
+            params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, getSd(), false);
       }
       return var;
     }
@@ -2640,21 +2640,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     public double getLocationVariance2() {
       if (var2 == -1) {
         var2 = FitConfiguration.this.getVariance(getLocalBackground() * signalToPhotons,
-            params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, getSD(), true);
+            params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, getSd(), true);
       }
       return var2;
     }
 
     @Override
-    public double getLocationVarianceCRLB() {
-      if (varCRLB == -1) {
-        varCRLB = FitConfiguration.this.getVariance(paramsDev, id);
+    public double getLocationVarianceCrlb() {
+      if (varCrlb == -1) {
+        varCrlb = FitConfiguration.this.getVariance(paramsDev, id);
       }
-      return varCRLB;
+      return varCrlb;
     }
 
     @Override
-    public float getSD() {
+    public float getSd() {
       if (isTwoAxisGaussian2D) {
         return (float) Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd);
       }
@@ -2708,22 +2708,22 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     @Override
-    public float getXSD() {
+    public float getXSd() {
       return (float) xsd;
     }
 
     @Override
-    public float getYSD() {
+    public float getYSd() {
       return (float) ysd;
     }
 
     @Override
-    public float getXSDFactor() {
+    public float getXSdFactor() {
       return (float) (xsd / initialParams[Gaussian2DFunction.X_SD + offset]);
     }
 
     @Override
-    public float getYSDFactor() {
+    public float getYSdFactor() {
       return (float) (ysd / initialParams[Gaussian2DFunction.Y_SD + offset]);
     }
 
@@ -2919,12 +2919,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd) : xsd;
     final double variance = getVariance(0, signal, sd, false);
     final double variance2 = getVariance(b, signal, sd, true);
-    final double varianceCRLB = getVariance(paramVariances, n);
+    final double varianceCrlb = getVariance(paramVariances, n);
 
     final double noise = peakResultValidationData.getNoise();
     final double u = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, ysd);
     return new BasePreprocessedPeakResult(frame, n, candidateId, signal, u, noise, b, angle, x, y,
-        z, x0, y0, xsd, ysd, xsd0, ysd0, variance, variance2, varianceCRLB, resultType);
+        z, x0, y0, xsd, ysd, xsd0, ysd0, variance, variance2, varianceCrlb, resultType);
   }
 
   /**
@@ -2936,11 +2936,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   public boolean isFitCameraCounts() {
     // Only the legacy MLE solvers that explicitly model the camera noise require the data
     // and estimate to be in ADUs. This is also true if there is no camera calibration.
-    if (fitSolverSettings.getFitSolverValue() == FitSolver.MLE_VALUE
-        || calibration.getCameraTypeValue() == CameraType.CAMERA_TYPE_NA_VALUE) {
-      return true;
-    }
-    return false;
+    return (fitSolverSettings.getFitSolverValue() == FitSolver.MLE_VALUE
+        || calibration.getCameraTypeValue() == CameraType.CAMERA_TYPE_NA_VALUE);
   }
 
   /**
@@ -2953,10 +2950,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     // This is only true if there is no camera calibration.
     // Otherwise the camera details can be used to convert input data in camera counts
     // to photo-electrons and all fitting is done assuming the signal is photo-electrons.
-    if (calibration.getCameraTypeValue() == CameraType.CAMERA_TYPE_NA_VALUE) {
-      return true;
-    }
-    return false;
+    return (calibration.getCameraTypeValue() == CameraType.CAMERA_TYPE_NA_VALUE);
   }
 
   /**
@@ -2964,7 +2958,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return true, if is a MLE modelling the camera
    */
-  public boolean isModelCameraMLE() {
+  public boolean isModelCameraMle() {
     return (isModelCamera() && fitSolverSettings.getFitSolverValue() == FitSolver.MLE_VALUE);
   }
 
@@ -2973,7 +2967,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return true, if is a MLE
    */
-  public boolean isMLE() {
+  public boolean isMle() {
     switch (getFitSolverValue()) {
       case FitSolver.LVM_MLE_VALUE:
       case FitSolver.MLE_VALUE:
@@ -3072,7 +3066,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       }
 
       // signalToPhotons should be 1.0/gain
-      return new MLEScaledFunctionSolver((MaximumLikelihoodFitter) functionSolver, signalToPhotons,
+      return new MleScaledFunctionSolver((MaximumLikelihoodFitter) functionSolver, signalToPhotons,
           indices);
     }
 
@@ -3096,7 +3090,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
     if (getFitSolverValue() == FitSolver.MLE_VALUE) {
       // Only support CCD/EM-CCD at the moment
-      if (!calibration.isCCDCamera()) {
+      if (!calibration.isCcdCamera()) {
         throw new IllegalStateException(
             "CCD/EM-CCD camera is required for fit solver: " + getFitSolver());
       }
@@ -3130,7 +3124,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         // Do not check if this is set as 0 is a valid option.
         fitter.setSigma(calibration.getReadNoise());
 
-        if (emCCD) {
+        if (emCcd) {
           // EMCCD = Poisson+Gamma+Gaussian
           fitter.setLikelihoodFunction(
               MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAMMA_GAUSSIAN);
@@ -3166,17 +3160,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
     switch (getFitSolverValue()) {
       case FitSolver.LVM_LSE_VALUE:
-        solver = new LSELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
+        solver = new LseLvmSteppingFunctionSolver(gaussianFunction, tc, bounds);
         break;
 
       case FitSolver.LVM_MLE_VALUE:
         checkCameraCalibration();
-        solver = new MLELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
+        solver = new MleLvmSteppingFunctionSolver(gaussianFunction, tc, bounds);
         break;
 
       case FitSolver.LVM_WLSE_VALUE:
         checkCameraCalibration();
-        solver = new WLSELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
+        solver = new WLseLvmSteppingFunctionSolver(gaussianFunction, tc, bounds);
         break;
 
       case FitSolver.FAST_MLE_VALUE:
@@ -3184,12 +3178,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         // This may throw a class cast exception if the function does not support
         // the Gradient2Function interface
         solver =
-            new FastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc, bounds);
+            new FastMleSteppingFunctionSolver((Gradient2Function) gaussianFunction, tc, bounds);
         break;
 
       case FitSolver.BACKTRACKING_FAST_MLE_VALUE:
         checkCameraCalibration();
-        solver = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction,
+        solver = new BacktrackingFastMleSteppingFunctionSolver((Gradient2Function) gaussianFunction,
             tc, bounds);
         break;
 
@@ -3197,10 +3191,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         throw new IllegalStateException("Unknown fit solver: " + getFitSolver());
     }
 
-    if (solver instanceof LVMSteppingFunctionSolver) {
-      ((LVMSteppingFunctionSolver) solver).setInitialLambda(getLambda());
-    } else if (solver instanceof FastMLESteppingFunctionSolver) {
-      ((FastMLESteppingFunctionSolver) solver).setLineSearchMethod(convertLineSearchMethod());
+    if (solver instanceof LvmSteppingFunctionSolver) {
+      ((LvmSteppingFunctionSolver) solver).setInitialLambda(getLambda());
+    } else if (solver instanceof FastMleSteppingFunctionSolver) {
+      ((FastMleSteppingFunctionSolver) solver).setLineSearchMethod(convertLineSearchMethod());
     }
     return solver;
   }
@@ -3209,7 +3203,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     return FitProtosHelper.convertSearchMethod(getSearchMethod());
   }
 
-  private FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod() {
+  private FastMleSteppingFunctionSolver.LineSearchMethod convertLineSearchMethod() {
     return FitProtosHelper.convertLineSearchMethod(getLineSearchMethod());
   }
 
@@ -3335,7 +3329,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ,
             maxZ);
       case PrecisionMethod.POISSON_CRLB_VALUE:
-        return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ,
+        return new MultiFilterCrlb(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ,
             maxZ);
       default:
         throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
@@ -3348,8 +3342,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return the smart filter XML if using this object as a smart filter.
    */
-  public String getDefaultSmartFilterXML() {
-    return getDefaultSmartFilter().toXML();
+  public String getDefaultSmartFilterXml() {
+    return getDefaultSmartFilter().toXml();
   }
 
   /**
@@ -3362,7 +3356,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     this.directFilter = directFilter;
     if (directFilter != null) {
       setSmartFilter(true);
-      filterSettings.setSmartFilterString(directFilter.toXML());
+      filterSettings.setSmartFilterString(directFilter.toXml());
     } else {
       setSmartFilter(false);
       filterSettings.clearSmartFilterString();
@@ -3408,10 +3402,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     } else {
       widthEnabled = !DirectFilter.areSet(flags, IDirectFilter.NO_WIDTH);
       if (DirectFilter.areSet(flags, IDirectFilter.NO_SHIFT)) {
-        offset = Float.POSITIVE_INFINITY;
+        shiftOffset = Float.POSITIVE_INFINITY;
       } else {
         final double shiftFactor = getCoordinateShiftFactor();
-        offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
+        shiftOffset =
+            (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
       }
       varianceThreshold = (precisionThreshold > 0) ? precisionThreshold : Double.POSITIVE_INFINITY;
     }
@@ -3428,7 +3423,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       // Note: These variables should be copied in copySettings(...)
       widthEnabled = !DirectFilter.areSet(flags, IDirectFilter.NO_WIDTH);
       if (DirectFilter.areSet(flags, IDirectFilter.NO_SHIFT)) {
-        offset = Float.POSITIVE_INFINITY;
+        shiftOffset = Float.POSITIVE_INFINITY;
       } else {
         double shiftFactor = getCoordinateShiftFactor();
         for (int i = filterSetupData.length; i-- > 0;) {
@@ -3443,7 +3438,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
             break;
           }
         }
-        offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
+        shiftOffset =
+            (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
       }
       varianceThreshold = (precisionThreshold > 0) ? precisionThreshold : Double.POSITIVE_INFINITY;
     }
@@ -3480,12 +3476,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   @Override
   public int validate(PreprocessedPeakResult peak) {
-    final int result = doValidate(peak);
-    if (log != null && result != 0) {
+    final int validateResult = doValidate(peak);
+    if (log != null && validateResult != 0) {
       LoggerUtils.log(log, Level.INFO, "Bad peak %d (%.1f,%.1f) [%d]: %s", peak.getCandidateId(),
-          peak.getX(), peak.getY(), peak.getId(), DirectFilter.getStatusMessage(peak, result));
+          peak.getX(), peak.getY(), peak.getId(),
+          DirectFilter.getStatusMessage(peak, validateResult));
     }
-    return result;
+    return validateResult;
   }
 
   @Override
@@ -3498,27 +3495,27 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       return 0;
     }
     // These could be conditional on the filter settings. For now just set them all.
-    int flags = V_PHOTONS | V_SNR | V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+    int validationFlags = V_PHOTONS | V_SNR | V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
     if (widthEnabled) {
-      flags |= V_X_SD_FACTOR;
+      validationFlags |= V_X_SD_FACTOR;
       if (isTwoAxisGaussian2D) {
-        flags |= V_Y_SD_FACTOR;
+        validationFlags |= V_Y_SD_FACTOR;
       }
     }
     switch (getPrecisionMethodValue()) {
       case PrecisionMethod.MORTENSEN_VALUE:
-        flags |= V_LOCATION_VARIANCE;
+        validationFlags |= V_LOCATION_VARIANCE;
         break;
       case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
-        flags |= V_LOCATION_VARIANCE2;
+        validationFlags |= V_LOCATION_VARIANCE2;
         break;
       case PrecisionMethod.POISSON_CRLB_VALUE:
-        flags |= V_LOCATION_VARIANCE_CRLB;
+        validationFlags |= V_LOCATION_VARIANCE_CRLB;
         break;
       default:
         break;
     }
-    return flags;
+    return validationFlags;
   }
 
   /**
@@ -3545,7 +3542,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     if (peak.getSignal() < getMinPhotons()) {
       return V_PHOTONS;
     }
-    if (peak.getSNR() < getSignalStrength()) {
+    if (peak.getSnr() < getSignalStrength()) {
       return V_SNR;
     }
     if (widthEnabled) {
@@ -3553,26 +3550,24 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       // Note this will ignore any flags passed to the IDirectFilter#setup methods
       // to control the filter.
       if (isTwoAxisGaussian2D) {
-        final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
+        final float s2 = peak.getXSdFactor() * peak.getYSdFactor();
         if (s2 > widthFactor || s2 < minWidthFactor) {
           return V_X_SD_FACTOR | V_Y_SD_FACTOR;
         }
       } else {
-        final double s = peak.getXSDFactor();
+        final double s = peak.getXSdFactor();
         if (s > widthFactor || s < minWidthFactor) {
           return V_X_SD_FACTOR;
         }
       }
     }
-    if (peak.getXRelativeShift2() > offset) {
+    if (peak.getXRelativeShift2() > shiftOffset) {
       return V_X_RELATIVE_SHIFT;
     }
-    if (peak.getYRelativeShift2() > offset) {
+    if (peak.getYRelativeShift2() > shiftOffset) {
       return V_Y_RELATIVE_SHIFT;
-      // Do not support Euclidian shift
-      // if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
-      // return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
     }
+    // Note: Do not support Euclidian shift
 
     if (zEnabled) {
       final double z = peak.getZ();
@@ -3581,6 +3576,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       }
     }
 
+    // Note: The variance threshold is set to infinity if the variance filter is disabled
     switch (getPrecisionMethodValue()) {
       case PrecisionMethod.MORTENSEN_VALUE:
         if (peak.getLocationVariance() > varianceThreshold) {
@@ -3593,7 +3589,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         }
         break;
       case PrecisionMethod.POISSON_CRLB_VALUE:
-        if (peak.getLocationVarianceCRLB() > varianceThreshold) {
+        if (peak.getLocationVarianceCrlb() > varianceThreshold) {
           return V_LOCATION_VARIANCE_CRLB;
         }
         break;
@@ -3781,7 +3777,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return The clamp value for the x sd.
    */
-  public double getClampXSD() {
+  public double getClampXSd() {
     return getClampValues()[Gaussian2DFunction.X_SD];
   }
 
@@ -3790,7 +3786,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @param value the new clamp value
    */
-  public void setClampXSD(double value) {
+  public void setClampXSd(double value) {
     updateClampValues(Gaussian2DFunction.X_SD, value);
   }
 
@@ -3799,7 +3795,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return The clamp value for the y sd.
    */
-  public double getClampYSD() {
+  public double getClampYSd() {
     return getClampValues()[Gaussian2DFunction.Y_SD];
   }
 
@@ -3808,7 +3804,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @param value the new clamp value
    */
-  public void setClampYSD(double value) {
+  public void setClampYSd(double value) {
     updateClampValues(Gaussian2DFunction.Y_SD, value);
   }
 
@@ -3942,8 +3938,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
           final double variance = MathUtils.pow2(calibration.getReadNoise());
           // This will throw an exception if the calibration is invalid.
           cameraModel =
-              (value == CameraType.EMCCD_VALUE) ? new EMCCDCameraModel(bias, gain, variance)
-                  : new CCDCameraModel(bias, gain, variance);
+              (value == CameraType.EMCCD_VALUE) ? new EmCcdCameraModel(bias, gain, variance)
+                  : new CcdCameraModel(bias, gain, variance);
           break;
 
         case CameraType.SCMOS_VALUE:
@@ -4012,7 +4008,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @param psfModelName the new PSF model name
    */
-  public void setPSFModelName(String psfModelName) {
+  public void setPsfModelName(String psfModelName) {
     psf.setModelName(psfModelName);
   }
 
@@ -4021,7 +4017,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    *
    * @return the PSF model name
    */
-  public String getPSFModelName() {
+  public String getPsfModelName() {
     return psf.getModelName();
   }
 
@@ -4033,8 +4029,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @throws ConfigurationException if the model pixel pitch does not match the calibration
    * @throws ConversionException if the model cannot be converted to pixel units
    */
-  public void setAstigmatismModel(AstigmatismModel model)
-      throws ConfigurationException, ConversionException {
+  public void setAstigmatismModel(AstigmatismModel model) {
     // Check the calibration
     if (DoubleEquality.relativeError(model.getNmPerPixel(), calibration.getNmPerPixel()) > 1e-3) {
       throw new ConfigurationException(String.format(
@@ -4043,17 +4038,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     }
 
     // Convert to pixels
-    model = PSFProtosHelper.convert(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
+    model = PsfProtosHelper.convert(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
 
     // Create the working model
     astigmatismZModel = HoltzerAstigmatismZModel.create(model.getS0X(), model.getS0Y(),
         model.getGamma(), model.getD(), model.getAx(), model.getBx(), model.getAy(), model.getBy());
 
     // Store the parameters in the PSF
-    final String modelName = getPSFModelName();
-    psf.clear().mergeFrom(PSFProtosHelper.createPSF(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL));
+    final String modelName = getPsfModelName();
+    psf.clear().mergeFrom(PsfProtosHelper.createPsf(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL));
     psf.setModelName(modelName);
-    updatePSF(false);
+    updatePsf(false);
   }
 
   /**
@@ -4064,10 +4059,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @throws ConfigurationException if the model cannot be created from the parameters
    */
   public AstigmatismZModel getAstigmatismZModel() {
-    if (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
+    if (getPsfTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
       if (astigmatismZModel == null) {
         // Use the helper to convert the PSF parameters back to a model
-        final AstigmatismModel model = PSFProtosHelper.createModel(getPSF(), DistanceUnit.PIXEL,
+        final AstigmatismModel model = PsfProtosHelper.createModel(getPsf(), DistanceUnit.PIXEL,
             DistanceUnit.PIXEL, calibration.getNmPerPixel());
         astigmatismZModel =
             HoltzerAstigmatismZModel.create(model.getS0X(), model.getS0Y(), model.getGamma(),
@@ -4086,7 +4081,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @throws ConfigurationException if the 3D model cannot be created
    */
   public boolean is3D() {
-    return (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE
+    return (getPsfTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE
         && getAstigmatismZModel() != null);
   }
 
@@ -4097,6 +4092,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * @throws ConfigurationException if the psf is null, or not a Gaussian 2D function
    */
   double[] getGaussian2DWxWy() {
-    return PSFHelper.getGaussian2DWxWy(psf);
+    return PsfHelper.getGaussian2DWxWy(psf);
   }
 }

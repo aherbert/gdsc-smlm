@@ -135,7 +135,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
       append(sb, "Signal",           peak.getSignal());
     }
     if (areSet(flags, V_SNR)) {
-      append(sb, "SNR",              peak.getSNR());
+      append(sb, "SNR",              peak.getSnr());
     }
     if (areSet(flags, V_NOISE)) {
       append(sb, "Noise",            peak.getNoise());
@@ -147,10 +147,10 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
       append(sb, "Precision2",       Math.sqrt(peak.getLocationVariance2()));
     }
     if (areSet(flags, V_LOCATION_VARIANCE_CRLB)) {
-      append(sb, "Precision CRLB",   Math.sqrt(peak.getLocationVarianceCRLB()));
+      append(sb, "Precision CRLB",   Math.sqrt(peak.getLocationVarianceCrlb()));
     }
     if (areSet(flags, V_SD)) {
-      append(sb, "SD",               peak.getSD());
+      append(sb, "SD",               peak.getSd());
     }
     if (areSet(flags, V_BACKGROUND)) {
       append(sb, "Background",       peak.getBackground());
@@ -177,16 +177,16 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
       append(sb, "Y Relative Shift", Math.sqrt(peak.getYRelativeShift2()));
     }
     if (areSet(flags, V_X_SD)) {
-      append(sb, "X SD",             peak.getXSD());
+      append(sb, "X SD",             peak.getXSd());
     }
     if (areSet(flags, V_Y_SD)) {
-      append(sb, "Y SD",             peak.getYSD());
+      append(sb, "Y SD",             peak.getYSd());
     }
     if (areSet(flags, V_X_SD_FACTOR)) {
-      append(sb, "X SD Factor",      peak.getXSDFactor());
+      append(sb, "X SD Factor",      peak.getXSdFactor());
     }
     if (areSet(flags, V_Y_SD_FACTOR)) {
-      append(sb, "Y SD Factor",      peak.getYSDFactor());
+      append(sb, "Y SD Factor",      peak.getYSdFactor());
     }
     //@formatter:on
     return sb.toString();

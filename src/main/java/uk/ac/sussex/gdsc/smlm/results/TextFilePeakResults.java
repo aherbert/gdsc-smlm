@@ -50,7 +50,7 @@ import java.util.Scanner;
 /**
  * Saves the fit results to file.
  */
-public class TextFilePeakResults extends SMLMFilePeakResults {
+public class TextFilePeakResults extends SmlmFilePeakResults {
   private Gaussian2DPeakResultCalculator calculator;
 
   private PeakResultConversionHelper helper;
@@ -159,7 +159,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     if (isShowPrecision() && hasCalibration() && computePrecision) {
       // Determine if we can compute the precision using the current settings
       try {
-        calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
+        calculator = Gaussian2DPeakResultHelper.create(getPsf(), getCalibrationReader(),
             Gaussian2DPeakResultHelper.LSE_PRECISION);
         canComputePrecision = true;
       } catch (final ConfigurationException | ConversionException ex) {
@@ -168,7 +168,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     }
 
     // We must correctly convert all the PSF parameter types
-    helper = new PeakResultConversionHelper(getCalibration(), getPSF());
+    helper = new PeakResultConversionHelper(getCalibration(), getPsf());
     helper.setIntensityUnit(intensityUnit);
     helper.setDistanceUnit(distanceUnit);
     helper.setAngleUnit(angleUnit);
@@ -260,7 +260,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
     }
     if (isShowPrecision()) {
       if (canComputePrecision) {
-        addPrecision(sb, calculator.getLSEPrecision(params, noise), true);
+        addPrecision(sb, calculator.getLsePrecision(params, noise), true);
       } else {
         sb.append("\t0");
       }
@@ -312,7 +312,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults {
       if (result.hasPrecision()) {
         addPrecision(sb, result.getPrecision(), false);
       } else if (canComputePrecision) {
-        addPrecision(sb, calculator.getLSEPrecision(params, result.getNoise()), true);
+        addPrecision(sb, calculator.getLsePrecision(params, result.getNoise()), true);
       } else {
         sb.append("\t0");
       }

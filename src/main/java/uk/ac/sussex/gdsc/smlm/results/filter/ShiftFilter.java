@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
@@ -72,7 +72,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter {
   @Override
   public void setup(MemoryPeakResults peakResults) {
     // Set the shift limit
-    final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+    final double[] s = PsfHelper.getGaussian2DWxWy(peakResults.getPsf());
     offsetx = getUpperLimit(s[0] * shift);
     offsety = getUpperLimit(s[1] * shift);
   }
@@ -217,7 +217,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public double getSNR() {
+  public double getSnr() {
     return 0;
   }
 

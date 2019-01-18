@@ -32,38 +32,38 @@ import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
-import uk.ac.sussex.gdsc.smlm.results.procedures.BIRResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.BIXYResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.BResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.BirResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.BixyResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.BixyzResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.HResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.IResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.IXYRResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.IXYResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.IXYZRResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.IXYZResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.LSEPrecisionBProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.LSEPrecisionProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.MLEPrecisionBProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.MLEPrecisionProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.IxyResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.IxyrResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.IxyzResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.IxyzrResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.LsePrecisionBProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.LsePrecisionProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.MlePrecisionBProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.MlePrecisionProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StoredPrecisionProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.TResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.TXYResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.TxyResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.WResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.WxWyResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYZRResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYZResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyzResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyzrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.ZResultProcedure;
 
 import java.awt.Rectangle;
@@ -329,7 +329,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    */
   public MemoryPeakResults(PSF psf) {
     this();
-    setPSF(psf);
+    setPsf(psf);
   }
 
   /**
@@ -976,10 +976,10 @@ public class MemoryPeakResults extends AbstractPeakResults {
     }
 
     final PeakResultConversionHelper helper =
-        new PeakResultConversionHelper(getCalibration(), getPSF());
+        new PeakResultConversionHelper(getCalibration(), getPsf());
     helper.setIntensityUnit(intensityUnit);
     helper.setDistanceUnit(distanceUnit);
-    if (PSFHelper.hasAngleParameters(getPSF())) {
+    if (PsfHelper.hasAngleParameters(getPsf())) {
       helper.setAngleUnit(angleUnit);
     }
     final Converter[] converters = helper.getConverters();
@@ -1040,12 +1040,12 @@ public class MemoryPeakResults extends AbstractPeakResults {
    *
    * @param procedure the procedure
    */
-  public void forFirstNative(BIXYZResultProcedure procedure) {
+  public void forFirstNative(BixyzResultProcedure procedure) {
     if (isEmpty()) {
       return;
     }
     final PeakResult r = getf(0);
-    procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(), r.getYPosition(),
+    procedure.executeBixyz(r.getBackground(), r.getIntensity(), r.getXPosition(), r.getYPosition(),
         r.getZPosition());
   }
 
@@ -1086,12 +1086,12 @@ public class MemoryPeakResults extends AbstractPeakResults {
    *
    * @param procedure the procedure
    */
-  public void forFirstNative(XYZResultProcedure procedure) {
+  public void forFirstNative(XyzResultProcedure procedure) {
     if (isEmpty()) {
       return;
     }
     final PeakResult r = getf(0);
-    procedure.executeXYZ(r.getXPosition(), r.getYPosition(), r.getZPosition());
+    procedure.executeXyz(r.getXPosition(), r.getYPosition(), r.getZPosition());
   }
 
   /**
@@ -1101,10 +1101,10 @@ public class MemoryPeakResults extends AbstractPeakResults {
    *
    * @param procedure the procedure
    */
-  public void forEachNative(BIXYZResultProcedure procedure) {
+  public void forEachNative(BixyzResultProcedure procedure) {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
-      procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(),
+      procedure.executeBixyz(r.getBackground(), r.getIntensity(), r.getXPosition(),
           r.getYPosition(), r.getZPosition());
     }
   }
@@ -1144,10 +1144,10 @@ public class MemoryPeakResults extends AbstractPeakResults {
    *
    * @param procedure the procedure
    */
-  public void forEachNative(XYZResultProcedure procedure) {
+  public void forEachNative(XyzResultProcedure procedure) {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
-      procedure.executeXYZ(r.getXPosition(), r.getYPosition(), r.getZPosition());
+      procedure.executeXyz(r.getXPosition(), r.getYPosition(), r.getZPosition());
     }
   }
 
@@ -1207,13 +1207,13 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(IntensityUnit intensityUnit, BIRResultProcedure procedure) {
+  public void forEach(IntensityUnit intensityUnit, BirResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeBIR(
+      procedure.executeBir(
           ic.convert(r.getBackground()),
           ic.convert(r.getIntensity()),
           r);
@@ -1233,7 +1233,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      BIXYResultProcedure procedure) {
+      BixyResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1241,7 +1241,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeBIXY(
+      procedure.executeBixy(
           ic.convert(r.getBackground()),
           ic.convert(r.getIntensity()),
           dc.convert(r.getXPosition()),
@@ -1262,7 +1262,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      BIXYZResultProcedure procedure) {
+      BixyzResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1270,7 +1270,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeBIXYZ(
+      procedure.executeBixyz(
           ic.convert(r.getBackground()),
           ic.convert(r.getIntensity()),
           dc.convert(r.getXPosition()),
@@ -1296,7 +1296,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
   public void forEach(IntensityUnit intensityUnit, HResultProcedure procedure) {
     checkCalibration();
 
-    final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+    final int[] indices = PsfHelper.getGaussian2DWxWyIndices(getPsf());
 
     final int isx = indices[0];
     final int isy = indices[1];
@@ -1355,7 +1355,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYResultProcedure procedure) {
+      IxyResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1363,7 +1363,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeIXY(
+      procedure.executeIxy(
           ic.convert(r.getIntensity()),
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()));
@@ -1383,7 +1383,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYRResultProcedure procedure) {
+      IxyrResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1391,7 +1391,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getfX(i);
       //@formatter:off
-      procedure.executeIXYR(
+      procedure.executeIxyr(
           ic.convert(r.getIntensity()),
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()),
@@ -1412,7 +1412,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYZResultProcedure procedure) {
+      IxyzResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1420,7 +1420,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeIXYZ(
+      procedure.executeIxyz(
           ic.convert(r.getIntensity()),
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()),
@@ -1441,7 +1441,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConfigurationException if the configuration is invalid
    */
   public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit,
-      IXYZRResultProcedure procedure) {
+      IxyzrResultProcedure procedure) {
     final TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
     final TypeConverter<DistanceUnit> dc =
         getCalibrationReader().getDistanceConverter(distanceUnit);
@@ -1449,7 +1449,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getfX(i);
       //@formatter:off
-      procedure.executeIXYZR(
+      procedure.executeIxyzr(
           ic.convert(r.getIntensity()),
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()),
@@ -1490,13 +1490,13 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, TXYResultProcedure procedure) {
+  public void forEach(DistanceUnit distanceUnit, TxyResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeTXY(
+      procedure.executeTxy(
           r.getFrame(),
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()));
@@ -1520,7 +1520,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     // Note that in the future we may support more than just Gaussian2D PSF
     // so this may have to change
 
-    final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+    final int[] indices = PsfHelper.getGaussian2DWxWyIndices(getPsf());
 
     final int isx = indices[0];
     final int isy = indices[1];
@@ -1560,7 +1560,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
     // Note that in the future we may support more than just Gaussian2D PSF
     // so this may have to change
 
-    final int[] indices = PSFHelper.getGaussian2DWxWyIndices(getPSF());
+    final int[] indices = PsfHelper.getGaussian2DWxWyIndices(getPsf());
 
     final int isx = indices[0];
     final int isy = indices[1];
@@ -1588,13 +1588,13 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYResultProcedure procedure) {
+  public void forEach(DistanceUnit distanceUnit, XyResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeXY(
+      procedure.executeXy(
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()));
       //@formatter:on
@@ -1613,13 +1613,13 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYRResultProcedure procedure) {
+  public void forEach(DistanceUnit distanceUnit, XyrResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getfX(i);
       //@formatter:off
-      procedure.executeXYR(
+      procedure.executeXyr(
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()),
           r);
@@ -1637,13 +1637,13 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYZResultProcedure procedure) {
+  public void forEach(DistanceUnit distanceUnit, XyzResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
       //@formatter:off
-      procedure.executeXYZ(
+      procedure.executeXyz(
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()),
           dc.convert(r.getZPosition()));
@@ -1661,13 +1661,13 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(DistanceUnit distanceUnit, XYZRResultProcedure procedure) {
+  public void forEach(DistanceUnit distanceUnit, XyzrResultProcedure procedure) {
     final TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getfX(i);
       //@formatter:off
-      procedure.executeXYZR(
+      procedure.executeXyzr(
           dc.convert(r.getXPosition()),
           dc.convert(r.getYPosition()),
           dc.convert(r.getZPosition()),
@@ -1719,15 +1719,15 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(LSEPrecisionProcedure procedure) {
+  public void forEach(LsePrecisionProcedure procedure) {
     checkCalibration();
 
-    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
+    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPsf(),
         getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
-      procedure.executeLSEPrecision(calculator.getLSEPrecision(r.getParameters(), r.getNoise()));
+      procedure.executeLsePrecision(calculator.getLsePrecision(r.getParameters(), r.getNoise()));
     }
   }
 
@@ -1740,14 +1740,14 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(LSEPrecisionBProcedure procedure) {
+  public void forEach(LsePrecisionBProcedure procedure) {
     checkCalibration();
 
-    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
+    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPsf(),
         getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION_X);
 
     for (int i = 0, size = size(); i < size; i++) {
-      procedure.executeLSEPrecisionB(calculator.getLSEPrecision(getf(i).getParameters()));
+      procedure.executeLsePrecisionB(calculator.getLsePrecision(getf(i).getParameters()));
     }
   }
 
@@ -1760,15 +1760,15 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(MLEPrecisionProcedure procedure) {
+  public void forEach(MlePrecisionProcedure procedure) {
     checkCalibration();
 
-    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
+    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPsf(),
         getCalibration(), Gaussian2DPeakResultHelper.MLE_PRECISION);
 
     for (int i = 0, size = size(); i < size; i++) {
       final PeakResult r = getf(i);
-      procedure.executeMLEPrecision(calculator.getMLEPrecision(r.getParameters(), r.getNoise()));
+      procedure.executeMlePrecision(calculator.getMlePrecision(r.getParameters(), r.getNoise()));
     }
   }
 
@@ -1781,14 +1781,14 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws ConversionException if the conversion is not possible
    * @throws ConfigurationException if the configuration is invalid
    */
-  public void forEach(MLEPrecisionBProcedure procedure) {
+  public void forEach(MlePrecisionBProcedure procedure) {
     checkCalibration();
 
-    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPSF(),
+    final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(getPsf(),
         getCalibration(), Gaussian2DPeakResultHelper.MLE_PRECISION_X);
 
     for (int i = 0, size = size(); i < size; i++) {
-      procedure.executeMLEPrecisionB(calculator.getMLEPrecision(getf(i).getParameters()));
+      procedure.executeMlePrecisionB(calculator.getMlePrecision(getf(i).getParameters()));
     }
   }
 

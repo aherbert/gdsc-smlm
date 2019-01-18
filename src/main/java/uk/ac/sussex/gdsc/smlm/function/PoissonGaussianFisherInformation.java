@@ -115,6 +115,125 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
   }
 
+  /** The standard deviation of the Gaussian. */
+  public final double sd;
+
+  /** The minimum range of the Gaussian kernel (in SD units). */
+  private int minRange = DEFAULT_MIN_RANGE;
+
+  /** The maximum range of the Gaussian kernel (in SD units). */
+  private int maxRange = DEFAULT_MAX_RANGE;
+
+  /** The scale of the kernel. */
+  private final int defaultScale;
+
+  /** The poisson distribution used to generate the Poisson probabilities. */
+  private CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
+
+  /** Working space to store the Poisson probabilities. */
+  private TDoubleArrayList list = new TDoubleArrayList();
+
+  /** The mean threshold for the switch to a Gaussian-Gaussian convolution. */
+  private double meanThreshold = 100;
+
+  /** The cumulative probability of the Poisson distribution that is used. */
+  private double cumulativeProbability = DEFAULT_CUMULATIVE_PROBABILITY;
+
+  /** Set to true to use Simpson's 3/8 rule for cubic interpolation of the integral. */
+  private boolean use38 = true;
+
+  /** Store the limit of the Poisson distribution for small mean for the cumulative probability. */
+  private int[] limits = defaultLimits;
+
+  /** Store the limit of the Poisson distribution for tiny mean for the cumulative probability. */
+  private int[] tinyLimits = defaultTinyLimits;
+
+  /** Flag to indicate no possible convolution with the gaussian. */
+  private final boolean noGaussian;
+
+  /** The gaussian kernel. */
+  private GaussianKernel gaussianKernel;
+
+  /** The relative accuracy for convergence. */
+  private double relativeAccuracy = DEFAULT_RELATIVE_ACCURACY;
+
+  /** The max iterations. */
+  private int maxIterations = DEFAULT_MAX_ITERATIONS;
+
+  /**
+   * Instantiates a new poisson gaussian fisher information.
+   *
+   * @param sd the standard deviation of the Gaussian
+   * @throws IllegalArgumentException If the standard deviation is not strictly positive
+   */
+  public PoissonGaussianFisherInformation(double sd) {
+    this(sd, DEFAULT_SAMPLING);
+  }
+
+  /**
+   * Instantiates a new poisson gaussian fisher information.
+   *
+   * @param sd the standard deviation of the Gaussian
+   * @param sampling The number of Gaussian samples to take per standard deviation
+   * @throws IllegalArgumentException If the standard deviation is not strictly positive
+   * @throws IllegalArgumentException If the sampling is below 1
+   * @throws IllegalArgumentException If the maximum kernel size after scaling is too large
+   */
+  public PoissonGaussianFisherInformation(double sd, double sampling) {
+    if (!(sd >= 0 && sd <= Double.MAX_VALUE)) {
+      throw new IllegalArgumentException("Gaussian standard deviation must be positive");
+    }
+    if (!(sampling >= 1 && sampling <= Double.MAX_VALUE)) {
+      throw new IllegalArgumentException("Gaussian sampling must at least 1");
+    }
+
+    this.sd = sd;
+    noGaussian = (sd * MAX_RANGE < 1);
+    if (noGaussian) {
+      // This is OK. Just return the information for a Poisson.
+      this.defaultScale = 0;
+    } else {
+      // This is set to work for reasonable values of the Gaussian kernel and sampling
+      // e.g. s [0.5:20], sampling from [1:8].
+
+      this.defaultScale = getPow2Scale(sampling / sd);
+
+      // Don'theta support excess scaling caused by small kernels
+      if (defaultScale * sd * MAX_RANGE > 1000000000) {
+        throw new IllegalArgumentException(
+            "Maximum Gaussian kernel size too large: " + defaultScale * sd * MAX_RANGE);
+      }
+
+      gaussianKernel = new GaussianKernel(sd);
+    }
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected PoissonGaussianFisherInformation(PoissonGaussianFisherInformation source) {
+    sd = source.sd;
+    minRange = source.minRange;
+    maxRange = source.maxRange;
+    defaultScale = source.defaultScale;
+    meanThreshold = source.meanThreshold;
+    cumulativeProbability = source.cumulativeProbability;
+    use38 = source.use38;
+    limits = source.limits;
+    tinyLimits = source.tinyLimits;
+    noGaussian = source.noGaussian;
+    gaussianKernel = source.gaussianKernel.clone();
+    relativeAccuracy = source.relativeAccuracy;
+    maxIterations = source.maxIterations;
+  }
+
+  @Override
+  public PoissonGaussianFisherInformation copy() {
+    return new PoissonGaussianFisherInformation(this);
+  }
+
   /**
    * Compute the limit of a usable probability above 0.
    *
@@ -164,107 +283,14 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     return pd.inverseCumulativeProbability(cumulativeProbability);
   }
 
-  /** The standard deviation of the Gaussian. */
-  public final double s;
-
-  /** The minimum range of the Gaussian kernel (in SD units). */
-  private int minRange = DEFAULT_MIN_RANGE;
-
-  /** The maximum range of the Gaussian kernel (in SD units). */
-  private int maxRange = DEFAULT_MAX_RANGE;
-
-  /** The scale of the kernel. */
-  private final int defaultScale;
-
-  /** The poisson distribution used to generate the Poisson probabilities. */
-  private CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
-
-  /** Working space to store the Poisson probabilities. */
-  private TDoubleArrayList list = new TDoubleArrayList();
-
-  /** The mean threshold for the switch to a Gaussian-Gaussian convolution. */
-  private double meanThreshold = 100;
-
-  /** The cumulative probability of the Poisson distribution that is used. */
-  private double cumulativeProbability = DEFAULT_CUMULATIVE_PROBABILITY;
-
-  /** Set to true to use Simpson's 3/8 rule for cubic interpolation of the integral. */
-  private boolean use38 = true;
-
-  /** Store the limit of the Poisson distribution for small mean for the cumulative probability. */
-  private int[] limits = defaultLimits;
-
-  /** Store the limit of the Poisson distribution for tiny mean for the cumulative probability. */
-  private int[] tinyLimits = defaultTinyLimits;
-
-  /** Flag to indicate no possible convolution with the gaussian. */
-  private final boolean noGaussian;
-
-  /** The gaussian kernel. */
-  private GaussianKernel gaussianKernel;
-
-  /** The relative accuracy for convergence. */
-  private double relativeAccuracy = DEFAULT_RELATIVE_ACCURACY;
-
-  /** The max iterations. */
-  private int maxIterations = DEFAULT_MAX_ITERATIONS;
-
-  /**
-   * Instantiates a new poisson gaussian fisher information.
-   *
-   * @param s the standard deviation of the Gaussian
-   * @throws IllegalArgumentException If the standard deviation is not strictly positive
-   */
-  public PoissonGaussianFisherInformation(double s) {
-    this(s, DEFAULT_SAMPLING);
-  }
-
-  /**
-   * Instantiates a new poisson gaussian fisher information.
-   *
-   * @param s the standard deviation of the Gaussian
-   * @param sampling The number of Gaussian samples to take per standard deviation
-   * @throws IllegalArgumentException If the standard deviation is not strictly positive
-   * @throws IllegalArgumentException If the sampling is below 1
-   * @throws IllegalArgumentException If the maximum kernel size after scaling is too large
-   */
-  public PoissonGaussianFisherInformation(double s, double sampling) {
-    if (!(s >= 0 && s <= Double.MAX_VALUE)) {
-      throw new IllegalArgumentException("Gaussian standard deviation must be positive");
-    }
-    if (!(sampling >= 1 && sampling <= Double.MAX_VALUE)) {
-      throw new IllegalArgumentException("Gaussian sampling must at least 1");
-    }
-
-    this.s = s;
-    noGaussian = (s * MAX_RANGE < 1);
-    if (noGaussian) {
-      // This is OK. Just return the information for a Poisson.
-      this.defaultScale = 0;
-    } else {
-      // This is set to work for reasonable values of the Gaussian kernel and sampling
-      // e.g. s [0.5:20], sampling from [1:8].
-
-      this.defaultScale = getPow2Scale(sampling / s);
-
-      // Don't support excess scaling caused by small kernels
-      if (defaultScale * s * MAX_RANGE > 1000000000) {
-        throw new IllegalArgumentException(
-            "Maximum Gaussian kernel size too large: " + defaultScale * s * MAX_RANGE);
-      }
-
-      gaussianKernel = new GaussianKernel(s);
-    }
-  }
-
   /**
    * Gets a value using the next integer power of 2. This is limited to a size of 2^16.
    *
-   * @param s the value
+   * @param scaleValue the value
    * @return the next power of 2
    */
-  protected static int getPow2Scale(double s) {
-    final double scale = Math.ceil(s);
+  protected static int getPow2Scale(double scaleValue) {
+    final double scale = Math.ceil(scaleValue);
     if (scale > MAX_SCALE) {
       return MAX_SCALE;
     }
@@ -282,8 +308,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * input parameter.
    */
   @Override
-  public double getFisherInformation(double t) {
-    final double I = getPoissonGaussianI(t);
+  public double getFisherInformation(double theta) {
+    final double I = getPoissonGaussianI(theta);
 
     // Check limits.
 
@@ -291,15 +317,15 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     // better than the Poisson-Gaussian Fisher information (lower limit).
     // Note a low Fisher information is worse as this is the amount of information
     // carried about the parameter.
-    final double lower = 1.0 / (t + s * s); // getPoissonGaussianApproximationI(t);
-    final double upper = 1.0 / t; // PoissonFisherInformation.getPoissonI(t);;
+    final double lower = 1.0 / (theta + sd * sd); // getPoissonGaussianApproximationI(theta)
+    final double upper = 1.0 / theta; // PoissonFisherInformation.getPoissonI(theta)
     return MathUtils.clip(lower, upper, I);
   }
 
   @Override
-  public double getAlpha(double t) {
+  public double getAlpha(double theta) {
     // Simple implementation
-    return (noGaussian) ? 1 : t * getFisherInformation(t);
+    return (noGaussian) ? 1 : theta * getFisherInformation(theta);
   }
 
   /**
@@ -317,27 +343,27 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * {@link #getFisherInformation(double)} for a checked return value, clipped to the expected range
    * for a Poisson and the Poisson-Gaussian approximation.
    *
-   * @param t the Poisson mean
+   * @param theta the Poisson mean
    * @return the Poisson Gaussian Fisher information
    * @throws IllegalArgumentException the illegal argument exception
    */
-  public double getPoissonGaussianI(double t) {
-    if (t <= 0) {
+  public double getPoissonGaussianI(double theta) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    if (t < MIN_MEAN) {
+    if (theta < MIN_MEAN) {
       return Double.POSITIVE_INFINITY;
     }
 
     if (noGaussian) {
       // No Gaussian convolution
       // Get the Fisher information for a Poisson.
-      return 1.0 / t;
+      return 1.0 / theta;
     }
 
-    if (t > meanThreshold) {
+    if (theta > meanThreshold) {
       // Use an approximation when the Poisson mean is large
-      return 1.0 / (t + s * s); // getPoissonGaussianApproximationI(t);
+      return 1.0 / (theta + sd * sd); // getPoissonGaussianApproximationI(theta);
     }
 
     // This computes the convolution of a Poisson PMF and a Gaussian PDF.
@@ -405,18 +431,18 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     // the values (for example those returned by computeLimit(...).
     int maxx;
     // The exponent provides a rough idea of the size of the mean
-    final int exp = NumberUtils.getSignedExponent(t);
-    if (t < 1) {
-      int e = -exp;
-      if (e >= tinyLimits.length) {
-        e = tinyLimits.length - 1;
+    final int exp = NumberUtils.getSignedExponent(theta);
+    if (theta < 1) {
+      int ex = -exp;
+      if (ex >= tinyLimits.length) {
+        ex = tinyLimits.length - 1;
       }
-      if (tinyLimits[e] == 0) {
-        tinyLimits[e] = computeTinyLimit(pd, -e, cumulativeProbability);
+      if (tinyLimits[ex] == 0) {
+        tinyLimits[ex] = computeTinyLimit(pd, -ex, cumulativeProbability);
       }
-      maxx = tinyLimits[e];
+      maxx = tinyLimits[ex];
     } else {
-      final int x = (int) Math.ceil(t);
+      final int x = (int) Math.ceil(theta);
       if (x < limits.length) {
         if (limits[x] == 0) {
           limits[x] = computeLimit(pd, x, cumulativeProbability);
@@ -432,11 +458,11 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     // Build the Poisson distribution.
-    pd.setMeanUnsafe(t);
+    pd.setMeanUnsafe(theta);
     list.resetQuick();
 
     // XXX - check this is needed
-    // For small t the tail of the distribution is important
+    // For small theta the tail of the distribution is important
     if (maxx < 10) {
       maxx = 10;
     }
@@ -465,19 +491,19 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     // and the extent of the kernel must change. Just increase the range
     // for the kernel for each power of 2 the number is below 1.
     int range = minRange;
-    for (int e = exp; range < maxRange && e <= 0; e++) {
-      range++;
+    for (int e = exp; range < maxRange && e <= 0; e++, range++) {
+      // The counters are incremented in the for loop increment clause
     }
     // Ensure the kernel range covers multiple values of the Poisson distribution.
     // Only applicable to small kernels
-    while (range < maxRange && range * s < 1) {
+    while (range < maxRange && range * sd < 1) {
       range++;
     }
 
     // In order for A(z) = P(z-1) to work sum A(z) must be 1
     double sum;
     // sum = list.sum();
-    // System.out.printf("Normalisation (t=%g) = %s\n", t, sum);
+    // System.out.printf("Normalisation (theta=%g) = %s\n", theta, sum);
     // for (int i = 0; i < p.length; i++)
     // p[i] /= sum;
 
@@ -496,8 +522,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
         return sum;
       }
       final double delta = FastMath.abs(sum - oldSum);
-      // System.out.printf("s=%g t=%g Iteration=%d sum=%s oldSum=%s change=%s\n", s, t, iteration,
-      // sum, oldSum,
+      // System.out.printf("s=%g theta=%g Iteration=%d sum=%s oldSum=%s change=%s\n", s, theta,
+      // iteration, sum, oldSum,
       // delta / (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5);
       final double rLimit =
           getRelativeAccuracy() * (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5;
@@ -543,7 +569,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
       return true;
     }
 
-    protected abstract void sum(double f);
+    protected abstract void sum(double value);
 
     public abstract double getSum();
   }
@@ -557,14 +583,14 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     @Override
-    protected void sum(double f) {
+    protected void sum(double value) {
       // Simpson's rule.
       // This computes the sum as:
       // h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
       if (counter % 2 == 0) {
-        sum2 += f;
+        sum2 += value;
       } else {
-        sum4 += f;
+        sum4 += value;
       }
     }
 
@@ -588,14 +614,14 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     @Override
-    protected void sum(double f) {
+    protected void sum(double value) {
       // Simpson's 3/8 rule based on cubic interpolation has a lower error.
       // This computes the sum as:
       // 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
       if (counter % 3 == 0) {
-        sum2 += f;
+        sum2 += value;
       } else {
-        sum3 += f;
+        sum3 += value;
       }
     }
 
@@ -615,17 +641,17 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    *
    * @param scale the scale of the Gaussian kernel
    * @param range the range of the Gaussian kernel
-   * @param p the poisson distribution
+   * @param pd the poisson distribution
    * @return the integral
    * @throws IllegalArgumentException If the convolution will be too large
    */
-  private double compute(int scale, int range, double[] p) {
+  private double compute(int scale, int range, double[] pd) {
     final double[] g = gaussianKernel.getGaussianKernel(scale, range, true);
 
     final IntegrationProcedure ip =
         (use38) ? new Simpson38IntegrationProcedure(scale) : new SimpsonIntegrationProcedure(scale);
 
-    Convolution.convolve(g, p, scale, ip);
+    Convolution.convolve(g, pd, scale, ip);
 
     // Subtract the final 1
     return ip.getSum() - 1;
@@ -634,44 +660,44 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   /**
    * Gets the approximate Poisson-Gaussian Fisher information.
    *
-   * <p>Approximate the Poisson as a Gaussian with {@code u=t} and {@code var=t}. Gaussian-Gaussian
-   * convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> =
+   * <p>Approximate the Poisson as a Gaussian with {@code u=theta} and {@code var=theta}.
+   * Gaussian-Gaussian convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> =
    * sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>). Fisher information of Gaussian mean
    * is 1/variance.
    *
-   * <p>The returned value is: {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and
+   * <p>The returned value is: {@code 1.0 / (theta + s * s)} with {@code theta} the Poisson mean and
    * {@code s} the Gaussian standard deviation.
    *
-   * @param t the poisson mean
+   * @param theta the poisson mean
    * @return the Poisson Gaussian Fisher information
    */
-  public double getPoissonGaussianApproximationI(double t) {
-    if (t <= 0) {
+  public double getPoissonGaussianApproximationI(double theta) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    return 1.0 / (t + s * s);
+    return 1.0 / (theta + sd * sd);
   }
 
   /**
    * Gets the approximate Poisson-Gaussian Fisher information.
    *
-   * <p>Approximate the Poisson as a Gaussian with {@code u=t} and {@code var=t}. Gaussian-Gaussian
-   * convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> =
+   * <p>Approximate the Poisson as a Gaussian with {@code u=theta} and {@code var=theta}.
+   * Gaussian-Gaussian convolution: s<sub>a</sub> * s<sub>b</sub> =&gt; s<sub>c</sub> =
    * sqrt(s<sub>a</sub><sup>2</sup>+s<sub>b</sub><sup>2</sup>). Fisher information of Gaussian mean
    * is 1/variance.
    *
-   * <p>The returned value is: {@code 1.0 / (t + s * s)} with {@code t} the Poisson mean and
+   * <p>The returned value is: {@code 1.0 / (theta + s * s)} with {@code theta} the Poisson mean and
    * {@code s} the Gaussian standard deviation.
    *
-   * @param t the poisson mean
-   * @param s the Gaussian standard deviation (no check made for negatives as this is squared)
+   * @param theta the poisson mean
+   * @param sd the Gaussian standard deviation (no check made for negatives as this is squared)
    * @return the Poisson Gaussian Fisher information
    */
-  public static double getPoissonGaussianApproximationI(double t, double s) {
-    if (t <= 0) {
+  public static double getPoissonGaussianApproximationI(double theta, double sd) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    return 1.0 / (t + s * s);
+    return 1.0 / (theta + sd * sd);
   }
 
   /**
@@ -681,18 +707,18 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @return the Gaussian Fisher information
    */
   public double getGaussianI() {
-    return 1.0 / (s * s);
+    return 1.0 / (sd * sd);
   }
 
   /**
    * Gets the Gaussian Fisher information for mean 0. Fisher information of Gaussian mean is
    * 1/variance.
    *
-   * @param s the Gaussian standard deviation (no check made for negatives as this is squared)
+   * @param sd the Gaussian standard deviation (no check made for negatives as this is squared)
    * @return the Gaussian Fisher information
    */
-  public static double getGaussianI(double s) {
-    return 1.0 / (s * s);
+  public static double getGaussianI(double sd) {
+    return 1.0 / (sd * sd);
   }
 
   /**
@@ -848,14 +874,5 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    */
   public void setMaxIterations(int maxIterations) {
     this.maxIterations = maxIterations;
-  }
-
-  @Override
-  protected void postClone() {
-    pd = new CustomPoissonDistribution(null, 1);
-    list = new TDoubleArrayList();
-    if (gaussianKernel != null) {
-      gaussianKernel = gaussianKernel.clone();
-    }
   }
 }

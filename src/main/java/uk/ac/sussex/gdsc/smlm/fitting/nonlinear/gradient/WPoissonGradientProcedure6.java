@@ -49,7 +49,7 @@ public class WPoissonGradientProcedure6 extends WPoissonGradientProcedure {
   public WPoissonGradientProcedure6(final double[] y, final double[] var,
       final Gradient1Function func) {
     super(y, var, func);
-    if (n != 6) {
+    if (numberOfGradients != 6) {
       throw new IllegalArgumentException("Function must compute 6 gradients");
     }
   }
@@ -57,34 +57,34 @@ public class WPoissonGradientProcedure6 extends WPoissonGradientProcedure {
   @Override
   public void execute(double value, double[] dyDa) {
     // Note: Ignore the value
-    final double w = this.w[yi++];
-    data[0] += dyDa[0] * w * dyDa[0];
-    double wgt;
-    wgt = dyDa[1] * w;
-    data[1] += wgt * dyDa[0];
-    data[2] += wgt * dyDa[1];
-    wgt = dyDa[2] * w;
-    data[3] += wgt * dyDa[0];
-    data[4] += wgt * dyDa[1];
-    data[5] += wgt * dyDa[2];
-    wgt = dyDa[3] * w;
-    data[6] += wgt * dyDa[0];
-    data[7] += wgt * dyDa[1];
-    data[8] += wgt * dyDa[2];
-    data[9] += wgt * dyDa[3];
-    wgt = dyDa[4] * w;
-    data[10] += wgt * dyDa[0];
-    data[11] += wgt * dyDa[1];
-    data[12] += wgt * dyDa[2];
-    data[13] += wgt * dyDa[3];
-    data[14] += wgt * dyDa[4];
-    wgt = dyDa[5] * w;
-    data[15] += wgt * dyDa[0];
-    data[16] += wgt * dyDa[1];
-    data[17] += wgt * dyDa[2];
-    data[18] += wgt * dyDa[3];
-    data[19] += wgt * dyDa[4];
-    data[20] += wgt * dyDa[5];
+    final double weight = this.wgt[yi++];
+    data[0] += dyDa[0] * weight * dyDa[0];
+    double dw;
+    dw = dyDa[1] * weight;
+    data[1] += dw * dyDa[0];
+    data[2] += dw * dyDa[1];
+    dw = dyDa[2] * weight;
+    data[3] += dw * dyDa[0];
+    data[4] += dw * dyDa[1];
+    data[5] += dw * dyDa[2];
+    dw = dyDa[3] * weight;
+    data[6] += dw * dyDa[0];
+    data[7] += dw * dyDa[1];
+    data[8] += dw * dyDa[2];
+    data[9] += dw * dyDa[3];
+    dw = dyDa[4] * weight;
+    data[10] += dw * dyDa[0];
+    data[11] += dw * dyDa[1];
+    data[12] += dw * dyDa[2];
+    data[13] += dw * dyDa[3];
+    data[14] += dw * dyDa[4];
+    dw = dyDa[5] * weight;
+    data[15] += dw * dyDa[0];
+    data[16] += dw * dyDa[1];
+    data[17] += dw * dyDa[2];
+    data[18] += dw * dyDa[3];
+    data[19] += dw * dyDa[4];
+    data[20] += dw * dyDa[5];
   }
 
   @Override

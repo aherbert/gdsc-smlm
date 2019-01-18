@@ -97,7 +97,7 @@ public class ConfigurationTemplateTest {
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     builder.setFitEngineSettings(config.getFitEngineSettings());
     Assertions.assertTrue(
-        SettingsManager.toJSON(builder.build(), tmpFile, SettingsManager.FLAG_JSON_WHITESPACE));
+        SettingsManager.toJson(builder.build(), tmpFile, SettingsManager.FLAG_JSON_WHITESPACE));
   }
 
   @Test

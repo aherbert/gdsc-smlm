@@ -49,8 +49,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
@@ -62,7 +62,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -371,7 +371,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       if (param2 > 0) {
         return String.format("Difference %s (@%s):%d", dataFilter.toString(),
             // param2 was absolute so convert to relative since the name is used in relative plots
-            MathUtils.roundUsingDecimalPlacesToBigDecimal(param2 / config.getHWHMMin(), 3)
+            MathUtils.roundUsingDecimalPlacesToBigDecimal(param2 / config.getHwhmMin(), 3)
                 .toPlainString(),
             search);
       }
@@ -757,8 +757,8 @@ public class BenchmarkSpotFilter implements PlugIn {
       showProgress();
 
       // Extract the data
-      data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(),
-          null, data);
+      data = ImageJImageConverter.getData(stack.getPixels(frame), stack.getWidth(),
+          stack.getHeight(), null, data);
 
       // Use this code to subtract the background before filtering. This produces different results
       // from using the raw data.
@@ -1161,7 +1161,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       final int flags =
           Gaussian2DPeakResultHelper.AMPLITUDE | Gaussian2DPeakResultHelper.PIXEL_AMPLITUDE;
       calculator =
-          Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
+          Gaussian2DPeakResultHelper.create(results.getPsf(), results.getCalibration(), flags);
 
       cameraModel = CreateData.getCameraModel(simulationParameters);
     } catch (final ConfigurationException ex) {
@@ -1185,7 +1185,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     if (batchMode) {
       // Batch mode to test enumeration of filters
-      final double sd = simulationParameters.s / simulationParameters.a;
+      final double sd = simulationParameters.sd / simulationParameters.pixelPitch;
       final int limit = (int) Math.floor(3 * sd);
 
       // This should be in integers otherwise we may repeat search box sizes
@@ -1210,7 +1210,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       if (differenceFilter && differenceSmooth > 0) {
         if (filterRelativeDistances) {
           // Convert to absolute for batch run
-          param2 = MathUtils.roundUsingDecimalPlaces(differenceSmooth * config.getHWHMMin(), 3);
+          param2 = MathUtils.roundUsingDecimalPlaces(differenceSmooth * config.getHwhmMin(), 3);
         } else {
           // Already an absolute value
           param2 = differenceSmooth;
@@ -1360,7 +1360,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     final String name = batchPlotNames[i];
     final String title = TITLE + " Performance " + name;
     final Plot plot = new Plot(title, "Relative width", name);
-    final double scale = 1.0 / config.getHWHMMin();
+    final double scale = 1.0 / config.getHwhmMin();
     for (final BatchResult[] batchResult : batchResults) {
       if (batchResult == null || batchResult.length == 0) {
         continue;
@@ -1435,8 +1435,8 @@ public class BenchmarkSpotFilter implements PlugIn {
       // Note: All batch runs use absolute distances for search and filter smoothing parameters.
       // The border parameter is already set as relative/absolute.
       if (filterRelativeDistances) {
-        final double hwhmMax = config.getHWHMMax();
-        final double hwhmMin = config.getHWHMMin();
+        final double hwhmMax = config.getHwhmMax();
+        final double hwhmMin = config.getHwhmMin();
 
         // Convert absolute search distance to relative
         config.setSearch(MathUtils.roundUsingDecimalPlaces(best.search / hwhmMax, 3), false);
@@ -1543,8 +1543,8 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     final StringBuilder sb = new StringBuilder();
     sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
-    final double s = simulationParameters.s / simulationParameters.a;
-    final double sa = getSa() / simulationParameters.a;
+    final double s = simulationParameters.sd / simulationParameters.pixelPitch;
+    final double sa = getSa() / simulationParameters.pixelPitch;
     sb.append("PSF width = ").append(MathUtils.rounded(s)).append(" px (sa = ")
         .append(MathUtils.rounded(sa)).append(" px). HWHM = ")
         .append(MathUtils.rounded(s * Gaussian2DFunction.SD_TO_HWHM_FACTOR)).append(" px\n");
@@ -1616,9 +1616,9 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     // Here we use PSF stored in the results if supported (i.e. a Gaussian).
     // The results are likely to come from the CreateData simulation.
-    final PSF psf = results.getPSF();
-    if (PSFHelper.isGaussian2D(psf)) {
-      fitConfig.setPSF(results.getPSF());
+    final PSF psf = results.getPsf();
+    if (PsfHelper.isGaussian2D(psf)) {
+      fitConfig.setPsf(results.getPsf());
     } else {
       fitConfig.setInitialPeakStdDev(s);
     }
@@ -1706,7 +1706,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     int analysisBorder;
     if (scoreRelativeDistances) {
       // Convert distance to PSF standard deviation units
-      final double hwhmMax = config.getHWHMMax();
+      final double hwhmMax = config.getHwhmMax();
       matchDistance = upperDistance * hwhmMax;
       lowerMatchDistance = lowerDistance * hwhmMax;
       analysisBorder = (int) (sAnalysisBorder * hwhmMax);
@@ -1727,8 +1727,8 @@ public class BenchmarkSpotFilter implements PlugIn {
   }
 
   private double getSa() {
-    final double sa =
-        PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a);
+    final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.sd,
+        simulationParameters.pixelPitch);
     return sa;
   }
 
@@ -2083,22 +2083,23 @@ public class BenchmarkSpotFilter implements PlugIn {
     sb.append(h).append('\t');
     sb.append(MathUtils.rounded(n)).append('\t');
     final double density = (n / imp.getStackSize()) / (w * h)
-        / (simulationParameters.a * simulationParameters.a / 1e6);
+        / (simulationParameters.pixelPitch * simulationParameters.pixelPitch / 1e6);
     sb.append(MathUtils.rounded(density)).append('\t');
     sb.append(MathUtils.rounded(signal)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.s)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.a)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.sd)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.pixelPitch)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.depth)).append('\t');
     sb.append(simulationParameters.fixedDepth).append('\t');
 
     // Camera specific
     CreateData.addCameraDescription(sb, simulationParameters).append('\t');
 
-    sb.append(MathUtils.rounded(simulationParameters.b)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.background)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.noise)).append('\t');
 
     sb.append(MathUtils.rounded(signal / simulationParameters.noise)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.s / simulationParameters.a)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.sd / simulationParameters.pixelPitch))
+        .append('\t');
     sb.append(config.getDataFilterType()).append('\t');
     // sb.append(spotFilter.getName()).append('\t');
     sb.append(spotFilter.getSearch()).append('\t');
@@ -2107,7 +2108,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     sb.append(config.getDataFilterMethod(0)).append('\t');
     final double param = config.getDataFilterParameterValue(0);
     final boolean absolute = config.getDataFilterParameterAbsolute(0);
-    final double hwhmMin = config.getHWHMMin();
+    final double hwhmMin = config.getHwhmMin();
     if (absolute) {
       sb.append(MathUtils.rounded(param)).append('\t');
       sb.append(MathUtils.roundUsingDecimalPlacesToBigDecimal(param / hwhmMin, 3)).append('\t');

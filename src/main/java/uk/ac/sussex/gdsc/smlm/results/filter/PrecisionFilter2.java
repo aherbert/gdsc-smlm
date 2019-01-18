@@ -59,11 +59,11 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter {
   @Override
   public void setup(MemoryPeakResults peakResults) {
     try {
-      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPsf(),
           peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION_X);
       useBackground = true;
     } catch (final ConfigurationException ex) {
-      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+      calculator = Gaussian2DPeakResultHelper.create(peakResults.getPsf(),
           peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
       useBackground = false;
     }
@@ -74,10 +74,10 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter {
   public boolean accept(PeakResult peak) {
     if (useBackground) {
       // Use the estimated background for the peak
-      return calculator.getLSEPrecision(peak.getParameters()) <= variance;
+      return calculator.getLsePrecision(peak.getParameters()) <= variance;
     }
     // Use the background noise to estimate precision
-    return calculator.getLSEPrecision(peak.getParameters(), peak.getNoise()) <= variance;
+    return calculator.getLsePrecision(peak.getParameters(), peak.getNoise()) <= variance;
   }
 
   @Override
@@ -158,7 +158,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public double getSNR() {
+  public double getSnr() {
     return 0;
   }
 

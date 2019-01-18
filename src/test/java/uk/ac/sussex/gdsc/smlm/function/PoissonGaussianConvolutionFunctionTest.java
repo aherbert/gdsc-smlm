@@ -124,7 +124,7 @@ public class PoissonGaussianConvolutionFunctionTest {
     // Note: The input s parameter is pre-gain.
     final PoissonGaussianConvolutionFunction f =
         PoissonGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, s * gain);
-    f.setComputePMF(computePMF);
+    f.setComputePmf(computePMF);
 
     // final PoissonGaussianConvolutionFunction f2 =
     // PoissonGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, mu*gain, s *
@@ -206,7 +206,7 @@ public class PoissonGaussianConvolutionFunctionTest {
     // Note: The input s parameter is pre-gain.
     final PoissonGaussianConvolutionFunction f =
         PoissonGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, s * gain);
-    f.setComputePMF(computePMF);
+    f.setComputePmf(computePMF);
 
     // Evaluate an initial range.
     // Gaussian should have >99% within +/- s
@@ -241,11 +241,11 @@ public class PoissonGaussianConvolutionFunctionTest {
 
     final PoissonGaussianConvolutionFunction f1 =
         PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g, s);
-    f1.setComputePMF(true);
+    f1.setComputePmf(true);
 
     final PoissonGaussianConvolutionFunction f2 =
         PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g, s);
-    f2.setComputePMF(false);
+    f2.setComputePmf(false);
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 

@@ -30,13 +30,13 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJTablePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -149,7 +149,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     final StandardResultProcedure sp;
     if (sortOrderIndex == 9) {
       sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
-      sp.getXYR();
+      sp.getXyr();
     } else {
       sp = null;
     }
@@ -183,7 +183,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     Collections.sort(rankedResults);
 
     // Prepare results table
-    final IJTablePeakResults table = new IJTablePeakResults(false, results.getName(), true);
+    final ImageJTablePeakResults table = new ImageJTablePeakResults(false, results.getName(), true);
     table.copySettings(results);
     table.setTableTitle(TITLE);
     table.setAddCounter(true);
@@ -340,13 +340,13 @@ public class SpotInspector implements PlugIn, MouseListener {
     if (sortOrderIndex != 8) {
       return 0;
     }
-    final PSF psf = results2.getPSF();
-    if (!PSFHelper.isGaussian2D(psf)) {
+    final PSF psf = results2.getPsf();
+    if (!PsfHelper.isGaussian2D(psf)) {
       return -1;
     }
     final FitConfiguration fitConfig = new FitConfiguration();
-    fitConfig.setPSF(psf);
-    return (float) MathUtils.max(1, fitConfig.getInitialXSD(), fitConfig.getInitialYSD());
+    fitConfig.setPsf(psf);
+    return (float) MathUtils.max(1, fitConfig.getInitialXSd(), fitConfig.getInitialYSd());
   }
 
   private static void plotScore(float[] xValues, float[] yValues, double yMin, double yMax) {
@@ -545,9 +545,9 @@ public class SpotInspector implements PlugIn, MouseListener {
 
         // Create ROIs
         final ArrayList<float[]> spots = new ArrayList<>();
-        results.forEach(DistanceUnit.PIXEL, new XYResultProcedure() {
+        results.forEach(DistanceUnit.PIXEL, new XyResultProcedure() {
           @Override
-          public void executeXY(float x, float y) {
+          public void executeXy(float x, float y) {
             if (x > minX && x < maxX && y > minY && y < maxY) {
               // Use only unique points
               final float xPosition = x - minX;

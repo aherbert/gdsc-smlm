@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
+import uk.ac.sussex.gdsc.smlm.filters.FhtFilter.Operation;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
@@ -127,7 +127,7 @@ public class FHTFilterTest {
     }
 
     // Test the FHT filter
-    final FHTFilter ff = new FHTFilter(input2, size, size);
+    final FhtFilter ff = new FhtFilter(input2, size, size);
     ff.setOperation(operation);
     ff.filter(input1, size, size);
 
@@ -186,7 +186,7 @@ public class FHTFilterTest {
   public void canWindow() {
     final int size = 16;
     final float[] in = SimpleArrayUtils.newFloatArray(size * size, 1);
-    final FHTFilter f = new FHTFilter(new float[1], 1, 1);
+    final FhtFilter f = new FhtFilter(new float[1], 1, 1);
     for (int i = 1; i < 5; i++) {
       final double[] wx = ImageWindow.tukeyEdge(size, i);
       final float[] e = ImageWindow.applyWindowSeparable(in, size, size, wx, wx);

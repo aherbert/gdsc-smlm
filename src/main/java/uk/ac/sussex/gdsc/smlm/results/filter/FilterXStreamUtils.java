@@ -55,7 +55,7 @@ public final class FilterXStreamUtils {
 
         // Add aliases for all Filter classes
         addAlias(AndFilter.class);
-        addAlias(ANRFilter.class);
+        addAlias(AnrFilter.class);
         addAlias(CombinedFilter.class);
         addAlias(CoordinateFilter.class);
         addAlias(DirectFilter.class);
@@ -64,26 +64,26 @@ public final class FilterXStreamUtils {
         addAlias(HysteresisFilter.class);
         addAlias(MultiFilter.class);
         addAlias(MultiFilter2.class);
-        addAlias(MultiFilterCRLB.class);
+        addAlias(MultiFilterCrlb.class);
         addAlias(MultiHysteresisFilter.class);
         addAlias(MultiHysteresisFilter2.class);
         addAlias(MultiPathFilter.class);
         addAlias(OrFilter.class);
         addAlias(PrecisionFilter.class);
         addAlias(PrecisionFilter2.class);
-        addAlias(PrecisionCRLBFilter.class);
+        addAlias(PrecisionCrlbFilter.class);
         addAlias(PrecisionHysteresisFilter.class);
         addAlias(PrecisionHysteresisFilter2.class);
-        addAlias(SBRFilter.class);
+        addAlias(SbrFilter.class);
         addAlias(ShiftFilter.class);
         addAlias(SignalFilter.class);
-        addAlias(SNRFilter.class);
-        addAlias(SNRHysteresisFilter.class);
+        addAlias(SnrFilter.class);
+        addAlias(SnrHysteresisFilter.class);
         addAlias(TraceFilter.class);
         addAlias(WidthFilter.class);
         addAlias(WidthFilter2.class);
-        addAlias(XYWidthFilter.class);
-        addAlias(XYWidthFilter2.class);
+        addAlias(XyWidthFilter.class);
+        addAlias(XyWidthFilter2.class);
         addAlias(ZCoordinateFilter.class);
       } catch (final Exception ex) {
         logger.log(Level.SEVERE, "Failed to initialise XStream", ex);
@@ -100,7 +100,7 @@ public final class FilterXStreamUtils {
    * Add a class name alias to the global XStream object used for serialisation.
    *
    * <p>Should be called to produce neater XML output for new sub-class types prior to using
-   * {@link #toXML(Object)} or {@link #fromXML(String)}.
+   * {@link #toXml(Object)} or {@link #fromXml(String)}.
    *
    * @param type The class
    */
@@ -118,7 +118,7 @@ public final class FilterXStreamUtils {
    * @param object the object
    * @return An XML representation of this object
    */
-  public static String toXML(Object object) {
+  public static String toXml(Object object) {
     if (xs != null) {
       try {
         return xs.toXML(object);
@@ -135,7 +135,7 @@ public final class FilterXStreamUtils {
    * @param xml the xml
    * @return the object
    */
-  public static @Nullable Object fromXML(String xml) {
+  public static @Nullable Object fromXml(String xml) {
     if (xs != null) {
       try {
         return xs.fromXML(xml);

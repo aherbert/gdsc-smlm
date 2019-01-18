@@ -50,10 +50,10 @@ public class ImagePeakResultsFactory {
    * @param mode The mode for showing consecutive results in the same pixel location
    * @return The PeakResults image
    */
-  public static IJImagePeakResults createPeakResultsImage(ResultsImageType resultsImage,
+  public static ImageJImagePeakResults createPeakResultsImage(ResultsImageType resultsImage,
       boolean weighted, boolean equalised, String title, Rectangle bounds, double nmPerPixel,
       double gain, double imageScale, double precision, ResultsImageMode mode) {
-    IJImagePeakResults image;
+    ImageJImagePeakResults image;
     switch (resultsImage) {
       case DRAW_FITTED_PSF:
       case DRAW_INTENSITY_PRECISION:
@@ -61,8 +61,8 @@ public class ImagePeakResultsFactory {
       case DRAW_INTENSITY_AVERAGE_PRECISION:
       case DRAW_LOCALISATIONS_AVERAGE_PRECISION:
         // Special case for full PSF image
-        final PSFImagePeakResults image2 =
-            new PSFImagePeakResults(title, bounds, (float) imageScale);
+        final PsfImagePeakResults image2 =
+            new PsfImagePeakResults(title, bounds, (float) imageScale);
         if (resultsImage == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION
             || resultsImage == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION) {
           // Fixed width display (in pixels)
@@ -75,7 +75,7 @@ public class ImagePeakResultsFactory {
         break;
 
       default:
-        image = new IJImagePeakResults(title, bounds, (float) imageScale);
+        image = new ImageJImagePeakResults(title, bounds, (float) imageScale);
     }
     int flags = 0;
 
@@ -84,16 +84,16 @@ public class ImagePeakResultsFactory {
       case DRAW_INTENSITY_PRECISION:
       case DRAW_INTENSITY_AVERAGE_PRECISION:
       case DRAW_FITTED_PSF:
-        flags |= IJImagePeakResults.DISPLAY_SIGNAL;
+        flags |= ImageJImagePeakResults.DISPLAY_SIGNAL;
         break;
       case DRAW_FRAME_NUMBER:
-        flags |= IJImagePeakResults.DISPLAY_PEAK;
+        flags |= ImageJImagePeakResults.DISPLAY_PEAK;
         break;
       case DRAW_FIT_ERROR:
-        flags |= IJImagePeakResults.DISPLAY_ERROR;
+        flags |= ImageJImagePeakResults.DISPLAY_ERROR;
         break;
       case DRAW_Z_POSITION:
-        flags |= IJImagePeakResults.DISPLAY_Z_POSITION;
+        flags |= ImageJImagePeakResults.DISPLAY_Z_POSITION;
         break;
       default:
         // Nothing to do for the other cases
@@ -102,10 +102,10 @@ public class ImagePeakResultsFactory {
 
     switch (mode) {
       case IMAGE_MAX:
-        flags |= IJImagePeakResults.DISPLAY_MAX;
+        flags |= ImageJImagePeakResults.DISPLAY_MAX;
         break;
       case IMAGE_REPLACE:
-        flags |= IJImagePeakResults.DISPLAY_REPLACE;
+        flags |= ImageJImagePeakResults.DISPLAY_REPLACE;
         break;
       default:
         // Nothing to do for the other cases
@@ -113,10 +113,10 @@ public class ImagePeakResultsFactory {
     }
 
     if (weighted) {
-      flags |= IJImagePeakResults.DISPLAY_WEIGHTED;
+      flags |= ImageJImagePeakResults.DISPLAY_WEIGHTED;
     }
     if (equalised) {
-      flags |= IJImagePeakResults.DISPLAY_EQUALIZED;
+      flags |= ImageJImagePeakResults.DISPLAY_EQUALIZED;
     }
     image.setDisplayFlags(flags);
     image.setCalibration(nmPerPixel, gain);

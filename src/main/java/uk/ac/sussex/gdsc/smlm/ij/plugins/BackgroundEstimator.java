@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.engine.DataEstimator;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -173,8 +173,8 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     for (int slice = start, i = 0; slice <= end; slice++, i++) {
       IJ.showProgress(i, size);
       final ImageProcessor ip = stack.getProcessor(slice);
-      buffer =
-          IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
+      buffer = ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds,
+          buffer);
       final DataEstimator de = new DataEstimator(buffer, bounds.width, bounds.height);
       de.setFraction(fraction);
       de.setHistogramSize(histogramSize);
@@ -257,7 +257,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     result[index++] = (pfr == null) ? 1 : pfr.getSliceNumber();
     final Rectangle bounds = ip.getRoi();
     final float[] buffer =
-        IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+        ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
     final DataEstimator de = new DataEstimator(buffer, bounds.width, bounds.height);
     de.setFraction(fraction);
     de.setHistogramSize(histogramSize);

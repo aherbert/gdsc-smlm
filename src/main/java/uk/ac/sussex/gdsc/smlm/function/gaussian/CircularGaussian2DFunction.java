@@ -43,7 +43,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
   protected final double[][] peakFactors;
 
   /** The Gaussian parameters (a). */
-  protected double[] a;
+  protected double[] params;
 
   /**
    * Constructor.
@@ -77,7 +77,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
 
   @Override
   public void initialise(double[] a) {
-    this.a = a;
+    this.params = a;
     // Precalculate multiplication factors
     for (int j = 0; j < numberOfPeaks; j++) {
       final double sx = a[j * PARAMETERS_PER_PEAK + X_SD];
@@ -109,7 +109,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
     int dydapos = 0;
 
     // First parameter is the background level
-    double y = a[BACKGROUND];
+    double y = params[BACKGROUND];
     dyda[dydapos++] = 1.0; // Gradient for a constant background is 1
 
     // Unpack the predictor into the dimensions
@@ -136,7 +136,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
     int apos = 0;
 
     // First parameter is the background level
-    double y = a[BACKGROUND];
+    double y = params[BACKGROUND];
 
     // Unpack the predictor into the dimensions
     final int x1 = x / maxx;
@@ -162,8 +162,8 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
    */
   protected double gaussian(final int x0, final int x1, final double[] dyDa, final int apos,
       final int dydapos, final double[] factors) {
-    final double dx = x0 - a[apos + X_POSITION];
-    final double dy = x1 - a[apos + Y_POSITION];
+    final double dx = x0 - params[apos + X_POSITION];
+    final double dy = x1 - params[apos + Y_POSITION];
 
     // Calculate gradients
 
@@ -190,8 +190,8 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
    * @return the Gaussian value
    */
   protected double gaussian(final int x0, final int x1, final int apos, final double[] factors) {
-    final double dx = x0 - a[apos + X_POSITION];
-    final double dy = x1 - a[apos + Y_POSITION];
+    final double dx = x0 - params[apos + X_POSITION];
+    final double dy = x1 - params[apos + Y_POSITION];
 
     return factors[HEIGHT] * FastMath.exp(factors[AA] * (dx * dx + dy * dy));
   }

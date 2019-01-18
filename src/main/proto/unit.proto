@@ -1,13 +1,13 @@
 syntax = "proto3";
 
 // ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
-// Authors: Alex Herbert, 2017 
+// Authors: Alex Herbert, 2017
 // License: GPL V3
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 option java_outer_classname = "UnitProtos";
 
-// enums that are used for optional fields have [enum_name]_NA as the first entry as the 
+// enums that are used for optional fields have [enum_name]_NA as the first entry as the
 // proto definition will use this as the default
 
 // Unit for measuring distance

@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
  * Calculates the Fisher information matrix for a Poisson process. The class can be used as a
- * substitute for {@link WLSQLVMGradientProcedure} if the user only requires the alpha matrix.
+ * substitute for {@link WLsqLvmGradientProcedure} if the user only requires the alpha matrix.
  *
  * <p>This procedure is based on computation of a modified Chi-squared expression to perform
  * Weighted Least Squares Estimation assuming a Poisson model with a Gaussian noise component. The
@@ -50,7 +50,7 @@ public class WPoissonGradientProcedure4 extends WPoissonGradientProcedure {
   public WPoissonGradientProcedure4(final double[] y, final double[] var,
       final Gradient1Function func) {
     super(y, var, func);
-    if (n != 4) {
+    if (numberOfGradients != 4) {
       throw new IllegalArgumentException("Function must compute 4 gradients");
     }
   }
@@ -58,21 +58,21 @@ public class WPoissonGradientProcedure4 extends WPoissonGradientProcedure {
   @Override
   public void execute(double value, double[] dyDa) {
     // Note: Ignore the value
-    final double w = this.w[yi++];
-    data[0] += dyDa[0] * w * dyDa[0];
-    double wgt;
-    wgt = dyDa[1] * w;
-    data[1] += wgt * dyDa[0];
-    data[2] += wgt * dyDa[1];
-    wgt = dyDa[2] * w;
-    data[3] += wgt * dyDa[0];
-    data[4] += wgt * dyDa[1];
-    data[5] += wgt * dyDa[2];
-    wgt = dyDa[3] * w;
-    data[6] += wgt * dyDa[0];
-    data[7] += wgt * dyDa[1];
-    data[8] += wgt * dyDa[2];
-    data[9] += wgt * dyDa[3];
+    final double weight = this.wgt[yi++];
+    data[0] += dyDa[0] * weight * dyDa[0];
+    double dw;
+    dw = dyDa[1] * weight;
+    data[1] += dw * dyDa[0];
+    data[2] += dw * dyDa[1];
+    dw = dyDa[2] * weight;
+    data[3] += dw * dyDa[0];
+    data[4] += dw * dyDa[1];
+    data[5] += dw * dyDa[2];
+    dw = dyDa[3] * weight;
+    data[6] += dw * dyDa[0];
+    data[7] += dw * dyDa[1];
+    data[8] += dw * dyDa[2];
+    data[9] += dw * dyDa[3];
   }
 
   @Override

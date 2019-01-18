@@ -79,7 +79,7 @@ public class PSFCalculator implements PlugIn, DialogListener {
   public void run(String arg) {
     SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-    final PSFCalculatorSettings settings = SettingsManager.readPSFCalculatorSettings(0);
+    final PSFCalculatorSettings settings = SettingsManager.readPsfCalculatorSettings(0);
 
     final double sd = calculate(settings, false);
     if (sd < 0) {
@@ -91,7 +91,7 @@ public class PSFCalculator implements PlugIn, DialogListener {
     final FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
     final FitConfiguration fitConfig = config.getFitConfiguration();
     fitConfig.setNmPerPixel(getPixelPitch());
-    fitConfig.setPSFType(PSFType.ONE_AXIS_GAUSSIAN_2D);
+    fitConfig.setPsfType(PSFType.ONE_AXIS_GAUSSIAN_2D);
     fitConfig.setInitialPeakStdDev(sd);
     SettingsManager.writeSettings(config, 0);
   }

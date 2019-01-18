@@ -44,7 +44,7 @@ public class ChiSquaredDistributionTable {
   /**
    * The p-value for computing the value using the cumulative probability.
    */
-  private final double p;
+  private final double pvalue;
 
   /** The chi squared critical value table. */
   final double[] chiSquared;
@@ -72,7 +72,7 @@ public class ChiSquaredDistributionTable {
    */
   private ChiSquaredDistributionTable(double significance, int df, boolean upperTailed) {
     // Convert the significance to a cumulative probability
-    this.p = (upperTailed) ? 1 - significance : significance;
+    this.pvalue = (upperTailed) ? 1 - significance : significance;
     // Fill table with NaN
     chiSquared = new double[df + 1];
     Arrays.fill(chiSquared, Double.NaN);
@@ -129,7 +129,7 @@ public class ChiSquaredDistributionTable {
    * @return the q value
    */
   public double getSignificanceValue() {
-    return (isUpperTailed()) ? 1 - p : p;
+    return (isUpperTailed()) ? 1 - pvalue : pvalue;
   }
 
   /**
@@ -147,7 +147,7 @@ public class ChiSquaredDistributionTable {
       throw new IllegalStateException("Maximum degrees of freedom = " + (chiSquared.length - 1));
     }
     if (Double.isNaN(chiSquared[degreesOfFreedom])) {
-      chiSquared[degreesOfFreedom] = getChiSquared(p, degreesOfFreedom);
+      chiSquared[degreesOfFreedom] = getChiSquared(pvalue, degreesOfFreedom);
     }
     return chiSquared[degreesOfFreedom];
   }
@@ -170,12 +170,12 @@ public class ChiSquaredDistributionTable {
   /**
    * Gets the chi squared value for the cumulative probability and degrees of freedom.
    *
-   * @param p the cumulative probability
+   * @param pvalue the cumulative probability
    * @param degreesOfFreedom the degrees of freedom
    * @return the chi squared
    */
-  public static double getChiSquared(double p, int degreesOfFreedom) {
-    return new ChiSquaredDistribution(null, degreesOfFreedom).inverseCumulativeProbability(p);
+  public static double getChiSquared(double pvalue, int degreesOfFreedom) {
+    return new ChiSquaredDistribution(null, degreesOfFreedom).inverseCumulativeProbability(pvalue);
   }
 
   /**

@@ -49,23 +49,23 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.gui.PeakResultTableModel;
 import uk.ac.sussex.gdsc.smlm.ij.gui.PeakResultTableModelFrame;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJTablePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.BinaryFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.FixedPeakResultList;
-import uk.ac.sussex.gdsc.smlm.results.MALKFilePeakResults;
+import uk.ac.sussex.gdsc.smlm.results.MalkFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsReader;
 import uk.ac.sussex.gdsc.smlm.results.ResultOption;
-import uk.ac.sussex.gdsc.smlm.results.TSFPeakResultsWriter;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
+import uk.ac.sussex.gdsc.smlm.results.TsfPeakResultsWriter;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 
@@ -387,7 +387,7 @@ public class ResultsManager implements PlugIn {
    * @param showId the show id
    * @return the IJ table peak results
    */
-  public static IJTablePeakResults addTableResults(PeakResultsList resultsList,
+  public static ImageJTablePeakResults addTableResults(PeakResultsList resultsList,
       ResultsTableSettings resultsSettings, boolean showDeviations, boolean showEndFrame,
       boolean showZ, boolean showId) {
     if (resultsSettings.getShowTable()) {
@@ -397,10 +397,10 @@ public class ResultsManager implements PlugIn {
     return null;
   }
 
-  private static IJTablePeakResults addImageJTableResults(PeakResultsList resultsList,
+  private static ImageJTablePeakResults addImageJTableResults(PeakResultsList resultsList,
       ResultsTableSettings resultsSettings, boolean showDeviations, boolean showEndFrame,
       boolean showZ, boolean showId) {
-    final IJTablePeakResults r = new IJTablePeakResults(showDeviations);
+    final ImageJTablePeakResults r = new ImageJTablePeakResults(showDeviations);
     r.setDistanceUnit(resultsSettings.getDistanceUnit());
     r.setIntensityUnit(resultsSettings.getIntensityUnit());
     r.setAngleUnit(resultsSettings.getAngleUnit());
@@ -444,7 +444,7 @@ public class ResultsManager implements PlugIn {
   public static void addImageResults(PeakResultsList resultsList,
       ResultsImageSettings resultsSettings, Rectangle bounds, int flags) {
     if (resultsSettings.getImageTypeValue() > 0) {
-      final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
+      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
           resultsSettings.getImageType(), resultsSettings.getWeighted(),
           resultsSettings.getEqualised(), resultsList.getName(), bounds,
           resultsList.getNmPerPixel(), resultsList.getGain(), resultsSettings.getScale(),
@@ -524,10 +524,10 @@ public class ResultsManager implements PlugIn {
             r = f;
             break;
           case MALK:
-            r = new MALKFilePeakResults(resultsFilename);
+            r = new MalkFilePeakResults(resultsFilename);
             break;
           case TSF:
-            r = new TSFPeakResultsWriter(resultsFilename);
+            r = new TsfPeakResultsWriter(resultsFilename);
             break;
           default:
             throw new RuntimeException(
@@ -862,7 +862,7 @@ public class ResultsManager implements PlugIn {
 
           private boolean collectOptions(boolean silent) {
             final ResultsFileFormat resultsFileFormat = fileSettings.getFileFormat();
-            if (!ResultsProtosHelper.isGDSC(resultsFileFormat)) {
+            if (!ResultsProtosHelper.isGdsc(resultsFileFormat)) {
               return false;
             }
             final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
@@ -1499,7 +1499,7 @@ public class ResultsManager implements PlugIn {
       input_exposureTime = calibration.getExposureTime();
       Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
       Prefs.set(Constants.inputExposureTime, input_exposureTime);
-      if (calibration.isCCDCamera()) {
+      if (calibration.isCcdCamera()) {
         input_gain = calibration.getCountPerPhoton();
         Prefs.set(Constants.inputGain, input_gain);
       }
@@ -1699,10 +1699,10 @@ public class ResultsManager implements PlugIn {
         r = f;
         break;
       case MALK:
-        r = new MALKFilePeakResults(resultsFilename);
+        r = new MalkFilePeakResults(resultsFilename);
         break;
       case TSF:
-        r = new TSFPeakResultsWriter(resultsFilename);
+        r = new TsfPeakResultsWriter(resultsFilename);
         break;
       default:
         throw new RuntimeException("Unsupported file format: " + resultsSettings.getFileFormat());

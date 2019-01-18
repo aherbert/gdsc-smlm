@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.utils.ImageROIPainter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
@@ -77,7 +77,7 @@ public class ResultsMatchCalculator implements PlugIn {
   private static boolean writeHeader = true;
   private static TextWindow resultsWindow;
   private static TextWindow pairsWindow;
-  private static ImageROIPainter pairPainter;
+  private static ImageRoiPainter pairPainter;
 
   private final Rounder rounder = RounderUtils.create(4);
 
@@ -322,7 +322,7 @@ public class ResultsMatchCalculator implements PlugIn {
             p.y += resultsWindow.getHeight();
             pairsWindow.setLocation(p);
           }
-          pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(), "", line -> {
+          pairPainter = new ImageRoiPainter(pairsWindow.getTextPanel(), "", line -> {
             // Extract the startT and x,y coordinates from the first pulse in the line
             final int[] index = {1, 4};
             final String[] fields = line.split("\t");

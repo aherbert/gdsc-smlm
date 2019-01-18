@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureUtils;
 import uk.ac.sussex.gdsc.smlm.function.FisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.HalfPoissonFisherInformation;
@@ -111,7 +111,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
     // This introduces a dependency on a different package, and relies on that
     // computing the correct answer. However that code predates this and so the
     // test ensures that the FisherInformationCalculator functions correctly.
-    final PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
+    final PoissonGradientProcedure p1 = PoissonGradientProcedureUtils.create(f1);
     p1.computeFisherInformation(params);
     final double[] e = p1.getLinear();
 
@@ -187,7 +187,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
     // This introduces a dependency on a different package, and relies on that
     // computing the correct answer. However that code predates this and so the
     // test ensures that the FisherInformationCalculator functions correctly.
-    final PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
+    final PoissonGradientProcedure p1 = PoissonGradientProcedureUtils.create(f1);
     p1.computeFisherInformation(params);
     final double[] e = p1.getLinear();
 

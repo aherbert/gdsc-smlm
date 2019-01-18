@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -152,7 +152,7 @@ public class SphericalDistributionTest {
       results.add(new PeakResult(frame, x, y, intensity));
     }
     results.end();
-    final IJImagePeakResults image = new IJImagePeakResults(
+    final ImageJImagePeakResults image = new ImageJImagePeakResults(
         (useRejctionMethod) ? "Rejection Method" : "Transformation Method", bounds, scale);
     image.setRollingWindowSize(1);
     image.begin();

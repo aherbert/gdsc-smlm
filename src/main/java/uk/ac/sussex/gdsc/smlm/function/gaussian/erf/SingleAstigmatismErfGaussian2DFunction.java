@@ -184,52 +184,52 @@ public class SingleAstigmatismErfGaussian2DFunction
   }
 
   @Override
-  public double eval(final int i, final double[] duda) {
+  public double eval(final int x, final double[] duda) {
     // Unpack the predictor into the dimensions
-    final int y = i / maxx;
-    final int x = i % maxx;
+    final int yy = x / maxx;
+    final int xx = x % maxx;
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
     duda[0] = 1.0;
-    duda[1] = deltaEx[x] * deltaEy[y];
-    duda[2] = duDtx[x] * deltaEy[y];
-    duda[3] = duDty[y] * deltaEx[x];
-    duda[4] = duDtsx[x] * deltaEy[y] * dtsxDtz + duDtsy[y] * deltaEx[x] * dtsyDtz;
+    duda[1] = deltaEx[xx] * deltaEy[yy];
+    duda[2] = duDtx[xx] * deltaEy[yy];
+    duda[3] = duDty[yy] * deltaEx[xx];
+    duda[4] = duDtsx[xx] * deltaEy[yy] * dtsxDtz + duDtsy[yy] * deltaEx[xx] * dtsyDtz;
 
     return tb + tI * duda[1];
   }
 
   @Override
-  public double eval2(final int i, final double[] duda, final double[] d2uda2) {
+  public double eval2(final int x, final double[] duda, final double[] d2uda2) {
     // Unpack the predictor into the dimensions
-    final int y = i / maxx;
-    final int x = i % maxx;
+    final int yy = x / maxx;
+    final int xx = x % maxx;
 
     // Return in order of Gaussian2DFunction.createGradientIndices().
     // Use pre-computed gradients
-    final double du_dsx = duDtsx[x] * deltaEy[y];
-    final double du_dsy = duDtsy[y] * deltaEx[x];
+    final double du_dsx = duDtsx[xx] * deltaEy[yy];
+    final double du_dsy = duDtsy[yy] * deltaEx[xx];
 
     duda[0] = 1.0;
-    duda[1] = deltaEx[x] * deltaEy[y];
-    duda[2] = duDtx[x] * deltaEy[y];
-    duda[3] = duDty[y] * deltaEx[x];
-    duda[4] = duDtsx[x] * deltaEy[y] * dtsxDtz + duDtsy[y] * deltaEx[x] * dtsyDtz;
+    duda[1] = deltaEx[xx] * deltaEy[yy];
+    duda[2] = duDtx[xx] * deltaEy[yy];
+    duda[3] = duDty[yy] * deltaEx[xx];
+    duda[4] = duDtsx[xx] * deltaEy[yy] * dtsxDtz + duDtsy[yy] * deltaEx[xx] * dtsyDtz;
     d2uda2[0] = 0;
     d2uda2[1] = 0;
-    d2uda2[2] = d2uDtx2[x] * deltaEy[y];
-    d2uda2[3] = d2uDty2[y] * deltaEx[x];
+    d2uda2[2] = d2uDtx2[xx] * deltaEy[yy];
+    d2uda2[3] = d2uDty2[yy] * deltaEx[xx];
     //@formatter:off
     d2uda2[4] =
-        d2uDtsx2[x] * deltaEy[y] * dtsxDtz * dtsxDtz +
+        d2uDtsx2[xx] * deltaEy[yy] * dtsxDtz * dtsxDtz +
         du_dsx * d2tsxDtz2 +
-        d2uDtsy2[y] * deltaEx[x] * dtsyDtz * dtsyDtz +
+        d2uDtsy2[yy] * deltaEx[xx] * dtsyDtz * dtsyDtz +
         du_dsy * d2tsyDtz2 +
         // Add the equivalent term we add in the circular version.
         // Note: this is not in the Smith, et al (2010) paper but is
         // in the GraspJ source code and it works in JUnit tests.
-        2 * duDtsx[x] * dtsxDtz * duDtsy[y] * dtsyDtz / tI;
+        2 * duDtsx[xx] * dtsxDtz * duDtsy[yy] * dtsyDtz / tI;
     //@formatter:on
 
     return tb + tI * duda[1];

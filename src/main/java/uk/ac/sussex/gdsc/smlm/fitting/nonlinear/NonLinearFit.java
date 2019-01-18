@@ -29,11 +29,11 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolverType;
-import uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.WLSEFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.MleFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.WLseFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
 import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
@@ -48,8 +48,8 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
  * function supports weights then the WLSEFunctionSolver is supported. The default implementation
  * supports the LSEFunctionSolver.
  */
-public class NonLinearFit extends LSEBaseFunctionSolver
-    implements MLEFunctionSolver, WLSEFunctionSolver {
+public class NonLinearFit extends LseBaseFunctionSolver
+    implements MleFunctionSolver, WLseFunctionSolver {
   /**
    * Index for the best sum-of-squares in {@link #sumOfSquaresWorking}.
    */
@@ -64,7 +64,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
   protected static final int SUM_OF_SQUARES_NEW = 2;
 
   /** The solver. */
-  protected EJMLLinearSolver solver = new EJMLLinearSolver();
+  protected EjmlLinearSolver solver = new EjmlLinearSolver();
   /** The calculator. */
   protected GradientCalculator calculator;
   /** The stopping criteria. */
@@ -222,18 +222,18 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    *
    * @param a The old fit parameters
    * @param ap The new fit parameters
-   * @param m the number of fitted parameters (matches gradient indicies length)
+   * @param np the number of fitted parameters (matches gradient indicies length)
    */
-  protected void accepted(double[] a, double[] ap, int m) {
+  protected void accepted(double[] a, double[] ap, int np) {
     decreaseLambda();
 
-    for (int i = 0; i < m; i++) {
-      for (int j = m; j-- > 0;) {
+    for (int i = 0; i < np; i++) {
+      for (int j = np; j-- > 0;) {
         alpha[i][j] = covar[i][j];
       }
     }
 
-    for (int j = m; j-- > 0;) {
+    for (int j = np; j-- > 0;) {
       beta[j] = da[j];
     }
     for (int j = a.length; j-- > 0;) {
@@ -270,11 +270,11 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    * to be in alpha and beta. The lambda parameter is used to weight the diagonal of the Hessian.
    *
    * @param a the current fit parameters
-   * @param m the number of fit parameters
+   * @param np the number of fit parameters
    * @return true, if successful
    */
-  protected boolean solve(double[] a, final int m) {
-    createLinearProblem(m);
+  protected boolean solve(double[] a, final int np) {
+    createLinearProblem(np);
     return solve(covar, da);
   }
 
@@ -289,10 +289,9 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    * @param b the b
    * @return False if the equation is singular (no solution)
    */
+  // @CHECKSTYLE.OFF: ParameterName
   protected boolean solve(double[][] a, double[] b) {
-    // 04-May-2017
-    // EJMLLinearSolver was updated to use the pseudoInverse to create a solution
-    // when the matrix is singular. Thus we no longer check for zeros in the gradients.
+    // @CHECKSTYLE.ON: ParameterName
 
     // TODO
     // Q. Do we need a better qr decomposition that uses the largest Eigen column first.
@@ -309,13 +308,13 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    * to be in alpha and beta. These are copied into the working variables covar and da. The lambda
    * parameter is used to weight the diagonal of the Hessian.
    *
-   * @param m the number of fit parameters
+   * @param np the number of fit parameters
    */
-  protected void createLinearProblem(final int m) {
+  protected void createLinearProblem(final int np) {
     final double weight = (1 + lambda);
-    for (int i = m; i-- > 0;) {
+    for (int i = np; i-- > 0;) {
       da[i] = beta[i];
-      for (int j = m; j-- > 0;) {
+      for (int j = np; j-- > 0;) {
         covar[i][j] = alpha[i][j];
       }
       covar[i][i] *= weight;
@@ -331,13 +330,13 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    * @param a the current fit parameters
    * @param gradientIndices the gradient indices (maps the fit parameter index to the parameter
    *        array)
-   * @param m the number of fit parameters
+   * @param np the number of fit parameters
    * @param da the parameter shift
    * @param ap the new fit parameters
    */
-  protected void updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da,
+  protected void updateFitParameters(double[] a, int[] gradientIndices, int np, double[] da,
       double[] ap) {
-    for (int j = m; j-- > 0;) {
+    for (int j = np; j-- > 0;) {
       ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
     }
   }
@@ -388,7 +387,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    * @return true, if successful
    */
   private boolean computeFitDeviations(int n, double[] parametersVariance) {
-    if (isMLE()) {
+    if (isMle()) {
       // The Hessian matrix refers to the log-likelihood ratio.
       // Compute and invert a matrix related to the Poisson log-likelihood.
       // This assumes this does achieve the maximum likelihood estimate for a
@@ -440,7 +439,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     final int nparams = function.gradientIndices().length;
 
     // Create dynamically for the parameter sizes
-    calculator = GradientCalculatorFactory.newCalculator(nparams, isMLE());
+    calculator = GradientCalculatorUtils.newCalculator(nparams, isMle());
 
     // Initialise storage.
     // Note that covar and da are passed to EJMLLinerSolver and so must be the correct size.
@@ -454,7 +453,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     sumOfSquaresWorking = new double[3];
 
     boolean copyYfit = true;
-    if (isMLE()) {
+    if (isMle()) {
       // We must have positive data
       y = ensurePositive(n, y);
 
@@ -473,7 +472,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     this.evaluations = this.iterations = sc.getIteration();
 
     // Ensure we have a private copy of fx since the any calling code may modify it
-    if (isMLE() && copyYfit) {
+    if (isMle() && copyYfit) {
       lastFx = SimpleArrayUtils.ensureSize(lastFx, y.length);
       System.arraycopy(fx, 0, lastFx, 0, y.length);
     }
@@ -534,7 +533,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    *
    * @return true if is set to perform MLE
    */
-  public boolean isMLE() {
+  public boolean isMle() {
     return getType() == FunctionSolverType.MLE;
   }
 
@@ -547,7 +546,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver
    *
    * @param mle true to perform Maximum Likelihood Estimation
    */
-  public void setMLE(boolean mle) {
+  public void setMle(boolean mle) {
     if (mle) {
       setType(FunctionSolverType.MLE);
     } else {
@@ -560,9 +559,9 @@ public class NonLinearFit extends LSEBaseFunctionSolver
     final int n = y.length;
 
     // Create dynamically for the parameter sizes
-    calculator = GradientCalculatorFactory.newCalculator(function.getNumberOfGradients(), isMLE());
+    calculator = GradientCalculatorUtils.newCalculator(function.getNumberOfGradients(), isMle());
 
-    if (isMLE()) {
+    if (isMle()) {
       // We must have positive data
       y = ensurePositive(n, y);
 
@@ -586,9 +585,9 @@ public class NonLinearFit extends LSEBaseFunctionSolver
 
   @Override
   public boolean computeDeviations(double[] y, double[] a, double[] parametersVariance) {
-    calculator = GradientCalculatorFactory.newCalculator(function.getNumberOfGradients(), isMLE());
+    calculator = GradientCalculatorUtils.newCalculator(function.getNumberOfGradients(), isMle());
 
-    if (isMLE()) {
+    if (isMle()) {
       return super.computeDeviations(y, a, parametersVariance);
     }
 

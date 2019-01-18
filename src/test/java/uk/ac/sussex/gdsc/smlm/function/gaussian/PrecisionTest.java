@@ -415,7 +415,7 @@ public class PrecisionTest {
   }
 
   @Test
-  public void circularFunctionsPrecisionIsNot3sfAtLargeXY() {
+  public void circularFunctionsPrecisionIsNot3sfAtLargeXy() {
     int maxx = this.maxx;
     try {
       maxx *= 2;
@@ -480,7 +480,7 @@ public class PrecisionTest {
   }
 
   @Test
-  public void fixedFunctionsPrecisionIsNot3sfAtLargeXY() {
+  public void fixedFunctionsPrecisionIsNot3sfAtLargeXy() {
     int maxx = this.maxx;
     try {
       maxx *= 2;

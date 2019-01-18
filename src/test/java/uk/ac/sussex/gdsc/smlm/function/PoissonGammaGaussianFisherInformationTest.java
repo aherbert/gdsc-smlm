@@ -84,7 +84,7 @@ public class PoissonGammaGaussianFisherInformationTest {
       double u) {
     final double[] max = f.findMaximum(u, 1e-6);
     final double[] upper = f.findUpperLimit(u, max, 1e-6);
-    logger.fine(FunctionUtils.getSupplier("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)", f.m, u,
+    logger.fine(FunctionUtils.getSupplier("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)", f.gain, u,
         max[0], max[1], max[2], upper[0], upper[1], upper[2]));
   }
 
@@ -256,7 +256,7 @@ public class PoissonGammaGaussianFisherInformationTest {
         final double upper = PoissonFisherInformation.getPoissonI(u);
         final double alpha = I / upper;
         logger.log(TestLogUtils.getRecord(Level.FINE, "m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s",
-            f.m, f.s, u, I, upper, alpha));
+            f.gain, f.sd, u, I, upper, alpha));
         Assertions.assertTrue(I < upper,
             () -> String.format("Fisher information (%s) is not below upper limit: %s", I, upper));
         Assertions.assertTrue(alpha > 0, "Alpha is not above zero");

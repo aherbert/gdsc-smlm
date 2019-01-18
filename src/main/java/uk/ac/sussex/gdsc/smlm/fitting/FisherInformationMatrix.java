@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 
 import uk.ac.sussex.gdsc.core.annotation.NotNull;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
-import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
@@ -58,7 +58,7 @@ public class FisherInformationMatrix {
    * @param inversionTolerance the inversion tolerance
    */
   public FisherInformationMatrix(double[][] matrix, double inversionTolerance) {
-    this(EJMLLinearSolver.toA(matrix), inversionTolerance);
+    this(EjmlLinearSolver.toA(matrix), inversionTolerance);
   }
 
   /**
@@ -69,7 +69,7 @@ public class FisherInformationMatrix {
    * @param inversionTolerance the inversion tolerance
    */
   public FisherInformationMatrix(double[] matrix, int n, double inversionTolerance) {
-    this(EJMLLinearSolver.toA(matrix, n), inversionTolerance);
+    this(EjmlLinearSolver.toA(matrix, n), inversionTolerance);
   }
 
   /**
@@ -89,7 +89,7 @@ public class FisherInformationMatrix {
    * @param matrix the fisher information matrix
    */
   public FisherInformationMatrix(double[][] matrix) {
-    this(EJMLLinearSolver.toA(matrix));
+    this(EjmlLinearSolver.toA(matrix));
   }
 
   /**
@@ -99,7 +99,7 @@ public class FisherInformationMatrix {
    * @param n the number of columns/rows
    */
   public FisherInformationMatrix(double[] matrix, int n) {
-    this(EJMLLinearSolver.toA(matrix, n));
+    this(EjmlLinearSolver.toA(matrix, n));
   }
 
   /**
@@ -155,7 +155,7 @@ public class FisherInformationMatrix {
     inverted = NO;
 
     // Matrix inversion
-    final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(inversionTolerance);
+    final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(inversionTolerance);
     final double[] result = solver.invertDiagonal(matrix); // Does not modify the matrix
     if (result == null) {
       return;
@@ -400,7 +400,7 @@ public class FisherInformationMatrix {
    * @return the matrix
    */
   public double[][] getSquareMatrix() {
-    return EJMLLinearSolver.toSquareData(matrix);
+    return EjmlLinearSolver.toSquareData(matrix);
   }
 
   /**

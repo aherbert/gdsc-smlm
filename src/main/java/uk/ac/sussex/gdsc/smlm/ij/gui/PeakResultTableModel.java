@@ -56,7 +56,7 @@ import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataOrigY;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataParameterConverter;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataParameterDeviationConverter;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataPrecision;
-import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataSNR;
+import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataSnr;
 
 import gnu.trove.list.array.TIntArrayList;
 
@@ -122,7 +122,7 @@ public class PeakResultTableModel extends AbstractTableModel {
     data = (copyData) ? new ArrayPeakResultStore(resultsSource.toArray())
         : new ArrayPeakResultStore(10);
     this.calibration = resultsSource.getCalibration();
-    this.psf = resultsSource.getPSF();
+    this.psf = resultsSource.getPsf();
 
     setShowDeviations(resultsSource.hasDeviations());
     setShowZ(resultsSource.is3D());
@@ -294,7 +294,7 @@ public class PeakResultTableModel extends AbstractTableModel {
       });
       addName("Mean" + paramNames[PeakResult.INTENSITY], namesList,
           unitNames[PeakResult.INTENSITY]);
-      valuesList.add(new PeakResultDataSNR());
+      valuesList.add(new PeakResultDataSnr());
       addName(valuesList, namesList);
     }
 
@@ -320,7 +320,7 @@ public class PeakResultTableModel extends AbstractTableModel {
 
       try {
         final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper
-            .create(getPSF(), calibration, Gaussian2DPeakResultHelper.LSE_PRECISION);
+            .create(getPsf(), calibration, Gaussian2DPeakResultHelper.LSE_PRECISION);
         precision = new PeakResultDataPrecision() {
           @Override
           public Double getValue(PeakResult result) {
@@ -328,7 +328,7 @@ public class PeakResultTableModel extends AbstractTableModel {
               return result.getPrecision();
             }
             if (calculator != null) {
-              return calculator.getLSEPrecision(result.getParameters(), result.getNoise());
+              return calculator.getLsePrecision(result.getParameters(), result.getNoise());
             }
             return 0.0;
           }
@@ -409,7 +409,7 @@ public class PeakResultTableModel extends AbstractTableModel {
     final ArrayPeakResultStore store = new ArrayPeakResultStore(data.size());
     store.addArray(data.toArray());
     final MemoryPeakResults results = new MemoryPeakResults(store);
-    results.setPSF(psf);
+    results.setPsf(psf);
     results.setCalibration(calibration);
     results.setSource(source);
     results.setConfiguration(configuration);
@@ -812,7 +812,7 @@ public class PeakResultTableModel extends AbstractTableModel {
    *
    * @return the psf
    */
-  public PSF getPSF() {
+  public PSF getPsf() {
     return psf;
   }
   // *************************************************************************/

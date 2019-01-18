@@ -44,7 +44,11 @@ import java.awt.Rectangle;
  * Represent an ImageJ image as a results source. Supports all greyscale images. Only processes
  * channel 0 of 32-bit colour images.
  */
+// This is allowed to support backwards serialisation compatibility
+// @CHECKSTYLE.OFF: AbbreviationAsWordInName
 public class IJImageSource extends ImageSource {
+  // @CHECKSTYLE.ON: AbbreviationAsWordInName
+
   @XStreamOmitField
   private int slice;
   private int singleFrame;

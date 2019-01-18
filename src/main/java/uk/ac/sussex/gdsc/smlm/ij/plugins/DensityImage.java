@@ -33,12 +33,12 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 import gnu.trove.list.array.TDoubleArrayList;
 
@@ -396,9 +396,9 @@ public class DensityImage implements PlugIn {
     // Create a new set of results within the bounds
     final MemoryPeakResults newResults = new MemoryPeakResults();
     newResults.begin();
-    results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
+    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
       @Override
-      public void executeXYR(float x, float y, PeakResult result) {
+      public void executeXyr(float x, float y, PeakResult result) {
         if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
           newResults.add(result);
         }
@@ -491,8 +491,8 @@ public class DensityImage implements PlugIn {
     return summary;
   }
 
-  private static String rounded(double d) {
-    return MathUtils.rounded(d, 3);
+  private static String rounded(double value) {
+    return MathUtils.rounded(value, 3);
   }
 
   /**
@@ -520,15 +520,15 @@ public class DensityImage implements PlugIn {
     }
 
     // Draw an image - Use error so that a floating point value can be used on a single pixel
-    final IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
+    final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
         ResultsImageType.DRAW_INTENSITY, false, false, results.getName() + " Density",
         results.getBounds(), results.getNmPerPixel(), results.getGain(), imageScale, 0,
         (cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
-    image.setDisplayFlags(image.getDisplayFlags() | IJImagePeakResults.DISPLAY_NEGATIVES);
+    image.setDisplayFlags(image.getDisplayFlags() | ImageJImagePeakResults.DISPLAY_NEGATIVES);
     image.setLutName("grays");
     image.begin();
     final StandardResultProcedure sp = new StandardResultProcedure(newResults, DistanceUnit.PIXEL);
-    sp.getXYR();
+    sp.getXyr();
     for (int i = 0; i < density.length; i++) {
       if (density[i] < densityThreshold) {
         continue;
@@ -554,8 +554,8 @@ public class DensityImage implements PlugIn {
 
     // Build a list of all images with a region ROI
     final List<String> titles = new LinkedList<>();
-    for (final int imageID : ImageJUtils.getIdList()) {
-      final ImagePlus imp = WindowManager.getImage(imageID);
+    for (final int imageId : ImageJUtils.getIdList()) {
+      final ImagePlus imp = WindowManager.getImage(imageId);
       if (imp != null && imp.getRoi() != null && imp.getRoi().isArea()) {
         titles.add(imp.getTitle());
       }

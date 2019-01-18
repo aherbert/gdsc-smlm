@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePSFHelper;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -266,7 +266,7 @@ public class PSFCombiner implements PlugIn {
         IJ.showProgress(progress += increment);
 
         // Get the data and adjust using the weight
-        final float[] psfData = IJImageConverter.getData(psfStack.getProcessor(n));
+        final float[] psfData = ImageJImageConverter.getData(psfStack.getProcessor(n));
         for (int i = 0; i < psfData.length; i++) {
           psfData[i] *= weight;
         }

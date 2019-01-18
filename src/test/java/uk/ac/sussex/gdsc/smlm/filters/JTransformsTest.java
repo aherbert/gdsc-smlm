@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.filters.FHTFilter.Operation;
+import uk.ac.sussex.gdsc.smlm.filters.FhtFilter.Operation;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
@@ -88,16 +88,16 @@ public class JTransformsTest {
   }
 
   @Test
-  public void canCorrelateUsingFFT() {
-    canComputeUsingFFT(false);
+  public void canCorrelateUsingFft() {
+    canComputeUsingFft(false);
   }
 
   @Test
-  public void canConvolveUsingFFT() {
-    canComputeUsingFFT(true);
+  public void canConvolveUsingFft() {
+    canComputeUsingFft(true);
   }
 
-  private static void canComputeUsingFFT(boolean convolution) {
+  private static void canComputeUsingFft(boolean convolution) {
     final int size = 16;
     final int ex = 5;
     final int ey = 7;
@@ -109,7 +109,7 @@ public class JTransformsTest {
     final float[] input1 = (float[]) fp1.getPixels();
     final float[] input2 = (float[]) fp2.getPixels();
 
-    final FHTFilter ff = new FHTFilter(input2.clone(), size, size);
+    final FhtFilter ff = new FhtFilter(input2.clone(), size, size);
     ff.setOperation((convolution) ? Operation.CONVOLUTION : Operation.CORRELATION);
     final float[] e = input1.clone();
     ff.filter(e, size, size);
@@ -148,7 +148,7 @@ public class JTransformsTest {
   }
 
   @Test
-  public void canComputeFHTUsingJTransforms() {
+  public void canComputeFhtUsingJTransforms() {
     // Note: no need to test the correlation as the transformed data
     // is the same format as FHT so we just test that.
 
@@ -179,11 +179,11 @@ public class JTransformsTest {
     Assertions.assertArrayEquals(fht2.getData(), input2, 1e-5f);
   }
 
-  private abstract class DHTSpeedTask extends BaseTimingTask {
+  private abstract class DhtSpeedTask extends BaseTimingTask {
     int maxN;
     float[][] data;
 
-    public DHTSpeedTask(String name, int maxN, float[][] data) {
+    public DhtSpeedTask(String name, int maxN, float[][] data) {
       super(name);
       this.maxN = maxN;
       this.data = data;
@@ -223,8 +223,8 @@ public class JTransformsTest {
     }
   }
 
-  private class IJFHTSpeedTask extends DHTSpeedTask {
-    public IJFHTSpeedTask(int maxN, float[][] data) {
+  private class ImageJFhtSpeedTask extends DhtSpeedTask {
+    public ImageJFhtSpeedTask(int maxN, float[][] data) {
       super(FHT.class.getSimpleName(), maxN, data);
     }
 
@@ -242,10 +242,10 @@ public class JTransformsTest {
     }
   }
 
-  private class IJFHT2SpeedTask extends DHTSpeedTask {
+  private class ImageJFht2SpeedTask extends DhtSpeedTask {
     Fht fht2;
 
-    public IJFHT2SpeedTask(int maxN, float[][] data) {
+    public ImageJFht2SpeedTask(int maxN, float[][] data) {
       super(Fht.class.getSimpleName(), maxN, data);
       // Create one so we have the pre-computed tables
       fht2 = new Fht(data[0].clone(), maxN, false);
@@ -268,10 +268,10 @@ public class JTransformsTest {
     }
   }
 
-  private class JTransformsDHTSpeedTask extends DHTSpeedTask {
+  private class JTransformsDhtSpeedTask extends DhtSpeedTask {
     FloatDHT_2D dht;
 
-    public JTransformsDHTSpeedTask(int maxN, float[][] data) {
+    public JTransformsDhtSpeedTask(int maxN, float[][] data) {
       super(FloatDHT_2D.class.getSimpleName(), maxN, data);
       dht = new FloatDHT_2D(maxN, maxN);
     }
@@ -290,7 +290,7 @@ public class JTransformsTest {
 
   @SpeedTag
   @SeededTest
-  public void jtransforms2DDHTIsFasterThanFHT2(RandomSeed seed) {
+  public void jtransforms2DDhtIsFasterThanFht2(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     // Test the forward DHT of data. and reverse transform or the pre-computed correlation.
@@ -330,9 +330,9 @@ public class JTransformsTest {
     CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
 
     final TimingService ts = new TimingService();
-    ts.execute(new IJFHTSpeedTask(size, data));
-    ts.execute(new IJFHT2SpeedTask(size, data));
-    ts.execute(new JTransformsDHTSpeedTask(size, data));
+    ts.execute(new ImageJFhtSpeedTask(size, data));
+    ts.execute(new ImageJFht2SpeedTask(size, data));
+    ts.execute(new JTransformsDhtSpeedTask(size, data));
     ts.repeat();
     if (logger.isLoggable(Level.INFO)) {
       logger.info(ts.getReport());

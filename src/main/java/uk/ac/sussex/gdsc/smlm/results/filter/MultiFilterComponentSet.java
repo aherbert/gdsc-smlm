@@ -27,14 +27,14 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public abstract class MultiFilterComponentSet implements Cloneable {
+public interface MultiFilterComponentSet {
   /**
    * Gets the validation flags. These are possible return flags from the
    * {@link #validate(PreprocessedPeakResult)} method.
    *
    * @return the validation flags
    */
-  public abstract int getValidationFlags();
+  int getValidationFlags();
 
   /**
    * Validate the peak.
@@ -42,21 +42,19 @@ public abstract class MultiFilterComponentSet implements Cloneable {
    * @param peak the peak
    * @return the result
    */
-  public abstract int validate(final PreprocessedPeakResult peak);
+  int validate(final PreprocessedPeakResult peak);
 
   /**
    * Replace the first component.
    *
-   * @param c the replacement component
+   * @param component the replacement component
    */
-  abstract void replace0(MultiFilterComponent c);
+  abstract void replace0(MultiFilterComponent component);
 
-  @Override
-  public MultiFilterComponentSet clone() {
-    try {
-      return (MultiFilterComponentSet) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
-  }
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  MultiFilterComponentSet copy();
 }

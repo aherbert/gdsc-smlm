@@ -41,8 +41,8 @@ import uk.ac.sussex.gdsc.smlm.results.filter.FilterXStreamUtils;
 import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionHysteresisFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.SNRFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.SNRHysteresisFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SnrHysteresisFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.TraceFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -177,7 +177,7 @@ public class FilterAnalysis implements PlugIn {
 
   private String getInputDirectory() {
     final GUIFilterSettings.Builder filterSettings =
-        SettingsManager.readGUIFilterSettings(0).toBuilder();
+        SettingsManager.readGuiFilterSettings(0).toBuilder();
 
     if (filterSettings.getFilterAnalysisDirectory() != null) {
       OpenDialog.setDefaultDirectory(filterSettings.getFilterAnalysisDirectory());
@@ -195,7 +195,7 @@ public class FilterAnalysis implements PlugIn {
   @SuppressWarnings("unchecked")
   private static List<FilterSet> readFilterSets() {
     final GUIFilterSettings.Builder filterSettings =
-        SettingsManager.readGUIFilterSettings(0).toBuilder();
+        SettingsManager.readGuiFilterSettings(0).toBuilder();
 
     final String[] path = ImageJUtils.decodePath(filterSettings.getFilterSetFilename());
     final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
@@ -224,7 +224,7 @@ public class FilterAnalysis implements PlugIn {
 
   private static void saveFilterSets(List<FilterSet> filterSets) {
     final GUIFilterSettings.Builder filterSettings =
-        SettingsManager.readGUIFilterSettings(0).toBuilder();
+        SettingsManager.readGuiFilterSettings(0).toBuilder();
 
     final String[] path = ImageJUtils.decodePath(filterSettings.getFilterSetFilename());
     final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
@@ -438,7 +438,7 @@ public class FilterAnalysis implements PlugIn {
       final WidthFilter wf = new WidthFilter((float) w);
       final List<Filter> filters = new LinkedList<>();
       for (int snr = minSnr; snr <= maxSnr; snr++) {
-        filters.add(new AndFilter(wf, new SNRFilter(snr)));
+        filters.add(new AndFilter(wf, new SnrFilter(snr)));
       }
       filterSets.add(new FilterSet(filters));
     }
@@ -460,7 +460,7 @@ public class FilterAnalysis implements PlugIn {
       return;
     }
     for (double d = minDistance; d <= maxDistance; d += incDistance) {
-      final SNRFilter snr = new SNRFilter(maxSnr);
+      final SnrFilter snr = new SnrFilter(maxSnr);
       final List<Filter> filters = new LinkedList<>();
       for (int t = minTime; t <= maxTime; t += incTime) {
         filters.add(new OrFilter(snr, new TraceFilter(d, t)));
@@ -478,7 +478,7 @@ public class FilterAnalysis implements PlugIn {
       for (int snrGap = minSnrGap; snrGap <= maxSnrGap; snrGap += incSnrGap) {
         final List<Filter> filters = new LinkedList<>();
         for (int snr = minSnr; snr <= maxSnr; snr++) {
-          filters.add(new AndFilter(wf, new SNRHysteresisFilter(2, 0, 1, 0, snr, snrGap)));
+          filters.add(new AndFilter(wf, new SnrHysteresisFilter(2, 0, 1, 0, snr, snrGap)));
         }
         filterSets.add(new FilterSet(filters));
       }

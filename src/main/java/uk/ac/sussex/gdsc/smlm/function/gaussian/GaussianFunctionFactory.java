@@ -28,14 +28,14 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiAstigmatismErfGaussian2
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiFixedErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiNBCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiNBFreeCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiNbCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiNbFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFixedErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleNBCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleNbCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleNbFreeCircularErfGaussian2DFunction;
 
 /**
  * Creates the appropriate Gaussian function.
@@ -269,10 +269,10 @@ public class GaussianFunctionFactory {
           }
         }
         if ((flags & FIT_Y_WIDTH) != 0) {
-          return new SingleNBFreeCircularErfGaussian2DFunction(maxx, maxy);
+          return new SingleNbFreeCircularErfGaussian2DFunction(maxx, maxy);
         }
         if ((flags & FIT_X_WIDTH) != 0) {
-          return new SingleNBCircularErfGaussian2DFunction(maxx, maxy);
+          return new SingleNbCircularErfGaussian2DFunction(maxx, maxy);
         }
       } else {
         if ((flags & FIT_BACKGROUND) != 0) {
@@ -294,10 +294,10 @@ public class GaussianFunctionFactory {
           }
         }
         if ((flags & FIT_Y_WIDTH) != 0) {
-          return new MultiNBFreeCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
+          return new MultiNbFreeCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
         }
         if ((flags & FIT_X_WIDTH) != 0) {
-          return new MultiNBCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
+          return new MultiNbCircularErfGaussian2DFunction(numberOfPeaks, maxx, maxy);
         }
       }
     }
@@ -320,25 +320,25 @@ public class GaussianFunctionFactory {
           return new SingleFixedGaussian2DFunction(maxx, maxy);
         }
 
-        return new SingleNSFixedGaussian2DFunction(maxx, maxy);
+        return new SingleNsFixedGaussian2DFunction(maxx, maxy);
       }
 
       if ((flags & FIT_ANGLE) != 0) {
-        return new SingleNBEllipticalGaussian2DFunction(maxx, maxy);
+        return new SingleNbEllipticalGaussian2DFunction(maxx, maxy);
       }
       if ((flags & FIT_Y_WIDTH) != 0) {
-        return new SingleNBFreeCircularGaussian2DFunction(maxx, maxy);
+        return new SingleNbFreeCircularGaussian2DFunction(maxx, maxy);
       }
       if ((flags & FIT_X_WIDTH) != 0) {
-        return new SingleNBCircularGaussian2DFunction(maxx, maxy);
+        return new SingleNbCircularGaussian2DFunction(maxx, maxy);
       }
 
       // Fixed function
       if ((flags & FIT_SIGNAL) != 0) {
-        return new SingleNBFixedGaussian2DFunction(maxx, maxy);
+        return new SingleNbFixedGaussian2DFunction(maxx, maxy);
       }
 
-      return new SingleNSNBFixedGaussian2DFunction(maxx, maxy);
+      return new SingleNsNbFixedGaussian2DFunction(maxx, maxy);
     }
 
     if ((flags & FIT_BACKGROUND) != 0) {
@@ -357,25 +357,25 @@ public class GaussianFunctionFactory {
         return new FixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
       }
 
-      return new NSFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
+      return new NsFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
 
     if ((flags & FIT_ANGLE) != 0) {
-      return new NBEllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);
+      return new NbEllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
     if ((flags & FIT_Y_WIDTH) != 0) {
-      return new NBFreeCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
+      return new NbFreeCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
     if ((flags & FIT_X_WIDTH) != 0) {
-      return new NBCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
+      return new NbCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
 
     // Fixed function
     if ((flags & FIT_SIGNAL) != 0) {
-      return new NBFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
+      return new NbFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
     }
 
-    return new NSNBFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
+    return new NsNbFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
 
   /**

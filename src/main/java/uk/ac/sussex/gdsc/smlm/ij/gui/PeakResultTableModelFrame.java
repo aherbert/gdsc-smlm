@@ -396,7 +396,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     if (source == null) {
       text += " = NA";
     } else {
-      text += "\n" + XmlUtils.prettyPrintXml(source.toXML());
+      text += "\n" + XmlUtils.prettyPrintXml(source.toXml());
     }
     IJ.log(text);
   }

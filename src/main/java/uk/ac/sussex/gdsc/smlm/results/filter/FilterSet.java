@@ -80,10 +80,8 @@ public class FilterSet {
    * @return the name
    */
   public String getName() {
-    if (name == null || name.length() == 0) {
-      if (filters != null && !filters.isEmpty()) {
-        name = filters.get(0).getName();
-      }
+    if ((name == null || name.length() == 0) && (filters != null && !filters.isEmpty())) {
+      name = filters.get(0).getName();
     }
     return name;
   }
@@ -115,8 +113,8 @@ public class FilterSet {
    *
    * @return An XML representation of this object.
    */
-  public String toXML() {
-    return FilterXStreamUtils.toXML(this);
+  public String toXml() {
+    return FilterXStreamUtils.toXml(this);
   }
 
   /**
@@ -125,11 +123,11 @@ public class FilterSet {
    * @param xml the xml
    * @return the filter set
    */
-  public static FilterSet fromXML(String xml) {
+  public static FilterSet fromXml(String xml) {
     try {
-      return (FilterSet) FilterXStreamUtils.fromXML(xml);
+      return (FilterSet) FilterXStreamUtils.fromXml(xml);
     } catch (final ClassCastException ex) {
-      // ex.printStackTrace();
+      // Not a FilterSet
     }
     return null;
   }

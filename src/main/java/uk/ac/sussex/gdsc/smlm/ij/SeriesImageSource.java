@@ -75,6 +75,63 @@ public class SeriesImageSource extends ImageSource {
   /** The buffer limit for sequential reading of TIFF images. Default = 50MB */
   private long sequentialReadBufferLimit = 52428800L;
 
+  /** The list of image filenames. */
+  private ArrayList<String> images;
+  /**
+   * Flag indicating if the image series contains only TIFF images. No other formats are currently
+   * supported.
+   */
+  public final boolean isTiffSeries;
+
+  /**
+   * Contains the cumulative size of the TIFF image series. Used for a binary search to find the
+   * image for the frame.
+   */
+  @XStreamOmitField
+  private int[] imageSize;
+
+  /**
+   * Used to cache data about the TIFF images.
+   */
+  @XStreamOmitField
+  private ImageData[] imageData;
+
+  // Used for frame-based read
+  @XStreamOmitField
+  private Image lastImage;
+  @XStreamOmitField
+  private int lastImageId;
+
+  private int numberOfThreads = 1;
+  private int numberOfImages = 1;
+
+  @XStreamOmitField
+  private TrackProgress trackProgress = NullTrackProgress.getInstance();
+
+  // Used to process the files into images
+  @XStreamOmitField
+  private ArrayList<BaseWorker> workers;
+  @XStreamOmitField
+  private ArrayList<Thread> threads;
+
+  /** The queue for in-memory buffered images awaiting TIFF decoding. */
+  @XStreamOmitField
+  private CloseableBlockingQueue<NextSource> decodeQueue;
+  /** The queue for in-memory buffered images awaiting TIFF reading. */
+  @XStreamOmitField
+  private CloseableBlockingQueue<NextSource> readQueue;
+
+  /** Used for sequential reading to queue the raw frames. */
+  @XStreamOmitField
+  private CloseableBlockingQueue<Object> rawFramesQueue;
+
+  /**
+   * The first error that occurred during sequential reading. This is stored, the queue is shutdown
+   * and then this can be thrown in the next() method.
+   */
+  @XStreamOmitField
+  private DataException error;
+
   /**
    * Store details for an image.
    */
@@ -652,14 +709,14 @@ public class SeriesImageSource extends ImageSource {
     }
   }
 
-  private abstract class BaseWorker implements Runnable {
+  private abstract static class BaseWorker implements Runnable {
     volatile boolean run = true;
   }
 
   /**
    * Add source images to the queue to be read.
    */
-  private class TIFFWorker extends BaseWorker {
+  private class TiffWorker extends BaseWorker {
     @Override
     public void run() {
       SeekableStream ss = null;
@@ -997,6 +1054,18 @@ public class SeriesImageSource extends ImageSource {
   }
 
   /**
+   * Hold image data.
+   */
+  private class ImageData {
+    long fileSize;
+    TiffImage tiffImage;
+
+    public ImageData(long size) {
+      fileSize = size;
+    }
+  }
+
+  /**
    * Creates the seekable stream.
    *
    * @param path the path
@@ -1168,86 +1237,6 @@ public class SeriesImageSource extends ImageSource {
   // }
   // }
 
-  private ArrayList<String> images;
-  /**
-   * Flag indicating if the image series contains only TIFF images. No other formats are currently
-   * supported.
-   */
-  public final boolean isTiffSeries;
-
-  /**
-   * Hold image data.
-   */
-  private class ImageData {
-    long fileSize;
-    TiffImage tiffImage;
-
-    public ImageData(long size) {
-      fileSize = size;
-    }
-  }
-
-  /**
-   * Contains the cumulative size of the TIFF image series. Used for a binary search to find the
-   * image for the frame.
-   */
-  @XStreamOmitField
-  private int[] imageSize;
-
-  /**
-   * Used to cache data about the TIFF images.
-   */
-  @XStreamOmitField
-  private ImageData[] imageData;
-
-  // // Used for sequential read
-  // @XStreamOmitField
-  // private Image image = null;
-  // @XStreamOmitField
-  // private int nextImageId;
-  // @XStreamOmitField
-  // private NextSource[] nextImages;
-  // @XStreamOmitField
-  // private int currentSlice;
-
-  // Used for frame-based read
-  @XStreamOmitField
-  private Image lastImage;
-  @XStreamOmitField
-  private int lastImageId;
-
-  @XStreamOmitField
-  private final long lastTime = 0;
-  private int numberOfThreads = 1;
-  private int numberOfImages = 1;
-
-  @XStreamOmitField
-  private TrackProgress trackProgress = NullTrackProgress.getInstance();
-
-  // Used to process the files into images
-  @XStreamOmitField
-  private ArrayList<BaseWorker> workers;
-  @XStreamOmitField
-  private ArrayList<Thread> threads;
-
-  /** The queue for in-memory buffered images awaiting TIFF decoding. */
-  @XStreamOmitField
-  private CloseableBlockingQueue<NextSource> decodeQueue;
-  /** The queue for in-memory buffered images awaiting TIFF reading. */
-  @XStreamOmitField
-  private CloseableBlockingQueue<NextSource> readQueue;
-
-  /** Used for sequential reading to queue the raw frames. */
-  @XStreamOmitField
-  private CloseableBlockingQueue<Object> rawFramesQueue;
-
-  /**
-   * The first error that occurred during sequential reading. This is stored, the queue is shutdown
-   * and then this can be thrown in the next() method.
-   */
-  @XStreamOmitField
-  private DataException error;
-
   /**
    * Create a new image source using the given image series.
    *
@@ -1369,7 +1358,7 @@ public class SeriesImageSource extends ImageSource {
   }
 
   @SuppressWarnings("unused")
-  private static boolean isOMETIFF(byte[] buf, boolean littleEndian) {
+  private static boolean isOmeTiff(byte[] buf, boolean littleEndian) {
     final int b8 = buf[8] & 255;
     final int b9 = buf[9] & 255;
     final int b10 = buf[10] & 255;
@@ -1407,10 +1396,7 @@ public class SeriesImageSource extends ImageSource {
     final int summaryMetadataHeader =
         (littleEndian) ? LittleEndianFastTiffDecoder.toInt(b32, b33, b34, b35)
             : BigEndianFastTiffDecoder.toInt(b32, b33, b34, b35);
-    if (summaryMetadataHeader != 2355492) {
-      return false;
-    }
-    return true;
+    return (summaryMetadataHeader == 2355492);
   }
 
   /**
@@ -1557,107 +1543,14 @@ public class SeriesImageSource extends ImageSource {
   protected void closeSource() {
     if (threads != null) {
       closeQueue();
-      // setDimensions(0, 0, 0);
-      // if (image != null)
-      // image.close(true);
     }
 
     if (lastImage != null) {
       lastImage.close(true);
     }
-    // image =
     lastImage = null;
-    // nextImageId = currentSlice =
     lastImageId = 0;
   }
-
-  // private Image getNextImage()
-  // {
-  // image = null;
-  // currentSlice = 0;
-  // if (nextImageId < nextImages.length)
-  // {
-  // try
-  // {
-  // for (;;)
-  // {
-  // // Images may be out of order due to multiple thread processing.
-  // // Check if we have processed the next image we need.
-  // NextImage next = nextImages[nextImageId];
-  // if (next != null)
-  // {
-  // // Clear memory
-  // nextImages[nextImageId] = null;
-  //
-  // nextImageId++;
-  //
-  // // Check if there is image data. It may be null if the image was invalid
-  // if (next.image != null)
-  // {
-  // image = next.image;
-  //
-  // //System.out.println("Found image: " + images.get(next.image));
-  //
-  // // Fill cache
-  // lastImage = image;
-  // lastImageId = next.imageId;
-  // // The cache is used for non-sequential reading. To prevent
-  // // memory usage during sequential reading only cache the first
-  // // one as this is generated when the source is opened and it is
-  // // unclear if the source is to be used non-sequentially.
-  // if (lastImageId == 0 && image instanceof TiffImage)
-  // storeTiffImage(lastImageId, (TiffImage) image);
-  // return image;
-  // }
-  // else
-  // {
-  // // Process the next stored image
-  // continue;
-  // }
-  // }
-  //
-  // // We are still awaiting the next image.
-  // // Get the images processed by the worker threads.
-  // next = imageQueue.poll();
-  //
-  // // If there is nothing then check if any workers are alive
-  // if (next == null && workersRunning())
-  // {
-  // // This will block until something produces an image
-  // next = imageQueue.take();
-  // }
-  //
-  // if (next != null)
-  // {
-  // // -1 is used when the worker has finished
-  // if (next.imageId != -1)
-  // {
-  // // Valid image so store it
-  // nextImages[next.imageId] = next;
-  // }
-  //
-  // continue;
-  // }
-  //
-  // // Nothing is alive producing images so break
-  // break;
-  // }
-  // }
-  // catch (InterruptedException e)
-  // {
-  //
-  // }
-  // }
-  // return image;
-  //
-  // private boolean workersRunning()
-  // {
-  // for (BaseWorker worker : workers)
-  // if (worker.run)
-  // return true;
-  // return false;
-  // }
-  // }
 
   /**
    * Creates a background thread to open the images sequentially.
@@ -1681,9 +1574,6 @@ public class SeriesImageSource extends ImageSource {
     rawFramesQueue = new CloseableBlockingQueue<>(n);
 
     if (belowBufferLimit() && images.size() > 1) {
-      // A list of images that may have been read
-      // nextImages = new NextSource[images.size()];
-
       // For now just support a single thread for reading the
       // raw byte data, decoding and read the TIFF. We can control
       // the number of images buffered into memory.
@@ -1701,7 +1591,7 @@ public class SeriesImageSource extends ImageSource {
       // A single worker thread to read the series
       workers = new ArrayList<>(1);
       threads = new ArrayList<>(1);
-      startWorker(new TIFFWorker());
+      startWorker(new TiffWorker());
     }
   }
 

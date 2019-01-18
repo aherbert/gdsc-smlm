@@ -44,7 +44,7 @@ public class DoubleDHT2DTest {
   static int size = 16;
   static double centre = (size - 1) / 2.0;
 
-  private static DoubleDHT2D createData(double cx, double cy) {
+  private static DoubleDht2D createData(double cx, double cy) {
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
         GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
     final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -55,15 +55,15 @@ public class DoubleDHT2DTest {
     a[Gaussian2DFunction.Y_SD] = 1.1;
     final StandardValueProcedure p = new StandardValueProcedure();
     p.getValues(f, a);
-    return new DoubleDHT2D(size, size, p.values, false);
+    return new DoubleDht2D(size, size, p.values, false);
   }
 
-  private static DoubleDHT2D createData() {
+  private static DoubleDht2D createData() {
     return createData(centre, centre);
   }
 
-  private static DoubleDHT2D createQuadrants(int w, int h) {
-    return new DoubleDHT2D(createQuadrantsProcessor(w, h));
+  private static DoubleDht2D createQuadrants(int w, int h) {
+    return new DoubleDht2D(createQuadrantsProcessor(w, h));
   }
 
   static FloatProcessor createQuadrantsProcessor(int w, int h) {
@@ -85,11 +85,11 @@ public class DoubleDHT2DTest {
 
   @Test
   public void canSwapQuadrants() {
-    DoubleDHT2D dht;
+    DoubleDht2D dht;
 
     // Simple test
     final double[] data = new double[] {2, 1, 3, 4};
-    dht = new DoubleDHT2D(2, 2, data.clone(), false);
+    dht = new DoubleDht2D(2, 2, data.clone(), false);
     dht.swapQuadrants();
     checkQuadrants(data, dht.getData());
 
@@ -122,19 +122,19 @@ public class DoubleDHT2DTest {
 
   @Test
   public void canConvolveAndDeconvolve() {
-    final DoubleDHT2D dht = createData();
+    final DoubleDht2D dht = createData();
 
     final double[] pixels = dht.getData().clone();
     dht.transform();
 
-    final DoubleDHT2D copy = dht.copy();
+    final DoubleDht2D copy = dht.copy();
     copy.initialiseFastMultiply();
 
-    final DoubleDHT2D convolved = dht.multiply(dht);
-    final DoubleDHT2D deconvolved = convolved.divide(dht);
+    final DoubleDht2D convolved = dht.multiply(dht);
+    final DoubleDht2D deconvolved = convolved.divide(dht);
 
-    final DoubleDHT2D convolved2 = dht.multiply(copy);
-    final DoubleDHT2D deconvolved2 = convolved.divide(copy);
+    final DoubleDht2D convolved2 = dht.multiply(copy);
+    final DoubleDht2D deconvolved2 = convolved.divide(copy);
 
     Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
     Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
@@ -158,10 +158,10 @@ public class DoubleDHT2DTest {
 
   @Test
   public void canCorrelate() {
-    final DoubleDHT2D dht = createData();
+    final DoubleDht2D dht = createData();
     dht.transform();
 
-    final DoubleDHT2D copy = dht.copy();
+    final DoubleDht2D copy = dht.copy();
     copy.initialiseFastMultiply();
 
     // Centre of power spectrum
@@ -169,11 +169,11 @@ public class DoubleDHT2DTest {
 
     for (int y = -1; y <= 1; y++) {
       for (int x = -1; x <= 1; x++) {
-        final DoubleDHT2D dht2 = createData(centre + x, centre + y);
+        final DoubleDht2D dht2 = createData(centre + x, centre + y);
         dht2.transform();
 
-        final DoubleDHT2D correlation = dht2.conjugateMultiply(dht);
-        final DoubleDHT2D correlation2 = dht2.conjugateMultiply(copy);
+        final DoubleDht2D correlation = dht2.conjugateMultiply(dht);
+        final DoubleDht2D correlation2 = dht2.conjugateMultiply(copy);
         Assertions.assertArrayEquals(correlation.getData(), correlation2.getData());
 
         correlation.inverseTransform();
@@ -198,17 +198,17 @@ public class DoubleDHT2DTest {
 
   @Test
   public void canConvertToDFT() {
-    final DoubleDHT2D dht = createData();
+    final DoubleDht2D dht = createData();
     final double[] input = dht.getData().clone();
     dht.transform();
 
-    final DoubleImage2D[] result = dht.toDFT(null, null);
+    final DoubleImage2D[] result = dht.toDft(null, null);
 
     final double rel = 1e-6;
     final double abs = 1e-6;
 
     // Test reverse transform
-    final DoubleDHT2D dht2 = DoubleDHT2D.fromDFT(result[0], result[1], null);
+    final DoubleDht2D dht2 = DoubleDht2D.fromDft(result[0], result[1], null);
 
     final double[] e = dht.getData();
     final double[] o = dht2.getData();
@@ -232,8 +232,8 @@ public class DoubleDHT2DTest {
 
   @Test
   public void canMatchFHT2() {
-    final DoubleDHT2D dht = createData();
-    final DoubleDHT2D dht2 = createData(centre + 1, centre + 1);
+    final DoubleDht2D dht = createData();
+    final DoubleDht2D dht2 = createData(centre + 1, centre + 1);
 
     final float[] pixels = SimpleArrayUtils.toFloat(dht.getData());
     final float[] pixels2 = SimpleArrayUtils.toFloat(dht2.getData());
@@ -264,7 +264,7 @@ public class DoubleDHT2DTest {
     }
   }
 
-  private static void check(String operation, DoubleDHT2D dht, Fht fht, double rel, double abs) {
+  private static void check(String operation, DoubleDht2D dht, Fht fht, double rel, double abs) {
     final float[] e = fht.getData();
     final double[] o = dht.getData();
     check(operation, e, o, rel, abs);

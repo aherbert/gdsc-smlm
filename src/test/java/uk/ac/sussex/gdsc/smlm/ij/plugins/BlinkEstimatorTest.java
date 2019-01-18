@@ -29,8 +29,8 @@ import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.model.ActivationEnergyImageModel;
 import uk.ac.sussex.gdsc.smlm.model.CompoundMoleculeModel;
 import uk.ac.sussex.gdsc.smlm.model.DiffusionType;
@@ -299,7 +299,7 @@ public class BlinkEstimatorTest {
     calibration.setExposureTime(msPerFrame);
     calibration.setCountPerPhoton(1);
     results.setCalibration(calibration.getCalibration());
-    results.setPSF(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
+    results.setPsf(PsfHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
     final float b = 0;
     float intensity;
     final float z = 0;

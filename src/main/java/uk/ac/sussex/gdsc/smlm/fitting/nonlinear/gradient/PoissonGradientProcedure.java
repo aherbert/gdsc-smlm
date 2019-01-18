@@ -42,7 +42,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
   /**
    * The number of gradients.
    */
-  public final int n;
+  public final int numberOfGradients;
 
   /** Working space for the Fisher information matrix (size n * (n + 1) / 2). */
   protected double[] data;
@@ -54,7 +54,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    */
   public PoissonGradientProcedure(final Gradient1Function func) {
     this.func = func;
-    this.n = func.getNumberOfGradients();
+    this.numberOfGradients = func.getNumberOfGradients();
   }
 
   /**
@@ -98,7 +98,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    */
   public void computeFisherInformation(final double[] a) {
     if (data == null) {
-      data = new double[n * (n + 1) / 2];
+      data = new double[numberOfGradients * (numberOfGradients + 1) / 2];
     } else {
       initialiseWorkingMatrix();
     }
@@ -119,7 +119,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
   public void execute(double value, double[] dyDa) {
     if (value > 0.0) {
       final double function = 1.0 / value;
-      for (int j = 0, i = 0; j < n; j++) {
+      for (int j = 0, i = 0; j < numberOfGradients; j++) {
         final double wgt = function * dyDa[j];
         for (int k = 0; k <= j; k++) {
           data[i++] += wgt * dyDa[k];
@@ -148,7 +148,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * @return the alpha
    */
   public double[][] getMatrix() {
-    final double[][] a = new double[n][n];
+    final double[][] a = new double[numberOfGradients][numberOfGradients];
     getMatrix(a);
     return a;
   }
@@ -159,7 +159,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * @param matrix the matrix
    */
   public void getMatrix(double[][] matrix) {
-    GradientProcedureHelper.getMatrix(data, matrix, n);
+    GradientProcedureHelper.getMatrix(data, matrix, numberOfGradients);
   }
 
   /**
@@ -168,7 +168,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * @return the alpha
    */
   public double[] getLinear() {
-    final double[] a = new double[n * n];
+    final double[] a = new double[numberOfGradients * numberOfGradients];
     getLinear(a);
     return a;
   }
@@ -179,7 +179,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * @param matrix the matrix
    */
   public void getLinear(double[] matrix) {
-    GradientProcedureHelper.getMatrix(data, matrix, n);
+    GradientProcedureHelper.getMatrix(data, matrix, numberOfGradients);
   }
 
   /**

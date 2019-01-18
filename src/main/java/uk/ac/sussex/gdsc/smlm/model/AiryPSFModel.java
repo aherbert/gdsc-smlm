@@ -45,7 +45,7 @@ import java.util.Arrays;
  * <p>Out-of-focus regions are computed using a width spreading of the Airy pattern. A true
  * diffraction model for out-of-focus regions is not implemented.
  */
-public class AiryPSFModel extends PSFModel {
+public class AiryPSFModel extends PsfModel {
   private double zeroW0;
   private double zeroW1;
   private double w0;

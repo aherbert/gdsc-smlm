@@ -25,10 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import org.scijava.java3d.Appearance;
-import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.GeometryStripArray;
-import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.IndexedGeometryStripArray;
 import org.scijava.vecmath.Color3f;
@@ -98,8 +96,8 @@ public class ReferenceItemMesh extends ItemMesh {
   }
 
   @Override
-  protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGA) {
-    final GeometryArray ga = createGeometryArray(sourceGA, GeometryArray.BY_REFERENCE);
+  protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGa) {
+    final GeometryArray ga = createGeometryArray(sourceGa, GeometryArray.BY_REFERENCE);
 
     ga.setCoordRefFloat(coords);
     ga.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
@@ -109,12 +107,12 @@ public class ReferenceItemMesh extends ItemMesh {
 
     // Handle indexed array
     if (isIndexGeometryArray()) {
-      final IndexedGeometryArray sourceIGA = (IndexedGeometryArray) sourceGA;
+      final IndexedGeometryArray sourceIga = (IndexedGeometryArray) sourceGa;
       final IndexedGeometryArray iga = (IndexedGeometryArray) ga;
-      final int objectIndexCount = sourceIGA.getValidIndexCount();
+      final int objectIndexCount = sourceIga.getValidIndexCount();
       final int[] objectIndices = new int[objectIndexCount];
       final int[] allIndices = new int[objectIndices.length * points.length];
-      sourceIGA.getCoordinateIndices(0, objectIndices);
+      sourceIga.getCoordinateIndices(0, objectIndices);
       duplicateIndices(objectIndices, allIndices);
       iga.setCoordinateIndices(0, allIndices);
 
@@ -122,13 +120,13 @@ public class ReferenceItemMesh extends ItemMesh {
       if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) == 0) {
         // Duplicate the other indices
         if (hasNormals()) {
-          sourceIGA.getNormalIndices(0, objectIndices);
+          sourceIga.getNormalIndices(0, objectIndices);
           duplicateIndices(objectIndices, allIndices);
           iga.setNormalIndices(0, allIndices);
         }
 
         if (hasColor()) {
-          sourceIGA.getColorIndices(0, objectIndices);
+          sourceIga.getColorIndices(0, objectIndices);
           duplicateIndices(objectIndices, allIndices);
           iga.setColorIndices(0, allIndices);
         }
@@ -138,7 +136,7 @@ public class ReferenceItemMesh extends ItemMesh {
     // Handle normals
     if (hasNormals()) {
       final float[] objectNormals = new float[vertexCount * 3];
-      sourceGA.getNormals(0, objectNormals);
+      sourceGa.getNormals(0, objectNormals);
       final float[] allNormals = new float[objectNormals.length * points.length];
       duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
       ga.setNormalRefFloat(allNormals);
@@ -153,6 +151,7 @@ public class ReferenceItemMesh extends ItemMesh {
     return ga;
   }
 
+  @SuppressWarnings("null")
   @Override
   public void reorderFast(int[] indices) {
     changed = true;
@@ -160,7 +159,7 @@ public class ReferenceItemMesh extends ItemMesh {
     final int oldSize = size();
     final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-    if (size == 0 || indices == null) {
+    if (size == 0) {
       points = new Point3f[0];
       sizes = new Point3f[0];
       this.setGeometry(null);
@@ -182,59 +181,56 @@ public class ReferenceItemMesh extends ItemMesh {
     // The normals, indices, strip counts are are unchanged.
     // int objectSize = vertexCount;
 
-    int n = vertexCount * 3;
+    int countPerObject = vertexCount * 3;
     final float[] oldCoords = ga.getCoordRefFloat();
-    final float[] coords = new float[size * n];
+    final float[] coords = new float[size * countPerObject];
     for (int i = 0; i < size; i++) {
       final int j = indices[i];
-      final int ii = i * n;
-      final int jj = j * n;
-      System.arraycopy(oldCoords, jj, coords, ii, n);
+      final int ii = i * countPerObject;
+      final int jj = j * countPerObject;
+      System.arraycopy(oldCoords, jj, coords, ii, countPerObject);
     }
 
     final float[] colors;
     if (hasColor()) {
-      n = colorUpdater.size();
+      countPerObject = colorUpdater.size();
       final float[] oldColors = ga.getColorRefFloat();
-      colors = new float[size * n];
+      colors = new float[size * countPerObject];
       for (int i = 0; i < size; i++) {
         final int j = indices[i];
-        final int ii = i * n;
-        final int jj = j * n;
-        System.arraycopy(oldColors, jj, colors, ii, n);
+        final int ii = i * countPerObject;
+        final int jj = j * countPerObject;
+        System.arraycopy(oldColors, jj, colors, ii, countPerObject);
       }
     } else {
       colors = null;
     }
 
-    ga.updateData(new GeometryUpdater() {
-      @Override
-      public void updateData(Geometry geometry) {
-        final GeometryArray ga = (GeometryArray) geometry;
-        // We re-use the geometry and just truncate the vertex count
-        ga.setCoordRefFloat(coords);
-        if (colors != null) {
-          ga.setColorRefFloat(colors);
-        }
+    ga.updateData(geometry -> {
+      final GeometryArray ga2 = (GeometryArray) geometry;
+      // We re-use the geometry and just truncate the vertex count
+      ga2.setCoordRefFloat(coords);
+      if (colors != null) {
+        ga2.setColorRefFloat(colors);
+      }
 
-        if (size != oldSize) {
-          if (isIndexGeometryArray()) {
-            if (isStripGeometryArray()) {
-              int[] indices = new int[indexCount * oldSize];
-              ((IndexedGeometryStripArray) ga).getStripIndexCounts(indices);
-              indices = Arrays.copyOf(indices, indexCount * size);
-              ((IndexedGeometryStripArray) ga).setStripIndexCounts(indices);
-            } else {
-              ((IndexedGeometryArray) ga).setValidIndexCount(size * indexCount);
-            }
-          } else if (isStripGeometryArray()) {
-            int[] indices = new int[vertexCount * oldSize];
-            ((GeometryStripArray) ga).getStripVertexCounts(indices);
-            indices = Arrays.copyOf(indices, vertexCount * size);
-            ((GeometryStripArray) ga).setStripVertexCounts(indices);
+      if (size != oldSize) {
+        if (isIndexGeometryArray()) {
+          if (isStripGeometryArray()) {
+            int[] indices2 = new int[indexCount * oldSize];
+            ((IndexedGeometryStripArray) ga2).getStripIndexCounts(indices2);
+            indices2 = Arrays.copyOf(indices2, indexCount * size);
+            ((IndexedGeometryStripArray) ga2).setStripIndexCounts(indices2);
           } else {
-            ga.setValidVertexCount(size * vertexCount);
+            ((IndexedGeometryArray) ga2).setValidIndexCount(size * indexCount);
           }
+        } else if (isStripGeometryArray()) {
+          int[] indices2 = new int[vertexCount * oldSize];
+          ((GeometryStripArray) ga2).getStripVertexCounts(indices2);
+          indices2 = Arrays.copyOf(indices2, vertexCount * size);
+          ((GeometryStripArray) ga2).setStripVertexCounts(indices2);
+        } else {
+          ga2.setValidVertexCount(size * vertexCount);
         }
       }
     });

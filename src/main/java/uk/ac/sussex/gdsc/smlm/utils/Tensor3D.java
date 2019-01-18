@@ -44,21 +44,21 @@ public class Tensor3D {
    * Instantiates a new tensor 3D.
    *
    * @param data the data (series of z slices packed in YX order)
-   * @param w the width
-   * @param h the height
+   * @param width the width
+   * @param height the height
    */
-  public Tensor3D(float[][] data, int w, int h) {
+  public Tensor3D(float[][] data, int width, int height) {
     // Compute centre-of-mass
     double cx = 0;
     double cy = 0;
     double cz = 0;
-    double sumXYZ = 0;
+    double sumXyz = 0;
     for (int z = 0; z < data.length; z++) {
       final float[] d = data[z];
       double sumXy = 0;
-      for (int y = 0, j = 0; y < h; y++) {
+      for (int y = 0, j = 0; y < height; y++) {
         double sumX = 0;
-        for (int x = 0; x < w; x++) {
+        for (int x = 0; x < width; x++) {
           final float f = d[j++];
           sumX += f;
           cx += f * x;
@@ -67,11 +67,11 @@ public class Tensor3D {
         cy += sumX * y;
       }
       cz += sumXy * z;
-      sumXYZ += sumXy;
+      sumXyz += sumXy;
     }
-    cx = cx / sumXYZ;
-    cy = cy / sumXYZ;
-    cz = cz / sumXYZ;
+    cx = cx / sumXyz;
+    cy = cy / sumXyz;
+    cz = cz / sumXyz;
     com = new double[] {cx, cy, cz};
 
     // Compute tensor
@@ -81,13 +81,13 @@ public class Tensor3D {
       final double dz = z - cz;
       final double dz2 = dz * dz;
       final float[] d = data[z];
-      for (int y = 0, j = 0; y < h; y++) {
+      for (int y = 0, j = 0; y < height; y++) {
         final double dy = y - cy;
         final double dy2 = dy * dy;
         double summ = 0;
         double summdx = 0;
         double summdx2 = 0;
-        for (int x = 0; x < w; x++) {
+        for (int x = 0; x < width; x++) {
           final double m = d[j++];
           final double dx = x - cx;
           final double dx2 = dx * dx;
@@ -149,28 +149,26 @@ public class Tensor3D {
    * Vector sorting routine for 3xn set of vectors. On output the weights (and corresponding
    * vectors) will be in descending order.
    *
-   * @param w Vector weights
-   * @param v Vectors
+   * @param wgts Vector weights
+   * @param vectors Vectors
    */
-  private static void sort3xN(double[] w, double[][] v) {
-    int k;
-    int j;
-    int i;
-    double p;
+  private static void sort3xN(double[] wgts, double[][] vectors) {
 
-    for (i = 3; i-- > 0;) {
-      p = w[k = i];
-      for (j = i; j-- > 0;) {
-        if (w[j] <= p) {
-          p = w[k = j];
+    for (int i = 3; i-- > 0;) {
+      int target = i;
+      double max = wgts[i];
+      for (int j = i; j-- > 0;) {
+        if (wgts[j] <= max) {
+          target = j;
+          max = wgts[j];
         }
       }
-      if (k != i) {
-        w[k] = w[i];
-        w[i] = p;
-        final double[] vv = v[k];
-        v[k] = v[i];
-        v[i] = vv;
+      if (target != i) {
+        wgts[target] = wgts[i];
+        wgts[i] = max;
+        final double[] vv = vectors[target];
+        vectors[target] = vectors[i];
+        vectors[i] = vv;
       }
     }
   }

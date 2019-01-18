@@ -57,7 +57,7 @@ public class NullFailCounter implements FailCounter {
   }
 
   @Override
-  public boolean isOK() {
+  public boolean isOk() {
     return true;
   }
 

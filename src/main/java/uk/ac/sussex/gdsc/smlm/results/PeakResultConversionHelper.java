@@ -33,9 +33,9 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -250,7 +250,7 @@ public class PeakResultConversionHelper {
     list.add(distanceConverter);
     if (psf != null) {
       try {
-        for (final PSFParameter p : PSFHelper.getParameters(psf)) {
+        for (final PSFParameter p : PsfHelper.getParameters(psf)) {
           switch (p.getUnit()) {
             case DISTANCE:
               list.add(distanceConverter);
@@ -289,7 +289,7 @@ public class PeakResultConversionHelper {
     list.add("Z");
     if (psf != null) {
       try {
-        for (final PSFParameter p : PSFHelper.getParameters(psf)) {
+        for (final PSFParameter p : PsfHelper.getParameters(psf)) {
           final String name = p.getName();
           list.add(TextUtils.isNullOrEmpty(name) ? "unknown" : name);
         }
@@ -326,7 +326,7 @@ public class PeakResultConversionHelper {
     list.add(safeDistanceUnit);
     if (psf != null) {
       try {
-        for (final PSFParameter p : PSFHelper.getParameters(psf)) {
+        for (final PSFParameter p : PsfHelper.getParameters(psf)) {
           switch (p.getUnit()) {
             case DISTANCE:
               list.add(safeDistanceUnit);

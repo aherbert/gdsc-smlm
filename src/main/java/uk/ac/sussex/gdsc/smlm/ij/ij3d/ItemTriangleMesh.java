@@ -27,13 +27,13 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 import customnode.CustomTriangleMesh;
 
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.TriangleArray;
 import org.scijava.java3d.utils.geometry.GeometryInfo;
@@ -212,15 +212,15 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
   }
 
   @Override
-  public void setCoordinate(final int i, final Point3f p) {
+  public void setCoordinate(final int index, final Point3f point) {
     dirty = true;
-    super.setCoordinate(i, p);
+    super.setCoordinate(index, point);
   }
 
   @Override
-  public void setCoordinates(final int[] indices, final Point3f p) {
+  public void setCoordinates(final int[] indices, final Point3f point) {
     dirty = true;
-    super.setCoordinates(indices, p);
+    super.setCoordinates(indices, point);
   }
 
   @Override
@@ -230,9 +230,9 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
   }
 
   @Override
-  public void addTriangles(Point3f[] v) {
+  public void addTriangles(Point3f[] vertices) {
     dirty = true;
-    super.addTriangles(v);
+    super.addTriangles(vertices);
   }
 
   @Override
@@ -248,21 +248,21 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
   }
 
   @Override
-  protected void addVertices(Point3f[] v) {
+  protected void addVertices(Point3f[] vertices) {
     dirty = true;
-    super.addVertices(v);
+    super.addVertices(vertices);
   }
 
   @Override
-  protected void addVerticesToGeometryArray(Point3f[] v) {
+  protected void addVerticesToGeometryArray(Point3f[] vertices) {
     dirty = true;
-    super.addVerticesToGeometryArray(v);
+    super.addVerticesToGeometryArray(vertices);
   }
 
   @Override
-  protected void addVerticesToGeometryStripArray(Point3f[] v) {
+  protected void addVerticesToGeometryStripArray(Point3f[] vertices) {
     dirty = true;
-    super.addVerticesToGeometryStripArray(v);
+    super.addVerticesToGeometryStripArray(vertices);
   }
 
   @Override
@@ -419,17 +419,10 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
       final double t = a * d + b * e + c * f;
       if (t < 0) {
         count++;
-        swap(vertices, i + 2, i);
+        SimpleArrayUtils.swap(vertices, i + 2, i);
       }
     }
-    // System.out.printf("Swapped %d\n", count);
     return count;
-  }
-
-  private static void swap(Point3f[] vertices, int i, int j) {
-    final Point3f tmp = vertices[i];
-    vertices[i] = vertices[j];
-    vertices[j] = tmp;
   }
 
   /**

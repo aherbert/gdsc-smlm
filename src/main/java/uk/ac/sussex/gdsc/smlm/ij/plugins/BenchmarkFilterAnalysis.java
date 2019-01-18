@@ -45,7 +45,6 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
-import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -141,8 +140,6 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextArea;
 import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -176,6 +173,7 @@ import java.util.logging.Logger;
 public class BenchmarkFilterAnalysis
     implements PlugIn, FitnessFunction<FilterScore>, TrackProgress, FullScoreFunction<FilterScore> {
   private static final String TITLE = "Benchmark Filter Analysis";
+  private static final UniqueIdPeakResult[] EMPTY = new UniqueIdPeakResult[0];
   private static TextWindow resultsWindow;
   private static TextWindow summaryWindow;
   private static TextWindow sensitivityWindow;
@@ -416,6 +414,7 @@ public class BenchmarkFilterAnalysis
    * Used to allow multi-threading of the scoring the fit results.
    */
   private class FitResultsWorker implements Runnable {
+
     volatile boolean finished;
     final BlockingQueue<Job> jobs;
     final List<MultiPathFitResults> results;
@@ -612,10 +611,10 @@ public class BenchmarkFilterAnalysis
           for (int j = 0; j < actual.length; j++) {
             final double d2 = actual[j].distance2(peak.getX(), peak.getY());
             if (d2 <= matchDistance) {
-              double d = Math.sqrt(d2);
+              double dist = Math.sqrt(d2);
 
               // Score ...
-              double score = distanceScore.score(d);
+              double score = distanceScore.score(dist);
               if (score != 0) {
                 final double signalFactor =
                     BenchmarkSpotFit.getSignalFactor(peak.getSignal(), actual[j].getIntensity());
@@ -637,8 +636,8 @@ public class BenchmarkFilterAnalysis
                 }
 
                 // Store distance in nm
-                d *= simulationParameters.a;
-                assignments.add(new CustomResultAssignment(id, distance, score, d, actual[j]));
+                dist *= simulationParameters.pixelPitch;
+                assignments.add(new CustomResultAssignment(id, distance, score, dist, actual[j]));
 
                 // Accumulate for each actual result
                 if (!matched[id]) {
@@ -649,7 +648,7 @@ public class BenchmarkFilterAnalysis
 
                 // Accumulate for all possible matches
                 signalFactorStats.add(signalFactor);
-                distanceStats.add(d);
+                distanceStats.add(dist);
               }
             }
           }
@@ -667,6 +666,12 @@ public class BenchmarkFilterAnalysis
         return (fitResult.results.length != 0);
       }
       return false;
+    }
+
+    private UniqueIdPeakResult[] getCoordinates(TIntObjectHashMap<UniqueIdPeakResult[]> coords,
+        int time) {
+      final UniqueIdPeakResult[] tmp = coords.get(time);
+      return (tmp == null) ? EMPTY : tmp;
     }
   }
 
@@ -1128,7 +1133,7 @@ public class BenchmarkFilterAnalysis
       }
     }
 
-    GUIFilterSettings filterSettings = SettingsManager.readGUIFilterSettings(0);
+    GUIFilterSettings filterSettings = SettingsManager.readGuiFilterSettings(0);
 
     final String filename =
         ImageJUtils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
@@ -1230,11 +1235,11 @@ public class BenchmarkFilterAnalysis
 
     final long[] expanded = new long[filterList.size()];
     final String[] name = new String[expanded.length];
-    int c = 0;
+    int count = 0;
     boolean doIt = false;
     for (final FilterSet filterSet : filterList) {
       if (filterSet.size() == 3 && filterSet.allSameType()) {
-        name[c] = filterSet.getName();
+        name[count] = filterSet.getName();
 
         // Check we have min:max:increment by counting the combinations
         final Filter f1 = filterSet.getFilters().get(0);
@@ -1251,11 +1256,11 @@ public class BenchmarkFilterAnalysis
         }
         final long combinations = countCombinations(parameters, parameters2, increment);
         if (combinations > 1) {
-          expanded[c] = combinations;
+          expanded[count] = combinations;
           doIt = true;
         }
       }
-      c++;
+      count++;
     }
 
     if (!doIt) {
@@ -1266,13 +1271,13 @@ public class BenchmarkFilterAnalysis
     gd.hideCancelButton();
     final StringBuilder sb =
         new StringBuilder("The filter file contains potential triples of min:max:increment.\n \n");
-    for (c = 0; c < expanded.length; c++) {
-      if (expanded[c] > 0) {
-        sb.append("Expand set [").append((c + 1)).append("]");
-        if (!TextUtils.isNullOrEmpty(name[c])) {
-          sb.append(" ").append(name[c]);
+    for (count = 0; count < expanded.length; count++) {
+      if (expanded[count] > 0) {
+        sb.append("Expand set [").append((count + 1)).append("]");
+        if (!TextUtils.isNullOrEmpty(name[count])) {
+          sb.append(" ").append(name[count]);
         }
-        sb.append(" to ").append(expanded[c]).append(" filters\n");
+        sb.append(" to ").append(expanded[count]).append(" filters\n");
       }
     }
     gd.addMessage(sb.toString());
@@ -1288,8 +1293,8 @@ public class BenchmarkFilterAnalysis
 
     final List<FilterSet> filterList2 = new ArrayList<>(filterList.size());
     for (final FilterSet filterSet : filterList) {
-      c = filterList2.size();
-      if (expanded[c] == 0) {
+      count = filterList2.size();
+      if (expanded[count] == 0) {
         filterList2.add(filterSet);
         continue;
       }
@@ -1533,79 +1538,70 @@ public class BenchmarkFilterAnalysis
       maxUniqueId = 0;
       nActual = 0;
 
+      // @formatter:off
       // -=-=-=-
       // The scoring is designed to find the best fitter+filter combination for the given spot
-      // candidates.
-      // The ideal combination would correctly fit+pick all the candidate positions that are close
-      // to a
-      // localisation.
+      // candidates. The ideal combination would correctly fit+pick all the candidate positions
+      // that are close to a localisation.
       //
       // Use the following scoring scheme for all candidates:
       //
-      // Candidates
+      //  Candidates
       // +----------------------------------------+
-      // | Actual matches |
-      // | +-----------+ TN |
-      // | | FN | |
-      // | | +---------- |
-      // | | | TP | | Fitted |
-      // | +-----------+ | spots |
-      // | | FP | |
-      // | +---------+ |
+      // |   Actual matches                       |
+      // |  +-----------+                TN       |
+      // |  |  FN       |                         |
+      // |  |      +----------                    |
+      // |  |      | TP |    | Fitted             |
+      // |  +-----------+    | spots              |
+      // |         |     FP  |                    |
+      // |         +---------+                    |
       // +----------------------------------------+
       //
-      // Candidates = All the spot candidates
+      // Candidates     = All the spot candidates
       // Actual matches = Any spot candidate or fitted spot candidate that matches a localisation
-      // Fitted spots = Any spot candidate that was successfully fitted
+      // Fitted spots   = Any spot candidate that was successfully fitted
       //
       // TP = A spot candidate that was fitted and matches a localisation and is accepted
       // FP = A spot candidate that was fitted but does not match a localisation and is accepted
       // FN = A spot candidate that failed to be fitted but matches a localisation
-      // = A spot candidate that was fitted and matches a localisation and is rejected
+      //    = A spot candidate that was fitted and matches a localisation and is rejected
       // TN = A spot candidate that failed to be fitted and does not match a localisation
-      // = A spot candidate that was fitted and does not match a localisation and is rejected
+      //    = A spot candidate that was fitted and does not match a localisation and is rejected
       //
       // When fitting only produces one result it is possible to compute the TN score.
       // Since unfitted candidates can only be TN or FN we could accumulate these scores and cache
-      // them.
-      // This was the old method of benchmarking single spot fitting and allowed more scores to be
-      // computed.
+      // them. This was the old method of benchmarking single spot fitting and allowed more scores
+      // to be computed.
       //
       // When fitting produces multiple results then we have to score each fit result against all
-      // possible
-      // actual results and keep a record of the scores. These can then be assessed when the
-      // specific
-      // results have been chosen by result filtering.
+      // possible actual results and keep a record of the scores. These can then be assessed when
+      // the specific results have been chosen by result filtering.
       //
       // Using a distance ramped scoring function the degree of match can be varied from 0 to 1.
-      // Using a signal-factor ramped scoring function the degree of fitted can be varied from 0 to
-      // 1.
-      // When using ramped scoring functions the fractional allocation of scores using the above
-      // scheme
-      // is performed, i.e. candidates are treated as if they both match and unmatch. This results
-      // in
-      // an equivalent to multiple analysis using different thresholds and averaging of the scores.
+      // Using a signal-factor ramped scoring function the degree of fitted can be varied from 0
+      // to 1. When using ramped scoring functions the fractional allocation of scores using the
+      // above scheme is performed, i.e. candidates are treated as if they both match and unmatch.
+      // This results in an equivalent to multiple analysis using different thresholds and averaging
+      // of the scores.
       //
       // The totals TP+FP+TN+FN must equal the number of spot candidates. This allows different
-      // fitting
-      // methods to be compared since the total number of candidates is the same.
+      // fitting methods to be compared since the total number of candidates is the same.
       //
-      // Precision = TP / (TP+FP) : This is always valid as a minimum criteria score
-      // Recall = TP / (TP+FN) : This is valid between different fitting methods since a method that
-      // fits more spots will have a potentially lower FN
-      // Jaccard = TP / (TP+FN+FP) : This is valid between fitting methods
+      // Precision = TP / (TP+FP)    : This is always valid as a minimum criteria score
+      // Recall    = TP / (TP+FN)    : This is valid between different fitting methods since a
+      //                               method that fits more spots will have a potentially lower FN
+      // Jaccard   = TP / (TP+FN+FP) : This is valid between fitting methods
       //
       // -=-=-=-
       // As an alternative scoring system, different fitting methods can be compared using the same
-      // TP
-      // value but calculating FN = localisations - TP and FP as Positives - TP. This creates a
-      // score
-      // against the original number of simulated molecules using everything that was passed through
-      // the
-      // filter (Positives). This score is comparable when a different spot candidate filter has
-      // been used
-      // and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
+      // TP value but calculating FN = localisations - TP and FP as Positives - TP. This creates a
+      // score against the original number of simulated molecules using everything that was passed
+      // through the filter (Positives). This score is comparable when a different spot candidate
+      // filter has been used and the total number of candidates is different, e.g. Mean filtering
+      // vs. Gaussian filtering
       // -=-=-=-
+      // @formatter:on
 
       final RampedScore distanceScore =
           new RampedScore(BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0,
@@ -1614,10 +1610,11 @@ public class BenchmarkFilterAnalysis
       distanceInPixels = distanceScore.upper;
       final double matchDistance = distanceInPixels * distanceInPixels;
 
-      resultsPrefix3 = "\t" + MathUtils.rounded(distanceScore.lower * simulationParameters.a) + "\t"
-          + MathUtils.rounded(distanceScore.upper * simulationParameters.a);
-      limitRange = ", d=" + MathUtils.rounded(distanceScore.lower * simulationParameters.a) + "-"
-          + MathUtils.rounded(distanceScore.upper * simulationParameters.a);
+      resultsPrefix3 =
+          "\t" + MathUtils.rounded(distanceScore.lower * simulationParameters.pixelPitch) + "\t"
+              + MathUtils.rounded(distanceScore.upper * simulationParameters.pixelPitch);
+      limitRange = ", d=" + MathUtils.rounded(distanceScore.lower * simulationParameters.pixelPitch)
+          + "-" + MathUtils.rounded(distanceScore.upper * simulationParameters.pixelPitch);
 
       // Signal factor must be greater than 1
       final RampedScore signalScore;
@@ -1660,12 +1657,9 @@ public class BenchmarkFilterAnalysis
       totalProgress = BenchmarkSpotFit.fitResults.size();
       stepProgress = ImageJUtils.getProgressInterval(totalProgress);
       progress = 0;
-      BenchmarkSpotFit.fitResults.forEachEntry(new TIntObjectProcedure<FilterCandidates>() {
-        @Override
-        public boolean execute(int a, FilterCandidates b) {
-          put(jobs, new Job(a, b));
-          return true;
-        }
+      BenchmarkSpotFit.fitResults.forEachEntry((frame, candidates) -> {
+        put(jobs, new Job(frame, candidates));
+        return true;
       });
       // Finish all the worker threads by passing in a null job
       for (int i = 0; i < threads.size(); i++) {
@@ -1722,7 +1716,7 @@ public class BenchmarkFilterAnalysis
     return resultsList;
   }
 
-  private TIntObjectHashMap<UniqueIdPeakResult[]> getCoordinates(MemoryPeakResults results) {
+  private static TIntObjectHashMap<UniqueIdPeakResult[]> getCoordinates(MemoryPeakResults results) {
     final TIntObjectHashMap<UniqueIdPeakResult[]> coords = new TIntObjectHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
@@ -1734,17 +1728,12 @@ public class BenchmarkFilterAnalysis
       final FrameCounter counter = new FrameCounter();
       final TurboList<PeakResult> tmp = new TurboList<>();
       // Add the results to the lists
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult p) {
-          if (counter.advanceAndReset(p.getFrame())) {
-            if (!tmp.isEmpty()) {
-              coords.put(counter.previousFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
-              tmp.clear();
-            }
-          }
-          tmp.add(new UniqueIdPeakResult(tmp.size(), uniqueId.getAndIncrement(), p));
+      results.forEach((PeakResultProcedure) result -> {
+        if (counter.advanceAndReset(result.getFrame()) && !tmp.isEmpty()) {
+          coords.put(counter.previousFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
+          tmp.clear();
         }
+        tmp.add(new UniqueIdPeakResult(tmp.size(), uniqueId.getAndIncrement(), result));
       });
 
       if (!tmp.isEmpty()) {
@@ -1752,14 +1741,6 @@ public class BenchmarkFilterAnalysis
       }
     }
     return coords;
-  }
-
-  private static UniqueIdPeakResult[] EMPTY = new UniqueIdPeakResult[0];
-
-  private static UniqueIdPeakResult[] getCoordinates(TIntObjectHashMap<UniqueIdPeakResult[]> coords,
-      Integer t) {
-    final UniqueIdPeakResult[] tmp = coords.get(t);
-    return (tmp == null) ? EMPTY : tmp;
   }
 
   private static final int FLAG_OPTIMISE_FILTER = 1;
@@ -1812,7 +1793,7 @@ public class BenchmarkFilterAnalysis
     gd.addNumericField("Criteria_limit", criteriaLimit, 4);
     gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
     gd.addMessage(String.format("Fitting match distance = %s nm; signal factor = %s",
-        MathUtils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.a),
+        MathUtils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.pixelPitch),
         MathUtils.rounded(BenchmarkSpotFit.signalFactor)));
     gd.addSlider("Upper_match_distance (%)", 0, 100, upperMatchDistance);
     gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
@@ -1863,16 +1844,19 @@ public class BenchmarkFilterAnalysis
       signal += simulationParameters.maxSignal;
       signal *= 0.5;
     }
-    final double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s,
-        signal, MathUtils.pow2(simulationParameters.noise), simulationParameters.isEMCCD());
-    final double pLSE = Gaussian2DPeakResultHelper.getPrecision(simulationParameters.a,
-        simulationParameters.s, signal, simulationParameters.noise, simulationParameters.isEMCCD());
-    final double pMLE = Gaussian2DPeakResultHelper.getMLPrecision(simulationParameters.a,
-        simulationParameters.s, signal, simulationParameters.noise, simulationParameters.isEMCCD());
+    final double pSignal =
+        CreateData.getPrecisionN(simulationParameters.pixelPitch, simulationParameters.sd, signal,
+            MathUtils.pow2(simulationParameters.noise), simulationParameters.isEmCcd());
+    final double pLse = Gaussian2DPeakResultHelper.getPrecision(simulationParameters.pixelPitch,
+        simulationParameters.sd, signal, simulationParameters.noise,
+        simulationParameters.isEmCcd());
+    final double pMle = Gaussian2DPeakResultHelper.getMLPrecision(simulationParameters.pixelPitch,
+        simulationParameters.sd, signal, simulationParameters.noise,
+        simulationParameters.isEmCcd());
     String msg = String.format(
         "Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\n"
             + "Expected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
-        fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE,
+        fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLse, pMle,
         notDuplicateCount, newResultCount, (100.0 * notDuplicateCount) / newResultCount);
 
     final FilterResult best = getBestResult();
@@ -2175,7 +2159,7 @@ public class BenchmarkFilterAnalysis
     }
     gd.addNumericField("Duplicate_distance", scoreDuplicateDistance, 2);
 
-    gd.addTextAreas(uk.ac.sussex.gdsc.core.utils.XmlUtils.convertQuotes(scoreFilter.toXML()), null,
+    gd.addTextAreas(uk.ac.sussex.gdsc.core.utils.XmlUtils.convertQuotes(scoreFilter.toXml()), null,
         6, 60);
 
     gd.addCheckbox("Reset_filter", false);
@@ -2201,20 +2185,17 @@ public class BenchmarkFilterAnalysis
       final Checkbox cb = (Checkbox) (gd.getCheckboxes().get(0));
       final Vector<TextField> v = gd.getNumericFields();
       final TextArea ta = gd.getTextArea1();
-      cb.addItemListener(new ItemListener() {
-        @Override
-        public void itemStateChanged(ItemEvent event) {
-          if (cb.getState()) {
-            scoreFilter = null;
-            getScoreFilter();
-            int i = 0;
-            v.get(i++).setText(Integer.toString(scoreFailCount));
-            if (BenchmarkSpotFit.computeDoublets) {
-              v.get(i++).setText(Double.toString(scoreResidualsThreshold));
-            }
-            v.get(i++).setText(Double.toString(scoreDuplicateDistance));
-            ta.setText(uk.ac.sussex.gdsc.core.utils.XmlUtils.convertQuotes(scoreFilter.toXML()));
+      cb.addItemListener(event -> {
+        if (cb.getState()) {
+          scoreFilter = null;
+          getScoreFilter();
+          int index = 0;
+          v.get(index++).setText(Integer.toString(scoreFailCount));
+          if (BenchmarkSpotFit.computeDoublets) {
+            v.get(index++).setText(Double.toString(scoreResidualsThreshold));
           }
+          v.get(index++).setText(Double.toString(scoreDuplicateDistance));
+          ta.setText(uk.ac.sussex.gdsc.core.utils.XmlUtils.convertQuotes(scoreFilter.toXml()));
         }
       });
     }
@@ -2233,7 +2214,7 @@ public class BenchmarkFilterAnalysis
 
     final String xml = gd.getNextText();
     try {
-      scoreFilter = (DirectFilter) Filter.fromXML(xml);
+      scoreFilter = (DirectFilter) Filter.fromXml(xml);
     } catch (final Exception ex) {
       scoreFilter = null;
       getScoreFilter();
@@ -2486,8 +2467,8 @@ public class BenchmarkFilterAnalysis
     String topFilterSummary = null;
     if (showSummaryTable || saveTemplate) {
       createSummaryWindow();
-      int n = 0;
-      final double range = (summaryDepth / simulationParameters.a) * 0.5;
+      int count = 0;
+      final double range = (summaryDepth / simulationParameters.pixelPitch) * 0.5;
       int np = 0;
       for (final double depth : depthStats) {
         if (Math.abs(depth) < range) {
@@ -2509,7 +2490,7 @@ public class BenchmarkFilterAnalysis
         // spots.
         int scored = 0;
         double tp = 0;
-        double d = 0;
+        double distance = 0;
         double sf = 0;
         double rmsd = 0;
 
@@ -2523,7 +2504,7 @@ public class BenchmarkFilterAnalysis
             if (Math.abs(c.peak.getZPosition()) <= range) {
               tp += c.getScore();
             }
-            d += c.distToTarget;
+            distance += c.distToTarget;
             sf += c.getSignalFactor();
             rmsd += c.distToTarget * c.distToTarget;
             regression.addData(c.peakResult.getSignal(), c.peak.getIntensity());
@@ -2534,7 +2515,7 @@ public class BenchmarkFilterAnalysis
 
         sb.append('\t');
         sb.append(MathUtils.rounded(tp / np)).append('\t');
-        sb.append(MathUtils.rounded(d / scored)).append('\t');
+        sb.append(MathUtils.rounded(distance / scored)).append('\t');
         sb.append(MathUtils.rounded(sf / scored)).append('\t');
         sb.append(MathUtils.rounded(Math.sqrt(rmsd / scored))).append('\t');
         sb.append(MathUtils.rounded(slope)).append('\t');
@@ -2575,13 +2556,13 @@ public class BenchmarkFilterAnalysis
         } else {
           summaryWindow.append(text);
         }
-        n++;
-        if (summaryTopN > 0 && n >= summaryTopN) {
+        count++;
+        if (summaryTopN > 0 && count >= summaryTopN) {
           break;
         }
       }
       // Add a spacer to the summary table if we have multiple results
-      if (n > 1 && showSummaryTable) {
+      if (count > 1 && showSummaryTable) {
         if (isHeadless) {
           IJ.log("");
         } else {
@@ -2597,8 +2578,7 @@ public class BenchmarkFilterAnalysis
 
     if (topFilterClassificationResult == null) {
       topFilterResults = new ArrayList<>(resultsList.length);
-      topFilterClassificationResult =
-          scoreFilter(bestFilter, minimalFilter, resultsList, topFilterResults, coordinateStore);
+      scoreFilter(bestFilter, minimalFilter, resultsList, topFilterResults, coordinateStore);
     }
     if (newResults || scores.isEmpty()) {
       scores.add(new FilterResult(failCount, residualsThreshold, duplicateDistance,
@@ -2703,7 +2683,7 @@ public class BenchmarkFilterAnalysis
 
     // Display the top N plots
     final int[] list = new int[plots.size()];
-    int i = 0;
+    int index = 0;
     for (final NamedPlot p : plots) {
       final Plot2 plot = new Plot2(p.name, p.xAxisName, COLUMNS[scoreIndex], p.xValues, p.yValues);
       plot.setLimits(p.xValues[0], p.xValues[p.xValues.length - 1], 0, 1);
@@ -2712,7 +2692,7 @@ public class BenchmarkFilterAnalysis
       plot.setColor(Color.BLUE);
       plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
       final PlotWindow plotWindow = ImageJUtils.display(p.name, plot);
-      list[i++] = plotWindow.getImagePlus().getID();
+      list[index++] = plotWindow.getImagePlus().getID();
     }
     WindowOrganiser.tileWindows(list);
   }
@@ -2731,12 +2711,13 @@ public class BenchmarkFilterAnalysis
 
         final DirectFilter filter = bestFilter.get(type).getFilter();
 
-        FractionClassificationResult s =
+        FractionClassificationResult score =
             scoreFilter(filter, minimalFilter, resultsList, coordinateStore);
-        s = getOriginalScore(s);
+        score = getOriginalScore(score);
 
-        final String message = type + "\t\t\t" + MathUtils.rounded(s.getJaccard(), 4) + "\t\t"
-            + MathUtils.rounded(s.getPrecision(), 4) + "\t\t" + MathUtils.rounded(s.getRecall(), 4);
+        final String message = type + "\t\t\t" + MathUtils.rounded(score.getJaccard(), 4) + "\t\t"
+            + MathUtils.rounded(score.getPrecision(), 4) + "\t\t"
+            + MathUtils.rounded(score.getRecall(), 4);
 
         if (isHeadless) {
           IJ.log(message);
@@ -2751,12 +2732,12 @@ public class BenchmarkFilterAnalysis
           final DirectFilter higher = (DirectFilter) filter.adjustParameter(index, delta);
           final DirectFilter lower = (DirectFilter) filter.adjustParameter(index, -delta);
 
-          FractionClassificationResult sHigher =
+          FractionClassificationResult scoreHigher =
               scoreFilter(higher, minimalFilter, resultsList, coordinateStore);
-          sHigher = getOriginalScore(sHigher);
-          FractionClassificationResult sLower =
+          scoreHigher = getOriginalScore(scoreHigher);
+          FractionClassificationResult scoreLower =
               scoreFilter(lower, minimalFilter, resultsList, coordinateStore);
-          sLower = getOriginalScore(sLower);
+          scoreLower = getOriginalScore(scoreLower);
 
           final StringBuilder sb = new StringBuilder();
           sb.append('\t').append(filter.getParameterName(index)).append('\t');
@@ -2764,11 +2745,12 @@ public class BenchmarkFilterAnalysis
 
           final double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
           final double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
-          addSensitivityScore(sb, s.getJaccard(), sHigher.getJaccard(), sLower.getJaccard(), dx1,
-              dx2);
-          addSensitivityScore(sb, s.getPrecision(), sHigher.getPrecision(), sLower.getPrecision(),
-              dx1, dx2);
-          addSensitivityScore(sb, s.getRecall(), sHigher.getRecall(), sLower.getRecall(), dx1, dx2);
+          addSensitivityScore(sb, score.getJaccard(), scoreHigher.getJaccard(),
+              scoreLower.getJaccard(), dx1, dx2);
+          addSensitivityScore(sb, score.getPrecision(), scoreHigher.getPrecision(),
+              scoreLower.getPrecision(), dx1, dx2);
+          addSensitivityScore(sb, score.getRecall(), scoreHigher.getRecall(),
+              scoreLower.getRecall(), dx1, dx2);
 
           if (isHeadless) {
             IJ.log(sb.toString());
@@ -2790,22 +2772,22 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private static void addSensitivityScore(StringBuilder sb, double s, double s1, double s2,
-      double dx1, double dx2) {
+  private static void addSensitivityScore(StringBuilder sb, double score, double score1,
+      double score2, double dx1, double dx2) {
     // Use absolute in case this is not a local maximum. We are mainly interested in how
     // flat the curve is at this point in relation to parameter changes.
     double abs = 0;
     double dydx = 0;
     int count = 0;
     if (dx1 > 0) {
-      final double abs1 = Math.abs(s - s1);
+      final double abs1 = Math.abs(score - score1);
       final double dydx1 = abs1 / dx1;
       abs += abs1;
       dydx += dydx1;
       count++;
     }
     if (dx2 > 0) {
-      final double abs2 = Math.abs(s - s2);
+      final double abs2 = Math.abs(score - score2);
       final double dydx2 = abs2 / dx2;
       abs += abs2;
       dydx += dydx2;
@@ -2859,7 +2841,7 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private void createGAWindow() {
+  private void createGaWindow() {
     if (isHeadless) {
       String header = createResultsHeader(false);
       header += "\tIteration";
@@ -2918,9 +2900,9 @@ public class BenchmarkFilterAnalysis
     sb.append('\t').append(MathUtils.rounded(100.0 * result.criteria / bestFilterScore.criteria));
     sb.append('\t').append(MathUtils.rounded(100.0 * result.score / bestFilterScore.score));
     sb.append('\t').append(filterScore.time);
-    sb.append('\t').append(MathUtils.rounded(filterScore.r2.getPrecision()));
-    sb.append('\t').append(MathUtils.rounded(filterScore.r2.getRecall()));
-    sb.append('\t').append(MathUtils.rounded(filterScore.r2.getJaccard()));
+    sb.append('\t').append(MathUtils.rounded(filterScore.result2.getPrecision()));
+    sb.append('\t').append(MathUtils.rounded(filterScore.result2.getRecall()));
+    sb.append('\t').append(MathUtils.rounded(filterScore.result2.getJaccard()));
     sb.append('\t');
     for (int i = 0; i < filterScore.combinations.length; i++) {
       if (i != 0) {
@@ -3081,10 +3063,10 @@ public class BenchmarkFilterAnalysis
         // for the first evaluation of the optimum. This is done when the input filter
         // set is not a range.
         seed = new double[filterSet.size()][];
-        int c = 0;
+        int count = 0;
         for (final Filter f : filterSet.getFilters()) {
           final double[] point = f.getParameters();
-          seed[c++] = point;
+          seed[count++] = point;
           for (int j = 0; j < lower.length; j++) {
             if (lower[j] > point[j]) {
               lower[j] = point[j];
@@ -3151,18 +3133,18 @@ public class BenchmarkFilterAnalysis
           // Range search uses SearchDimension and we must centre on the optimum after creation.
           for (int i = 0; i < originalDimensions.length; i++) {
             final double centre = p[i];
-            double r = 0;
+            double rangeFactor = 0;
             if (originalDimensions[i].isActive()) {
               // Set the range around the centre.
               // This uses the range for each param when we read the filters.
-              r = range[i];
+              rangeFactor = range[i];
               // Optionally reduce the width of the dimensions.
               if (rangeReduction > 0 && rangeReduction < 1) {
-                r *= rangeReduction;
+                rangeFactor *= rangeReduction;
               }
             }
-            final double lower = centre - r * 0.5;
-            final double upper = centre + r * 0.5;
+            final double lower = centre - rangeFactor * 0.5;
+            final double upper = centre + rangeFactor * 0.5;
             originalDimensions[i] = originalDimensions[i].create(lower, upper);
           }
         }
@@ -3335,7 +3317,7 @@ public class BenchmarkFilterAnalysis
         gaIteration = 0;
         gaPopulation.setTracker(this);
 
-        createGAWindow();
+        createGaWindow();
         resumeFilterTimer();
 
         best = gaPopulation.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
@@ -3512,7 +3494,7 @@ public class BenchmarkFilterAnalysis
           final ConvergenceChecker<FilterScore> checker =
               new InterruptConvergenceChecker(0, 0, maxIterations);
 
-          createGAWindow();
+          createGaWindow();
           resumeFilterTimer();
 
           final SearchResult<FilterScore> optimum =
@@ -3635,7 +3617,7 @@ public class BenchmarkFilterAnalysis
         final ConvergenceChecker<FilterScore> checker =
             new InterruptConvergenceChecker(0, 0, maxIterations, convergedCount);
 
-        createGAWindow();
+        createGaWindow();
         resumeFilterTimer();
 
         final SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker,
@@ -3853,16 +3835,16 @@ public class BenchmarkFilterAnalysis
         final String title = filterSet.getName();
 
         // Check if a previous filter set had the same name, update if necessary
-        NamedPlot p = getNamedPlot(title);
-        if (p == null) {
+        NamedPlot plot = getNamedPlot(title);
+        if (plot == null) {
           plots.add(new NamedPlot(title, xAxisName, xValues, yValues));
         } else {
-          p.updateValues(xAxisName, xValues, yValues);
+          plot.updateValues(xAxisName, xValues, yValues);
         }
 
         if (plots.size() > plotTopN) {
           Collections.sort(plots);
-          p = plots.remove(plots.size() - 1);
+          plot = plots.remove(plots.size() - 1);
         }
       }
     }
@@ -3877,11 +3859,11 @@ public class BenchmarkFilterAnalysis
       if (allowDuplicates) {
         // Duplicate type: create a unique key
         // Start at 2 to show it is the second one of the same type
-        int n = 2;
-        while (bestFilter.containsKey(type + n)) {
-          n++;
+        int count = 2;
+        while (bestFilter.containsKey(type + count)) {
+          count++;
         }
-        type += n;
+        type += count;
         bestFilter.put(type, newFilterScore);
         bestFilterOrder.add(type);
 
@@ -4002,22 +3984,22 @@ public class BenchmarkFilterAnalysis
     final String[] names = {"Fail count", "Residuals threshold", "Duplicate distance"};
 
     {
-      // Local scope for i
-      int i = 0;
+      // Local scope for index
+      int index = 0;
       try {
-        originalDimensions[i++] = new FixedDimension(minFailCount, maxFailCount, 1);
+        originalDimensions[index++] = new FixedDimension(minFailCount, maxFailCount, 1);
         // TODO - let the min intervals be configured, maybe via extra options
         if (BenchmarkSpotFit.computeDoublets) {
-          originalDimensions[i++] =
+          originalDimensions[index++] =
               new FixedDimension(minResidualsThreshold, maxResidualsThreshold, 0.05);
         } else {
-          originalDimensions[i++] = new FixedDimension(1, 1, 0.05);
+          originalDimensions[index++] = new FixedDimension(1, 1, 0.05);
         }
-        originalDimensions[i++] =
+        originalDimensions[index++] =
             new FixedDimension(minDuplicateDistance, maxDuplicateDistance, 0.5);
       } catch (final IllegalArgumentException ex) {
-        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(), i,
-            names[i]);
+        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
+            index, names[index]);
         return null;
       }
     }
@@ -4042,12 +4024,12 @@ public class BenchmarkFilterAnalysis
 
       for (int i = 0; i < originalDimensions.length; i++) {
         final double centre = point[i];
-        double r = 0;
+        double rangeFactor = 0;
         if (originalDimensions[i].isActive()) {
-          r = (originalDimensions[i].max - originalDimensions[i].min) * rangeReduction;
+          rangeFactor = (originalDimensions[i].max - originalDimensions[i].min) * rangeReduction;
         }
-        final double lower = centre - r * 0.5;
-        final double upper = centre + r * 0.5;
+        final double lower = centre - rangeFactor * 0.5;
+        final double upper = centre + rangeFactor * 0.5;
         originalDimensions[i] = originalDimensions[i].create(lower, upper);
       }
     }
@@ -4111,8 +4093,8 @@ public class BenchmarkFilterAnalysis
               // Centre on current optimum
               dimensions[i].setCentre(point[i]);
             } catch (final IllegalArgumentException ex) {
-              IJ.error(TITLE, String.format(
-                  "Unable to configure dimension [%d] %s: " + ex.getMessage(), i, names[i]));
+              IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: %s", i,
+                  names[i], ex.getMessage()));
               return null;
             }
           } else {
@@ -4160,7 +4142,7 @@ public class BenchmarkFilterAnalysis
           final ConvergenceChecker<FilterScore> checker =
               new InterruptConvergenceChecker(0, 0, pMaxIterations);
 
-          createGAWindow();
+          createGaWindow();
           resumeParameterTimer();
 
           optimum = ss.search(dimensions, new ParameterScoreFunction(), checker, myRefinementMode);
@@ -4231,7 +4213,7 @@ public class BenchmarkFilterAnalysis
         final ConvergenceChecker<FilterScore> checker =
             new InterruptConvergenceChecker(0, 0, pMaxIterations, pConvergedCount);
 
-        createGAWindow();
+        createGaWindow();
         resumeParameterTimer();
 
         optimum = ss.enrichmentSearch(dimensions, new ParameterScoreFunction(), checker,
@@ -4297,7 +4279,7 @@ public class BenchmarkFilterAnalysis
         final SearchSpace ss = new SearchSpace();
 
         ss.setTracker(this);
-        createGAWindow();
+        createGaWindow();
         resumeParameterTimer();
 
         optimum = ss.findOptimum(dimensions, new ParameterScoreFunction());
@@ -4322,7 +4304,7 @@ public class BenchmarkFilterAnalysis
     if (coordinateStore == null
         // Due to the scaling factor the distance may not be exactly the same
         || DoubleEquality.relativeError(duplicateDistance,
-            coordinateStore.getXYResolution() / distanceScallingFactor) > 0.01) {
+            coordinateStore.getXyResolution() / distanceScallingFactor) > 0.01) {
       coordinateStore = createCoordinateStore();
     }
     createResultsPrefix2();
@@ -4627,7 +4609,7 @@ public class BenchmarkFilterAnalysis
   private FractionClassificationResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
       MultiPathFitResults[] resultsList, List<FractionalAssignment[]> allAssignments,
       CoordinateStore coordinateStore) {
-    final MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
+    final MultiPathFilter multiPathFilter = createMpf(filter, minFilter);
 
     // multiPathFilter.setDebugFile("/tmp/fractionScoreSubset.txt");
 
@@ -4712,7 +4694,7 @@ public class BenchmarkFilterAnalysis
     return new ParameterScoreResult(score, criteria, parameters, text);
   }
 
-  private MultiPathFilter createMPF(DirectFilter filter, DirectFilter minFilter) {
+  private MultiPathFilter createMpf(DirectFilter filter, DirectFilter minFilter) {
     return new MultiPathFilter(filter, minFilter, residualsThreshold);
   }
 
@@ -4723,7 +4705,7 @@ public class BenchmarkFilterAnalysis
    * @return The score
    */
   private ArrayList<FractionalAssignment[]> getAssignments(DirectFilter filter) {
-    final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+    final MultiPathFilter multiPathFilter = createMpf(filter, minimalFilter);
 
     final ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<>(resultsList.length);
     multiPathFilter.fractionScoreSubset(resultsList, ConsecutiveFailCounter.create(failCount),
@@ -4731,16 +4713,16 @@ public class BenchmarkFilterAnalysis
     return allAssignments;
   }
 
-  private StringBuilder createResult(DirectFilter filter, FractionClassificationResult r) {
-    return createResult(filter, r, resultsPrefix2);
+  private StringBuilder createResult(DirectFilter filter, FractionClassificationResult result) {
+    return createResult(filter, result, resultsPrefix2);
   }
 
-  private StringBuilder createResult(DirectFilter filter, FractionClassificationResult r,
+  private StringBuilder createResult(DirectFilter filter, FractionClassificationResult result,
       String resultsPrefix2) {
     final StringBuilder sb = new StringBuilder(resultsPrefix);
     sb.append(filter.getName()).append(resultsPrefix2).append(resultsPrefix3);
 
-    int i = 0;
+    int index = 0;
 
     // TODO - Fix the scores that we show since we no longer have TN results
     // We could set:
@@ -4752,42 +4734,43 @@ public class BenchmarkFilterAnalysis
 
     // Integer results
     if (requireIntegerResults) {
-      final ClassificationResult r2 = createIntegerResult(r);
-      add(sb, r2.getTruePositives(), i++);
-      add(sb, r2.getFalsePositives(), i++);
-      add(sb, r2.getFalseNegatives(), i++);
-      add(sb, r2.getPrecision(), i++);
-      add(sb, r2.getRecall(), i++);
-      add(sb, r2.getF1Score(), i++);
-      add(sb, r2.getJaccard(), i++);
+      final ClassificationResult r2 = createIntegerResult(result);
+      add(sb, r2.getTruePositives(), index++);
+      add(sb, r2.getFalsePositives(), index++);
+      add(sb, r2.getFalseNegatives(), index++);
+      add(sb, r2.getPrecision(), index++);
+      add(sb, r2.getRecall(), index++);
+      add(sb, r2.getF1Score(), index++);
+      add(sb, r2.getJaccard(), index++);
     } else {
-      i += 7;
+      index += 7;
     }
 
-    addCount(sb, r.getTruePositives(), i++);
-    addCount(sb, r.getFalsePositives(), i++);
-    addCount(sb, r.getFalseNegatives(), i++);
-    add(sb, r.getPrecision(), i++);
-    add(sb, r.getRecall(), i++);
-    add(sb, r.getF1Score(), i++);
-    add(sb, r.getJaccard(), i++);
+    addCount(sb, result.getTruePositives(), index++);
+    addCount(sb, result.getFalsePositives(), index++);
+    addCount(sb, result.getFalseNegatives(), index++);
+    add(sb, result.getPrecision(), index++);
+    add(sb, result.getRecall(), index++);
+    add(sb, result.getF1Score(), index++);
+    add(sb, result.getJaccard(), index);
 
     return sb;
   }
 
-  private static ClassificationResult createIntegerResult(FractionClassificationResult r) {
-    return new ClassificationResult(r.getNumberOfPositives(), r.getNumberOfNegatives(), 0,
-        nActual - r.getNumberOfPositives());
+  private static ClassificationResult createIntegerResult(FractionClassificationResult result) {
+    return new ClassificationResult(result.getNumberOfPositives(), result.getNumberOfNegatives(), 0,
+        nActual - result.getNumberOfPositives());
   }
 
   /**
    * Gets the original score.
    *
-   * @param r the result
+   * @param result the result
    * @return the original score
    */
-  private static FractionClassificationResult getOriginalScore(FractionClassificationResult r) {
-    throw new RuntimeException("fix this");
+  private static FractionClassificationResult
+      getOriginalScore(FractionClassificationResult result) {
+    throw new IllegalStateException("fix this");
 
     // // Score the fitting results against the original simulated data:
     // // TP are all fit results that can be matched to a spot
@@ -4795,9 +4778,9 @@ public class BenchmarkFilterAnalysis
     // // FN are the number of missed spots
     // // Note: We cannot calculate TN since this is the number of fit candidates that are
     // // filtered after fitting that do not match a spot or were not fitted.
-    // final double fp = r.getPositives() - r.getTruePositives();
-    // final double fn = nActual - r.getTruePositives();
-    // return new FractionClassificationResult(r.getTruePositives(), fp, 0, fn);
+    // final double fp = result.getPositives() - result.getTruePositives();
+    // final double fn = nActual - result.getTruePositives();
+    // return new FractionClassificationResult(result.getTruePositives(), fp, 0, fn);
   }
 
   private static void add(StringBuilder sb, int value) {
@@ -4929,7 +4912,7 @@ public class BenchmarkFilterAnalysis
       final TemplateSettings.Builder settings = TemplateSettings.newBuilder();
       getNotes(settings, topFilterSummary);
       settings.setFitEngineSettings(config.getFitEngineSettings());
-      if (!SettingsManager.toJSON(settings.build(), filename, SettingsManager.FLAG_SILENT)) {
+      if (!SettingsManager.toJson(settings.build(), filename, SettingsManager.FLAG_SILENT)) {
         IJ.log("Unable to save the template configuration");
         return;
       }
@@ -5213,10 +5196,10 @@ public class BenchmarkFilterAnalysis
 
     // Convert pixel depth to nm
     for (int i = 0; i < h1[0].length; i++) {
-      h1[0][i] *= simulationParameters.a;
+      h1[0][i] *= simulationParameters.pixelPitch;
     }
-    limits[0] *= simulationParameters.a;
-    limits[1] *= simulationParameters.a;
+    limits[0] *= simulationParameters.pixelPitch;
+    limits[1] *= simulationParameters.pixelPitch;
 
     // Produce a histogram of the number of spots at each depth
     final String title1 = TITLE + " Depth Histogram";
@@ -5356,8 +5339,8 @@ public class BenchmarkFilterAnalysis
 
     double[] limits2;
     if (BenchmarkSpotFit.distanceInPixels > 0 && upperMatchDistance > 0) {
-      final double range =
-          simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
+      final double range = simulationParameters.pixelPitch * BenchmarkSpotFit.distanceInPixels
+          * upperMatchDistance / 100.0;
       limits2 = new double[] {0, range};
     } else {
       limits2 = MathUtils.limits(distance);
@@ -5455,34 +5438,34 @@ public class BenchmarkFilterAnalysis
     final String[] names = getNames(bestFilter);
 
     // Skip disabled parameters
-    int nParams = bestFilter.getNumberOfParameters();
-    final boolean[] enable = new boolean[nParams];
-    final int[] map = new int[nParams];
+    int paramCount = bestFilter.getNumberOfParameters();
+    final boolean[] enable = new boolean[paramCount];
+    final int[] map = new int[paramCount];
     for (int n = 0, i = 0; n < map.length; n++) {
       if (bestFilter.getParameterValue(n) == bestFilter.getDisabledParameterValue(n)) {
         enable[n] = true; // Mark to ignore
-        nParams--;
+        paramCount--;
       } else {
         map[i++] = n;
       }
     }
 
     // Score the best filter just so we have the unique Ids of the results
-    scoreComponents(bestFilter, -1, nParams, null, null, null, 0);
+    scoreComponents(bestFilter, -1, paramCount, null, null, null, 0);
     final int[] uniqueIds1 = uniqueIds;
     final int uniqueIdCount1 = uniqueIdCount;
 
     // Limit to 12 params == 4095 combinations (this is the max for two multi filters combined)
-    if (componentAnalysis >= 3 && nParams <= 12) {
+    if (componentAnalysis >= 3 && paramCount <= 12) {
       // Enumeration of combinations
-      final long count = countComponentCombinations(nParams);
+      final long count = countComponentCombinations(paramCount);
 
       // Enumerate all combinations
       final ComplexFilterScore[] scores = new ComplexFilterScore[(int) count];
-      int j = 0;
+      int index = 0;
 
-      for (int k = 1; k <= nParams; k++) {
-        final Iterator<int[]> it = CombinatoricsUtils.combinationsIterator(nParams, k);
+      for (int k = 1; k <= paramCount; k++) {
+        final Iterator<int[]> it = CombinatoricsUtils.combinationsIterator(paramCount, k);
         while (it.hasNext()) {
           final int[] combinations = it.next();
           final boolean[] enable2 = enable.clone();
@@ -5491,7 +5474,8 @@ public class BenchmarkFilterAnalysis
             enable2[combinations[i]] = true;
           }
           final DirectFilter f = (DirectFilter) bestFilter.create(enable2);
-          scores[j++] = scoreComponents(f, 0, k, combinations, enable2, uniqueIds1, uniqueIdCount1);
+          scores[index++] =
+              scoreComponents(f, 0, k, combinations, enable2, uniqueIds1, uniqueIdCount1);
         }
       }
 
@@ -5566,11 +5550,11 @@ public class BenchmarkFilterAnalysis
     // Progressively add components until all are the same as the input bestFilter
     int enabled = 0;
     int[] previousCombinations = new int[0];
-    for (int ii = 0; ii < nParams; ii++) {
+    for (int ii = 0; ii < paramCount; ii++) {
       // Create a set of filters by enabling each component that is not currently enabled.
-      final ComplexFilterScore[] scores = new ComplexFilterScore[nParams - enabled];
+      final ComplexFilterScore[] scores = new ComplexFilterScore[paramCount - enabled];
       final int k = enabled + 1;
-      for (int i = 0, j = 0; i < nParams; i++) {
+      for (int i = 0, j = 0; i < paramCount; i++) {
         final int n = map[i];
         if (enable[n]) {
           continue;
@@ -5602,13 +5586,13 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private ComplexFilterScore scoreComponents(DirectFilter f, int i, int size, int[] combinations,
-      boolean[] enable, int[] uniqueIds1, int uniqueIdCount1) {
+  private ComplexFilterScore scoreComponents(DirectFilter filter, int index, int size,
+      int[] combinations, boolean[] enable, int[] uniqueIds1, int uniqueIdCount1) {
     setupFractionScoreStore();
 
     // Score them
     long time = System.nanoTime();
-    final FilterScoreResult r = scoreFilter(f);
+    final FilterScoreResult r = scoreFilter(filter);
     time = System.nanoTime() - time;
 
     endFractionScoreStore();
@@ -5654,7 +5638,7 @@ public class BenchmarkFilterAnalysis
     }
 
     // These scores are used when the same filter type so set allSameType to true
-    return new ComplexFilterScore(r, true, i, time, r2, size, combinations, enable);
+    return new ComplexFilterScore(r, true, index, time, r2, size, combinations, enable);
   }
 
   private static String[] getNames(DirectFilter bestFilter) {
@@ -5665,10 +5649,10 @@ public class BenchmarkFilterAnalysis
     for (int n = 0; n < nParams; n++) {
       final String name = bestFilter.getParameterName(n);
       String uniqueName = name;
-      int i = 1;
+      int count = 1;
       // Avoid duplicates
       while (contains(names, n, uniqueName)) {
-        uniqueName = name + (++i);
+        uniqueName = name + (++count);
       }
       names[n] = uniqueName;
     }
@@ -5737,7 +5721,7 @@ public class BenchmarkFilterAnalysis
     static final char CEIL = 'U';
 
     int index;
-    final ClassificationResult r2;
+    final ClassificationResult result2;
     final int size;
     final int[] combinations;
     final boolean[] enable;
@@ -5747,27 +5731,28 @@ public class BenchmarkFilterAnalysis
     String paramAlgorithm;
     long paramTime;
 
-    private ComplexFilterScore(FilterScoreResult r, boolean allSameType, char[] atLimit, int index,
-        long time, ClassificationResult r2, int size, int[] combinations, boolean[] enable) {
-      super(r, allSameType, r.criteria >= minCriteria);
+    private ComplexFilterScore(FilterScoreResult result, boolean allSameType, char[] atLimit,
+        int index, long time, ClassificationResult result2, int size, int[] combinations,
+        boolean[] enable) {
+      super(result, allSameType, result.criteria >= minCriteria);
       this.index = index;
       this.time = time;
-      this.r2 = r2;
+      this.result2 = result2;
       this.size = size;
       this.combinations = combinations;
       this.enable = enable;
       this.atLimit = atLimit;
     }
 
-    public ComplexFilterScore(FilterScoreResult r, boolean allSameType, int index, long time,
-        ClassificationResult r2, int size, int[] combinations, boolean[] enable) {
-      this(r, allSameType, null, index, time, r2, size, combinations, enable);
+    public ComplexFilterScore(FilterScoreResult result, boolean allSameType, int index, long time,
+        ClassificationResult result2, int size, int[] combinations, boolean[] enable) {
+      this(result, allSameType, null, index, time, result2, size, combinations, enable);
     }
 
-    public ComplexFilterScore(FilterScoreResult r, char[] atLimit, String algorithm, long time,
+    public ComplexFilterScore(FilterScoreResult result, char[] atLimit, String algorithm, long time,
         String paramAlgorithm, long paramTime) {
       // This may be used in comparisons of different type so set allSameType to false
-      this(r, false, atLimit, 0, time, null, 0, null, null);
+      this(result, false, atLimit, 0, time, null, 0, null, null);
       this.algorithm = algorithm;
       this.paramAlgorithm = paramAlgorithm;
       this.paramTime = paramTime;
@@ -5777,8 +5762,8 @@ public class BenchmarkFilterAnalysis
       return result.filter;
     }
 
-    public char atLimit(int i) {
-      return atLimit[i];
+    public char atLimit(int index) {
+      return atLimit[index];
     }
 
     public char[] atLimit() {
@@ -5810,8 +5795,8 @@ public class BenchmarkFilterAnalysis
     }
 
     @Override
-    public int compareTo(NamedPlot o) {
-      return Double.compare(o.score, score);
+    public int compareTo(NamedPlot other) {
+      return Double.compare(other.score, score);
     }
   }
 
@@ -6225,7 +6210,7 @@ public class BenchmarkFilterAnalysis
       CoordinateStore coordinateStore2;
 
       // Re-use
-      gridCoordinateStore.changeXYResolution(duplicateDistance * distanceScallingFactor);
+      gridCoordinateStore.changeXyResolution(duplicateDistance * distanceScallingFactor);
       coordinateStore2 = gridCoordinateStore;
 
       // New
@@ -6498,7 +6483,7 @@ public class BenchmarkFilterAnalysis
     if (weakest != null) {
       gaSubset = true;
 
-      gaResultsListToScore = createMPF((DirectFilter) weakest, minimalFilter)
+      gaResultsListToScore = createMpf((DirectFilter) weakest, minimalFilter)
           .filterSubset(gaResultsList, ConsecutiveFailCounter.create(failCount), true);
 
       // MultiPathFilter.resetValidationFlag(ga_resultsListToScore);
@@ -6542,11 +6527,11 @@ public class BenchmarkFilterAnalysis
     return searchSpaceToFilters(null, searchSpace);
   }
 
-  private List<Filter> searchSpaceToFilters(DirectFilter f, double[][] searchSpace) {
-    final int size = ((searchSpace == null) ? 0 : searchSpace.length) + ((f == null) ? 0 : 1);
+  private List<Filter> searchSpaceToFilters(DirectFilter filter, double[][] searchSpace) {
+    final int size = ((searchSpace == null) ? 0 : searchSpace.length) + ((filter == null) ? 0 : 1);
     final ArrayList<Filter> filters = new ArrayList<>(size);
-    if (f != null) {
-      filters.add(f);
+    if (filter != null) {
+      filters.add(filter);
     }
     if (searchSpace != null) {
       for (int i = 0; i < searchSpace.length; i++) {
@@ -7119,7 +7104,7 @@ public class BenchmarkFilterAnalysis
       }
       float[] tx = null;
       float[] ty = null;
-      int t = 0;
+      int count = 0;
       // tp += assignments.length;
       if (showTP) {
         tx = new float[assignments.length];
@@ -7134,12 +7119,12 @@ public class BenchmarkFilterAnalysis
         predicted.add(spot.getUniqueId());
         frame = spot.getFrame();
         if (showTP) {
-          tx[t] = spot.getX();
-          ty[t++] = spot.getY();
+          tx[count] = spot.getX();
+          ty[count++] = spot.getY();
         }
       }
       if (showTP) {
-        SpotFinderPreview.addRoi(frame, o, tx, ty, t, Color.green);
+        SpotFinderPreview.addRoi(frame, o, tx, ty, count, Color.green);
       }
     }
 
@@ -7151,23 +7136,23 @@ public class BenchmarkFilterAnalysis
     // Do FP (all remaining results that are not a TP)
     PreprocessedPeakResult[] filterResults = null;
     if (showFP) {
-      final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+      final MultiPathFilter multiPathFilter = createMpf(filter, minimalFilter);
       // multiPathFilter.setDebugFile("/tmp/filter.txt");
 
       filterResults = filterResults(multiPathFilter);
 
       int frame = 0;
-      int c = 0;
+      int c1 = 0;
       int c2 = 0;
       for (int i = 0; i < filterResults.length; i++) {
         if (frame != filterResults[i].getFrame()) {
-          if (c != 0) {
-            SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
+          if (c1 != 0) {
+            SpotFinderPreview.addRoi(frame, o, x, y, c1, Color.red);
           }
           if (c2 != 0) {
             SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.magenta);
           }
-          c = c2 = 0;
+          c1 = c2 = 0;
         }
         frame = filterResults[i].getFrame();
         if (predicted.contains(filterResults[i].getUniqueId())) {
@@ -7181,17 +7166,17 @@ public class BenchmarkFilterAnalysis
           x2[c2] = filterResults[i].getX();
           y2[c2++] = filterResults[i].getY();
         } else {
-          if (x.length == c) {
-            x = Arrays.copyOf(x, c * 2);
-            y = Arrays.copyOf(y, c * 2);
+          if (x.length == c1) {
+            x = Arrays.copyOf(x, c1 * 2);
+            y = Arrays.copyOf(y, c1 * 2);
           }
-          x[c] = filterResults[i].getX();
-          y[c++] = filterResults[i].getY();
+          x[c1] = filterResults[i].getX();
+          y[c1++] = filterResults[i].getY();
         }
       }
       // fp += c;
-      if (c != 0) {
-        SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
+      if (c1 != 0) {
+        SpotFinderPreview.addRoi(frame, o, x, y, c1, Color.red);
       }
       if (c2 != 0) {
         SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.magenta);
@@ -7218,7 +7203,7 @@ public class BenchmarkFilterAnalysis
       actualCoordinates.forEachEntry(new CustomTIntObjectProcedure(x, y, x2, y2) {
         @Override
         public boolean execute(int frame, UniqueIdPeakResult[] results) {
-          int c = 0;
+          int c1 = 0;
           int c2 = 0;
           if (x.length <= results.length) {
             x = new float[results.length];
@@ -7239,13 +7224,13 @@ public class BenchmarkFilterAnalysis
               x2[c2] = results[i].getXPosition();
               y2[c2++] = results[i].getYPosition();
             } else {
-              x[c] = results[i].getXPosition();
-              y[c++] = results[i].getYPosition();
+              x[c1] = results[i].getXPosition();
+              y[c1++] = results[i].getYPosition();
             }
           }
           // fn += c;
-          if (c != 0) {
-            SpotFinderPreview.addRoi(frame, o, x, y, c, Color.yellow);
+          if (c1 != 0) {
+            SpotFinderPreview.addRoi(frame, o, x, y, c1, Color.yellow);
           }
           if (c2 != 0) {
             SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
@@ -7283,17 +7268,17 @@ public class BenchmarkFilterAnalysis
     final float xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
     final float ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
     final UniqueIdPeakResult[] results2 = new UniqueIdPeakResult[results.length];
-    int j = 0;
+    int count = 0;
     for (int i = 0; i < results.length; i++) {
       final UniqueIdPeakResult p = results[i];
       if (outsideBorder(p, border, xlimit, ylimit)) {
         continue;
       }
-      results2[j++] = p;
+      results2[count++] = p;
     }
-    if (j < results.length) {
+    if (count < results.length) {
       // System.out.printf("Removed %d\n", results.length - j);
-      return Arrays.copyOf(results2, j);
+      return Arrays.copyOf(results2, count);
     }
     return results;
   }
@@ -7301,18 +7286,18 @@ public class BenchmarkFilterAnalysis
   /**
    * Check if the result is outside border.
    *
-   * @param p the result
+   * @param result the result
    * @param border the border
    * @param xlimit the xlimit
    * @param ylimit the ylimit
    * @return true, if outside the border (should be ignored)
    */
-  private static boolean outsideBorder(PeakResult p, final float border, final float xlimit,
+  private static boolean outsideBorder(PeakResult result, final float border, final float xlimit,
       final float ylimit) {
     // Respect the border used in BenchmarkSpotFilter?
     // Just implement a hard border
-    if (p.getXPosition() < border || p.getXPosition() > xlimit || p.getYPosition() < border
-        || p.getYPosition() > ylimit) {
+    if (result.getXPosition() < border || result.getXPosition() > xlimit
+        || result.getYPosition() < border || result.getYPosition() > ylimit) {
       return true;
     }
     return false;
@@ -7321,17 +7306,18 @@ public class BenchmarkFilterAnalysis
   /**
    * Check if the result is outside border.
    *
-   * @param p the result
+   * @param result the result
    * @param border the border
    * @param xlimit the xlimit
    * @param ylimit the ylimit
    * @return true, if outside the border (should be ignored)
    */
-  private static boolean outsideBorder(BasePreprocessedPeakResult p, final float border,
+  private static boolean outsideBorder(BasePreprocessedPeakResult result, final float border,
       final float xlimit, final float ylimit) {
     // Respect the border used in BenchmarkSpotFilter?
     // Just implement a hard border
-    if (p.getX() < border || p.getX() > xlimit || p.getY() < border || p.getY() > ylimit) {
+    if (result.getX() < border || result.getX() > xlimit || result.getY() < border
+        || result.getY() > ylimit) {
       return true;
     }
     return false;
@@ -7357,7 +7343,7 @@ public class BenchmarkFilterAnalysis
   private MemoryPeakResults createResults(PreprocessedPeakResult[] filterResults,
       DirectFilter filter, boolean withBorder) {
     if (filterResults == null) {
-      final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+      final MultiPathFilter multiPathFilter = createMpf(filter, minimalFilter);
       // multiPathFilter.setDebugFile("/tmp/filter.txt");
       filterResults = filterResults(multiPathFilter);
     }
@@ -7443,7 +7429,7 @@ public class BenchmarkFilterAnalysis
         distanceScallingFactor = 1;
       } else {
         // The duplicate distance is scaled
-        distanceScallingFactor = BenchmarkSpotFit.config.getHWHMMax();
+        distanceScallingFactor = BenchmarkSpotFit.config.getHwhmMax();
       }
 
       final ImagePlus imp = CreateData.getImage();

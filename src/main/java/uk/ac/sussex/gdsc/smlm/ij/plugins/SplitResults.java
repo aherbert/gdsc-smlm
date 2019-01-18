@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.ij.utils.ObjectAnalyzer;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -139,9 +139,9 @@ public class SplitResults implements PlugIn {
     final Counter i = new Counter();
     final int size = results.size();
     final int step = ImageJUtils.getProgressInterval(size);
-    results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
+    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
       @Override
-      public void executeXYR(float xx, float yy, PeakResult result) {
+      public void executeXyr(float xx, float yy, PeakResult result) {
         if (i.incrementAndGet() % step == 0) {
           IJ.showProgress(i.getCount(), size);
         }

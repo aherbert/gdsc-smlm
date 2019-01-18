@@ -44,8 +44,8 @@ public class CombinedOrFailCounter extends CombinedFailCounter {
   }
 
   @Override
-  public boolean isOK() {
-    return c1.isOK() || c2.isOK();
+  public boolean isOk() {
+    return c1.isOk() || c2.isOk();
   }
 
   @Override

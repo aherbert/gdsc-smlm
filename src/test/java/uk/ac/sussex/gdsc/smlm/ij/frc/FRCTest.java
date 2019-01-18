@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
@@ -77,7 +77,7 @@ public class FRCTest {
       final double a = i * delta;
       final double cosA = Math.cos(a);
       final double e = Math.sin(a);
-      final double o = FRC.getSine(a, cosA);
+      final double o = Frc.getSine(a, cosA);
       // logger.fine(FunctionUtils.getSupplier("%f %f ?= %f", a, e, o);
       Assertions.assertTrue(DoubleEquality.almostEqualRelativeOrAbsolute(o, e, 1e-6, 1e-10));
     }
@@ -96,12 +96,12 @@ public class FRCTest {
     }
     // Create 2 images
     final Rectangle bounds = new Rectangle(0, 0, size, size);
-    IJImagePeakResults i1 = createImage(bounds);
-    IJImagePeakResults i2 = createImage(bounds);
+    ImageJImagePeakResults i1 = createImage(bounds);
+    ImageJImagePeakResults i2 = createImage(bounds);
     final int[] indices = SimpleArrayUtils.natural(data.length);
     PermutationSampler.shuffle(r, indices);
     for (final int i : indices) {
-      final IJImagePeakResults image = i1;
+      final ImageJImagePeakResults image = i1;
       i1 = i2;
       i2 = image;
       image.add((float) data[i][0], (float) data[i][1], 1);
@@ -111,11 +111,11 @@ public class FRCTest {
     final ImageProcessor ip1 = i1.getImagePlus().getProcessor();
     final ImageProcessor ip2 = i2.getImagePlus().getProcessor();
     // Test
-    final FRC frc = new FRC();
+    final Frc frc = new Frc();
     FloatProcessor[] fft1;
     FloatProcessor[] fft2;
-    fft1 = frc.getComplexFFT(ip1);
-    fft2 = frc.getComplexFFT(ip2);
+    fft1 = frc.getComplexFft(ip1);
+    fft2 = frc.getComplexFft(ip2);
 
     final float[] dataA1 = (float[]) fft1[0].getPixels();
     final float[] dataB1 = (float[]) fft1[1].getPixels();
@@ -126,7 +126,7 @@ public class FRCTest {
     final float[] absFFT1E = new float[dataA1.length];
     final float[] absFFT2E = new float[dataA1.length];
 
-    FRC.compute(numeratorE, absFFT1E, absFFT2E, dataA1, dataB1, dataA2, dataB2);
+    Frc.compute(numeratorE, absFFT1E, absFFT2E, dataA1, dataB1, dataA2, dataB2);
 
     Assertions.assertTrue(checkSymmetry(numeratorE, size), "numeratorE");
     Assertions.assertTrue(checkSymmetry(absFFT1E, size), "absFFT1E");
@@ -135,7 +135,7 @@ public class FRCTest {
     final float[] numeratorA = new float[dataA1.length];
     final float[] absFFT1A = new float[dataA1.length];
     final float[] absFFT2A = new float[dataA1.length];
-    FRC.computeMirrored(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
+    Frc.computeMirrored(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
 
     // for (int y=0, i=0; y<size; y++)
     // for (int x=0; x<size; x++, i++)
@@ -148,7 +148,7 @@ public class FRCTest {
     Assertions.assertArrayEquals(absFFT1E, absFFT1A, "absFFT1");
     Assertions.assertArrayEquals(absFFT2E, absFFT2A, "absFFT2");
 
-    FRC.computeMirroredFast(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
+    Frc.computeMirroredFast(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
 
     // Check this.
     for (int y = 1; y < size; y++) {
@@ -160,8 +160,8 @@ public class FRCTest {
     }
   }
 
-  private static IJImagePeakResults createImage(Rectangle bounds) {
-    final IJImagePeakResults i1 = new IJImagePeakResults("1", bounds, 1);
+  private static ImageJImagePeakResults createImage(Rectangle bounds) {
+    final ImageJImagePeakResults i1 = new ImageJImagePeakResults("1", bounds, 1);
     i1.setDisplayImage(false);
     i1.begin();
     return i1;
@@ -248,7 +248,7 @@ public class FRCTest {
       public Object run(Object data) {
         double value = 0;
         for (int i = 0; i < angle.length; i++) {
-          value += FRC.getSine(angle[i], cosAngle[i]);
+          value += Frc.getSine(angle[i], cosAngle[i]);
         }
         return value;
       }
@@ -279,12 +279,12 @@ public class FRCTest {
     }
     // Create 2 images
     final Rectangle bounds = new Rectangle(0, 0, N, N);
-    IJImagePeakResults i1 = createImage(bounds);
-    IJImagePeakResults i2 = createImage(bounds);
+    ImageJImagePeakResults i1 = createImage(bounds);
+    ImageJImagePeakResults i2 = createImage(bounds);
     final int[] indices = SimpleArrayUtils.natural(data.length);
     PermutationSampler.shuffle(r, indices);
     for (final int i : indices) {
-      final IJImagePeakResults image = i1;
+      final ImageJImagePeakResults image = i1;
       i1 = i2;
       i2 = image;
       image.add((float) data[i][0], (float) data[i][1], 1);
@@ -294,11 +294,11 @@ public class FRCTest {
     final ImageProcessor ip1 = i1.getImagePlus().getProcessor();
     final ImageProcessor ip2 = i2.getImagePlus().getProcessor();
     // Test
-    final FRC frc = new FRC();
+    final Frc frc = new Frc();
     FloatProcessor[] fft1;
     FloatProcessor[] fft2;
-    fft1 = frc.getComplexFFT(ip1);
-    fft2 = frc.getComplexFFT(ip2);
+    fft1 = frc.getComplexFft(ip1);
+    fft2 = frc.getComplexFft(ip2);
 
     final float[] dataA1 = (float[]) fft1[0].getPixels();
     final float[] dataB1 = (float[]) fft1[1].getPixels();
@@ -313,21 +313,21 @@ public class FRCTest {
     ts.execute(new MyTimingTask("compute") {
       @Override
       public Object run(Object data) {
-        FRC.compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+        Frc.compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
         return null;
       }
     });
     ts.execute(new MyTimingTask("computeMirrored") {
       @Override
       public Object run(Object data) {
-        FRC.computeMirrored(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+        Frc.computeMirrored(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
         return null;
       }
     });
     ts.execute(new MyTimingTask("computeMirroredFast") {
       @Override
       public Object run(Object data) {
-        FRC.computeMirroredFast(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+        Frc.computeMirroredFast(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
         return null;
       }
     });

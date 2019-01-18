@@ -87,7 +87,7 @@ public interface PreprocessedPeakResult {
    *
    * @return The SNR
    */
-  default float getSNR() {
+  default float getSnr() {
     return getMeanSignal() / getNoise();
   }
 
@@ -119,14 +119,14 @@ public interface PreprocessedPeakResult {
    *
    * @return The location variance in nm
    */
-  double getLocationVarianceCRLB();
+  double getLocationVarianceCrlb();
 
   /**
    * Gets the average peak standard deviation in the X and Y dimension.
    *
    * @return The average peak standard deviation in the X and Y dimension.
    */
-  float getSD();
+  float getSd();
 
   /**
    * Gets the background.
@@ -191,14 +191,14 @@ public interface PreprocessedPeakResult {
    *
    * @return The x-dimension standard deviation.
    */
-  float getXSD();
+  float getXSd();
 
   /**
    * Gets the y-dimension standard deviation.
    *
    * @return The y-dimension standard deviation.
    */
-  float getYSD();
+  float getYSd();
 
   /**
    * Return the ratio between the initial and the final x-dimension standard deviation, i.e. how
@@ -206,7 +206,7 @@ public interface PreprocessedPeakResult {
    *
    * @return The x-dimension width factor
    */
-  float getXSDFactor();
+  float getXSdFactor();
 
   /**
    * Return the ratio between the initial and the final y-dimension standard deviation, i.e. how
@@ -214,7 +214,7 @@ public interface PreprocessedPeakResult {
    *
    * @return The y-dimension width factor
    */
-  float getYSDFactor();
+  float getYSdFactor();
 
   /**
    * Return true if this is a result that has previously been fitted.

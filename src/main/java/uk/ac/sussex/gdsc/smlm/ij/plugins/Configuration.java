@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
@@ -237,7 +237,7 @@ public class Configuration
     calibrationWriter.setNmPerPixel(gd.getNextNumber());
     calibrationWriter.setExposureTime(gd.getNextNumber());
     fitConfig.setCalibration(calibrationWriter.getCalibration());
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
     config.setSearch(gd.getNextNumber());
@@ -269,10 +269,10 @@ public class Configuration
     try {
       Parameters.isAboveZero("nm per pixel", calibrationWriter.getNmPerPixel());
       Parameters.isAboveZero("Exposure time", calibrationWriter.getExposureTime());
-      if (fitConfig.getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
-        Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
-        if (fitConfig.getPSF().getParametersCount() > 1) {
-          Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+      if (fitConfig.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
+        Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
+        if (fitConfig.getPsf().getParametersCount() > 1) {
+          Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
         }
       }
       Parameters.isAboveZero("Search_width", config.getSearch());
@@ -335,7 +335,7 @@ public class Configuration
           settings.setCalibration(fitConfig.getCalibration());
           settings.setFitEngineSettings(config.getFitEngineSettings());
           // Note: No results settings are currently supported
-          settings.setPsf(fitConfig.getPSF());
+          settings.setPsf(fitConfig.getPsf());
           if (!ConfigurationTemplate.saveTemplate(name, settings.build(), file)) {
             IJ.error(TITLE, "Failed to save to file: " + templateFilename);
           }
@@ -458,9 +458,9 @@ public class Configuration
     }
 
     // Do not use set() as we support merging a partial PSF
-    fitConfig.mergePSF(psf);
+    fitConfig.mergePsf(psf);
 
-    textPSF.select(PSFProtosHelper.getName(fitConfig.getPSFType()));
+    textPSF.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }
 
   /**

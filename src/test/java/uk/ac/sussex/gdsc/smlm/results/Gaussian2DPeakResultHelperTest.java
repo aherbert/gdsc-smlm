@@ -28,9 +28,9 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -226,7 +226,7 @@ public class Gaussian2DPeakResultHelperTest {
             f.initialise0(params);
             final double e = f.eval(0);
 
-            final PSF psf = PSFHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D);
+            final PSF psf = PsfHelper.create(PSFType.TWO_AXIS_GAUSSIAN_2D);
             final CalibrationWriter calibration = new CalibrationWriter();
             calibration.setCountPerPhoton(1);
             calibration.setIntensityUnit(IntensityUnit.PHOTON);

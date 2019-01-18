@@ -47,7 +47,7 @@ public class NullCoordinateStore implements CoordinateStore {
   }
 
   @Override
-  public double getXYResolution() {
+  public double getXyResolution() {
     return 0;
   }
 

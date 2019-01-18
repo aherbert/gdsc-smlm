@@ -58,7 +58,7 @@ public class GridCoordinateStore1 extends GridCoordinateStore {
 
   @Override
   public GridCoordinateStore newInstance(int minx, int miny, int width, int height) {
-    return new GridCoordinateStore1(minx, miny, width, height, getXYResolution(), getZResolution());
+    return new GridCoordinateStore1(minx, miny, width, height, getXyResolution(), getZResolution());
   }
 
   @Override
@@ -68,8 +68,8 @@ public class GridCoordinateStore1 extends GridCoordinateStore {
   }
 
   @Override
-  public void changeXYResolution(double xyResolution) {
+  public void changeXyResolution(double xyResolution) {
     checkResolution(xyResolution);
-    super.changeXYResolution(xyResolution);
+    super.changeXyResolution(xyResolution);
   }
 }

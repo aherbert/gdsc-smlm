@@ -157,14 +157,14 @@ public interface PeakResults {
    *
    * @return the PSF
    */
-  PSF getPSF();
+  PSF getPsf();
 
   /**
    * Sets the Point Spread Function (PSF) used when fitting the results.
    *
    * @param psf the new PSF
    */
-  void setPSF(PSF psf);
+  void setPsf(PSF psf);
 
   /**
    * Sets the configuration used to obtain the results.

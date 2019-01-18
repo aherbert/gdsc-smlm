@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
 import uk.ac.sussex.gdsc.core.utils.FloatMedianWindow;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -221,7 +221,8 @@ public class MedianFilter implements PlugInFilter {
     public void run() {
       showProgressSingle();
 
-      final float[] data = imageStack[n - 1] = IJImageConverter.getData(inputStack.getProcessor(n));
+      final float[] data =
+          imageStack[n - 1] = ImageJImageConverter.getData(inputStack.getProcessor(n));
       double sum = 0;
       for (final float f : data) {
         sum += f;
@@ -445,7 +446,7 @@ public class MedianFilter implements PlugInFilter {
     public void run() {
       showProgressSingle();
 
-      final float[] data = IJImageConverter.getData(inputStack.getProcessor(n));
+      final float[] data = ImageJImageConverter.getData(inputStack.getProcessor(n));
       final float[] filter = imageStack[n - 1];
       final float b = bias;
       for (int i = 0; i < data.length; i++) {

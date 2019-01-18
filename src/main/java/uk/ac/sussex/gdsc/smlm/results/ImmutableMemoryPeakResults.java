@@ -98,11 +98,11 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   }
 
   @Override
-  public void setPSF(PSF psf) {
+  public void setPsf(PSF psf) {
     if (built) {
       throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
     }
-    super.setPSF(psf);
+    super.setPsf(psf);
   }
 
   @Override

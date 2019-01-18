@@ -24,14 +24,24 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
 import java.awt.Rectangle;
 
 /**
  * Computes a Gaussian convolution in the spatial domain for each point within the array.
  *
- * <p>Adapted from ij.plugin.filter.GaussianBlur
+ * <p>Adapted from {@link ij.plugin.filter.GaussianBlur}.
+ *
+ * <p>This is identical to the {@link GaussianFilter} but the {@code float} data is converted to
+ * {@code double} for processing.
  */
 public class DoubleGaussianFilter extends BaseWeightedFilter {
+  /** number of pixels to add for upscaling. */
+  private static final int UPSCALE_K_RADIUS = 2;
+  /** minimum standard deviation in the downscaled image. */
+  private static final double MIN_DOWNSCALED_SIGMA = 4.;
+
   private final double accuracy;
 
   private double lastSigma;
@@ -72,10 +82,10 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   /**
    * Instantiates a new double gaussian filter.
    *
-   * <p>Use the default accuracy of 0.02.
+   * <p>Use the default accuracy of {@value GaussianFilter#DEFAULT_ACCURACY}.
    */
   public DoubleGaussianFilter() {
-    this(0.02);
+    this(GaussianFilter.DEFAULT_ACCURACY);
   }
 
   /**
@@ -123,7 +133,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    * Compute the Gaussian convolution. Pixels within border regions (defined by 3 sigma) are
    * unchanged.
    *
-   * <p>Note: the input data is destructively modified
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -153,7 +163,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   /**
    * Compute the Gaussian convolution.
    *
-   * <p>Note: the input data is destructively modified
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -168,7 +178,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   /**
    * Compute the Gaussian convolution.
    *
-   * <p>Note: the input data is destructively modified
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -244,8 +254,6 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    */
   private void blur1Direction(final double[] pixels, Rectangle roi, final int width,
       final int height, final double sigma, final boolean xDirection, final int extraLines) {
-    final int UPSCALE_K_RADIUS = 2; // number of pixels to add for upscaling
-    final double MIN_DOWNSCALED_SIGMA = 4.; // minimum standard deviation in the downscaled image
     // number of points per line (line can be a row or column)
     final int length = xDirection ? width : height;
     // increment of the pixels array index to the next point in a line
@@ -313,7 +321,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
       if (doDownscaling) {
         downscaleLine(pixels, cache1, downscaleKernel, reduceBy, pixel0, unscaled0, length,
             pointInc, newLength);
-        convolveLine(cache1, cache2, gaussKernel, 0, newLength, 1, newLength - 1, 0, 1);
+        convolveLine(cache1, cache2, gaussKernel, 1, newLength - 1, 0, 1);
         upscaleLine(cache2, pixels, upscaleKernel, reduceBy, pixel0, unscaled0, writeFrom, writeTo,
             pointInc);
       } else {
@@ -321,8 +329,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
         for (int i = readFrom; i < readTo; i++, pi += pointInc) {
           cache1[i] = pixels[pi];
         }
-        convolveLine(cache1, pixels, gaussKernel, readFrom, readTo, writeFrom, writeTo, pixel0,
-            pointInc);
+        convolveLine(cache1, pixels, gaussKernel, writeFrom, writeTo, pixel0, pointInc);
       }
     }
   }
@@ -361,7 +368,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
       double sum1 = 0;
       double sum2 = 0;
       for (int x = 0; x < reduceBy; x++, pi += pointInc) {
-        final double v = pixels[pi < pixel0 ? pixel0 : (pi > pLast ? pLast : pi)];
+        final double v = pixels[MathUtils.clip(pixel0, pLast, pi)];
         sum0 += v * kernel[x + 2 * reduceBy];
         sum1 += v * kernel[x + reduceBy];
         sum2 += v * kernel[x];
@@ -432,7 +439,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
     kernel[0] = 0;
     for (int i = 0; i < unitLength; i++) {
       final double x = i / (double) unitLength;
-      final double v = ((2. / 3. - x * x * (1 - 0.5 * x)));
+      final double v = (2. / 3. - x * x * (1 - 0.5 * x));
       kernel[mid + i] = v;
       kernel[mid - i] = v;
     }
@@ -467,8 +474,8 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    *        it should be <code>1</code> for a row, <code>width</code> for a column)
    */
   private static final void convolveLine(final double[] input, final double[] pixels,
-      final double[][] kernel, final int readFrom, final int readTo, final int writeFrom,
-      final int writeTo, final int point0, final int pointInc) {
+      final double[][] kernel, final int writeFrom, final int writeTo, final int point0,
+      final int pointInc) {
     final int length = input.length;
     final double first = input[0]; // out-of-edge pixels are replaced by nearest edge pixels
     final double last = input[length - 1];

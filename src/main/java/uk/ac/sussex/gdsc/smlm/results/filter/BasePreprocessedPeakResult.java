@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -52,7 +53,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   private final float snr;
   private final float noise;
   private final float sd;
-  private final float b;
+  private final float background;
   private final float amp;
   private final float angle;
   private final float x;
@@ -66,7 +67,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   private final float ywf;
   private final double variance;
   private final double variance2;
-  private final double varianceCRLB;
+  private final double varianceCrlb;
   private final boolean existingResult;
   private final boolean newResult;
 
@@ -99,7 +100,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
    *            the mean signal
    * @param noise
    *            the noise estimate
-   * @param b
+   * @param background
    *            The background level (in photons)
    * @param angle
    *            The angle of the fit
@@ -137,7 +138,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
       double signal,
       double meanSignal,
       double noise,
-      double b,
+      double background,
       double angle,
       double x,
       double y,
@@ -163,7 +164,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
     this.snr = (float) (signal / noise);
     this.noise = (float) (noise);
     this.sd = (float) (Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd));
-    this.b = (float) (b);
+    this.background = (float) (background);
     this.amp = (float) (signal / (2 * Math.PI * xsd * ysd));
     this.angle = (float) (angle);
     this.x = (float) (x);
@@ -177,13 +178,13 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
     this.ywf = (float) (ysd / ysd0);
     this.variance = variance;
     this.variance2 = variance2;
-    this.varianceCRLB = varianceCRLB;
+    this.varianceCrlb = varianceCRLB;
     this.existingResult = resultType == ResultType.EXISTING;
     this.newResult = resultType == ResultType.NEW;
   }
 
-  private static float squared(double f) {
-    return (float) (f * f);
+  private static float squared(double value) {
+    return (float) (value * value);
   }
 
   @Override
@@ -217,7 +218,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   }
 
   @Override
-  public float getSNR() {
+  public float getSnr() {
     return snr;
   }
 
@@ -237,18 +238,18 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   }
 
   @Override
-  public double getLocationVarianceCRLB() {
-    return varianceCRLB;
+  public double getLocationVarianceCrlb() {
+    return varianceCrlb;
   }
 
   @Override
-  public float getSD() {
+  public float getSd() {
     return sd;
   }
 
   @Override
   public float getBackground() {
-    return b;
+    return background;
   }
 
   @Override
@@ -287,22 +288,22 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   }
 
   @Override
-  public float getXSD() {
+  public float getXSd() {
     return xsd;
   }
 
   @Override
-  public float getYSD() {
+  public float getYSd() {
     return ysd;
   }
 
   @Override
-  public float getXSDFactor() {
+  public float getXSdFactor() {
     return xwf;
   }
 
   @Override
-  public float getYSDFactor() {
+  public float getYSdFactor() {
     return ywf;
   }
 
@@ -325,7 +326,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
    * @return the assignments
    */
   @Override
-  public FractionalAssignment[] getAssignments(final int predictedId) {
+  public @Nullable FractionalAssignment[] getAssignments(final int predictedId) {
     if (assignments == null || assignments.length == 0) {
       return null;
     }
@@ -370,7 +371,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   @Override
   public double[] toGaussian2DParameters() {
     final double[] p = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-    p[Gaussian2DFunction.BACKGROUND] = b;
+    p[Gaussian2DFunction.BACKGROUND] = background;
     p[Gaussian2DFunction.SIGNAL] = signal;
     p[Gaussian2DFunction.X_POSITION] = x;
     p[Gaussian2DFunction.Y_POSITION] = y;

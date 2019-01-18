@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 // ProtoBuffer description file for testing
-// Authors: Alex Herbert, 2017 
+// Authors: Alex Herbert, 2017
 // License: GPL V3
 package uk.ac.sussex.gdsc.smlm.data.config;
 

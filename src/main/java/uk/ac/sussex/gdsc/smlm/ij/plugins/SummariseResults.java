@@ -43,7 +43,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.SNRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.SnrResultProcedure;
 
 import ij.IJ;
 import ij.gui.GenericDialog;
@@ -171,8 +171,8 @@ public class SummariseResults implements PlugIn, MouseListener {
 
       // SNR
       try {
-        final SNRResultProcedure p = new SNRResultProcedure(result);
-        p.getSNR();
+        final SnrResultProcedure p = new SnrResultProcedure(result);
+        p.getSnr();
         for (final double v : p.snr) {
           stats[1].addValue(v);
         }
@@ -215,7 +215,7 @@ public class SummariseResults implements PlugIn, MouseListener {
       if (calibration.hasCameraType())
       {
         sb.append('\t').append(CalibrationProtosHelper.getName(calibration.getCameraType()));
-        if (calibration.isCCDCamera())
+        if (calibration.isCcdCamera())
         {
           sb.append(" bias=").append(calibration.getBias());
           sb.append(" gain=").append(calibration.getCountPerPhoton());
@@ -341,7 +341,7 @@ public class SummariseResults implements PlugIn, MouseListener {
     if ((settings.getPlotNoise() || settings.getPlotSnr()) && result.hasNoise()) {
       if (settings.getPlotSnr()) {
         try {
-          plot(wo, "SNR", new SNRResultProcedure(result).getSNR());
+          plot(wo, "SNR", new SnrResultProcedure(result).getSnr());
         } catch (final DataException ex) {
           // Ignore
         }

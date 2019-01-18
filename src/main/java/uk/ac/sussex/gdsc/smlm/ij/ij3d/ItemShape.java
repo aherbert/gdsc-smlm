@@ -41,10 +41,10 @@ public interface ItemShape {
   /**
    * Gets the coordinate of the specified item.
    *
-   * @param i the index
+   * @param index the index
    * @return the coordinate
    */
-  Point3f getCoordinate(int i);
+  Point3f getCoordinate(int index);
 
   /**
    * Sets the color for each item.

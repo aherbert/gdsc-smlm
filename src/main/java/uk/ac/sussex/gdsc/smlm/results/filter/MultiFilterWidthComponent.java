@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Width. Assumes XY width are the same.
  */
-public class MultiFilterWidthComponent extends MultiFilterComponent {
+public class MultiFilterWidthComponent implements MultiFilterComponent {
   private final float lowerSigmaThreshold;
   private final float upperSigmaThreshold;
 
@@ -48,7 +48,7 @@ public class MultiFilterWidthComponent extends MultiFilterComponent {
 
   @Override
   public boolean fail(final PreprocessedPeakResult peak) {
-    final float xsdf = peak.getXSDFactor();
+    final float xsdf = peak.getXSdFactor();
     return (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold);
   }
 

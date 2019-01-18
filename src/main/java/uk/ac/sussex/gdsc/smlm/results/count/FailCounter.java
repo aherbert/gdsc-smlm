@@ -50,13 +50,13 @@ public interface FailCounter {
   void pass(int n);
 
   /**
-   * Called when the most recent event failed. It is expected that the result of {@link #isOK()} may
+   * Called when the most recent event failed. It is expected that the result of {@link #isOk()} may
    * change after calling this method.
    */
   void fail();
 
   /**
-   * Called when the n most recent event failed. It is expected that the result of {@link #isOK()}
+   * Called when the n most recent event failed. It is expected that the result of {@link #isOk()}
    * may change after calling this method.
    *
    * <p>This method can be used when a series of events are known to fail.
@@ -71,7 +71,7 @@ public interface FailCounter {
    *
    * @return true, if is ok to continue
    */
-  boolean isOK();
+  boolean isOk();
 
   /**
    * Create a duplicate fail counter reset to the initialised state.

@@ -40,11 +40,11 @@ public class InterpolatedPoissonFisherInformationTest {
     }
   }
 
-  private static void canInterpolateFisherInformation(double s) {
-    canComputeFisherInformation(new PoissonGaussianApproximationFisherInformation(s));
+  private static void canInterpolateFisherInformation(double sd) {
+    canComputeFisherInformation(new PoissonGaussianApproximationFisherInformation(sd));
   }
 
-  private static void canComputeFisherInformation(BasePoissonFisherInformation f) {
+  private static void canComputeFisherInformation(BasePoissonFisherInformation fi) {
     // Build a range for the Fisher information
     final int min = -100;
     final int max = 20;
@@ -53,32 +53,32 @@ public class InterpolatedPoissonFisherInformationTest {
 
     for (int exp = min, i = 0; exp <= max; exp++, i++) {
       logU[i] = exp;
-      alpha[i] = f.getAlpha(FastMath.exp(exp));
+      alpha[i] = fi.getAlpha(FastMath.exp(exp));
     }
 
-    final InterpolatedPoissonFisherInformation fi =
-        new InterpolatedPoissonFisherInformation(logU, alpha, false, f);
+    final InterpolatedPoissonFisherInformation intFi =
+        new InterpolatedPoissonFisherInformation(logU, alpha, false, fi);
 
     // No check for beyond the range since a separate test does this.
-    check(f, fi, min, 5e-3);
+    check(intFi, intFi, min, 5e-3);
 
     // Within
     for (int exp = min; exp < max; exp++) {
-      check(f, fi, exp + 0.5, 5e-3);
+      check(intFi, intFi, exp + 0.5, 5e-3);
     }
 
     // Upper bound
-    check(f, fi, max, 5e-3);
+    check(intFi, intFi, max, 5e-3);
 
     // Beyond upper bound
-    check(f, fi, max + 1, 5e-3);
+    check(intFi, intFi, max + 1, 5e-3);
   }
 
-  private static void check(BasePoissonFisherInformation f, InterpolatedPoissonFisherInformation fi,
-      double logU, double tol) {
+  private static void check(BasePoissonFisherInformation fi,
+      InterpolatedPoissonFisherInformation intFi, double logU, double tol) {
     final double u = FastMath.exp(logU);
-    final double e = f.getAlpha(u);
-    final double o = fi.getAlpha(u);
+    final double e = fi.getAlpha(u);
+    final double o = intFi.getAlpha(u);
     // logger.fine(FunctionUtils.getSupplier("logU=%g u=%g e=%g o=%g error=%g", logU, u, e, o,
     // DoubleEquality.relativeError(o, e));
 
@@ -95,11 +95,11 @@ public class InterpolatedPoissonFisherInformationTest {
     }
   }
 
-  private static void canInterpolateLowerFisherInformation(double s) {
-    canComputeLowerFisherInformation(new PoissonGaussianApproximationFisherInformation(s));
+  private static void canInterpolateLowerFisherInformation(double sd) {
+    canComputeLowerFisherInformation(new PoissonGaussianApproximationFisherInformation(sd));
   }
 
-  private static void canComputeLowerFisherInformation(BasePoissonFisherInformation f) {
+  private static void canComputeLowerFisherInformation(BasePoissonFisherInformation fi) {
     // Build a range for the Fisher information where it should plateau
     final int min = -500;
     final int max = min + 4;
@@ -108,57 +108,57 @@ public class InterpolatedPoissonFisherInformationTest {
 
     for (int exp = min, i = 0; exp <= max; exp++, i++) {
       logU[i] = exp;
-      alpha[i] = f.getAlpha(FastMath.exp(exp));
+      alpha[i] = fi.getAlpha(FastMath.exp(exp));
     }
 
     // Lower fixed I
-    InterpolatedPoissonFisherInformation fi =
-        new InterpolatedPoissonFisherInformation(logU, alpha, true, f);
+    InterpolatedPoissonFisherInformation intFi =
+        new InterpolatedPoissonFisherInformation(logU, alpha, true, fi);
 
-    final double I = f.getFisherInformation(FastMath.exp(min));
+    final double I = fi.getFisherInformation(FastMath.exp(min));
     final BasePoissonFisherInformation fixedI = new BasePoissonFisherInformation() {
       @Override
-      public double getFisherInformation(double t) {
+      public double getFisherInformation(double theta) {
         return I;
       }
 
       @Override
-      public double getAlpha(double t) {
-        return t * I;
+      public double getAlpha(double theta) {
+        return theta * I;
       }
 
       @Override
-      protected void postClone() {
-        // Do nothing
+      public BasePoissonFisherInformation copy() {
+        return this;
       }
     };
-    check(fixedI, fi, min - 1, 0);
-    check(fixedI, fi, min - 2, 0);
-    check(fixedI, fi, min - 20, 0);
+    check(fixedI, intFi, min - 1, 0);
+    check(fixedI, intFi, min - 2, 0);
+    check(fixedI, intFi, min - 20, 0);
 
     // Lower fixed alpha
-    fi = new InterpolatedPoissonFisherInformation(logU, alpha, false, f);
+    intFi = new InterpolatedPoissonFisherInformation(logU, alpha, false, fi);
 
     final double A = alpha[0];
     final BasePoissonFisherInformation fixedA = new BasePoissonFisherInformation() {
       @Override
-      public double getFisherInformation(double t) {
-        return t / A;
+      public double getFisherInformation(double theta) {
+        return theta / A;
       }
 
       @Override
-      public double getAlpha(double t) {
+      public double getAlpha(double theta) {
         return A;
       }
 
       @Override
-      protected void postClone() {
-        // Do nothing
+      public BasePoissonFisherInformation copy() {
+        return this;
       }
     };
 
-    check(fixedA, fi, min - 1, 0);
-    check(fixedA, fi, min - 2, 0);
-    check(fixedA, fi, min - 20, 0);
+    check(fixedA, intFi, min - 1, 0);
+    check(fixedA, intFi, min - 2, 0);
+    check(fixedA, intFi, min - 20, 0);
   }
 }

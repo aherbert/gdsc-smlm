@@ -34,10 +34,10 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 //@formatter:off
 public class PrecisionResultProcedure extends AbstractResultProcedure implements
     StoredPrecisionProcedure,
-    LSEPrecisionProcedure,
-    LSEPrecisionBProcedure,
-    MLEPrecisionProcedure,
-    MLEPrecisionBProcedure {
+    LsePrecisionProcedure,
+    LsePrecisionBProcedure,
+    MlePrecisionProcedure,
+    MlePrecisionBProcedure {
   //@formatter:on
 
   /** The precisions. */
@@ -56,7 +56,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    * Gets the precision for the results.
    *
    * <p>If the results contain stored precision values then these are used. Otherwise an attempt is
-   * made to compute the precision using {@link #getLSEPrecision()}. If no exception is thrown then
+   * made to compute the precision using {@link #getLsePrecision()}. If no exception is thrown then
    * the precision has been computed.
    *
    * @return the precision method
@@ -71,7 +71,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    * calculated precision to be collected from results even if they have stored precision.
    *
    * <p>If the stored flag is passed then the stored precision results are used. Otherwise an
-   * attempt is made to compute the precision using {@link #getLSEPrecision()}. If no exception is
+   * attempt is made to compute the precision using {@link #getLsePrecision()}. If no exception is
    * thrown then the precision has been computed.
    *
    * @param stored the stored flag
@@ -89,7 +89,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     // We use the LSE precision even if the results are fit using MLE.
     // This is just a rough indicator of the result precision so it doesn't matter
     // that much anyway.
-    getLSEPrecision();
+    getLsePrecision();
     return PrecisionMethod.MORTENSEN;
   }
 
@@ -113,14 +113,14 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getLSEPrecision() {
+  public void getLsePrecision() {
     counter = 0;
     precisions = allocate(precisions);
-    results.forEach((LSEPrecisionProcedure) this);
+    results.forEach((LsePrecisionProcedure) this);
   }
 
   @Override
-  public void executeLSEPrecision(double precision) {
+  public void executeLsePrecision(double precision) {
     this.precisions[counter++] = precision;
   }
 
@@ -130,14 +130,14 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getLSEPrecisionB() {
+  public void getLsePrecisionB() {
     counter = 0;
     precisions = allocate(precisions);
-    results.forEach((LSEPrecisionBProcedure) this);
+    results.forEach((LsePrecisionBProcedure) this);
   }
 
   @Override
-  public void executeLSEPrecisionB(double precision) {
+  public void executeLsePrecisionB(double precision) {
     this.precisions[counter++] = precision;
   }
 
@@ -147,14 +147,14 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getMLEPrecision() {
+  public void getMlePrecision() {
     counter = 0;
     precisions = allocate(precisions);
-    results.forEach((MLEPrecisionProcedure) this);
+    results.forEach((MlePrecisionProcedure) this);
   }
 
   @Override
-  public void executeMLEPrecision(double precision) {
+  public void executeMlePrecision(double precision) {
     this.precisions[counter++] = precision;
   }
 
@@ -164,14 +164,14 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    *
    * @throws DataException if conversion to the required units for precision is not possible
    */
-  public void getMLEPrecisionB() {
+  public void getMlePrecisionB() {
     counter = 0;
     precisions = allocate(precisions);
-    results.forEach((MLEPrecisionBProcedure) this);
+    results.forEach((MlePrecisionBProcedure) this);
   }
 
   @Override
-  public void executeMLEPrecisionB(double precision) {
+  public void executeMlePrecisionB(double precision) {
     this.precisions[counter++] = precision;
   }
 }

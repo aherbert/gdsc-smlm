@@ -119,7 +119,7 @@ public class SolverSpeedTest {
     final ArrayList<double[]> bdata2 = copyBdouble(data.bdata, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
     final TestCounter failCounter = new TestCounter(failureLimit, 2);
@@ -162,7 +162,7 @@ public class SolverSpeedTest {
     final ArrayList<double[]> bdata2 = copyBdouble(data.bdata, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
     final TestCounter failCounter = new TestCounter(failureLimit);
@@ -246,7 +246,7 @@ public class SolverSpeedTest {
     final SolverSpeedTestData data = ensureData(seed, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     long t1 = Long.MAX_VALUE;
     long t2 = Long.MAX_VALUE;
@@ -279,7 +279,7 @@ public class SolverSpeedTest {
     final SolverSpeedTestData data = ensureData(seed, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     long t1 = Long.MAX_VALUE;
     long t2 = Long.MAX_VALUE;
@@ -319,7 +319,7 @@ public class SolverSpeedTest {
     final SolverSpeedTestData data = ensureData(seed, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     long t1 = Long.MAX_VALUE;
     long t2 = Long.MAX_VALUE;
@@ -352,7 +352,7 @@ public class SolverSpeedTest {
     final SolverSpeedTestData data = ensureData(seed, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     long t1 = Long.MAX_VALUE;
     long t2 = Long.MAX_VALUE;
@@ -385,7 +385,7 @@ public class SolverSpeedTest {
     final SolverSpeedTestData data = ensureData(seed, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     long t1 = Long.MAX_VALUE;
     long t2 = Long.MAX_VALUE;
@@ -418,7 +418,7 @@ public class SolverSpeedTest {
     final SolverSpeedTestData data = ensureData(seed, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     long t1 = Long.MAX_VALUE;
     long t2 = Long.MAX_VALUE;
@@ -451,7 +451,7 @@ public class SolverSpeedTest {
     final SolverSpeedTestData data = ensureData(seed, iter);
 
     final GaussJordan solver = new GaussJordan();
-    final EJMLLinearSolver solver2 = new EJMLLinearSolver();
+    final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
     long t1 = Long.MAX_VALUE;
     long t2 = Long.MAX_VALUE;
@@ -524,7 +524,7 @@ public class SolverSpeedTest {
 
     // Check for a positive definite matrix
     if (positiveDifinite) {
-      final EJMLLinearSolver solver = new EJMLLinearSolver();
+      final EjmlLinearSolver solver = new EjmlLinearSolver();
       return solver.solveCholeskyLDLT(copydouble(alpha), copydouble(beta));
     }
 
@@ -609,7 +609,7 @@ public class SolverSpeedTest {
   }
 
   protected void solveLinearWithInversion(ArrayList<double[]> adata, ArrayList<double[]> bdata,
-      int iter, EJMLLinearSolver solver) {
+      int iter, EjmlLinearSolver solver) {
     iter = FastMath.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       final double[] data = adata.get(i);
@@ -619,7 +619,7 @@ public class SolverSpeedTest {
   }
 
   protected void solveLinear(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
-      EJMLLinearSolver solver) {
+      EjmlLinearSolver solver) {
     iter = FastMath.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solveLinear(adata.get(i), bdata.get(i));
@@ -627,7 +627,7 @@ public class SolverSpeedTest {
   }
 
   protected void solveCholesky(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
-      EJMLLinearSolver solver) {
+      EjmlLinearSolver solver) {
     iter = FastMath.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solveCholesky(adata.get(i), bdata.get(i));
@@ -635,7 +635,7 @@ public class SolverSpeedTest {
   }
 
   protected void solveCholeskyLDLT(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
-      EJMLLinearSolver solver) {
+      EjmlLinearSolver solver) {
     iter = FastMath.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solveCholeskyLDLT(adata.get(i), bdata.get(i));
@@ -643,7 +643,7 @@ public class SolverSpeedTest {
   }
 
   protected void solve(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
-      EJMLLinearSolver solver) {
+      EjmlLinearSolver solver) {
     iter = FastMath.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solve(adata.get(i), bdata.get(i));

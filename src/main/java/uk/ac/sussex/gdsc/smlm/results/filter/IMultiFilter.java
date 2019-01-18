@@ -41,7 +41,7 @@ public interface IMultiFilter {
    *
    * @return the Signal-to-noise ratio (SNR)
    */
-  double getSNR();
+  double getSnr();
 
   /**
    * Gets the min width.

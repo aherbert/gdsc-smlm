@@ -522,7 +522,7 @@ public class Convolution {
    * @throws IllegalArgumentException if either {@code x} or {@code h} is {@code null} or either
    *         {@code x} or {@code h} is empty.
    */
-  public static double[] convolveFFT(double[] x, double[] h) {
+  public static double[] convolveFft(double[] x, double[] h) {
     checkInput(x, h);
 
     final int xLen = x.length;
@@ -579,7 +579,7 @@ public class Convolution {
    * @throws IllegalArgumentException If any input is null or empty. If h1 and h2 are different
    *         lengths.
    */
-  public static double[][] convolveFFT(double[] x, double[] h1, double[] h2) {
+  public static double[][] convolveFft(double[] x, double[] h1, double[] h2) {
     checkInput(x, h1, h2);
 
     final int xLen = x.length;
@@ -648,8 +648,8 @@ public class Convolution {
    */
   public static double[] convolveFast(double[] x, double[] h) {
     checkInput(x, h);
-    if (isFFT(x.length, h.length)) {
-      return convolveFFT(x, h);
+    if (isFft(x.length, h.length)) {
+      return convolveFft(x, h);
     }
     return convolve(x, h);
   }
@@ -673,8 +673,8 @@ public class Convolution {
    */
   public static double[][] convolveFast(double[] x, double[] h1, double[] h2) {
     checkInput(x, h1, h2);
-    if (isFFT(x.length, h1.length)) {
-      return convolveFFT(x, h1, h2);
+    if (isFft(x.length, h1.length)) {
+      return convolveFft(x, h1, h2);
     }
     return convolve(x, h1, h2);
   }
@@ -686,7 +686,7 @@ public class Convolution {
    * @param length2 the length 2
    * @return true, if using the FFT method
    */
-  public static boolean isFFT(int length1, int length2) {
+  public static boolean isFft(int length1, int length2) {
     // See Junit class ConvolveTest to determine when to switch to the FFT method.
     // This is not perfect for all length combinations but the switch will happen
     // when the two methods are roughly the same speed.

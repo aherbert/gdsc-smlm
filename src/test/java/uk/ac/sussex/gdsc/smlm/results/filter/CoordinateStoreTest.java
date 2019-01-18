@@ -270,7 +270,7 @@ public class CoordinateStoreTest {
     final GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 0, 0.0);
     for (int i = 0; i < resolution.length; i++) {
       final int ii = i;
-      s.changeXYResolution(resolution[i]);
+      s.changeXyResolution(resolution[i]);
 
       for (int j = 0; j < datax.length; j++) {
         s.add(datax[j], datay[j], dataz[j]);
@@ -300,7 +300,7 @@ public class CoordinateStoreTest {
     final GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
     for (int i = 0; i < resolution.length; i++) {
       final int ii = i;
-      s.changeXYResolution(resolution[i]);
+      s.changeXyResolution(resolution[i]);
 
       for (int j = 0; j < datax.length; j++) {
         s.add(datax[j], datay[j], dataz[j]);
@@ -324,7 +324,7 @@ public class CoordinateStoreTest {
   public void cannotChangeToBadXYResolutionOnFixedStore() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       final GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
-      s.changeXYResolution(1.1);
+      s.changeXyResolution(1.1);
     });
   }
 }

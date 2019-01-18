@@ -274,7 +274,7 @@ public class SCMOSLikelihoodWrapperTest {
     final double[] dyda = new double[indices.length];
     double[] params;
 
-    SCMOSLikelihoodWrapper ff1;
+    ScmosLikelihoodWrapper ff1;
 
     final int n = maxx * maxx;
     int count = 0;
@@ -313,7 +313,7 @@ public class SCMOSLikelihoodWrapperTest {
                     data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
                   }
 
-                  ff1 = new SCMOSLikelihoodWrapper(f1, params, data, n, var, g, o);
+                  ff1 = new ScmosLikelihoodWrapper(f1, params, data, n, var, g, o);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
@@ -484,7 +484,7 @@ public class SCMOSLikelihoodWrapperTest {
     final double[] dyda = new double[indices.length];
     double[] params;
 
-    SCMOSLikelihoodWrapper ff1;
+    ScmosLikelihoodWrapper ff1;
 
     final int n = maxx * maxx;
     int count = 0;
@@ -523,7 +523,7 @@ public class SCMOSLikelihoodWrapperTest {
                     data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
                   }
 
-                  ff1 = new SCMOSLikelihoodWrapper(f1, params, data, n, var, g, o);
+                  ff1 = new ScmosLikelihoodWrapper(f1, params, data, n, var, g, o);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
@@ -616,7 +616,7 @@ public class SCMOSLikelihoodWrapperTest {
     final UnivariateIntegrator in = new SimpsonIntegrator();
 
     final double pvalue =
-        in.integrate(20000, x -> SCMOSLikelihoodWrapper.likelihood(mu, VAR, G, O, x), min, max);
+        in.integrate(20000, x -> ScmosLikelihoodWrapper.likelihood(mu, VAR, G, O, x), min, max);
 
     // TestLog.fine(logger,"mu=%f, p=%f", mu, p);
     if (test) {
@@ -692,7 +692,7 @@ public class SCMOSLikelihoodWrapperTest {
         return 0;
       }
     };
-    SCMOSLikelihoodWrapper func = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
+    ScmosLikelihoodWrapper func = new ScmosLikelihoodWrapper(nlf, a, k, n, var, g, o);
 
     final IntArrayFormatSupplier msg1 = new IntArrayFormatSupplier("computeLikelihood @ %d", 1);
     final IntArrayFormatSupplier msg2 =
@@ -706,7 +706,7 @@ public class SCMOSLikelihoodWrapperTest {
       final double nll = func.computeLikelihood(i);
       final double nll2 = func.computeLikelihood(gradient, i);
       final double nll3 =
-          SCMOSLikelihoodWrapper.negativeLogLikelihood(mu, var[i], g[i], o[i], k[i]);
+          ScmosLikelihoodWrapper.negativeLogLikelihood(mu, var[i], g[i], o[i], k[i]);
       total += nll;
       TestAssertions.assertTest(nll3, nll, predicate, msg1.set(0, i));
       TestAssertions.assertTest(nll3, nll2, predicate, msg2.set(0, i));
@@ -862,13 +862,13 @@ public class SCMOSLikelihoodWrapperTest {
       k[i] = mean * g[i] + o[i] + gs.sample() * sd[i];
     }
 
-    final SCMOSLikelihoodWrapper f = new SCMOSLikelihoodWrapper(nlf, a, k, n, var, g, o);
+    final ScmosLikelihoodWrapper f = new ScmosLikelihoodWrapper(nlf, a, k, n, var, g, o);
 
     final double oll = f.computeObservedLikelihood();
     double oll2 = 0;
     final double[] op = new double[n];
     for (int j = 0; j < n; j++) {
-      op[j] = SCMOSLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
+      op[j] = ScmosLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
       oll2 -= Math.log(op[j]);
     }
     logger.log(TestLogUtils.getRecord(Level.INFO, "oll=%f, oll2=%f", oll, oll2));
@@ -886,7 +886,7 @@ public class SCMOSLikelihoodWrapperTest {
       BigDecimal product = new BigDecimal(1);
       double ll2 = 0;
       for (int j = 0; j < n; j++) {
-        final double p1 = SCMOSLikelihoodWrapper.likelihood(nlf.eval(j), var[j], g[j], o[j], k[j]);
+        final double p1 = ScmosLikelihoodWrapper.likelihood(nlf.eval(j), var[j], g[j], o[j], k[j]);
         ll2 -= Math.log(p1);
         final double ratio = p1 / op[j];
         product = product.multiply(new BigDecimal(ratio));

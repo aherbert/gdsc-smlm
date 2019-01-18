@@ -98,7 +98,7 @@ public class RollingWindowFailCounter extends BaseFailCounter {
   }
 
   @Override
-  public boolean isOK() {
+  public boolean isOk() {
     return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
   }
 

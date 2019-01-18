@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
  */
 public class PSFModelGradient1Function implements Gradient1Function, NamedFunction {
   private static final int[] gradientIndices = SimpleArrayUtils.natural(5);
-  private final PSFModel psf;
+  private final PsfModel psf;
   private final int width;
   private final int height;
 
@@ -49,7 +49,7 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
    * @param width the width
    * @param height the height
    */
-  public PSFModelGradient1Function(PSFModel psf, int width, int height) {
+  public PSFModelGradient1Function(PsfModel psf, int width, int height) {
     if (psf == null) {
       throw new NullPointerException("PSF is null");
     }

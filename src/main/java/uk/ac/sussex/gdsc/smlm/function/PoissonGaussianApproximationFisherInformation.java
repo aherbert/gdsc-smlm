@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Calculate the Fisher information for a Poisson-Gaussian distribution using an approximation of
- * the Poisson (mean=t) as a Gaussian (u=t, var=t).
+ * the Poisson (mean=theta) as a Gaussian (u=theta, var=theta).
  */
 public class PoissonGaussianApproximationFisherInformation extends BasePoissonFisherInformation {
   /** The variance of the Gaussian. */
@@ -35,42 +35,52 @@ public class PoissonGaussianApproximationFisherInformation extends BasePoissonFi
   /**
    * Instantiates a new poisson gaussian fisher information.
    *
-   * @param s the standard deviation of the Gaussian
+   * @param sd the standard deviation of the Gaussian
    * @throws IllegalArgumentException If the standard deviation is not strictly positive
    */
-  public PoissonGaussianApproximationFisherInformation(double s) {
-    if (!(s > 0 && s <= Double.MAX_VALUE)) {
+  public PoissonGaussianApproximationFisherInformation(double sd) {
+    if (!(sd > 0 && sd <= Double.MAX_VALUE)) {
       throw new IllegalArgumentException("Gaussian variance must be strictly positive");
     }
-    this.variance = s * s;
+    this.variance = sd * sd;
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected PoissonGaussianApproximationFisherInformation(
+      PoissonGaussianApproximationFisherInformation source) {
+    this.variance = source.variance;
   }
 
   /**
    * {@inheritDoc}
    *
    * <p>Gets the approximate Poisson-Gaussian Fisher information. Approximate the Poisson as a
-   * Gaussian (u=t, var=t) and convolve with a Gaussian (u=0,var=s*s). Gaussian-Gaussian
+   * Gaussian (u=theta, var=theta) and convolve with a Gaussian (u=0,var=s*s). Gaussian-Gaussian
    * convolution: var1 * var2 =&gt; var = var1+var2. The Fisher information of Gaussian mean is
-   * 1/variance. The Poisson-Gaussian Fisher information is therefore 1 / (t + s*s).
+   * 1/variance. The Poisson-Gaussian Fisher information is therefore 1 / (theta + s*s).
    */
   @Override
-  public double getFisherInformation(double t) {
-    if (t <= 0) {
+  public double getFisherInformation(double theta) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    return 1.0 / (t + variance);
+    return 1.0 / (theta + variance);
   }
 
   @Override
-  public double getAlpha(double t) {
-    if (t <= 0) {
+  public double getAlpha(double theta) {
+    if (theta <= 0) {
       throw new IllegalArgumentException("Poisson mean must be positive");
     }
-    return t / (t + variance);
+    return theta / (theta + variance);
   }
 
   @Override
-  protected void postClone() {
-    // Nothing to do
+  public PoissonGaussianApproximationFisherInformation copy() {
+    return new PoissonGaussianApproximationFisherInformation(this);
   }
 }

@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.SimplePeakResultValidationData;
 import uk.ac.sussex.gdsc.smlm.filters.BlockMeanFilter;
@@ -313,7 +313,7 @@ public class SpotFit implements PlugIn {
     private static FitConfiguration createFitConfiguration() {
       final FitConfiguration config = new FitConfiguration();
       config.setFitSolver(FitSolver.LVM_LSE);
-      config.setPSF(PSFProtosHelper.getDefaultPSF(PSFType.ONE_AXIS_GAUSSIAN_2D));
+      config.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.ONE_AXIS_GAUSSIAN_2D));
       // config.setMaxIterations(getMaxIterations());
       // config.setRelativeThreshold(relativeThreshold);
       // config.setAbsoluteThreshold(absoluteThreshold);

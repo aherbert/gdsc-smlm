@@ -33,7 +33,7 @@ public class QuadrantAnalysis {
   // Make these public for simplicity
 
   /** The sum of the 4 quadrants using the X dividing lines (two diagonals through the centre). */
-  public double sumABCD;
+  public double sumAbcd;
   /** The sum of the A quadrant using the X dividing lines (two diagonals through the centre). */
   public double sumA;
   /** The sum of the B quadrant using the X dividing lines (two diagonals through the centre). */
@@ -46,7 +46,7 @@ public class QuadrantAnalysis {
    * The sum of the 4 quadrants using the + dividing lines (horizontal and vertical through the
    * centre).
    */
-  public double sumABCD2;
+  public double sumAbcd2;
   /**
    * The sum of the A quadrant using the + dividing lines (horizontal and vertical through the
    * centre).
@@ -71,14 +71,14 @@ public class QuadrantAnalysis {
   /**
    * {@link #sumA} + {@link #sumC}.
    */
-  public double sumAC;
+  public double sumAc;
   /**
    * {@link #sumB} + {@link #sumD}.
    */
-  public double sumBD;
+  public double sumBd;
   /**
-   * The asymmetry score for the + dividing lines. Math.abs({@link #sumAC} - {@link #sumBD}) /
-   * {@link #sumABCD}.
+   * The asymmetry score for the + dividing lines. Math.abs({@link #sumAc} - {@link #sumBd}) /
+   * {@link #sumAbcd}.
    */
   public double score1;
 
@@ -92,7 +92,7 @@ public class QuadrantAnalysis {
   public double sumBD2;
   /**
    * The asymmetry score for the + dividing lines. Math.abs({@link #sumAC2} - {@link #sumBD2}) /
-   * {@link #sumABCD2}.
+   * {@link #sumAbcd2}.
    */
   public double score2;
 
@@ -191,14 +191,14 @@ public class QuadrantAnalysis {
     // DD.BB
     // D.C.B
     // .CCC.
-    sumABCD = 0;
+    sumAbcd = 0;
     sumA = 0;
     sumB = 0;
     sumC = 0;
     sumD = 0;
     for (int y = cy, xa = cx, xb = cx; y < height; y++, xa--, xb++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumABCD += Math.abs(residuals[index]);
+        sumAbcd += Math.abs(residuals[index]);
         if (x < xa) {
           sumD += residuals[index];
         } else if (x < xb && x > xa) {
@@ -206,13 +206,13 @@ public class QuadrantAnalysis {
         } else if (x > xb) {
           sumB += residuals[index];
         } else {
-          sumABCD -= Math.abs(residuals[index]);
+          sumAbcd -= Math.abs(residuals[index]);
         }
       }
     }
     for (int y = cy - 1, xa = cx - 1, xb = cx + 1; y >= 0; y--, xa--, xb++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumABCD += Math.abs(residuals[index]);
+        sumAbcd += Math.abs(residuals[index]);
         if (x < xa) {
           sumD += residuals[index];
         } else if (x < xb && x > xa) {
@@ -220,7 +220,7 @@ public class QuadrantAnalysis {
         } else if (x > xb) {
           sumB += residuals[index];
         } else {
-          sumABCD -= Math.abs(residuals[index]);
+          sumAbcd -= Math.abs(residuals[index]);
         }
       }
     }
@@ -231,14 +231,14 @@ public class QuadrantAnalysis {
     // .....
     // DD.CC
     // DD.CC
-    sumABCD2 = 0;
+    sumAbcd2 = 0;
     sumA2 = 0;
     sumB2 = 0;
     sumC2 = 0;
     sumD2 = 0;
     for (int y = cy + 1; y < height; y++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumABCD2 += Math.abs(residuals[index]);
+        sumAbcd2 += Math.abs(residuals[index]);
         if (x < cx) {
           sumD2 += residuals[index];
         } else if (x > cx) {
@@ -248,7 +248,7 @@ public class QuadrantAnalysis {
     }
     for (int y = cy - 1; y >= 0; y--) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumABCD2 += Math.abs(residuals[index]);
+        sumAbcd2 += Math.abs(residuals[index]);
         if (x < cx) {
           sumA2 += residuals[index];
         } else if (x > cx) {
@@ -263,9 +263,9 @@ public class QuadrantAnalysis {
     // DD.BB
     // D.C.B
     // .CCC.
-    sumAC = sumA + sumC;
-    sumBD = sumB + sumD;
-    score1 = Math.abs(sumAC - sumBD) / sumABCD;
+    sumAc = sumA + sumC;
+    sumBd = sumB + sumD;
+    score1 = Math.abs(sumAc - sumBd) / sumAbcd;
 
     // + quadrant:
     // AA.BB
@@ -275,10 +275,10 @@ public class QuadrantAnalysis {
     // DD.CC
     sumAC2 = sumA2 + sumC2;
     sumBD2 = sumB2 + sumD2;
-    score2 = Math.abs(sumAC2 - sumBD2) / sumABCD2;
+    score2 = Math.abs(sumAC2 - sumBD2) / sumAbcd2;
 
     if (score1 > score2) {
-      vector = (sumAC > sumBD) ? new int[] {0, 1} : new int[] {1, 0};
+      vector = (sumAc > sumBd) ? new int[] {0, 1} : new int[] {1, 0};
       score = score1;
     } else {
       vector = (sumAC2 > sumBD2) ? new int[] {1, 1} : new int[] {1, -1};

@@ -418,7 +418,7 @@ public class Cluster implements Comparable<Cluster> {
    *
    * @return The mean squared-distance between adjacent localisations.
    */
-  public double getMSD() {
+  public double getMsd() {
     if (size() < 2) {
       return 0;
     }

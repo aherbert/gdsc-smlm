@@ -492,14 +492,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       precision = 999;
       try {
         final Gaussian2DPeakResultCalculator calculator = Gaussian2DPeakResultHelper.create(
-            results.getPSF(), results.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
+            results.getPsf(), results.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
         // Get the average precision of the localisations
         precision = 0;
         int n = 0;
         for (final Trace trace : traces) {
           for (int k = 0; k < trace.size(); k++) {
             final PeakResult r = trace.get(k);
-            precision += calculator.getLSEPrecision(r.getParameters(), r.getNoise());
+            precision += calculator.getLsePrecision(r.getParameters(), r.getNoise());
           }
           n += trace.size();
         }
@@ -1660,7 +1660,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     double[][] fit;
     if (settings.getMle()) {
-      fit = jd.fitJumpDistancesMLE(jumpDistances.getValues(), jdHistogram);
+      fit = jd.fitJumpDistancesMle(jumpDistances.getValues(), jdHistogram);
     } else {
       fit = jd.fitJumpDistanceHistogram(jumpDistances.getMean(), jdHistogram);
     }

@@ -40,8 +40,8 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CreateDataSettingsHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.DiffusionType;
@@ -262,7 +262,7 @@ public class DiffusionRateTest implements PlugIn {
     results.setCalibration(CalibrationHelper.create(settings.getPixelPitch(), 1,
         1000.0 / settings.getStepsPerSecond()));
     results.setName(TITLE);
-    results.setPSF(PSFHelper.create(PSFType.CUSTOM));
+    results.setPsf(PsfHelper.create(PSFType.CUSTOM));
     int peak = 0;
     // Store raw coordinates
     final ArrayList<Point> points = new ArrayList<>(totalSteps);
@@ -997,7 +997,7 @@ public class DiffusionRateTest implements PlugIn {
     results.setCalibration(CalibrationHelper.create(settings.getPixelPitch(), 1,
         myAggregateSteps * 1000.0 / settings.getStepsPerSecond()));
     results.setName(TITLE + " Aggregated");
-    results.setPSF(PSFHelper.create(PSFType.CUSTOM));
+    results.setPsf(PsfHelper.create(PSFType.CUSTOM));
     MemoryPeakResults.addResults(results);
     lastSimulatedDataset[1] = results.getName();
     int id = 0;

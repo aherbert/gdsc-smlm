@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.RelativeParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 
 /**
@@ -405,20 +405,20 @@ public final class FitProtosHelper {
 
   /**
    * Convert line search method to the
-   * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod}.
+   * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver.LineSearchMethod}.
    *
    * @param lineSearchMethod the line search method
    * @return the line search method
    */
-  public static FastMLESteppingFunctionSolver.LineSearchMethod
+  public static FastMleSteppingFunctionSolver.LineSearchMethod
       convertLineSearchMethod(LineSearchMethod lineSearchMethod) {
     switch (lineSearchMethod) {
       case IGNORE:
-        return FastMLESteppingFunctionSolver.LineSearchMethod.IGNORE;
+        return FastMleSteppingFunctionSolver.LineSearchMethod.IGNORE;
       case NONE:
-        return FastMLESteppingFunctionSolver.LineSearchMethod.NONE;
+        return FastMleSteppingFunctionSolver.LineSearchMethod.NONE;
       case PARTIAL_IGNORE:
-        return FastMLESteppingFunctionSolver.LineSearchMethod.PARTIAL_IGNORE;
+        return FastMleSteppingFunctionSolver.LineSearchMethod.PARTIAL_IGNORE;
       case UNRECOGNIZED:
       default:
         throw new IllegalArgumentException(

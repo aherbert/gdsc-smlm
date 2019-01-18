@@ -154,7 +154,7 @@ public class PoissonGammaGaussianFunctionTest {
     final UnivariateFunction uf = new UnivariateFunction() {
       @Override
       public double value(double x) {
-        return f.gaussianPDF(x);
+        return f.gaussianPdf(x);
       }
     };
     final DoubleDoubleBiPredicate integratePredicate = TestHelper.doublesAreClose(0.1, 0);
@@ -163,8 +163,8 @@ public class PoissonGammaGaussianFunctionTest {
       final double ux = u + 0.5;
       final double lx = u - 0.5;
       final double e = in.integrate(20000, uf, lx, ux);
-      final double o = f.gaussianCDF(ux) - f.gaussianCDF(lx);
-      final double o2 = f.gaussianCDF(lx, ux);
+      final double o = f.gaussianCdf(ux) - f.gaussianCdf(lx);
+      final double o2 = f.gaussianCdf(lx, ux);
       TestAssertions.assertTest(e, o, integratePredicate);
       TestAssertions.assertTest(o, o2, rangePredicate);
     }

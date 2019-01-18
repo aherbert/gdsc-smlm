@@ -151,12 +151,12 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     }
     final float[] colors = new float[4 * size];
     ga.getColors(0, colors);
-    int i = 0;
-    while (i < colors.length) {
-      colors[i++] = color.x;
-      colors[i++] = color.y;
-      colors[i++] = color.z;
-      i++; // Skip over alpha
+    int index = 0;
+    while (index < colors.length) {
+      colors[index++] = color.x;
+      colors[index++] = color.y;
+      colors[index++] = color.z;
+      index++; // Skip over alpha
     }
     ga.setColors(0, colors);
     changed = true;
@@ -175,12 +175,12 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     }
     final float[] colors = new float[4 * size];
     ga.getColors(0, colors);
-    int i = 0;
+    int index = 0;
     for (final Color3f c : color) {
-      colors[i++] = c.x;
-      colors[i++] = c.y;
-      colors[i++] = c.z;
-      i++; // Skip over alpha
+      colors[index++] = c.x;
+      colors[index++] = c.y;
+      colors[index++] = c.z;
+      index++; // Skip over alpha
     }
     ga.setColors(0, colors);
     changed = true;

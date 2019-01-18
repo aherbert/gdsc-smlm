@@ -60,13 +60,13 @@ public abstract class CameraNoiseModel implements NoiseModel {
    *
    * @param readNoise the read noise
    * @param bias the bias
-   * @param emCCD the EM-CCD flag
+   * @param emCcd the EM-CCD flag
    * @return the camera noise model
    */
   public static CameraNoiseModel createNoiseModel(final double readNoise, final double bias,
-      final boolean emCCD) {
-    return (emCCD) ? new EMCCDCameraNoiseModel(readNoise, bias)
-        : new CCDCameraNoiseModel(readNoise, bias);
+      final boolean emCcd) {
+    return (emCcd) ? new EmCcdCameraNoiseModel(readNoise, bias)
+        : new CcdCameraNoiseModel(readNoise, bias);
   }
 
   /**
@@ -134,5 +134,5 @@ public abstract class CameraNoiseModel implements NoiseModel {
    *
    * @return true if the camera is an Electron Multiplying CCD camera.
    */
-  public abstract boolean isEmCCD();
+  public abstract boolean isEmCcd();
 }

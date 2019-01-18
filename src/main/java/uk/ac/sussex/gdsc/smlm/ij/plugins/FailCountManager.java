@@ -277,7 +277,7 @@ public class FailCountManager implements PlugIn {
           counter.fail();
         }
         i++;
-        if (!counter.isOK()) {
+        if (!counter.isOk()) {
           return score(i);
         }
       }

@@ -59,16 +59,16 @@ public class FastGaussian2DFitter extends Gaussian2DFitter {
     // the width (i.e. at z=0).
 
     // Cache the estimate for the Gaussian
-    if (fitConfiguration.getInitialXSD() > 0) {
-      sx = fitConfiguration.getInitialXSD();
+    if (fitConfiguration.getInitialXSd() > 0) {
+      sx = fitConfiguration.getInitialXSd();
     } else {
       throw new IllegalArgumentException("No initial width0 estimate");
     }
 
-    isWidth1Fitting = fitConfiguration.isYSDFitting();
+    isWidth1Fitting = fitConfiguration.isYSdFitting();
     if (isWidth1Fitting) {
-      if (fitConfiguration.getInitialYSD() > 0) {
-        sy = fitConfiguration.getInitialYSD();
+      if (fitConfiguration.getInitialYSd() > 0) {
+        sy = fitConfiguration.getInitialYSd();
       } else {
         throw new IllegalArgumentException("No initial width1 estimate");
       }

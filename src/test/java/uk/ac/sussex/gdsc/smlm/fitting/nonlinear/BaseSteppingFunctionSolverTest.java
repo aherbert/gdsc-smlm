@@ -51,7 +51,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 
   enum SteppingFunctionSolverType {
     // Enum names should al be uppercase but this is just for a test so ignore that convention
-    MLELVM, FastLogMLELVM, LSELVM, WLSELVM, FastMLE, JFastMLE, BTFastMLE
+    MLELVM, FastLogMLELVM, LSELVM, WLSELVM, FastMLE, JFastMLE, BtFastMLE
   }
 
   // For convenience declare variables of the enum type
@@ -65,7 +65,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
   static final SteppingFunctionSolverType WLSELVM = SteppingFunctionSolverType.WLSELVM;
   static final SteppingFunctionSolverType FastMLE = SteppingFunctionSolverType.FastMLE;
   static final SteppingFunctionSolverType JFastMLE = SteppingFunctionSolverType.JFastMLE;
-  static final SteppingFunctionSolverType BTFastMLE = SteppingFunctionSolverType.BTFastMLE;
+  static final SteppingFunctionSolverType BtFastMLE = SteppingFunctionSolverType.BtFastMLE;
   static final boolean BOUNDED = true;
   static final boolean NO_BOUND = false;
 
@@ -109,51 +109,51 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
     SteppingFunctionSolver solver;
     switch (type) {
       case LSELVM:
-        solver = new LSELVMSteppingFunctionSolver(f, tc, bounds);
+        solver = new LseLvmSteppingFunctionSolver(f, tc, bounds);
         break;
       case MLELVM:
       case FastLogMLELVM:
-        final MLELVMSteppingFunctionSolver mleSolver =
-            new MLELVMSteppingFunctionSolver(f, tc, bounds);
+        final MleLvmSteppingFunctionSolver mleSolver =
+            new MleLvmSteppingFunctionSolver(f, tc, bounds);
         solver = mleSolver;
         // MLE requires a positive function value so use a lower bound
-        solver.setBounds(getLB(), null);
+        solver.setBounds(getLb(), null);
         // For testing the fast log version
         if (type == FastLogMLELVM) {
           mleSolver.setFastLog(FastLogFactory.getFastLog());
         }
         break;
       case WLSELVM:
-        solver = new WLSELVMSteppingFunctionSolver(f, tc, bounds);
+        solver = new WLseLvmSteppingFunctionSolver(f, tc, bounds);
         break;
       case FastMLE:
-        solver = new FastMLESteppingFunctionSolver(f, tc, bounds);
+        solver = new FastMleSteppingFunctionSolver(f, tc, bounds);
         // MLE requires a positive function value so use a lower bound
-        solver.setBounds(getLB(), null);
+        solver.setBounds(getLb(), null);
         break;
-      case BTFastMLE:
-        solver = new BacktrackingFastMLESteppingFunctionSolver(f, tc, bounds);
+      case BtFastMLE:
+        solver = new BacktrackingFastMleSteppingFunctionSolver(f, tc, bounds);
         // MLE requires a positive function value so use a lower bound
-        solver.setBounds(getLB(), null);
+        solver.setBounds(getLb(), null);
         break;
       case JFastMLE:
-        final ExtendedFastMLESteppingFunctionSolver efmSolver =
-            new ExtendedFastMLESteppingFunctionSolver(f, tc, bounds);
+        final ExtendedFastMleSteppingFunctionSolver efmSolver =
+            new ExtendedFastMleSteppingFunctionSolver(f, tc, bounds);
         efmSolver.enableJacobianSolution(true);
         // MLE requires a positive function value so use a lower bound
         solver = efmSolver;
-        solver.setBounds(getLB(), null);
+        solver.setBounds(getLb(), null);
         break;
       default:
         throw new NotImplementedException();
     }
-    if (solver instanceof LVMSteppingFunctionSolver) {
-      ((LVMSteppingFunctionSolver) solver).setInitialLambda(1);
+    if (solver instanceof LvmSteppingFunctionSolver) {
+      ((LvmSteppingFunctionSolver) solver).setInitialLambda(1);
     }
     return solver;
   }
 
-  double[] getLB() {
+  double[] getLb() {
     final double[] lb = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
     lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
     return lb;

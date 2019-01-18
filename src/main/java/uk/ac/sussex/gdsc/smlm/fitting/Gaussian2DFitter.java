@@ -38,6 +38,7 @@ import java.util.Arrays;
  * <p>Performs fitting using the configured algorithm.
  */
 public class Gaussian2DFitter {
+  private static final double TWO_PI = 2 * Math.PI;
   /** The fit configuration. */
   protected Gaussian2DFitConfiguration fitConfiguration;
   /** The solver. */
@@ -495,8 +496,8 @@ public class Gaussian2DFitter {
       // double[] params2 = params.clone();
 
       // Re-assemble all the parameters
-      if (fitConfiguration.isXSDFitting()) {
-        if (fitConfiguration.isYSDFitting()) {
+      if (fitConfiguration.isXSdFitting()) {
+        if (fitConfiguration.isYSdFitting()) {
           // Ensure widths are positive
           for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak) {
             params[j + Gaussian2DFunction.X_SD] = Math.abs(params[j + Gaussian2DFunction.X_SD]);
@@ -589,8 +590,8 @@ public class Gaussian2DFitter {
         // It does not matter if they are negative as we use max(1, sx+sy)
         // to search for the centre. It will also effect the conversion of
         // amplitudes to signal.
-        sx = fitConfiguration.getInitialXSD();
-        sy = fitConfiguration.getInitialYSD();
+        sx = fitConfiguration.getInitialXSd();
+        sy = fitConfiguration.getInitialYSd();
         angle = 0;
       } else {
 
@@ -599,8 +600,8 @@ public class Gaussian2DFitter {
         angle = params[j + Gaussian2DFunction.ANGLE];
 
         if (sx == 0) {
-          if (fitConfiguration.getInitialXSD() > 0) {
-            sx = fitConfiguration.getInitialXSD();
+          if (fitConfiguration.getInitialXSd() > 0) {
+            sx = fitConfiguration.getInitialXSd();
           } else {
             // Fail if the width cannot be estimated due to out of bounds
             if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy) {
@@ -612,9 +613,9 @@ public class Gaussian2DFitter {
         }
 
         if (sy == 0) {
-          if (fitConfiguration.isYSDFitting()) {
-            if (fitConfiguration.getInitialYSD() > 0) {
-              sy = fitConfiguration.getInitialYSD();
+          if (fitConfiguration.isYSdFitting()) {
+            if (fitConfiguration.getInitialYSd() > 0) {
+              sy = fitConfiguration.getInitialYSd();
             } else {
               // Fail if the width cannot be estimated
               if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy) {
@@ -997,10 +998,9 @@ public class Gaussian2DFitter {
   protected void correctAngle(final int index, final double[] params, final double[] paramsDev) {
     double angle = params[index];
 
-    final double twicePI = 2 * Math.PI;
-    double fixed = (angle + Math.PI) % twicePI;
+    double fixed = (angle + Math.PI) % TWO_PI;
     if (fixed < 0) {
-      fixed += twicePI;
+      fixed += TWO_PI;
     }
     angle = fixed - Math.PI;
 
@@ -1219,7 +1219,7 @@ public class Gaussian2DFitter {
 
     if (result) {
       // Ensure the deviations are copied for a symmetric Gaussian
-      if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting()) {
+      if (!fitConfiguration.isYSdFitting() && fitConfiguration.isXSdFitting()) {
         // Ensure Y deviation is updated with the X deviation
         for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
           paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];

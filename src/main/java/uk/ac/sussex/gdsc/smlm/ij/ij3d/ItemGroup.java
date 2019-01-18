@@ -225,7 +225,7 @@ public abstract class ItemGroup extends Group implements ItemShape {
   }
 
   @Override
-  public Point3f getCoordinate(int i) {
-    return points[i];
+  public Point3f getCoordinate(int index) {
+    return points[index];
   }
 }

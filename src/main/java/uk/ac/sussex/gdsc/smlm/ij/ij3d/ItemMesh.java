@@ -369,27 +369,27 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   }
 
   @Override
-  public void setCoordinate(final int i, final Point3f p) {
+  public void setCoordinate(final int index, final Point3f point) {
     throw new NotImplementedException();
   }
 
   @Override
-  public void setCoordinates(final int[] indices, final Point3f p) {
+  public void setCoordinates(final int[] indices, final Point3f point) {
     throw new NotImplementedException();
   }
 
   @Override
-  protected void addVertices(Point3f[] v) {
+  protected void addVertices(Point3f[] vertices) {
     throw new NotImplementedException();
   }
 
   @Override
-  protected void addVerticesToGeometryArray(Point3f[] v) {
+  protected void addVerticesToGeometryArray(Point3f[] vertices) {
     throw new NotImplementedException();
   }
 
   @Override
-  protected void addVerticesToGeometryStripArray(Point3f[] v) {
+  protected void addVerticesToGeometryStripArray(Point3f[] vertices) {
     throw new NotImplementedException();
   }
 
@@ -407,11 +407,11 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
    * Creates the geometry.
    *
    * @param coords the coords
-   * @param sourceGA the source geometry array
+   * @param sourceGa the source geometry array
    * @return the geometry array
    */
-  protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGA) {
-    final GeometryArray ga = createGeometryArray(sourceGA, 0);
+  protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGa) {
+    final GeometryArray ga = createGeometryArray(sourceGa, 0);
 
     ga.setCoordinates(0, coords);
     ga.setCapability(GeometryArray.ALLOW_COORDINATE_WRITE);
@@ -430,12 +430,12 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
     // Handle indexed array
     if (isIndexGeometryArray()) {
-      final IndexedGeometryArray sourceIGA = (IndexedGeometryArray) sourceGA;
+      final IndexedGeometryArray sourceIga = (IndexedGeometryArray) sourceGa;
       final IndexedGeometryArray iga = (IndexedGeometryArray) ga;
-      final int objectIndexCount = sourceIGA.getValidIndexCount();
+      final int objectIndexCount = sourceIga.getValidIndexCount();
       final int[] objectIndices = new int[objectIndexCount];
       final int[] allIndices = new int[objectIndices.length * points.length];
-      sourceIGA.getCoordinateIndices(0, objectIndices);
+      sourceIga.getCoordinateIndices(0, objectIndices);
       duplicateIndices(objectIndices, allIndices);
       iga.setCoordinateIndices(0, allIndices);
 
@@ -451,12 +451,12 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       } else {
         if (hasNormals()) {
           // Use the same index for all vertices for normals
-          sourceIGA.getNormalIndices(0, objectIndices);
+          sourceIga.getNormalIndices(0, objectIndices);
           duplicate(objectIndices, 0, objectIndices.length, points.length, allIndices, 0);
           iga.setNormalIndices(0, allIndices);
 
           final float[] normals = new float[(MathUtils.max(objectIndices) + 1) * 3];
-          sourceIGA.getNormals(0, normals);
+          sourceIga.getNormals(0, normals);
           iga.setNormals(0, normals);
 
           doNormals = false;
@@ -478,7 +478,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
     if (doNormals) {
       final float[] objectNormals = new float[vertexCount * 3];
-      sourceGA.getNormals(0, objectNormals);
+      sourceGa.getNormals(0, objectNormals);
       final float[] allNormals = new float[objectNormals.length * points.length];
       duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
       ga.setNormals(0, allNormals);
@@ -490,15 +490,15 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   /**
    * Creates the geometry array.
    *
-   * @param sourceGA the source geometry array
+   * @param sourceGa the source geometry array
    * @param format the format
    * @return the geometry array
    */
-  protected GeometryArray createGeometryArray(GeometryArray sourceGA, int format) {
+  protected GeometryArray createGeometryArray(GeometryArray sourceGa, int format) {
     // Create using reflection
     final GeometryArray ga;
     try {
-      final Class<?> clazz = sourceGA.getClass();
+      final Class<?> clazz = sourceGa.getClass();
       // clazz = clazz.asSubclass(clazz);
 
       final TurboList<Class<?>> paramTypes = new TurboList<>(4);
@@ -518,13 +518,13 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       int numStrips = 0;
       int[] objectStripCounts = null;
       int[] allStripCounts = null;
-      if (sourceGA instanceof IndexedGeometryStripArray) {
-        final IndexedGeometryStripArray igsa = (IndexedGeometryStripArray) sourceGA;
+      if (sourceGa instanceof IndexedGeometryStripArray) {
+        final IndexedGeometryStripArray igsa = (IndexedGeometryStripArray) sourceGa;
         numStrips = igsa.getNumStrips();
         objectStripCounts = new int[numStrips];
         igsa.getStripIndexCounts(objectStripCounts);
-      } else if (sourceGA instanceof GeometryStripArray) {
-        final GeometryStripArray gsa = (GeometryStripArray) sourceGA;
+      } else if (sourceGa instanceof GeometryStripArray) {
+        final GeometryStripArray gsa = (GeometryStripArray) sourceGa;
         numStrips = gsa.getNumStrips();
         objectStripCounts = new int[numStrips];
         gsa.getStripVertexCounts(objectStripCounts);
@@ -783,29 +783,29 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     // The normals, indices, strip counts are are unchanged.
     // int objectSize = vertexCount;
 
-    int n = vertexCount * 3;
-    final float[] oldCoords = new float[oldSize * n];
+    int countPerObject = vertexCount * 3;
+    final float[] oldCoords = new float[oldSize * countPerObject];
     ga.getCoordinates(0, oldCoords);
-    final float[] coords = new float[size * n];
+    final float[] coords = new float[size * countPerObject];
     for (int i = 0; i < size; i++) {
       final int j = indices[i];
-      final int ii = i * n;
-      final int jj = j * n;
-      System.arraycopy(oldCoords, jj, coords, ii, n);
+      final int ii = i * countPerObject;
+      final int jj = j * countPerObject;
+      System.arraycopy(oldCoords, jj, coords, ii, countPerObject);
     }
 
     final float[] colors;
     if (hasColor()) {
-      n = colorUpdater.size();
-      final int colorSize = oldSize * n;
+      countPerObject = colorUpdater.size();
+      final int colorSize = oldSize * countPerObject;
       final float[] oldColors = (colorSize < oldCoords.length) ? oldCoords : new float[colorSize];
       ga.getColors(0, oldColors);
-      colors = new float[size * n];
+      colors = new float[size * countPerObject];
       for (int i = 0; i < size; i++) {
         final int j = indices[i];
-        final int ii = i * n;
-        final int jj = j * n;
-        System.arraycopy(oldColors, jj, colors, ii, n);
+        final int ii = i * countPerObject;
+        final int jj = j * countPerObject;
+        System.arraycopy(oldColors, jj, colors, ii, countPerObject);
       }
     } else {
       colors = null;
@@ -847,14 +847,14 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   /**
    * Reorder the points using the indices.
    *
-   * @param p the points
+   * @param points the points
    * @param indices the indices
    * @return the new points
    */
-  static Point3f[] reorderPoints(Point3f[] p, int[] indices) {
+  static Point3f[] reorderPoints(Point3f[] points, int[] indices) {
     final Point3f[] c = new Point3f[indices.length];
     for (int i = indices.length; i-- > 0;) {
-      c[i] = p[indices[i]];
+      c[i] = points[indices[i]];
     }
     return c;
   }
@@ -865,8 +865,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   }
 
   @Override
-  public Point3f getCoordinate(int i) {
-    return points[i];
+  public Point3f getCoordinate(int index) {
+    return points[index];
   }
 
   @Override
@@ -1061,9 +1061,9 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   }
 
   @Override
-  public void setShaded(boolean b) {
+  public void setShaded(boolean shaded) {
     if (!isPointArray) {
-      super.setShaded(b);
+      super.setShaded(shaded);
     }
   }
 }

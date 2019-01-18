@@ -44,7 +44,9 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   protected final int[] gradientIndices;
 
   /** The target intensity for each peak. */
+  // @CHECKSTYLE.OFF: LocalVariableName
   protected final double[] tI;
+  // @CHECKSTYLE.ON: LocalVariableName
 
   /**
    * Instantiates a new multi-peak erf gaussian 2D function.
@@ -84,13 +86,13 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
     final int start = (evaluatesBackground() ? 1 : 0);
     final int m = singleGradientIndices.length;
     final int[] indices = new int[start + numberOfPeaks * (m - start)];
-    int p = 0;
+    int count = 0;
     if (evaluatesBackground()) {
-      indices[p++] = 0;
+      indices[count++] = 0;
     }
     for (int n = 0, i = 0; n < numberOfPeaks; n++, i += PARAMETERS_PER_PEAK) {
       for (int j = start; j < m; j++) {
-        indices[p++] = i + singleGradientIndices[j];
+        indices[count++] = i + singleGradientIndices[j];
       }
     }
     return indices;
@@ -109,42 +111,42 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   /**
    * Evaluates a 2-dimensional Gaussian function for multiple peaks.
    *
-   * @param i Input predictor
+   * @param x Input predictor
    * @return The Gaussian value
    */
   @Override
-  public double eval(final int i) {
+  public double eval(final int x) {
     // Unpack the predictor into the dimensions
-    int yy = i / maxx;
-    int xx = i % maxx;
+    int yy = x / maxx;
+    int xx = x % maxx;
 
-    double I = tb;
+    double value = tb;
     for (int n = 0; n < numberOfPeaks; n++, xx += maxx, yy += maxy) {
-      I += tI[n] * deltaEx[xx] * deltaEy[yy];
+      value += tI[n] * deltaEx[xx] * deltaEy[yy];
     }
-    return I;
+    return value;
   }
 
   /**
    * Evaluates a 2-dimensional Gaussian function for multiple peaks.
    *
-   * @param i Input predictor
+   * @param x Input predictor
    * @param duda Partial gradient of function with respect to each coefficient
    * @return The predicted value
    */
   @Override
-  public abstract double eval(final int i, final double[] duda);
+  public abstract double eval(final int x, final double[] duda);
 
   /**
    * Evaluates a 2-dimensional Gaussian function for multiple peaks.
    *
-   * @param i Input predictor
+   * @param x Input predictor
    * @param duda Partial first gradient of function with respect to each coefficient
    * @param d2uda2 Partial second gradient of function with respect to each coefficient
    * @return The predicted value
    */
   @Override
-  public abstract double eval2(final int i, final double[] duda, final double[] d2uda2);
+  public abstract double eval2(final int x, final double[] duda, final double[] d2uda2);
 
   @Override
   public void forEach(ValueProcedure procedure) {
@@ -180,20 +182,20 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         }
 
         for (int x = 0; x < maxx; x++) {
-          double I = tb;
+          double value = tb;
           for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
-            I += tI_deltaEy[n] * deltaEx[xx];
+            value += tI_deltaEy[n] * deltaEx[xx];
           }
-          procedure.execute(I);
+          procedure.execute(value);
         }
 
         // No pre-compute
         // for (int x = 0; x < maxx; x++)
         // {
-        // double I = tb;
+        // double value = tb;
         // for (int n = 0, xx = x, yy = y; n < numberOfPeaks; n++, xx += maxx, yy += maxy)
-        // I += tI[n] * deltaEx[xx] * deltaEy[yy];
-        // procedure.execute(I);
+        // value += tI[n] * deltaEx[xx] * deltaEy[yy];
+        // procedure.execute(value);
         // }
       }
     }
@@ -235,11 +237,11 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
         }
 
         for (int x = 0; x < maxx; x++) {
-          double I = tb;
+          double value = tb;
           for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
-            I += tI_deltaEy[n] * deltaEx[xx];
+            value += tI_deltaEy[n] * deltaEx[xx];
           }
-          values[i++] = I;
+          values[i++] = value;
         }
       }
     }

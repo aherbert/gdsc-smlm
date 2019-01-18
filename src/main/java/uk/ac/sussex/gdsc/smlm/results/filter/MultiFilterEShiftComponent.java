@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using Euclidian Shift.
  */
-public class MultiFilterEShiftComponent extends MultiFilterComponent {
+public class MultiFilterEShiftComponent implements MultiFilterComponent {
   private static final int type =
       IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
 

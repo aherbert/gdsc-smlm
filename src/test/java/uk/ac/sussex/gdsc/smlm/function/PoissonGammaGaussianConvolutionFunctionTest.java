@@ -77,8 +77,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
     final double p2 = cumulativeProbability(gain, mu, sd);
     // This only works when the mean is above 2 if the gain is low
     if (mu > 2 || gain > 20) {
-      Assertions.assertEquals(1, p2, 0.02,
-          () -> String.format("g=%f, mu=%f, s=%f", gain, mu, sd));
+      Assertions.assertEquals(1, p2, 0.02, () -> String.format("g=%f, mu=%f, s=%f", gain, mu, sd));
     }
   }
 
@@ -148,8 +147,8 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
     }
 
     if (pvalue < 0.98 || pvalue > 1.02) {
-      logger.log(
-          TestLogUtils.getRecord(Level.FINE, "g=%f, mu=%f, s=%f p=%f", gain, mu, sd, pvalue));
+      logger
+          .log(TestLogUtils.getRecord(Level.FINE, "g=%f, mu=%f, s=%f p=%f", gain, mu, sd, pvalue));
     }
 
     // Do a formal integration

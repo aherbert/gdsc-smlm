@@ -27,13 +27,13 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSet0 extends MultiFilterComponentSet {
+public class MultiFilterComponentSet0 implements MultiFilterComponentSet {
   /**
    * Instantiates a new multi filter component set for 0 components.
    *
    * @param components the components
    */
-  public MultiFilterComponentSet0(MultiFilterComponent[] components) {
+  MultiFilterComponentSet0(MultiFilterComponent[] components) {
     // Ignore the array
   }
 
@@ -48,7 +48,12 @@ public class MultiFilterComponentSet0 extends MultiFilterComponentSet {
   }
 
   @Override
-  void replace0(MultiFilterComponent c) {
+  public void replace0(MultiFilterComponent component) {
     // This set is empty so no replacement is possible. Don't throw an exception though!
+  }
+
+  @Override
+  public MultiFilterComponentSet copy() {
+    return new MultiFilterComponentSet0(null);
   }
 }

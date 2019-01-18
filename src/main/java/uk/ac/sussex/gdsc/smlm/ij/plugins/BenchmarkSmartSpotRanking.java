@@ -45,12 +45,11 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 
 import ij.IJ;
@@ -184,18 +183,18 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   /** The candidate FN. */
   static double candidateFN;
 
-  private class FilterCandidates {
+  private static class FilterCandidates {
     // Integer counts of positives (matches) and negatives
-    final int p;
-    final int n;
+    final int pos;
+    final int neg;
     // Double sums of the fractions match score and antiscore
     final double np;
     final double nn;
     final ScoredSpot[] spots;
 
-    public FilterCandidates(int p, int n, double np, double nn, ScoredSpot[] spots) {
-      this.p = p;
-      this.n = n;
+    FilterCandidates(int pos, int neg, double np, double nn, ScoredSpot[] spots) {
+      this.pos = pos;
+      this.neg = neg;
       this.np = np;
       this.nn = nn;
       this.spots = spots;
@@ -207,21 +206,21 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private static final byte TN = (byte) 3;
   private static final byte FN = (byte) 4;
 
-  private class RankResult {
-    final float t;
-    final FractionClassificationResult f;
-    final ClassificationResult c;
+  private static class RankResult {
+    final float frame;
+    final FractionClassificationResult fresult;
+    final ClassificationResult cresult;
     /**
      * Store details about the spots that were accepted.
      */
     final byte[] good;
     final long time;
 
-    public RankResult(float t, FractionClassificationResult f, ClassificationResult c, byte[] good,
-        long time) {
-      this.t = t;
-      this.f = f;
-      this.c = c;
+    RankResult(float frame, FractionClassificationResult fresult, ClassificationResult cresult,
+        byte[] good, long time) {
+      this.frame = frame;
+      this.fresult = fresult;
+      this.cresult = cresult;
       this.good = good;
       this.time = time;
     }
@@ -254,7 +253,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final TIntObjectHashMap<FilterCandidates> filterCandidates;
     final TIntObjectHashMap<RankResults> results;
     final int fitting;
-    final boolean requireSNR;
+    final boolean requireSnr;
 
     float[] data;
     double[] region;
@@ -268,7 +267,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       this.filterCandidates = filterCandidates;
       this.results = new TIntObjectHashMap<>();
       fitting = config.getFittingWidth();
-      requireSNR = (levels.length > 0);
+      requireSnr = (levels.length > 0);
     }
 
     @Override
@@ -315,11 +314,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
       // Estimate SNR
       double[] snr = null;
-      long tSnr = 0;
-      if (requireSNR) {
-        tSnr = System.nanoTime();
-        data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(),
-            null, data);
+      long timeSnr = 0;
+      if (requireSnr) {
+        timeSnr = System.nanoTime();
+        data = ImageJImageConverter.getData(stack.getPixels(frame), stack.getWidth(),
+            stack.getHeight(), null, data);
         final int maxx = stack.getWidth();
         final int maxy = stack.getHeight();
         final ImageExtractor ie = ImageExtractor.wrap(data, maxx, maxy);
@@ -358,12 +357,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
             }
             Arrays.sort(region, 0, size2);
             double sumB = 0;
-            int c = 0;
+            int count = 0;
             for (int k = (int) Math.ceil(size2 * 0.2); k-- > 0;) {
               sumB += region[k];
-              c++;
+              count++;
             }
-            b = sumB / (c * 2);// Account for averaging
+            b = sumB / (count * 2);// Account for averaging
           }
 
           // System.out.printf("%d (%d,%d) %f %f\n", frame, spot.x, spot.y, b);
@@ -371,7 +370,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
           final double signal = sum - b * size;
           snr[i] = signal / noise;
         }
-        tSnr = System.nanoTime() - tSnr;
+        timeSnr = System.nanoTime() - timeSnr;
       }
 
       final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
@@ -439,7 +438,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
       for (final double l : levels) {
         // Get the intensity of the lowest spot
-        double t = Double.POSITIVE_INFINITY;
+        double minIntensity = Double.POSITIVE_INFINITY;
 
         // Score
         final byte[] category = new byte[spots.length];
@@ -462,8 +461,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
               category[i] = FP;
               ifp++;
             }
-            if (t > intensity[i]) {
-              t = intensity[i];
+            if (minIntensity > intensity[i]) {
+              minIntensity = intensity[i];
             }
           } else {
             fn += spots[i].getScore();
@@ -480,9 +479,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
         // Store the results using a copy of the original (to preserve the candidates for repeat
         // analysis)
-        results.results
-            .add(new RankResult((float) t, new FractionClassificationResult(tp, fp, tn, fn),
-                new ClassificationResult(itp, ifp, itn, ifn), category, tSnr));
+        results.results.add(
+            new RankResult((float) minIntensity, new FractionClassificationResult(tp, fp, tn, fn),
+                new ClassificationResult(itp, ifp, itn, ifn), category, timeSnr));
       }
 
       //// Testing: Correlation between intensity and SNR
@@ -544,7 +543,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
             + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
             + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \n"
             + "Configure the fitting:",
-        MathUtils.rounded(simulationParameters.s), MathUtils.rounded(getSa())));
+        MathUtils.rounded(simulationParameters.sd), MathUtils.rounded(getSa())));
 
     gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
     gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
@@ -556,7 +555,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     // Collect options for fitting that may effect ranking
     final double sa = getSa();
-    gd.addNumericField("Initial_StdDev", sa / simulationParameters.a, 3);
+    gd.addNumericField("Initial_StdDev", sa / simulationParameters.pixelPitch, 3);
     gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
     // gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
     // gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
@@ -758,7 +757,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * @param filterResults the filter results
    * @return The filter candidates
    */
-  private TIntObjectHashMap<FilterCandidates>
+  private static TIntObjectHashMap<FilterCandidates>
       subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults) {
     // Convert fractions from percent
     final double f1 = Math.min(1, fractionPositives / 100.0);
@@ -769,96 +768,92 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     nP = nN = 0;
     final double[] fX = new double[2];
     final int[] nX = new int[2];
-    filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>() {
-      @Override
-      public boolean execute(int frame, FilterResult r) {
-        // Determine the number of positives to find. This score may be fractional.
-        fX[0] += r.result.getTruePositives();
-        fX[1] += r.result.getFalsePositives();
+    filterResults.forEachEntry((frame, result) -> {
+      // Determine the number of positives to find. This score may be fractional.
+      fX[0] += result.result.getTruePositives();
+      fX[1] += result.result.getFalsePositives();
 
-        // Q. Is r.result.getTruePositives() not the same as the total of r.spots[i].match?
-        // A. Not if we used fractional scoring.
-        int c = 0;
-        for (int i = r.spots.length; i-- > 0;) {
-          if (r.spots[i].match) {
-            c++;
-          }
-        }
-        nX[0] += c;
-        nX[1] += (r.spots.length - c);
-
-        // Make the target use the fractional score
-        final double np2 = r.result.getTruePositives() * f1;
-        double targetP = np2;
-
-        // Set the target using the closest
-        if (f1 < 1) {
-          double np = 0;
-          double min = r.result.getTruePositives();
-          for (final ScoredSpot spot : r.spots) {
-            if (spot.match) {
-              np += spot.getScore();
-              final double d = np2 - np;
-              if (d < min) {
-                min = d;
-                targetP = np;
-              } else {
-                break;
-              }
-            }
-          }
-
-          // if (targetP < np2)
-          // System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
-        }
-
-        // Count the number of positive & negatives
-        int p = 0;
-        int n = 0;
-        double np = 0;
-        double nn = 0;
-
-        boolean reachedTarget = false;
-        int nAfter = 0;
-
-        int count = 0;
-        for (final ScoredSpot spot : r.spots) {
+      // Q. Is r.result.getTruePositives() not the same as the total of r.spots[i].match?
+      // A. Not if we used fractional scoring.
+      int count = 0;
+      for (int i = result.spots.length; i-- > 0;) {
+        if (result.spots[i].match) {
           count++;
-          nn += spot.antiScore();
+        }
+      }
+      nX[0] += count;
+      nX[1] += (result.spots.length - count);
+
+      // Make the target use the fractional score
+      final double np2 = result.result.getTruePositives() * f1;
+      double targetP = np2;
+
+      // Set the target using the closest
+      if (f1 < 1) {
+        double np = 0;
+        double min = result.result.getTruePositives();
+        for (final ScoredSpot spot : result.spots) {
           if (spot.match) {
             np += spot.getScore();
-            p++;
-            if (!reachedTarget) {
-              reachedTarget = np >= targetP;
-            }
-          } else {
-            n++;
-            if (reachedTarget) {
-              nAfter++;
-            }
-          }
-
-          if (reachedTarget) {
-            // Check if we have reached both the limits
-            if (nAfter >= negativesAfterAllPositives && (double) n / (n + p) >= f2) {
+            final double d = np2 - np;
+            if (d < min) {
+              min = d;
+              targetP = np;
+            } else {
               break;
             }
           }
         }
 
-        // Debug
-        // System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n",
-        // result.getKey().intValue(),
-        // r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(),
-        // p, n,
-        // nAfter, (double) n / (n + p));
-
-        // TODO - This is different from BenchmarkSpotFit where all the candidates are
-        // included but only the first N are processed. Should this be changed here too.
-
-        subset.put(frame, new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
-        return true;
+        // if (targetP < np2)
+        // System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
       }
+
+      // Count the number of positive & negatives
+      int pos = 0;
+      int neg = 0;
+      double np = 0;
+      double nn = 0;
+
+      boolean reachedTarget = false;
+      int negAfter = 0;
+
+      count = 0;
+      for (final ScoredSpot spot : result.spots) {
+        count++;
+        nn += spot.antiScore();
+        if (spot.match) {
+          np += spot.getScore();
+          pos++;
+          if (!reachedTarget) {
+            reachedTarget = np >= targetP;
+          }
+        } else {
+          neg++;
+          if (reachedTarget) {
+            negAfter++;
+          }
+        }
+
+        if (reachedTarget
+            // Check if we have reached both the limits
+            && negAfter >= negativesAfterAllPositives && (double) neg / (neg + pos) >= f2) {
+          break;
+        }
+      }
+
+      // Debug
+      // System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n",
+      // result.getKey().intValue(),
+      // r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(),
+      // p, n,
+      // nAfter, (double) n / (n + p));
+
+      // TODO - This is different from BenchmarkSpotFit where all the candidates are
+      // included but only the first N are processed. Should this be changed here too.
+
+      subset.put(frame, new FilterCandidates(pos, neg, np, nn, Arrays.copyOf(result.spots, count)));
+      return true;
     });
 
     fP = fX[0];
@@ -914,21 +909,21 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     filterCandidates.forEachValue(result -> {
       counter1[0] += result.np;
       counter1[1] += result.nn;
-      counter2[0] += result.p;
-      counter2[1] += result.n;
+      counter2[0] += result.pos;
+      counter2[1] += result.neg;
       return true;
     });
-    final int cTP = counter2[0];
-    final int cFP = counter2[2];
+    final int countTp = counter2[0];
+    final int countFp = counter2[2];
 
     // The fraction of positive and negative candidates that were included
-    add(sb, (100.0 * cTP) / nP);
-    add(sb, (100.0 * cFP) / nN);
+    add(sb, (100.0 * countTp) / nP);
+    add(sb, (100.0 * countFp) / nN);
 
     // Add counts of the the candidates
-    add(sb, cTP + cFP);
-    add(sb, cTP);
-    add(sb, cFP);
+    add(sb, countTp + countFp);
+    add(sb, countTp);
+    add(sb, countFp);
 
     // Add fractional counts of the the candidates
     double tp = counter1[0];
@@ -941,14 +936,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final int[] frames = new int[rankResults.size()];
     final RankResults[] results = new RankResults[rankResults.size()];
     final int[] counter = new int[1];
-    rankResults.forEachEntry(new TIntObjectProcedure<RankResults>() {
-      @Override
-      public boolean execute(int a, RankResults b) {
-        frames[counter[0]] = a;
-        results[counter[0]] = b;
-        counter[0]++;
-        return true;
-      }
+    rankResults.forEachEntry((frame, result) -> {
+      frames[counter[0]] = frame;
+      results[counter[0]] = result;
+      counter[0]++;
+      return true;
     });
 
     // Summarise actual and candidate spots per frame
@@ -1022,16 +1014,16 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       for (final RankResults rr : results) {
         final RankResult r = rr.results.get(i);
         // Some results will not have a threshold
-        if (!Float.isInfinite(r.t)) {
-          s.add(r.t);
+        if (!Float.isInfinite(r.frame)) {
+          s.add(r.frame);
         }
         time += r.time;
-        tp += r.f.getTruePositives();
-        fp += r.f.getFalsePositives();
-        tn += r.f.getTrueNegatives();
-        itp += r.c.getTruePositives();
-        ifp += r.c.getFalsePositives();
-        itn += r.c.getTrueNegatives();
+        tp += r.fresult.getTruePositives();
+        fp += r.fresult.getFalsePositives();
+        tn += r.fresult.getTrueNegatives();
+        itp += r.cresult.getTruePositives();
+        ifp += r.cresult.getFalsePositives();
+        itn += r.cresult.getTrueNegatives();
       }
 
       sb.setLength(0);
@@ -1127,13 +1119,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private static void addToOverlay(Overlay o, int frame, int[] x, int[] y, int c, Color color) {
-    final PointRoi roi = new PointRoi(x, y, c);
+  private static void addToOverlay(Overlay overlay, int frame, int[] x, int[] y, int count,
+      Color color) {
+    final PointRoi roi = new PointRoi(x, y, count);
     roi.setFillColor(color);
     roi.setStrokeColor(color);
     roi.setPosition(frame);
     roi.setShowLabels(false);
-    o.add(roi);
+    overlay.add(roi);
   }
 
   private static void add(StringBuilder sb, String value) {
@@ -1212,20 +1205,20 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private static double addScores(StringBuilder sb, FractionClassificationResult m) {
+  private static double addScores(StringBuilder sb, FractionClassificationResult result) {
     final double[] scores = new double[SORT.length - 1];
-    int i = 0;
-    scores[i++] = m.getTruePositives();
-    scores[i++] = m.getFalsePositives();
-    scores[i++] = m.getTrueNegatives();
-    scores[i++] = m.getFalseNegatives();
-    scores[i++] = m.getPrecision();
-    scores[i++] = m.getRecall();
-    scores[i++] = m.getFScore(0.5);
-    scores[i++] = m.getF1Score();
-    scores[i++] = m.getFScore(2);
-    scores[i++] = m.getJaccard();
-    scores[i++] = m.getMatthewsCorrelationCoefficient();
+    int index = 0;
+    scores[index++] = result.getTruePositives();
+    scores[index++] = result.getFalsePositives();
+    scores[index++] = result.getTrueNegatives();
+    scores[index++] = result.getFalseNegatives();
+    scores[index++] = result.getPrecision();
+    scores[index++] = result.getRecall();
+    scores[index++] = result.getFScore(0.5);
+    scores[index++] = result.getF1Score();
+    scores[index++] = result.getFScore(2);
+    scores[index++] = result.getJaccard();
+    scores[index] = result.getMatthewsCorrelationCoefficient();
     for (final double s : scores) {
       add(sb, s);
     }
@@ -1241,8 +1234,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private double getSa() {
-    final double sa =
-        PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a);
-    return sa;
+    return PSFCalculator.squarePixelAdjustment(simulationParameters.sd,
+        simulationParameters.pixelPitch);
   }
 }

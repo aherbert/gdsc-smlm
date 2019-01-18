@@ -27,6 +27,8 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.Arrays;
 
 /**
@@ -51,8 +53,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   private double minimumSignal = Float.NEGATIVE_INFINITY;
   private double[] minimumPosition;
   private double[] maximumPosition;
-  private double[] minimumSD;
-  private double[] maximumSD;
+  private double[] minimumSd;
+  private double[] maximumSd;
 
   /**
    * Instantiates a new gaussian stopping criteria.
@@ -173,22 +175,22 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
       }
 
       if (func.evaluatesSD0()) {
-        if (isBelow(minimumSD, a,
+        if (isBelow(minimumSd, a,
             i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD)) {
           return true;
         }
-        if (isAbove(maximumSD, a,
+        if (isAbove(maximumSd, a,
             i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD)) {
           return true;
         }
       }
 
       if (func.evaluatesSD1()) {
-        if (isBelow(minimumSD, a,
+        if (isBelow(minimumSd, a,
             i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD)) {
           return true;
         }
-        if (isAbove(maximumSD, a,
+        if (isAbove(maximumSd, a,
             i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_SD)) {
           return true;
         }
@@ -316,11 +318,11 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
   /**
    * Sets the minimum standard deviation (SD) for each dimension.
    *
-   * @param minimumSD the minimum SD for each dimension
+   * @param minimumSd the minimum SD for each dimension
    */
-  public void setMinimumSD(double[] minimumSD) {
+  public void setMinimumSd(double[] minimumSd) {
     if (func.evaluatesSD0()) {
-      this.minimumSD = checkArray(minimumSD);
+      this.minimumSd = checkArray(minimumSd);
     }
   }
 
@@ -329,18 +331,18 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
    *
    * @return the minimum SD for each dimension.
    */
-  public double[] getMinimumSD() {
-    return minimumSD;
+  public double[] getMinimumSd() {
+    return minimumSd;
   }
 
   /**
    * Sets the maximum standard deviation (SD) for each dimension.
    *
-   * @param maximumSD the maximum SD for each dimension
+   * @param maximumSd the maximum SD for each dimension
    */
-  public void setMaximumSD(double[] maximumSD) {
+  public void setMaximumSd(double[] maximumSd) {
     if (func.evaluatesSD0()) {
-      this.maximumSD = checkArray(maximumSD);
+      this.maximumSd = checkArray(maximumSd);
     }
   }
 
@@ -349,11 +351,11 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
    *
    * @return the maximum SD for each dimension.
    */
-  public double[] getMaximumSD() {
-    return maximumSD;
+  public double[] getMaximumSd() {
+    return maximumSd;
   }
 
   private static double[] checkArray(double[] array) {
-    return (array == null || array.length != 2) ? null : array;
+    return (ArrayUtils.getLength(array) == 2) ? array : null;
   }
 }

@@ -136,7 +136,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public double getSNR() {
+  public double getSnr() {
     return 0;
   }
 

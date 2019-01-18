@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LseBaseFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 
 /**
@@ -82,10 +82,10 @@ public class GradientCalculator {
     func.initialise(a);
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wa = new double[1];
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.evalw(x[i], dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(x[i], dyDa, wa);
+        final double weight = getWeight(wa[0]);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -183,10 +183,10 @@ public class GradientCalculator {
     }
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wa = new double[1];
       for (int i = 0; i < x.length; i++) {
-        final double dy = y[i] - func.evalw(x[i], dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(x[i], dyDa, wa);
+        final double weight = getWeight(wa[0]);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -260,10 +260,10 @@ public class GradientCalculator {
 
     if (fx == null || fx.length < x.length) {
       if (func.canComputeWeights()) {
-        final double[] w = new double[1];
+        final double[] wgt = new double[1];
         for (int i = 0; i < x.length; i++) {
-          final double dy = y[i] - func.evalw(x[i], w);
-          final double weight = getWeight(w[0]);
+          final double dy = y[i] - func.evalw(x[i], wgt);
+          final double weight = getWeight(wgt[0]);
           ssx += dy * dy * weight;
         }
       } else {
@@ -273,11 +273,11 @@ public class GradientCalculator {
         }
       }
     } else if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wgt = new double[1];
       for (int i = 0; i < x.length; i++) {
-        fx[i] = func.evalw(x[i], w);
+        fx[i] = func.evalw(x[i], wgt);
         final double dy = y[i] - fx[i];
-        final double weight = getWeight(w[0]);
+        final double weight = getWeight(wgt[0]);
         ssx += dy * dy * weight;
       }
     } else {
@@ -327,10 +327,10 @@ public class GradientCalculator {
     func.initialise(a);
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wa = new double[1];
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.evalw(i, dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(i, dyDa, wa);
+        final double weight = getWeight(wa[0]);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -435,10 +435,10 @@ public class GradientCalculator {
     }
 
     if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wa = new double[1];
       for (int i = 0; i < n; i++) {
-        final double dy = y[i] - func.evalw(i, dyDa, w);
-        final double weight = getWeight(w[0]);
+        final double dy = y[i] - func.evalw(i, dyDa, wa);
+        final double weight = getWeight(wa[0]);
 
         // Compute:
         // - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -511,10 +511,10 @@ public class GradientCalculator {
 
     if (fx == null || fx.length < n) {
       if (func.canComputeWeights()) {
-        final double[] w = new double[1];
+        final double[] wgt = new double[1];
         for (int i = 0; i < n; i++) {
-          final double dy = y[i] - func.evalw(i, w);
-          final double weight = getWeight(w[0]);
+          final double dy = y[i] - func.evalw(i, wgt);
+          final double weight = getWeight(wgt[0]);
           ssx += dy * dy * weight;
         }
       } else {
@@ -524,11 +524,11 @@ public class GradientCalculator {
         }
       }
     } else if (func.canComputeWeights()) {
-      final double[] w = new double[1];
+      final double[] wgt = new double[1];
       for (int i = 0; i < n; i++) {
-        fx[i] = func.evalw(i, w);
+        fx[i] = func.evalw(i, wgt);
         final double dy = y[i] - fx[i];
-        final double weight = getWeight(w[0]);
+        final double weight = getWeight(wgt[0]);
         ssx += dy * dy * weight;
       }
     } else {
@@ -877,7 +877,7 @@ public class GradientCalculator {
       return null;
     }
 
-    return LSEBaseFunctionSolver.covariance(I, Ei_Eia_Eib);
+    return LseBaseFunctionSolver.covariance(I, Ei_Eia_Eib);
   }
 
   /**
@@ -949,6 +949,6 @@ public class GradientCalculator {
     // System.out.println(new DenseMatrix64F(I).toString());
     // System.out.println(new DenseMatrix64F(Ei_Eia_Eib).toString());
 
-    return LSEBaseFunctionSolver.variance(I, Ei_Eia_Eib);
+    return LseBaseFunctionSolver.variance(I, Ei_Eia_Eib);
   }
 }

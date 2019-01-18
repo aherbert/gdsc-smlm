@@ -40,7 +40,9 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
   // Required for the PSF
 
   /** The intensity. */
+  // @CHECKSTYLE.OFF: LocalVariableName
   protected double tI;
+  // @CHECKSTYLE.ON: LocalVariableName
 
   /**
    * Instantiates a new erf gaussian 2D function.
@@ -62,38 +64,38 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
   /**
    * Evaluates a 2-dimensional Gaussian function for a single peak.
    *
-   * @param i Input predictor
+   * @param x Input predictor
    * @return The Gaussian value
    */
   @Override
-  public double eval(final int i) {
+  public double eval(final int x) {
     // Unpack the predictor into the dimensions
-    final int y = i / maxx;
-    final int x = i % maxx;
+    final int yy = x / maxx;
+    final int xx = x % maxx;
 
-    return tb + tI * deltaEx[x] * deltaEy[y];
+    return tb + tI * deltaEx[xx] * deltaEy[yy];
   }
 
   /**
    * Evaluates a 2-dimensional Gaussian function for a single peak.
    *
-   * @param i Input predictor
+   * @param x Input predictor
    * @param duda Partial gradient of function with respect to each coefficient
    * @return The predicted value
    */
   @Override
-  public abstract double eval(final int i, final double[] duda);
+  public abstract double eval(final int x, final double[] duda);
 
   /**
    * Evaluates a 2-dimensional Gaussian function for a single peak.
    *
-   * @param i Input predictor
+   * @param x Input predictor
    * @param duda Partial first gradient of function with respect to each coefficient
    * @param d2uda2 Partial second gradient of function with respect to each coefficient
    * @return The predicted value
    */
   @Override
-  public abstract double eval2(final int i, final double[] duda, final double[] d2uda2);
+  public abstract double eval2(final int x, final double[] duda, final double[] d2uda2);
 
   @Override
   public void forEach(ValueProcedure procedure) {

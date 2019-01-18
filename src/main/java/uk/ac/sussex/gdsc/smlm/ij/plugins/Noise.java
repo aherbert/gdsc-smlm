@@ -35,10 +35,10 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
-import uk.ac.sussex.gdsc.smlm.model.camera.CCDCameraModel;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
-import uk.ac.sussex.gdsc.smlm.model.camera.EMCCDCameraModel;
+import uk.ac.sussex.gdsc.smlm.model.camera.CcdCameraModel;
+import uk.ac.sussex.gdsc.smlm.model.camera.EmCcdCameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.NullCameraModel;
 
 import ij.IJ;
@@ -155,10 +155,10 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     yAxisTitle = Y_AXIS_PHOTON;
     switch (calibration.getCameraType()) {
       case CCD:
-        cameraModel = new CCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
+        cameraModel = new CcdCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
         break;
       case EMCCD:
-        cameraModel = new EMCCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
+        cameraModel = new EmCcdCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
         break;
       case SCMOS:
         cameraModel = CameraModelManager.load(calibration.getCameraModelName());
@@ -239,8 +239,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     for (int slice = start, i = 0; slice <= end; slice++, i++) {
       IJ.showProgress(i, size);
       final ImageProcessor ip = stack.getProcessor(slice);
-      buffer =
-          IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
+      buffer = ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds,
+          buffer);
       cameraModel.removeBiasAndGain(bounds, buffer);
       final NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
       ne.setPreserveResiduals(preserveResiduals);
@@ -302,7 +302,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
     final Rectangle bounds = ip.getRoi();
     final float[] buffer =
-        IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+        ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
     cameraModel.removeBiasAndGain(bounds, buffer);
     final NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
     ne.setPreserveResiduals(true);

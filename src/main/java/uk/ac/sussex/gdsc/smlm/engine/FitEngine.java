@@ -156,7 +156,7 @@ public class FitEngine {
     final FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
     final FitConfiguration fitConfiguration = config.getFitConfiguration();
     final Calibration calibration = fitConfiguration.getCalibration();
-    final PSF psf = fitConfiguration.getPSF();
+    final PSF psf = fitConfiguration.getPsf();
 
     for (int i = 0; i < threads; i++) {
       final FitEngineConfiguration copy =

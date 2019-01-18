@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -78,10 +78,10 @@ public class WidthFilter extends DirectFilter implements IMultiFilter {
   @Override
   public void setup(MemoryPeakResults peakResults) {
     calculator =
-        Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
+        Gaussian2DPeakResultHelper.create(peakResults.getPsf(), peakResults.getCalibration(), 0);
 
     // Set the width limit
-    final double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+    final double s = PsfHelper.getGaussian2DWx(peakResults.getPsf());
     upperSigmaThreshold = Filter.getUpperLimit(s * width);
   }
 
@@ -132,7 +132,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter {
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (widthEnabled) {
-      if (peak.getXSDFactor() > upperSigmaThreshold) {
+      if (peak.getXSdFactor() > upperSigmaThreshold) {
         return V_X_SD_FACTOR;
       }
     }
@@ -203,7 +203,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public double getSNR() {
+  public double getSnr() {
     return 0;
   }
 

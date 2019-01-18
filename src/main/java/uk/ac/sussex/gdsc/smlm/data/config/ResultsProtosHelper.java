@@ -158,12 +158,12 @@ public final class ResultsProtosHelper {
   }
 
   /**
-   * Checks if is gdsc.
+   * Checks if the format is a GDSC file format.
    *
    * @param value the results file format
-   * @return true, if is gdsc
+   * @return true, if a GDSC file format
    */
-  public static boolean isGDSC(ResultsFileFormat value) {
+  public static boolean isGdsc(ResultsFileFormat value) {
     switch (value) {
       case BINARY:
       case TEXT:

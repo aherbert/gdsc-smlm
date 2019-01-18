@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSetDefault extends MultiFilterComponentSet {
+public class MultiFilterComponentSetDefault implements MultiFilterComponentSet {
   private final MultiFilterComponent[] components;
 
   /**
@@ -59,19 +59,19 @@ public class MultiFilterComponentSetDefault extends MultiFilterComponentSet {
   }
 
   @Override
-  void replace0(MultiFilterComponent c) {
+  public void replace0(MultiFilterComponent component) {
     if (components.length > 0) {
-      components[0] = c;
+      components[0] = component;
     }
   }
 
   @Override
-  public MultiFilterComponentSet clone() {
+  public MultiFilterComponentSet copy() {
     // Copy the array
-    final MultiFilterComponent[] c = new MultiFilterComponent[components.length];
-    if (c.length > 0) {
-      System.arraycopy(components, 0, c, 0, c.length);
+    final MultiFilterComponent[] cmp = new MultiFilterComponent[components.length];
+    if (cmp.length > 0) {
+      System.arraycopy(components, 0, cmp, 0, cmp.length);
     }
-    return new MultiFilterComponentSetDefault(c);
+    return new MultiFilterComponentSetDefault(cmp);
   }
 }

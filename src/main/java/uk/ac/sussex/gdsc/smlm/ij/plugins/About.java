@@ -148,7 +148,7 @@ public class About implements PlugIn, MacroExtension {
     final Class<About> resourceClass = About.class;
 
     StringBuilder msg = new StringBuilder();
-    String helpURL = HELP_URL;
+    String helpUrl = HELP_URL;
 
     try (BufferedReader input = new BufferedReader(new UnicodeReader(
         resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/README.txt"), null))) {
@@ -156,7 +156,7 @@ public class About implements PlugIn, MacroExtension {
       String line;
       while ((line = input.readLine()) != null) {
         if (line.contains("http:")) {
-          helpURL = line;
+          helpUrl = line;
         } else {
           if (line.equals("")) {
             line = " "; // Required to insert a line in the GenericDialog
@@ -183,7 +183,7 @@ public class About implements PlugIn, MacroExtension {
 
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage(msg.toString());
-    gd.addHelp(helpURL);
+    gd.addHelp(helpUrl);
     gd.hideCancelButton();
     gd.showDialog();
   }

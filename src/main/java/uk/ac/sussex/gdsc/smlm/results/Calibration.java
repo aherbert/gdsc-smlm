@@ -252,7 +252,7 @@ class Calibration implements Cloneable {
    * Clear has EMCCD.
    */
   @Deprecated
-  public void clearHasEMCCD() {
+  public void clearHasEmCcd() {
     clearHasCameraType();
   }
 
@@ -379,7 +379,9 @@ class Calibration implements Cloneable {
    *             of old configuration.
    */
   @Deprecated
+  // @CHECKSTYLE.OFF
   boolean emCCD;
+  // @CHECKSTYLE.ON
   /**
    * The camera amplification (ADUs/e-) used when modelling a microscope camera.
    *
@@ -636,7 +638,7 @@ class Calibration implements Cloneable {
    *
    * @return true, if successful
    */
-  public boolean isCCDCamera() {
+  public boolean isCcdCamera() {
     return hasCameraType() && (cameraType == CameraType.CCD || cameraType == CameraType.EMCCD);
   }
 
@@ -647,7 +649,7 @@ class Calibration implements Cloneable {
    * @throws IllegalStateException if the missing field exceptions is enabled and the camera type
    *         field has not been set
    */
-  public boolean isEmCCD() {
+  public boolean isEmCcd() {
     return getCameraType() == CameraType.EMCCD;
   }
 
@@ -658,7 +660,7 @@ class Calibration implements Cloneable {
    * @throws IllegalStateException if the missing field exceptions is enabled and the camera type
    *         field has not been set
    */
-  public boolean isCCD() {
+  public boolean isCcd() {
     return getCameraType() == CameraType.CCD;
   }
 
@@ -666,19 +668,19 @@ class Calibration implements Cloneable {
    * Set if the CCD camera was run in Electron Multiplying (EM) mode, otherwise assume a standard
    * CCD.
    *
-   * @param emCCD true, if the CCD camera was run in Electron Multiplying (EM) mode, otherwise set
+   * @param emCcd true, if the CCD camera was run in Electron Multiplying (EM) mode, otherwise set
    *        to CCD
    * @deprecated Replaced by camera type
    */
   @Deprecated
-  public void setEmCCD(boolean emCCD) {
-    setCameraType((emCCD) ? CameraType.EMCCD : CameraType.CCD);
+  public void setEmCcd(boolean emCcd) {
+    setCameraType((emCcd) ? CameraType.EMCCD : CameraType.CCD);
   }
 
   /**
    * Sets the camera type from the deprecated EM CCD field.
    */
-  void setCameraTypeFromEmCCDField() {
+  void setCameraTypeFromEmCcdField() {
     setCameraType((emCCD) ? CameraType.EMCCD : CameraType.CCD);
   }
 

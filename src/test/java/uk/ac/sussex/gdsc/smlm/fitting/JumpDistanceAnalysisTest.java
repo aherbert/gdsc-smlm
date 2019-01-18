@@ -356,13 +356,13 @@ public class JumpDistanceAnalysisTest {
       jd.setMinFraction(0.05);
       jd.setMinDifference(2);
       jd.setMaxN(10);
-      fit = (mle) ? jd.fitJumpDistancesMLE(jumpDistances) : jd.fitJumpDistances(jumpDistances);
+      fit = (mle) ? jd.fitJumpDistancesMle(jumpDistances) : jd.fitJumpDistances(jumpDistances);
     } else {
       // No validation
       jd.setMinFraction(0);
       jd.setMinDifference(0);
       fit =
-          (mle) ? jd.fitJumpDistancesMLE(jumpDistances, n) : jd.fitJumpDistances(jumpDistances, n);
+          (mle) ? jd.fitJumpDistancesMle(jumpDistances, n) : jd.fitJumpDistances(jumpDistances, n);
     }
     final double[] fitD = (fit == null) ? new double[0] : fit[0];
     final double[] fitF = (fit == null) ? new double[0] : fit[1];

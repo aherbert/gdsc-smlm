@@ -34,8 +34,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -165,7 +165,7 @@ public class LoadLocalisations implements PlugIn {
             psfType = PSFType.TWO_AXIS_GAUSSIAN_2D;
           }
         }
-        results.setPSF(PSFHelper.create(psfType));
+        results.setPsf(PsfHelper.create(psfType));
 
         for (int i = 0; i < size(); i++) {
           l = get(i);
@@ -468,7 +468,7 @@ public class LoadLocalisations implements PlugIn {
       IJ.error(TITLE, "Require positive pixel pitch");
       return false;
     }
-    if (cw.isCCDCamera()) {
+    if (cw.isCcdCamera()) {
       if (!cw.hasCountPerPhoton()) {
         IJ.error(TITLE, "Require positive count/photon for CCD camera type");
         return false;

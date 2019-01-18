@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -199,7 +199,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     upperSigmaThreshold = Float.POSITIVE_INFINITY;
     // Set the shift limit. The calculator can support both 1/2 axis widths
     // when extracting the Standard Deviation from the parameters.
-    final double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+    final double[] s = PsfHelper.getGaussian2DWxWy(peakResults.getPsf());
     final double s0 =
         (s[0] == s[1]) ? s[0] : Gaussian2DPeakResultHelper.getStandardDeviation(s[0], s[1]);
     lowerSigmaThreshold = (float) (s0 * minWidth);
@@ -259,7 +259,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
    * @param peakResults the results
    */
   protected void setupCalculator(MemoryPeakResults peakResults) {
-    calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(),
+    calculator = Gaussian2DPeakResultHelper.create(peakResults.getPsf(),
         peakResults.getCalibration(), Gaussian2DPeakResultHelper.LSE_PRECISION);
   }
 
@@ -282,13 +282,13 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       // Current order of filter power obtained from BenchmarkFilterAnalysis:
       // SNR, Max Width, Precision, Shift, Min width
       if (isFiniteStrictlyPositive(snr)) {
-        components1[s1++] = new MultiFilterSNRComponent(snr);
+        components1[s1++] = new MultiFilterSnrComponent(snr);
       }
       if ((maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY)
           || (minWidth > 0 && minWidth < 1)) {
         // Handle the width being 1/2 axis variable.
         if (areSet(flags, IDirectFilter.XY_WIDTH)) {
-          components1[s1++] = new MultiFilterXYWidthComponent(minWidth, maxWidth);
+          components1[s1++] = new MultiFilterXyWidthComponent(minWidth, maxWidth);
         } else {
           components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
         }
@@ -384,7 +384,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     // Current order of filter power obtained from BenchmarkFilterAnalysis:
     // SNR, Max Width, Precision, Shift, Min width
 
-    if (peak.getSNR() < this.snr) {
+    if (peak.getSnr() < this.snr) {
       return false;
     }
 
@@ -429,7 +429,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
    * @return the variance
    */
   protected double getVariance(PeakResult peak) {
-    return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
+    return calculator.getLseVariance(peak.getParameters(), peak.getNoise());
   }
 
   @Override
@@ -504,7 +504,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       case 0:
         return SignalFilter.DEFAULT_INCREMENT;
       case 1:
-        return SNRFilter.DEFAULT_INCREMENT;
+        return SnrFilter.DEFAULT_INCREMENT;
       case 2:
         return WidthFilter2.DEFAULT_MIN_INCREMENT;
       case 3:
@@ -558,7 +558,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
 
   /** The default range. */
   protected static double[] defaultRange = new double[] {SignalFilter.DEFAULT_RANGE,
-      SNRFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE,
+      SnrFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE,
       ShiftFilter.DEFAULT_RANGE, EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE,
       ZCoordinateFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE};
 
@@ -643,7 +643,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public double getSNR() {
+  public double getSnr() {
     return snr;
   }
 
@@ -695,7 +695,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     // Replace any object that is manipulated by the instance
     if (componentsShift0 != null) {
       final boolean update = components == componentsShift0;
-      componentsShift0 = componentsShift0.clone();
+      componentsShift0 = componentsShift0.copy();
       if (update) {
         components = componentsShift0;
       }

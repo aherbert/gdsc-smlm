@@ -49,7 +49,7 @@ import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineData;
 import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineFunction;
 import uk.ac.sussex.gdsc.smlm.function.cspline.SingleCubicSplineFunction;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 import ij.IJ;
@@ -82,9 +82,9 @@ public class CubicSplineManager implements PlugIn {
   /**
    * Contains the information used to represent a point spread function using a cubic spline.
    */
-  public static class CubicSplinePSF {
+  public static class CubicSplinePsf {
     /** The image PSF. */
-    ImagePSF imagePSF;
+    ImagePSF imagePsf;
 
     /** The spline data. */
     CubicSplineData splineData;
@@ -92,20 +92,20 @@ public class CubicSplineManager implements PlugIn {
     /**
      * Instantiates a new cubic spline PSF.
      *
-     * @param imagePSF the image PSF
+     * @param imagePsf the image PSF
      * @param splineData the spline data
      * @throws IllegalArgumentException If the centre is not within the function range
      */
-    public CubicSplinePSF(ImagePSF imagePSF, CubicSplineData splineData) {
-      this.imagePSF = imagePSF;
+    public CubicSplinePsf(ImagePSF imagePsf, CubicSplineData splineData) {
+      this.imagePsf = imagePsf;
       this.splineData = splineData;
       //@formatter:off
-      if (imagePSF.getXCentre() < 0 ||
-          imagePSF.getYCentre() < 0||
-          imagePSF.getZCentre() < 0 ||
-          imagePSF.getXCentre() > splineData.getMaxX() ||
-          imagePSF.getYCentre() > splineData.getMaxY() ||
-          imagePSF.getZCentre() > splineData.getMaxZ()
+      if (imagePsf.getXCentre() < 0 ||
+          imagePsf.getYCentre() < 0||
+          imagePsf.getZCentre() < 0 ||
+          imagePsf.getXCentre() > splineData.getMaxX() ||
+          imagePsf.getYCentre() > splineData.getMaxY() ||
+          imagePsf.getZCentre() > splineData.getMaxZ()
           //@formatter:on
       ) {
         throw new IllegalArgumentException("The centre is not within the function");
@@ -121,8 +121,8 @@ public class CubicSplineManager implements PlugIn {
      * @return the cubic spline function
      */
     public CubicSplineFunction createCubicSplineFunction(int maxy, int maxx, int scale) {
-      return new SingleCubicSplineFunction(splineData, maxx, maxy, imagePSF.getXCentre(),
-          imagePSF.getYCentre(), imagePSF.getZCentre(), scale);
+      return new SingleCubicSplineFunction(splineData, maxx, maxy, imagePsf.getXCentre(),
+          imagePsf.getYCentre(), imagePsf.getZCentre(), scale);
     }
 
     /**
@@ -132,7 +132,7 @@ public class CubicSplineManager implements PlugIn {
      * @return the scale
      */
     public int getScale(double nmPerPixel) {
-      return CubicSplineManager.getScale(imagePSF.getPixelSize(), nmPerPixel);
+      return CubicSplineManager.getScale(imagePsf.getPixelSize(), nmPerPixel);
     }
   }
 
@@ -140,7 +140,7 @@ public class CubicSplineManager implements PlugIn {
   private static String directory = "";
   private static String filename = "";
   private static String cacheName = "";
-  private static CubicSplinePSF cache;
+  private static CubicSplinePsf cache;
 
   private static CubicSplineSettings.Builder settings;
 
@@ -158,20 +158,20 @@ public class CubicSplineManager implements PlugIn {
   /**
    * Creates the cubic spline.
    *
-   * @param imagePSF the image PSF details
+   * @param imagePsf the image PSF details
    * @param image the image
    * @param singlePrecision Set to true to use single precision (float values) to store the cubic
    *        spline coefficients
    * @return the cubic spline PSF
    */
-  public static CubicSplinePSF createCubicSpline(ImagePSFOrBuilder imagePSF, ImageStack image,
+  public static CubicSplinePsf createCubicSpline(ImagePSFOrBuilder imagePsf, ImageStack image,
       final boolean singlePrecision) {
     final int maxx = image.getWidth();
     final int maxy = image.getHeight();
     final int maxz = image.getSize();
     final float[][] psf = new float[maxz][];
     for (int z = 0; z < maxz; z++) {
-      psf[z] = IJImageConverter.getData(image.getPixels(z + 1), null);
+      psf[z] = ImageJImageConverter.getData(image.getPixels(z + 1), null);
     }
 
     // We reduce by a factor of 3
@@ -250,33 +250,33 @@ public class CubicSplineManager implements PlugIn {
 
     // Create a new info with the PSF details
     final ImagePSF.Builder b = ImagePSF.newBuilder();
-    b.setImageCount(imagePSF.getImageCount());
+    b.setImageCount(imagePsf.getImageCount());
     // Reducing the image has the effect of enlarging the pixel size
-    b.setPixelSize(imagePSF.getPixelSize() * 3.0);
-    b.setPixelDepth(imagePSF.getPixelDepth() * 3.0);
+    b.setPixelSize(imagePsf.getPixelSize() * 3.0);
+    b.setPixelDepth(imagePsf.getPixelDepth() * 3.0);
     // The centre has to be moved as we reduced the image size by 3.
     // In the ImagePSF the XY centre puts 0.5 at the centre of the pixel.
     // The spline puts 0,0 at the centre of each pixel for convenience.
     double cx = maxi / 2.0;
-    if (imagePSF.getXCentre() != 0) {
-      cx = (imagePSF.getXCentre() - 0.5) / 3;
+    if (imagePsf.getXCentre() != 0) {
+      cx = (imagePsf.getXCentre() - 0.5) / 3;
     }
     double cy = maxj / 2.0;
-    if (imagePSF.getYCentre() != 0) {
-      cy = (imagePSF.getYCentre() - 0.5) / 3;
+    if (imagePsf.getYCentre() != 0) {
+      cy = (imagePsf.getYCentre() - 0.5) / 3;
     }
     double cz = maxk / 2.0;
-    if (imagePSF.getZCentre() != 0) {
-      cz = imagePSF.getZCentre() / 3;
-    } else if (imagePSF.getCentreImage() != 0) {
-      cz = (imagePSF.getCentreImage() - 1) / 3.0;
+    if (imagePsf.getZCentre() != 0) {
+      cz = imagePsf.getZCentre() / 3;
+    } else if (imagePsf.getCentreImage() != 0) {
+      cz = (imagePsf.getCentreImage() - 1) / 3.0;
     }
 
     b.setXCentre(cx);
     b.setYCentre(cy);
     b.setZCentre(cz);
 
-    return new CubicSplinePSF(b.build(), f);
+    return new CubicSplinePsf(b.build(), f);
   }
 
   /**
@@ -287,7 +287,7 @@ public class CubicSplineManager implements PlugIn {
    * @param filename the filename
    * @return true, if successful
    */
-  public static boolean save(CubicSplinePSF psfModel, String filename) {
+  public static boolean save(CubicSplinePsf psfModel, String filename) {
     if (psfModel == null || TextUtils.isNullOrEmpty(filename)) {
       return false;
     }
@@ -296,7 +296,7 @@ public class CubicSplineManager implements PlugIn {
     try (FileOutputStream os = new FileOutputStream(filename)) {
       final TrackProgress progress = new ImageJTrackProgress();
 
-      psfModel.imagePSF.writeDelimitedTo(os);
+      psfModel.imagePsf.writeDelimitedTo(os);
       psfModel.splineData.write(os, progress);
 
       saveResource(psfModel, filename, getName(filename));
@@ -314,10 +314,10 @@ public class CubicSplineManager implements PlugIn {
     return ImageJUtils.removeExtension(file.getName());
   }
 
-  private static void saveResource(CubicSplinePSF psfModel, String filename, String name) {
+  private static void saveResource(CubicSplinePsf psfModel, String filename, String name) {
     final CubicSplineResource.Builder resource = CubicSplineResource.newBuilder();
     resource.setFilename(filename);
-    resource.setSplineScale(psfModel.imagePSF.getPixelSize());
+    resource.setSplineScale(psfModel.imagePsf.getPixelSize());
 
     final CubicSplineSettings.Builder settings = getSettings();
     settings.putCubicSplineResources(name, resource.build());
@@ -334,7 +334,7 @@ public class CubicSplineManager implements PlugIn {
    * @param name the name
    * @return the per pixel spline model (or null)
    */
-  public static CubicSplinePSF load(String name) {
+  public static CubicSplinePsf load(String name) {
     if (cache != null && cacheName.equals(name)) {
       return cache;
     }
@@ -345,7 +345,7 @@ public class CubicSplineManager implements PlugIn {
     if (resource == null) {
       return null;
     }
-    final CubicSplinePSF f = loadFromFile(name, resource.getFilename());
+    final CubicSplinePsf f = loadFromFile(name, resource.getFilename());
     if (f != null) {
       cache = f;
       cacheName = name;
@@ -353,16 +353,16 @@ public class CubicSplineManager implements PlugIn {
     return f;
   }
 
-  private static CubicSplinePSF loadFromFile(String name, String filename) {
+  private static CubicSplinePsf loadFromFile(String name, String filename) {
     // Try to load from file
     try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
       IJ.showStatus("Loading cubic spline: " + name);
       final TrackProgress progress = new ImageJTrackProgress();
 
-      final ImagePSF imagePSF = ImagePSF.parseDelimitedFrom(is);
+      final ImagePSF imagePsf = ImagePSF.parseDelimitedFrom(is);
       final CubicSplineData function = CubicSplineData.read(is, progress);
 
-      return new CubicSplinePSF(imagePSF, function);
+      return new CubicSplinePsf(imagePsf, function);
     } catch (final Exception ex) {
       ImageJUtils.log("Failed to load spline model %s from file: %s. %s", name, filename,
           ex.getMessage());
@@ -492,7 +492,7 @@ public class CubicSplineManager implements PlugIn {
     final String name = gd.getNextChoice();
     pluginSettings.setSelected(name);
 
-    final CubicSplinePSF psfModel = load(name);
+    final CubicSplinePsf psfModel = load(name);
 
     if (psfModel == null) {
       IJ.log("Failed to find spline data for model: " + name);
@@ -504,21 +504,21 @@ public class CubicSplineManager implements PlugIn {
   }
 
   private class CSplineRenderer implements DialogListener {
-    CubicSplinePSF psfModel;
-    ImagePSF imagePSF;
+    CubicSplinePsf psfModel;
+    ImagePSF imagePsf;
     CubicSplineData function;
     double padx;
     double pady;
     Label label;
 
-    public CSplineRenderer(CubicSplinePSF psfModel) {
+    public CSplineRenderer(CubicSplinePsf psfModel) {
       this.psfModel = psfModel;
-      imagePSF = psfModel.imagePSF;
+      imagePsf = psfModel.imagePsf;
       function = psfModel.splineData;
 
       // Find the limits of the model. This works if the centre is within the image
-      padx = Math.max(imagePSF.getXCentre(), function.getMaxX() - imagePSF.getXCentre());
-      pady = Math.max(imagePSF.getYCentre(), function.getMaxY() - imagePSF.getYCentre());
+      padx = Math.max(imagePsf.getXCentre(), function.getMaxX() - imagePsf.getXCentre());
+      pady = Math.max(imagePsf.getYCentre(), function.getMaxY() - imagePsf.getYCentre());
     }
 
     public void run() {
@@ -526,11 +526,11 @@ public class CubicSplineManager implements PlugIn {
       gd.addSlider("Scale", 1, 5, pluginSettings.getScale());
 
       // Find the limits of the PSF
-      final int width = (int) Math.ceil(function.getMaxX() * imagePSF.getPixelSize());
-      final int height = (int) Math.ceil(function.getMaxY() * imagePSF.getPixelSize());
-      final int minZ = (int) Math.floor(-imagePSF.getZCentre() * imagePSF.getPixelDepth());
+      final int width = (int) Math.ceil(function.getMaxX() * imagePsf.getPixelSize());
+      final int height = (int) Math.ceil(function.getMaxY() * imagePsf.getPixelSize());
+      final int minZ = (int) Math.floor(-imagePsf.getZCentre() * imagePsf.getPixelDepth());
       final int maxZ =
-          (int) Math.ceil((function.getMaxZ() - imagePSF.getZCentre()) * imagePSF.getPixelDepth());
+          (int) Math.ceil((function.getMaxZ() - imagePsf.getZCentre()) * imagePsf.getPixelDepth());
 
       gd.addSlider("x_shift (nm)", -width, width, pluginSettings.getXShift());
       final TextField tfxshift = gd.getLastTextField();
@@ -602,8 +602,8 @@ public class CubicSplineManager implements PlugIn {
       final double[] params2 = this.params.clone();
 
       // Adjust the centre
-      final double nmPerPixel = imagePSF.getPixelSize() * scale;
-      final double nmPerSlice = imagePSF.getPixelDepth() * scale;
+      final double nmPerPixel = imagePsf.getPixelSize() * scale;
+      final double nmPerSlice = imagePsf.getPixelDepth() * scale;
 
       params2[PeakResult.X] += xshift / nmPerPixel;
       params2[PeakResult.Y] += yshift / nmPerPixel;
@@ -709,7 +709,7 @@ public class CubicSplineManager implements PlugIn {
 
   private static void loadFromFileAndSaveResource(String filename) {
     final String name = getName(filename);
-    final CubicSplinePSF model = loadFromFile(name, filename);
+    final CubicSplinePsf model = loadFromFile(name, filename);
 
     if (model != null) {
       saveResource(model, filename, name);
@@ -730,7 +730,7 @@ public class CubicSplineManager implements PlugIn {
     final int magnification = (int) gd.getNextNumber();
     pluginSettings.setMagnification(magnification);
 
-    final CubicSplinePSF psfModel = load(name);
+    final CubicSplinePsf psfModel = load(name);
 
     if (psfModel == null) {
       IJ.log("Failed to find spline data for model: " + name);
@@ -749,10 +749,10 @@ public class CubicSplineManager implements PlugIn {
     final ImagePlus imp = ImageJUtils.display(name + " (upsampled)", stack);
     final Calibration c = imp.getLocalCalibration();
     c.setUnit("nm");
-    c.pixelWidth = c.pixelHeight = psfModel.imagePSF.getPixelSize() * magnification;
-    c.pixelDepth = psfModel.imagePSF.getPixelDepth() * magnification;
+    c.pixelWidth = c.pixelHeight = psfModel.imagePsf.getPixelSize() * magnification;
+    c.pixelDepth = psfModel.imagePsf.getPixelDepth() * magnification;
 
-    final int centre = 1 + (int) Math.round(psfModel.imagePSF.getZCentre() * magnification);
+    final int centre = 1 + (int) Math.round(psfModel.imagePsf.getZCentre() * magnification);
     imp.setSlice(centre);
     imp.resetDisplayRange();
     imp.updateAndDraw();

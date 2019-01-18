@@ -24,25 +24,35 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * Contains the fitting result.
  */
 public class FitResult {
+  private FitStatus status;
+  private final int degreesOfFreedom;
+  private double error;
+  private final double[] initialParameters;
+  private final double[] parameters;
+  private final double[] parameterDevs;
+  private final int numberOfPeaks;
+  private final int numberOfFittedParameters;
+  private Object data;
+  private final int iterations;
+  private final int evaluations;
+
   /**
    * Provides a builder to allow simple adjustments to the immutable FitResult fields to create a
    * new FitResult.
    */
-  public class Builder {
+  public static class Builder {
     private FitStatus status;
     private int degreesOfFreedom;
     private double error;
     private double[] initialParameters;
     private double[] parameters;
     private double[] parameterDevs;
-    private int nPeaks;
-    private int nFittedParameters;
+    private int numberOfPeaks;
+    private int numberOfFittedParameters;
     private Object data;
     private int iterations;
     private int evaluations;
@@ -56,23 +66,23 @@ public class FitResult {
      * @param initialParameters the initial parameters
      * @param parameters the parameters
      * @param parameterDevs the parameter deviations
-     * @param nPeaks the number of peaks
-     * @param nFittedParameters the number of fitted parameters
+     * @param numberOfPeaks the number of peaks
+     * @param numberOfFittedParameters the number of fitted parameters
      * @param data the data
      * @param iterations the iterations
      * @param evaluations the evaluations
      */
     public Builder(FitStatus status, int degreesOfFreedom, double error, double[] initialParameters,
-        double[] parameters, double[] parameterDevs, int nPeaks, int nFittedParameters, Object data,
-        int iterations, int evaluations) {
+        double[] parameters, double[] parameterDevs, int numberOfPeaks,
+        int numberOfFittedParameters, Object data, int iterations, int evaluations) {
       this.status = status;
       this.degreesOfFreedom = degreesOfFreedom;
       this.error = error;
       this.initialParameters = initialParameters;
       this.parameters = parameters;
       this.parameterDevs = parameterDevs;
-      this.nPeaks = nPeaks;
-      this.nFittedParameters = nFittedParameters;
+      this.numberOfPeaks = numberOfPeaks;
+      this.numberOfFittedParameters = numberOfFittedParameters;
       this.data = data;
       this.iterations = iterations;
       this.evaluations = evaluations;
@@ -204,17 +214,17 @@ public class FitResult {
      * @return the number of peaks
      */
     public int getNumberOfPeaks() {
-      return nPeaks;
+      return numberOfPeaks;
     }
 
     /**
      * Set the number of peaks.
      *
-     * @param nPeaks the number of peaks
+     * @param numberOfPeaks the number of peaks
      * @return the builder
      */
-    public Builder setNumberOfPeaks(int nPeaks) {
-      this.nPeaks = nPeaks;
+    public Builder setNumberOfPeaks(int numberOfPeaks) {
+      this.numberOfPeaks = numberOfPeaks;
       return this;
     }
 
@@ -224,17 +234,17 @@ public class FitResult {
      * @return the number of fitted parameters
      */
     public int getNumberOfFittedParameters() {
-      return nFittedParameters;
+      return numberOfFittedParameters;
     }
 
     /**
      * Set the number of fitted parameters.
      *
-     * @param nFittedParameters the number of fitted parameters
+     * @param numberOfFittedParameters the number of fitted parameters
      * @return the builder
      */
-    public Builder setNumberOfFittedParameters(int nFittedParameters) {
-      this.nFittedParameters = nFittedParameters;
+    public Builder setNumberOfFittedParameters(int numberOfFittedParameters) {
+      this.numberOfFittedParameters = numberOfFittedParameters;
       return this;
     }
 
@@ -305,21 +315,9 @@ public class FitResult {
      */
     public FitResult build() {
       return new FitResult(status, degreesOfFreedom, error, initialParameters, initialParameters,
-          parameterDevs, nPeaks, nFittedParameters, data, iterations, evaluations);
+          parameterDevs, numberOfPeaks, numberOfFittedParameters, data, iterations, evaluations);
     }
   }
-
-  private FitStatus status;
-  private final int degreesOfFreedom;
-  private double error;
-  private final double[] initialParameters;
-  private final double[] parameters;
-  private final double[] parameterDevs;
-  private final int nPeaks;
-  private final int nFittedParameters;
-  private Object data;
-  private final int iterations;
-  private final int evaluations;
 
   /**
    * Constructor.
@@ -330,23 +328,23 @@ public class FitResult {
    * @param initialParameters the initial parameters
    * @param parameters the parameters
    * @param parameterDevs the parameter deviations
-   * @param nPeaks the number of peaks
-   * @param nFittedParameters the number of fitted parameters
+   * @param numberOfPeaks the number of peaks
+   * @param numberOfFittedParameters the number of fitted parameters
    * @param data the data
    * @param iterations the iterations
    * @param evaluations the evaluations
    */
   public FitResult(FitStatus status, int degreesOfFreedom, double error, double[] initialParameters,
-      double[] parameters, double[] parameterDevs, int nPeaks, int nFittedParameters, Object data,
-      int iterations, int evaluations) {
+      double[] parameters, double[] parameterDevs, int numberOfPeaks, int numberOfFittedParameters,
+      Object data, int iterations, int evaluations) {
     this.status = status;
     this.degreesOfFreedom = degreesOfFreedom;
     this.error = error;
     this.initialParameters = initialParameters;
     this.parameters = parameters;
     this.parameterDevs = parameterDevs;
-    this.nPeaks = nPeaks;
-    this.nFittedParameters = nFittedParameters;
+    this.numberOfPeaks = numberOfPeaks;
+    this.numberOfFittedParameters = numberOfFittedParameters;
     this.data = data;
     this.iterations = iterations;
     this.evaluations = evaluations;
@@ -360,13 +358,11 @@ public class FitResult {
   public FitResult(FitStatus result) {
     this.status = result;
     this.degreesOfFreedom = 0;
-    this.error = 0;
     this.initialParameters = null;
     this.parameters = null;
     this.parameterDevs = null;
-    this.nPeaks = 0;
-    this.nFittedParameters = 0;
-    this.data = null;
+    this.numberOfPeaks = 0;
+    this.numberOfFittedParameters = 0;
     this.iterations = 0;
     this.evaluations = 0;
   }
@@ -441,7 +437,7 @@ public class FitResult {
    * @return the number of fitted peaks
    */
   public int getNumberOfPeaks() {
-    return nPeaks;
+    return numberOfPeaks;
   }
 
   /**
@@ -451,7 +447,7 @@ public class FitResult {
    *         fitted parameters)
    */
   public int getNumberOfFittedParameters() {
-    return nFittedParameters;
+    return numberOfFittedParameters;
   }
 
   /**
@@ -501,6 +497,6 @@ public class FitResult {
    */
   public Builder toBuilder() {
     return new Builder(status, degreesOfFreedom, error, initialParameters, parameters,
-        parameterDevs, nPeaks, nFittedParameters, data, iterations, evaluations);
+        parameterDevs, numberOfPeaks, numberOfFittedParameters, data, iterations, evaluations);
   }
 }

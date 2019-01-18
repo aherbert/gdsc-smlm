@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
 import java.awt.Rectangle;
 
 /**
@@ -32,6 +34,11 @@ import java.awt.Rectangle;
  * <p>Adapted from {@link ij.plugin.filter.GaussianBlur}.
  */
 public class GaussianFilter extends BaseWeightedFilter {
+  /** number of pixels to add for upscaling. */
+  private static final int UPSCALE_K_RADIUS = 2;
+  /** minimum standard deviation in the downscaled image. */
+  private static final double MIN_DOWNSCALED_SIGMA = 4.;
+
   /**
    * The default accuracy. This is the highest acceptable value of the accuracy for maximum speed.
    * Lower values will increase the kernel size.
@@ -128,7 +135,7 @@ public class GaussianFilter extends BaseWeightedFilter {
    * Compute the Gaussian convolution. Pixels within border regions (defined by 3 sigma) are
    * unchanged.
    *
-   * <p>Note: the input data is destructively modified
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -158,7 +165,7 @@ public class GaussianFilter extends BaseWeightedFilter {
   /**
    * Compute the Gaussian convolution.
    *
-   * <p>Note: the input data is destructively modified
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -173,7 +180,7 @@ public class GaussianFilter extends BaseWeightedFilter {
   /**
    * Compute the Gaussian convolution.
    *
-   * <p>Note: the input data is destructively modified
+   * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
@@ -241,8 +248,6 @@ public class GaussianFilter extends BaseWeightedFilter {
    */
   private void blur1Direction(final float[] pixels, Rectangle roi, final int width,
       final int height, final double sigma, final boolean xDirection, final int extraLines) {
-    final int UPSCALE_K_RADIUS = 2; // number of pixels to add for upscaling
-    final double MIN_DOWNSCALED_SIGMA = 4.; // minimum standard deviation in the downscaled image
     // number of points per line (line can be a row or column)
     final int length = xDirection ? width : height;
     // increment of the pixels array index to the next point in a line
@@ -310,7 +315,7 @@ public class GaussianFilter extends BaseWeightedFilter {
       if (doDownscaling) {
         downscaleLine(pixels, cache1, downscaleKernel, reduceBy, pixel0, unscaled0, length,
             pointInc, newLength);
-        convolveLine(cache1, cache2, gaussKernel, 0, newLength, 1, newLength - 1, 0, 1);
+        convolveLine(cache1, cache2, gaussKernel, 1, newLength - 1, 0, 1);
         upscaleLine(cache2, pixels, upscaleKernel, reduceBy, pixel0, unscaled0, writeFrom, writeTo,
             pointInc);
       } else {
@@ -318,8 +323,7 @@ public class GaussianFilter extends BaseWeightedFilter {
         for (int i = readFrom; i < readTo; i++, pi += pointInc) {
           cache1[i] = pixels[pi];
         }
-        convolveLine(cache1, pixels, gaussKernel, readFrom, readTo, writeFrom, writeTo, pixel0,
-            pointInc);
+        convolveLine(cache1, pixels, gaussKernel, writeFrom, writeTo, pixel0, pointInc);
       }
     }
   }
@@ -358,7 +362,7 @@ public class GaussianFilter extends BaseWeightedFilter {
       float sum1 = 0;
       float sum2 = 0;
       for (int x = 0; x < reduceBy; x++, pi += pointInc) {
-        final float v = pixels[pi < pixel0 ? pixel0 : (pi > pLast ? pLast : pi)];
+        final float v = pixels[MathUtils.clip(pixel0, pLast, pi)];
         sum0 += v * kernel[x + 2 * reduceBy];
         sum1 += v * kernel[x + reduceBy];
         sum2 += v * kernel[x];
@@ -429,7 +433,7 @@ public class GaussianFilter extends BaseWeightedFilter {
     kernel[0] = 0;
     for (int i = 0; i < unitLength; i++) {
       final double x = i / (double) unitLength;
-      final float v = (float) ((2. / 3. - x * x * (1 - 0.5 * x)));
+      final float v = (float) (2. / 3. - x * x * (1 - 0.5 * x));
       kernel[mid + i] = v;
       kernel[mid - i] = v;
     }
@@ -453,10 +457,6 @@ public class GaussianFilter extends BaseWeightedFilter {
    *        to the periphery. The kernel must be normalized, i.e. sum(kernel[0][n]) = 1 where n runs
    *        from the kernel periphery (last element) to 0 and back. Normalization should include all
    *        kernel points, also these not calculated because they are not needed.
-   * @param readFrom First array element of the line that must be read.
-   *        <code>writeFrom-kernel.length</code> or 0.
-   * @param readTo Last array element+1 of the line that must be read.
-   *        <code>writeTo+kernel.length</code> or <code>input.length</code>
    * @param writeFrom Index of the first point in the line that should be written
    * @param writeTo Index+1 of the last point in the line that should be written
    * @param point0 Array index of first element of the 'line' in pixels (i.e., lineNumber * lineInc)
@@ -464,8 +464,8 @@ public class GaussianFilter extends BaseWeightedFilter {
    *        it should be <code>1</code> for a row, <code>width</code> for a column)
    */
   private static final void convolveLine(final float[] input, final float[] pixels,
-      final float[][] kernel, final int readFrom, final int readTo, final int writeFrom,
-      final int writeTo, final int point0, final int pointInc) {
+      final float[][] kernel, final int writeFrom, final int writeTo, final int point0,
+      final int pointInc) {
     final int length = input.length;
     final float first = input[0]; // out-of-edge pixels are replaced by nearest edge pixels
     final float last = input[length - 1];
@@ -578,8 +578,6 @@ public class GaussianFilter extends BaseWeightedFilter {
           break;
         }
       }
-      // System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma,
-      // kRadius, r, sqrtSlope);
       for (int r1 = radius + 2; r1 < kradius; r1++) {
         kernel[0][r1] = (float) ((kradius - r1) * (kradius - r1) * sqrtSlope * sqrtSlope);
       }

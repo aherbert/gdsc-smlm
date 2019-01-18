@@ -235,7 +235,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       score[2] = s[TN];
       score[3] = s[FN];
       score[4] = p.getCount();
-      score[5] = results.size() - p.getCount();
+      score[5] = (double) results.size() - p.getCount();
     }
 
     return newResults;
@@ -304,7 +304,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       score[2] = s[TN];
       score[3] = s[FN];
       score[4] = newResults.size();
-      score[5] = results.size() - newResults.size();
+      score[5] = (double) results.size() - newResults.size();
     }
 
     return newResults;
@@ -374,7 +374,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       score[2] = s[TN];
       score[3] = s[FN];
       score[4] = p.getCount();
-      score[5] = results.size() - p.getCount();
+      score[5] = (double) results.size() - p.getCount();
     }
 
     return newResults;
@@ -450,7 +450,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       score[2] = s[TN];
       score[3] = s[FN];
       score[4] = newResults.size();
-      score[5] = results.size() - newResults.size();
+      score[5] = (double) results.size() - newResults.size();
     }
 
     return newResults;
@@ -471,22 +471,19 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     final int[] s = new int[4];
     for (final MemoryPeakResults peakResults : resultsList) {
       setup(peakResults);
-      peakResults.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult peak) {
-          final boolean isTrue = peak.getOrigValue() != 0;
-          final boolean isPositive = accept(peak);
-          if (isTrue) {
-            if (isPositive) {
-              s[TP]++; // true positive
-            } else {
-              s[FN]++; // false negative
-            }
-          } else if (isPositive) {
-            s[FP]++; // false positive
+      peakResults.forEach((PeakResultProcedure) peak -> {
+        final boolean isTrue = peak.getOrigValue() != 0;
+        final boolean isPositive = accept(peak);
+        if (isTrue) {
+          if (isPositive) {
+            s[TP]++; // true positive
           } else {
-            s[TN]++; // true negative
+            s[FN]++; // false negative
           }
+        } else if (isPositive) {
+          s[FP]++; // false positive
+        } else {
+          s[TN]++; // true negative
         }
       });
       end();
@@ -953,8 +950,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
    *
    * @return An XML representation of this object
    */
-  public String toXML() {
-    return FilterXStreamUtils.toXML(this);
+  public String toXml() {
+    return FilterXStreamUtils.toXml(this);
   }
 
   /**
@@ -963,13 +960,15 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
    * @param xml the xml
    * @return the filter
    */
-  public static Filter fromXML(String xml) {
+  public static @Nullable Filter fromXml(String xml) {
     try {
-      final Filter f = (Filter) FilterXStreamUtils.fromXML(xml);
-      f.initialiseState();
-      return f;
+      final Filter filter = (Filter) FilterXStreamUtils.fromXml(xml);
+      if (filter != null) {
+        filter.initialiseState();
+        return filter;
+      }
     } catch (final ClassCastException ex) {
-      // ex.printStackTrace();
+      // Not a filter
     }
     return null;
   }

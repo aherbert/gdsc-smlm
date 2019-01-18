@@ -41,7 +41,7 @@ public class PoissonGradientProcedure5 extends PoissonGradientProcedure {
    */
   public PoissonGradientProcedure5(final Gradient1Function func) {
     super(func);
-    if (n != 5) {
+    if (numberOfGradients != 5) {
       throw new IllegalArgumentException("Function must compute 5 gradients");
     }
   }
@@ -52,25 +52,25 @@ public class PoissonGradientProcedure5 extends PoissonGradientProcedure {
       final double function = 1.0 / value;
 
       data[0] += dyDa[0] * function * dyDa[0];
-      double w;
-      w = dyDa[1] * function;
-      data[1] += w * dyDa[0];
-      data[2] += w * dyDa[1];
-      w = dyDa[2] * function;
-      data[3] += w * dyDa[0];
-      data[4] += w * dyDa[1];
-      data[5] += w * dyDa[2];
-      w = dyDa[3] * function;
-      data[6] += w * dyDa[0];
-      data[7] += w * dyDa[1];
-      data[8] += w * dyDa[2];
-      data[9] += w * dyDa[3];
-      w = dyDa[4] * function;
-      data[10] += w * dyDa[0];
-      data[11] += w * dyDa[1];
-      data[12] += w * dyDa[2];
-      data[13] += w * dyDa[3];
-      data[14] += w * dyDa[4];
+      double wgt;
+      wgt = dyDa[1] * function;
+      data[1] += wgt * dyDa[0];
+      data[2] += wgt * dyDa[1];
+      wgt = dyDa[2] * function;
+      data[3] += wgt * dyDa[0];
+      data[4] += wgt * dyDa[1];
+      data[5] += wgt * dyDa[2];
+      wgt = dyDa[3] * function;
+      data[6] += wgt * dyDa[0];
+      data[7] += wgt * dyDa[1];
+      data[8] += wgt * dyDa[2];
+      data[9] += wgt * dyDa[3];
+      wgt = dyDa[4] * function;
+      data[10] += wgt * dyDa[0];
+      data[11] += wgt * dyDa[1];
+      data[12] += wgt * dyDa[2];
+      data[13] += wgt * dyDa[3];
+      data[14] += wgt * dyDa[4];
     }
   }
 

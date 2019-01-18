@@ -40,14 +40,14 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -251,7 +251,7 @@ public class DriftCalculator implements PlugIn {
     @Override
     public void run() {
       incrementProgress();
-      final IJImagePeakResults blockImage = newImage(bounds, scale);
+      final ImageJImagePeakResults blockImage = newImage(bounds, scale);
       for (final Localisation r : localisations) {
         blockImage.add(r.time, (float) (r.x + dx[r.time]), (float) (r.y + dy[r.time]), r.signal);
       }
@@ -816,9 +816,9 @@ public class DriftCalculator implements PlugIn {
     final float maxy = bounds.y + bounds.height;
 
     // Find spots within the ROI
-    results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
+    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
       @Override
-      public void executeXYR(float x, float y, PeakResult result) {
+      public void executeXyr(float x, float y, PeakResult result) {
         if (x > minx && x < maxx && y > miny && y < maxy) {
           list.add(new Spot(result.getFrame(), x, y, result.getIntensity()));
         }
@@ -1350,7 +1350,7 @@ public class DriftCalculator implements PlugIn {
 
     for (int i = 0; i < blocks.size(); i++) {
       tracker.progress(i, blocks.size());
-      final IJImagePeakResults blockImage = newImage(bounds, scale);
+      final ImageJImagePeakResults blockImage = newImage(bounds, scale);
       for (final Localisation r : blocks.get(i)) {
         blockImage.add(r.time, (float) (r.x + dx[r.time]), (float) (r.y + dy[r.time]), r.signal);
       }
@@ -1483,8 +1483,8 @@ public class DriftCalculator implements PlugIn {
     return FastMath.max(1, (int) Math.round((double) images.length / Prefs.getThreads()));
   }
 
-  private static IJImagePeakResults newImage(Rectangle bounds, float imageScale) {
-    final IJImagePeakResults image =
+  private static ImageJImagePeakResults newImage(Rectangle bounds, float imageScale) {
+    final ImageJImagePeakResults image =
         ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, true, false,
             "", bounds, 100, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
     image.setDisplayImage(false);
@@ -1492,7 +1492,7 @@ public class DriftCalculator implements PlugIn {
     return image;
   }
 
-  private static ImageProcessor getImage(IJImagePeakResults imageResults) {
+  private static ImageProcessor getImage(ImageJImagePeakResults imageResults) {
     imageResults.end();
     return imageResults.getImagePlus().getProcessor();
   }

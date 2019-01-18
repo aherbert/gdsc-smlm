@@ -70,8 +70,8 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore
   public void forEach(Gradient2Procedure procedure) {
     index = 0;
     createValues();
-    createDYDA();
-    createD2YDA2();
+    createDyDa();
+    createD2yDa2();
     this.procedure = procedure;
     function2.forEach((Gradient2Procedure) this);
   }
@@ -79,7 +79,7 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore
   /**
    * Creates the {@link #d2yda2} matrix.
    */
-  protected void createD2YDA2() {
+  protected void createD2yDa2() {
     if (d2yda2 == null || d2yda2.length != function2.size()) {
       d2yda2 = new double[values.length][length];
     }

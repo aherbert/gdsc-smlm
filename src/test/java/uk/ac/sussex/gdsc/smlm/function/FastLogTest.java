@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.function.ICSIFastLog.DataType;
+import uk.ac.sussex.gdsc.smlm.function.IcsiFastLog.DataType;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
@@ -65,7 +65,7 @@ public class FastLogTest {
     logger = null;
   }
 
-  ICSIFastLog icsiLog = ICSIFastLog.create(DataType.BOTH);
+  IcsiFastLog icsiLog = IcsiFastLog.create(DataType.BOTH);
   FFastLog ffastLog = new FFastLog();
   DFastLog dfastLog = new DFastLog();
   TurboLog turboLog = new TurboLog();
@@ -384,7 +384,7 @@ public class FastLogTest {
 
     final TurboList<TestFastLog> test = new TurboList<>();
     final int n = 13;
-    test.add(new TestFastLog(ICSIFastLog.create(n, DataType.FLOAT)));
+    test.add(new TestFastLog(IcsiFastLog.create(n, DataType.FLOAT)));
     test.add(new TestFastLog(new FFastLog(n)));
     test.add(new TestFastLog(new DFastLog(n)));
     test.add(new TestFastLog(new TurboLog(n)));
@@ -635,7 +635,7 @@ public class FastLogTest {
 
     final TurboList<TestFastLog> test = new TurboList<>();
     final int n = 13;
-    test.add(new TestFastLog(ICSIFastLog.create(n, DataType.DOUBLE)));
+    test.add(new TestFastLog(IcsiFastLog.create(n, DataType.DOUBLE)));
     test.add(new TestFastLog(new FFastLog(n)));
     test.add(new TestFastLog(new DFastLog(n)));
     test.add(new TestFastLog(new TurboLog(n)));
@@ -778,7 +778,7 @@ public class FastLogTest {
     ts.execute(new FloatTimingTask(new TestLog(new FastMathLog()), 0, x));
     for (final int q : new int[] {11}) {
       final int n = 23 - q;
-      final ICSIFastLog fl = ICSIFastLog.create(n, DataType.FLOAT);
+      final IcsiFastLog fl = IcsiFastLog.create(n, DataType.FLOAT);
       ts.execute(new FloatTimingTask(new TestLog(fl), q, x));
       ts.execute(new FloatTimingTask(new TestFastLog(fl), q, x));
       final FFastLog ff = new FFastLog(n);
@@ -865,7 +865,7 @@ public class FastLogTest {
     // ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
     for (final int q : new int[] {11}) {
       final int n = 23 - q;
-      final ICSIFastLog fl = ICSIFastLog.create(n, DataType.DOUBLE);
+      final IcsiFastLog fl = IcsiFastLog.create(n, DataType.DOUBLE);
       ts.execute(new DoubleTimingTask(new TestLog(fl), q, values));
       ts.execute(new DoubleTimingTask(new TestFastLog(fl), q, values));
       final DFastLog df = new DFastLog(n);
@@ -942,9 +942,9 @@ public class FastLogTest {
     ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
     for (final int q : new int[] {11}) {
       final int n = 23 - q;
-      final ICSIFastLog ff = ICSIFastLog.create(n, DataType.FLOAT);
-      final ICSIFastLog fd = ICSIFastLog.create(n, DataType.DOUBLE);
-      final ICSIFastLog ff2 = ICSIFastLog.create(n, DataType.FLOAT);
+      final IcsiFastLog ff = IcsiFastLog.create(n, DataType.FLOAT);
+      final IcsiFastLog fd = IcsiFastLog.create(n, DataType.DOUBLE);
+      final IcsiFastLog ff2 = IcsiFastLog.create(n, DataType.FLOAT);
       ts.execute(new DoubleToFloatTimingTask(new TestLog(ff), q, x, xf));
       ts.execute(new DoubleToFloatTimingTask(new TestFastLog(ff), q, x, xf));
       ts.execute(new FloatTimingTask(new TestLog(ff2), q, xf));

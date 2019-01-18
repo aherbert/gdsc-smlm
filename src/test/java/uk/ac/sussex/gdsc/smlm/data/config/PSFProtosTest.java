@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.data.config;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.utils.JSONUtils;
+import uk.ac.sussex.gdsc.smlm.utils.JsonUtils;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -95,7 +95,7 @@ public class PSFProtosTest {
     final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
     String json = printer.print(psf);
     logger.log(TestLogUtils.getRecord(logLevel, json));
-    json = JSONUtils.simplify(json);
+    json = JsonUtils.simplify(json);
     logger.log(TestLogUtils.getRecord(logLevel, json));
 
     psfBuilder.clear();

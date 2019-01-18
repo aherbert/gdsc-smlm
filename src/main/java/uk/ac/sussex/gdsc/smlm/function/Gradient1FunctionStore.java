@@ -87,7 +87,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore
   public void forEach(Gradient1Procedure procedure) {
     index = 0;
     createValues();
-    createDYDA();
+    createDyDa();
     this.procedure = procedure;
     function1.forEach((Gradient1Procedure) this);
   }
@@ -95,7 +95,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore
   /**
    * Creates the {@link #dyda} matrix.
    */
-  protected void createDYDA() {
+  protected void createDyDa() {
     if (dyda == null || dyda.length != function1.size()) {
       dyda = new double[values.length][length];
     }

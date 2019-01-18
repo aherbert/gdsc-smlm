@@ -470,9 +470,9 @@ public abstract class ImageSource {
    * Serialise to XML.
    *
    * @return An XML representation of this object
-   * @see #fromXML(String)
+   * @see #fromXml(String)
    */
-  public String toXML() {
+  public String toXml() {
     final XStream xs = new XStream(new DomDriver());
     try {
       XStream.setupDefaultSecurity(xs); // to be removed after 1.5
@@ -490,9 +490,9 @@ public abstract class ImageSource {
    *
    * @param xml the xml
    * @return the image source
-   * @see #toXML()
+   * @see #toXml()
    */
-  public static ImageSource fromXML(String xml) {
+  public static ImageSource fromXml(String xml) {
     final XStream xs = new XStream(new DomDriver());
     try {
       XStream.setupDefaultSecurity(xs); // to be removed after 1.5

@@ -357,11 +357,11 @@ public abstract class HysteresisFilter extends Filter {
   private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults,
       LinkedList<PeakResult> candidates) {
     final Gaussian2DPeakResultCalculator calculator =
-        Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+        Gaussian2DPeakResultHelper.create(peakResults.getPsf(), peakResults.getCalibration(),
             Gaussian2DPeakResultHelper.LSE_PRECISION);
     double sum = 0;
     for (final PeakResult peakResult : candidates) {
-      sum += calculator.getLSEPrecision(peakResult.getParameters(), peakResult.getNoise());
+      sum += calculator.getLsePrecision(peakResult.getParameters(), peakResult.getNoise());
     }
     final double nmPerPixel = peakResults.getNmPerPixel();
     final double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;

@@ -40,7 +40,7 @@ public class ImagePSFHelper {
    * @return the string
    */
   public static String toString(ImagePSFOrBuilder imagePsf) {
-    return SettingsManager.toJSON(imagePsf, SettingsManager.FLAG_JSON_WHITESPACE);
+    return SettingsManager.toJson(imagePsf, SettingsManager.FLAG_JSON_WHITESPACE);
   }
 
   /**
@@ -51,7 +51,7 @@ public class ImagePSFHelper {
    */
   public static ImagePSF fromString(String string) {
     final ImagePSF.Builder builder = ImagePSF.newBuilder();
-    if (SettingsManager.fromJSON(string, builder)) {
+    if (SettingsManager.fromJson(string, builder)) {
       return builder.build();
     }
     return null;

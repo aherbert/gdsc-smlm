@@ -50,13 +50,13 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.GUIProtosHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
@@ -76,15 +76,15 @@ import uk.ac.sussex.gdsc.smlm.engine.FitQueue;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
 import uk.ac.sussex.gdsc.smlm.engine.ParameterisedFitJob;
 import uk.ac.sussex.gdsc.smlm.filters.SpotFilter;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJImagePeakResults;
-import uk.ac.sussex.gdsc.smlm.ij.results.IJTablePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.AggregatedImageSource;
@@ -101,7 +101,7 @@ import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -200,7 +200,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private static boolean showTable = true;
   private static boolean showImage = true;
   private static PSFCalculatorSettings.Builder calculatorSettings =
-      GUIProtosHelper.defaultPSFCalculatorSettings.toBuilder();
+      GuiProtosHelper.defaultPSFCalculatorSettings.toBuilder();
 
   // All the fields that will be updated when reloading the configuration file
   private Choice textCameraType;
@@ -357,7 +357,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       }
 
       // Check it is not a previous result
-      if (imp.getTitle().endsWith(IJImagePeakResults.IMAGE_SUFFIX)) {
+      if (imp.getTitle().endsWith(ImageJImagePeakResults.IMAGE_SUFFIX)) {
         IJImageSource tmpImageSource = null;
 
         // Check the image to see if it has an image source XML structure in the info property
@@ -366,7 +366,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
             Pattern.compile("Source: (<.*IJImageSource>.*<.*IJImageSource>)", Pattern.DOTALL);
         final Matcher match = pattern.matcher((o == null) ? "" : o.toString());
         if (match.find()) {
-          final ImageSource source = ImageSource.fromXML(match.group(1));
+          final ImageSource source = ImageSource.fromXml(match.group(1));
           if (source instanceof IJImageSource) {
             tmpImageSource = (IJImageSource) source;
             if (!tmpImageSource.open()) {
@@ -380,7 +380,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
         if (tmpImageSource == null) {
           // Look for a parent using the title
           final String parentTitle = imp.getTitle().substring(0,
-              imp.getTitle().length() - IJImagePeakResults.IMAGE_SUFFIX.length() - 1);
+              imp.getTitle().length() - ImageJImagePeakResults.IMAGE_SUFFIX.length() - 1);
           final ImagePlus parentImp = WindowManager.getImage(parentTitle);
           if (parentImp != null) {
             tmpImageSource = new IJImageSource(parentImp);
@@ -598,8 +598,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // }
 
     results.setCalibration(fitConfig.getCalibration());
-    results.setPSF(fitConfig.getPSF());
-    results.setConfiguration(SettingsManager.toJSON(config.getFitEngineSettings()));
+    results.setPsf(fitConfig.getPsf());
+    results.setConfiguration(SettingsManager.toJson(config.getFitEngineSettings()));
 
     // This is added first as it cannot be closed. If the table is closed then the
     // number of results at the end is reported incorrectly.
@@ -615,8 +615,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     if (simpleFit && showImage) {
       for (final PeakResults r : results.toArray()) {
-        if (r instanceof IJImagePeakResults) {
-          final ImagePlus i = ((IJImagePeakResults) r).getImagePlus();
+        if (r instanceof ImageJImagePeakResults) {
+          final ImagePlus i = ((ImageJImagePeakResults) r).getImagePlus();
           ImageJUtils.log("Super-resolution image title = " + i.getTitle());
           WindowManager.toFront(i.getWindow());
         }
@@ -748,7 +748,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     _PSFTypeValues = d.toArray(new PSFType[d.size()]);
     _PSFTypeNames = new String[_PSFTypeValues.length];
     for (int i = 0; i < _PSFTypeValues.length; i++) {
-      _PSFTypeNames[i] = PSFProtosHelper.getName(_PSFTypeValues[i]);
+      _PSFTypeNames[i] = PsfProtosHelper.getName(_PSFTypeValues[i]);
     }
   }
 
@@ -1174,7 +1174,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
                 new CalibrationWriter(calibrationProvider.getCalibration());
             final ExtendedGenericDialog egd =
                 new ExtendedGenericDialog("Camera type options", null);
-            if (calibration.isCCDCamera()) {
+            if (calibration.isCcdCamera()) {
               egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
               if (BitFlagUtils.anyNotSet(options, FLAG_NO_GAIN)) {
                 egd.addNumericField("Gain", calibration.getCountPerPhoton(), 4, 6, "Count/photon");
@@ -1186,7 +1186,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
                 egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 4, 6,
                     "electron/photon");
               }
-            } else if (calibration.isSCMOS()) {
+            } else if (calibration.isScmos()) {
               final String[] models = CameraModelManager.listCameraModels(true);
               egd.addChoice("Camera_model_name", models, calibration.getCameraModelName());
               if (BitFlagUtils.areSet(options, FLAG_QUANTUM_EFFICIENCY)) {
@@ -1204,7 +1204,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
               return false;
             }
             final Calibration old = calibration.getCalibration();
-            if (calibration.isCCDCamera()) {
+            if (calibration.isCcdCamera()) {
               calibration.setBias(Math.abs(egd.getNextNumber()));
               if (BitFlagUtils.anyNotSet(options, FLAG_NO_GAIN)) {
                 calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
@@ -1215,7 +1215,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
               if (BitFlagUtils.areSet(options, FLAG_QUANTUM_EFFICIENCY)) {
                 calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
               }
-            } else if (calibration.isSCMOS()) {
+            } else if (calibration.isScmos()) {
               // Note: Since this does not go through the FitConfiguration object the
               // camera model is not invalidated. However any code using this function
               // should later call configureFitSolver(...) which will set the camera model
@@ -1330,12 +1330,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
   public static void addPSFOptions(final ExtendedGenericDialog gd,
       final FitConfigurationProvider fitConfigurationProvider) {
     final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-    gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(fitConfig.getPSFType()),
+    gd.addChoice("PSF", getPSFTypeNames(), PsfProtosHelper.getName(fitConfig.getPsfType()),
         new OptionListener<Integer>() {
           @Override
           public boolean collectOptions(Integer field) {
             final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-            fitConfig.setPSFType(PeakFit.getPSFTypeValues()[field]);
+            fitConfig.setPsfType(PeakFit.getPSFTypeValues()[field]);
             final boolean result = collectOptions(false);
             return result;
           }
@@ -1347,7 +1347,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
           private boolean collectOptions(boolean silent) {
             final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-            final PSFType psfType = fitConfig.getPSFType();
+            final PSFType psfType = fitConfig.getPsfType();
             final ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
             PSF oldPsf = null;
             if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D) {
@@ -1358,17 +1358,17 @@ public class PeakFit implements PlugInFilter, ItemListener {
               if (list.length == 0) {
                 list = AstigmatismModelManager.listAstigmatismModels(false, true);
               }
-              egd.addChoice("Z-model", list, fitConfig.getPSFModelName());
+              egd.addChoice("Z-model", list, fitConfig.getPsfModelName());
             } else {
               // Collect the PSF parameters
-              oldPsf = fitConfig.getPSF();
+              oldPsf = fitConfig.getPsf();
               for (int i = 0; i < oldPsf.getParametersCount(); i++) {
                 final PSFParameter p = oldPsf.getParameters(i);
                 egd.addNumericField(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
                     p.getValue(), 3);
               }
               if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D) {
-                egd.addCheckbox("Fixed", fitConfig.isFixedPSF());
+                egd.addCheckbox("Fixed", fitConfig.isFixedPsf());
               }
             }
 
@@ -1379,7 +1379,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
             }
             if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D) {
               // The PSF is entirely defined in the model
-              fitConfig.setPSFModelName(egd.getNextChoice());
+              fitConfig.setPsfModelName(egd.getNextChoice());
               return true;
             }
             @SuppressWarnings("null")
@@ -1389,12 +1389,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
               b.getParametersBuilder(i).setValue(egd.getNextNumber());
             }
             final PSF newPsf = b.build();
-            fitConfig.setPSF(newPsf);
+            fitConfig.setPsf(newPsf);
             boolean changed = !oldPsf.equals(newPsf);
             if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D) {
               final boolean newFixed = egd.getNextBoolean();
-              changed = changed || (newFixed != fitConfig.isFixedPSF());
-              fitConfig.setFixedPSF(newFixed);
+              changed = changed || (newFixed != fitConfig.isFixedPsf());
+              fitConfig.setFixedPsf(newFixed);
             }
             return changed;
           }
@@ -1770,8 +1770,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private int showSimpleDialog() {
     // Just support circular fitting
-    fitConfig.setPSF(PSFProtosHelper.defaultOneAxisGaussian2DPSF);
-    fitConfig.setFixedPSF(false);
+    fitConfig.setPsf(PsfProtosHelper.defaultOneAxisGaussian2DPSF);
+    fitConfig.setFixedPsf(false);
 
     // TODO - Support sCMOS camera. This may be 'too difficult' as the
     // user will need to have created a per-pixel calibration image
@@ -1814,7 +1814,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
 
     // Restore fitting to default settings but maintain the calibrated width
-    final double sd = fitConfig.getInitialXSD();
+    final double sd = fitConfig.getInitialXSd();
     config = new FitEngineConfiguration();
     fitConfig = config.getFitConfiguration();
     fitConfig.setInitialPeakStdDev(sd);
@@ -1844,7 +1844,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     IJ.log("-=-=-=-");
     ImageJUtils.log("Pixel pitch = %s", MathUtils.rounded(calibration.getNmPerPixel(), 4));
     ImageJUtils.log("Exposure Time = %s", MathUtils.rounded(calibration.getExposureTime(), 4));
-    ImageJUtils.log("PSF width = %s", MathUtils.rounded(fitConfig.getInitialXSD(), 4));
+    ImageJUtils.log("PSF width = %s", MathUtils.rounded(fitConfig.getInitialXSd(), 4));
 
     // Save
     fitConfig.setCalibration(calibration.getCalibration());
@@ -1873,7 +1873,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
    */
   private boolean requireCalibration(CalibrationWriter calibration) {
     // Check for a supported camera
-    if (!calibration.isCCDCamera()) {
+    if (!calibration.isCcdCamera()) {
       return true;
     }
     // Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
@@ -1889,7 +1889,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
 
     // Check for a PSF width
-    if (fitConfig.getInitialXSD() <= 0) {
+    if (fitConfig.getInitialXSd() <= 0) {
       return true;
     }
 
@@ -1928,7 +1928,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       // We allow bias to be zero
       Parameters.isAboveZero("Gain", calibration.getCountPerPhoton());
       Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
-      Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSD());
+      Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSd());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -1957,7 +1957,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       return false;
     }
     calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
-    if (!calibration.isCCDCamera()) {
+    if (!calibration.isCcdCamera()) {
       // TODO - Support sCMOS camera
 
       IJ.error("Unsupported camera type "
@@ -2031,7 +2031,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
             + " the checkbox below:");
     // Add ability to run the PSF Calculator to get the width
     gd.addCheckbox("Run_PSF_calculator", false);
-    gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSD(), 3);
+    gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSd(), 3);
     if (ImageJUtils.isShowGenericDialog()) {
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
       gd.addAndGetButton("Run PSF calculator", new ActionListener() {
@@ -2151,7 +2151,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       ignoreBoundsForNoise = optionIgnoreBoundsForNoise = gd.getNextBoolean();
     }
 
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     // Note: The absolute flag is set in extra options
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
@@ -2224,10 +2224,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
       Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
       Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
-      if (fitConfig.getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
-        Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
-        if (fitConfig.getPSF().getParametersCount() > 1) {
-          Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+      if (fitConfig.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
+        Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
+        if (fitConfig.getPsf().getParametersCount() > 1) {
+          Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
         }
       }
       Parameters.isAboveZero("Search_width", config.getSearch());
@@ -2256,7 +2256,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
             if (fitConfig.getPrecisionMethod() == PrecisionMethod.PRECISION_METHOD_NA) {
               throw new IllegalArgumentException("Precision filter requires a precision method");
             }
-            if (fitConfig.isPrecisionUsingBackground() && calibration.isCCDCamera()
+            if (fitConfig.isPrecisionUsingBackground() && calibration.isCcdCamera()
                 && (calibration.getBias() == 0 || !calibration.hasCountPerPhoton())) {
               throw new IllegalArgumentException(
                   "Precision using the local background requires the camera bias");
@@ -2371,14 +2371,14 @@ public class PeakFit implements PlugInFilter, ItemListener {
    */
   public static boolean configurePSFModel(FitEngineConfiguration config, int flags) {
     final FitConfiguration fitConfig = config.getFitConfiguration();
-    if (fitConfig.getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
+    if (fitConfig.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
       return true;
     }
 
     // Get the astigmatism z-model
-    final AstigmatismModel model = AstigmatismModelManager.getModel(fitConfig.getPSFModelName());
+    final AstigmatismModel model = AstigmatismModelManager.getModel(fitConfig.getPsfModelName());
     if (model == null) {
-      IJ.error(TITLE, "Failed to load the model: " + fitConfig.getPSFModelName());
+      IJ.error(TITLE, "Failed to load the model: " + fitConfig.getPsfModelName());
       return false;
     }
 
@@ -2495,7 +2495,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     String xml = fitConfig.getSmartFilterString();
     if (TextUtils.isNullOrEmpty(xml)) {
-      xml = fitConfig.getDefaultSmartFilterXML();
+      xml = fitConfig.getDefaultSmartFilterXml();
     }
 
     gd.addMessage("Smart filter (used to pick optimum results during fitting)");
@@ -2511,7 +2511,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
 
     xml = gd.getNextText();
-    final Filter f = Filter.fromXML(xml);
+    final Filter f = Filter.fromXml(xml);
     if (f == null || !(f instanceof DirectFilter)) {
       return false;
     }
@@ -2664,7 +2664,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     final FitConfiguration fitConfig = config.getFitConfiguration();
     final CalibrationReader calibration = fitConfig.getCalibrationReader();
-    if (calibration.isSCMOS()) {
+    if (calibration.isScmos()) {
       fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
     }
 
@@ -2727,7 +2727,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
         gd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "count");
         gd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6,
             "electron/photon");
-        gd.addCheckbox("EM-CCD", calibration.isEMCCD());
+        gd.addCheckbox("EM-CCD", calibration.isEmCcd());
       } else {
         gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
       }
@@ -2802,16 +2802,16 @@ public class PeakFit implements PlugInFilter, ItemListener {
         gd.addCheckbox("Fixed_iterations", fitConfig.isFixedIterations());
         // This works because the proto configuration enum matches the named enum
         final String[] lineSearchNames = SettingsManager
-            .getNames((Object[]) FastMLESteppingFunctionSolver.LineSearchMethod.values());
+            .getNames((Object[]) FastMleSteppingFunctionSolver.LineSearchMethod.values());
         gd.addChoice("Line_search_method", lineSearchNames,
             lineSearchNames[fitConfig.getLineSearchMethod().getNumber()]);
       }
 
       gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
       gd.addCheckbox("Dynamic_clamping", fitConfig.isUseDynamicClamping());
-      final PSF psf = fitConfig.getPSF();
+      final PSF psf = fitConfig.getPsf();
       final boolean isAstigmatism = psf.getPsfType() == PSFType.ASTIGMATIC_GAUSSIAN_2D;
-      final int nParams = PSFHelper.getParameterCount(psf);
+      final int nParams = PsfHelper.getParameterCount(psf);
       if (extraOptions) {
         gd.addNumericField("Clamp_background", fitConfig.getClampBackground(), 2);
         gd.addNumericField("Clamp_signal", fitConfig.getClampSignal(), 2);
@@ -2820,11 +2820,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
         if (isAstigmatism) {
           gd.addNumericField("Clamp_z", fitConfig.getClampZ(), 2);
         } else {
-          if (nParams > 1 || !fitConfig.isFixedPSF()) {
-            gd.addNumericField("Clamp_sx", fitConfig.getClampXSD(), 2);
+          if (nParams > 1 || !fitConfig.isFixedPsf()) {
+            gd.addNumericField("Clamp_sx", fitConfig.getClampXSd(), 2);
           }
           if (nParams > 1) {
-            gd.addNumericField("Clamp_sy", fitConfig.getClampYSD(), 2);
+            gd.addNumericField("Clamp_sy", fitConfig.getClampYSd(), 2);
           }
           if (nParams > 2) {
             gd.addNumericField("Clamp_angle", fitConfig.getClampAngle(), 2);
@@ -2846,7 +2846,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
         gd.addMessage(fitSolverName + " requires calibration for camera: "
             + CalibrationProtosHelper.getName(calibration.getCameraType()));
-        if (calibration.isSCMOS()) {
+        if (calibration.isScmos()) {
           final String[] models = CameraModelManager.listCameraModels(true);
           gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
         } else {
@@ -2883,11 +2883,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
         if (isAstigmatism) {
           fitConfig.setClampZ(Math.abs(gd.getNextNumber()));
         } else {
-          if (nParams > 1 || !fitConfig.isFixedPSF()) {
-            fitConfig.setClampXSD(Math.abs(gd.getNextNumber()));
+          if (nParams > 1 || !fitConfig.isFixedPsf()) {
+            fitConfig.setClampXSd(Math.abs(gd.getNextNumber()));
           }
           if (nParams > 1) {
-            fitConfig.setClampYSD(Math.abs(gd.getNextNumber()));
+            fitConfig.setClampYSd(Math.abs(gd.getNextNumber()));
           }
           if (nParams > 2) {
             fitConfig.setClampAngle(Math.abs(gd.getNextNumber()));
@@ -2896,7 +2896,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       }
 
       if (requireCalibration) {
-        if (calibration.isSCMOS()) {
+        if (calibration.isScmos()) {
           fitConfig.setCameraModelName(gd.getNextChoice());
         } else {
           calibration.setBias(Math.abs(gd.getNextNumber()));
@@ -2907,7 +2907,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
       // Do this even if collection of calibration settings was ignored. This ensures the
       // camera model is set.
-      if (calibration.isSCMOS()) {
+      if (calibration.isScmos()) {
         fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
         if (!checkCameraModel(fitConfig, sourceBounds, bounds, true)) {
           return false;
@@ -2970,7 +2970,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle sourceBounds,
       Rectangle cropBounds, boolean initialise) {
     final CalibrationReader calibration = fitConfig.getCalibrationReader();
-    if (calibration.isSCMOS() && sourceBounds != null) {
+    if (calibration.isScmos() && sourceBounds != null) {
       CameraModel cameraModel = fitConfig.getCameraModel();
       if (cameraModel == null) {
         throw new IllegalStateException(
@@ -3127,11 +3127,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   private void addTableResults(PeakResultsList resultsList) {
-    final IJTablePeakResults r =
+    final ImageJTablePeakResults r =
         ResultsManager.addTableResults(resultsList, resultsSettings.getResultsTableSettings(),
             resultsSettings.getShowDeviations(), false, false, false);
     if (r != null) {
-      r.setShowZ(PSFHelper.is3D(resultsList.getPSF()));
+      r.setShowZ(PsfHelper.is3D(resultsList.getPsf()));
       r.setClearAtStart(simpleFit);
       r.setShowEndFrame(integrateFrames > 1);
     }
@@ -3291,7 +3291,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
             config.getNoiseMethod());
 
         // Crop the data to the region
-        data = IJImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
+        data =
+            ImageJImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
       }
 
       if (showProcessedFrames) {
@@ -3356,9 +3357,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
       final int size = results.size();
       final Counter j = new Counter(size);
       final ImagePlus finalImp = imp;
-      results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
+      results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
         @Override
-        public void executeXYR(float x, float y, PeakResult r) {
+        public void executeXyr(float x, float y, PeakResult r) {
           final PointRoi roi = new PointRoi(x, y);
           final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
           roi.setStrokeColor(c);
@@ -3498,8 +3499,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
       IJ.log("-=-=-=-");
       IJ.log("Peak Fit");
       IJ.log("-=-=-=-");
-      ImageJUtils.log("Initial Peak SD = %s,%s", MathUtils.rounded(fitConfig.getInitialXSD()),
-          MathUtils.rounded(fitConfig.getInitialYSD()));
+      ImageJUtils.log("Initial Peak SD = %s,%s", MathUtils.rounded(fitConfig.getInitialXSd()),
+          MathUtils.rounded(fitConfig.getInitialYSd()));
       final SpotFilter spotFilter = engine.getSpotFilter();
       IJ.log("Spot Filter = " + spotFilter.getDescription());
       final int w = 2 * engine.getFitting() + 1;
@@ -3724,9 +3725,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
 
     // Do not use set() as we support merging a partial PSF
-    fitConfig.mergePSF(psf);
+    fitConfig.mergePsf(psf);
 
-    textPSF.select(PSFProtosHelper.getName(fitConfig.getPSFType()));
+    textPSF.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }
 
   /**

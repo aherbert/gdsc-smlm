@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.smlm.data.config.PSFHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.IdPeakResult;
@@ -305,7 +305,7 @@ public class ResultsManagerTest {
   private static MemoryPeakResults extract(Spot[] spots, int channel, int slice, int position,
       int type) {
     final MemoryPeakResults results =
-        new MemoryPeakResults(PSFHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
+        new MemoryPeakResults(PsfHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
     for (final Spot spot : spots) {
       if (spot.getChannel() == channel && spot.getSlice() == slice && spot.getPos() == position
           && spot.getFluorophoreType() == type) {

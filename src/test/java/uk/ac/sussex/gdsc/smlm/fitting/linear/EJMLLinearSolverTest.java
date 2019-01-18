@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -73,7 +73,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canSolveLinearEquation()
   {
-    final EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+    final EjmlLinearSolver solver = new EjmlLinearSolver(5e-3, 1e-6);
 
     // Solves (one) linear equation, a x = b, for x[n]
 
@@ -112,7 +112,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canSolveLinearEquationWithZeroInB()
   {
-    final EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+    final EjmlLinearSolver solver = new EjmlLinearSolver(5e-3, 1e-6);
 
     // Solves (one) linear equation, a x = b, for x[n]
 
@@ -151,7 +151,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canSolveLinearEquationWithZeroInA()
   {
-    final EJMLLinearSolver solver = new EJMLLinearSolver(5e-3, 1e-6);
+    final EjmlLinearSolver solver = new EjmlLinearSolver(5e-3, 1e-6);
 
     // Solves (one) linear equation, a x = b, for x[n]
 
@@ -191,7 +191,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canSolveLinearEquationWithZerosInA()
   {
-    final EJMLLinearSolver solver = new EJMLLinearSolver();
+    final EjmlLinearSolver solver = new EjmlLinearSolver();
     final DoubleEquality eq = new DoubleEquality(5e-3, 1e-16);
     solver.setEqual(eq);
 
@@ -237,7 +237,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canInvert()
   {
-    final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+    final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
     // Solves (one) linear equation, a x = b, for x[n]
 
@@ -269,7 +269,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canInvertWithZeros()
   {
-    final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+    final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
     // Solves (one) linear equation, a x = b, for x[n]
 
@@ -307,7 +307,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canInvertDiagonal()
   {
-    final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+    final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
     // Solves (one) linear equation, a x = b, for x[n]
 
@@ -333,7 +333,7 @@ public class EJMLLinearSolverTest {
   @Test
   public void canInvertDiagonalWithZeros()
   {
-    final EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+    final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
     // Solves (one) linear equation, a x = b, for x[n]
 
@@ -365,7 +365,7 @@ public class EJMLLinearSolverTest {
     DenseMatrix64F[] b;
     final boolean badSolver;
     // No validation for a pure speed test
-    EJMLLinearSolver solver = new EJMLLinearSolver();
+    EjmlLinearSolver solver = new EjmlLinearSolver();
 
     public SolverTimingTask(String name, DenseMatrix64F[] a, DenseMatrix64F[] b) {
       super(name + " " + a[0].numCols);
@@ -524,7 +524,7 @@ public class EJMLLinearSolverTest {
     final double[] testcy1 = new double[] {4.8, 5.2};
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
-    final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
+    final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
     final CustomPoissonDistribution pd = new CustomPoissonDistribution(
         new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
     // double lambda = 10;
@@ -554,8 +554,8 @@ public class EJMLLinearSolverTest {
               // As per the LVM algorithm
               // for (int i = 0; i < np; i++)
               // alpha[i][i] *= lambda;
-              aList.add(EJMLLinearSolver.toA(alpha));
-              bList.add(EJMLLinearSolver.toB(beta));
+              aList.add(EjmlLinearSolver.toA(alpha));
+              bList.add(EjmlLinearSolver.toB(beta));
             }
           }
         }
@@ -606,7 +606,7 @@ public class EJMLLinearSolverTest {
     boolean[] ignore;
     final boolean badSolver;
     // No validation for a pure speed test
-    EJMLLinearSolver solver = new EJMLLinearSolver();
+    EjmlLinearSolver solver = new EjmlLinearSolver();
 
     public InversionTimingTask(String name, DenseMatrix64F[] a, boolean[] ignore,
         double[][] answer) {
@@ -732,7 +732,7 @@ public class EJMLLinearSolverTest {
 
     @Override
     double[] invert(DenseMatrix64F a) {
-      if (solver.invertCholeskyLDLT(a)) {
+      if (solver.invertCholeskyLdlT(a)) {
         return extract(a);
       }
       return null;
@@ -777,7 +777,7 @@ public class EJMLLinearSolverTest {
 
     @Override
     double[] invert(DenseMatrix64F a) {
-      return EJMLLinearSolver.invertDiagonalDirectInversion(a);
+      return EjmlLinearSolver.invertDiagonalDirectInversion(a);
     }
   }
 
@@ -825,7 +825,7 @@ public class EJMLLinearSolverTest {
     final double[] testcy1 = new double[] {4.8, 5.2};
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
-    final GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
+    final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
     final CustomPoissonDistribution pd = new CustomPoissonDistribution(
         new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
     // double lambda = 10;
@@ -855,7 +855,7 @@ public class EJMLLinearSolverTest {
               // As per the LVM algorithm
               // for (int i = 0; i < np; i++)
               // alpha[i][i] *= lambda;
-              aList.add(EJMLLinearSolver.toA(alpha));
+              aList.add(EjmlLinearSolver.toA(alpha));
             }
           }
         }

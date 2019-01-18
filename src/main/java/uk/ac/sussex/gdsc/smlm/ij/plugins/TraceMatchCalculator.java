@@ -33,11 +33,11 @@ import uk.ac.sussex.gdsc.core.match.Pulse;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.utils.ImageROIPainter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XYRResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 import ij.IJ;
@@ -73,8 +73,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   private static TextWindow resultsWindow;
   private static TextWindow pairsWindow;
   private static TextWindow triplesWindow;
-  private static ImageROIPainter pairPainter;
-  private static ImageROIPainter triplePainter;
+  private static ImageRoiPainter pairPainter;
+  private static ImageRoiPainter triplePainter;
 
   @Override
   public void run(String arg) {
@@ -205,7 +205,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
             final Point p = resultsWindow.getLocation();
             p.y += resultsWindow.getHeight();
             pairsWindow.setLocation(p);
-            pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(),
+            pairPainter = new ImageRoiPainter(pairsWindow.getTextPanel(),
                 results1.getSource().getOriginal().getName(), this);
           }
           pairsWindow.getTextPanel().clear();
@@ -233,7 +233,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
             final Point p = resultsWindow.getLocation();
             p.y += resultsWindow.getHeight();
             triplesWindow.setLocation(p);
-            triplePainter = new ImageROIPainter(triplesWindow.getTextPanel(),
+            triplePainter = new ImageRoiPainter(triplesWindow.getTextPanel(),
                 results1.getSource().getName(), this);
           }
           triplesWindow.getTextPanel().clear();
@@ -299,9 +299,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     }
     final Pulse[] pulses = new Pulse[results.size()];
     final Counter i = new Counter();
-    results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure() {
+    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
       @Override
-      public void executeXYR(float x, float y, PeakResult p) {
+      public void executeXyr(float x, float y, PeakResult p) {
         pulses[i.getAndIncrement()] = new Pulse(x, y, p.getFrame(), p.getEndFrame());
       }
     });

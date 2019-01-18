@@ -45,7 +45,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
@@ -58,13 +58,13 @@ import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolverType;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
-import uk.ac.sussex.gdsc.smlm.fitting.LSEFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.MLEFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.LseFunctionSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.MleFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -541,7 +541,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       // Extract the data
       final int maxx = stack.getWidth();
       final int maxy = stack.getHeight();
-      data = IJImageConverter.getData(stack.getPixels(frame), maxx, maxy, null, data);
+      data = ImageJImageConverter.getData(stack.getPixels(frame), maxx, maxy, null, data);
 
       // Smooth the image and identify spots with a filter
       final Spot[] spots = spotFilter.rank(data, maxx, maxy);
@@ -722,10 +722,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
           if (result.good1) {
             result.sumOfSquares1 = (f1.getType() == FunctionSolverType.LSE)
-                ? ((LSEFunctionSolver) f1).getTotalSumOfSquares()
+                ? ((LseFunctionSolver) f1).getTotalSumOfSquares()
                 : 0;
             result.ll1 = (f1.getType() == FunctionSolverType.MLE)
-                ? ((MLEFunctionSolver) f1).getLogLikelihood()
+                ? ((MleFunctionSolver) f1).getLogLikelihood()
                 : 0;
             result.value1 = gf.getValue();
 
@@ -786,10 +786,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
               if (r2 != 0) {
                 result.good2 = r2 == 2;
                 result.sumOfSquares2 = (f2.getType() == FunctionSolverType.LSE)
-                    ? ((LSEFunctionSolver) f2).getTotalSumOfSquares()
+                    ? ((LseFunctionSolver) f2).getTotalSumOfSquares()
                     : 0;
                 result.ll2 = (f2.getType() == FunctionSolverType.MLE)
-                    ? ((MLEFunctionSolver) f2).getLogLikelihood()
+                    ? ((MleFunctionSolver) f2).getLogLikelihood()
                     : 0;
                 result.value2 = gf.getValue();
 
@@ -844,8 +844,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                   result.mbic2 = result.bic2;
                 }
                 if (f1.getType() == FunctionSolverType.LSE) {
-                  result.r1 = ((LSEFunctionSolver) f1).getAdjustedCoefficientOfDetermination();
-                  result.r2 = ((LSEFunctionSolver) f2).getAdjustedCoefficientOfDetermination();
+                  result.r1 = ((LseFunctionSolver) f1).getAdjustedCoefficientOfDetermination();
+                  result.r2 = ((LseFunctionSolver) f2).getAdjustedCoefficientOfDetermination();
                 }
 
                 // Debugging: see if the AIC or BIC ever differ
@@ -1392,8 +1392,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         }
 
         // Check if centre is within the region - Border allowing fit slightly outside
-        final double borderx = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialXSD();
-        final double bordery = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialYSD();
+        final double borderx = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialXSd();
+        final double bordery = Gaussian2DFunction.SD_TO_HWHM_FACTOR * fitConfig.getInitialYSd();
         if ((params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK
             + Gaussian2DFunction.X_POSITION] < -borderx
             || params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK
@@ -1534,7 +1534,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final double sa = getSa();
     gd.addMessage(String.format(
         "Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
-        MathUtils.rounded(simulationParameters.s / simulationParameters.a), MathUtils.rounded(sa)));
+        MathUtils.rounded(simulationParameters.sd / simulationParameters.pixelPitch),
+        MathUtils.rounded(sa)));
 
     // For each new benchmark width, reset the PSF width to the square pixel adjustment
     if (lastId != simulationParameters.id) {
@@ -1545,7 +1546,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
       final CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
 
-      cal.setNmPerPixel(simulationParameters.a);
+      cal.setNmPerPixel(simulationParameters.pixelPitch);
       cal.setCountPerPhoton(simulationParameters.gain);
       cal.setQuantumEfficiency(simulationParameters.qe);
       cal.setExposureTime(100);
@@ -1623,7 +1624,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // Ignore the template
     gd.getNextChoice();
     useBenchmarkSettings = gd.getNextBoolean();
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
     config.setSearch(gd.getNextNumber());
@@ -1716,7 +1717,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     final CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
 
-    cal.setNmPerPixel(simulationParameters.a);
+    cal.setNmPerPixel(simulationParameters.pixelPitch);
     cal.setCountPerPhoton(simulationParameters.gain);
     cal.setQuantumEfficiency(simulationParameters.qe);
     cal.setExposureTime(100);
@@ -1756,8 +1757,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @return the sa
    */
   private double getSa() {
-    return PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a)
-        / simulationParameters.a;
+    return PSFCalculator.squarePixelAdjustment(simulationParameters.sd,
+        simulationParameters.pixelPitch) / simulationParameters.pixelPitch;
   }
 
   private int progress;
@@ -1790,8 +1791,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       return true;
     });
     final double density = 1e6 * sumCount[0]
-        / (simulationParameters.a * simulationParameters.a * results.getBounds().getWidth()
-            * results.getBounds().getHeight() * actualCoordinates.size());
+        / (simulationParameters.pixelPitch * simulationParameters.pixelPitch
+            * results.getBounds().getWidth() * results.getBounds().getHeight()
+            * actualCoordinates.size());
 
     // Create a pool of workers
     final int nThreads = Prefs.getThreads();
@@ -1970,14 +1972,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     sb.append(MathUtils.rounded(density)).append('\t');
     sb.append(MathUtils.rounded(getSa())).append('\t');
     sb.append(config.getFittingWidth()).append('\t');
-    sb.append(PSFProtosHelper.getName(fitConfig.getPSFType()));
+    sb.append(PsfProtosHelper.getName(fitConfig.getPsfType()));
     sb.append(":").append(PeakFit.getSolverName(fitConfig));
-    if (fitConfig.isModelCameraMLE()) {
+    if (fitConfig.isModelCameraMle()) {
       sb.append(":Camera\t");
 
       // Add details of the noise model for the MLE
       final CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
-      sb.append("EM=").append(r.isEMCCD());
+      sb.append("EM=").append(r.isEmCcd());
       sb.append(":A=").append(MathUtils.rounded(r.getCountPerElectron()));
       sb.append(":N=").append(MathUtils.rounded(r.getReadNoise()));
       sb.append('\t');
@@ -2003,24 +2005,24 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     sb.append(MathUtils.rounded(simulationParameters.minSignal)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.maxSignal)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.averageSignal)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.s)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.a)).append('\t');
-    sb.append(MathUtils.rounded(getSa() * simulationParameters.a)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.sd)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.pixelPitch)).append('\t');
+    sb.append(MathUtils.rounded(getSa() * simulationParameters.pixelPitch)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.gain)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.readNoise)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.b)).append('\t');
+    sb.append(MathUtils.rounded(simulationParameters.background)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.noise)).append('\t');
     sb.append(MathUtils.rounded(simulationParameters.averageSignal / simulationParameters.noise))
         .append('\t');
     sb.append(config.getFittingWidth()).append('\t');
-    sb.append(PSFProtosHelper.getName(fitConfig.getPSFType()));
+    sb.append(PsfProtosHelper.getName(fitConfig.getPsfType()));
     sb.append(":").append(PeakFit.getSolverName(fitConfig));
-    if (fitConfig.isModelCameraMLE()) {
+    if (fitConfig.isModelCameraMle()) {
       sb.append(":Camera\t");
 
       // Add details of the noise model for the MLE
       final CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
-      sb.append("EM=").append(r.isEMCCD());
+      sb.append("EM=").append(r.isEmCcd());
       sb.append(":A=").append(MathUtils.rounded(r.getCountPerElectron()));
       sb.append(":N=").append(MathUtils.rounded(r.getReadNoise()));
       sb.append('\t');
@@ -2590,14 +2592,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
             final double maxShiftX;
             final double maxShiftY;
             final double factor = Gaussian2DFunction.SD_TO_HWHM_FACTOR;
-            if (fitConfig.isXSDFitting()) {
+            if (fitConfig.isXSdFitting()) {
               // Add the fitted standard deviation to the allowed shift
               maxShiftX = regionBounds.width * 0.5 + factor * params[Gaussian2DFunction.X_SD];
               maxShiftY = regionBounds.height * 0.5 + factor * params[Gaussian2DFunction.Y_SD];
             } else {
               // Add the configured standard deviation to the allowed shift
-              maxShiftX = regionBounds.width * 0.5 + factor * fitConfig.getInitialXSD();
-              maxShiftY = regionBounds.height * 0.5 + factor * fitConfig.getInitialYSD();
+              maxShiftX = regionBounds.width * 0.5 + factor * fitConfig.getInitialXSd();
+              maxShiftY = regionBounds.height * 0.5 + factor * fitConfig.getInitialYSd();
             }
 
             for (int n = 0; n < 2; n++) {
@@ -2747,7 +2749,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       final TemplateSettings.Builder settings = TemplateSettings.newBuilder();
       getNotes(settings, summary);
       settings.setFitEngineSettings(config.getFitEngineSettings());
-      if (!SettingsManager.toJSON(settings.build(), filename, SettingsManager.FLAG_SILENT)) {
+      if (!SettingsManager.toJson(settings.build(), filename, SettingsManager.FLAG_SILENT)) {
         IJ.log("Unable to save the template configuration");
       }
     }
@@ -2925,7 +2927,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         new StringBuilder("Filters the doublet fits and reports the performance increase\n");
 
     // Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
-    sb.append("SD0 = ").append(MathUtils.rounded(fitConfig.getInitialXSD())).append("\n");
+    sb.append("SD0 = ").append(MathUtils.rounded(fitConfig.getInitialXSd())).append("\n");
     // sb.append("SD1 =
     // ").append(MathUtils.rounded(fitConfig.getInitialPeakStdDev1())).append("\n");
     sb.append("Fit Width = ").append(config.getFittingWidth()).append("\n");
@@ -2937,7 +2939,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Copy the settings used when fitting
     filterFitConfig.setCalibration(fitConfig.getCalibration());
-    filterFitConfig.setPSF(fitConfig.getPSF());
+    filterFitConfig.setPsf(fitConfig.getPsf());
     filterFitConfig.setFitSolverSettings(fitConfig.getFitSolverSettings());
 
     final String[] templates = ConfigurationTemplate.getTemplateNames(true);
@@ -3097,7 +3099,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           fitConfig = new FitConfiguration();
           final FitConfiguration fitConfig2 = config2.getFitConfiguration();
           if (custom && template.hasPsf()) {
-            textPSF.select(PeakFit.getPSFTypeNames()[fitConfig2.getPSFType().ordinal()]);
+            textPSF.select(PeakFit.getPSFTypeNames()[fitConfig2.getPsfType().ordinal()]);
           }
           textDataFilterType.select(config2.getDataFilterType().ordinal());
           textDataFilter.select(config2.getDataFilterMethod(0).ordinal());
@@ -3110,7 +3112,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
           // Copy settings not in the dialog for the fit solver
           if (custom) {
-            fitConfig.setPSF(fitConfig2.getPSF());
+            fitConfig.setPsf(fitConfig2.getPsf());
           }
           fitConfig.setFitSolverSettings(fitConfig2.getFitSolverSettings());
         }
@@ -3141,7 +3143,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           return;
         }
 
-        textPSF.select(PeakFit.getPSFTypeNames()[fitConfig.getPSFType().ordinal()]);
+        textPSF.select(PeakFit.getPSFTypeNames()[fitConfig.getPsfType().ordinal()]);
         textDataFilterType.select(config.getDataFilterType().ordinal());
         textDataFilter.select(config.getDataFilterMethod(0).ordinal());
         textSmooth.setText("" + config.getDataFilterParameterValue(0));

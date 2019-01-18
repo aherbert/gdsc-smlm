@@ -217,7 +217,7 @@ public class FilterTest {
     final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
     testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
     testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
-    testSerialisation(new MultiFilterCRLB(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
+    testSerialisation(new MultiFilterCrlb(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
   }
 
   private static void testSerialisation(MultiFilter f,
@@ -225,9 +225,9 @@ public class FilterTest {
     for (int i = 10; i-- > 0;) {
       final MultiFilter f1 =
           (MultiFilter) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
-      final String xml = f1.toXML();
+      final String xml = f1.toXml();
       logger.log(TestLogUtils.getRecord(Level.FINE, XmlUtils.prettyPrintXml(xml)));
-      final MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
+      final MultiFilter f2 = (MultiFilter) Filter.fromXml(xml);
       Assertions.assertTrue(f1.getClass().equals(f2.getClass()));
       Assertions.assertEquals(f1, f2);
     }

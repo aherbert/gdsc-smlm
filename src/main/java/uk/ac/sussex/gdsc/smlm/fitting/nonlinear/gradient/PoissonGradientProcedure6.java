@@ -41,7 +41,7 @@ public class PoissonGradientProcedure6 extends PoissonGradientProcedure {
    */
   public PoissonGradientProcedure6(final Gradient1Function func) {
     super(func);
-    if (n != 6) {
+    if (numberOfGradients != 6) {
       throw new IllegalArgumentException("Function must compute 6 gradients");
     }
   }
@@ -52,32 +52,32 @@ public class PoissonGradientProcedure6 extends PoissonGradientProcedure {
       final double function = 1.0 / value;
 
       data[0] += dyDa[0] * function * dyDa[0];
-      double w;
-      w = dyDa[1] * function;
-      data[1] += w * dyDa[0];
-      data[2] += w * dyDa[1];
-      w = dyDa[2] * function;
-      data[3] += w * dyDa[0];
-      data[4] += w * dyDa[1];
-      data[5] += w * dyDa[2];
-      w = dyDa[3] * function;
-      data[6] += w * dyDa[0];
-      data[7] += w * dyDa[1];
-      data[8] += w * dyDa[2];
-      data[9] += w * dyDa[3];
-      w = dyDa[4] * function;
-      data[10] += w * dyDa[0];
-      data[11] += w * dyDa[1];
-      data[12] += w * dyDa[2];
-      data[13] += w * dyDa[3];
-      data[14] += w * dyDa[4];
-      w = dyDa[5] * function;
-      data[15] += w * dyDa[0];
-      data[16] += w * dyDa[1];
-      data[17] += w * dyDa[2];
-      data[18] += w * dyDa[3];
-      data[19] += w * dyDa[4];
-      data[20] += w * dyDa[5];
+      double wgt;
+      wgt = dyDa[1] * function;
+      data[1] += wgt * dyDa[0];
+      data[2] += wgt * dyDa[1];
+      wgt = dyDa[2] * function;
+      data[3] += wgt * dyDa[0];
+      data[4] += wgt * dyDa[1];
+      data[5] += wgt * dyDa[2];
+      wgt = dyDa[3] * function;
+      data[6] += wgt * dyDa[0];
+      data[7] += wgt * dyDa[1];
+      data[8] += wgt * dyDa[2];
+      data[9] += wgt * dyDa[3];
+      wgt = dyDa[4] * function;
+      data[10] += wgt * dyDa[0];
+      data[11] += wgt * dyDa[1];
+      data[12] += wgt * dyDa[2];
+      data[13] += wgt * dyDa[3];
+      data[14] += wgt * dyDa[4];
+      wgt = dyDa[5] * function;
+      data[15] += wgt * dyDa[0];
+      data[16] += wgt * dyDa[1];
+      data[17] += wgt * dyDa[2];
+      data[18] += wgt * dyDa[3];
+      data[19] += wgt * dyDa[4];
+      data[20] += wgt * dyDa[5];
     }
   }
 

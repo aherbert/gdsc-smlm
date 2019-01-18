@@ -83,7 +83,7 @@ public class CustomContentInstant extends ContentInstant {
   private boolean visible = true;
   private boolean bbVisible;
   private boolean coordVisible = UniverseSettings.showLocalCoordinateSystemsByDefault;
-  private boolean showPL;
+  private boolean showPl;
 
   // entries
   private ContentNode contentNode;
@@ -238,7 +238,7 @@ public class CustomContentInstant extends ContentInstant {
     setSwitch(BS, selected);
     setSwitch(CS, coordVisible);
     setSwitch(CO, visible);
-    setSwitch(PL, showPL);
+    setSwitch(PL, showPl);
 
     // update type
     this.type = CUSTOM;
@@ -410,7 +410,7 @@ public class CustomContentInstant extends ContentInstant {
     }
 
     setSwitch(PL, visible);
-    showPL = visible;
+    showPl = visible;
     if (visible && plDialog != null) {
       plDialog.addPointList(getName(), plPanel);
     } else if (!visible && plDialog != null) {
@@ -867,6 +867,6 @@ public class CustomContentInstant extends ContentInstant {
 
   @Override
   public boolean isPLVisible() {
-    return showPL;
+    return showPl;
   }
 }

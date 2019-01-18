@@ -27,14 +27,14 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using a single component of the multi filter.
  */
-public abstract class MultiFilterComponent {
+interface MultiFilterComponent {
   /**
    * Validate the peak.
    *
    * @param peak the peak
    * @return true, if it fails the filter
    */
-  public abstract boolean fail(final PreprocessedPeakResult peak);
+  boolean fail(final PreprocessedPeakResult peak);
 
   /**
    * Gets the type of the component. The return value will match the constants defined in
@@ -42,5 +42,5 @@ public abstract class MultiFilterComponent {
    *
    * @return the type
    */
-  public abstract int getType();
+  int getType();
 }

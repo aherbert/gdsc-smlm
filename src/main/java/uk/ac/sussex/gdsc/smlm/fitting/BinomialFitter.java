@@ -28,7 +28,6 @@ import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
@@ -173,8 +172,8 @@ public class BinomialFitter {
   public double[] fitBinomial(int[] data, int minN, int maxN, boolean zeroTruncated) {
     double[] histogram = getHistogram(data, false);
 
-    final double initialSS = Double.POSITIVE_INFINITY;
-    double bestSS = initialSS;
+    final double initialValue = Double.POSITIVE_INFINITY;
+    double bestValue = initialValue;
     double[] parameters = null;
     int worse = 0;
     int currentN = histogram.length - 1;
@@ -216,11 +215,11 @@ public class BinomialFitter {
 
       log("Fitted %s : N=%d, p=%s. SS=%g", name, n, MathUtils.rounded(p), solution.getValue());
 
-      if (bestSS > solution.getValue()) {
-        bestSS = solution.getValue();
+      if (bestValue > solution.getValue()) {
+        bestValue = solution.getValue();
         parameters = new double[] {n, p};
         worse = 0;
-      } else if (bestSS != initialSS && ++worse >= 3) {
+      } else if (bestValue != initialValue && ++worse >= 3) {
         break;
       }
     }
@@ -302,8 +301,8 @@ public class BinomialFitter {
     // https://www.lri.fr/~hansen/cmaes.m
     // Take the defaults from the Matlab documentation
     final int maxIterations = 2000;
-    final double stopFitness = 0; // Double.NEGATIVE_INFINITY;
-    final boolean isActiveCMA = true;
+    final double stopFitness = 0;
+    final boolean isActiveCma = true;
     final int diagonalOnly = 0;
     final int checkFeasableCount = 1;
     final RandomGenerator random = new Well19937c();
@@ -326,7 +325,7 @@ public class BinomialFitter {
         final GoalType goalType = (maximumLikelihood) ? GoalType.MAXIMIZE : GoalType.MINIMIZE;
 
         // Iteratively fit
-        final CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA,
+        final CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCma,
             diagonalOnly, checkFeasableCount, random, generateStatistics, checker);
         for (int iteration = 0; iteration <= fitRestarts; iteration++) {
           try {
@@ -339,9 +338,7 @@ public class BinomialFitter {
             if (solution == null || result.getValue() < solution.getValue()) {
               solution = result;
             }
-          } catch (final TooManyEvaluationsException ex) {
-            // No solution
-          } catch (final TooManyIterationsException ex) {
+          } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
             // No solution
           }
           if (solution == null) {
@@ -357,9 +354,7 @@ public class BinomialFitter {
             if (result.getValue() < solution.getValue()) {
               solution = result;
             }
-          } catch (final TooManyEvaluationsException ex) {
-            // No solution
-          } catch (final TooManyIterationsException ex) {
+          } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
             // No solution
           }
         }
@@ -396,12 +391,7 @@ public class BinomialFitter {
               .start(solution.getPointRef())
               .target(gradientFunction.pvalues)
               .weight(new DiagonalMatrix(gradientFunction.getWeights()))
-              .model(gradientFunction, new MultivariateMatrixFunction() {
-                @Override
-                public double[][] value(double[] point) throws IllegalArgumentException
-                {
-                  return gradientFunction.jacobian(point);
-                }} )
+              .model(gradientFunction, gradientFunction::jacobian)
               //.checker (checker)
               .build();
           //@formatter:on
@@ -454,8 +444,7 @@ public class BinomialFitter {
       sum += histogram[i] * i;
       count += histogram[i];
     }
-    final double mean = sum / count;
-    return mean;
+    return MathUtils.div0(sum, count);
   }
 
   /**
@@ -576,7 +565,7 @@ public class BinomialFitter {
       super(histogram, trials, zeroTruncated);
 
       // We could ignore the first p value as it is always zero:
-      // p = Arrays.copyOfRange(p, 1, p.length);
+      // p = Arrays.copyOfRange(p, 1, p.length)
       // BUT then we would have to override the getP() method since this has
       // an offset of 1 and assumes the index of p is X.
 
@@ -615,7 +604,7 @@ public class BinomialFitter {
       if (startIndex == 0) {
         for (int k = 0; k <= n; ++k) {
           // jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) +
-          // nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1;
+          // nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1
 
           // Optimise
           final double pk_1 = FastMath.pow(p, k - 1);
@@ -630,14 +619,14 @@ public class BinomialFitter {
         jacobian[0][0] = 0;
 
         // In the zero-truncated Binomial all values are scaled by a factor
-        // pi = 1.0 / (1.0 - dist.probability(0));
+        // pi = 1.0 / (1.0 - dist.probability(0))
 
         // We must apply the product rule with pi as f
         // (f.g)' = f'.g +f.g'
 
         // So far we have only computed g' for the original Binomial
 
-        // double pi = dist.probability(0);
+        // double pi = dist.probability(0)
         final double q = 1 - p;
         final double p_n = FastMath.pow(1 - p, n);
         final double f = 1.0 / (1.0 - nchoose[0] * p_n);

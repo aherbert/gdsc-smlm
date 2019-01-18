@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
@@ -158,7 +158,7 @@ public class FisherInformationMatrixTest {
     fun.initialise(a);
 
     final GradientCalculator calc =
-        GradientCalculatorFactory.newCalculator(fun.getNumberOfGradients());
+        GradientCalculatorUtils.newCalculator(fun.getNumberOfGradients());
     double[][] matrixI = calc.fisherInformationMatrix(size, a, fun);
 
     // Reduce to the desired size

@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.GUIProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -60,7 +60,7 @@ public class FilterResults implements PlugIn {
   private MemoryPeakResults results;
 
   private GUIFilterSettings.Builder filterSettings =
-      GUIProtosHelper.defaultGUIFilterSettings.toBuilder();
+      GuiProtosHelper.defaultGUIFilterSettings.toBuilder();
 
   // Used to pass data from analyseResults() to checkLimits()
   private float minDrift = Float.MAX_VALUE;
@@ -151,7 +151,7 @@ public class FilterResults implements PlugIn {
 
     try {
       sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
-      sp.getXYR();
+      sp.getXyr();
 
       // Re-use for convenience
       sp.intensity = new float[sp.x.length];
@@ -345,7 +345,7 @@ public class FilterResults implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    filterSettings = SettingsManager.readGUIFilterSettings(0).toBuilder();
+    filterSettings = SettingsManager.readGuiFilterSettings(0).toBuilder();
 
     checkLimits();
 

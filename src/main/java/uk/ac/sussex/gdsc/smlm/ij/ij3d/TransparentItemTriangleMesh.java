@@ -28,7 +28,6 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.TriangleArray;
 import org.scijava.java3d.utils.geometry.GeometryInfo;
 import org.scijava.java3d.utils.geometry.NormalGenerator;
@@ -193,18 +192,13 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     }
     mesh = Arrays.asList(coords);
 
-    ga.updateData(new GeometryUpdater() {
-      @Override
-      public void updateData(Geometry geometry) {
-        final GeometryArray ga = (GeometryArray) geometry;
-        // We re-use the geometry and just truncate the vertex count
-        ga.setCoordinates(0, coords);
-        ga.setColors(0, colors);
-        ga.setValidVertexCount(coords.length);
-      }
+    ga.updateData(geometry -> {
+      final GeometryArray ga2 = (GeometryArray) geometry;
+      // We re-use the geometry and just truncate the vertex count
+      ga2.setCoordinates(0, coords);
+      ga2.setColors(0, colors);
+      ga2.setValidVertexCount(coords.length);
     });
-
-    // this.setGeometry(ga);
   }
 
   @Override
@@ -222,12 +216,12 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     final int N = objectSize * size;
     final float[] colors = new float[N * 4];
     ga.getColors(0, colors);
-    int i = 0;
-    while (i < colors.length) {
-      colors[i++] = color.x;
-      colors[i++] = color.y;
-      colors[i++] = color.z;
-      i++; // Skip over alpha
+    int index = 0;
+    while (index < colors.length) {
+      colors[index++] = color.x;
+      colors[index++] = color.y;
+      colors[index++] = color.z;
+      index++; // Skip over alpha
     }
     ga.setColors(0, colors);
     changed = true;
@@ -248,13 +242,13 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     final int N = objectSize * size;
     final float[] colors = new float[N * 4];
     ga.getColors(0, colors);
-    int i = 0;
+    int index = 0;
     for (final Color3f c : color) {
       for (int j = objectSize; j-- > 0;) {
-        colors[i++] = c.x;
-        colors[i++] = c.y;
-        colors[i++] = c.z;
-        i++; // Skip over alpha
+        colors[index++] = c.x;
+        colors[index++] = c.y;
+        colors[index++] = c.z;
+        index++; // Skip over alpha
       }
     }
     ga.setColors(0, colors);
@@ -275,10 +269,10 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     final int objectSize = objectVertices.length;
     final int N = objectSize * size;
     final Color4f[] colors = new Color4f[N];
-    int i = 0;
+    int index = 0;
     for (final Color4f c : color) {
       for (int j = objectSize; j-- > 0;) {
-        colors[i++] = c;
+        colors[index++] = c;
       }
     }
     ga.setColors(0, colors);
@@ -299,11 +293,11 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     final int N = objectSize * size;
     final float[] colors = new float[N * 4];
     ga.getColors(0, colors);
-    int i = 3;
+    int index = 3;
     for (final float f : alpha) {
       for (int j = objectSize; j-- > 0;) {
-        colors[i] = f;
-        i += 4;
+        colors[index] = f;
+        index += 4;
       }
     }
     ga.setColors(0, colors);
@@ -321,11 +315,11 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
     final int N = objectSize * size;
     final float[] colors = new float[N * 4];
     ga.getColors(0, colors);
-    int i = 3;
+    int index = 3;
     while (size-- > 0) {
       for (int j = objectSize; j-- > 0;) {
-        colors[i] = alpha;
-        i += 4;
+        colors[index] = alpha;
+        index += 4;
       }
     }
     ga.setColors(0, colors);

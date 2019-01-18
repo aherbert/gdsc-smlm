@@ -151,7 +151,7 @@ public class PoissonGaussianFisherInformationTest {
       final double upper = PoissonFisherInformation.getPoissonI(u);
       final double alpha = I / upper;
       logger.log(TestLogUtils.getRecord(Level.INFO,
-          "s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", f.s, u, I, I2, lower, upper, alpha));
+          "s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", f.sd, u, I, I2, lower, upper, alpha));
       Assertions.assertTrue(I > lower);
       Assertions.assertTrue(I < upper);
 

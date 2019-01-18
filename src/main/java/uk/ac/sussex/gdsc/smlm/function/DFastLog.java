@@ -45,7 +45,9 @@ public class DFastLog extends FastLog {
   /** The base. */
   private final double base;
   /** The number of bits to remove from a float mantissa. */
+  // @CHECKSTYLE.OFF: MemberName
   private final int q;
+  // @CHECKSTYLE.ON: MemberName
   /** (q-1). */
   private final int qm1;
   /**
@@ -102,18 +104,6 @@ public class DFastLog extends FastLog {
     for (int i = 0; i < size; i++) {
       data[i] = (float) (exactLog2(((long) i) << q) - 1075);
     }
-
-    // We need the complete table to do this.
-    // Comment out for production code since the tolerance is variable.
-    // for (int i = 1; i < size; i++)
-    // {
-    // double value = ((long) i) << q;
-    // double log2 = data[i] + 1075;
-    // assert Math.abs((log2 - fastLog2(value)) / log2) < 1e-5 : String.format("[%d] log2(%g) %g !=
-    // %g %g", i,
-    // value, log2, fastLog2(value), uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(log2,
-    // fastLog2(value)));
-    // }
   }
 
   @Override

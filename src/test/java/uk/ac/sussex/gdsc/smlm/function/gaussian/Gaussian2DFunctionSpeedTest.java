@@ -175,40 +175,40 @@ public class Gaussian2DFunctionSpeedTest {
   }
 
   @SeededTest
-  public void freeCircularComputesSameAsEllipticalSinglePeakNB(RandomSeed seed) {
+  public void freeCircularComputesSameAsEllipticalSinglePeakNb(RandomSeed seed) {
     f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
   }
 
   @SpeedTag
   @SeededTest
-  public void freeCircularFasterThanEllipticalSinglePeakNB(RandomSeed seed) {
+  public void freeCircularFasterThanEllipticalSinglePeakNb(RandomSeed seed) {
     f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
   }
 
   @SeededTest
-  public void circularComputesSameAsFreeCircularSinglePeakNB(RandomSeed seed) {
+  public void circularComputesSameAsFreeCircularSinglePeakNb(RandomSeed seed) {
     f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void circularFasterThanFreeCircularSinglePeakNB(RandomSeed seed) {
+  public void circularFasterThanFreeCircularSinglePeakNb(RandomSeed seed) {
     f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fixedComputesSameAsFreeCircularSinglePeakNB(RandomSeed seed) {
+  public void fixedComputesSameAsFreeCircularSinglePeakNb(RandomSeed seed) {
     f1ComputesSameAsf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void fixedFasterThanFreeCircularSinglePeakNB(RandomSeed seed) {
+  public void fixedFasterThanFreeCircularSinglePeakNb(RandomSeed seed) {
     f1FasterThanf2(seed, single, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
@@ -253,40 +253,40 @@ public class Gaussian2DFunctionSpeedTest {
   }
 
   @SeededTest
-  public void freeCircularComputesSameAsEllipticalMultiPeakNB(RandomSeed seed) {
+  public void freeCircularComputesSameAsEllipticalMultiPeakNb(RandomSeed seed) {
     f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
   }
 
   @SpeedTag
   @SeededTest
-  public void freeCircularFasterThanEllipticalMultiPeakNB(RandomSeed seed) {
+  public void freeCircularFasterThanEllipticalMultiPeakNb(RandomSeed seed) {
     f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
   }
 
   @SeededTest
-  public void circularComputesSameAsFreeCircularMultiPeakNB(RandomSeed seed) {
+  public void circularComputesSameAsFreeCircularMultiPeakNb(RandomSeed seed) {
     f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void circularFasterThanFreeCircularMultiPeakNB(RandomSeed seed) {
+  public void circularFasterThanFreeCircularMultiPeakNb(RandomSeed seed) {
     f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fixedComputesSameAsFreeCircularMultiPeakNB(RandomSeed seed) {
+  public void fixedComputesSameAsFreeCircularMultiPeakNb(RandomSeed seed) {
     f1ComputesSameAsf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void fixedFasterThanFreeCircularMultiPeakNB(RandomSeed seed) {
+  public void fixedFasterThanFreeCircularMultiPeakNb(RandomSeed seed) {
     f1FasterThanf2(seed, multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
         GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }

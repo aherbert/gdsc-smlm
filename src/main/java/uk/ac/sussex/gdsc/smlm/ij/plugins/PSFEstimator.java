@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitJob;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.IJImageConverter;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.AggregatedImageSource;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.InterlacedImageSource;
@@ -123,7 +123,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
       return DONE;
     }
 
-    settings = SettingsManager.readPSFEstimatorSettings(0).toBuilder();
+    settings = SettingsManager.readPsfEstimatorSettings(0).toBuilder();
     // Reset
     if (IJ.controlKeyDown()) {
       config = new FitEngineConfiguration();
@@ -155,8 +155,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     initialPeakStdDev1 = 1;
     initialPeakAngle = 0;
     try {
-      initialPeakStdDev0 = fitConfig.getInitialXSD();
-      initialPeakStdDev1 = fitConfig.getInitialYSD();
+      initialPeakStdDev0 = fitConfig.getInitialXSd();
+      initialPeakStdDev1 = fitConfig.getInitialYSd();
       initialPeakAngle = fitConfig.getInitialAngle();
     } catch (final IllegalStateException ex) {
       // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
@@ -253,7 +253,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     settings.setHistogramBins((int) gd.getNextNumber());
 
     final FitConfiguration fitConfig = config.getFitConfiguration();
-    fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
     config.setSearch(gd.getNextNumber());
@@ -314,7 +314,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
       return false;
     }
 
-    if (fitConfig.getPSFType() == PSFType.ONE_AXIS_GAUSSIAN_2D && fitConfig.isFixedPSF()) {
+    if (fitConfig.getPsfType() == PSFType.ONE_AXIS_GAUSSIAN_2D && fitConfig.isFixedPsf()) {
       final String msg =
           "ERROR: A width-fitting function must be selected (i.e. not fixed-width fitting)";
       IJ.error(TITLE, msg);
@@ -531,7 +531,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
         log("NOTE: Angle is not significant: %g ~ %g (p=%g) => Re-run with fixed zero angle",
             sampleStats.getMean(), testAngle, p);
         ignore[ANGLE] = true;
-        config.getFitConfiguration().setPSFType(PSFType.TWO_AXIS_GAUSSIAN_2D);
+        config.getFitConfiguration().setPsfType(PSFType.TWO_AXIS_GAUSSIAN_2D);
         tryAgain = true;
         break;
       }
@@ -546,7 +546,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     if (identical[XY]) {
       log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => "
           + "Re-run with circular function", sampleNew[X].getMean(), sampleNew[Y].getMean());
-      config.getFitConfiguration().setPSFType(PSFType.ONE_AXIS_GAUSSIAN_2D);
+      config.getFitConfiguration().setPsfType(PSFType.ONE_AXIS_GAUSSIAN_2D);
       tryAgain = true;
     }
     return tryAgain;
@@ -632,7 +632,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
 
       final ImageProcessor ip = stack.getProcessor(slice);
       ip.setRoi(roi); // stack processor does not set the bounds required by ImageConverter
-      final FitJob job = new FitJob(slice, IJImageConverter.getData(ip), roi);
+      final FitJob job = new FitJob(slice, ImageJImageConverter.getData(ip), roi);
       engine.run(job);
 
       if (sampleSizeReached() || ImageJUtils.isInterrupted()) {
@@ -901,13 +901,13 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   @Override
-  public PSF getPSF() {
+  public PSF getPsf() {
     // Ignored
     return null;
   }
 
   @Override
-  public void setPSF(PSF psf) {
+  public void setPsf(PSF psf) {
     // Ignored
   }
 }

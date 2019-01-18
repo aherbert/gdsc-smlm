@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.smlm.fitting.linear.EJMLLinearSolver;
+import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
 import uk.ac.sussex.gdsc.smlm.function.CameraNoiseModel;
 import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleCircularGaussian2DFunction
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNbFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
@@ -102,31 +102,31 @@ public class GradientCalculatorSpeedTest {
 
   @SeededTest
   public void gradientCalculatorFactoryCreatesOptimisedCalculators() {
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(3).getClass(),
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(3).getClass(),
         GradientCalculator3.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(4).getClass(),
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(4).getClass(),
         GradientCalculator4.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(5).getClass(),
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(5).getClass(),
         GradientCalculator5.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(6).getClass(),
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(6).getClass(),
         GradientCalculator6.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(7).getClass(),
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(7).getClass(),
         GradientCalculator7.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(13).getClass(),
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(13).getClass(),
         GradientCalculator.class);
 
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(3, true).getClass(),
-        MLEGradientCalculator3.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(4, true).getClass(),
-        MLEGradientCalculator4.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(5, true).getClass(),
-        MLEGradientCalculator5.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(6, true).getClass(),
-        MLEGradientCalculator6.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(7, true).getClass(),
-        MLEGradientCalculator7.class);
-    Assertions.assertEquals(GradientCalculatorFactory.newCalculator(13, true).getClass(),
-        MLEGradientCalculator.class);
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(3, true).getClass(),
+        MleGradientCalculator3.class);
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(4, true).getClass(),
+        MleGradientCalculator4.class);
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(5, true).getClass(),
+        MleGradientCalculator5.class);
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(6, true).getClass(),
+        MleGradientCalculator6.class);
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(7, true).getClass(),
+        MleGradientCalculator7.class);
+    Assertions.assertEquals(GradientCalculatorUtils.newCalculator(13, true).getClass(),
+        MleGradientCalculator.class);
   }
 
   @SeededTest
@@ -184,14 +184,14 @@ public class GradientCalculatorSpeedTest {
   @SeededTest
   public void mleGradientCalculator3ComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientCalculatorNComputesSameAsGradientCalculator(seed,
-        new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, true);
+        new SingleNbFixedGaussian2DFunction(blockWidth, blockWidth), 3, true);
   }
 
   @SpeedTag
   @SeededTest
   public void mleGradientCalculator3IsFasterThanGradientCalculator(RandomSeed seed) {
     gradientCalculatorNIsFasterThanGradientCalculator(seed,
-        new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, true);
+        new SingleNbFixedGaussian2DFunction(blockWidth, blockWidth), 3, true);
   }
 
   @SeededTest
@@ -249,14 +249,14 @@ public class GradientCalculatorSpeedTest {
   @SeededTest
   public void gradientCalculator3ComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientCalculatorNComputesSameAsGradientCalculator(seed,
-        new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, false);
+        new SingleNbFixedGaussian2DFunction(blockWidth, blockWidth), 3, false);
   }
 
   @SpeedTag
   @SeededTest
   public void gradientCalculator3IsFasterThanGradientCalculator(RandomSeed seed) {
     gradientCalculatorNIsFasterThanGradientCalculator(seed,
-        new SingleNBFixedGaussian2DFunction(blockWidth, blockWidth), 3, false);
+        new SingleNbFixedGaussian2DFunction(blockWidth, blockWidth), 3, false);
   }
 
   private void gradientCalculatorNComputesSameAsGradientCalculator(RandomSeed seed,
@@ -277,8 +277,8 @@ public class GradientCalculatorSpeedTest {
     final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc =
-        (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
-    final GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
+        (mle) ? new MleGradientCalculator(beta.length) : new GradientCalculator(beta.length);
+    final GradientCalculator calc2 = GradientCalculatorUtils.newCalculator(nparams, mle);
 
     // Create messages
     IntArrayFormatSupplier msgR = new IntArrayFormatSupplier("Result: Not same @ %d", 1);
@@ -370,8 +370,8 @@ public class GradientCalculatorSpeedTest {
     final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc =
-        (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
-    final GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
+        (mle) ? new MleGradientCalculator(beta.length) : new GradientCalculator(beta.length);
+    final GradientCalculator calc2 = GradientCalculatorUtils.newCalculator(nparams, mle);
 
     for (int i = 0; i < paramsList.size(); i++) {
       calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -449,7 +449,7 @@ public class GradientCalculatorSpeedTest {
 
   @SeededTest
   public void mleGradientCalculatorComputesGradient(RandomSeed seed) {
-    gradientCalculatorComputesGradient(seed, new MLEGradientCalculator(7));
+    gradientCalculatorComputesGradient(seed, new MleGradientCalculator(7));
   }
 
   private void gradientCalculatorComputesGradient(RandomSeed seed, GradientCalculator calc) {
@@ -536,18 +536,18 @@ public class GradientCalculatorSpeedTest {
       double ll = 0;
       final PoissonDistribution pd = new PoissonDistribution(u);
       for (final int x : xx) {
-        double obs = MLEGradientCalculator.likelihood(u, x);
+        double obs = MleGradientCalculator.likelihood(u, x);
         double exp = pd.probability(x);
         TestAssertions.assertTest(exp, obs, predicate, "likelihood");
 
-        obs = MLEGradientCalculator.logLikelihood(u, x);
+        obs = MleGradientCalculator.logLikelihood(u, x);
         exp = pd.logProbability(x);
         TestAssertions.assertTest(exp, obs, predicate, "log likelihood");
 
         ll += exp;
       }
 
-      final MLEGradientCalculator gc = new MLEGradientCalculator(1);
+      final MleGradientCalculator gc = new MleGradientCalculator(1);
       final double o = gc.logLikelihood(xxx, new double[] {u}, func);
 
       TestAssertions.assertTest(ll, o, predicate, "sum log likelihood");
@@ -578,7 +578,7 @@ public class GradientCalculatorSpeedTest {
       background = 1e-2;
       createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
 
-      final EJMLLinearSolver solver = new EJMLLinearSolver(1e-5, 1e-6);
+      final EjmlLinearSolver solver = new EjmlLinearSolver(1e-5, 1e-6);
 
       for (int i = 0; i < paramsList.size(); i++) {
         final double[] y = yList.get(i);
@@ -702,7 +702,7 @@ public class GradientCalculatorSpeedTest {
       final double[][] alpha = new double[ng][ng];
       final double[] beta = new double[ng];
 
-      final GradientCalculator calc = GradientCalculatorFactory.newCalculator(ng, true);
+      final GradientCalculator calc = GradientCalculatorUtils.newCalculator(ng, true);
 
       final double llr = PoissonCalculator.logLikelihoodRatio(u, x);
       final double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);

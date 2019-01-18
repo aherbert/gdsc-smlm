@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
 import uk.ac.sussex.gdsc.smlm.function.PoissonLikelihoodWrapper;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
@@ -79,7 +79,7 @@ import java.util.logging.Logger;
  * <p>The probability mass function can be changed to a Poisson-Gaussian or Poisson-Gamma-Gaussian
  * distribution in order to model the counts from a CCD/EMCCD camera.
  */
-public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
+public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
   /**
    * Wrap the LikelihoodFunction with classes that implement the required interfaces.
    */
@@ -419,7 +419,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // https://www.lri.fr/~hansen/cmaes.m
         // Take the defaults from the Matlab documentation
         final double stopFitness = 0;
-        final boolean isActiveCMA = true;
+        final boolean isActiveCma = true;
         final int diagonalOnly = 0;
         final int checkFeasableCount = 1;
         final RandomGenerator random = new Well19937c();
@@ -455,7 +455,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
             popSize *= 2;
             data[1] = new CMAESOptimizer.PopulationSize(popSize);
           }
-          final CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCMA,
+          final CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCma,
               diagonalOnly, checkFeasableCount, random, generateStatistics,
               new SimpleValueChecker(relativeThreshold, absoluteThreshold));
           baseOptimiser = o;
@@ -476,7 +476,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
         // Do not use the convergence checker on the value of the function. Use the convergence on
         // the point coordinate and gradient.
         // BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs))
-        final BFGSOptimizer o = new BFGSOptimizer();
+        final BfgsOptimizer o = new BfgsOptimizer();
         baseOptimiser = o;
 
         // Configure maximum step length for each dimension using the bounds
@@ -490,14 +490,13 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
 
         // The GoalType is always minimise so no need to pass this in
         final OptimizationData positionChecker = null;
-        // new org.apache.commons.math3.optim.PositionChecker(relativeThreshold, absoluteThreshold);
         optimum = o.optimize(new MaxEval(getMaxEvaluations()),
             new ObjectiveFunctionGradient(
                 new MultivariateVectorLikelihood(maximumLikelihoodFunction)),
             new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)),
             new InitialGuess(startPoint), new SimpleBounds(lowerConstraint, upperConstraint),
-            new BFGSOptimizer.GradientTolerance(relativeThreshold), positionChecker,
-            new BFGSOptimizer.StepLength(stepLength));
+            new BfgsOptimizer.GradientTolerance(relativeThreshold), positionChecker,
+            new BfgsOptimizer.StepLength(stepLength));
       } else {
         // The line search algorithm often fails. This is due to searching into a region where the
         // function evaluates to a negative so has been clipped. This means the upper bound of the
@@ -618,7 +617,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver {
     } catch (final ConvergenceException ex) {
       // Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
       return FitStatus.SINGULAR_NON_LINEAR_MODEL;
-    } catch (final BFGSOptimizer.LineSearchRoundoffException ex) {
+    } catch (final BfgsOptimizer.LineSearchRoundoffException ex) {
       return FitStatus.FAILED_TO_CONVERGE;
     } catch (final Exception ex) {
       Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Failed to fit", ex);
